@@ -1,0 +1,143 @@
+<template>
+    <v-text-field
+        class="custom-default-input"
+        outlined
+        :dense="dense"
+        hide-details="auto"
+        :clearable="clearable"
+        :placeholder="placeholder"
+        :label="label"
+        v-model="localText"
+        :disabled="disabled"
+        @click:clear="onClear"
+        @input="updateValue"
+        @keypress.enter="onKeyPressEnter"
+        :rules="rules"
+        :counter="counter"
+        :type="type"
+        :max="max"
+        :min="min"
+        :step="step"
+        :single-line="singeLine"
+        :suffix="suffix"
+        :prefix="prefix"
+    >
+        <template v-slot:append v-if="appendIcon">
+            <v-btn plain icon :ripple="false" @click="onClickAppendIcon">
+                <v-icon>{{ appendIcon }}</v-icon>
+            </v-btn>
+        </template>
+        <template v-slot:label v-if="showRequired">
+            {{ label }}<RequiredFieldSymbol/>
+        </template>
+    </v-text-field>
+</template>
+
+<script>
+export default {
+    props: {
+        value: {
+            required: true
+        },
+        type: {
+            type: String,
+            default: 'text',
+        },
+        suffix: {
+            type: String,
+            default: null,
+        },
+        prefix: {
+            type: String,
+            default: null,
+        },
+        placeholder: {
+            type: String
+        },
+        label: {
+            type: String
+        },
+        clearable: {
+            type: Boolean,
+            default: false,
+        },
+        showRequired: {
+            type: Boolean,
+            default: false,
+        },
+        min: {
+            type: Number | String,
+            default: 0,
+        },
+
+        step: {
+            type: Number | String,
+            default: 1,
+        },
+
+        max: {
+            type: Number | String,
+            default: 255,
+        },
+
+        dense: {
+            type: Boolean,
+            default: false,
+        },
+        singeLine: {
+            type: Boolean,
+            default: false,
+        },
+        disabled: {
+            type: Boolean,
+            default: false,
+        },
+        rules: {
+            type: Object | Array,
+        },
+        counter: {
+            type: String | Number,
+            default: false,
+        },
+        appendIcon: {
+            default: null
+        }
+    },
+    data() {
+        return {
+            localText: null
+        }
+    },
+    created() {
+        if (this.value) {
+            this.localText = this.value // set initial value
+        }
+    },
+    watch: {
+        value(val) {
+            this.localText = val // watch change from parent component
+        }
+    },
+    methods: {
+        updateValue(value) {
+            let vue = this
+            vue.$emit('input', value || null)
+        },
+        onClear() {
+            let vue = this
+            vue.localText = ''
+            vue.updateValue()
+            // vue.onKeyPressEnter()
+        },
+        onKeyPressEnter() {
+            let vue = this
+            vue.$emit('onEnter')
+        },
+        onClickAppendIcon(){
+            let vue = this
+            // console.log('onClickAppendIcon')
+            vue.$emit('clickAppendIcon')
+        }
+    }
+}
+</script>

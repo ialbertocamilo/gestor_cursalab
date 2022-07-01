@@ -1,0 +1,67 @@
+<template>
+    <v-btn
+        class="mx-1 "
+        :class="{'font-weight-bold': textBold}"
+        elevation="0"
+        :ripple="false"
+        color="primary"
+        @click="click"
+        :block="block"
+        :disabled="disabled"
+        :outlined="outlined"
+        :text="text"
+        style="max-width: min-content"
+    >
+        <v-icon :small="smallIcon" class="mr-1" v-text="icon" v-if="icon"/>
+        {{ label }}
+        <v-icon :small="smallIcon" class="ml-1" v-text="appendIcon" v-if="appendIcon"/>
+    </v-btn>
+</template>
+
+
+<script>
+export default {
+    props: {
+        label: {
+            type: String,
+            default: 'Botón Modal'
+        },
+        icon: {
+            type: String
+        },
+        appendIcon: {
+            type: String
+        },
+        block: {
+            type: Boolean,
+            default: false
+        },
+        disabled: {
+            type: Boolean,
+            default: false
+        },
+        outlined: {
+            type: Boolean,
+            default: false
+        },
+        textBold: {
+            type: Boolean,
+            default: false
+        },
+        text: {
+            type: Boolean,
+            default: false
+        },
+        smallIcon: {
+            type: Boolean,
+            default: false
+        }
+    },
+    methods: {
+        click() {
+            let vue = this;
+            vue.$emit('click')
+        }
+    }
+}
+</script>

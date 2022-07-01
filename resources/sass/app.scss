@@ -1,0 +1,94 @@
+// Fonts
+@import url("https://fonts.googleapis.com/css?family=Nunito");
+
+// Variables
+//@import 'variables';
+
+// Global Components
+@import "global_components";
+
+// Bootstrap
+@import "~bootstrap/scss/bootstrap";
+
+.navbar-laravel {
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/*Comentado para ajustar el menú con Vue (para que se extienda en todo el alto por defecto según el contenido)*/
+/*.v-application {
+	max-height: 0 !important;
+}*/
+
+.v-application--wrap {
+	background: #f8f8fb;
+}
+
+.v-dialog .v-form {
+	padding-right: 16px !important;
+	padding-left: 16px !important;
+	padding-top: 5px !important;
+}
+
+.v-dialog .v-card__text::-webkit-scrollbar,
+.reports-menu .v-slide-group__wrapper::-webkit-scrollbar,
+body::-webkit-scrollbar {
+	width: 12px; /* width of the entire scrollbar */
+}
+
+.v-dialog .v-card__text::-webkit-scrollbar-track,
+.reports-menu .v-slide-group__wrapper::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+	// background: transparent; /* color of the tracking area */
+	background-color: rgba(0, 0, 0, 0.05); /* color of the scroll thumb */
+}
+
+.v-dialog .v-card__text::-webkit-scrollbar-thumb,
+.reports-menu .v-slide-group__wrapper::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 0, 0, 0.2); /* color of the scroll thumb */
+	border-radius: 20px;
+	/* border: 3px solid orange; creates padding around scroll thumb */
+}
+
+.v-date-picker-table {
+	height: auto !important;
+}
+
+.form-alert{
+    .v-alert__wrapper{
+        align-items: start !important;
+        .v-alert__dismissible{
+            margin: 1px 0 0 0 !important;
+        }
+    }
+    li{
+        //list-style: none;
+        margin-left: 10px;
+    }
+}
+
+
+.reports-menu .v-slide-group__wrapper{
+    height: 85vh;
+    overflow-y: scroll;
+}
+
+
+.v-list-group.notas-usuarios-list .v-list-group__header .v-list-item__icon.v-list-group__header__append-icon {
+
+    justify-content: flex-start !important;
+}
+
+.reports-menu .v-tab {
+	font-size: .8rem !important;
+}
+
+.checklist-form .v-input .v-icon{
+	margin-top: 15px;
+}
+
+.default-toggle.default-toggle.v-input--selection-controls{
+	flex: auto !important;
+	margin-top: 15px !important;
+}

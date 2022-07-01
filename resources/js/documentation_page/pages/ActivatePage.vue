@@ -1,0 +1,116 @@
+<template>
+    <v-card elevation="0" class="mx-10">
+        <v-card-title class="font-weight-bold">
+            Activar usuarios
+        </v-card-title>
+        <v-card-text class="ml-2">
+            <descriptionApi :options="api_description_options" />
+        </v-card-text>
+    </v-card>
+</template>
+<script>
+import descriptionApi from '../components/description_api.vue';
+let base_url = window.location.origin;
+export default {
+    components: {descriptionApi},
+    data() {
+        return{
+             api_description_options:{
+                title:'Activar Usuarios',
+                type:'POST',
+                route:'/integrations/activate_users',
+                parameters_type:[
+                    {
+                        title:'Parametros (body)',
+                        parameters:[
+                            {
+                                name:'users_dni',
+                                type:'Array (String)',
+                                description:'Listado de DNI de los usuarios.'
+                            },
+                            {
+                                name:'users_email (opcional)',
+                                type:'Array (String)',
+                                description:'Listado de emails de los usuarios.'
+                            }
+                        ],
+                    },
+                    {
+                        title:'Parametros (header)',
+                        parameters:[
+                            {
+                                name:'secretKey',
+                                type:'String',
+                                description:'Clave secreta asociada a la cuenta del administrador.'
+                            },
+                            {
+                                name:'Authorization',
+                                type:'String',
+                                description:`
+                                    Token asociado a la cuenta del administrador concatenado con el tipo de token.<br>Ejemplo:<br>
+<pre class='language-js line-numbers'>
+    <code>
+        token:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+    </code>
+</pre>`
+                            }
+                        ]
+                    }
+                ],
+                example_code:{
+                    title:'Ejemplo',
+                    tabs:[
+                        'Request', 'Response (200)'
+                    ],
+                    content_tabs:[
+                        {
+type:'language-js',
+code:
+`   
+    const base_url = '${base_url}';
+    const axios = require('axios');
+    const data = JSON.stringify({
+        "users_dni":["87364823","2937892384","98723497234","98237492384","98237492834"
+        ],
+        "users_email":["usuario1@gmail.com"]}
+    );
+    const config = {
+        method: 'post',
+        url: base_url+'/integrations/activate_users',
+        headers: { 
+            'secretKey': 'asd-i4qEJK46[hdj', 
+            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9....', 
+            'Content-Type': 'application/json'
+        },
+        data : data
+    };
+    axios(config).then(function (response) {
+        console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+        console.log(error);
+    });
+`
+},
+{
+type:'language-js',
+code:
+`
+"data":{
+    "quantity_activated": "Cantidad de usuarios que han sido activados.",
+    "amount_errors": "Cantida|d de errores encontrados en la petición.",
+    "processed_data": "Cantidad de datos procesados obtenidos de la petición",
+    "errors":"Listado de errores"{
+        "type": "",
+        "message": "Mensaje del error",
+        "value": "El valor enviado en la petición"
+    },
+}`
+}
+                ],
+                }
+            },
+        }
+    }
+}
+</script>

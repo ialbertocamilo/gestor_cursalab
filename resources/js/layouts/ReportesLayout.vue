@@ -1,0 +1,518 @@
+<template>
+    <v-app class="--section-list">
+
+        <v-card flat class="elevation-0 --mb-4">
+            <v-tabs vertical class="reports-menu">
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-account</v-icon>
+                    <span class="pt-2">
+                        Notas de usuario
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-lock</v-icon>
+                    <span class="pt-2">
+                        Usuarios
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Avance de currícula
+                    </span>
+                </v-tab>
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-certificate</v-icon>
+                    <span class="pt-2">
+                        Diplomas
+                    </span>
+                </v-tab>
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Visitas
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Notas por tema
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Temas no evaluables
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Notas por curso
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Evaluaciones abiertas
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Reinicios
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Versiones usadas
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Usuario Uploads
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Vademecum
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-play-box-outline</v-icon>
+                    <span class="pt-2">
+                        Videoteca
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-playlist-check</v-icon>
+                    <span class="pt-2">
+                        Checklist Detallado
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-playlist-check</v-icon>
+                    <span class="pt-2">
+                        Checklist General
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon>
+                    <span class="pt-2">
+                        Ranking
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-access-point</v-icon> 
+                    <span class="pt-2">
+                        Reuniones
+                    </span>
+                </v-tab>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <NotasUsuario :API_REPORTES="API_REPORTES"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Usuarios :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                      @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <AvanceCurricula :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                             @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Diploma :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                             @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Visitas :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                     @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <NotasTema :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                       @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <TemasNoEvaluables :Modulos="Modulos" :API_FILTROS="API_FILTROS"
+                                               :API_REPORTES="API_REPORTES"
+                                               @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <NotasCurso :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                        @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <EvaAbiertas :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                         @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Renicios :Admins="Admins" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                      @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <VersionesUsadas :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                             @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <UsuarioUploads :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                            @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
+                                       :API_REPORTES="API_REPORTES"
+                                       @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Videoteca :VideotecaList="VideotecaList" :API_FILTROS="API_FILTROS"
+                                       :API_REPORTES="API_REPORTES"
+                                       @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <ChecklistDetallado :Modulos="Modulos" :API_FILTROS="API_FILTROS"
+                                                :API_REPORTES="API_REPORTES"
+                                                @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <ChecklistGeneral :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                              @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Ranking :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                     @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Meetings/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+            </v-tabs>
+        </v-card>
+        <!-- </v-app> -->
+    </v-app>
+</template>
+<script>
+const FileSaver = require("file-saver");
+const moment = require("moment");
+moment.locale("es");
+import NotasTema from "../components/Reportes/NotasTema";
+import Diploma from "../components/Reportes/Diploma";
+import NotasUsuario from "../components/Reportes/NotasUsuario";
+import Usuarios from "../components/Reportes/Usuarios";
+import Visitas from "../components/Reportes/Visitas";
+import NotasCurso from "../components/Reportes/NotasCurso";
+import EvaAbiertas from "../components/Reportes/EvaAbiertas";
+import Renicios from "../components/Reportes/Renicios";
+import VersionesUsadas from "../components/Reportes/VersionesUsadas";
+import UsuarioUploads from "../components/Reportes/UsuarioUploads";
+import AvanceCurricula from "../components/Reportes/AvanceCurricula";
+import Vademecum from "../components/Reportes/Vademecum.vue";
+import Videoteca from "../components/Reportes/Videoteca.vue";
+import {mapState} from "vuex";
+import TemasNoEvaluables from "../components/Reportes/TemasNoEvaluables.vue";
+import ChecklistDetallado from "../components/Reportes/ChecklistDetallado.vue";
+import ChecklistGeneral from "../components/Reportes/ChecklistGeneral.vue";
+import Ranking from "../components/Reportes/Ranking.vue";
+import Meetings from "../components/Reportes/Meetings";
+
+export default {
+    components: {
+        NotasUsuario,
+        Usuarios,
+        Visitas,
+        NotasCurso,
+        EvaAbiertas,
+        Renicios,
+        NotasTema,
+        VersionesUsadas,
+        UsuarioUploads,
+        AvanceCurricula,
+        Vademecum,
+        Videoteca,
+        TemasNoEvaluables,
+        ChecklistDetallado,
+        ChecklistGeneral,
+        Ranking,
+        Meetings,
+        Diploma
+    },
+    data() {
+        return {
+            value: "",
+            Modulos: [],
+            Admins: [],
+            VademecumList: [],
+            VideotecaList: [],
+            // URL DE LAS APIS
+            API_FILTROS: process.env.MIX_API_FILTROS,
+            API_REPORTES: process.env.MIX_API_REPORTES,
+        };
+    },
+    methods: {
+        async crearReporte(res) {
+            try {
+                var dateNow = res.data.createAt; //Este es el nombre del excel creado con Date.Now()
+                var extension = res.data.extension;
+                var modulo = res.data.modulo;
+                // Excel Nombre : Nombre del modulo + Fecha convertida + Hora convertida + Extension
+                let ExcelNuevoNombre =
+                    modulo + moment(res.createAt).format("L") + " " + moment(res.createAt).format("LT");
+                // La extension la define el back-end, ya que el quien crea el archivo
+                FileSaver.saveAs(`/storage/${dateNow + extension}`, ExcelNuevoNombre + extension);
+                // this.hideLoader()
+                this.hideLoader()
+            } catch (error) {
+                console.log(error);
+                // this.hideLoader()
+                this.hideLoader()
+                return error;
+            }
+        }
+    },
+    computed: {
+        ...mapState(["User"])
+    },
+    async beforeCreate() {
+        var res = await axios("/exportar/obtenerdatos");
+        this.Modulos = res.data.modulos;
+        this.Admins = res.data.users;
+        this.$store.commit("setUser", res.data.user[0]);
+        this.VademecumList = res.data.vademecums;
+    }
+};
+</script>
+<style>
+input[type="date"]::-webkit-calendar-picker-indicator {
+    -webkit-appearance: none;
+    display: none;
+}
+
+input[type="date"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    display: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+label {
+    margin: 0;
+}
+
+/* button {
+color: #ffffff !important;
+} */
+.max-w-1920 {
+    max-width: 1920px;
+}
+
+.v-label {
+    display: contents !important;
+}
+
+.info-icon {
+    color: darkgrey !important;
+    font-size: 20px !important;
+}
+
+/* Tooltips */
+[tooltip] {
+    /* margin: 20px; */
+    position: relative;
+}
+
+[tooltip]::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px 6px 0 6px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
+    z-index: 100;
+    opacity: 0;
+}
+
+[tooltip]::after {
+    content: attr(tooltip);
+    position: absolute;
+    left: 50%;
+    top: -6px;
+    transform: translateX(-50%) translateY(-100%);
+    background: rgba(0, 0, 0, 0.7);
+    text-align: left;
+    color: #fff;
+    padding: 6px 4px;
+    font-size: 14px;
+    font-family: Roboto, sans-serif;
+    font-weight: 500;
+    min-width: 150px;
+    width: 250px;
+    max-width: 250px;
+    border-radius: 5px;
+    pointer-events: none;
+    opacity: 0;
+}
+
+[tooltip-position="left"]::before {
+    left: 0%;
+    top: 50%;
+    margin-left: -12px;
+    transform: translatey(-50%) rotate(-90deg);
+}
+
+[tooltip-position="top"]::before {
+    left: 50%;
+}
+
+[tooltip-position="bottom"]::before {
+    top: 100%;
+    margin-top: 8px;
+    transform: translateX(-50%) translatey(-100%) rotate(-180deg);
+}
+
+[tooltip-position="right"]::before {
+    left: 100%;
+    top: 50%;
+    margin-left: 1px;
+    transform: translatey(-50%) rotate(90deg);
+}
+
+[tooltip-position="left"]::after {
+    left: 0%;
+    top: 50%;
+    margin-left: -8px;
+    transform: translateX(-100%) translateY(-50%);
+}
+
+[tooltip-position="top"]::after {
+    left: 50%;
+}
+
+[tooltip-position="bottom"]::after {
+    top: 100%;
+    margin-top: 8px;
+    transform: translateX(-50%) translateY(0%);
+}
+
+[tooltip-position="right"]::after {
+    left: 100%;
+    top: 50%;
+    margin-left: 8px;
+    transform: translateX(0%) translateY(-50%);
+}
+
+[tooltip]:hover::after,
+[tooltip]:hover::before {
+    opacity: 1;
+}
+</style>

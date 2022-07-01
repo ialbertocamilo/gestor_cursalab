@@ -1,0 +1,283 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Account;
+use App\Models\Meeting;
+use App\Models\Usuario;
+use App\Models\Abconfig;
+use App\Models\Criterio;
+use App\Models\Taxonomy;
+use App\Models\Attendant;
+use App\Models\Usuario_rest;
+use App\Models\SourceMultimarca;
+use App\Exports\EventosExport;
+use App\Services\MeetingService;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+
+use App\Http\Requests\MeetingRequest;
+use App\Exports\Meeting\MeetingExport;
+
+use App\Http\Resources\MeetingResource;
+use App\Exports\EventosAsistentesExport;
+
+use App\Http\Requests\MeetingFinishRequest;
+use App\Exports\Meeting\GeneralMeetingsExport;
+use App\Exports\Meeting\MeetingAttendantsExport;
+use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
+use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Http\Requests\Meeting\MeetingUploadAttendantsFormRequest;
+
+class MeetingController extends Controller
+{
+    public function search(Request $request)
+    {
+        $meetings = Meeting::search($request);
+
+        MeetingResource::collection($meetings);
+
+        return $this->success($meetings);
+    }
+
+    public function getListSelects()
+    {
+        $types = Taxonomy::getSelectData('meeting', 'type');
+        $statuses = Taxonomy::getSelectData('meeting', 'status');
+
+        return $this->success(get_defined_vars());
+    }
+
+    public function getSelectSearchFilters(Request $request)
+    {
+        $modulos = Abconfig::select('id', 'etapa as nombre')->get();
+
+        $grupos = Criterio::getGruposForSelect($request->all());
+
+        return $this->success(compact('grupos', 'modulos'));
+    }
+
+    public function getFormSelects($compactResponse = false)
+    {
+        $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
+        $user_types = Taxonomy::getSelectData('meeting', 'user');
+        $types = Taxonomy::getSelectData('meeting', 'type');
+        $hosts = Usuario::getCurrentHosts();
+
+        $response = compact('types', 'hosts', 'user_types', 'default_meeting_type');
+
+        return $compactResponse ? $response : $this->success($response);
+    }
+
+    public function store(MeetingRequest $request)
+    {
+        $meeting = Meeting::storeRequest($request->validated());
+
+        return $this->success(['msg' => 'Reunión creada correctamente.']);
+    }
+
+    public function getDuplicatedData(Meeting $meeting)
+    {
+        $meeting->load('type', 'host.config');
+
+        extract($this->getFormSelects(true), EXTR_OVERWRITE);
+
+        $duplicate = [
+            'type' => $meeting->type,
+            'host' => $meeting->host,
+            'attendants' => Attendant::getMeetingAttendantsForMeeting($meeting),
+            'description' => $meeting->description,
+        ];
+
+        return $this->success(compact('types', 'user_types', 'hosts', 'duplicate'));
+    }
+
+    public function edit(Meeting $meeting)
+    {
+        $meeting->load('type', 'host.config', 'status');
+
+        $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
+
+        $meeting->setDateAndTimeToForm();
+
+        extract($this->getFormSelects(true), EXTR_OVERWRITE);
+
+        return $this->success(get_defined_vars());
+    }
+
+    public function update(Meeting $meeting, MeetingRequest $request)
+    {
+        Meeting::storeRequest($request->validated(), $meeting);
+
+        return $this->success(['msg' => 'Reunión actualizada correctamente.']);
+    }
+
+    public function show(Meeting $meeting)
+    {
+        $meeting->load('type', 'host.config', 'status', 'user');
+
+        $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
+        $meeting->attendants_count = $meeting->attendants()->count();
+        $meeting->real_attendants_count = $meeting->attendants()->whereNotNull('first_login_at')->count();
+        $meeting->real_percentage_attendees = $meeting->getRealPercetageOfAttendees();
+        // $meeting->duration = $meeting->getTotalDuration();
+        $meeting->download_ready = $meeting->checkIfDataIsReady();
+        $meeting->getDatesFormatted();
+        $meeting->isMasterOrAdminCursalab = auth()->user()->isMasterOrAdminCursalab();
+
+
+        return $this->success(get_defined_vars());
+    }
+
+    public function start(Meeting $meeting)
+    {
+        $url = $meeting->start();
+
+        return $this->success(['msg' => 'Se inició la reunión correctamente.', 'url' => $url]);
+    }
+
+    public function join(Meeting $meeting)
+    {
+        $meeting->join();
+
+        return $this->success(['msg' => 'Se unió a la reunión correctamente.']);
+    }
+
+    public function finish(Meeting $meeting, MeetingFinishRequest $request)
+    {
+        $meeting->finalize();
+
+        return $this->success(['msg' => 'Se finalizó la reunión correctamente.']);
+    }
+
+    public function cancel(Meeting $meeting)
+    {
+        $meeting->cancel();
+
+        return $this->success(['msg' => 'Se canceló la reunión correctamente.']);
+    }
+
+
+    public function destroy(Meeting $meeting)
+    {
+        SourceMultimarca::destroySource('meeting',$meeting->id,$meeting->identifier);
+        $meeting->delete();
+
+        return $this->success(['msg' => 'Se eliminó la reunión correctamente.']);
+    }
+
+    public function uploadAttendants(MeetingSearchAttendantRequest $request)
+    {
+        $data = $request->validated();
+
+        $attendants = [];
+
+        $data['usuarios_dni'] = Attendant::getUsuariosDniFromExcel($data);
+
+        if (count($data['usuarios_dni']) > 0) {
+            $attendants = Attendant::searchAttendants($data);
+            Attendant::filterEmptyMeetingInvitations($attendants);
+        }
+
+        return $this->success(compact('attendants'));
+    }
+
+    // public function exportAllUserMeetings()
+    // {
+    //     $creador = auth()->user();
+
+    //     $filtros = ['creador_id' => $creador->id];
+    //     $eventos_export = new EventosExport($filtros);
+    //     $eventos_export->view();
+    //     $random = rand(0, 10000);
+    //     $date = date('mdY');
+    //     ob_end_clean();
+    //     ob_start();
+    //     return Excel::download($eventos_export, "Eventos_" . $creador->dni . "_" . $date . "_" . $random . ".xlsx");
+    // }
+
+    public function exportMeetingReport(Meeting $meeting)
+    {
+        $meeting->load('user', 'host.config', 'status', 'type', 'attendants');
+
+        $date = date('Y-m-d');
+        $random = date('His');
+        $file_name = "Reporte-de-reunión-{$meeting->id}-{$date}--{$random}.xlsx";
+
+        $data = [
+            'meeting' => $meeting
+        ];
+
+        ob_end_clean();
+        ob_start();
+
+        return Excel::download(new MeetingExport($data), $file_name);
+    }
+
+    public function exportGeneralMeetingsReport(Request $request)
+    {
+        $data = $request->all();
+
+        $date = date('Y-m-d');
+        $random = date('His');
+        $file_name = "Reporte-general-de-reuniones-{$date}--{$random}.xlsx";
+
+        $data = [
+            'starts_at' => $data['starts_at'] ?? null,
+            'finishes_at' => $data['finishes_at'] ?? null,
+        ];
+
+        ob_end_clean();
+        ob_start();
+
+        return Excel::download(new GeneralMeetingsExport($data), $file_name);
+    }
+
+    public function exportAttendants(Meeting $meeting)
+    {
+
+    }
+
+    public function searchAttendants(MeetingSearchAttendantRequest $request)
+    {
+        $data = $request->validated();
+
+        $attendants = Attendant::searchAttendants($data);
+
+        $attendants = MeetingSearchAttendantsResource::collection($attendants);
+
+        Attendant::filterEmptyMeetingInvitations($attendants);
+
+        return $this->success(compact('attendants'));
+    }
+
+    public function getMeetingStats(Meeting $meeting)
+    {
+        $meeting->getStats();
+        $stats = $meeting->stats;
+        $isMasterOrAdminCursalab = auth()->user()->isMasterOrAdminCursalab();
+
+        return $this->success(compact('stats', 'isMasterOrAdminCursalab'));
+    }
+
+    public function updateUrlStart(Meeting $meeting)
+    {
+        $meeting->updateMeetingUrlStart();
+        $meeting->refresh();
+        $url_start = $meeting->url_start;
+
+        return $this->success(compact('url_start'));
+    }
+    public function updateAttendanceData(Meeting $meeting)
+    {
+        $meeting->updateAttendantsData();
+
+        $attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
+        $isMasterOrAdminCursalab = auth()->user()->isMasterOrAdminCursalab();
+
+        return $this->success(compact('attendants', 'isMasterOrAdminCursalab'));
+    }
+}

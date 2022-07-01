@@ -1,0 +1,619 @@
+<template>
+    <section class="section-list">
+        <v-card flat elevation="0">
+            <v-card-title>
+                Temas: {{ tema_id ? 'Editar' : 'Crear' }}
+            </v-card-title>
+        </v-card>
+        <!--        <DefaultDivider/>-->
+        <br>
+        <v-card flat elevation="0">
+            <v-card-text>
+                <v-form ref="TemaForm">
+                    <DefaultSectionLabel label="Contenido General"/>
+                    <v-row justify="center">
+                        <v-col cols="6">
+                            <DefaultAutocomplete
+                                dense
+                                label="Requisito"
+                                placeholder="Seleccione un requisito"
+                                v-model="resource.requisito_id"
+                                :items="selects.requisitos"
+                                clearable
+                            />
+                        </v-col>
+                        <v-col cols="6">
+                            <DefaultInput
+                                dense
+                                label="Nombre"
+                                show-required
+                                placeholder="Ingrese un nombre"
+                                v-model="resource.nombre"
+                                :rules="rules.nombre"
+                            />
+                        </v-col>
+                    </v-row>
+                    <v-row justify="center">
+                        <v-col cols="8">
+                            <!-- <DefaultRichText
+                                v-model="resource.contenido"
+                                label="Contenido"
+                                :height="225"
+                            /> -->
+                            <editor
+                            api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                            v-model="resource.contenido"
+                            :init="{
+                                content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                height: 175,
+                                menubar: false,
+                                language: 'es',
+                                force_br_newlines : true,
+                                force_p_newlines : false,
+                                forced_root_block : '',
+                                plugins: ['lists image preview anchor', 'code', 'paste','link'],
+                                toolbar:
+                                    'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                images_upload_handler: images_upload_handler,
+                            }"/>
+                            
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultSelectOrUploadMultimedia
+                                ref="inputLogo"
+                                v-model="resource.imagen"
+                                label="Imagen"
+                                :file-types="['image']"
+                                @onSelect="setFile($event, resource,'imagen')"/>
+                        </v-col>
+                    </v-row>
+                    <DefaultSectionLabel label="Método de Evaluación"/>
+                    <v-row justify="center">
+                        <v-col cols="4">
+                            <DefaultSelect
+                                dense
+                                show-required
+                                label="Evaluable"
+                                v-model="resource.evaluable"
+                                :items="selects.evaluable"
+                                :rules="rules.evaluable"
+                                @onChange="validateTipoEv"
+                            />
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultSelect
+                                dense
+                                :show-required="resource.evaluable === 'si'"
+                                label="Tipo Evaluación"
+                                v-model="resource.tipo_ev"
+                                :items="selects.tipo_ev"
+                                :rules="resource.evaluable === 'no' ? [] : rules.tipo_ev"
+                                :disabled="resource.evaluable === 'no' || !resource.evaluable"
+                                @onChange="showAlertEvaluacion"
+                            />
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultInput
+                                dense
+                                show-required
+                                label="Orden"
+                                v-model="resource.orden"
+                                :rules="rules.orden"
+                            />
+                        </v-col>
+                    </v-row>
+                    <br>
+                    <DefaultSectionLabel label="Multimedia"/>
+                    <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
+                    <br>
+                    <v-row justify="center">
+                        <v-col cols="12">
+
+                            <table class="table table-hover">
+                                <thead class="bg-default-primary">
+                                <tr>
+                                    <th class="text-left white--text" v-text="'Tipo'"/>
+                                    <th class="text-left white--text"
+                                        style="max-width: 25% !important;     justify-content: right !important;"
+                                        v-text="'Título'"/>
+                                    <th class="text-center white--text" v-text="'Archivo'"/>
+                                    <!--                                <th class="text-center white&#45;&#45;text" v-text="'Valor'"/>-->
+                                    <th class="text-center white--text" v-text="'¿Embebido?'"/>
+                                    <th class="text-center white--text" v-text="'¿Descargable?'"/>
+                                    <th class="text-center white--text" v-text="'Eliminar'"/>
+                                </tr>
+                                </thead>
+                                <draggable
+                                    v-model="resource.media"
+                                    group="multimedias"
+                                    @start="drag=true"
+                                    @end="drag=false"
+                                    ghost-class="ghost"
+                                    tag="tbody"
+                                >
+                                    <!--                                    <transition-group type="transition" name="flip-list">-->
+                                    <tr v-if="resource.media && resource.media.length === 0">
+                                        <td class="text-center" colspan="6"
+                                            v-text="'No hay multimedias seleccionados'"/>
+                                    </tr>
+                                    <tr
+                                        v-else
+                                        style="cursor: pointer"
+                                        v-for="(media, media_index) in resource.media" :key="media.media_index">
+                                        <td>
+                                            <div class="multimedia-box"
+                                                 style="height: 40px !important; width: 40px !important;">
+                                                <i :class="mixin_multimedias.find(el => el.type === media.tipo).icon || 'mdi mdi-loading'"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <DefaultInput
+                                                v-model="media.titulo"
+                                                placeholder="Ingrese un título"
+                                                dense
+                                            />
+                                        </td>
+                                        <td>{{ media.valor || media.file.name }}</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <DefaultToggle v-model="media.embed" no-label :disabled="media.disabled"
+                                                               @onChange="verifyDisabledMediaEmbed"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <DefaultToggle
+                                                    v-model="media.descarga"
+                                                    no-label
+                                                    :disabled="['youtube', 'vimeo', 'scorm'].includes(media.tipo)"
+                                                />
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <DefaultDeleteBtnIcon
+                                                @click="deleteMedia(media_index)"/>
+                                        </td>
+                                    </tr>
+                                    <!--                                    </transition-group>-->
+                                </draggable>
+                            </table>
+                        </v-col>
+
+                    </v-row>
+                    <v-row>
+                        <v-col cols="7">
+                            <DefaultAutocomplete
+                                multiple
+                                show-required
+                                placeholder="Tags"
+                                dense
+                                v-model="resource.tags"
+                                :items="selects.tags"
+                                label="Tags"
+                                :count-show-values="4"
+                                open-up
+                                :max-values-selected="3"
+                            />
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="5">
+                            <DefaultToggle
+                                v-model="resource.estado"
+                                :disabled="resource && resource.evaluable === 'si' && resource.cant_preguntas_evaluables_activas === 0"/>
+                            <small
+                                v-if="resource && resource.evaluable === 'si' && resource.cant_preguntas_evaluables_activas === 0"
+                                v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <DefaultModalActionButton
+                    @cancel="leavePage"
+                    @confirm="validate"
+                    :loading="loadingActionBtn"
+                />
+            </v-card-actions>
+
+        </v-card>
+        <TemaValidacionesModal
+            :width="modalTemasValidaciones.width"
+            :ref="modalTemasValidaciones.ref"
+            :options="modalTemasValidaciones"
+            @onCancel="closeFormModal(modalTemasValidaciones)"
+            @onConfirm="sendForm"
+            :resource="resource"
+        />
+    </section>
+</template>
+<script>
+
+import MultimediaBox from "./MultimediaBox";
+// import DefaultRichText from "../../components/globals/DefaultRichText";
+import TemaMultimediaTypes from "./TemaMultimediaTypes";
+import draggable from 'vuedraggable'
+import TemaValidacionesModal from "./TemaValidacionesModal";
+import Editor from "@tinymce/tinymce-vue";
+
+
+const fields = ['nombre', 'estado', 'orden', 'imagen', 'curso_id', 'config_id', 'categoria_id',
+    'tema_id', 'contenido', 'evaluable', 'tipo_ev', 'tags', 'requisito_id'];
+const file_fields = ['imagen'];
+export default {
+    components: {editor: Editor,TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal},
+    props: ["modulo_id", 'categoria_id', 'curso_id', 'tema_id'],
+    data() {
+        return {
+            drag: false,
+            base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos/${this.curso_id}/temas`,
+            resourceDefault: {
+                curso_id: this.curso_id,
+                config_id: this.modulo_id,
+                categoria_id: this.categoria_id,
+                nombre: null,
+                requisito_id: null,
+                resumen: null,
+                contenido: null,
+                imagen: null,
+                file_imagen: null,
+                evaluable: null,
+                tipo_ev: null,
+                orden: null,
+                media: [],
+                tags: [],
+                estado: false,
+                hide_evaluable: null,
+                hide_tipo_ev: null,
+                disabled_estado_toggle: false,
+                cant_preguntas_evaluables_activas: 0
+            },
+            selects: {
+                evaluable: [
+                    {id: 'si', nombre: 'Si'},
+                    {id: 'no', nombre: 'No'},
+                ],
+                tipo_ev: [
+                    {id: 'calificada', nombre: 'Calificada'},
+                    {id: 'abierta', nombre: 'Abierta'},
+                ],
+                tags: [],
+                requisitos: []
+            },
+            resource: {},
+            rules: {
+                nombre: this.getRules(['required']),
+                evaluable: this.getRules(['required']),
+                tipo_ev: this.getRules(['required']),
+                orden: this.getRules(['required', 'number']),
+            },
+            loadingActionBtn: false,
+            modalTemasValidaciones: {
+                ref: 'TemaValidacionesModal',
+                width: '50vw',
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: false,
+                hideCancelBtn: false,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'TemasValidaciones',
+                persistent: false,
+                showCloseIcon: true
+            },
+            modalTemasValidacionesDefault: {
+                ref: 'TemaValidacionesModal',
+                width: '50vw',
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: false,
+                hideCancelBtn: false,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'TemasValidaciones',
+                persistent: false,
+                showCloseIcon: true
+            },
+        }
+    },
+    computed: {
+        showErrorReinicios() {
+            let vue = this
+            const reinicio = vue.resource.reinicio_automatico
+            const dias = vue.resource.reinicio_automatico_dias
+            const horas = vue.resource.reinicio_automatico_horas
+            const minutos = vue.resource.reinicio_automatico_minutos
+            if (!reinicio) {
+                return false
+            }
+            return !(dias > 0 || horas > 0 || minutos > 0);
+        },
+    },
+    async mounted() {
+        let vue = this
+        vue.showLoader()
+        await this.loadData()
+        vue.hideLoader()
+    },
+    methods: {
+        leavePage() {
+            let vue = this
+            // window.history.back()
+            window.location.href = vue.base_endpoint;
+        },
+        async validate() {
+            let vue = this
+            if (vue.tema_id !== '') {
+
+                if (vue.resource.hide_evaluable !== vue.resource.evaluable || vue.resource.hide_tipo_ev !== vue.resource.tipo_ev) {
+                    let data = {
+                        tema: vue.resource.id,
+                        curso: vue.resource.curso_id,
+                        modulo: vue.modulo_id,
+                        escuela: vue.resource.categoria_id, //falta
+                        grupo: [],
+                        cursos_libres: false,
+                        UsuariosActivos: true,
+                        UsuariosInactivos: false,
+                        url: 'temas_noevaluables'
+                    }
+                    if (vue.resource.hide_evaluable === 'no' || vue.resource.hide_tipo_ev === 'calificada') {
+                        data.carrera = []
+                        data.ciclo = []
+                        data.temasActivos = true
+                        data.temasInactivos = true
+                        if (vue.resource.hide_tipo_ev === 'calificada') {
+                            // Mostrar modal con check y opcion de descarga (endpoint notas por temas)
+                            data.aprobados = true;
+                            data.desaprobados = true;
+                            data.validacion = false;
+                            data.variantes = false;
+                            data.url = 'notas_tema';
+                        }
+                    } else if (vue.resource.hide_tipo_ev === 'abierta') {
+                        // endpoint evaluaciones abiertas)
+                        data.variantes = false;
+                        data.url = 'evaluaciones_abiertas';
+                    }
+                    await vue.cleanModalTemasValidaciones()
+                    vue.modalTemasValidaciones.hideConfirmBtn = false
+                    // const cancelLabel = (vue.resource && vue.resource.hide_tipo_ev === 'calificada' && vue.resource.evaluable === 'no') ? 'Cerrar' : 'Entendido'
+                    vue.modalTemasValidaciones.cancelLabel = 'Cerrar'
+                    await vue.openFormModal(vue.modalTemasValidaciones, data, 'validacionFormPage', 'Atención')
+                    return
+                }
+            }
+            // return
+            return vue.sendForm({checkbox: false})
+        },
+        sendForm(data) {
+            let vue = this
+
+            // console.log("SEND FORM DATA :: ", data)
+            if (data.confirmMethod === 'messagesActions'){
+                vue.leavePage()
+                return
+            }
+
+            vue.modalTemasValidaciones.open = false
+            vue.loadingActionBtn = true
+            vue.showLoader()
+            const validateForm = vue.validateForm('TemaForm')
+            const hasMultimedia = vue.resource.media.length > 0
+
+            if (!validateForm || !hasMultimedia) {
+                vue.hideLoader()
+                vue.loadingActionBtn = false
+                if (!hasMultimedia)
+                    vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
+                return
+            }
+
+            const edit = vue.tema_id !== ''
+            let url = `${vue.base_endpoint}/${edit ? `update/${vue.tema_id}` : 'store'}`
+            let method = edit ? 'PUT' : 'POST';
+
+            let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+            vue.addMedias(formData)
+            if (data.checkbox)
+                formData.append('check_tipo_ev', data.checkbox)
+
+            vue.$http.post(url, formData)
+                .then(async ({data}) => {
+                    const messages = data.data.messages
+                    this.hideLoader()
+                    if (messages.data.length > 0) {
+                        console.log("MODAL DE AVISO")
+                        await vue.cleanModalTemasValidaciones()
+                        vue.modalTemasValidaciones.hideCancelBtn = true
+                        vue.modalTemasValidaciones.confirmLabel = 'Entendido'
+                        vue.modalTemasValidaciones.persistent = true
+                        vue.modalTemasValidaciones.showCloseIcon = false
+                        await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
+                    } else {
+                        vue.showAlert(data.data.msg)
+                        setTimeout(() => vue.leavePage(), 2000)
+                    }
+                })
+                .catch(async ({data}) => {
+                    // console.log('PAGE ERROR DATA ::', data)
+                    await vue.cleanModalTemasValidaciones()
+                    vue.loadingActionBtn = false
+                    // vue.modalTemasValidaciones.hideConfirmBtn = true
+                    // vue.modalTemasValidaciones.confirmLabel = 'Guardar cambios'
+                    // await vue.openFormModal(vue.modalTemasValidaciones, data.validate, data.validate.type, data.validate.title)
+                    if (data.validate.show_confirm) {
+                        vue.modalTemasValidaciones.hideConfirmBtn = false
+                        vue.modalTemasValidaciones.hideCancelBtn = false
+                        vue.modalTemasValidaciones.cancelLabel = 'Cancelar'
+                        vue.modalTemasValidaciones.confirmLabel = 'Confirmar'
+                    } else {
+                        vue.modalTemasValidaciones.hideConfirmBtn = true
+                        vue.modalTemasValidaciones.cancelLabel = 'Entendido'
+                    }
+                    await vue.openFormModal(vue.modalTemasValidaciones, data.validate, 'validateUpdateTema', data.validate.title)
+                })
+        },
+        images_upload_handler(blobInfo, success, failure) {
+            console.log(blobInfo.blob());
+            let formdata = new FormData();
+            formdata.append("image", blobInfo.blob(), blobInfo.filename());
+            formdata.append("model_id", null);
+
+            axios
+                .post("/upload-image/temas", formdata)
+                .then((res) => {
+                    success(res.data.location);
+                })
+                .catch((err) => {
+                    console.log(err)
+                    failure("upload failed!");
+                });
+        },
+        addMedias(formData) {
+            let vue = this
+            vue.resource.media.forEach((el, index) => {
+                if (el.file)
+                    formData.append(`medias[${index}][file]`, el.file)
+                else
+                    formData.append(`medias[${index}][valor]`, el.valor)
+
+                formData.append(`medias[${index}][titulo]`, el.titulo)
+                formData.append(`medias[${index}][tipo]`, el.tipo)
+                formData.append(`medias[${index}][embed]`, Number(el.embed))
+                formData.append(`medias[${index}][descarga]`, Number(el.descarga))
+            })
+        },
+        deleteMedia(media_index) {
+            let vue = this
+            vue.resource.media.splice(media_index, 1)
+        },
+        async cleanModalTemasValidaciones() {
+            let vue = this
+            await vue.$nextTick(() => {
+                vue.modalTemasValidaciones = Object.assign({}, vue.modalTemasValidaciones, vue.modalTemasValidacionesDefault)
+            })
+        },
+        async loadData() {
+            let vue = this
+            vue.$nextTick(() => {
+                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+            })
+            let url = `${vue.base_endpoint}/${vue.tema_id === '' ? 'form-selects' : `search/${vue.tema_id}`}`
+            await vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.tags = data.data.tags
+                    vue.selects.requisitos = data.data.requisitos
+                    if (vue.tema_id !== '') {
+                        vue.resource = Object.assign({}, data.data.tema)
+                    }
+                })
+            return 0;
+        },
+        addMultimedia(multimedia) {
+            let vue = this
+            // console.log(multimedia)
+            vue.resource.media.push({
+                titulo: multimedia.titulo,
+                valor: multimedia.valor || null,
+                file: multimedia.file || null,
+                tipo: multimedia.type,
+                embed: true,
+                descarga: false,
+                disabled: false,
+            })
+            vue.verifyDisabledMediaEmbed();
+        },
+        validateTipoEv() {
+            let vue = this
+            vue.resource.tipo_ev = null
+            vue.resetFormValidation('TemaForm')
+
+            // Si se está creando un tema y es evaluable = 'si'
+            // no se puede activar hasta que tenga una evalacion
+            if (vue.resource.cant_preguntas_evaluables_activas === 0) {
+                vue.resource.disabled_estado_toggle = true;
+                vue.resource.estado = false;
+            }
+        },
+        verifyDisabledMediaEmbed() {
+            let vue = this;
+            const f = vue.resource.media.filter((e) => e.embed == true);
+            if (f.length == 1) {
+                const idx = vue.resource.media.findIndex((e) => e.embed == true);
+                if (idx > -1) {
+                    vue.resource.media[idx].disabled = true;
+                }
+            } else {
+                vue.resource.media.map(e => e.disabled = false);
+            }
+        },
+        async showAlertEvaluacion() {
+            let vue = this
+            vue.modalTemasValidaciones.hideConfirmBtn = true
+            const tipo_ev = vue.resource.tipo_ev === 'calificada' ? 'calificada' : 'abierta'
+            const data = {
+                data: [
+                    {
+                        title: `Debe tener una evaluación ${tipo_ev}`
+                    }
+                ]
+            }
+            await vue.cleanModalTemasValidaciones()
+            vue.modalTemasValidaciones.width = "30vw"
+            vue.modalTemasValidaciones.hideConfirmBtn = true
+            vue.modalTemasValidaciones.cancelLabel = 'Entendido'
+            await vue.openFormModal(vue.modalTemasValidaciones, data, 'showAlertEvaluacion', 'Atención')
+        },
+    }
+}
+</script>
+<style lang="scss">
+@import "resources/sass/variables";
+
+.date_reinicios_disabled {
+    pointer-events: none;
+    padding: 10px 0;
+    border-radius: 9px;
+    opacity: 0.3;
+    background: #CCC;
+}
+
+.date_reinicios_error {
+    padding: 10px 0;
+    border: #FF5252 2px solid;
+    border-radius: 5px;
+}
+
+.date_reinicios_error_message {
+    line-height: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    font-weight: 400;
+    color: #FF5252;
+    caret-color: #FF5252;
+}
+
+.box_date_reinicios {
+    background: $primary-default-color;
+    padding: 2px 9px 9px 9px;
+    border-radius: 5px;
+
+    label {
+        color: white;
+    }
+
+    .input_date_reinicios {
+        appearance: textfield;
+        -moz-appearance: textfield;
+        text-align: center;
+        background: white;
+        width: 50px;
+        height: 30px;
+    }
+}
+</style>

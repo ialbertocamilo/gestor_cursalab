@@ -1,0 +1,70 @@
+<template>
+    <v-row justify="center" class="mx-0">
+        <v-col cols="4" class="d-flex justify-content-around">
+            <v-btn
+                class="default-modal-action-button  mx-1"
+                text
+                elevation="0"
+                :ripple="false"
+                color="primary"
+                @click="onCancel"
+                v-if="!hideCancelBtn"
+                :disabled="loading"
+            >
+                {{ cancelLabel }}
+            </v-btn>
+            <v-btn
+                class="default-modal-action-button mx-1"
+                elevation="0"
+                :ripple="false"
+                color="primary"
+                @click="onConfirm"
+                v-if="!hideConfirmBtn"
+                :disabled="loading"
+            >
+                {{ confirmLabel }}
+            </v-btn>
+        </v-col>
+
+    </v-row>
+
+</template>
+
+
+<script>
+export default {
+    props: {
+        cancelLabel: {
+            type: String,
+            default: 'Cancelar'
+        },
+        confirmLabel: {
+            type: String,
+            default: 'Confirmar'
+        },
+        hideCancelBtn: {
+            type: Boolean,
+            default: false
+        },
+        hideConfirmBtn: {
+            type: Boolean,
+            default: false
+        },
+        loading: {
+            type: Boolean,
+            default: false
+        }
+    },
+    methods: {
+        onCancel() {
+            let vue = this;
+            vue.$emit('cancel')
+        },
+        onConfirm() {
+            let vue = this;
+            vue.$emit('confirm')
+        }
+    }
+}
+</script>
+
