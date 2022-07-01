@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(WorldTablesSeeder::class);
+        // $this->call(WorldTablesSeeder::class);
 
         $this->call(TaxonomySeederSystem::class);
         $this->call(TaxonomySeederNotification::class);
@@ -32,15 +32,13 @@ class DatabaseSeeder extends Seeder
 
         $this->call(BouncerSeeder::class);
         $this->call(UserSeeder::class);
-        $this->call(ServerSeeder::class);
-        $this->call(ClientSeeder::class);
+        // $this->call(ClientSeeder::class);
 
         $this->call(SchoolSeeder::class);
         $this->call(CourseSeeder::class);
         $this->call(TopicSeeder::class);
-        $this->call(BenefitsSeeder::class);
 
-        $this->call(GamingSeeder::class);
+        // $this->call(GamingSeeder::class);
 
         // $this->call(AccountSeeder::class);
         // $this->call(PostSeeder::class);
