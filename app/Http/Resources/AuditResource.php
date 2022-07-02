@@ -18,10 +18,10 @@ class AuditResource extends JsonResource
         $dataProcessed = $this->getModelProcessed();
         $modified_fields_count = $this->countModifiedFieldsFiltered();
 
-        $cover_user = $this->user->getFirstMediaUrl('avatar', 'thumb');
+        // $cover_user = $this->user->getFirstMediaUrl('avatar', 'thumb');
 
         $data = [
-            'avatar' => empty($cover_user) ? 'default_user.png' : $cover_user,
+            // 'avatar' => empty($cover_user) ? 'default_user.png' : $cover_user,
             'id' => $this->id,
             'user' => $this->user->name ?? 'Anónimo',
             'ip' => $this->ip_address,

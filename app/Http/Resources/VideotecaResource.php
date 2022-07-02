@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Videoteca;
+use App\Models\Videoteca;
 
 class VideotecaResource extends JsonResource
 {

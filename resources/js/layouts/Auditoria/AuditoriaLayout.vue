@@ -126,6 +126,7 @@ export default {
                     {text: "Acción", value: "event", align: 'center', sortable: false},
                     {text: "Sección", value: "resource", align: 'center', sortable: false},
                     {text: "Registro", value: "register", align: 'center', sortable: false},
+                    {text: '# Modificados', align: 'center', value: 'modified_fields_count', sortable: false},
                     {text: "Fecha", value: "created_at", align: 'center', sortable: true},
                     {text: "Acciones", value: "actions", align: 'center', sortable: false},
                 ],
@@ -139,29 +140,12 @@ export default {
                         show_condition: 'show'
                         // method_name: 'seeData',
                     },
-                    {
-                        text: 'Dependencias',
-                        icon: 'mdi mdi-close',
-                        type: 'route',
-                        route: 'dependency',
-                        route_type: 'external',
-                        show_condition: 'dependency'
-                        // method_name: 'verDependencia'
-                    },
                 ],
             },
             audits: [],
             loading: true,
             date_range_modal: false,
-            // headers: [
-            //     {text: "USUARIO", value: "user.name"},
-            //     {text: "ACCIÓN", value: "event"},
-            //     {text: "SECCIÓN", value: "resource"},
-            //     {text: "REGISTRO", value: "register"},
-            //     {text: "FECHA", value: "created_at"},
-            //     {text: "DATOS", value: "show", align: 'center', sortable: false},
-            //     {text: "DEPENDENCIA", value: "dependency", align: 'center', sortable: false},
-            // ],
+  
             auditoria: [],
             page: 1,
             pageCount: 0,

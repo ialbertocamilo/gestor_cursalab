@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('glosario')->group(base_path('routes/cms/glosario.php'));
     Route::prefix('vademecum')->group(base_path('routes/cms/vademecum.php'));
     Route::prefix('preguntas-frecuentes')->group(base_path('routes/cms/preguntas_frecuentes.php'));
-    // Route::prefix('aulas_virtuales')->group(base_path('routes/cms/aulas_virtuales.php'));
+    Route::prefix('auditoria')->group(base_path('routes/cms/audits.php'));
     Route::prefix('entrenadores')->group(base_path('routes/cms/entrenadores.php'));
     Route::prefix('notificaciones_push')->group(base_path('routes/cms/notificaciones_push.php'));
     Route::prefix('multimedia')->group(base_path('routes/cms/multimedia.php'));

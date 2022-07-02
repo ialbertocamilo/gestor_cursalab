@@ -84,7 +84,7 @@ Vue.component("reportes-supervisores-layout", require("./layouts/ReportesSupervi
 
 Vue.component("duplicar-escuelas", require("./components/Duplicar/DuplicarEscuelas.vue"));
 Vue.component("duplicar-cursos", require("./components/Duplicar/DuplicarCursos.vue"));
-Vue.component("auditoria", require("./layouts/Auditoria/AuditoriaLayout.vue"));
+Vue.component("auditoria-layout", require("./layouts/Auditoria/AuditoriaLayout.vue"));
 Vue.component("videoteca-layout", require("./layouts/VideotecaLayout.vue"));
 
 Vue.component("usuario-ayuda", require("./layouts/UsuarioAyuda.vue"));

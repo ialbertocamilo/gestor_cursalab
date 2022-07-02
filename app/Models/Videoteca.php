@@ -128,7 +128,7 @@ class Videoteca extends BaseModel
         return $row;
     }
 
-    protected function storeRequest($data = [], $videoteca = null)
+    protected function storeRequest($data = [], $videoteca = null, $files = [])
     {
         try {
 

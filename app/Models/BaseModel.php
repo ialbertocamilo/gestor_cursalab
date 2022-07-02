@@ -31,9 +31,10 @@ use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 
 use DB;
 
-class BaseModel extends Model implements HasMedia, Recordable
+// class BaseModel extends Model implements HasMedia, Recordable
+class BaseModel extends Model implements Recordable
 {
-    use InteractsWithMedia;
+    // use InteractsWithMedia;
     // use Rememberable;
     use SoftDeletes;
     use HasFactory;
@@ -41,7 +42,8 @@ class BaseModel extends Model implements HasMedia, Recordable
 
     use UnixTimestampSerializable;
 
-    use CustomMedia, CustomCRUD, CustomAudit;
+    // use CustomMedia, CustomCRUD, CustomAudit;
+    use CustomCRUD, CustomAudit;
 
     // use Cachable;
     use Cachable {
@@ -160,34 +162,34 @@ class BaseModel extends Model implements HasMedia, Recordable
         return $code;
     }
 
-    public function registerMediaConversions(Media $media = null): void
-    {
-        $this
-            ->addMediaConversion('thumb')
-            // ->width(350)
-            // ->height(350)
-            ->crop('crop-center', 350, 350)
-            ->keepOriginalImageFormat();
+    // public function registerMediaConversions(Media $media = null): void
+    // {
+    //     $this
+    //         ->addMediaConversion('thumb')
+    //         // ->width(350)
+    //         // ->height(350)
+    //         ->crop('crop-center', 350, 350)
+    //         ->keepOriginalImageFormat();
 
-        $this
-            ->addMediaConversion('main')
-            ->fit('contain', 1920, 1080)
-            ->quality(85)
-            ->withResponsiveImages()
-            // ->performOnCollections('logo', 'etc')
-            ->keepOriginalImageFormat();
-    }
+    //     $this
+    //         ->addMediaConversion('main')
+    //         ->fit('contain', 1920, 1080)
+    //         ->quality(85)
+    //         ->withResponsiveImages()
+    //         // ->performOnCollections('logo', 'etc')
+    //         ->keepOriginalImageFormat();
+    // }
 
-    public static function bootInteractsWithMedia()
-    {
-        static::deleting(function (HasMedia $model) {
+    // public static function bootInteractsWithMedia()
+    // {
+    //     static::deleting(function (HasMedia $model) {
             
-            if ($model->shouldDeletePreservingMedia()) 
-                return;
+    //         if ($model->shouldDeletePreservingMedia()) 
+    //             return;
 
-            $model->media()->cursor()->each(fn (Media $media) => $media->delete());
-        });
-    }
+    //         $model->media()->cursor()->each(fn (Media $media) => $media->delete());
+    //     });
+    // }
 
     public static function definedRelations(): array
     {
