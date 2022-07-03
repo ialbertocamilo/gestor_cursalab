@@ -13,22 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('schools', function (Blueprint $table) {
+        Schema::create('blocks', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->string('descripcion');
+            $table->string('name');
+            $table->string('slug')->nullable();
+            $table->string('description')->nullable();
 
-            $table->string('imagen');
+            $table->smallInteger('criterion_value_count')->nullable();
 
-            $table->string('modalidad');
-
-            $table->string('plantilla_diploma');
-
-            $table->text('reinicios_programados');
-
-            $table->tinyInteger('orden');
-
-            $table->tinyInteger('estado')->nullable()->default(1);
+            $table->boolean('active')->nullable()->default(true);
 
             $table->softDeletes();
             $table->timestamps();
@@ -42,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('blocks');
     }
 };

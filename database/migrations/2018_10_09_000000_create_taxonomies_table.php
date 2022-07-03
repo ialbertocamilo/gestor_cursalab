@@ -13,31 +13,31 @@ class CreateTaxonomiesTable extends Migration
      */
     public function up()
     {
-        // Schema::create('taxonomies', function (Blueprint $table) {
-        //     $table->id();
+        Schema::create('taxonomies', function (Blueprint $table) {
+            $table->id();
 
-        //     $table->string('group', 30)->nullable();
-        //     $table->string('type', 30)->nullable();
-        //     $table->tinyInteger('position')->nullable();
-        //     $table->string('code', 100)->nullable();
-        //     $table->string('name')->nullable();
-        //     $table->string('path')->nullable();
-        //     $table->string('alias')->nullable();
-        //     $table->string('icon')->nullable();
-        //     $table->string('color')->nullable();
-        //     $table->string('slug')->nullable();
-        //     $table->boolean('active')->nullable();
-        //     $table->string('description', 3000)->nullable();
-        //     $table->string('detail', 3000)->nullable();
+            $table->string('group', 30)->nullable();
+            $table->string('type', 30)->nullable();
+            $table->tinyInteger('position')->nullable();
+            $table->string('code', 100)->nullable();
+            $table->string('name')->nullable();
+            $table->string('path')->nullable();
+            $table->string('alias')->nullable();
+            $table->string('icon')->nullable();
+            $table->string('color')->nullable();
+            $table->string('slug')->nullable();
+            $table->boolean('active')->nullable();
+            $table->string('description', 3000)->nullable();
+            $table->text('detail')->nullable();
 
-        //     $table->foreignId('parent_id')->nullable()->constrained('taxonomies');
+            $table->foreignId('parent_id')->nullable()->constrained('taxonomies');
 
-        //     $table->timestamps();
-        //     $table->softDeletes();
+            $table->timestamps();
+            $table->softDeletes();
 
-        //     $table->index('group');
-        //     $table->index('type');
-        // });
+            $table->index('group');
+            $table->index('type');
+        });
     }
 
     /**

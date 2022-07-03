@@ -18,20 +18,20 @@ return new class extends Migration
 
             $table->foreignId('criterion_id')->nullable()->constrained('criteria');
 
-            $table->string('name_text')->nullable();
-            $table->date('name_date')->nullable();
-            $table->dateTime('name_datetime')->nullable();
-            $table->tinyInteger('name_boolean')->nullable()->default(0);
-            $table->decimal('name_decimal', 10, 2)->nullable();
-            $table->integer('name_integer')->nullable();
+            $table->string('value_text')->nullable();
+            $table->date('value_date')->nullable();
+            $table->dateTime('value_datetime')->nullable();
+            $table->boolean('value_boolean')->nullable()->default(false);
+            $table->decimal('value_decimal', 10, 2)->nullable();
+            $table->integer('value_integer')->nullable();
 
             $table->foreignId('parent_id')->nullable()->constrained('criterion_values');
 
             $table->tinyInteger('position')->nullable();
 
-            $table->tinyInteger('exclusive_criterion_id')->nullable();
+            $table->foreignId('exclusive_criterion_id')->nullable()->constrained('criteria');
 
-            $table->tinyInteger('active')->nullable()->default(1);
+            $table->boolean('active')->nullable()->default(true);
             $table->string('description', 3000)->nullable();
 
 

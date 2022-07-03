@@ -13,13 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('user_criteria', function (Blueprint $table) {
+        Schema::create('criterion_value_user', function (Blueprint $table) {
 
-            $table->foreignId('usuario_id')->nullable()->constrained('usuarios');
+            $table->foreignId('user_id')->nullable();
+            $table->foreignId('criterion_value_id')->nullable()->constrained('criterion_values');
 
-            $table->foreignId('criterion_id')->nullable()->constrained('criteria');
-
-            $table->tinyInteger('active')->nullable()->default(1);
+            // $table->boolean('active')->nullable()->default(true);
         });
     }
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_criteria');
+        Schema::dropIfExists('criterion_value_user');
     }
 };

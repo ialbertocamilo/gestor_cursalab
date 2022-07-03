@@ -28,22 +28,22 @@ return new class extends Migration
             $table->foreignId('validation_id')->nullable()->constrained('taxonomies');
             // $table->unsignedBigInteger('validation_id')->nullable()->index();
 
-            $table->tinyInteger('show_as_parent')->nullable()->default(0);
+            $table->boolean('show_as_parent')->nullable()->default(false);
 
-            $table->tinyInteger('show_in_reports')->nullable()->default(0);
-            $table->tinyInteger('show_in_ranking')->nullable()->default(0);
-            $table->tinyInteger('show_in_profile')->nullable()->default(0);
-            $table->tinyInteger('show_in_segmentation')->nullable()->default(0);
-            $table->tinyInteger('show_in_form')->nullable()->default(0);
+            $table->boolean('show_in_reports')->nullable()->default(false);
+            $table->boolean('show_in_ranking')->nullable()->default(false);
+            $table->boolean('show_in_profile')->nullable()->default(false);
+            $table->boolean('show_in_segmentation')->nullable()->default(false);
+            $table->boolean('show_in_form')->nullable()->default(false);
 
-            $table->tinyInteger('required')->nullable()->default(0);
+            $table->boolean('required')->nullable()->default(false);
 
-            $table->tinyInteger('editable_configuration')->nullable()->default(0);
-            $table->tinyInteger('editable_segmentation')->nullable()->default(0);
+            $table->boolean('editable_configuration')->nullable()->default(false);
+            $table->boolean('editable_segmentation')->nullable()->default(false);
 
-            $table->tinyInteger('multiple')->nullable()->default(0);
+            $table->boolean('multiple')->nullable()->default(false);
 
-            $table->tinyInteger('active')->nullable()->default(1);
+            $table->boolean('active')->nullable()->default(true);
             $table->string('description', 3000)->nullable();
 
             $table->timestamps();

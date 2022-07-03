@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('school_workspace', function (Blueprint $table) {
-            $table->foreignId('school_id')->nullable()->constrained('schools');
+            $table->foreignId('school_id')->nullable();
 
-            $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
+            $table->foreignId('workspace_id')->nullable();
         });
     }
 

@@ -13,22 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('usuarios', function (Blueprint $table) {
+        Schema::create('segments', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('lastname')->nullable();
-            $table->string('surname')->nullable();
+            $table->string('slug')->nullable();
+            $table->string('description')->nullable();
+            
+            $table->foreignId('user_id')->nullable();
 
-            $table->string('identifier')->unique();
-            $table->string('email')->nullable();
+            $table->boolean('mandatory')->nullable()->default(true);
 
-            $table->string('password');
+            $table->smallInteger('criterion_value_count')->nullable();
 
-            $table->text('firebase_token');
-
-            $table->text('rol_entrenamiento');
-
-            $table->tinyInteger('estado')->nullable()->default(true);
+            $table->boolean('active')->nullable()->default(true);
 
             $table->softDeletes();
             $table->timestamps();
@@ -42,6 +39,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('usuarios');
+        Schema::dropIfExists('segments');
     }
 };

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('model');
             $table->string('key');
-            $table->string('key');
+            $table->string('value');
 
             $table->softDeletes();
             $table->timestamps();

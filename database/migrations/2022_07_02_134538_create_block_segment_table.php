@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('course_school', function (Blueprint $table) {
-            $table->foreignId('school_id')->nullable();
-
-            $table->foreignId('course_id')->nullable();
+        Schema::create('block_segment', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('block_id')->nullable();
+            $table->foreignId('segment_id')->nullable();
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('course_school');
+        Schema::dropIfExists('block_segment');
     }
 };

@@ -13,21 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('courses', function (Blueprint $table) {
+        Schema::create('schools', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug')->nullable();
             $table->string('description')->nullable();
 
-            $table->string('imagen')->nullable();
-            // $table->string('plantilla_diploma');
+            $table->string('imagen');
 
             // $table->string('modalidad');
-            $table->boolean('freely_eligible')->nullable()->default(false);
-            $table->boolean('assessable')->nullable()->default(false);
 
-            // $table->unsignedBigInteger('requisito_id');
-            // $table->unsignedBigInteger('duplicado_id');
+            $table->string('plantilla_diploma');
 
             $table->tinyInteger('position')->nullable();
 
@@ -47,6 +42,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('courses');
+        Schema::dropIfExists('schools');
     }
 };

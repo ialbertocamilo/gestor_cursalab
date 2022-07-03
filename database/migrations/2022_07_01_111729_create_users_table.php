@@ -20,10 +20,12 @@ return new class extends Migration
             $table->string('surname')->nullable();
 
             $table->string('email')->nullable();
+            $table->string('username')->nullable();
+            $table->string('code')->nullable();
 
             $table->string('password');
 
-            $table->tinyInteger('active')->nullable()->default(true);
+            $table->boolean('active')->nullable()->default(true);
 
             $table->rememberToken();
 
