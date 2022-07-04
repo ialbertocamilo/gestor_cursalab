@@ -72,8 +72,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $dates = ['birthdate'];
 
     public $defaultRelationships = [
-        'type_id' => 'type', 'job_position_id' => 'job_position', 'area_id' =>  'area', 'gender_id' => 'gender',
-        'document_type_id' => 'document_type', 'country_id' => 'country', 'district_id' =>  'district'
+        'type_id' => 'type', 
+        // 'job_position_id' => 'job_position', 'area_id' =>  'area', 'gender_id' => 'gender',
+        // 'document_type_id' => 'document_type', 'country_id' => 'country', 'district_id' =>  'district'
     ];
 
     protected $hidden = [
@@ -169,10 +170,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     //     return $this->hasMany(Post::class);
     // }
 
-    // public function type()
-    // {
-    //    return $this->belongsTo(Taxonomy::class, 'type_id');
-    // }
+    public function type()
+    {
+       return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
 
     // public function job_position()
     // {
