@@ -19,15 +19,14 @@ class DatabaseSeeder extends Seeder
         $this->call(TaxonomySeederNotification::class);
         $this->call(TaxonomySeederPriority::class);
         $this->call(TaxonomySeederMediaTypes::class);
-        // $this->call(TaxonomySeederPriority::class);
-        $this->call(TaxonomySeederClientEmployees::class);
-        $this->call(TaxonomySeederFeature::class);
-        $this->call(TaxonomySeederFeatureInterval::class);
-        $this->call(TaxonomySeederFeatureType::class);
-        $this->call(TaxonomySeederServer::class);
+        // $this->call(TaxonomySeederClientEmployees::class);
+        // $this->call(TaxonomySeederFeature::class);
+        // $this->call(TaxonomySeederFeatureInterval::class);
+        // $this->call(TaxonomySeederFeatureType::class);
+        // $this->call(TaxonomySeederServer::class);
 
         // $this->call(TaxonomySeederClientEmployees::class);
-        $this->call(TaxonomySeederSector::class);
+        // $this->call(TaxonomySeederSector::class);
         $this->call(TaxonomySeederQuestionType::class);
 
         $this->call(BouncerSeeder::class);
@@ -42,6 +41,6 @@ class DatabaseSeeder extends Seeder
 
         // $this->call(AccountSeeder::class);
         // $this->call(PostSeeder::class);
-        $this->call(NotificationTypeSeeder::class);
+        // $this->call(NotificationTypeSeeder::class);
     }
 }

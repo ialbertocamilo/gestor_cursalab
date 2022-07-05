@@ -296,6 +296,89 @@ class TaxonomySeederSystem extends Seeder
             'position' => 23,
         ]);
 
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'criterion',
+            'path' => 'App\Models\Criterion',
+            'name' => 'Criterio',
+            'active' => ACTIVE,
+            'position' => 24,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'criterion-value',
+            'path' => 'App\Models\CriterionValue',
+            'name' => 'Criterio',
+            'active' => ACTIVE,
+            'position' => 25,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'workspace',
+            'path' => 'App\Models\Workspace',
+            'name' => 'Espacio de trabajo',
+            'active' => ACTIVE,
+            'position' => 26,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'block',
+            'path' => 'App\Models\Block',
+            'name' => 'Bloque de segmentos',
+            'active' => ACTIVE,
+            'position' => 27,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'segment',
+            'path' => 'App\Models\Segment',
+            'name' => 'Segmento de cursos',
+            'active' => ACTIVE,
+            'position' => 28,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'course',
+            'path' => 'App\Models\Course',
+            'name' => 'Curso',
+            'active' => ACTIVE,
+            'position' => 29,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'topic',
+            'path' => 'App\Models\Topic',
+            'name' => 'Tema',
+            'active' => ACTIVE,
+            'position' => 27,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'system',
+            'type' => 'model',
+            'code' => 'question',
+            'path' => 'App\Models\Pregunta',
+            'name' => 'Pregunta',
+            'active' => ACTIVE,
+            'position' => 27,
+        ]);
+
+
+
+
 
 
 
@@ -548,15 +631,25 @@ class TaxonomySeederSystem extends Seeder
             'position' => 1,
         ]);
 
-        // Taxonomy::create([
-        //     'group' => 'user',
-        //     'type' => 'type',
-        //     'code' => 'client',
-        //     'icon' => 'folder_shared',
-        //     'name' => 'Cliente',
-        //     'active' => ACTIVE,
-        //     'position' => 2,
-        // ]);
+        Taxonomy::create([
+            'group' => 'user',
+            'type' => 'type',
+            'code' => 'client',
+            'icon' => 'folder_shared',
+            'name' => 'Cliente',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'user',
+            'type' => 'type',
+            'code' => 'cursalab',
+            'icon' => 'folder_shared',
+            'name' => 'Cursalab',
+            'active' => ACTIVE,
+            'position' => 3,
+        ]);
 
         Taxonomy::create([
             'group' => 'user',
