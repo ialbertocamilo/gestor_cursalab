@@ -15,7 +15,6 @@
         "hisorange/browser-detect": "^4.5",
         "itsgoingd/clockwork": "^5.1",
         "jenssegers/mongodb": "^3.9",
-        "khsing/world": "^9.0",
         "kreait/firebase-php": "6.3.1",
         "langleyfoxall/laravel-nist-password-rules": "^6.0",
         "laravel-notification-channels/fcm": "^2.4",

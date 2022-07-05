@@ -23,6 +23,8 @@ return new class extends Migration
             $table->foreignId('topic_id')->nullable();
             
             $table->timestamp('issued_at')->nullable();
+            // $table->timestamp('certification_issued_at')->nullable();
+            
 
             $table->timestamps();
             $table->softDeletes();

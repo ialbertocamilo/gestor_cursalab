@@ -23,9 +23,10 @@ return new class extends Migration
 
             $table->foreignId('restarter_id')->nullable()->constrained('users');
 
-            $table->foreignId('type_id')->nullable()->constrained('taxonomies');
+            $table->foreignId('type_id')->nullable()->constrained('taxonomies'); // course, topic, total
             
             $table->unsignedInteger('total')->nullable();
+            // $table->unsignedInteger('total_restarts')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
