@@ -122,10 +122,10 @@ export default {
                 ref: 'AuditoriaTable',
                 endpoint: 'auditoria/search',
                 headers: [
-                    {text: "Usuario", value: "user.name", align: 'center', sortable: false},
+                    {text: "Usuario", value: "user", align: 'center', sortable: false},
                     {text: "Acción", value: "event", align: 'center', sortable: false},
                     {text: "Sección", value: "resource", align: 'center', sortable: false},
-                    {text: "Registro", value: "register", align: 'center', sortable: false},
+                    {text: "Registro", value: "model", align: 'center', sortable: false},
                     {text: '# Modificados', align: 'center', value: 'modified_fields_count', sortable: false},
                     {text: "Fecha", value: "created_at", align: 'center', sortable: true},
                     {text: "Acciones", value: "actions", align: 'center', sortable: false},
