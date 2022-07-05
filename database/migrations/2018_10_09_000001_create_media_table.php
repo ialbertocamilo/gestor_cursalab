@@ -16,9 +16,11 @@ return new class extends Migration
         Schema::create('media', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->string('file');
             $table->string('ext');
+
+            $table->integer('size')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
