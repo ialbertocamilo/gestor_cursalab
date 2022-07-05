@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('checklist_answer_id')->nullable()->constrained('checklist_answers');
             $table->foreignId('checklist_item_id')->nullable()->constrained('checklist_items');
 
-            $table->char('calificacion', 30);
+            $table->char('qualification', 30);
 
             $table->timestamps();
             $table->softDeletes();
