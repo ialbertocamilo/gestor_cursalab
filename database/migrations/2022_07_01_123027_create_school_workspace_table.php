@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('category_workspace');
+        Schema::dropIfExists('school_workspace');
     }
 };

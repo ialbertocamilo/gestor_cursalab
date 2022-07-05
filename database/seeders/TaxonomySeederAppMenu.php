@@ -47,10 +47,10 @@ class TaxonomySeederAppMenu extends Seeder
 
         Taxonomy::create([
 
-            'group' => 'system'
-            'type' => 'side_menu'
-            'name' => 'Subir Link'
-            'code' => 'subir_link'
+            'group' => 'system',
+            'type' => 'side_menu',
+            'name' => 'Subir Link',
+            'code' => 'subir_link',
         ]);
 
         Taxonomy::create([

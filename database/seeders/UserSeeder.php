@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
 
         $user_1 = User::create([
             'name' => 'Deyvi',
-            'alias' => 'Deyvi C',
+            // 'alias' => 'Deyvi C',
             'lastname' => 'Chavarría',
             'email' => 'deyvi@cursalab.io',
             'password' => $password,
@@ -51,7 +51,7 @@ class UserSeeder extends Seeder
 
         $user_2 = User::create([
             'name' => 'Rodrigo',
-            'alias' => 'Rodrigo CF',
+            // 'alias' => 'Rodrigo CF',
             'lastname' => 'Callañaupa',
             'email' => 'rodrigo@cursalab.io',
             'password' => $password,

@@ -47,6 +47,6 @@ class CreateTaxonomiesTable extends Migration
      */
     public function down()
     {
-        // Schema::dropIfExists('taxonomies');
+        Schema::dropIfExists('taxonomies');
     }
 }

@@ -21,11 +21,11 @@ class UserFactory extends Factory
             'lastname' => $this->faker->lastname(),
             'surname' => $this->faker->lastname(),
             'email' => $this->faker->unique()->safeEmail(),
-            'phone' => $this->faker->unique()->phoneNumber(),
-            'email_verified_at' => now(),
+            // 'phone' => $this->faker->unique()->phoneNumber(),
+            // 'email_verified_at' => now(),
             'password' => $password, // password
             'remember_token' => Str::random(10),
-            'birthdate' => $this->faker->dateTimeInInterval('-50 years', '+32 years')
+            // 'birthdate' => $this->faker->dateTimeInInterval('-50 years', '+32 years')
         ];
     }
 

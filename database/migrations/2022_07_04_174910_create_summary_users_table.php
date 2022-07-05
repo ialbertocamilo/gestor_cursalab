@@ -17,15 +17,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users');
 
-            $table->integer('cur_asignados');
-            $table->integer('tot_completados');
-            $table->integer('intentos');
-            $table->integer('porcentaje');
+            $table->integer('courses_assigned');
+            $table->integer('courses_completed');
+            $table->integer('attempts');
+            $table->integer('advanced_percentage');
 
-            $table->decimal('nota_prom', 4, 2);
-            $table->decimal('rank', 4, 2);
+            $table->decimal('grade_average', 4, 2);
+            $table->decimal('score', 8, 2);
 
-            $table->timestamp('last_ev')->nullable();
+            $table->timestamp('last_time_evaluated_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

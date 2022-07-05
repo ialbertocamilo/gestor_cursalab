@@ -15,24 +15,28 @@ return new class extends Migration
     {
         Schema::create('summary_courses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('course_id')->nullable()->constrained('courses');
             $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->foreignId('course_id')->nullable()->constrained('courses');
 
-            $table->tinyInteger('libre')->nullable()->default(false);
+            // $table->tinyInteger('libre')->nullable()->default(false);
 
-            $table->integer('asignados')->nullable();
-            $table->integer('aprobados')->nullable();
-            $table->integer('realizados')->nullable();
-            $table->integer('revisados')->nullable();
-            $table->integer('desaprobados')->nullable();
+            $table->unsignedInteger('assigned')->nullable();
+            $table->unsignedInteger('passed')->nullable();
+            $table->unsignedInteger('taken')->nullable();
+            $table->unsignedInteger('reviewed')->nullable();
+            $table->unsignedInteger('failed')->nullable();
 
-            $table->decimal('nota_prom', 4, 2)->nullable();
-            $table->decimal('porcentaje', 4, 2)->nullable();
+            $table->decimal('grade_average', 4, 2)->nullable();
+            $table->decimal('advanced_percentage', 4, 2)->nullable();
 
-            $table->integer('intentos')->nullable();
-            $table->integer('visitas')->nullable();
+            $table->unsignedInteger('attempts')->nullable();
+            $table->unsignedInteger('views')->nullable();
 
-            $table->timestamp('last_ev')->nullable();
+            $table->unsignedInteger('restarts')->nullable();
+            $table->foreignId('restarter_id')->nullable()->constrained('users');
+
+            $table->timestamp('last_time_evaluated_at')->nullable();
+            $table->timestamp('certification_issued_at')->nullable();
 
             $table->boolean('active')->nullable()->default(true);
 
