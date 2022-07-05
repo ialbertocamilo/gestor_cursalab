@@ -13,13 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('user_uploads', function (Blueprint $table) {
+        Schema::create('usuario_uploads', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users');
 
-            $table->text('link');
-            $table->text('file');
-            $table->text('description');
+            $table->foreignId('usuario_id')->nullable()->constrained('users');
+
+            $table->text('link')->nullable();
+            $table->string('file')->nullable();
+            $table->text('description')->nullable();
+
+            // $table->boolean('active')->nullable()->default(true);
 
             $table->timestamps();
             $table->softDeletes();
@@ -33,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_uploads');
+        Schema::dropIfExists('usuario_uploads');
     }
 };
