@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('checklist_id')->nullable()->constrained('checklists');
 
-            $table->string('actividad');
+            $table->string('activity');
 
             $table->tinyInteger('position')->nullable();
 
