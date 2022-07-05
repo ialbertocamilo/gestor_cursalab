@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('lastname')->nullable();
             $table->string('surname')->nullable();
 
+            $table->foreignId('type_id')->nullable()->constrained('taxonomies');
+            
             $table->string('email')->nullable();
             $table->string('username')->nullable();
             $table->string('code')->nullable();

@@ -17,6 +17,26 @@ class TaxonomySeederSystem extends Seeder
         $master = Taxonomy::create([
             'group' => 'system',
             'type' => 'platform',
+            'code' => 'gestor',
+            'name' => 'Gestor',
+            'alias' => 'Gestor LMS',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        $client = Taxonomy::create([
+            'group' => 'system',
+            'type' => 'platform',
+            'code' => 'app',
+            'name' => 'App Usuario',
+            'alias' => 'APP Usuario',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        $master = Taxonomy::create([
+            'group' => 'system',
+            'type' => 'environment',
             'code' => 'web',
             'name' => 'Web',
             'alias' => 'Web',
@@ -26,10 +46,10 @@ class TaxonomySeederSystem extends Seeder
 
         $client = Taxonomy::create([
             'group' => 'system',
-            'type' => 'platform',
+            'type' => 'environment',
             'code' => 'app',
-            'name' => 'APP',
-            'alias' => 'APP',
+            'name' => 'App',
+            'alias' => 'App',
             'active' => ACTIVE,
             'position' => 2,
         ]);
@@ -651,134 +671,134 @@ class TaxonomySeederSystem extends Seeder
             'position' => 3,
         ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'gender',
-            'code' => 'male',
-            'name' => 'Masculino',
-            'icon' => 'male',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'gender',
+        //     'code' => 'male',
+        //     'name' => 'Masculino',
+        //     'icon' => 'male',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'gender',
-            'code' => 'female',
-            'name' => 'Femenino',
-            'icon' => 'female',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'gender',
+        //     'code' => 'female',
+        //     'name' => 'Femenino',
+        //     'icon' => 'female',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'job-position',
-            'code' => 'coder',
-            'name' => 'Programador',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'job-position',
+        //     'code' => 'coder',
+        //     'name' => 'Programador',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'job-position',
-            'code' => 'CEO',
-            'name' => 'CEO',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'job-position',
+        //     'code' => 'CEO',
+        //     'name' => 'CEO',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'job-position',
-            'code' => 'cto',
-            'name' => 'CTO',
-            'active' => ACTIVE,
-            'position' => 3,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'job-position',
+        //     'code' => 'cto',
+        //     'name' => 'CTO',
+        //     'active' => ACTIVE,
+        //     'position' => 3,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'job-position',
-            'code' => 'analista',
-            'name' => 'Analista',
-            'active' => ACTIVE,
-            'position' => 4,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'job-position',
+        //     'code' => 'analista',
+        //     'name' => 'Analista',
+        //     'active' => ACTIVE,
+        //     'position' => 4,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'job-position',
-            'code' => 'designer',
-            'name' => 'Diseñador',
-            'active' => ACTIVE,
-            'position' => 5,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'job-position',
+        //     'code' => 'designer',
+        //     'name' => 'Diseñador',
+        //     'active' => ACTIVE,
+        //     'position' => 5,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'job-position',
-            'code' => 'qa',
-            'name' => 'QA',
-            'active' => ACTIVE,
-            'position' => 6,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'job-position',
+        //     'code' => 'qa',
+        //     'name' => 'QA',
+        //     'active' => ACTIVE,
+        //     'position' => 6,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'job-position',
-            'code' => 'designer',
-            'name' => 'Diseñador',
-            'active' => ACTIVE,
-            'position' => 5,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'job-position',
+        //     'code' => 'designer',
+        //     'name' => 'Diseñador',
+        //     'active' => ACTIVE,
+        //     'position' => 5,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'area',
-            'code' => 'design',
-            'name' => 'Diseño',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'area',
+        //     'code' => 'design',
+        //     'name' => 'Diseño',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'area',
-            'code' => 'develop',
-            'name' => 'Desarrollo',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'area',
+        //     'code' => 'develop',
+        //     'name' => 'Desarrollo',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'area',
-            'code' => 'marketing',
-            'name' => 'Marketing',
-            'active' => ACTIVE,
-            'position' => 3,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'area',
+        //     'code' => 'marketing',
+        //     'name' => 'Marketing',
+        //     'active' => ACTIVE,
+        //     'position' => 3,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'area',
-            'code' => 'commercial',
-            'name' => 'Comercial',
-            'active' => ACTIVE,
-            'position' => 4,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'area',
+        //     'code' => 'commercial',
+        //     'name' => 'Comercial',
+        //     'active' => ACTIVE,
+        //     'position' => 4,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'area',
-            'code' => 'support',
-            'name' => 'Soporte',
-            'active' => ACTIVE,
-            'position' => 5,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'area',
+        //     'code' => 'support',
+        //     'name' => 'Soporte',
+        //     'active' => ACTIVE,
+        //     'position' => 5,
+        // ]);
 
         Taxonomy::create([
             'group' => 'user',
@@ -796,6 +816,69 @@ class TaxonomySeederSystem extends Seeder
             'name' => 'Carné de extranjería',
             'active' => ACTIVE,
             'position' => 2,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'error',
+            'type' => 'status',
+            'code' => 'pending',
+            'name' => 'Pendiente',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'error',
+            'type' => 'status',
+            'code' => 'working',
+            'name' => 'Revisando',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'error',
+            'type' => 'status',
+            'code' => 'solved',
+            'name' => 'Solucionado',
+            'active' => ACTIVE,
+            'position' => 3,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'error',
+            'type' => 'status',
+            'code' => 'stand-by',
+            'name' => 'Stand By',
+            'active' => ACTIVE,
+            'position' => 4,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'restart',
+            'type' => 'type',
+            'code' => 'total',
+            'name' => 'Total',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'restart',
+            'type' => 'type',
+            'code' => 'course',
+            'name' => 'Curso',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'restart',
+            'type' => 'type',
+            'code' => 'topic',
+            'name' => 'Tema',
+            'active' => ACTIVE,
+            'position' => 3,
         ]);
 
         // Taxonomy::create([

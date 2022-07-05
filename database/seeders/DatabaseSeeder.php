@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(WorldTablesSeeder::class);
 
         $this->call(TaxonomySeederSystem::class);
+        $this->call(TaxonomySeederAppMenu::class);
         $this->call(TaxonomySeederNotification::class);
         $this->call(TaxonomySeederPriority::class);
         $this->call(TaxonomySeederMediaTypes::class);
