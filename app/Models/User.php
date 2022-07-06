@@ -59,7 +59,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username', 'slug', 'alias', 
+        'name', 'lastname', 'surname', 'username', 'slug', 'alias',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document_number', 'ruc',
@@ -72,7 +72,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $dates = ['birthdate'];
 
     public $defaultRelationships = [
-        'type_id' => 'type', 
+        'type_id' => 'type',
         // 'job_position_id' => 'job_position', 'area_id' =>  'area', 'gender_id' => 'gender',
         // 'document_type_id' => 'document_type', 'country_id' => 'country', 'district_id' =>  'district'
     ];
@@ -118,6 +118,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $notification->webhookUrl ?? config('slack.routes.general');
     }
+
+
+    public function criteria()
+    {
+        $this->belongsToMany(Criterion::class, 'criteria_user', 'user_id', 'criterion_id' );
+    }
+
 
     public function getFullnameAttribute()
     {
@@ -285,7 +292,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
-        
+
         $query->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->rowsPerPage);
@@ -300,7 +307,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         //     }
         // }
         return $permissions;
-    } 
+    }
 
     // /**
     //  * Route notifications for the Slack channel.

@@ -23,7 +23,7 @@ class MigrationData3 extends Command
         evaluaciones => se une con la tabla users,
         encuestas => pasa a criterios y se elimina,
         visitas => pasa a criterios y se elimina,
-        tablas resumen => pasa a criterios y se elimina,"¨
+        tablas resumen => pasa a criterios y se elimina,";
 
     /**
      * Execute the console command.

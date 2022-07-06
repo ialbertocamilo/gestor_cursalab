@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('criterion_value_user', function (Blueprint $table) {
-
-            $table->foreignId('user_id')->nullable();
+        Schema::create('criterion_value_relationship', function (Blueprint $table) {
+            $table->foreignId('criterion_value_parent_id')->nullable()->constrained('criterion_values');
             $table->foreignId('criterion_value_id')->nullable()->constrained('criterion_values');
-
-            // $table->boolean('active')->nullable()->default(true);
         });
     }
 
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('criterion_value_user');
+        Schema::dropIfExists('criterion_value_relationship');
     }
 };

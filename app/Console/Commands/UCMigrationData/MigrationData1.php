@@ -34,12 +34,14 @@ class MigrationData1 extends Command
      */
     public function handle()
     {
-        // TODO: Migrate usuarios
-        // TODO: Migrate carreras
-        // TODO: Migrate ciclos
-        // TODO: Migrate grupos
-        // TODO: Migrate boticas
-        // TODO: Migrate modulos
-        Migration_1::migrationData();
+
+        $this->info(" Inicio: " . now());
+        info(" Inicio: " . now());
+
+        Migration_1::migrateData1();
+
+        $this->info(" Fin: " . now());
+        info(" Fin: " . now());
+
     }
 }
