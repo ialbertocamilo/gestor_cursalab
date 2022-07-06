@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->foreignId('glossary_id')->nullable()->constrained('glossaries');
             $table->foreignId('taxonomy_id')->nullable()->constrained('taxonomies');
-            $table->unsignedBigInteger('glossary_group_id')->nullable()->constrained('taxonomies');
+            $table->unsignedBigInteger('glossary_group_id')->nullable()->constrained('taxonomies'); // glosario - grupo
         });
     }
 

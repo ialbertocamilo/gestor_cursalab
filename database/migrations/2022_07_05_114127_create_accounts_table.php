@@ -14,7 +14,7 @@ class CreateAccountsTable extends Migration
     public function up()
     {
         Schema::create('accounts', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('username')->nullable();
@@ -28,6 +28,8 @@ class CreateAccountsTable extends Migration
             $table->text('sdk_token')->nullable();
             $table->text('zak_token')->nullable();
 
+            $table->unsignedBigInteger('service_id')->nullable()->index();
+            
             $table->unsignedBigInteger('service_id')->nullable()->index();
             $table->unsignedBigInteger('plan_id')->nullable()->index();
             $table->unsignedBigInteger('type_id')->nullable()->index();

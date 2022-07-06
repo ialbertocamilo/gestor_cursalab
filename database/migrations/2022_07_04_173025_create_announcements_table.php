@@ -15,23 +15,23 @@ return new class extends Migration
     {
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('module_id')->nullable()->constrained('taxonomies');
+            $table->foreignId('module_id')->nullable()->constrained('criterion_values');
 
             $table->string('nombre');
 
-            $table->text('contenido');
+            $table->text('contenido')->nullable();
 
-            $table->string('imagen');
-            $table->string('archivo');
+            $table->string('imagen')->nullable();
+            $table->string('archivo')->nullable();
 
-            $table->string('destino');
-            $table->string('link');
+            $table->string('destino')->nullable();
+            $table->string('link')->nullable();
 
-            $table->tinyInteger('position'); // ???
+            $table->tinyInteger('position')->nullable(); // ???
 
             $table->boolean('active')->nullable()->default(true);
 
-            $table->timestamp('publish_date');
+            $table->dateTime('publish_date')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
