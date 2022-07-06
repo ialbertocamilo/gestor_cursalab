@@ -101,13 +101,13 @@ class BaseModel extends Model implements Recordable
         return abort(500, $message);
     }
 
-    public function setCodeAttribute($value = '')
-    {
+    // public function setCodeAttribute($value = '')
+    // {
         // if ( ! empty ($value) )
         // {
-            $this->attributes['code'] = $this->generateCode($value);
+            // $this->attributes['code'] = $this->generateCode($value);
         // }
-    }
+    // }
 
     public function hasManySync($related, $foreignKey = null, $localKey = null)
     {
