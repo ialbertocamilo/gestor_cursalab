@@ -14,7 +14,7 @@ class ExternalDatabase extends Model
         return new OTFConnection($db_data);
     }
 
-    protected function insertMigrationData($db_config, $data)
+    protected function insertMigrationData_1($db_config, $data)
     {
         $db = self::connect($db_config);
 
