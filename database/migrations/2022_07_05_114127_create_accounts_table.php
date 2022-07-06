@@ -29,8 +29,6 @@ class CreateAccountsTable extends Migration
             $table->text('zak_token')->nullable();
 
             $table->unsignedBigInteger('service_id')->nullable()->index();
-            
-            $table->unsignedBigInteger('service_id')->nullable()->index();
             $table->unsignedBigInteger('plan_id')->nullable()->index();
             $table->unsignedBigInteger('type_id')->nullable()->index();
             // $table->morphs('model');
@@ -40,7 +38,7 @@ class CreateAccountsTable extends Migration
 
             $table->timestamps();
             $table->softDeletes();
-			
+
             // $table->index(['service_id', 'plan_id']);
         });
     }
