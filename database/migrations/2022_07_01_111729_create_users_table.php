@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('surname')->nullable();
 
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
 
             $table->string('email')->nullable();
             $table->string('username')->nullable();

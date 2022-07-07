@@ -47,11 +47,11 @@ class CreateMeetingsTable extends Migration
             $table->timestamp('url_start_generated_at')->nullable();
             $table->timestamp('report_generated_at')->nullable();
 
-            $table->unsignedBigInteger('status_id')->nullable()->index();
-            $table->unsignedBigInteger('account_id')->nullable()->index();
-            $table->unsignedBigInteger('type_id')->nullable()->index();
-            $table->unsignedBigInteger('host_id')->nullable()->index();
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->foreignId('status_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('type_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('account_id')->nullable()->index()->constrained('accounts');
+            $table->foreignId('host_id')->nullable()->index()->constrained('users');
+            $table->foreignId('user_id')->nullable()->index()->constrained('users');
 
             $table->text('raw_data_response')->nullable();
 

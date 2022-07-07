@@ -17,8 +17,8 @@ class CreateAttendantsTable extends Migration
 
             $table->id();
 
-            $table->unsignedBigInteger('meeting_id')->nullable()->index();
-            $table->unsignedBigInteger('usuario_id')->nullable()->index();
+            $table->foreignId('meeting_id')->nullable()->index()->constrained('meetings');
+            $table->foreignId('usuario_id')->nullable()->index()->constrained('users');
 
             $table->string('link')->nullable();
 
@@ -38,7 +38,7 @@ class CreateAttendantsTable extends Migration
 
             $table->timestamp('confirmed_attendance_at')->nullable();
 
-            $table->unsignedBigInteger('type_id')->nullable()->index();
+            $table->foreignId('type_id')->nullable()->index()->constrained('taxonomies');
             $table->boolean('online')->nullable();
 
             $table->timestamp('first_attempt_at')->nullable();
@@ -46,12 +46,12 @@ class CreateAttendantsTable extends Migration
             $table->string('identifier')->nullable();
             $table->string('ip')->nullable();
 
-            $table->unsignedBigInteger('browser_family_id')->nullable()->index();
-            $table->unsignedBigInteger('browser_version_id')->nullable()->index();
-            $table->unsignedBigInteger('platform_family_id')->nullable()->index();
-            $table->unsignedBigInteger('platform_version_id')->nullable()->index();
-            $table->unsignedBigInteger('device_family_id')->nullable()->index();
-            $table->unsignedBigInteger('device_model_id')->nullable()->index();
+            $table->foreignId('browser_family_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('browser_version_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('platform_family_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('platform_version_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('device_family_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('device_model_id')->nullable()->index()->constrained('taxonomies');
 
             $table->timestamps();
             $table->softDeletes();

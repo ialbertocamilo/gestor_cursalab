@@ -13,16 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('topic_id')->nullable()->constrained('topics');
+            $table->foreignId('setting_type_id')->nullable()->constrained('taxonomies');
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
 
-            $table->text('pregunta');
-            $table->text('rptas_json');
-            $table->text('rpta_ok');
-
-            $table->boolean('active')->nullable()->default(true);
+            $table->string('name');
+            $table->string('value');
+            $table->tinyInteger('position')->nullable();
+            $table->text('description')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('settings');
     }
 };
