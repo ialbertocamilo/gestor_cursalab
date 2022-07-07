@@ -8,12 +8,18 @@ use DB;
 
 class Encuesta extends BaseModel
 {
+    protected $table = 'polls';
     // protected $fillable = ['titulo', 'imagen', 'vigencia', 'post_id', 'estado', 'created_at', 'updated_at'];
-    protected $fillable = ['titulo', 'imagen', 'estado', 'created_at', 'updated_at', 'tipo', 'anonima'];
+    protected $fillable = ['titulo', 'imagen', 'estado', 'created_at', 'updated_at', 'type_id', 'anonima'];
 
     public function preguntas()
     {
         return $this->hasMany(Encuestas_pregunta::class, 'encuesta_id');
+    }
+
+    public function type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_id');
     }
 
     protected function search($request)

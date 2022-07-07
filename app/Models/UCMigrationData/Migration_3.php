@@ -31,6 +31,12 @@ class Migration_3 extends Model
     {
         $data = self::getEncuestasData();
         self::insertChunkedData($data, 'polls');
+
+        $data = self::getEncuestasPreguntasData();
+        self::insertChunkedData($data, 'poll_questions');
+
+        $data = self::getEncuestasPreguntasRespuestasData();
+        self::insertChunkedData($data, 'poll_question_answers');
     }
 
 
@@ -56,6 +62,7 @@ class Migration_3 extends Model
             $topic_id = $types->where('code', $encuesta->tipo)->first();
 
             $data[] = [
+                'external_id' => $encuesta->id,
                 'type_id' => $type_id,
                 'anonima' => $encuesta->anonima,
                 'titulo' => $encuesta->titulo,
@@ -63,6 +70,67 @@ class Migration_3 extends Model
                 'active' => $encuesta->estado,
                 'created_at' => $encuesta->created_at,
                 'updated_at' => $encuesta->updated_at,
+            ];
+        }
+
+        return array_chunk($data, self::CHUNK_LENGTH, true);
+    }
+
+    protected function getEncuestasPreguntasData()
+    {
+        $db = self::connect();
+
+        $preguntas = $db->getTable('encuestas_preguntas')->get();
+        $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
+        $polls = Poll::all();
+
+        $data = [];
+
+        foreach ($preguntas as $key => $pregunta)
+        {
+            $type_id = $types->where('code', $pregunta->tipo_pregunta)->first();
+            $poll_id = $polls->where('external_id', $pregunta->encuesta_id)->first();
+
+            $data[] = [
+                'external_id' => $pregunta->id,
+                'poll_id' => $poll_id,
+                'type_id' => $type_id,
+                'titulo' => $pregunta->titulo,
+                'opciones' => $pregunta->opciones,
+                'active' => $pregunta->estado,
+                'created_at' => $pregunta->created_at,
+                'updated_at' => $pregunta->updated_at,
+            ];
+        }
+
+        return array_chunk($data, self::CHUNK_LENGTH, true);
+    }
+
+    protected function getEncuestasPreguntasRespuestasData()
+    {
+        $db = self::connect();
+
+        $respuestas = $db->getTable('encuestas_respuestas')->get();
+        $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
+        $polls = Poll::all();
+
+        $data = [];
+
+        foreach ($respuestas as $key => $respuesta)
+        {
+            $type_id = $types->where('code', $respuesta->tipo_pregunta)->first();
+            $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
+
+            $data[] = [
+                // 'external_id' => $respuesta->id,
+                'poll_id' => $poll_id,
+                'type_id' => $type_id,
+                'poll_question_id' => $question_id,
+                'titulo' => $respuesta->titulo,
+                'respuestas' => $respuesta->respuestas,
+                'active' => $respuesta->estado,
+                'created_at' => $respuesta->created_at,
+                'updated_at' => $respuesta->updated_at,
             ];
         }
 

@@ -21,19 +21,10 @@ class DatabaseSeeder extends Seeder
         $this->call(TaxonomySeederPriority::class);
         $this->call(TaxonomySeederMediaTypes::class);
         $this->call(TaxonomySeederPoll::class);
-        // $this->call(TaxonomySeederClientEmployees::class);
-        // $this->call(TaxonomySeederFeature::class);
-        // $this->call(TaxonomySeederFeatureInterval::class);
-        // $this->call(TaxonomySeederFeatureType::class);
-        // $this->call(TaxonomySeederServer::class);
-
-        // $this->call(TaxonomySeederClientEmployees::class);
-        // $this->call(TaxonomySeederSector::class);
         $this->call(TaxonomySeederQuestionType::class);
 
         $this->call(BouncerSeeder::class);
         $this->call(UserSeeder::class);
-        // $this->call(ClientSeeder::class);
 
 //        $this->call(SchoolSeeder::class);
 //        $this->call(CourseSeeder::class);

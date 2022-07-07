@@ -13,17 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('poll_questions', function (Blueprint $table) {
+        Schema::create('poll_question_answers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('external_id')->nullable();
-            $table->foreignId('poll_id')->nullable()->constrained('polls');
+            // $table->unsignedBigInteger('external_id')->nullable();
+            $table->foreignId('course_id')->nullable()->constrained('courses');
+            $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->foreignId('poll_question_id')->nullable()->constrained('poll_questions');
 
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
 
-            $table->string('titulo');
-            $table->text('opciones');
-
-            $table->boolean('active')->nullable()->default(true);
+            $table->text('respuestas')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
