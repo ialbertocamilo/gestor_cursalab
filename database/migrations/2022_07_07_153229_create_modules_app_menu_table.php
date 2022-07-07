@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('modules_app_menu', function (Blueprint $table) {
-            $table->foreignId('module_id')->nullable()->constrained('criterion_value');
+            $table->foreignId('module_id')->nullable()->constrained('criterion_values');
             $table->foreignId('menu_id')->nullable()->constrained('taxonomies');
 
             $table->tinyInteger('position')->nullable();
