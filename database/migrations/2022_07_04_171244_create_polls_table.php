@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
 
-            $table->boolean('is_anonymous')->nullable()->default(false);
+            $table->boolean('anonima')->nullable()->default(false);
 
             $table->string('titulo');
             $table->string('imagen');

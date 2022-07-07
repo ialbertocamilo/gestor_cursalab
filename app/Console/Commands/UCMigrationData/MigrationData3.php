@@ -23,7 +23,7 @@ class MigrationData3 extends Command
         evaluaciones => se une con la tabla users,
         encuestas => pasa a criterios y se elimina,
         visitas => pasa a criterios y se elimina,
-        tablas resumen => pasa a criterios y se elimina,"¨
+        tablas resumen => pasa a criterios y se elimina,"
 
     /**
      * Execute the console command.
@@ -32,12 +32,7 @@ class MigrationData3 extends Command
      */
     public function handle()
     {
-        // TODO: Migrate usuarios
-        // TODO: Migrate carreras
-        // TODO: Migrate ciclos
-        // TODO: Migrate grupos
-        // TODO: Migrate boticas
-        // TODO: Migrate modulos
-        Migration_1::migrationData();
+        Migration_3::migratePruebas();
+        Migration_3::migrateEncuestas();
     }
 }
