@@ -15,13 +15,14 @@ return new class extends Migration
     {
         Schema::create('videoteca', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
             $table->string('title');
-            $table->string('description');
+            $table->string('description')->nullable();
 
             $table->foreignId('category_id')->nullable()->constrained('taxonomies');
 
-            $table->string('media_video');
-            $table->string('media_type');
+            $table->string('media_video')->nullable();
+            $table->string('media_type')->nullable();
 
             $table->foreignId('media_id')->nullable()->constrained('media');
             $table->foreignId('preview_id')->nullable()->constrained('media');
