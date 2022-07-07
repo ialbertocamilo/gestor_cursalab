@@ -16,6 +16,7 @@ class CreateMeetingsTable extends Migration
         Schema::create('meetings', function (Blueprint $table) {
 
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
 
             $table->string('name')->nullable();
             $table->text('description')->nullable();

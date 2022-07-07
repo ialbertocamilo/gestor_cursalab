@@ -15,6 +15,8 @@ class CreateTaxonomiesTable extends Migration
     {
         Schema::create('taxonomies', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
+            $table->unsignedBigInteger('external_id_es')->nullable()->index();
 
             $table->string('group', 30)->nullable();
             $table->string('type', 30)->nullable();
@@ -29,8 +31,9 @@ class CreateTaxonomiesTable extends Migration
             $table->boolean('active')->nullable();
             $table->string('description', 3000)->nullable();
             $table->text('detail')->nullable();
-
             $table->foreignId('parent_id')->nullable()->constrained('taxonomies');
+            $table->unsignedBigInteger('external_parent_id')->nullable();
+            $table->unsignedBigInteger('external_parent_id_es')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

@@ -17,9 +17,9 @@ class Media extends Model
     const DEFAULT_PDF_IMG = "images/default-pdf-img_210.png";
 
     protected $table = 'media';
-    
+
     protected $fillable = [
-        'name', 'description', 'file', 'ext', 'status'
+        'title', 'description', 'file', 'ext', 'status', 'external_id', 'size'
     ];
 
     public function getFullTitleAttribute()
@@ -106,7 +106,6 @@ class Media extends Model
         if (!empty($data[$field])) {
 
             $data[$field] = $data[$field];
-
         } else {
 
             $file_field = 'file_' . $field;
@@ -142,7 +141,7 @@ class Media extends Model
         // $multimedia_field = 'multimedia_' . $field;
 
         if (!empty($data[$multimedia_field])) {
-//            dd(1);
+            //            dd(1);
             $media = Media::uploadFile($data[$multimedia_field], $nombre, true);
             $data[$field . '_id'] = $media->id;
         } else {
@@ -150,17 +149,17 @@ class Media extends Model
 
             if (!empty($data[$multimedia_field])) {
                 // $media = Media::uploadFile($data[$field], $nombre, true);
-//                dd(2);
+                //                dd(2);
 
                 $data[$field . '_id'] = $data[$multimedia_field] ?? NULL;
             } else {
                 if (!empty($data[$field])) {
-//                    dd(3);
+                    //                    dd(3);
 
                     $media = Media::where('file', $data[$field])->first();
                     $data[$field . '_id'] = $media->id ?? NULL;
                 } else {
-//                    dd(4);
+                    //                    dd(4);
 
                     $data[$field . '_id'] = NULL;
                 }
@@ -351,4 +350,3 @@ class Media extends Model
     // }
 
 }
-
