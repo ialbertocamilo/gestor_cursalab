@@ -11,7 +11,7 @@ class Migration_1 extends Model
 {
     use HasFactory;
 
-    public function migrateData1()
+    protected function migrateData1()
     {
         $client_lms_data = ExternalLMSMigration::setMigrationData_1();
 

@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('checklists', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
+
             $table->string('title');
             $table->string('description');
 

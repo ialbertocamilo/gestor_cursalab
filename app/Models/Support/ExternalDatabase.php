@@ -2,6 +2,8 @@
 
 namespace App\Models\Support;
 
+use App\Models\CriterionValue;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 
@@ -9,141 +11,134 @@ class ExternalDatabase extends Model
 {
     const CHUNK_LENGTH = 5000;
 
-    protected function connect($db_data)
+    protected function insertMigrationData_1($data)
     {
-        return new OTFConnection($db_data);
+        $this->insertUsersData($data);
+
+        $this->insertModulosData($data);
+        $this->insertUserModuleData($data);
+
+        $this->insertCarrerasData($data);
+//        $this->insertCiclosData($data);
+//        $this->insertUserCarreraData($data);
+
+//        $this->insertCoursesData($data);
+//
+//        $this->insertCourseSchoolData($data);
+//
+//        $this->insertTopicsData($data);
+//
+//        $this->insertQuestionData($data);
     }
 
-    protected function insertMigrationData_1($db_config, $data)
-    {
-        $db = self::connect($db_config);
-
-        $this->insertUsersData($db, $data);
-
-        $this->insertSchoolsData($db, $data);
-
-        $this->insertCoursesData($db, $data);
-
-        $this->insertCourseSchoolData($db, $data);
-
-        $this->insertTopicsData($db, $data);
-
-        $this->insertQuestionData($db, $data);
-    }
-
-    public function insertChunkedData($db, $data, $table_name)
+    public function insertChunkedData($table_name, $data)
     {
         foreach ($data as $chunk)
-            $db->getTable($table_name)->insert($chunk);
+            DB::table($table_name)->insert($chunk);
     }
 
-    public function insertUsersData($db, $data)
+    public function insertUsersData($data)
     {
-        $this->insertChunkedData($db, $data['users'], 'users');
+        $this->insertChunkedData('users', $data['users']);
     }
 
-    public function insertSchoolsData($db, $data)
+    public function insertModulosData($data)
     {
-        $this->insertChunkedData($db, $data['schools'], 'schools');
+        $this->insertChunkedData('criterion_values', $data['modulos']);
     }
 
-    public function insertCoursesData($db, $data)
+    public function insertUserModuleData($data)
     {
-        $this->insertChunkedData($db, $data['courses'], 'courses');
-    }
-
-    public function insertTopicsData($db, $data)
-    {
-        $courses = $db->getTable('courses')->get();
-
+        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+        $users = User::all();
         $temp = [];
 
-        foreach ($data['topics'] as $topic) {
-            $course = $courses->where('external_id', $topic['curso_id'])->first();
-            unset($topic['curso_id']);
+        foreach ($data['user_modulo'] as $relation) {
+            $module = $modules_values->where('external_id', $relation['config_id'])->first();
+            $user = $users->where('external_id', $relation['usuario_id'])->first();
+            unset($relation['config_id'], $relation['usuario_id']);
 
-            $temp[] = array_merge($topic, ['course_id' => $course->id ?? null]);
+            if ($module and $user)
+                $temp[] = array_merge($relation, ['criterion_id' => $module->id, 'user_id' => $user->id]);
+
         }
 
         $chunk = array_chunk($temp, self::CHUNK_LENGTH, true);
 
-        $this->insertChunkedData($db, $chunk, 'topics');
+        $this->insertChunkedData('criteria_user', $chunk);
     }
 
-    public function insertCourseSchoolData($db, $data)
+    public function insertCarrerasData($data)
     {
-        $courses = $db->getTable('courses')->get();
-        $schools = $db->getTable('schools')->get();
+        $this->insertChunkedData('criterion_values', $data['carreras']);
 
         $temp = [];
-        foreach ($data['course_school'] as $course_school) {
-            $course = $courses->where('external_id', $course_school['curso_id'])->first();
-            $school = $schools->where('external_id', $course_school['categoria_id'])->first();
-            if ($course && $school) {
-                $temp[] = [
-                    'course_id' => $course->id,
-                    'school_id' => $school->id
-                ];
-            }
+        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+        $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+
+        foreach ($data['modulo_carrera_relation'] as $relation) {
+            $module = $modules_values->where('external_id', $relation['config_id'])->first();
+            $carrera = $carreras_values->where('value_text', $relation['nombre'])->first();
+
+            if ($module and $carrera)
+                $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $carrera->id];
         }
 
         $chunk = array_chunk($temp, self::CHUNK_LENGTH, true);
 
-        $this->insertChunkedData($db, $chunk, 'course_school');
+        $this->insertChunkedData('criterion_value_relationship', $chunk);
     }
 
-    public function insertQuestionData($db, $data)
+    public function insertCiclosData($data)
     {
-        $topics = $db->getTable('topics')->get();
-
-        foreach ($data['questions'] as $question) {
-            $topic = $topics->where('external_id', $question['post_id'])->first();
-            $options = $question['rptas_json'];
-            unset($question['post_id'], $question['rptas_json']);
-
-            if ($topic) {
-                $temp_question = array_merge($question, ['model_id' => $topic->id]);
-
-                $db->getTable('questions')->insert($temp_question);
-
-                $this->insertOptionsData($db, array_merge($question, ['rptas_json' => $options]));
-            }
-        }
-    }
-
-    public function insertOptionsData($db, $data)
-    {
-        $now = now()->format('Y-m-d H:i:s');
-
-        $options = json_decode($data['rptas_json'] ?? [], true);
-
-        $position = 1;
-        $temp = [];
-        foreach ($options as $option) {
-            $temp[] = [
-                'question_id' => $data['external_id'],
-
-                'statement' => $option['opc'],
-                'position' => $position,
-
-                'is_correct' => $option['correcta'],
-
-                'active' => ACTIVE,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-            $position++;
-        }
-
-        $db->getTable('options')->insert($temp);
+        $this->insertChunkedData('criterion_values', $data['ciclos']);
     }
 
 
-//    // CHANNEL
-//
-//    public function setExternalDatabaseConnection()
+//    public function insertQuestionData($data)
 //    {
-//        return new OTFConnection($this->settings['database']);
+//        $topics = Topic::all();
+//
+//        foreach ($data['questions'] as $question) {
+//            $topic = $topics->where('external_id', $question['post_id'])->first();
+//            $options = $question['rptas_json'];
+//            unset($question['post_id'], $question['rptas_json']);
+//
+//            if ($topic) {
+//                $temp_question = array_merge($question, ['model_id' => $topic->id]);
+//
+//                $db->getTable('questions')->insert($temp_question);
+//
+//                $this->insertOptionsData($db, array_merge($question, ['rptas_json' => $options]));
+//            }
+//        }
+//    }
+//
+//    public function insertOptionsData($db, $data)
+//    {
+//        $now = now()->format('Y-m-d H:i:s');
+//
+//        $options = json_decode($data['rptas_json'] ?? [], true);
+//
+//        $position = 1;
+//        $temp = [];
+//        foreach ($options as $option) {
+//            $temp[] = [
+//                'question_id' => $data['external_id'],
+//
+//                'statement' => $option['opc'],
+//                'position' => $position,
+//
+//                'is_correct' => $option['correcta'],
+//
+//                'active' => ACTIVE,
+//                'created_at' => $now,
+//                'updated_at' => $now,
+//            ];
+//            $position++;
+//        }
+//
+//        $db->getTable('options')->insert($temp);
 //    }
 
 }

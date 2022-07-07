@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('criterion_values', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
 
             $table->foreignId('criterion_id')->nullable()->constrained('criteria');
 

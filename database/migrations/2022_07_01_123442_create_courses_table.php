@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
+
             $table->string('name');
             $table->string('slug')->nullable();
             $table->string('external_code')->nullable();
