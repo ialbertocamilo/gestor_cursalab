@@ -42,6 +42,18 @@ class Migration_3 extends Model
         self::insertChunkedData($data, 'poll_question_answers');
     }
 
+    protected function migrateResumenes()
+    {
+        $data = self::getResumenGeneralData();
+        self::insertChunkedData($data, 'summary_users');
+
+        $data = self::getResumenCursosData();
+        self::insertChunkedData($data, 'summary_courses');
+
+        $data = self::getResumenTemasData();
+        self::insertChunkedData($data, 'summary_topics');
+    }
+
 
     public function insertChunkedData($data, $table_name)
     {

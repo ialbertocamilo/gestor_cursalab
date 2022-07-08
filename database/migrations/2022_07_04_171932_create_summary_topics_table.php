@@ -19,15 +19,23 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->foreignId('topic_id')->nullable()->constrained('topics');
 
-            $table->integer('total_attempts')->nullable();
-            $table->integer('total_answers_right')->nullable();
-            $table->integer('total_answers_failed')->nullable();
+            $table->unsignedInteger('attempts')->nullable();
+            $table->unsignedInteger('correct_answers')->nullable();
+            $table->unsignedInteger('failed_answers')->nullable();
 
-            $table->integer('grade')->nullable();
+            $table->unsignedInteger('views')->nullable();
+            $table->unsignedInteger('downloads')->nullable();
+            $table->unsignedInteger('restarts')->nullable();
 
-            $table->tinyInteger('historical')->nullable(); // ????
+            // $table->integer('grade')->nullable();
+            $table->unsignedDecimal('grade', 8, 2)->nullable();
+            $table->boolean('approved')->nullable()->default(true);
 
-            $table->timestamp('test_attempt_at')->nullable();
+            // $table->tinyInteger('historical')->nullable(); // ????
+
+            // $table->timestamp('test_attempt_at')->nullable();
+            $table->json('answers')->nullable();
+            $table->timestamp('last_time_evaluated_at')->nullable();
 
             $table->foreignId('source_id')->nullable()->constrained('taxonomies');
             $table->foreignId('status_id')->nullable()->constrained('taxonomies');

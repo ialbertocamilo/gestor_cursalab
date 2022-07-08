@@ -17,13 +17,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users');
 
-            $table->integer('courses_assigned');
-            $table->integer('courses_completed');
-            $table->integer('attempts');
-            $table->integer('advanced_percentage');
+            $table->unsignedInteger('courses_assigned');
+            $table->unsignedInteger('courses_completed');
+            $table->unsignedInteger('attempts');
 
-            $table->decimal('grade_average', 4, 2);
-            $table->decimal('score', 8, 2);
+            $table->unsignedDecimal('score', 10, 2);
+            $table->unsignedDecimal('grade_average', 4, 2);
+            $table->unsignedDecimal('advanced_percentage', 4, 2);
 
             $table->timestamp('last_time_evaluated_at')->nullable();
 
