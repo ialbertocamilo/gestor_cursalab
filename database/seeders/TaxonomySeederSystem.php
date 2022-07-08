@@ -14,9 +14,9 @@ class TaxonomySeederSystem extends Seeder
      */
     public function run()
     {
-        $master = Taxonomy::create([
+        Taxonomy::create([
             'group' => 'system',
-            'type' => 'platform',
+            'type' => 'platform-env',
             'code' => 'gestor',
             'name' => 'Gestor',
             'alias' => 'Gestor LMS',
@@ -24,9 +24,9 @@ class TaxonomySeederSystem extends Seeder
             'position' => 1,
         ]);
 
-        $client = Taxonomy::create([
+        Taxonomy::create([
             'group' => 'system',
-            'type' => 'platform',
+            'type' => 'platform-env',
             'code' => 'app',
             'name' => 'App Usuario',
             'alias' => 'APP Usuario',
@@ -34,45 +34,45 @@ class TaxonomySeederSystem extends Seeder
             'position' => 2,
         ]);
 
-        $master = Taxonomy::create([
-            'group' => 'system',
-            'type' => 'environment',
-            'code' => 'web',
-            'name' => 'Web',
-            'alias' => 'Web',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'environment',
+        //     'code' => 'web',
+        //     'name' => 'Web',
+        //     'alias' => 'Web',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        $client = Taxonomy::create([
-            'group' => 'system',
-            'type' => 'environment',
-            'code' => 'app',
-            'name' => 'App',
-            'alias' => 'App',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'environment',
+        //     'code' => 'app',
+        //     'name' => 'App',
+        //     'alias' => 'App',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
         // Source
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'source',
-            'code' => 'internal',
-            'name' => 'Interno',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'source',
+        //     'code' => 'internal',
+        //     'name' => 'Interno',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'source',
-            'code' => 'external',
-            'name' => 'Externo',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'source',
+        //     'code' => 'external',
+        //     'name' => 'Externo',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
         // Models
 
@@ -404,185 +404,185 @@ class TaxonomySeederSystem extends Seeder
 
         // Database actions
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'event',
-            'code' => 'created',
-            'name' => 'Creación',
-            'active' => ACTIVE,
-            'position' => 1,
-            'icon' => 'add',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'event',
+        //     'code' => 'created',
+        //     'name' => 'Creación',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        //     'icon' => 'add',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'event',
-            'code' => 'updated',
-            'name' => 'Actualización',
-            'active' => ACTIVE,
-            'position' => 2,
-            'icon' => 'edit',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'event',
+        //     'code' => 'updated',
+        //     'name' => 'Actualización',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        //     'icon' => 'edit',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'event',
-            'code' => 'deleted',
-            'name' => 'Eliminación',
-            'active' => ACTIVE,
-            'position' => 3,
-            'icon' => 'delete',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'event',
+        //     'code' => 'deleted',
+        //     'name' => 'Eliminación',
+        //     'active' => ACTIVE,
+        //     'position' => 3,
+        //     'icon' => 'delete',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'event',
-            'code' => 'synced',
-            'name' => 'Sincronización (S)',
-            'active' => ACTIVE,
-            'position' => 4,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'event',
+        //     'code' => 'synced',
+        //     'name' => 'Sincronización (S)',
+        //     'active' => ACTIVE,
+        //     'position' => 4,
+        //     'icon' => 'sync',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'event',
-            'code' => 'attached',
-            'name' => 'Sincronización (A)',
-            'active' => ACTIVE,
-            'position' => 5,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'event',
+        //     'code' => 'attached',
+        //     'name' => 'Sincronización (A)',
+        //     'active' => ACTIVE,
+        //     'position' => 5,
+        //     'icon' => 'sync',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'event',
-            'code' => 'toggled',
-            'name' => 'Sincronización (T)',
-            'active' => ACTIVE,
-            'position' => 6,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'event',
+        //     'code' => 'toggled',
+        //     'name' => 'Sincronización (T)',
+        //     'active' => ACTIVE,
+        //     'position' => 6,
+        //     'icon' => 'sync',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'event',
-            'code' => 'detached',
-            'name' => 'Sincronización (D)',
-            'active' => ACTIVE,
-            'position' => 7,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'event',
+        //     'code' => 'detached',
+        //     'name' => 'Sincronización (D)',
+        //     'active' => ACTIVE,
+        //     'position' => 7,
+        //     'icon' => 'sync',
+        // ]);
 
 
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'action',
-            'code' => 'created',
-            'name' => 'Creó',
-            'active' => ACTIVE,
-            'position' => 1,
-            'icon' => 'add',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'action',
+        //     'code' => 'created',
+        //     'name' => 'Creó',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        //     'icon' => 'add',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'action',
-            'code' => 'updated',
-            'name' => 'Actualizó',
-            'active' => ACTIVE,
-            'position' => 2,
-            'icon' => 'edit',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'action',
+        //     'code' => 'updated',
+        //     'name' => 'Actualizó',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        //     'icon' => 'edit',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'action',
-            'code' => 'deleted',
-            'name' => 'Eliminó',
-            'active' => ACTIVE,
-            'position' => 3,
-            'icon' => 'delete',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'action',
+        //     'code' => 'deleted',
+        //     'name' => 'Eliminó',
+        //     'active' => ACTIVE,
+        //     'position' => 3,
+        //     'icon' => 'delete',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'action',
-            'code' => 'synced',
-            'name' => 'Actualizó (S)',
-            'active' => ACTIVE,
-            'position' => 4,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'action',
+        //     'code' => 'synced',
+        //     'name' => 'Actualizó (S)',
+        //     'active' => ACTIVE,
+        //     'position' => 4,
+        //     'icon' => 'sync',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'action',
-            'code' => 'attached',
-            'name' => 'Actualizó (A)',
-            'active' => ACTIVE,
-            'position' => 5,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'action',
+        //     'code' => 'attached',
+        //     'name' => 'Actualizó (A)',
+        //     'active' => ACTIVE,
+        //     'position' => 5,
+        //     'icon' => 'sync',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'action',
-            'code' => 'toggled',
-            'name' => 'Actualizó (T)',
-            'active' => ACTIVE,
-            'position' => 6,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'action',
+        //     'code' => 'toggled',
+        //     'name' => 'Actualizó (T)',
+        //     'active' => ACTIVE,
+        //     'position' => 6,
+        //     'icon' => 'sync',
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'action',
-            'code' => 'detached',
-            'name' => 'Actualizó (D)',
-            'active' => ACTIVE,
-            'position' => 7,
-            'icon' => 'sync',
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'action',
+        //     'code' => 'detached',
+        //     'name' => 'Actualizó (D)',
+        //     'active' => ACTIVE,
+        //     'position' => 7,
+        //     'icon' => 'sync',
+        // ]);
 
         // Notification channels
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'channel',
-            'code' => 'push',
-            'name' => 'Push',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'channel',
+        //     'code' => 'push',
+        //     'name' => 'Push',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'channel',
-            'code' => 'mail',
-            'name' => 'Correo',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'channel',
+        //     'code' => 'mail',
+        //     'name' => 'Correo',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'channel',
-            'code' => 'sms',
-            'name' => 'SMS',
-            'active' => ACTIVE,
-            'position' => 3,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'channel',
+        //     'code' => 'sms',
+        //     'name' => 'SMS',
+        //     'active' => ACTIVE,
+        //     'position' => 3,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'system',
-            'type' => 'channel',
-            'code' => 'slack',
-            'name' => 'Slack',
-            'active' => ACTIVE,
-            'position' => 4,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'system',
+        //     'type' => 'channel',
+        //     'code' => 'slack',
+        //     'name' => 'Slack',
+        //     'active' => ACTIVE,
+        //     'position' => 4,
+        // ]);
 
 
         Taxonomy::create([
@@ -616,59 +616,59 @@ class TaxonomySeederSystem extends Seeder
         ]);
 
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'document-type',
-            'code' => 'dni',
-            'name' => 'DNI',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'document-type',
+        //     'code' => 'dni',
+        //     'name' => 'DNI',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'user',
-            'type' => 'document-type',
-            'code' => 'visa',
-            'name' => 'Carné de extranjería',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'user',
+        //     'type' => 'document-type',
+        //     'code' => 'visa',
+        //     'name' => 'Carné de extranjería',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'error',
-            'type' => 'status',
-            'code' => 'pending',
-            'name' => 'Pendiente',
-            'active' => ACTIVE,
-            'position' => 1,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'error',
+        //     'type' => 'status',
+        //     'code' => 'pending',
+        //     'name' => 'Pendiente',
+        //     'active' => ACTIVE,
+        //     'position' => 1,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'error',
-            'type' => 'status',
-            'code' => 'working',
-            'name' => 'Revisando',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'error',
+        //     'type' => 'status',
+        //     'code' => 'working',
+        //     'name' => 'Revisando',
+        //     'active' => ACTIVE,
+        //     'position' => 2,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'error',
-            'type' => 'status',
-            'code' => 'solved',
-            'name' => 'Solucionado',
-            'active' => ACTIVE,
-            'position' => 3,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'error',
+        //     'type' => 'status',
+        //     'code' => 'solved',
+        //     'name' => 'Solucionado',
+        //     'active' => ACTIVE,
+        //     'position' => 3,
+        // ]);
 
-        Taxonomy::create([
-            'group' => 'error',
-            'type' => 'status',
-            'code' => 'stand-by',
-            'name' => 'Stand By',
-            'active' => ACTIVE,
-            'position' => 4,
-        ]);
+        // Taxonomy::create([
+        //     'group' => 'error',
+        //     'type' => 'status',
+        //     'code' => 'stand-by',
+        //     'name' => 'Stand By',
+        //     'active' => ACTIVE,
+        //     'position' => 4,
+        // ]);
 
         Taxonomy::create([
             'group' => 'restart',

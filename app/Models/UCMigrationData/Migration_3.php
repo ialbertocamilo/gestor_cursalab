@@ -111,8 +111,9 @@ class Migration_3 extends Model
         $db = self::connect();
 
         $respuestas = $db->getTable('encuestas_respuestas')->get();
+        $courses = Course::select('id', 'external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
-        $polls = Poll::all();
+        $users = User::select('id', 'external_id')->get();
 
         $data = [];
 
@@ -120,15 +121,16 @@ class Migration_3 extends Model
         {
             $type_id = $types->where('code', $respuesta->tipo_pregunta)->first();
             $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
+            $user_id = $users->where('external_id', $respuesta->usuario_id)->first();
+            $course_id = $courses->where('external_id', $respuesta->curso_id)->first();
 
             $data[] = [
-                // 'external_id' => $respuesta->id,
-                'poll_id' => $poll_id,
+                'course_id' => $course_id,
+                'user_id' => $user_id,
                 'type_id' => $type_id,
                 'poll_question_id' => $question_id,
-                'titulo' => $respuesta->titulo,
+
                 'respuestas' => $respuesta->respuestas,
-                'active' => $respuesta->estado,
                 'created_at' => $respuesta->created_at,
                 'updated_at' => $respuesta->updated_at,
             ];

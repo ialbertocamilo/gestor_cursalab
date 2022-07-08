@@ -41,6 +41,25 @@ class TaxonomySeederPoll extends Seeder
             'position' => 3,
         ]);
 
+
+        Taxonomy::create([
+            'group' => 'poll',
+            'type' => 'tipo-pregunta',
+            'code' => 'califica',
+            'name' => 'Califica',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'poll',
+            'type' => 'tipo-pregunta',
+            'code' => 'texto',
+            'name' => 'Texto',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
     
 
     }

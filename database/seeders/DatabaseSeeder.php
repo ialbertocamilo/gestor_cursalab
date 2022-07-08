@@ -16,10 +16,10 @@ class DatabaseSeeder extends Seeder
         // $this->call(WorldTablesSeeder::class);
 
         $this->call(TaxonomySeederSystem::class);
-        $this->call(TaxonomySeederAppMenu::class);
-        $this->call(TaxonomySeederNotification::class);
-        $this->call(TaxonomySeederPriority::class);
-        $this->call(TaxonomySeederMediaTypes::class);
+        // $this->call(TaxonomySeederAppMenu::class);
+        // $this->call(TaxonomySeederNotification::class);
+        // $this->call(TaxonomySeederPriority::class);
+        // $this->call(TaxonomySeederMediaTypes::class);
         $this->call(TaxonomySeederPoll::class);
         $this->call(TaxonomySeederQuestionType::class);
 
@@ -29,8 +29,6 @@ class DatabaseSeeder extends Seeder
 //        $this->call(SchoolSeeder::class);
 //        $this->call(CourseSeeder::class);
 //        $this->call(TopicSeeder::class);
-
-        // $this->call(GamingSeeder::class);
 
         // $this->call(AccountSeeder::class);
         // $this->call(PostSeeder::class);
