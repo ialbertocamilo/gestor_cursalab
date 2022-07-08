@@ -34,5 +34,6 @@ class MigrationData3 extends Command
     {
         Migration_3::migratePruebas();
         Migration_3::migrateEncuestas();
+        // Migration_3::migrateResumenes();
     }
 }

@@ -2,9 +2,12 @@
 
 namespace App\Models\UCMigrationData;
 
-// use App\Models\Support\ExternalDatabase;
-// use App\Models\Support\ExternalLMSMigration;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Encuesta;
+use App\Models\Taxonomy;
+use App\Models\Course;
+use App\Models\Posteo;
+use App\Models\User;
 use DB;
 
 class Migration_3 extends Model
@@ -82,7 +85,7 @@ class Migration_3 extends Model
 
         $preguntas = $db->getTable('encuestas_preguntas')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
-        $polls = Poll::all();
+        $polls = Encuesta::all();
 
         $data = [];
 
@@ -145,7 +148,7 @@ class Migration_3 extends Model
 
         $pruebas = $db->getTable('pruebas')->get();
 
-        $topics = Topic::select('id', 'external_id')->get();
+        $topics = Posteo::select('id', 'external_id')->get();
         $sources = Taxonomy::getData('system', 'source')->get();
         $type_id = Taxonomy::getFirstData('quiz', 'type', 'graded')->id;
         $users = User::select('id', 'external_id')->get();
@@ -189,7 +192,7 @@ class Migration_3 extends Model
 
         $pruebas = $db->getTable('ev_abiertas')->get();
 
-        $topics = Topic::select('id', 'external_id')->get();
+        $topics = Posteo::select('id', 'external_id')->get();
         $sources = Taxonomy::getData('system', 'source')->get();
         $type_id = Taxonomy::getFirstData('quiz', 'type', 'free')->id;
         $users = User::select('id', 'external_id')->get();
@@ -204,14 +207,11 @@ class Migration_3 extends Model
             // $user_id = User::where('external_id', $prueba->usuario_id)->first();
 
             $data[] = [
-                // 'external_id' => $prueba->id,
-
                 'topic_id' => $topic_id,
                 'user_id' => $user_id,
                 'answers' => $prueba->usu_rptas,
                 'source_id' => $source_id,
                 'type_id' => $type_id,
-                // 'approved' => $prueba->resultado,
 
                 'created_at' => $prueba->created_at,
                 'updated_at' => $prueba->updated_at,
