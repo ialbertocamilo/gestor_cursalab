@@ -15,10 +15,11 @@ return new class extends Migration
     {
         Schema::create('vademecum', function (Blueprint $table) {
             $table->id();
-            
+            $table->unsignedBigInteger('external_id')->nullable()->index();
+
             $table->string('name')->nullable();
 
-            $table->foreignId('media_id')->nullable();
+            $table->foreignId('media_id')->nullable()->constrained('media');
             $table->foreignId('category_id')->nullable()->constrained('taxonomies');
             $table->foreignId('subcategory_id')->nullable()->constrained('taxonomies');
 

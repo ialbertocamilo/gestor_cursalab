@@ -15,6 +15,7 @@ class CreateAccountsTable extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('username')->nullable();

@@ -29,11 +29,15 @@ class ExternalLMSMigration6 extends Model
             'taxonomies_es' => [],
             'videoteca' => [],
             'meetings' => [],
+            'accounts' => [],
+            'vademecum' => [],
         ];
         $this->setMediaData($client_LMS_data, $db);
         $this->setTaxonomiesData($client_LMS_data, $db);
         $this->setTaxonomiesEsData($client_LMS_data, $db);
         $this->setVideotecaData($client_LMS_data, $db);
+        $this->setAccountsData($client_LMS_data, $db);
+        $this->setVademecumData($client_LMS_data, $db);
         $this->setMeetingsData($client_LMS_data, $db);
 
         return $client_LMS_data;
@@ -58,6 +62,65 @@ class ExternalLMSMigration6 extends Model
         }
 
         $result['media'] = array_chunk($result['media'], self::CHUNK_LENGTH, true);
+    }
+
+    public function setAccountsData(&$result, $db)
+    {
+        $temp['temp_accounts'] = $db->getTable('accounts')
+            ->select()
+            ->get();
+        foreach ($temp['temp_accounts'] as $user) {
+            $result['accounts'][] = [
+                'external_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'username' => $user->username,
+                'password' => $user->password,
+                'key' => $user->key,
+                'secret' => $user->secret,
+                'token' => $user->token,
+                'refresh_token' => $user->refresh_token,
+                'identifier' => $user->identifier,
+                'sdk_token' => $user->sdk_token,
+                'zak_token' => $user->zak_token,
+
+                'service_id' => $user->service_id,
+                'plan_id' => $user->plan_id,
+                'type_id' => $user->type_id,
+
+                'description' => $user->description,
+                'active' => $user->active,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+
+        // $result['accounts'] = array_chunk($result['accounts'], self::CHUNK_LENGTH, true);
+    }
+
+    public function setVademecumData(&$result, $db)
+    {
+        $temp['temp_vademecum'] = $db->getTable('vademecum')
+            ->select()
+            ->get();
+        foreach ($temp['temp_vademecum'] as $user) {
+            $result['vademecum'][] = [
+                'external_id' => $user->id,
+                'name' => $user->nombre,
+
+                'media_id' => $user->media_id,
+                'category_id' => $user->categoria_id,
+                'subcategory_id' => $user->subcategoria_id,
+
+                'active' => $user->estado,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+
+        // $result['vademecum'] = array_chunk($result['vademecum'], self::CHUNK_LENGTH, true);
     }
 
     public function setVideotecaData(&$result, $db)
