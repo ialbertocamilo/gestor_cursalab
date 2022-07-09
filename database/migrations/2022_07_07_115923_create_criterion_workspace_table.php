@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('criteria_user', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->constrained('users');
-            $table->foreignId('criterion_id')->nullable()->constrained('criterion_values');
+        Schema::create('criterion_workspace', function (Blueprint $table) {
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
+            $table->foreignId('criterion_value_id')->nullable()->constrained('criterion_values');
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('criteria_user');
+        Schema::dropIfExists('criterion_workspace');
     }
 };
