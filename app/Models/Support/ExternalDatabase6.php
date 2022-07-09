@@ -30,6 +30,12 @@ class ExternalDatabase6 extends Model
         // Videoteca
         $this->insertVideotecaData($data);
 
+        // Accounts
+        $this->insertAccountsData($data);
+
+        // Vademecum
+        $this->insertVademecumData($data);
+
         // TODO: Meetings
         // $this->insertMeetingsData($data);
     }
@@ -42,6 +48,43 @@ class ExternalDatabase6 extends Model
     public function insertMeetingsData($data)
     {
         $this->insertChunkedData($data['meetings'], 'meetings');
+    }
+    // Accounts
+    public function insertAccountsData($data)
+    {
+        $temp = [];
+        foreach ($data['accounts'] as $item) {
+
+            $service_id = (!is_null($item['service_id'])) ? DB::table('taxonomies')->where('external_id', $item['service_id'])->first('id') : null;
+            $plan_id = (!is_null($item['plan_id'])) ?  DB::table('taxonomies')->where('external_id', $item['plan_id'])->first('id') : null;
+            $type_id = (!is_null($item['type_id'])) ?  DB::table('taxonomies')->where('external_id', $item['type_id'])->first('id') : null;
+
+            $item['service_id'] = (!is_null($service_id)) ? $service_id->id : null;
+            $item['plan_id'] = (!is_null($plan_id)) ? $plan_id->id : null;
+            $item['type_id'] = (!is_null($type_id)) ? $type_id->id : null;
+
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'accounts');
+    }
+    // Vademecum
+    public function insertVademecumData($data)
+    {
+        $temp = [];
+        foreach ($data['vademecum'] as $item) {
+
+            $media_id = (!is_null($item['media_id'])) ? DB::table('media')->where('external_id', $item['media_id'])->first('id') : null;
+            $category_id = (!is_null($item['category_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['category_id'])->first('id') : null;
+            $subcategory_id = (!is_null($item['subcategory_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['subcategory_id'])->first('id') : null;
+
+            $item['media_id'] = (!is_null($media_id)) ? $media_id->id : null;
+            $item['category_id'] = (!is_null($category_id)) ? $category_id->id : null;
+            $item['subcategory_id'] = (!is_null($subcategory_id)) ? $subcategory_id->id : null;
+
+            array_push($temp, $item);
+        }
+        $this->insertChunkedData($temp, 'vademecum');
     }
     // Videoteca
     public function insertVideotecaData($data)
