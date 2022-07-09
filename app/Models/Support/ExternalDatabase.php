@@ -4,6 +4,7 @@ namespace App\Models\Support;
 
 use App\Models\CriterionValue;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 
@@ -16,9 +17,9 @@ class ExternalDatabase extends Model
         $this->insertUsersData($data);
 
         $this->insertModulosData($data);
-        $this->insertUserModuleData($data);
+//        $this->insertUserModuleData($data);
 
-        $this->insertCarrerasData($data);
+//        $this->insertCarrerasData($data);
 //        $this->insertCiclosData($data);
 //        $this->insertUserCarreraData($data);
 
@@ -37,6 +38,13 @@ class ExternalDatabase extends Model
             DB::table($table_name)->insert($chunk);
     }
 
+    public function makeChunkAndInsert($data, $table_name)
+    {
+        $chunk = array_chunk($data, self::CHUNK_LENGTH, true);
+
+        $this->insertChunkedData($table_name, $chunk);
+    }
+
     public function insertUsersData($data)
     {
         $this->insertChunkedData('users', $data['users']);
@@ -45,6 +53,23 @@ class ExternalDatabase extends Model
     public function insertModulosData($data)
     {
         $this->insertChunkedData('criterion_values', $data['modulos']);
+
+        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+        $temp = [];
+
+        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+
+        foreach ($modules_values as $module) {
+//        foreach ($data['criterion_workspace'] as $pivot){
+//            $module = $modules_values->where('external_id', $pivot['modulo_id'])->first();
+//            unset($pivot['modulo_id']);
+//
+//            if ($module)
+
+            $temp[] = ['workspace_id' => $uc_workspace->id, 'criterion_value_id' => $module->id];
+        }
+
+        $this->makeChunkAndInsert($temp, 'criterion_workspace');
     }
 
     public function insertUserModuleData($data)
@@ -56,37 +81,35 @@ class ExternalDatabase extends Model
         foreach ($data['user_modulo'] as $relation) {
             $module = $modules_values->where('external_id', $relation['config_id'])->first();
             $user = $users->where('external_id', $relation['usuario_id'])->first();
-            unset($relation['config_id'], $relation['usuario_id']);
 
             if ($module and $user)
-                $temp[] = array_merge($relation, ['criterion_id' => $module->id, 'user_id' => $user->id]);
+                $temp[] = ['criterion_id' => $module->id, 'user_id' => $user->id];
 
         }
 
         $chunk = array_chunk($temp, self::CHUNK_LENGTH, true);
 
-        $this->insertChunkedData('criteria_user', $chunk);
+        $this->insertChunkedData('criterion_user', $chunk);
     }
 
     public function insertCarrerasData($data)
     {
         $this->insertChunkedData('criterion_values', $data['carreras']);
 
-        $temp = [];
         $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
         $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
 
-        foreach ($data['modulo_carrera_relation'] as $relation) {
+        $temp = [];
+        foreach ($data['modulo_carrera'] as $relation) {
             $module = $modules_values->where('external_id', $relation['config_id'])->first();
-            $carrera = $carreras_values->where('value_text', $relation['nombre'])->first();
+            $career = $carreras_values->where('external_id', $relation['carrera_id'])->first();
+//            $carrera = $carreras_values->where('value_text', $relation['nombre'])->first();
 
-            if ($module and $carrera)
-                $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $carrera->id];
+            if ($module and $career)
+                $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $career->id];
         }
 
-        $chunk = array_chunk($temp, self::CHUNK_LENGTH, true);
-
-        $this->insertChunkedData('criterion_value_relationship', $chunk);
+        $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
     }
 
     public function insertCiclosData($data)

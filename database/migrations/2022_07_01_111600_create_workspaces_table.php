@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('workspaces', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug');
             $table->string('description')->nullable();
 
             $table->boolean('active')->nullable()->default(true);

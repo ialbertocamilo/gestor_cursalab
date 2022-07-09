@@ -4,6 +4,7 @@ namespace App\Models\Support;
 
 use App\Models\Taxonomy;
 use App\Models\Topic;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Criterion;
 
@@ -47,6 +48,12 @@ class ExternalLMSMigration extends Model
 
     public function setUsersData(&$result, $db)
     {
+        $uc = [
+            'name' => "Universidad Corporativa",
+            'active' => ACTIVE
+        ];
+        $uc_workspace = Workspace::create($uc);
+
         $temp['users'] = $db->getTable('usuarios')
             ->select(
                 'id', 'nombre', 'email', 'dni', 'config_id',
@@ -72,6 +79,7 @@ class ExternalLMSMigration extends Model
                 'code' => $user->dni,
 
                 'type_id' => $type_client->id,
+                'workspace_id' => $uc_workspace->id,
 
                 'password' => Hash::make($user->dni),
 
@@ -116,7 +124,7 @@ class ExternalLMSMigration extends Model
         $result['modulos'] = array_chunk($result['modulos'], self::CHUNK_LENGTH, true);
     }
 
-    public function setCarrerasData(&$result, $db)
+    public function setCarrerasData(&$result, $db) // migrar duplicados por modulos
     {
         $carrera_criterion = Criterion::create([
             'name' => 'Carrera',
@@ -132,32 +140,34 @@ class ExternalLMSMigration extends Model
             ->get();
 
         foreach ($temp['carreras'] as $carrera) {
-            $result['modulo_carrera_relation'][] = [
+            $result['modulo_carrera'][] = [
                 'config_id' => $carrera->config_id,
-                'nombre' => $carrera->nombre,
+//                'nombre' => $carrera->nombre,
+                'carrera_id' => $carrera->id,
             ];
 
-            $found = in_array($carrera->nombre, array_column($result['carreras'], 'value_text'));
-            info($carrera->id.' - '.$carrera->nombre.' - '.$found);
-            if ($found === false){
+//            $carreras_added = array_map('strtolower',array_column($result['carreras'], 'value_text'));
+//            $found = in_array($carrera->nombre, $carreras_added);
+
+//            if ($found === false) {
                 $result['carreras'][] = [
                     'external_id' => $carrera->id,
                     'criterion_id' => $carrera_criterion->id,
 
-                    'value_text' => $carrera->nombre,
+                    'value_text' => "M{$carrera->config_id}::" .$carrera->nombre,
 
                     'active' => $carrera->estado,
 
                     'created_at' => $carrera->created_at,
                     'updated_at' => $carrera->updated_at,
                 ];
-            }
+//            }
         }
 
         $result['carreras'] = array_chunk($result['carreras'], self::CHUNK_LENGTH, true);
     }
 
-    public function setCiclosData(&$result, $db)
+    public function setCiclosData(&$result, $db) // migrar duplicados por carreras
     {
         $ciclo_criterion = Criterion::create([
             'name' => 'Ciclo',
@@ -170,27 +180,26 @@ class ExternalLMSMigration extends Model
                 'id', 'nombre', 'tipo', 'secuencia', 'carrera_id',
                 'estado', 'created_at', 'updated_at'
             )
+            ->groupBy('nombre')
             ->get();
 
         foreach ($temp['ciclos'] as $ciclo) {
+
+
             $result['ciclos'][] = [
-                'external_id' => $ciclo->id,
                 'criterion_id' => $ciclo_criterion->id,
 
                 'value_text' => $ciclo->nombre,
                 'position' => $ciclo->secuencia,
 
                 'active' => $ciclo->estado,
-
-                'created_at' => $ciclo->created_at,
-                'updated_at' => $ciclo->updated_at,
             ];
         }
 
         $result['ciclos'] = array_chunk($result['ciclos'], self::CHUNK_LENGTH, true);
     }
 
-    public function setGruposData(&$result, $db)
+    public function setGruposData(&$result, $db) // migrar duplicados por modulos
     {
         $temp['grupos'] = $db->getTable('criterios')
             ->select(
@@ -204,7 +213,7 @@ class ExternalLMSMigration extends Model
                 'external_id' => $grupo->id,
                 'temp_parent_id' => $grupo->config_id,
 
-                'value_text' => $grupo->valor,
+                'value_text' => "M{$grupo->config_id}::".$grupo->valor,
 
                 'created_at' => $grupo->created_at,
                 'updated_at' => $grupo->updated_at,
@@ -214,7 +223,7 @@ class ExternalLMSMigration extends Model
         $result['grupos'] = array_chunk($result['grupos'], self::CHUNK_LENGTH, true);
     }
 
-    public function setBoticasData(&$result, $db)
+    public function setBoticasData(&$result, $db) // migrar duplicados por grupos
     {
         $temp['boticas'] = $db->getTable('boticas')
             ->select(
