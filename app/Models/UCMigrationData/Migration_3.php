@@ -261,17 +261,13 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $rows_reinicios = $db->getTable('reinicios')->where('tipo', 'por_curso')->get();
-
         $users = User::select('id', 'external_id')->whereNull('email')->get();
         $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
         $topics = Posteo::select('id', 'external_id')->get();
         $sources = Taxonomy::getData('system', 'source')->get();
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
-        // $data = [];
-
-        $db->getTable('pruebas')->chunkById(5000, function ($rows_pruebas) use ($users, $topics, $sources, $rows_reinicios) {
+        $db->getTable('pruebas')->chunkById(5000, function ($rows_pruebas) use ($users, $topics, $sources) {
             
             $chunk = [];
             
@@ -280,19 +276,6 @@ class Migration_3 extends Model
                 $user_id = $users->where('external_id', $row->usuario_id)->first();
                 $topic_id = $topics->where('external_id', $row->curso_id)->first();
                 // $source_id = $sources->where('code', $prueba->fuente)->first();
-
-                // $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
-
-                // $restarts = 0;
-                // $restarter = NULL;
-
-                // if ($restart)
-                // {
-                //     $restarts = $restart->acumulado;
-                //     $restarter = $admins->where('external_id', $row->admin_id)->first();
-                // }
-
-                // $restarter_id = $users->where('external_id', $row->usuario_id)->first();
 
                 $chunk[] = [
                     'user_id' => $user_id,
@@ -309,9 +292,6 @@ class Migration_3 extends Model
 
                     'answers' => $prueba->usu_rptas,
                     
-                    // 'restarts' => $restarts, // from reinicios
-                    // 'restarter_id' => $restarter->id ?? NULL, // from reinicios
-
                     'last_time_evaluated_at' => $row->last_ev ?? NULL,
 
                     'created_at' => $row->created_at,
@@ -322,7 +302,33 @@ class Migration_3 extends Model
             DB::table('summary_topics')->insert($chunk);
         });
 
-        $db->getTable('reinicios')->chunkById(5000, function ($rows_reinicios) use ($admins, $db, $topics, $users) {
+        $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(5000, function ($rows_ev_abiertas) use ($db, $topics, $users, $sources) {
+            
+            $chunk = [];
+
+            foreach ($rows_ev_abiertas as $prueba)
+            {
+                $topic_id = $topics->where('external_id', $prueba->posteo_id)->first();
+                $user_id = $users->where('external_id', $prueba->usuario_id)->first();
+                // $source_id = $sources->where('code', $prueba->fuente)->first();
+                // $user_id = User::where('external_id', $prueba->usuario_id)->first();
+
+                $chunk[] = [
+                    'topic_id' => $topic_id,
+                    'user_id' => $user_id,
+                    'answers' => $prueba->usu_rptas,
+                    // 'source_id' => $source_id,
+                    'type_id' => $type_id,
+
+                    'created_at' => $prueba->created_at,
+                    'updated_at' => $prueba->updated_at,
+                ];
+            }
+
+            DB::table('summary_topics')->insert($chunk);
+        });
+
+        $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(5000, function ($rows_reinicios) use ($admins, $db, $topics, $users) {
             foreach ($rows_reinicios as $restart) {
 
                 $user_id = $users->where('external_id', $restart->usuario_id)->first();
@@ -367,31 +373,5 @@ class Migration_3 extends Model
             }
         });
 
-        $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(5000, function ($rows_ev_abiertas) use ($db, $topics, $users, $sources) {
-            
-            $chunk = [];
-
-            foreach ($rows_ev_abiertas as $prueba)
-            {
-                $topic_id = $topics->where('external_id', $prueba->posteo_id)->first();
-                $user_id = $users->where('external_id', $prueba->usuario_id)->first();
-                // $source_id = $sources->where('code', $prueba->fuente)->first();
-                // $user_id = User::where('external_id', $prueba->usuario_id)->first();
-
-                $chunk[] = [
-                    'topic_id' => $topic_id,
-                    'user_id' => $user_id,
-                    'answers' => $prueba->usu_rptas,
-                    // 'source_id' => $source_id,
-                    'type_id' => $type_id,
-
-                    'created_at' => $prueba->created_at,
-                    'updated_at' => $prueba->updated_at,
-                ];
-            }
-
-            DB::table('summary_topics')->insert($chunk);
-        });
-        // return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 }

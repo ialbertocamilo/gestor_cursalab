@@ -36,7 +36,6 @@ return new class extends Migration
             $table->json('answers')->nullable();
             $table->timestamp('last_time_evaluated_at')->nullable();
 
-            $table->unsignedInteger('restarts')->nullable();
             $table->foreignId('restarter_id')->nullable()->constrained('users');
 
             $table->foreignId('source_id')->nullable()->constrained('taxonomies');
