@@ -119,12 +119,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $notification->webhookUrl ?? config('slack.routes.general');
     }
 
-
-    public function criteria()
+    public function criterion_values()
     {
-        $this->belongsToMany(Criterion::class, 'criteria_user', 'user_id', 'criterion_id' );
+        return $this->belongsToMany(CriterionValue::class, 'criterion_user', 'criterion_value_id', 'user_id' );
     }
-
 
     public function getFullnameAttribute()
     {

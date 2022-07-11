@@ -197,16 +197,13 @@ class ExternalLMSMigration extends Model
         $temp['ciclos_all'] = $db->getTable('ciclos')
             ->select('nombre', 'carrera_id')
             ->get();
-        info("CICLOS COUNT");
-        info($temp['ciclos_all']->count());
+
         foreach ($temp['ciclos_all'] as $ciclo){
             $result['ciclos_all'][] = [
               'ciclo_nombre' => $ciclo->nombre,
               'carrera_id' => $ciclo->carrera_id
             ];
         }
-
-
     }
 
     public function setGruposData(&$result, $db) // migrar duplicados por modulos
