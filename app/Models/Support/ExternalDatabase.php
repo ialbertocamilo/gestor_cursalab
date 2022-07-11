@@ -31,8 +31,8 @@ class ExternalDatabase extends Model
         $this->insertGruposData($data);
         $this->insertBoticasData($data);
 
-//        $this->insertUserModuleData($data);
-//        $this->insertUserCarreraData($data);
+//        $this->insertUserModuleData();
+        $this->insertCriterionUserData();
     }
 
     public function insertChunkedData($table_name, $data)
@@ -157,14 +157,14 @@ class ExternalDatabase extends Model
             $user = $users->where('external_id', $relation['usuario_id'])->first();
 
             if ($module and $user)
-                $temp[] = ['criterion_id' => $module->id, 'user_id' => $user->id];
+                $temp[] = ['criterion_value_id' => $module->id, 'user_id' => $user->id];
 
         }
 
         $this->makeChunkAndInsert($temp, 'criterion_user');
     }
 
-    public function insertUserCarreraData()
+    public function insertCriterionUserData()
     {
         $db = self::connect();
 
@@ -176,35 +176,36 @@ class ExternalDatabase extends Model
             ->get();
 
 
-        $criterion_values = [];
-        foreach ($users as $user){
+        $criterion_user = [];
+        foreach ($users as $user) {
 
             $usuario_matriculas = $matriculas->where('usuario_id', $user->external_id);
+//            info($usuario_matriculas->toArray());
 
             if ($usuario_matriculas->count() > 0):
 
-                $career = $carreras_values->where('external_id', $usuario_matriculas[0]->carrera_id)->first();
+                $career = $carreras_values->where('external_id', $usuario_matriculas->first()->carrera_id)->first();
                 $ciclos_id = $ciclos_values->whereIn('external_id', $usuario_matriculas)->pluck('ciclo_id');
 
                 if ($career and $ciclos_id->count() > 0):
 
-                    $criterion_values[] = ['user_id' => $user->id, 'criterion_id' => $career->id];
+                    // Push carrera
+                    $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $career->id];
 
+                    // Push ciclos
                     foreach ($ciclos_id as $ciclo_id)
-                        $criterion_values[] = ['user_id' => $user->id, 'criterion_id' => $ciclo_id];
+                        $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $ciclo_id];
 
                 endif;
 
             endif;
 
+
+
+
         }
 
-        $this->makeChunkAndInsert($criterion_values, 'criterion_user');
-    }
-
-    public function insertUserCicloData()
-    {
-
+        $this->makeChunkAndInsert($criterion_user, 'criterion_user');
     }
 
     public function insertUserGrupoData()
