@@ -19,4 +19,9 @@ class CriterionValue extends BaseModel
     {
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_relationship', 'criterion_value_id', 'criterion_value_parent_id');
     }
+
+    public function scopeParentsByCriterionID($q, $criterion_id)
+    {
+        return $q->where('criterion_id', $criterion_id);
+    }
 }

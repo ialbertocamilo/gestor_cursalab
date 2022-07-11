@@ -2,6 +2,7 @@
 
 namespace App\Models\Support;
 
+use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\User;
 use App\Models\Workspace;
@@ -31,7 +32,7 @@ class ExternalDatabase extends Model
         $this->insertGruposData($data);
         $this->insertBoticasData($data);
 
-//        $this->insertUserModuleData();
+//        $this->insertUserModuleData($data);
         $this->insertCriterionUserData();
     }
 
@@ -146,33 +147,37 @@ class ExternalDatabase extends Model
         $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
     }
 
-    public function insertUserModuleData($data)
-    {
-        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
-        $users = User::all();
-        $temp = [];
-
-        foreach ($data['user_modulo'] as $relation) {
-            $module = $modules_values->where('external_id', $relation['config_id'])->first();
-            $user = $users->where('external_id', $relation['usuario_id'])->first();
-
-            if ($module and $user)
-                $temp[] = ['criterion_value_id' => $module->id, 'user_id' => $user->id];
-
-        }
-
-        $this->makeChunkAndInsert($temp, 'criterion_user');
-    }
+//    public function insertUserModuleData($data)
+//    {
+//        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+//        $users = User::all();
+//        $temp = [];
+//
+//        foreach ($data['user_modulo'] as $relation) {
+//            $module = $modules_values->where('external_id', $relation['config_id'])->first();
+//            $user = $users->where('external_id', $relation['usuario_id'])->first();
+//
+//            if ($module and $user)
+//                $temp[] = ['criterion_value_id' => $module->id, 'user_id' => $user->id];
+//
+//        }
+//
+//        $this->makeChunkAndInsert($temp, 'criterion_value_user');
+//    }
 
     public function insertCriterionUserData()
     {
         $db = self::connect();
 
         $users = User::all();
-        $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+        $module = Criterion::where('code', 'module')->first();
+
+        $carreras_values = CriterionValue::with(['parents' => fn($q) => $q->where('criterion_id', $module->id)])
+            ->whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
         $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
         $matriculas = $db->getTable('matricula')
             ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
+            ->whereIn('usuario_id', $users->pluck('external_id'))
             ->get();
 
 
@@ -185,27 +190,32 @@ class ExternalDatabase extends Model
             if ($usuario_matriculas->count() > 0):
 
                 $career = $carreras_values->where('external_id', $usuario_matriculas->first()->carrera_id)->first();
-                $ciclos_id = $ciclos_values->whereIn('external_id', $usuario_matriculas)->pluck('ciclo_id');
+                $module = $career->parents->first();
+                $ciclos = $ciclos_values->whereIn('position', $usuario_matriculas->pluck('secuencia_ciclo'));
+//                info($career->id. ' '.$career->value_text);
+//                info($ciclos);
 
-                if ($career and $ciclos_id->count() > 0):
+                if ($career and $module and $ciclos->count() > 0):
+
+                    // Push modulo
+                    $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $module->id];
 
                     // Push carrera
                     $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $career->id];
 
                     // Push ciclos
-                    foreach ($ciclos_id as $ciclo_id)
-                        $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $ciclo_id];
+                    foreach ($ciclos as $ciclo)
+                        $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $ciclo->id];
 
                 endif;
 
             endif;
 
-
-
-
         }
 
-        $this->makeChunkAndInsert($criterion_user, 'criterion_user');
+//        info($criterion_user);
+
+        $this->makeChunkAndInsert($criterion_user, 'criterion_value_user');
     }
 
     public function insertUserGrupoData()

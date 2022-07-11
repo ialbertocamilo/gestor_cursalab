@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\UCMigrationData;
 
-use App\Models\UCMigrationData\Migration_1;
+use App\Models\UCMigrationData\Migration_3;
 use Illuminate\Console\Command;
 
 class MigrationData3 extends Command

@@ -121,7 +121,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function criterion_values()
     {
-        return $this->belongsToMany(CriterionValue::class, 'criterion_user', 'criterion_value_id', 'user_id' );
+        return $this->belongsToMany(CriterionValue::class);
     }
 
     public function getFullnameAttribute()
