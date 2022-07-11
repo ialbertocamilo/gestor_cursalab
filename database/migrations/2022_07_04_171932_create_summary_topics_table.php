@@ -27,15 +27,17 @@ return new class extends Migration
             $table->unsignedInteger('downloads')->nullable();
             $table->unsignedInteger('restarts')->nullable();
 
-            // $table->integer('grade')->nullable();
             $table->unsignedDecimal('grade', 8, 2)->nullable();
-            $table->boolean('approved')->nullable()->default(true);
+            $table->boolean('passed')->nullable()->default(true);
 
             // $table->tinyInteger('historical')->nullable(); // ????
 
             // $table->timestamp('test_attempt_at')->nullable();
             $table->json('answers')->nullable();
             $table->timestamp('last_time_evaluated_at')->nullable();
+
+            $table->unsignedInteger('restarts')->nullable();
+            $table->foreignId('restarter_id')->nullable()->constrained('users');
 
             $table->foreignId('source_id')->nullable()->constrained('taxonomies');
             $table->foreignId('status_id')->nullable()->constrained('taxonomies');

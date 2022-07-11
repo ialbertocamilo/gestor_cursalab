@@ -32,8 +32,8 @@ class MigrationData3 extends Command
      */
     public function handle()
     {
-        Migration_3::migratePruebas();
+        // Migration_3::migratePruebas();
         Migration_3::migrateEncuestas();
-        // Migration_3::migrateResumenes();
+        Migration_3::migrateResumenes();
     }
 }

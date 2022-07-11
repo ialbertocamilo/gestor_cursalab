@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(TaxonomySeederMediaTypes::class);
         $this->call(TaxonomySeederPoll::class);
         $this->call(TaxonomySeederQuestionType::class);
+        $this->call(TaxonomySeederCourse::class);
 
         $this->call(BouncerSeeder::class);
         $this->call(UserSeeder::class);

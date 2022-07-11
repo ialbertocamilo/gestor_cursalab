@@ -21,14 +21,14 @@ class Migration_3 extends Model
         return new OTFConnection($db_uc_data);
     }
 
-    protected function migratePruebas()
-    {
-        $data = self::getPruebasData();
-        self::insertChunkedData($data, 'records');
+    // protected function migratePruebas()
+    // {
+    //     $data = self::getPruebasData();
+    //     self::insertChunkedData($data, 'records');
 
-        $data = self::getPruebasLibresData();
-        self::insertChunkedData($data, 'records');
-    }
+    //     $data = self::getPruebasLibresData();
+    //     self::insertChunkedData($data, 'records');
+    // }
 
     protected function migrateEncuestas()
     {
@@ -50,8 +50,8 @@ class Migration_3 extends Model
         $data = self::getResumenCursosData();
         self::insertChunkedData($data, 'summary_courses');
 
-        $data = self::getResumenTemasData();
-        self::insertChunkedData($data, 'summary_topics');
+        self::getAndInsertResumenTemasData();
+        // self::insertChunkedData($data, 'summary_topics');
     }
 
 
@@ -128,7 +128,7 @@ class Migration_3 extends Model
         $respuestas = $db->getTable('encuestas_respuestas')->get();
         $courses = Course::select('id', 'external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
-        $users = User::select('id', 'external_id')->get();
+        $users = User::select('id', 'external_id')->whereNull('email')->get();
 
         $data = [];
 
@@ -154,82 +154,244 @@ class Migration_3 extends Model
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
-    protected function getPruebasData()
+    protected function getResumenGeneralData()
     {
         $db = self::connect();
 
-        $pruebas = $db->getTable('pruebas')->get();
+        $rows = $db->getTable('resumen_general')->get();
 
-        $topics = Posteo::select('id', 'external_id')->get();
-        $sources = Taxonomy::getData('system', 'source')->get();
-        $type_id = Taxonomy::getFirstData('quiz', 'type', 'graded')->id;
-        $users = User::select('id', 'external_id')->get();
+        $users = User::select('id', 'external_id')->whereNull('email')->get();
 
         $data = [];
 
-        foreach ($pruebas as $prueba)
+        foreach ($rows as $row)
         {
-            $topic_id = $topics->where('external_id', $prueba->posteo_id)->first();
-            $user_id = $users->where('external_id', $prueba->usuario_id)->first();
-            $source_id = $sources->where('code', $prueba->fuente)->first();
-            // $user_id = User::where('external_id', $prueba->usuario_id)->first();
+            $user_id = $users->where('external_id', $row->usuario_id)->first();
+            // $user_id = User::where('external_id', $row->usuario_id)->first();
 
             $data[] = [
-                // 'external_id' => $prueba->id,
-
-                'topic_id' => $topic_id,
                 'user_id' => $user_id,
-                'attempts' => $prueba->intentos,
 
-                'correct_answers' => $prueba->rptas_ok,
-                'failed_answers' => $prueba->rptas_fail,
+                'score' => $row->rank,
+                'attempts' => $row->intentos,
+                'grade_average' => $row->nota_prom,
+                'advanced_percentage' => $row->porcentaje,
 
-                'grade' => $prueba->nota,
-                'last_time_evaluated_at' => $prueba->last_ev,
-                'answers' => $prueba->usu_rptas,
-                'source_id' => $source_id,
-                'approved' => $prueba->resultado,
+                'courses_assigned' => $row->cur_asignados,
+                'courses_completed' => $row->tot_completados,
 
-                'created_at' => $prueba->created_at,
-                'updated_at' => $prueba->updated_at,
+                'last_time_evaluated_at' => $row->last_ev,
+
+                'created_at' => $row->created_at,
+                'updated_at' => $row->updated_at,
             ];
         }
 
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
-    protected function getPruebasLibresData()
+    protected function getResumenCursosData()
     {
         $db = self::connect();
 
-        $pruebas = $db->getTable('ev_abiertas')->get();
+        $rows_cursos = $db->getTable('resumen_x_curso')->get();
+        $rows_reinicios = $db->getTable('reinicios')->where('tipo', 'por_curso')->get();
+        $rows_diplomas = $db->getTable('diplomas')->whereNull('posteo_id')->get();
 
-        $topics = Posteo::select('id', 'external_id')->get();
-        $sources = Taxonomy::getData('system', 'source')->get();
-        $type_id = Taxonomy::getFirstData('quiz', 'type', 'free')->id;
-        $users = User::select('id', 'external_id')->get();
+        $users = User::select('id', 'external_id')->whereNull('email')->get();
+        $courses = Course::select('id', 'external_id')->get();
+        $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
+        $statuses = Taxonomy::getData('course', 'user-status')->get();
 
         $data = [];
 
-        foreach ($pruebas as $prueba)
+        foreach ($rows_cursos as $row)
         {
-            $topic_id = $topics->where('external_id', $prueba->posteo_id)->first();
-            $user_id = $users->where('external_id', $prueba->usuario_id)->first();
-            $source_id = $sources->where('code', $prueba->fuente)->first();
-            // $user_id = User::where('external_id', $prueba->usuario_id)->first();
+            $status_id = $statuses->where('code', $row->estado)->first();
+            $user_id = $users->where('external_id', $row->usuario_id)->first();
+            $course_id = $courses->where('external_id', $row->curso_id)->first();
+            $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
+            $certification = $rows_diplomas->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
+
+            $restarts = 0;
+            $restarter = NULL;
+
+            if ($restart)
+            {
+                $restarts = $restart->acumulado;
+                $restarter = $admins->where('external_id', $row->admin_id)->first();
+            }
+
+            $restarter_id = $users->where('external_id', $row->usuario_id)->first();
 
             $data[] = [
-                'topic_id' => $topic_id,
                 'user_id' => $user_id,
-                'answers' => $prueba->usu_rptas,
-                'source_id' => $source_id,
-                'type_id' => $type_id,
+                'course_id' => $course_id,
+                'status_id' => $status_id,
 
-                'created_at' => $prueba->created_at,
-                'updated_at' => $prueba->updated_at,
+                'assigned' => $row->asignados,
+                'passed' => $row->aprobados,
+                'taken' => $row->realizados,
+                'reviewed' => $row->revisados,
+                'failed' => $row->desaprobados,
+
+                'grade_average' => $row->nota_prom,
+                'advanced_percentage' => $row->porcentaje,
+
+                'attempts' => $row->intentos,
+                'views' => $row->visitas,
+                
+                'restarts' => $restarts,
+                'restarter_id' => $restarter->id ?? NULL,
+
+                'last_time_evaluated_at' => $row->last_ev ?? NULL,
+                'certification_issued_at' => $certification->fecha_emision ?? NULL,
+
+                // 'active' => $row->last_ev,
+
+                'created_at' => $row->created_at,
+                'updated_at' => $row->updated_at,
             ];
         }
 
         return array_chunk($data, self::CHUNK_LENGTH, true);
+    }
+
+    protected function getAndInsertResumenTemasData()
+    {
+        $db = self::connect();
+
+        $rows_reinicios = $db->getTable('reinicios')->where('tipo', 'por_curso')->get();
+
+        $users = User::select('id', 'external_id')->whereNull('email')->get();
+        $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
+        $topics = Posteo::select('id', 'external_id')->get();
+        $sources = Taxonomy::getData('system', 'source')->get();
+        $statuses = Taxonomy::getData('topic', 'user-status')->get();
+
+        // $data = [];
+
+        $db->getTable('pruebas')->chunkById(5000, function ($rows_pruebas) use ($users, $topics, $sources, $rows_reinicios) {
+            
+            $chunk = [];
+            
+            foreach ($rows_pruebas as $row) {
+                //
+                $user_id = $users->where('external_id', $row->usuario_id)->first();
+                $topic_id = $topics->where('external_id', $row->curso_id)->first();
+                // $source_id = $sources->where('code', $prueba->fuente)->first();
+
+                // $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
+
+                // $restarts = 0;
+                // $restarter = NULL;
+
+                // if ($restart)
+                // {
+                //     $restarts = $restart->acumulado;
+                //     $restarter = $admins->where('external_id', $row->admin_id)->first();
+                // }
+
+                // $restarter_id = $users->where('external_id', $row->usuario_id)->first();
+
+                $chunk[] = [
+                    'user_id' => $user_id,
+                    'topic_id' => $topic_id,
+
+                    // 'source_id' => $source_id,
+
+                    'attempts' => $row->intentos,
+                    'correct_answers' => $row->rptas_ok,
+                    'failed_answers' => $row->rptas_fail,
+
+                    'grade' => $row->nota,
+                    'passed' => $row->resultado,
+
+                    'answers' => $prueba->usu_rptas,
+                    
+                    // 'restarts' => $restarts, // from reinicios
+                    // 'restarter_id' => $restarter->id ?? NULL, // from reinicios
+
+                    'last_time_evaluated_at' => $row->last_ev ?? NULL,
+
+                    'created_at' => $row->created_at,
+                    'updated_at' => $row->updated_at,
+                ];
+            }
+
+            DB::table('summary_topics')->insert($chunk);
+        });
+
+        $db->getTable('reinicios')->chunkById(5000, function ($rows_reinicios) use ($admins, $db, $topics, $users) {
+            foreach ($rows_reinicios as $restart) {
+
+                $user_id = $users->where('external_id', $restart->usuario_id)->first();
+                $topic_id = $topics->where('external_id', $restart->curso_id)->first();
+
+                $restarts = 0;
+                $restarter = NULL;
+
+                if ($restart)
+                {
+                    $restarts = $restart->acumulado;
+                    $restarter = $admins->where('external_id', $restart->admin_id)->first();
+                }
+
+                $data = [
+                    'restarts' => $restarts, // from reinicios
+                    'restarter_id' => $restarter->id ?? NULL, // from reinicios
+                ];
+
+                $db->getTable('summary_topics')
+                    ->where('user_id', $user_id)
+                    ->where('topic_id', $topic_id)
+                    ->update($data);
+            }
+        });
+
+        $db->getTable('visitas')->chunkById(5000, function ($rows_visitas) use ($db, $topics, $users, $statuses) {
+            foreach ($rows_visitas as $row) {
+
+                $user_id = $users->where('external_id', $row->usuario_id)->first();
+                $topic_id = $topics->where('external_id', $row->curso_id)->first();
+                $status_id = $statuses->where('code', $row->estado_tema)->first();
+
+                $data = [
+                    'downloads' => $row->descargas, 
+                    'views' => $row->sumatorias, 
+                    'status_id' => $status_id, 
+                ];
+
+                $db->getTable('summary_topics')
+                    ->updateOrInsert(['user_id' => $user_id, 'topic_id' => $topic_id], $data);
+            }
+        });
+
+        $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(5000, function ($rows_ev_abiertas) use ($db, $topics, $users, $sources) {
+            
+            $chunk = [];
+
+            foreach ($rows_ev_abiertas as $prueba)
+            {
+                $topic_id = $topics->where('external_id', $prueba->posteo_id)->first();
+                $user_id = $users->where('external_id', $prueba->usuario_id)->first();
+                // $source_id = $sources->where('code', $prueba->fuente)->first();
+                // $user_id = User::where('external_id', $prueba->usuario_id)->first();
+
+                $chunk[] = [
+                    'topic_id' => $topic_id,
+                    'user_id' => $user_id,
+                    'answers' => $prueba->usu_rptas,
+                    // 'source_id' => $source_id,
+                    'type_id' => $type_id,
+
+                    'created_at' => $prueba->created_at,
+                    'updated_at' => $prueba->updated_at,
+                ];
+            }
+
+            DB::table('summary_topics')->insert($chunk);
+        });
+        // return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 }

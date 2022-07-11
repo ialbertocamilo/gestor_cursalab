@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->foreignId('course_id')->nullable()->constrained('courses');
+            $table->foreignId('status_id')->nullable()->constrained('taxonomies');
 
             // $table->tinyInteger('libre')->nullable()->default(false);
 
@@ -38,7 +39,7 @@ return new class extends Migration
             $table->timestamp('last_time_evaluated_at')->nullable();
             $table->timestamp('certification_issued_at')->nullable();
 
-            $table->boolean('active')->nullable()->default(true);
+            // $table->boolean('active')->nullable()->default(true);
 
             $table->timestamps();
             $table->softDeletes();

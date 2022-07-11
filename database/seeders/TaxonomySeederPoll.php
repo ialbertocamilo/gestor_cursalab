@@ -60,7 +60,5 @@ class TaxonomySeederPoll extends Seeder
             'position' => 2,
         ]);
 
-    
-
     }
 }
