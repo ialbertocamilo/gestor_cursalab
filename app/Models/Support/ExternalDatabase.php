@@ -12,6 +12,13 @@ class ExternalDatabase extends Model
 {
     const CHUNK_LENGTH = 5000;
 
+    protected function connect()
+    {
+        $db_uc_data = config('database.connections.mysql_uc');
+
+        return new OTFConnection($db_uc_data);
+    }
+
     protected function insertMigrationData_1($data)
     {
         $this->insertUsersData($data);
@@ -154,9 +161,60 @@ class ExternalDatabase extends Model
 
         }
 
-        $chunk = array_chunk($temp, self::CHUNK_LENGTH, true);
+        $this->makeChunkAndInsert($temp, 'criterion_user');
+    }
 
-        $this->insertChunkedData('criterion_user', $chunk);
+    public function insertUserCarreraData()
+    {
+        $db = self::connect();
+
+        $users = User::all();
+        $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
+        $matriculas = $db->getTable('matricula')
+            ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
+            ->get();
+
+
+        $criterion_values = [];
+        foreach ($users as $user){
+
+            $usuario_matriculas = $matriculas->where('usuario_id', $user->external_id);
+
+            if ($usuario_matriculas->count() > 0):
+
+                $career = $carreras_values->where('external_id', $usuario_matriculas[0]->carrera_id)->first();
+                $ciclos_id = $ciclos_values->whereIn('external_id', $usuario_matriculas)->pluck('ciclo_id');
+
+                if ($career and $ciclos_id->count() > 0):
+
+                    $criterion_values[] = ['user_id' => $user->id, 'criterion_id' => $career->id];
+
+                    foreach ($ciclos_id as $ciclo_id)
+                        $criterion_values[] = ['user_id' => $user->id, 'criterion_id' => $ciclo_id];
+
+                endif;
+
+            endif;
+
+        }
+
+        $this->makeChunkAndInsert($criterion_values, 'criterion_user');
+    }
+
+    public function insertUserCicloData()
+    {
+
+    }
+
+    public function insertUserGrupoData()
+    {
+
+    }
+
+    public function insertUserBoticaData()
+    {
+
     }
 
 

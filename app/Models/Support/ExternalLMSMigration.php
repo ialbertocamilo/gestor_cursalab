@@ -59,7 +59,7 @@ class ExternalLMSMigration extends Model
                 'id', 'nombre', 'email', 'dni', 'config_id',
                 'estado', 'created_at', 'updated_at'
             )
-            ->limit(10000)
+            ->limit(100)
             ->get();
 
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');
