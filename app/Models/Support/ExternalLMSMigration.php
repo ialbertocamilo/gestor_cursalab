@@ -59,7 +59,7 @@ class ExternalLMSMigration extends Model
                 'id', 'nombre', 'email', 'dni', 'config_id',
                 'estado', 'created_at', 'updated_at'
             )
-            ->limit(10)
+            ->limit(10000)
             ->get();
 
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');
@@ -167,7 +167,7 @@ class ExternalLMSMigration extends Model
         $result['carreras'] = array_chunk($result['carreras'], self::CHUNK_LENGTH, true);
     }
 
-    public function setCiclosData(&$result, $db) // migrar duplicados por carreras
+    public function setCiclosData(&$result, $db) // agrupar y asignar por carreras
     {
         $ciclo_criterion = Criterion::create([
             'name' => 'Ciclo',
@@ -175,18 +175,14 @@ class ExternalLMSMigration extends Model
             'multiple' => ACTIVE
         ]);
 
-        $temp['ciclos'] = $db->getTable('ciclos')
+        $temp['grouped_ciclos'] = $db->getTable('ciclos')
             ->select(
-                'id', 'nombre', 'tipo', 'secuencia', 'carrera_id',
-                'estado', 'created_at', 'updated_at'
-            )
-            ->groupBy('nombre')
+                'id', 'nombre', 'secuencia', 'carrera_id', 'estado'
+            )->groupBy('nombre')
             ->get();
 
-        foreach ($temp['ciclos'] as $ciclo) {
-
-
-            $result['ciclos'][] = [
+        foreach ($temp['grouped_ciclos'] as $ciclo) {
+            $result['grouped_ciclos'][] = [
                 'criterion_id' => $ciclo_criterion->id,
 
                 'value_text' => $ciclo->nombre,
@@ -196,11 +192,30 @@ class ExternalLMSMigration extends Model
             ];
         }
 
-        $result['ciclos'] = array_chunk($result['ciclos'], self::CHUNK_LENGTH, true);
+        $result['grouped_ciclos'] = array_chunk($result['grouped_ciclos'], self::CHUNK_LENGTH, true);
+
+        $temp['ciclos_all'] = $db->getTable('ciclos')
+            ->select('nombre', 'carrera_id')
+            ->get();
+        info("CICLOS COUNT");
+        info($temp['ciclos_all']->count());
+        foreach ($temp['ciclos_all'] as $ciclo){
+            $result['ciclos_all'][] = [
+              'ciclo_nombre' => $ciclo->nombre,
+              'carrera_id' => $ciclo->carrera_id
+            ];
+        }
+
+
     }
 
     public function setGruposData(&$result, $db) // migrar duplicados por modulos
     {
+        $grupo_criterion = Criterion::create([
+            'name' => 'Grupo',
+            'code' => 'group'
+        ]);
+
         $temp['grupos'] = $db->getTable('criterios')
             ->select(
                 'id', 'valor', 'config_id',
@@ -209,9 +224,14 @@ class ExternalLMSMigration extends Model
             ->get();
 
         foreach ($temp['grupos'] as $grupo) {
+            $result['grupo_carrera'][] = [
+                'config_id' => $grupo->config_id,
+                'grupo_id' => $grupo->id
+            ];
+
             $result['grupos'][] = [
                 'external_id' => $grupo->id,
-                'temp_parent_id' => $grupo->config_id,
+                'criterion_id' => $grupo_criterion->id,
 
                 'value_text' => "M{$grupo->config_id}::".$grupo->valor,
 
@@ -225,6 +245,11 @@ class ExternalLMSMigration extends Model
 
     public function setBoticasData(&$result, $db) // migrar duplicados por grupos
     {
+        $botica_criterion = Criterion::create([
+            'name' => 'Botica',
+            'code' => 'botica'
+        ]);
+
         $temp['boticas'] = $db->getTable('boticas')
             ->select(
                 'id', 'nombre', 'criterio_id', 'codigo_local',
@@ -233,9 +258,14 @@ class ExternalLMSMigration extends Model
             ->get();
 
         foreach ($temp['boticas'] as $botica) {
+            $result['grupo_botica'][] = [
+                'grupo_id' => $botica->criterio_id,
+                'botica_id' => $botica->id
+            ];
+
             $result['boticas'][] = [
                 'external_id' => $botica->id,
-                'temp_parent_id' => $botica->criterio_id,
+                'criterion_id' => $botica_criterion->id,
 
                 'value_text' => $botica->nombre,
 

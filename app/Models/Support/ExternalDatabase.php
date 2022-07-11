@@ -17,19 +17,15 @@ class ExternalDatabase extends Model
         $this->insertUsersData($data);
 
         $this->insertModulosData($data);
+
+        $this->insertCarrerasData($data);
+        $this->insertCiclosData($data);
+
+        $this->insertGruposData($data);
+        $this->insertBoticasData($data);
+
 //        $this->insertUserModuleData($data);
-
-//        $this->insertCarrerasData($data);
-//        $this->insertCiclosData($data);
 //        $this->insertUserCarreraData($data);
-
-//        $this->insertCoursesData($data);
-//
-//        $this->insertCourseSchoolData($data);
-//
-//        $this->insertTopicsData($data);
-//
-//        $this->insertQuestionData($data);
     }
 
     public function insertChunkedData($table_name, $data)
@@ -60,36 +56,10 @@ class ExternalDatabase extends Model
         $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
 
         foreach ($modules_values as $module) {
-//        foreach ($data['criterion_workspace'] as $pivot){
-//            $module = $modules_values->where('external_id', $pivot['modulo_id'])->first();
-//            unset($pivot['modulo_id']);
-//
-//            if ($module)
-
             $temp[] = ['workspace_id' => $uc_workspace->id, 'criterion_value_id' => $module->id];
         }
 
         $this->makeChunkAndInsert($temp, 'criterion_workspace');
-    }
-
-    public function insertUserModuleData($data)
-    {
-        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
-        $users = User::all();
-        $temp = [];
-
-        foreach ($data['user_modulo'] as $relation) {
-            $module = $modules_values->where('external_id', $relation['config_id'])->first();
-            $user = $users->where('external_id', $relation['usuario_id'])->first();
-
-            if ($module and $user)
-                $temp[] = ['criterion_id' => $module->id, 'user_id' => $user->id];
-
-        }
-
-        $chunk = array_chunk($temp, self::CHUNK_LENGTH, true);
-
-        $this->insertChunkedData('criterion_user', $chunk);
     }
 
     public function insertCarrerasData($data)
@@ -114,7 +84,79 @@ class ExternalDatabase extends Model
 
     public function insertCiclosData($data)
     {
-        $this->insertChunkedData('criterion_values', $data['ciclos']);
+        $this->insertChunkedData('criterion_values', $data['grouped_ciclos']);
+
+        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
+        $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+
+        $temp = [];
+        foreach ($data['ciclos_all'] as $relation) {
+            $ciclo = $ciclos_values->where('value_text', $relation['ciclo_nombre'])->first();
+            $career = $carreras_values->where('external_id', $relation['carrera_id'])->first();
+
+            if ($ciclo and $career)
+                $temp[] = ['criterion_value_parent_id' => $career->id, 'criterion_value_id' => $ciclo->id];
+        }
+
+        $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
+    }
+
+    public function insertGruposData($data)
+    {
+        $this->insertChunkedData('criterion_values', $data['grupos']);
+
+        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+        $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
+
+        $temp = [];
+        foreach ($data['grupo_carrera'] as $relation) {
+            $module = $modules_values->where('external_id', $relation['config_id'])->first();
+            $group = $grupos_values->where('external_id', $relation['grupo_id'])->first();
+
+            if ($module and $group)
+                $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $group->id];
+        }
+
+        $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
+    }
+
+    public function insertBoticasData($data)
+    {
+        $this->insertChunkedData('criterion_values', $data['boticas']);
+
+        $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
+        $boticas_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'botica'))->get();
+
+        $temp = [];
+        foreach ($data['grupo_botica'] as $relation) {
+            $group = $grupos_values->where('external_id', $relation['grupo_id'])->first();
+            $botica = $boticas_values->where('external_id', $relation['botica_id'])->first();
+
+            if ($group and $botica)
+                $temp[] = ['criterion_value_parent_id' => $group->id, 'criterion_value_id' => $botica->id];
+        }
+
+        $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
+    }
+
+    public function insertUserModuleData($data)
+    {
+        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+        $users = User::all();
+        $temp = [];
+
+        foreach ($data['user_modulo'] as $relation) {
+            $module = $modules_values->where('external_id', $relation['config_id'])->first();
+            $user = $users->where('external_id', $relation['usuario_id'])->first();
+
+            if ($module and $user)
+                $temp[] = ['criterion_id' => $module->id, 'user_id' => $user->id];
+
+        }
+
+        $chunk = array_chunk($temp, self::CHUNK_LENGTH, true);
+
+        $this->insertChunkedData('criterion_user', $chunk);
     }
 
 
