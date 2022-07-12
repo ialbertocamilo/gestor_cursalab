@@ -57,6 +57,7 @@ class ExternalLMSMigration extends Model
         $temp['users'] = $db->getTable('usuarios')
             ->select(
                 'id', 'nombre', 'email', 'dni', 'config_id',
+                'grupo', 'botica_id',
                 'estado', 'created_at', 'updated_at'
             )
             ->limit(100)
@@ -65,9 +66,11 @@ class ExternalLMSMigration extends Model
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');
 
         foreach ($temp['users'] as $user) {
-            $result['user_modulo'][] = [
+            $result['usuario_relations'][] = [
                 'usuario_id' => $user->id,
-                'config_id' => $user->config_id
+                'config_id' => $user->config_id,
+                'grupo_id' => $user->grupo,
+                'botica_id' => $user->botica_id
             ];
 
             $result['users'][] = [

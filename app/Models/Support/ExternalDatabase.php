@@ -33,7 +33,7 @@ class ExternalDatabase extends Model
         $this->insertBoticasData($data);
 
 //        $this->insertUserModuleData($data);
-        $this->insertCriterionUserData();
+        $this->insertCriterionUserData($data);
     }
 
     public function insertChunkedData($table_name, $data)
@@ -147,53 +147,35 @@ class ExternalDatabase extends Model
         $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
     }
 
-//    public function insertUserModuleData($data)
-//    {
-//        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
-//        $users = User::all();
-//        $temp = [];
-//
-//        foreach ($data['user_modulo'] as $relation) {
-//            $module = $modules_values->where('external_id', $relation['config_id'])->first();
-//            $user = $users->where('external_id', $relation['usuario_id'])->first();
-//
-//            if ($module and $user)
-//                $temp[] = ['criterion_value_id' => $module->id, 'user_id' => $user->id];
-//
-//        }
-//
-//        $this->makeChunkAndInsert($temp, 'criterion_value_user');
-//    }
-
-    public function insertCriterionUserData()
+    public function insertCriterionUserData($data)
     {
         $db = self::connect();
 
         $users = User::all();
-        $module = Criterion::where('code', 'module')->first();
-
-        $carreras_values = CriterionValue::with(['parents' => fn($q) => $q->where('criterion_id', $module->id)])
-            ->whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+        $modules_value = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+        $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
         $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
+        $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
+        $boticas_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'botica'))->get();
         $matriculas = $db->getTable('matricula')
             ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
             ->whereIn('usuario_id', $users->pluck('external_id'))
             ->get();
 
-
         $criterion_user = [];
+
         foreach ($users as $user) {
 
+            $user_relations_key = array_search($user->external_id, array_column($data['usuario_relations'], 'usuario_id'));
+            $user_relations = $user_relations_key === false ? false : $data['usuario_relations'][$user_relations_key];
+
             $usuario_matriculas = $matriculas->where('usuario_id', $user->external_id);
-//            info($usuario_matriculas->toArray());
 
             if ($usuario_matriculas->count() > 0):
 
+                $module = $modules_value->where('external_id', $user_relations['config_id'])->first();
                 $career = $carreras_values->where('external_id', $usuario_matriculas->first()->carrera_id)->first();
-                $module = $career->parents->first();
                 $ciclos = $ciclos_values->whereIn('position', $usuario_matriculas->pluck('secuencia_ciclo'));
-//                info($career->id. ' '.$career->value_text);
-//                info($ciclos);
 
                 if ($career and $module and $ciclos->count() > 0):
 
@@ -211,68 +193,25 @@ class ExternalDatabase extends Model
 
             endif;
 
-        }
+            if ($user_relations):
 
-//        info($criterion_user);
+                $group = $grupos_values->where('external_id', $user_relations['grupo_id'])->first();
+                $botica = $boticas_values->where('external_id', $user_relations['botica_id'])->first();
+
+                if ($group and $botica):
+
+                    // Push grupo
+                    $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $group->id];
+
+                    // Push botica
+                    $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $botica->id];
+
+                endif;
+
+            endif;
+
+        }
 
         $this->makeChunkAndInsert($criterion_user, 'criterion_value_user');
     }
-
-    public function insertUserGrupoData()
-    {
-
-    }
-
-    public function insertUserBoticaData()
-    {
-
-    }
-
-
-//    public function insertQuestionData($data)
-//    {
-//        $topics = Topic::all();
-//
-//        foreach ($data['questions'] as $question) {
-//            $topic = $topics->where('external_id', $question['post_id'])->first();
-//            $options = $question['rptas_json'];
-//            unset($question['post_id'], $question['rptas_json']);
-//
-//            if ($topic) {
-//                $temp_question = array_merge($question, ['model_id' => $topic->id]);
-//
-//                $db->getTable('questions')->insert($temp_question);
-//
-//                $this->insertOptionsData($db, array_merge($question, ['rptas_json' => $options]));
-//            }
-//        }
-//    }
-//
-//    public function insertOptionsData($db, $data)
-//    {
-//        $now = now()->format('Y-m-d H:i:s');
-//
-//        $options = json_decode($data['rptas_json'] ?? [], true);
-//
-//        $position = 1;
-//        $temp = [];
-//        foreach ($options as $option) {
-//            $temp[] = [
-//                'question_id' => $data['external_id'],
-//
-//                'statement' => $option['opc'],
-//                'position' => $position,
-//
-//                'is_correct' => $option['correcta'],
-//
-//                'active' => ACTIVE,
-//                'created_at' => $now,
-//                'updated_at' => $now,
-//            ];
-//            $position++;
-//        }
-//
-//        $db->getTable('options')->insert($temp);
-//    }
-
 }

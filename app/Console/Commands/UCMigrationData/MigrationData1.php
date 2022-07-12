@@ -37,6 +37,14 @@ class MigrationData1 extends Command
      */
     public function handle()
     {
+//
+//        $user = User::query()
+//            ->withWhereHas('criterion_values', fn($q) => $q->whereIn('criterion_id', [5]))
+////            ->whereHas('criteria')
+////                ->where('id')
+//            ->first();
+//
+//        $this->info($user);
 
         $this->info(" Inicio: " . now());
         info(" Inicio: " . now());
