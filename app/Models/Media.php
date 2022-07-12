@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
 use ZipArchive;
-use Storage;
 
-// class Media extends Model
+
 class Media extends Model
 {
+
+    use SoftDeletes;
+
     const DEFAULT_AUDIO_IMG = "images/default-audio-img_119.png";
     const DEFAULT_SCORM_IMG = "images/default-scorm-img_116.png";
     const DEFAULT_VIDEO_IMG = "images/default-video-img_285.png";
@@ -22,14 +27,35 @@ class Media extends Model
         'title', 'description', 'file', 'ext', 'status', 'external_id', 'size'
     ];
 
+    /*
+
+        Attributes
+
+    --------------------------------------------------------------------------*/
+
     public function getFullTitleAttribute()
     {
         return ucwords(str_replace('-', ' ', $this->title));
     }
 
-    protected function uploadFile($file, $name = null, $return_media = false)
+    /*
+
+        Methods
+
+    --------------------------------------------------------------------------*/
+
+    /**
+     * Upload file to local or remote location
+     * @param $file
+     * @param $name
+     * @param bool $return_media
+     * @return Media|Application|UrlGenerator|string
+     */
+    protected function uploadFile($file, $name = null, bool $return_media = false)
     {
-        // $file = $request->file('file');
+
+        // Get file values
+
         $ext = $file->getClientOriginalExtension();
 
         if (!$name) {
@@ -39,19 +65,31 @@ class Media extends Model
             $name = str_slug($name);
         }
 
+        // Generate filename
+
         $name = $name . '-' . date('YmdHis') . '-' . rand(1000, 9999);
-        // $name = $name . '-' . rand(300, 600);
         $fileName = $name . '.' . $ext;
+
+        // Get file size, Laravel returns the value in bytes,
+        // so converts the value to Kilobytes (as an integer)
+
+        try {
+            $size = floor($file->getSize() / 1024);
+        } catch (\Exception $exception) {
+            $size = 0;
+        }
+
+        // Generate path according file extension
 
         $path = '';
         $uploaded = false;
 
-        $valid_ext1 = array("jpeg", "jpg", "png", "gif", "svg", "webp");
-        $valid_ext2 = array("mp4", "webm", "mov");
-        $valid_ext3 = array("mp3");
-        $valid_ext4 = array("pdf");
-        $valid_ext5 = array("zip", "scorm"); // Los zip se suben en el storage local (del proyecto)
-        $valid_ext6 = array('xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx');
+        $valid_ext1 = ['jpeg', 'jpg', 'png', 'gif', 'svg', 'webp'];
+        $valid_ext2 = ['mp4', 'webm', 'mov'];
+        $valid_ext3 = ['mp3'];
+        $valid_ext4 = ['pdf'];
+        $valid_ext5 = ['zip', 'scorm']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
+        $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx'];
 
         if (in_array(strtolower($ext), $valid_ext1)) {
             $path = 'images/' . $fileName;
@@ -64,7 +102,7 @@ class Media extends Model
         } else if (in_array(strtolower($ext), $valid_ext6)) {
             $path = 'office-files/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext5)) {
-            // $path = 'zip/'.$fileName;
+
             $localpath = 'uploads/scorm/' . $name;
             $zip = new ZipArchive();
             $res = $zip->open($file, ZipArchive::CREATE);
@@ -79,21 +117,26 @@ class Media extends Model
         }
 
         // Upload to remote storage
+
         if (!$uploaded) {
             // $file->move($path, $fileName);
             if (Storage::disk('do_spaces')->put($path, file_get_contents($file), 'public')) {
                 $uploaded = true;
             }
         }
+
         // Insert Media
+
         if ($uploaded) {
             $media = new Media;
             $media->title = $name;
-            // $media->file = $fileName;
             $media->file = $path;
             $media->ext = $ext;
+            $media->size = $size;
             $media->save();
         }
+
+        // Return media or path;
 
         if ($return_media)
             return $media;
@@ -106,6 +149,7 @@ class Media extends Model
         if (!empty($data[$field])) {
 
             $data[$field] = $data[$field];
+
         } else {
 
             $file_field = 'file_' . $field;

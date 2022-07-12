@@ -2,52 +2,62 @@
 
 namespace App\Models;
 
+use App\Imports\VademecumImport;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Imports\VademecumImport;
-use DB;
 
 
 class Vademecum extends Model
 {
     use SoftDeletes;
-    
-
 
     protected $table = 'vademecum';
 
     protected $fillable = [
-        'nombre', 'categoria_id', 'subcategoria_id', 'media_id', 'estado'
+        'name', 'category_id', 'subcategory_id', 'media_id', 'active'
     ];
 
     protected $hidden = [
         'created_at', 'updated_at', 'deleted_at'
     ];
 
-    /* AUDIT TAGS */
+    /**
+     * Generate audits tags
+     * @return string[]
+     */
     public function generateTags(): array
     {
         return [
             'modelo_independiente',
         ];
     }
-    /* AUDIT TAGS */
 
-    // Relationships
+    /*
 
-    public function modulos()
+        Relationships
+
+    --------------------------------------------------------------------------*/
+
+
+    public function modules()
     {
-        return $this->belongsToMany(Abconfig::class, 'vademecum_modulo', 'vademecum_id', 'modulo_id');
+        return $this->belongsToMany(
+            Abconfig::class,
+            'vademecum_module',
+            'vademecum_id',
+            'module_id'
+        );
     }
 
-    public function categoria()
+    public function category()
     {
-        return $this->belongsTo(Taxonomia::class, 'categoria_id');
+        return $this->belongsTo(Taxonomia::class, 'category_id');
     }
 
-    public function subcategoria()
+    public function subcategory()
     {
-        return $this->belongsTo(Taxonomia::class, 'subcategoria_id');
+        return $this->belongsTo(Taxonomia::class, 'subcategory_id');
     }
 
     public function media()
@@ -60,99 +70,98 @@ class Vademecum extends Model
         return $this->morphMany(UsuarioAccion::class, 'model');
     }
 
+    /*
+
+        Attributes
+
+    --------------------------------------------------------------------------*/
+
+
+    public function setActiveAttribute($value)
+    {
+        $this->attributes['active'] = (
+            $value==='true' OR
+            $value === true OR
+            $value === 1 OR
+            $value === '1'
+        );
+    }
+
+    /*
+
+        Methods
+
+    --------------------------------------------------------------------------*/
+
+
     public function incrementAction($type_id, $quantity = 1)
     {
         $user_id = auth()->user()->id;
 
         $row = $this->actions()
-            ->firstOrCreate(compact('user_id', 'type_id'));
+                    ->firstOrCreate(
+                        compact('user_id', 'type_id')
+                    );
 
         $row->increment('score', $quantity);
 
         return $row;
     }
 
-    public function setEstadoAttribute($value)
-    {
-        $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
-    }
-
-    // Functions
-
-    // protected function importFromFile($data)
-    // {
-    //     try {
-    //         $model = (new VademecumImport);
-
-    //         $model->modulo_id = $data['modulo_id'];
-    //         $model->categoria_id = $data['categoria_id'];
-
-    //         $model->import($data['excel']);
-
-    //         if ($model->failures()->count()) {
-    //             request()->session()->flash('excel-errors', $model->failures());
-
-    //             return ['status' => 'error', 'message' => 'Se encontraron algunos errores.'];
-    //         }
-    //     } catch (\Exception $e) {
-    //         // info($e);
-    //         return ['status' => 'error', 'message' => $e->getMessage()];
-    //     }
-
-    //     return ['status' => 'success', 'message' => 'Registros ingresados correctamente.'];
-    // }
-
     protected function search($request, $api = false, $paginate = 20)
     {
-        $relationships = ['modulos', 'categoria', 'subcategoria', 'media'];
+        $relationships = ['modules', 'category', 'subcategory', 'media'];
 
-        if ($api) :
+        if ($api) {
 
             $relationships = [
-                'modulos' => function ($q) use ($request) {
-                    if ($request->modulo_id)
-                        $q->where('id', $request->modulo_id);
+                'modules' => function ($q) use ($request) {
+                    if ($request->module_id)
+                        $q->where('id', $request->module_id);
                 },
-                'subcategoria',
-                'categoria',
+                'subcategory',
+                'category',
                 'media',
             ];
-
-        endif;
+        }
 
         $query = Vademecum::with($relationships);
 
-        if ($request->categoria_id)
-            $query->where('categoria_id', $request->categoria_id);
+        if ($request->category_id)
+            $query->where('category_id', $request->category_id);
 
-        if ($request->subcategoria_id)
-//            $query->where('subcategoria_id', $request->subcategoria_id);
-            $query->whereIn('subcategoria_id', explode(',', $request->subcategoria_id));
+        if ($request->subcategory_id) {
 
+            $query->whereIn(
+                'subcategory_id',
+                explode(',', $request->subcategory_id)
+            );
+        }
 
         if ($request->q)
-            $query->where('nombre', 'like', "%{$request->q}%");
+            $query->where('name', 'like', "%{$request->q}%");
 
         if ($request->modulo_id)
             $query->whereHas('modulos', function ($q) use ($request) {
                 $q->where('id', $request->modulo_id);
             });
 
-        if ($request->estado)
-            $query->where('estado', $request->estado);
+        if ($request->active)
+            $query->where('active', $request->active);
 
-        // if ($api)
-        //     $query->orderBy('nombre', 'ASC');
 
-        if ($api){
-            $query->orderBy('nombre', 'ASC');
-        }else{
-            $field = $request->sortBy ?? 'nombre';
+        if ($api) {
+
+            $query->orderBy('name', 'ASC');
+
+        } else {
+
+            $field = $request->sortBy ?? 'name';
             $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-            
+
             $query->orderBy($field, $sort);
         }
-        
+
         $vademecum = $query->paginate($paginate);
 
         return $vademecum;
@@ -163,7 +172,7 @@ class Vademecum extends Model
         $query = Vademecum::query();
 
         if ($request->q)
-            $query->where('nombre', 'like', "%{$request->q}%");
+            $query->where('name', 'like', "%{$request->q}%");
 
         $categorias = $query->paginate($paginate);
 
@@ -176,8 +185,8 @@ class Vademecum extends Model
 
             DB::beginTransaction();
 
-            // $taxonomia = $this->prepareTaxonomy($data, 'categoria_id', 'categoria');
-            // $data['categoria_id'] = $taxonomia->id ?? NULL;
+            // $taxonomia = $this->prepareTaxonomy($data, 'category_id', 'categoria');
+            // $data['category_id'] = $taxonomia->id ?? NULL;
 
 
             if ($elemento) :
@@ -243,15 +252,39 @@ class Vademecum extends Model
 
         foreach ($result['data'] as $key => $row) {
             $data[$key]['id'] = $row['id'];
-            $data[$key]['nombre'] = $row['nombre'];
+            $data[$key]['name'] = $row['name'];
             $data[$key]['scorm'] = $row['media']['file'] ?? null;
-            $data[$key]['categoria'] = $row['categoria']['nombre'] ?? null;
-            $data[$key]['categoria_id'] = $row['categoria_id'];
-            $data[$key]['subcategoria_id'] = $row['subcategoria_id'];
+            $data[$key]['category'] = $row['category']['name'] ?? null;
+            $data[$key]['category_id'] = $row['category_id'];
+            $data[$key]['subcategory_id'] = $row['subcategory_id'];
         }
 
         $result['data'] = $data;
 
         return $result;
     }
+
+    // todo: this method, is not used anywhere
+    // protected function importFromFile($data)
+    // {
+    //     try {
+    //         $model = (new VademecumImport);
+
+    //         $model->modulo_id = $data['modulo_id'];
+    //         $model->category_id = $data['category_id'];
+
+    //         $model->import($data['excel']);
+
+    //         if ($model->failures()->count()) {
+    //             request()->session()->flash('excel-errors', $model->failures());
+
+    //             return ['status' => 'error', 'message' => 'Se encontraron algunos errores.'];
+    //         }
+    //     } catch (\Exception $e) {
+    //         // info($e);
+    //         return ['status' => 'error', 'message' => $e->getMessage()];
+    //     }
+
+    //     return ['status' => 'success', 'message' => 'Registros ingresados correctamente.'];
+    // }
 }

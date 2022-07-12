@@ -66,7 +66,7 @@ class ExportarController extends Controller
         $users = \DB::select("SELECT id, name FROM users WHERE id IN (select admin_id FROM reinicios) ORDER BY name");
         $user_id = Auth::user()->id;
         $user = \DB::select("SELECT u.name, u.email, r.name as rol FROM users as u inner join role_user as ru on u.id=ru.user_id inner join roles as r on r.id=ru.role_id WHERE u.id = " . $user_id);
-        $vademecums = Vademecum::where('estado', 1)->get(['id', 'nombre']);
+        $vademecums = Vademecum::where('active', 1)->get(['id', 'name']);
         // $user = \DB::select("SELECT u.name, u.email, r.name as rol FROM users as u inner join role_user as ru on u.id=ru.user_id inner join roles as r on r.id=ru.role_id WHERE u.id = " . $user_id);
         return compact('modulos', 'users', 'user', 'vademecums');
     }
