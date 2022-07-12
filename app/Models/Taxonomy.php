@@ -122,7 +122,7 @@ class Taxonomy extends BaseModel
         return $data->where('code', $code)->first();
     }
 
-    protected function getData($group, $type, $filters = [], mixed $relationship = null)
+    protected static function getData($group, $type, $filters = [], mixed $relationship = null)
     {
         $result = Taxonomy::where('group', $group)->where('type', $type)->where('active', ACTIVE);
 

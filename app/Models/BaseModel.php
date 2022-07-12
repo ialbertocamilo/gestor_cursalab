@@ -142,15 +142,15 @@ class BaseModel extends Model implements Recordable
 
     public function generateCode(string $keys = '')
     {
-        $code = $this->getClassCode();
+        // $code = $this->getClassCode();
 
-        $prefix = 'CM-' . $code . '-' . ($keys ? $keys . '-' : $keys);
+        // $prefix = 'CM-' . $code . '-' . ($keys ? $keys . '-' : $keys);
 
-        $key = Keygen::numeric(21)->prefix($prefix)->generate(function($key) {
-            return join('-', str_split($key, 4));
-        });
+        // $key = Keygen::numeric(21)->prefix($prefix)->generate(function($key) {
+        //     return join('-', str_split($key, 4));
+        // });
 
-        return $key;
+        // return $key;
     }
 
     public function getClassCode()

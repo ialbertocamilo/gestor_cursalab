@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 
 class Usuario extends Model
 {
+    protected $table = 'users';
+    
     use Notifiable;
 
     const TAG_ROL_ENTRENAMIENTO_ENTRENADOR = 'entrenador';

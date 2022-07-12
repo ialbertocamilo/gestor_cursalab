@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Encuestas_pregunta extends BaseModel
 {
-	protected $table = 'encuestas_preguntas';
+	protected $table = 'poll_questions';
     
     protected $fillable = [
     	'encuesta_id', 'tipo_pregunta', 'titulo', 'opciones', 'estado', 'created_at', 'updated_at'

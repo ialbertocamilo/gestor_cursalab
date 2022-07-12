@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class Posteo extends Model
 {
-    
+    protected $table = 'topics';
 
     protected $fillable = [
         // 'nombre', 'resumen', 'contenido', 'cod_video', 'imagen', 'archivo', 'estado', 'created_at', 'updated_at', 'tipo_post', 'orden', 'requisito_id', 'categoria_id', 'curso_id', 'video', 'tipo_ev', 'media'

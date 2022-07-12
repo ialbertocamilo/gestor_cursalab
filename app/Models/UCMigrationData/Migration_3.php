@@ -8,11 +8,13 @@ use App\Models\Taxonomy;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\User;
+use App\Models\Encuestas_pregunta;
+use App\Models\Support\OTFConnection;
 use DB;
 
 class Migration_3 extends Model
 {
-    const CHUNK_LENGTH = 5000;
+    const CHUNK_LENGTH = 2500;
 
     protected function connect()
     {
@@ -32,24 +34,32 @@ class Migration_3 extends Model
 
     protected function migrateEncuestas()
     {
-        $data = self::getEncuestasData();
-        self::insertChunkedData($data, 'polls');
+        // info('getEncuestasData');
+        // $data = self::getEncuestasData();
+        // self::insertChunkedData($data, 'polls');
 
-        $data = self::getEncuestasPreguntasData();
-        self::insertChunkedData($data, 'poll_questions');
+        // info('getEncuestasPreguntasData');
+        // $data = self::getEncuestasPreguntasData();
+        // self::insertChunkedData($data, 'poll_questions');
 
-        $data = self::getEncuestasPreguntasRespuestasData();
-        self::insertChunkedData($data, 'poll_question_answers');
+        // info('getEncuestasPreguntasRespuestasData');
+        // self::getEncuestasPreguntasRespuestasData();
+
+
+        // self::insertChunkedData($data, 'poll_question_answers');
     }
 
     protected function migrateResumenes()
     {
-        $data = self::getResumenGeneralData();
-        self::insertChunkedData($data, 'summary_users');
+        // info('getResumenGeneralData');
+        // $data = self::getResumenGeneralData();
+        // self::insertChunkedData($data, 'summary_users');
 
-        $data = self::getResumenCursosData();
-        self::insertChunkedData($data, 'summary_courses');
+        // info('getResumenCursosData');
+        // $data = self::getResumenCursosData();
+        // self::insertChunkedData($data, 'summary_courses');
 
+        info('getAndInsertResumenTemasData');
         self::getAndInsertResumenTemasData();
         // self::insertChunkedData($data, 'summary_topics');
     }
@@ -60,6 +70,8 @@ class Migration_3 extends Model
         foreach ($data as $chunk)
         {
             DB::table($table_name)->insert($chunk);
+
+            info($table_name . ' chunked inserted');
         }
     }
 
@@ -74,11 +86,11 @@ class Migration_3 extends Model
 
         foreach ($encuestas as $key => $encuesta)
         {
-            $topic_id = $types->where('code', $encuesta->tipo)->first();
+            $type = $types->where('code', $encuesta->tipo)->first();
 
             $data[] = [
                 'external_id' => $encuesta->id,
-                'type_id' => $type_id,
+                'type_id' => $type->id ?? NULL,
                 'anonima' => $encuesta->anonima,
                 'titulo' => $encuesta->titulo,
                 'imagen' => $encuesta->imagen,
@@ -103,13 +115,13 @@ class Migration_3 extends Model
 
         foreach ($preguntas as $key => $pregunta)
         {
-            $type_id = $types->where('code', $pregunta->tipo_pregunta)->first();
-            $poll_id = $polls->where('external_id', $pregunta->encuesta_id)->first();
+            $type = $types->where('code', $pregunta->tipo_pregunta)->first();
+            $poll = $polls->where('external_id', $pregunta->encuesta_id)->first();
 
             $data[] = [
                 'external_id' => $pregunta->id,
-                'poll_id' => $poll_id,
-                'type_id' => $type_id,
+                'poll_id' => $poll->id ?? NULL,
+                'type_id' => $type->id ?? NULL,
                 'titulo' => $pregunta->titulo,
                 'opciones' => $pregunta->opciones,
                 'active' => $pregunta->estado,
@@ -125,33 +137,42 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $respuestas = $db->getTable('encuestas_respuestas')->get();
         $courses = Course::select('id', 'external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
         $users = User::select('id', 'external_id')->whereNull('email')->get();
+        $preguntas = Encuestas_pregunta::select('id', 'external_id')->get();
 
-        $data = [];
+        $db->getTable('encuestas_respuestas')->chunkById(2500, function ($respuestas) use ($users, $types, $courses, $preguntas) {
+            
+            $chunk = [];
+            
+            foreach ($respuestas as $key => $respuesta)
+            {
+                $type = $types->where('code', $respuesta->tipo_pregunta)->first();
+                // $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
+                $user = $users->where('external_id', $respuesta->usuario_id)->first();
+                $course = $courses->where('external_id', $respuesta->curso_id)->first();
+                $question = $preguntas->where('external_id', $respuesta->pregunta_id)->first();
 
-        foreach ($respuestas as $key => $respuesta)
-        {
-            $type_id = $types->where('code', $respuesta->tipo_pregunta)->first();
-            $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
-            $user_id = $users->where('external_id', $respuesta->usuario_id)->first();
-            $course_id = $courses->where('external_id', $respuesta->curso_id)->first();
+                $chunk[] = [
+                    'course_id' => $course->id ?? NULL,
+                    'user_id' => $user->id ?? NULL,
+                    'type_id' => $type->id ?? NULL,
+                    'poll_question_id' => $question->id ?? NULL,
 
-            $data[] = [
-                'course_id' => $course_id,
-                'user_id' => $user_id,
-                'type_id' => $type_id,
-                'poll_question_id' => $question_id,
+                    'respuestas' => $respuesta->respuestas,
+                    'created_at' => $respuesta->created_at,
+                    'updated_at' => $respuesta->updated_at,
+                ];
+            }
 
-                'respuestas' => $respuesta->respuestas,
-                'created_at' => $respuesta->created_at,
-                'updated_at' => $respuesta->updated_at,
-            ];
-        }
+            DB::table('poll_question_answers')->insert($chunk);
 
-        return array_chunk($data, self::CHUNK_LENGTH, true);
+            info('poll_question_answers chunked inserted');
+        });
+
+
+
     }
 
     protected function getResumenGeneralData()
@@ -166,11 +187,11 @@ class Migration_3 extends Model
 
         foreach ($rows as $row)
         {
-            $user_id = $users->where('external_id', $row->usuario_id)->first();
-            // $user_id = User::where('external_id', $row->usuario_id)->first();
+            $user = $users->where('external_id', $row->usuario_id)->first();
+            // $user = User::where('external_id', $row->usuario_id)->first();
 
             $data[] = [
-                'user_id' => $user_id,
+                'user_id' => $user->id ?? NULL,
 
                 'score' => $row->rank,
                 'attempts' => $row->intentos,
@@ -194,67 +215,91 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $rows_cursos = $db->getTable('resumen_x_curso')->get();
+        // $rows_cursos = $db->getTable('resumen_x_curso')->get();
         $rows_reinicios = $db->getTable('reinicios')->where('tipo', 'por_curso')->get();
-        $rows_diplomas = $db->getTable('diplomas')->whereNull('posteo_id')->get();
+        // $rows_diplomas = $db->getTable('diplomas')->whereNull('posteo_id')->get();
 
         $users = User::select('id', 'external_id')->whereNull('email')->get();
         $courses = Course::select('id', 'external_id')->get();
         $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
         $statuses = Taxonomy::getData('course', 'user-status')->get();
 
-        $data = [];
+        $db->getTable('resumen_x_curso')->chunkById(1000, function ($rows_cursos) use ($users, $rows_reinicios, $courses, $statuses, $admins) {
+            
+            $chunk = [];
 
-        foreach ($rows_cursos as $row)
-        {
-            $status_id = $statuses->where('code', $row->estado)->first();
-            $user_id = $users->where('external_id', $row->usuario_id)->first();
-            $course_id = $courses->where('external_id', $row->curso_id)->first();
-            $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
-            $certification = $rows_diplomas->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
+            info('Start resumen_x_curso chunk');
 
-            $restarts = 0;
-            $restarter = NULL;
-
-            if ($restart)
+            foreach ($rows_cursos as $row)
             {
-                $restarts = $restart->acumulado;
-                $restarter = $admins->where('external_id', $row->admin_id)->first();
+                $status = $statuses->where('code', $row->estado)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $course = $courses->where('external_id', $row->curso_id)->first();
+                $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
+                // $certification = $rows_diplomas->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
+
+                $restarts = 0;
+                $restarter = NULL;
+
+                if ($restart)
+                {
+                    $restarts = $restart->acumulado;
+                    $restarter = $admins->where('external_id', $restart->admin_id)->first();
+                }
+
+                // $restarter_id = $users->where('external_id', $row->usuario_id)->first();
+
+                $chunk[] = [
+                    'user_id' => $user->id ?? NULL,
+                    'course_id' => $course->id ?? NULL,
+                    'status_id' => $status->id ?? NULL,
+
+                    'assigned' => $row->asignados,
+                    'passed' => $row->aprobados,
+                    'taken' => $row->realizados,
+                    'reviewed' => $row->revisados,
+                    'failed' => $row->desaprobados,
+
+                    'grade_average' => $row->nota_prom,
+                    'advanced_percentage' => $row->porcentaje,
+
+                    'attempts' => $row->intentos,
+                    'views' => $row->visitas,
+                    
+                    'restarts' => $restarts,
+                    'restarter_id' => $restarter->id ?? NULL,
+
+                    'last_time_evaluated_at' => $row->last_ev ?? NULL,
+                    // 'certification_issued_at' => $certification->fecha_emision ?? NULL,
+
+                    // 'active' => $row->last_ev,
+
+                    'created_at' => $row->created_at,
+                    'updated_at' => $row->updated_at,
+                ];
             }
 
-            $restarter_id = $users->where('external_id', $row->usuario_id)->first();
+            DB::table('summary_courses')->insert($chunk);
 
-            $data[] = [
-                'user_id' => $user_id,
-                'course_id' => $course_id,
-                'status_id' => $status_id,
+            info('summary_courses chunked inserted');
+        });
 
-                'assigned' => $row->asignados,
-                'passed' => $row->aprobados,
-                'taken' => $row->realizados,
-                'reviewed' => $row->revisados,
-                'failed' => $row->desaprobados,
+        $db->getTable('diplomas')->whereNull('posteo_id')->chunkById(2500, function ($rows_diplomas) use ($courses, $users) {
+            foreach ($rows_diplomas as $row) {
 
-                'grade_average' => $row->nota_prom,
-                'advanced_percentage' => $row->porcentaje,
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $course = $courses->where('external_id', $row->curso_id)->first();
 
-                'attempts' => $row->intentos,
-                'views' => $row->visitas,
-                
-                'restarts' => $restarts,
-                'restarter_id' => $restarter->id ?? NULL,
+                DB::table('summary_courses')
+                    ->updateOrInsert(['user_id' => $user->id ?? NULL, 'course_id' => $course->id ?? NULL], ['certification_issued_at' => $row->fecha_emision]);
 
-                'last_time_evaluated_at' => $row->last_ev ?? NULL,
-                'certification_issued_at' => $certification->fecha_emision ?? NULL,
+                info('summary_courses diplomas chunked inserted');
+            }
+        });
 
-                // 'active' => $row->last_ev,
 
-                'created_at' => $row->created_at,
-                'updated_at' => $row->updated_at,
-            ];
-        }
 
-        return array_chunk($data, self::CHUNK_LENGTH, true);
+        // return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
     protected function getAndInsertResumenTemasData()
@@ -267,19 +312,19 @@ class Migration_3 extends Model
         $sources = Taxonomy::getData('system', 'source')->get();
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
-        $db->getTable('pruebas')->chunkById(5000, function ($rows_pruebas) use ($users, $topics, $sources) {
+        $db->getTable('pruebas')->chunkById(1000, function ($rows_pruebas) use ($users, $topics, $sources) {
             
             $chunk = [];
             
             foreach ($rows_pruebas as $row) {
                 //
-                $user_id = $users->where('external_id', $row->usuario_id)->first();
-                $topic_id = $topics->where('external_id', $row->curso_id)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $topic = $topics->where('external_id', $row->curso_id)->first();
                 // $source_id = $sources->where('code', $prueba->fuente)->first();
 
                 $chunk[] = [
-                    'user_id' => $user_id,
-                    'topic_id' => $topic_id,
+                    'user_id' => $user->id ?? NULL,
+                    'topic_id' => $topic->id ?? NULL,
 
                     // 'source_id' => $source_id,
 
@@ -290,7 +335,7 @@ class Migration_3 extends Model
                     'grade' => $row->nota,
                     'passed' => $row->resultado,
 
-                    'answers' => $prueba->usu_rptas,
+                    'answers' => $row->usu_rptas,
                     
                     'last_time_evaluated_at' => $row->last_ev ?? NULL,
 
@@ -300,25 +345,27 @@ class Migration_3 extends Model
             }
 
             DB::table('summary_topics')->insert($chunk);
+
+            info('summary_topics pruebas chunked inserted');
         });
 
-        $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(5000, function ($rows_ev_abiertas) use ($db, $topics, $users, $sources) {
+        $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(2500, function ($rows_ev_abiertas) use ($topics, $users, $sources) {
             
             $chunk = [];
 
             foreach ($rows_ev_abiertas as $prueba)
             {
-                $topic_id = $topics->where('external_id', $prueba->posteo_id)->first();
-                $user_id = $users->where('external_id', $prueba->usuario_id)->first();
+                $topic = $topics->where('external_id', $prueba->posteo_id)->first();
+                $user = $users->where('external_id', $prueba->usuario_id)->first();
                 // $source_id = $sources->where('code', $prueba->fuente)->first();
                 // $user_id = User::where('external_id', $prueba->usuario_id)->first();
 
                 $chunk[] = [
-                    'topic_id' => $topic_id,
-                    'user_id' => $user_id,
+                    'topic_id' => $topic->id ?? NULL,
+                    'user_id' => $user->id ?? NULL,
                     'answers' => $prueba->usu_rptas,
                     // 'source_id' => $source_id,
-                    'type_id' => $type_id,
+                    // 'type_id' => $type_id,
 
                     'created_at' => $prueba->created_at,
                     'updated_at' => $prueba->updated_at,
@@ -326,13 +373,15 @@ class Migration_3 extends Model
             }
 
             DB::table('summary_topics')->insert($chunk);
+
+            info('summary_topics ev_abiertas chunked inserted');
         });
 
-        $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(5000, function ($rows_reinicios) use ($admins, $db, $topics, $users) {
+        $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(2500, function ($rows_reinicios) use ($admins, $db, $topics, $users) {
             foreach ($rows_reinicios as $restart) {
 
-                $user_id = $users->where('external_id', $restart->usuario_id)->first();
-                $topic_id = $topics->where('external_id', $restart->curso_id)->first();
+                $user = $users->where('external_id', $restart->usuario_id)->first();
+                $topic = $topics->where('external_id', $restart->curso_id)->first();
 
                 $restarts = 0;
                 $restarter = NULL;
@@ -348,28 +397,32 @@ class Migration_3 extends Model
                     'restarter_id' => $restarter->id ?? NULL, // from reinicios
                 ];
 
-                $db->getTable('summary_topics')
-                    ->where('user_id', $user_id)
-                    ->where('topic_id', $topic_id)
+                DB::table('summary_topics')
+                    ->where('user_id', $user->id ?? NULL)
+                    ->where('topic_id', $topic->id ?? NULL)
                     ->update($data);
+
+                    info('summary_topics reinicios chunked inserted');
             }
         });
 
-        $db->getTable('visitas')->chunkById(5000, function ($rows_visitas) use ($db, $topics, $users, $statuses) {
+        $db->getTable('visitas')->chunkById(2500, function ($rows_visitas) use ($db, $topics, $users, $statuses) {
             foreach ($rows_visitas as $row) {
 
-                $user_id = $users->where('external_id', $row->usuario_id)->first();
-                $topic_id = $topics->where('external_id', $row->curso_id)->first();
-                $status_id = $statuses->where('code', $row->estado_tema)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $topic = $topics->where('external_id', $row->curso_id)->first();
+                $status = $statuses->where('code', $row->estado_tema)->first();
 
                 $data = [
                     'downloads' => $row->descargas, 
                     'views' => $row->sumatorias, 
-                    'status_id' => $status_id, 
+                    'status_id' => $status->id ?? NULL, 
                 ];
 
-                $db->getTable('summary_topics')
-                    ->updateOrInsert(['user_id' => $user_id, 'topic_id' => $topic_id], $data);
+                DB::table('summary_topics')
+                    ->updateOrInsert(['user_id' => $user->id ?? NULL, 'topic_id' => $topic->id ?? NULL], $data);
+
+                info('summary_topics visitas chunked inserted');
             }
         });
 

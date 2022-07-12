@@ -27,8 +27,8 @@ return new class extends Migration
             $table->unsignedInteger('reviewed')->nullable();
             $table->unsignedInteger('failed')->nullable();
 
-            $table->unsignedDecimal('grade_average', 4, 2)->nullable();
-            $table->unsignedDecimal('advanced_percentage', 4, 2)->nullable();
+            $table->unsignedDecimal('grade_average', 6, 2)->nullable();
+            $table->unsignedDecimal('advanced_percentage', 5, 2)->nullable();
 
             $table->unsignedInteger('attempts')->nullable();
             $table->unsignedInteger('views')->nullable();

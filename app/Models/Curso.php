@@ -9,6 +9,8 @@ use Illuminate\Support\Carbon;
 
 class Curso extends Model
 {
+    protected $table = 'courses';
+    
     protected $fillable = [
         'config_id', 'categoria_id', 'duplicado_id', 'nombre', 'descripcion', 'imagen', 'estado',
         'orden', 'requisito_id', 'c_evaluable', 'libre', 'reinicios_programado', 'plantilla_diploma'

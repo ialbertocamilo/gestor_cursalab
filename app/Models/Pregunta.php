@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pregunta extends Model
 {
+    protected $table = 'poll_questions';    
+    
     protected $fillable = [
     	'post_id', 'pregunta', 'rptas_json','ubicacion', 'estado', 'tipo_pregunta', 'created_at', 'updated_at', 'rpta_ok'
     ];
