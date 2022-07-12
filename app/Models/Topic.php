@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Topic extends Model
+class Topic extends BaseModel
 {
-    use HasFactory;
+    protected $fillable = [
+        'name', 'slug', 'description', 'content', 'imagen',
+        'position', 'visits_count', 'assessable',
+        'topic_requirement_id', 'type_evaluation_id', 'duplicate_id'
+    ];
 }
