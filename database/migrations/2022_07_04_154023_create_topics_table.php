@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('imagen')->nullable();
             $table->tinyInteger('position')->nullable();
 
-            $table->integer('visits_count'); // visitas
+            $table->integer('visits_count')->nullable(); // column from table 'visitas'
 
             $table->boolean('assessable')->nullable()->default(false);
 

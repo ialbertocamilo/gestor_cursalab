@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands\UCMigrationData;
 
-use App\Models\Criterion;
-use App\Models\CriterionValue;
 use App\Models\UCMigrationData\Migration_1;
 use App\Models\User;
 use Illuminate\Console\Command;

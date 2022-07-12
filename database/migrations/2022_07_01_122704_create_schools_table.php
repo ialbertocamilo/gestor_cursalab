@@ -15,14 +15,16 @@ return new class extends Migration
     {
         Schema::create('schools', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
+
             $table->string('name');
             $table->string('description')->nullable();
 
-            $table->string('imagen');
+            $table->string('imagen')->nullable();
 
             // $table->string('modalidad');
 
-            $table->string('plantilla_diploma');
+            $table->string('plantilla_diploma')->nullable();
 
             $table->tinyInteger('position')->nullable();
 
