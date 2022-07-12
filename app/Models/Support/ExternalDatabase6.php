@@ -14,7 +14,7 @@ class ExternalDatabase6 extends Model
         return new OTFConnection($db_data);
     }
 
-    protected function insertMigrationData($data)
+    protected function insertMigrationData5($data)
     {
         // Media
         $this->insertMediaData($data);
@@ -30,15 +30,25 @@ class ExternalDatabase6 extends Model
         // Videoteca
         $this->insertVideotecaData($data);
 
+        // Vademecum
+        $this->insertVademecumData($data);
+    }
+
+    protected function insertMigrationData6($data)
+    {
+
         // Accounts
         $this->insertAccountsData($data);
 
-        // Vademecum
-        $this->insertVademecumData($data);
+        // Require the Users Table
+        // Meetings
+        $this->insertMeetingsData($data);
 
-        // TODO: Meetings
-        // $this->insertMeetingsData($data);
+        // Require the Meetings Table
+        // Attendants
+        $this->insertAttendantsData($data);
     }
+
     // Media
     public function insertMediaData($data)
     {
@@ -47,7 +57,70 @@ class ExternalDatabase6 extends Model
     // Meetings
     public function insertMeetingsData($data)
     {
-        $this->insertChunkedData($data['meetings'], 'meetings');
+        $temp = [];
+        foreach ($data['meetings'] as $item) {
+
+            $status_id = (!is_null($item['status_id'])) ?  DB::table('taxonomies')->where('external_id', $item['status_id'])->first('id') : null;
+
+            $type_id = (!is_null($item['type_id'])) ?  DB::table('taxonomies')->where('external_id', $item['type_id'])->first('id') : null;
+
+            $account_id = (!is_null($item['account_id'])) ?  DB::table('accounts')->where('external_id', $item['account_id'])->first('id') : null;
+
+            $host_id = (!is_null($item['host_id'])) ?  DB::table('users')->where('external_id', $item['host_id'])->first('id') : null;
+
+            $user_id = (!is_null($item['user_id'])) ?  DB::table('users')->where('external_id', $item['user_id'])->first('id') : null;
+
+
+            $item['status_id'] = (!is_null($status_id)) ? $status_id->id : null;
+            $item['type_id'] = (!is_null($type_id)) ? $type_id->id : null;
+            $item['account_id'] = (!is_null($account_id)) ? $account_id->id : null;
+            $item['host_id'] = (!is_null($host_id)) ? $host_id->id : null;
+            $item['user_id'] = (!is_null($user_id)) ? $user_id->id : null;
+
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'meetings');
+    }
+    // Attendants
+    public function insertAttendantsData($data)
+    {
+        $temp = [];
+        foreach ($data['attendants'] as $item) {
+
+            $meeting_id = (!is_null($item['meeting_id'])) ?  DB::table('meetings')->where('external_id', $item['meeting_id'])->first('id') : null;
+
+            $usuario_id = (!is_null($item['usuario_id'])) ?  DB::table('users')->where('external_id', $item['usuario_id'])->first('id') : null;
+
+            $type_id = (!is_null($item['type_id'])) ?  DB::table('taxonomies')->where('external_id', $item['type_id'])->first('id') : null;
+
+            $browser_family_id = (!is_null($item['browser_family_id'])) ?  DB::table('taxonomies')->where('external_id', $item['browser_family_id'])->first('id') : null;
+
+            $browser_version_id = (!is_null($item['browser_version_id'])) ?  DB::table('taxonomies')->where('external_id', $item['browser_version_id'])->first('id') : null;
+
+            $platform_family_id = (!is_null($item['platform_family_id'])) ?  DB::table('taxonomies')->where('external_id', $item['platform_family_id'])->first('id') : null;
+
+            $platform_version_id = (!is_null($item['platform_version_id'])) ?  DB::table('taxonomies')->where('external_id', $item['platform_version_id'])->first('id') : null;
+
+            $device_family_id = (!is_null($item['device_family_id'])) ?  DB::table('taxonomies')->where('external_id', $item['device_family_id'])->first('id') : null;
+
+            $device_model_id = (!is_null($item['device_model_id'])) ?  DB::table('taxonomies')->where('external_id', $item['device_model_id'])->first('id') : null;
+
+
+            $item['meeting_id'] = (!is_null($meeting_id)) ? $meeting_id->id : null;
+            $item['usuario_id'] = (!is_null($usuario_id)) ? $usuario_id->id : null;
+            $item['type_id'] = (!is_null($type_id)) ? $type_id->id : null;
+            $item['browser_family_id'] = (!is_null($browser_family_id)) ? $browser_family_id->id : null;
+            $item['browser_version_id'] = (!is_null($browser_version_id)) ? $browser_version_id->id : null;
+            $item['platform_family_id'] = (!is_null($platform_family_id)) ? $platform_family_id->id : null;
+            $item['platform_version_id'] = (!is_null($platform_version_id)) ? $platform_version_id->id : null;
+            $item['device_family_id'] = (!is_null($device_family_id)) ? $device_family_id->id : null;
+            $item['device_model_id'] = (!is_null($device_model_id)) ? $device_model_id->id : null;
+
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'attendants');
     }
     // Accounts
     public function insertAccountsData($data)

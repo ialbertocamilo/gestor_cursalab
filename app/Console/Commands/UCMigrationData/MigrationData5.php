@@ -5,14 +5,14 @@ namespace App\Console\Commands\UCMigrationData;
 use App\Models\UCMigrationData\Migration_6;
 use Illuminate\Console\Command;
 
-class MigrationData6 extends Command
+class MigrationData5 extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'uc-migration:migration-data-6';
+    protected $signature = 'uc-migration:migration-data-5';
 
     /**
      * The console command description.
@@ -20,7 +20,7 @@ class MigrationData6 extends Command
      * @var string
      */
     protected $description = "Migración de:
-        meetings, accounts, attendants";
+        taxonomies, multimedia, vademecum, videoteca";
 
     /**
      * Execute the console command.
@@ -29,7 +29,7 @@ class MigrationData6 extends Command
      */
     public function handle()
     {
-        // TODO: Migrate meetings, accounts, attendants
-        Migration_6::migrateData6();
+        // TODO: Migrate taxonomies, multimedia, vademecum, videoteca
+        Migration_6::migrateData5();
     }
 }

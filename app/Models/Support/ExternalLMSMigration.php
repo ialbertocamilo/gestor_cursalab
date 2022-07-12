@@ -56,21 +56,24 @@ class ExternalLMSMigration extends Model
 
         $temp['users'] = $db->getTable('usuarios')
             ->select(
-                'id', 'nombre', 'email', 'dni', 'config_id',
-                'grupo', 'botica_id',
-                'estado', 'created_at', 'updated_at'
+                'id',
+                'nombre',
+                'email',
+                'dni',
+                'config_id',
+                'estado',
+                'created_at',
+                'updated_at'
             )
-            ->limit(100)
+            // ->limit(100)
             ->get();
 
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');
 
         foreach ($temp['users'] as $user) {
-            $result['usuario_relations'][] = [
+            $result['user_modulo'][] = [
                 'usuario_id' => $user->id,
-                'config_id' => $user->config_id,
-                'grupo_id' => $user->grupo,
-                'botica_id' => $user->botica_id
+                'config_id' => $user->config_id
             ];
 
             $result['users'][] = [
@@ -81,7 +84,7 @@ class ExternalLMSMigration extends Model
                 'email' => $user->email,
                 'code' => $user->dni,
 
-                'type_id' => $type_client->id,
+                'type_id' => (!is_null($type_client)) ? $type_client->id : null,
                 'workspace_id' => $uc_workspace->id,
 
                 'password' => Hash::make($user->dni),
@@ -105,8 +108,11 @@ class ExternalLMSMigration extends Model
 
         $temp['modulos'] = $db->getTable('ab_config')
             ->select(
-                'id', 'etapa',
-                'estado', 'created_at', 'updated_at'
+                'id',
+                'etapa',
+                'estado',
+                'created_at',
+                'updated_at'
             )
             ->get();
 
@@ -136,35 +142,41 @@ class ExternalLMSMigration extends Model
 
         $temp['carreras'] = $db->getTable('carreras')
             ->select(
-                'id', 'nombre', 'imagen', 'malla_archivo', 'contar_en_graficos',
+                'id',
+                'nombre',
+                'imagen',
+                'malla_archivo',
+                'contar_en_graficos',
                 'config_id',
-                'estado', 'created_at', 'updated_at'
+                'estado',
+                'created_at',
+                'updated_at'
             )
             ->get();
 
         foreach ($temp['carreras'] as $carrera) {
             $result['modulo_carrera'][] = [
                 'config_id' => $carrera->config_id,
-//                'nombre' => $carrera->nombre,
+                //                'nombre' => $carrera->nombre,
                 'carrera_id' => $carrera->id,
             ];
 
-//            $carreras_added = array_map('strtolower',array_column($result['carreras'], 'value_text'));
-//            $found = in_array($carrera->nombre, $carreras_added);
+            //            $carreras_added = array_map('strtolower',array_column($result['carreras'], 'value_text'));
+            //            $found = in_array($carrera->nombre, $carreras_added);
 
-//            if ($found === false) {
-                $result['carreras'][] = [
-                    'external_id' => $carrera->id,
-                    'criterion_id' => $carrera_criterion->id,
+            //            if ($found === false) {
+            $result['carreras'][] = [
+                'external_id' => $carrera->id,
+                'criterion_id' => $carrera_criterion->id,
 
-                    'value_text' => "M{$carrera->config_id}::" .$carrera->nombre,
+                'value_text' => "M{$carrera->config_id}::" . $carrera->nombre,
 
-                    'active' => $carrera->estado,
+                'active' => $carrera->estado,
 
-                    'created_at' => $carrera->created_at,
-                    'updated_at' => $carrera->updated_at,
-                ];
-//            }
+                'created_at' => $carrera->created_at,
+                'updated_at' => $carrera->updated_at,
+            ];
+            //            }
         }
 
         $result['carreras'] = array_chunk($result['carreras'], self::CHUNK_LENGTH, true);
@@ -180,7 +192,11 @@ class ExternalLMSMigration extends Model
 
         $temp['grouped_ciclos'] = $db->getTable('ciclos')
             ->select(
-                'id', 'nombre', 'secuencia', 'carrera_id', 'estado'
+                'id',
+                'nombre',
+                'secuencia',
+                'carrera_id',
+                'estado'
             )->groupBy('nombre')
             ->get();
 
@@ -200,11 +216,12 @@ class ExternalLMSMigration extends Model
         $temp['ciclos_all'] = $db->getTable('ciclos')
             ->select('nombre', 'carrera_id')
             ->get();
-
-        foreach ($temp['ciclos_all'] as $ciclo){
+        info("CICLOS COUNT");
+        info($temp['ciclos_all']->count());
+        foreach ($temp['ciclos_all'] as $ciclo) {
             $result['ciclos_all'][] = [
-              'ciclo_nombre' => $ciclo->nombre,
-              'carrera_id' => $ciclo->carrera_id
+                'ciclo_nombre' => $ciclo->nombre,
+                'carrera_id' => $ciclo->carrera_id
             ];
         }
     }
@@ -218,8 +235,11 @@ class ExternalLMSMigration extends Model
 
         $temp['grupos'] = $db->getTable('criterios')
             ->select(
-                'id', 'valor', 'config_id',
-                'created_at', 'updated_at'
+                'id',
+                'valor',
+                'config_id',
+                'created_at',
+                'updated_at'
             )
             ->get();
 
@@ -233,7 +253,7 @@ class ExternalLMSMigration extends Model
                 'external_id' => $grupo->id,
                 'criterion_id' => $grupo_criterion->id,
 
-                'value_text' => "M{$grupo->config_id}::".$grupo->valor,
+                'value_text' => "M{$grupo->config_id}::" . $grupo->valor,
 
                 'created_at' => $grupo->created_at,
                 'updated_at' => $grupo->updated_at,
@@ -252,8 +272,12 @@ class ExternalLMSMigration extends Model
 
         $temp['boticas'] = $db->getTable('boticas')
             ->select(
-                'id', 'nombre', 'criterio_id', 'codigo_local',
-                'created_at', 'updated_at'
+                'id',
+                'nombre',
+                'criterio_id',
+                'codigo_local',
+                'created_at',
+                'updated_at'
             )
             ->get();
 
@@ -276,5 +300,4 @@ class ExternalLMSMigration extends Model
 
         $result['boticas'] = array_chunk($result['boticas'], self::CHUNK_LENGTH, true);
     }
-
 }
