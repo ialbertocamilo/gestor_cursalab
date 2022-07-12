@@ -16,6 +16,7 @@ class CreateAttendantsTable extends Migration
         Schema::create('attendants', function (Blueprint $table) {
 
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
 
             $table->foreignId('meeting_id')->nullable()->index()->constrained('meetings');
             $table->foreignId('usuario_id')->nullable()->index()->constrained('users');

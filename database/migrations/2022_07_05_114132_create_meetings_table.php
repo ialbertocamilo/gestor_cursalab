@@ -23,7 +23,7 @@ class CreateMeetingsTable extends Migration
 
             $table->boolean('embed')->nullable();
 
-            $table->morphs('model');
+            $table->nullableMorphs('model');
 
             $table->dateTime('starts_at')->nullable();
             $table->dateTime('finishes_at')->nullable();

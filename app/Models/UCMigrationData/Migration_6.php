@@ -20,9 +20,15 @@ class Migration_6 extends Model
         return new OTFConnection($db_uc_data);
     }
 
-    protected function migrateData()
+    protected function migrateData5()
     {
-        $client_lms_data = ExternalLMSMigration6::setMigrationData();
-        ExternalDatabase6::insertMigrationData($client_lms_data);
+        $client_lms_data = ExternalLMSMigration6::setMigrationData5();
+        ExternalDatabase6::insertMigrationData5($client_lms_data);
+    }
+
+    protected function migrateData6()
+    {
+        $client_lms_data = ExternalLMSMigration6::setMigrationData6();
+        ExternalDatabase6::insertMigrationData6($client_lms_data);
     }
 }

@@ -20,7 +20,7 @@ class ExternalLMSMigration6 extends Model
         return new OTFConnection($db_uc_data);
     }
 
-    protected function setMigrationData()
+    protected function setMigrationData5()
     {
         $db = self::connect();
         $client_LMS_data = [
@@ -28,17 +28,28 @@ class ExternalLMSMigration6 extends Model
             'taxonomies' => [],
             'taxonomies_es' => [],
             'videoteca' => [],
-            'meetings' => [],
-            'accounts' => [],
             'vademecum' => [],
         ];
         $this->setMediaData($client_LMS_data, $db);
         $this->setTaxonomiesData($client_LMS_data, $db);
         $this->setTaxonomiesEsData($client_LMS_data, $db);
         $this->setVideotecaData($client_LMS_data, $db);
-        $this->setAccountsData($client_LMS_data, $db);
         $this->setVademecumData($client_LMS_data, $db);
+
+        return $client_LMS_data;
+    }
+
+    protected function setMigrationData6()
+    {
+        $db = self::connect();
+        $client_LMS_data = [
+            'meetings' => [],
+            'accounts' => [],
+            'attendants' => [],
+        ];
+        $this->setAccountsData($client_LMS_data, $db);
         $this->setMeetingsData($client_LMS_data, $db);
+        $this->setAttendantsData($client_LMS_data, $db);
 
         return $client_LMS_data;
     }
@@ -188,7 +199,55 @@ class ExternalLMSMigration6 extends Model
             ];
         }
 
-        $result['meetings'] = array_chunk($result['meetings'], self::CHUNK_LENGTH, true);
+        // $result['meetings'] = array_chunk($result['meetings'], self::CHUNK_LENGTH, true);
+    }
+
+    public function setAttendantsData(&$result, $db)
+    {
+        $temp['temp_attendants'] = $db->getTable('attendants')
+            ->select()
+            ->get();
+        foreach ($temp['temp_attendants'] as $user) {
+            $result['attendants'][] = [
+                'external_id' => $user->id,
+                'meeting_id' => $user->meeting_id,
+                'usuario_id' => $user->usuario_id,
+                'link' => $user->link,
+
+                'total_logins' => $user->total_logins,
+                'total_logouts' => $user->total_logouts,
+                'total_duration' => $user->total_duration,
+
+                'first_login_at' => $user->first_login_at,
+                'first_logout_at' => $user->first_logout_at,
+
+                'last_login_at' => $user->last_login_at,
+                'last_logout_at' => $user->last_logout_at,
+
+                'present_at_first_call' => $user->present_at_first_call,
+                'present_at_middle_call' => $user->present_at_middle_call,
+                'present_at_last_call' => $user->present_at_last_call,
+
+                'confirmed_attendance_at' => $user->confirmed_attendance_at,
+                'type_id' => $user->type_id,
+                'online' => $user->online,
+                'first_attempt_at' => $user->first_attempt_at,
+                'identifier' => $user->identifier,
+                'ip' => $user->ip,
+
+                'browser_family_id' => $user->browser_family_id,
+                'browser_version_id' => $user->browser_version_id,
+                'platform_family_id' => $user->platform_family_id,
+                'platform_version_id' => $user->platform_version_id,
+                'device_family_id' => $user->device_family_id,
+                'device_model_id' => $user->device_model_id,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+
+        // $result['attendants'] = array_chunk($result['attendants'], self::CHUNK_LENGTH, true);
     }
 
     public function setTaxonomiesData(&$result, $db)
