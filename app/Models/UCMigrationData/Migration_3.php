@@ -23,45 +23,32 @@ class Migration_3 extends Model
         return new OTFConnection($db_uc_data);
     }
 
-    // protected function migratePruebas()
-    // {
-    //     $data = self::getPruebasData();
-    //     self::insertChunkedData($data, 'records');
-
-    //     $data = self::getPruebasLibresData();
-    //     self::insertChunkedData($data, 'records');
-    // }
-
     protected function migrateEncuestas()
     {
-        // info('getEncuestasData');
-        // $data = self::getEncuestasData();
-        // self::insertChunkedData($data, 'polls');
+        info('getEncuestasData');
+        $data = self::getEncuestasData();
+        self::insertChunkedData($data, 'polls');
 
-        // info('getEncuestasPreguntasData');
-        // $data = self::getEncuestasPreguntasData();
-        // self::insertChunkedData($data, 'poll_questions');
+        info('getEncuestasPreguntasData');
+        $data = self::getEncuestasPreguntasData();
+        self::insertChunkedData($data, 'poll_questions');
 
-        // info('getEncuestasPreguntasRespuestasData');
-        // self::getEncuestasPreguntasRespuestasData();
-
-
-        // self::insertChunkedData($data, 'poll_question_answers');
+        info('getAndInsertEncuestasPreguntasRespuestasData');
+        self::getAndInsertEncuestasPreguntasRespuestasData();
     }
 
     protected function migrateResumenes()
     {
-        // info('getResumenGeneralData');
-        // $data = self::getResumenGeneralData();
-        // self::insertChunkedData($data, 'summary_users');
+        info('getResumenGeneralData');
+        $data = self::getResumenGeneralData();
+        self::insertChunkedData($data, 'summary_users');
 
-        // info('getResumenCursosData');
-        // $data = self::getResumenCursosData();
-        // self::insertChunkedData($data, 'summary_courses');
+        info('getResumenCursosData');
+        $data = self::getResumenCursosData();
+        self::insertChunkedData($data, 'summary_courses');
 
         info('getAndInsertResumenTemasData');
         self::getAndInsertResumenTemasData();
-        // self::insertChunkedData($data, 'summary_topics');
     }
 
 
@@ -133,7 +120,7 @@ class Migration_3 extends Model
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
-    protected function getEncuestasPreguntasRespuestasData()
+    protected function getAndInsertEncuestasPreguntasRespuestasData()
     {
         $db = self::connect();
 
@@ -215,9 +202,7 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        // $rows_cursos = $db->getTable('resumen_x_curso')->get();
         $rows_reinicios = $db->getTable('reinicios')->where('tipo', 'por_curso')->get();
-        // $rows_diplomas = $db->getTable('diplomas')->whereNull('posteo_id')->get();
 
         $users = User::select('id', 'external_id')->whereNull('email')->get();
         $courses = Course::select('id', 'external_id')->get();
@@ -293,13 +278,10 @@ class Migration_3 extends Model
                 DB::table('summary_courses')
                     ->updateOrInsert(['user_id' => $user->id ?? NULL, 'course_id' => $course->id ?? NULL], ['certification_issued_at' => $row->fecha_emision]);
 
-                info('summary_courses diplomas chunked inserted');
             }
+
+            info('summary_courses diplomas chunked updateOrInsert');
         });
-
-
-
-        // return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
     protected function getAndInsertResumenTemasData()
@@ -401,9 +383,9 @@ class Migration_3 extends Model
                     ->where('user_id', $user->id ?? NULL)
                     ->where('topic_id', $topic->id ?? NULL)
                     ->update($data);
-
-                    info('summary_topics reinicios chunked inserted');
             }
+
+            info('summary_topics reinicios chunked update');
         });
 
         $db->getTable('visitas')->chunkById(2500, function ($rows_visitas) use ($db, $topics, $users, $statuses) {
@@ -422,8 +404,9 @@ class Migration_3 extends Model
                 DB::table('summary_topics')
                     ->updateOrInsert(['user_id' => $user->id ?? NULL, 'topic_id' => $topic->id ?? NULL], $data);
 
-                info('summary_topics visitas chunked inserted');
             }
+            
+            info('summary_topics visitas chunked updateOrInsert');
         });
 
     }
