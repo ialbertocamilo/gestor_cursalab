@@ -5,6 +5,7 @@ namespace App\Models\UCMigrationData;
 use App\Models\Course;
 use App\Models\School;
 use App\Models\Support\OTFConnection;
+use App\Models\Taxonomy;
 use App\Models\Topic;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
@@ -123,7 +124,7 @@ class Migration_2 extends Model
             ->get();
         $data = [];
 
-    foreach ($cursos as $curso) {
+        foreach ($cursos as $curso) {
             if ($curso->requisito_id):
 
                 $data['curso_requisitos'][] = [
@@ -181,7 +182,7 @@ class Migration_2 extends Model
 
 //         TODO: Relaciones de curso requisito
         $course_requirements = [];
-        foreach ($data['curso_requisitos'] as $relation){
+        foreach ($data['curso_requisitos'] as $relation) {
             $course = $courses->where('external_id', $relation['curso_id'])->first();
             $course_requirement = $courses->where('external_id', $relation['curso_requisito_id'])->first();
 
@@ -200,11 +201,14 @@ class Migration_2 extends Model
         $temas = $db->getTable('posteos')
             ->select(
                 'id', 'nombre', 'resumen', 'imagen', 'orden',
-                'contenido', 'evaluable', 'curso_id', 'requisito_id',
+                'contenido', 'tipo_ev', 'evaluable', 'curso_id', 'requisito_id',
                 'estado', 'created_at', 'updated_at')
             ->get();
         $courses = Course::all();
         $data = [];
+
+        $topic_open_evaluations_type = Taxonomy::getFirstData('topic', 'evaluation-type', 'open');
+        $topic_qualified_evaluations_type = Taxonomy::getFirstData('topic', 'evaluation-type', 'qualified');
 
         foreach ($temas as $tema) {
             $course = $courses->where('external_id', $tema->curso_id)->first();
@@ -219,6 +223,9 @@ class Migration_2 extends Model
 
                 endif;
 
+                $type_evaluation_id = $tema->tipo_ev == 'abierta' ? $topic_open_evaluations_type->id
+                    : ($tema->tipo_ev == 'calificada' ? $topic_qualified_evaluations_type->id : null);
+
                 $data['temas'][] = [
                     'external_id' => $tema->id,
                     'course_id' => $course->id,
@@ -230,9 +237,7 @@ class Migration_2 extends Model
 
                     'assessable' => $tema->evaluable === 'si',
 
-//                'topic_requirement_id' => $tema->requisito_id,
-//                'type_evaluation_id' => ,
-//                'duplicate_id' => ,
+                    'type_evaluation_id' => $type_evaluation_id,
 
                     'position' => $tema->orden,
                     'active' => $tema->estado,
@@ -253,7 +258,7 @@ class Migration_2 extends Model
         // TODO: Relaciones de tema requisito
         $topics = Topic::all();
 
-        foreach ($data['tema_requisitos'] as $relation){
+        foreach ($data['tema_requisitos'] as $relation) {
             $topic = $topics->where('external_id', $relation['tema_id'])->first();
             $topic_requirement = $topics->where('external_id', $relation['tema_requisito_id'])->first();
 
