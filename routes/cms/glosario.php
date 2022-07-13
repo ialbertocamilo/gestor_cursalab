@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\GlosarioController;
+use App\Http\Controllers\GlossaryController;
 
-Route::controller(GlosarioController::class)->group(function() {
+Route::controller(GlossaryController::class)->group(function() {
 
 	Route::view('/', 'glosarios.list')->name('glosario.list');
 	// ->middleware('permission:glosario.list');

@@ -2,25 +2,17 @@
 
 namespace App\Imports;
 
-use App\Models\Taxonomia;
-use App\Models\Glosario;
-
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-
-use Maatwebsite\Excel\Concerns\WithStartRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
-
+use App\Models\Glossary;
+use App\Models\Taxonomy;
 use Maatwebsite\Excel\Concerns\Importable;
-
-use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\SkipsErrors;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-
-use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Concerns\OnEachRow;
-use Maatwebsite\Excel\Validators\Failure;
+use Maatwebsite\Excel\Concerns\SkipsErrors;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Row;
 
 class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure
 {
@@ -36,7 +28,7 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
         $name = trim($row['descripcion']);
         $code = trim($row['codigo']);
 
-        $glosario = Glosario::where('nombre', $name)->first();
+        $glosario = Glossary::where('nombre', $name)->first();
 
         if ( $glosario ) :
 
@@ -47,7 +39,7 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
                 if ( $module->pivot->codigo != $code ):
 
                     $name = $name . ' DUPLICATED-NAME-' . now()->format('Y-m-dH:i:s');
-                   
+
                     // Crear nuevo glosario
                     $glosario = $this->createGlosario($name, $code, $row);
 
@@ -85,7 +77,7 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
 
         $data['estado'] = 1;
 
-        $glosario = Glosario::create($data);
+        $glosario = Glossary::create($data);
 
         $principios_activos = $this->getPrincipiosActivos($row);
 
@@ -117,11 +109,11 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
         $principios_activos = [];
 
         for ($i = 1; $i <= 5; $i++ ):
-            
+
             $pa_id = $this->getTaxonomyId($row, 'principio_activo', 'principio_activo_' . $i);
 
             if ( $pa_id )
-                $principios_activos[$pa_id] = ['glosario_grupo_id' => Glosario::GRUPOS['principio_activo'] ];
+                $principios_activos[$pa_id] = ['glosario_grupo_id' => Glossary::GRUPOS['principio_activo'] ];
         endfor;
 
         return $principios_activos;
@@ -144,7 +136,7 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
                 $id = $this->getTaxonomyId($new, $type);
 
                 if ( $id ) :
-                    $ids[$id] = ['glosario_grupo_id' => Glosario::GRUPOS[$type]];
+                    $ids[$id] = ['glosario_grupo_id' => Glossary::GRUPOS[$type]];
                 endif;
 
             endforeach;
@@ -161,9 +153,9 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
         if ( ! empty($row[$fieldname]) ) :
 
             $name = trim($row[$fieldname]);
-            $taxonomia = Taxonomia::getOrCreate('glosario', $type, $name);
+            $taxonomy = Taxonomy::getOrCreate('glosario', $type, $name);
 
-            return $taxonomia->id;
+            return $taxonomy->id;
 
         endif;
 

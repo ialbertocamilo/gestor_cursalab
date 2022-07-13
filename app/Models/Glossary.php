@@ -8,7 +8,7 @@ use App\Imports\GlosarioImport;
 use App\Traits\ApiResponse;
 use DB;
 
-class Glosario extends Model
+class Glossary extends Model
 {
     use SoftDeletes;
     use ApiResponse;
@@ -38,83 +38,141 @@ class Glosario extends Model
 
     public function principios_activos()
     {
-        return $this->belongsToMany(Taxonomia::class, 'glosario_taxonomia', 'glosario_id', 'taxonomia_id')->wherePivot('glosario_grupo_id', Glosario::GRUPOS['principio_activo']);
+        return $this->belongsToMany(
+            Taxonomy::class,
+            'glossary_taxonomy',
+            'glossary_id',
+            'taxonomy_id'
+        )->wherePivot(
+            'glossary_group_id',
+            Glossary::GRUPOS['principio_activo']
+        );
     }
 
     public function contraindicaciones()
     {
-        return $this->belongsToMany(Taxonomia::class, 'glosario_taxonomia', 'glosario_id', 'taxonomia_id')->wherePivot('glosario_grupo_id', Glosario::GRUPOS['contraindicacion']);
+        return $this->belongsToMany(
+            Taxonomy::class,
+            'glossary_taxonomy',
+            'glossary_id',
+            'taxonomy_id'
+        )->wherePivot(
+            'glossary_group_id',
+            Glossary::GRUPOS['contraindicacion']
+        );
     }
 
     public function interacciones()
     {
-        return $this->belongsToMany(Taxonomia::class, 'glosario_taxonomia', 'glosario_id', 'taxonomia_id')->wherePivot('glosario_grupo_id', Glosario::GRUPOS['interaccion']);
+        return $this->belongsToMany(
+            Taxonomy::class,
+            'glossary_taxonomy',
+            'glossary_id',
+            'taxonomy_id'
+        )->wherePivot(
+            'glossary_group_id',
+            Glossary::GRUPOS['interaccion']
+        );
     }
 
     public function reacciones()
     {
-        return $this->belongsToMany(Taxonomia::class, 'glosario_taxonomia', 'glosario_id', 'taxonomia_id')->wherePivot('glosario_grupo_id', Glosario::GRUPOS['reaccion']);
+        return $this->belongsToMany(
+            Taxonomy::class,
+            'glossary_taxonomy',
+            'glossary_id',
+            'taxonomy_id'
+        )->wherePivot(
+            'glossary_group_id',
+            Glossary::GRUPOS['reaccion']
+        );
     }
 
     public function modulos()
     {
-        return $this->belongsToMany(Abconfig::class, 'glosario_modulo', 'glosario_id', 'modulo_id')->withPivot('codigo');
+        return $this->belongsToMany(Abconfig::class, 'glosario_modulo', 'glossary_id', 'modulo_id')->withPivot('codigo');
     }
 
     public function laboratorio()
     {
-        return $this->belongsTo(Taxonomia::class, 'laboratorio_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'laboratorio_id'
+        );
     }
 
     public function categoria()
     {
-        return $this->belongsTo(Taxonomia::class, 'categoria_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'categoria_id'
+        );
     }
 
     public function jerarquia()
     {
-        return $this->belongsTo(Taxonomia::class, 'jerarquia_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'jerarquia_id'
+        );
     }
 
     public function advertencias()
     {
-        return $this->belongsTo(Taxonomia::class, 'advertencias_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'advertencias_id'
+        );
     }
 
     public function condicion_de_venta()
     {
-        return $this->belongsTo(Taxonomia::class, 'condicion_de_venta_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'condicion_de_venta_id'
+        );
     }
 
     public function via_de_administracion()
     {
-        return $this->belongsTo(Taxonomia::class, 'via_de_administracion_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'via_de_administracion_id'
+        );
     }
 
     public function grupo_farmacologico()
     {
-        return $this->belongsTo(Taxonomia::class, 'grupo_farmacologico_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'grupo_farmacologico_id'
+        );
     }
 
     public function dosis_adulto()
     {
-        return $this->belongsTo(Taxonomia::class, 'dosis_adulto_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'dosis_adulto_id'
+        );
     }
 
     public function dosis_nino()
     {
-        return $this->belongsTo(Taxonomia::class, 'dosis_nino_id');
+        return $this->belongsTo(
+            Taxonomy::class, 'dosis_nino_id'
+        );
     }
 
     public function recomendacion_de_administracion()
     {
-        return $this->belongsTo(Taxonomia::class, 'recomendacion_de_administracion_id');
+        return $this->belongsTo(
+            Taxonomy::class,
+            'recomendacion_de_administracion_id'
+        );
     }
 
 
     public function setEstadoAttribute($value)
     {
-        $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
+        $this->attributes['active'] = (
+            $value==='true' OR
+            $value === true OR
+            $value === 1 OR
+            $value === '1'
+        );
     }
 
     // Functions
@@ -163,7 +221,7 @@ class Glosario extends Model
 
         endif;
 
-        $query = Glosario::with($relationships);
+        $query = Glossary::with($relationships);
 
         if ($request->q || $request->modulo_id) {
             $query->where(function ($query) use ($request) {
@@ -205,7 +263,7 @@ class Glosario extends Model
         }else{
             $field = $request->sortBy ?? 'nombre';
             $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-            
+
             $query->orderBy($field, $sort);
         }
 
@@ -287,7 +345,7 @@ class Glosario extends Model
             DB::commit();
 
         } catch (\Exception $e) {
-            
+
             DB::rollBack();
 
             return $this->error($e->getMessage(), 422);
@@ -339,10 +397,15 @@ class Glosario extends Model
         $value = trim($value);
 
 
-        if (is_numeric($value))
-            return Taxonomia::where('grupo', 'glosario')->where('tipo', $type)->where('id', $value)->first();
+        if (is_numeric($value)) {
 
-        return Taxonomia::getOrCreate('glosario', $type, $value);
+            return Taxonomy::where('group', 'glosario')
+                ->where('type', $type)
+                ->where('id', $value)
+                ->first();
+        }
+
+        return Taxonomy::getOrCreate('glosario', $type, $value);
     }
 
     public function prepareTaxonomiesData($data, $key, $type)
@@ -356,7 +419,7 @@ class Glosario extends Model
                 $taxonomia = $this->getOrCreateTaxonomyByValue($type, $value);
 
                 if ($taxonomia) :
-                    $ids[$taxonomia->id] = ['glosario_grupo_id' => Glosario::GRUPOS[$type]];
+                    $ids[$taxonomia->id] = ['glossary_group_id' => Glossary::GRUPOS[$type]];
                 endif;
 
             endforeach;

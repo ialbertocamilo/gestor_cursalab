@@ -10,7 +10,7 @@ class Taxonomia extends Model
     use SoftDeletes;
 
     protected $fillable = [
-    	'grupo', 'tipo', 'nombre', 'estado', 'parent_taxonomia_id', 'code'
+        'grupo', 'tipo', 'nombre', 'estado', 'parent_taxonomia_id', 'code'
     ];
 
     protected $hidden = [
@@ -18,22 +18,22 @@ class Taxonomia extends Model
 
         'created_at', 'updated_at', 'deleted_at', 'pivot'
     ];
-    
+
     public function scopeCategoriaVideoteca($q)
     {
         return $q->where('grupo', 'videoteca')
-                    ->where('tipo', 'categoria');
+                  ->where('tipo', 'categoria');
     }
     public function scopeCategoriaVademecum($q)
     {
         return $q->where('grupo', 'vademecum')
-                    ->where('tipo', 'categoria');
+                  ->where('tipo', 'categoria');
     }
     public function scopeSubcategoriaVademecum($q, $parent_taxonomia_id)
     {
         return $q->where('grupo', 'vademecum')
-                    ->where('tipo', 'subcategoria')
-                    ->where('parent_taxonomia_id', $parent_taxonomia_id);
+                 ->where('tipo', 'subcategoria')
+                 ->where('parent_taxonomia_id', $parent_taxonomia_id);
     }
 
     public function scopeGroup($q, $group)
@@ -68,7 +68,7 @@ class Taxonomia extends Model
 
     public function vademecums()
     {
-        return $this->hasMany(Vademecum::class, 'categoria_id');
+        return $this->hasMany(Vademecum::class, 'category_id');
     }
 
     protected function getDataForSelect($group, $type)

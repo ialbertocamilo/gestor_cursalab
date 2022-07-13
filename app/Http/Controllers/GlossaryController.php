@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Glosario;
-use App\Models\Abconfig;
-use App\Models\Taxonomia;
-use App\Models\Carrera;
-
-use App\Http\Requests\GlosarioStoreRequest;
 use App\Http\Requests\GlosarioImportExcelRequest;
+use App\Http\Requests\GlosarioStoreRequest;
 use App\Http\Resources\GlosarioResource;
+use App\Models\Abconfig;
+use App\Models\Carrera;
+use App\Models\Glossary;
+use App\Models\Taxonomy;
 use Illuminate\Http\Request;
 
-class GlosarioController extends Controller
+class GlossaryController extends Controller
 {
 
     public function search(Request $request)
     {
-        $glosario = Glosario::search($request, false, $request->paginate);
+        $glosario = Glossary::search($request, false, $request->paginate);
 
         GlosarioResource::collection($glosario);
 
@@ -28,21 +27,21 @@ class GlosarioController extends Controller
     {
         $modules = Abconfig::select('id', 'etapa as nombre')->get();
         // $modulos = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        $categories = Taxonomia::getDataForSelect('glosario', 'categoria');
-        $laboratorios = Taxonomia::getDataForSelect('glosario', 'laboratorio');
-        $principios_activos = Taxonomia::getDataForSelect('glosario', 'principio_activo');
+        $categories = Taxonomy::getDataForSelect('glosario', 'categoria');
+        $laboratorios = Taxonomy::getDataForSelect('glosario', 'laboratorio');
+        $principios_activos = Taxonomy::getDataForSelect('glosario', 'principio_activo');
 
         return $this->success(compact('modules', 'categories'));
     }
 
     public function index(Request $request)
     {
-        $glosarios = Glosario::search($request);
+        $glosarios = Glossary::search($request);
 
         $modulos = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        $categorias = Taxonomia::getDataForSelect('glosario', 'categoria');
-        $laboratorios = Taxonomia::getDataForSelect('glosario', 'laboratorio');
-        $principios_activos = Taxonomia::getDataForSelect('glosario', 'principio_activo');
+        $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
+        $laboratorios = Taxonomy::getDataForSelect('glosario', 'laboratorio');
+        $principios_activos = Taxonomy::getDataForSelect('glosario', 'principio_activo');
 
         return view('glosarios.index', compact('glosarios', 'laboratorios', 'modulos', 'principios_activos', 'categorias'));
     }
@@ -50,14 +49,14 @@ class GlosarioController extends Controller
     public function import()
     {
         $modulos = Abconfig::getModulesForSelect();
-        $categorias = Taxonomia::getDataForSelect('glosario', 'categoria');
+        $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
 
         return $this->success(get_defined_vars());
     }
 
-    public function importFile(GlosarioImportExcelRequest $request) 
+    public function importFile(GlosarioImportExcelRequest $request)
     {
-        return Glosario::importFromFile($request->validated());
+        return Glossary::importFromFile($request->validated());
     }
 
     public function carreerCategories()
@@ -69,20 +68,20 @@ class GlosarioController extends Controller
 
         $carreras = $carreras->groupBy('config_id');
 
-        $categorias = Taxonomia::getDataForSelect('glosario', 'categoria');
+        $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
 
         return $this->success(get_defined_vars());
     }
 
     public function carreerCategoriesStore(Request $request)
     {
-        return Glosario::storeCarreerCategories($request->all());
+        return Glossary::storeCarreerCategories($request->all());
     }
 
     public function create()
     {
         $selects = $this->getSelectsForForm();
-        $modulos = Glosario::getModulesWithCode();
+        $modulos = Glossary::getModulesWithCode();
 
         return $this->success(get_defined_vars());
     }
@@ -93,7 +92,7 @@ class GlosarioController extends Controller
 
         foreach ($selects as $key => $select)
         {
-            $selects[$key]['list'] = Taxonomia::getDataForSelect('glosario', $select['key']);
+            $selects[$key]['list'] = Taxonomy::getDataForSelect('glosario', $select['key']);
         }
 
         return $selects;
@@ -103,38 +102,38 @@ class GlosarioController extends Controller
     {
         $data = $request->validated();
 
-        $result = Glosario::storeRequest($data);
+        $result = Glossary::storeRequest($data);
 
         return $this->success(['msg' => 'Glosario creado correctamente.']);
     }
-    
-    public function edit(Glosario $glosario)
+
+    public function edit(Glossary $glosario)
     {
         $glosario->load('laboratorio', 'categoria', 'jerarquia', 'advertencias', 'condicion_de_venta', 'via_de_administracion', 'grupo_farmacologico', 'dosis_adulto', 'dosis_nino', 'recomendacion_de_administracion', 'principios_activos', 'contraindicaciones', 'interacciones', 'reacciones', 'modulos');
 
         $selects = $this->getSelectsForForm();
-        $modulos = Glosario::getModulesWithCode($glosario->modulos);
+        $modulos = Glossary::getModulesWithCode($glosario->modulos);
 
         return $this->success(get_defined_vars());
     }
 
-    public function update(Glosario $glosario, GlosarioStoreRequest $request)
+    public function update(Glossary $glosario, GlosarioStoreRequest $request)
     {
         $data = $request->validated();
 
-        $result = Glosario::storeRequest($data, $glosario);
+        $result = Glossary::storeRequest($data, $glosario);
 
         return $this->success(['msg' => 'Glosario actualizado correctamente.']);
     }
 
-    public function destroy(Glosario $glosario)
+    public function destroy(Glossary $glosario)
     {
         $glosario->delete();
 
         return $this->success(['msg' => 'Glosario eliminado correctamente.']);
     }
 
-    public function status(Glosario $glosario, Request $request)
+    public function status(Glossary $glosario, Request $request)
     {
         $glosario->update(['estado' => !$glosario->estado]);
 

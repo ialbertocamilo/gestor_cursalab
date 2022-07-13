@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class Abconfig extends Model
 {
-    
+
 
     protected $table = 'ab_config';
 
@@ -74,21 +74,21 @@ class Abconfig extends Model
 
     public function app_menu()
     {
-        return $this->belongsToMany(Taxonomia::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
             ->where('tipo', 'main_menu')
             ->select('id', 'nombre');
     }
 
     public function main_menu()
     {
-        return $this->belongsToMany(Taxonomia::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
             ->where('tipo', 'main_menu')
             ->select('id', 'nombre', 'code');
     }
 
     public function side_menu()
     {
-        return $this->belongsToMany(Taxonomia::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
             ->where('tipo', 'side_menu')
             ->select('id', 'nombre', 'code');
     }
@@ -163,7 +163,7 @@ class Abconfig extends Model
 
     protected function getFullAppMenu($tipo, $codes)
     {
-        $values = Taxonomia::getDataByGroupAndType('system', $tipo);
+        $values = Taxonomy::getDataByGroupAndType('system', $tipo);
 
         $data = [];
 

@@ -20,7 +20,7 @@ class AuditCustom extends Model
 
     public function section()
     {
-        return $this->belongsTo(Taxonomia::class, 'auditable_type', 'code');
+        return $this->belongsTo(Taxonomy::class, 'auditable_type', 'code');
     }
 
     protected function search($request, $paginate = 15)
@@ -86,7 +86,7 @@ class AuditCustom extends Model
         {
             $sort = $request->sortDesc == 'true' ? 'ASC' : 'DESC';
         }
-        
+
         $q->orderBy($field, $sort);
 
         return $q;

@@ -52,12 +52,12 @@ class Vademecum extends Model
 
     public function category()
     {
-        return $this->belongsTo(Taxonomia::class, 'category_id');
+        return $this->belongsTo(Taxonomy::class, 'category_id');
     }
 
     public function subcategory()
     {
-        return $this->belongsTo(Taxonomia::class, 'subcategory_id');
+        return $this->belongsTo(Taxonomy::class, 'subcategory_id');
     }
 
     public function media()
@@ -238,10 +238,15 @@ class Vademecum extends Model
     {
         $value = trim($value);
 
-        if (is_numeric($value))
-            return Taxonomia::where('grupo', 'vademecum')->where('tipo', $type)->where('id', $value)->first();
+        if (is_numeric($value)) {
 
-        return Taxonomia::getOrCreate('vademecum', $type, $value);
+            return Taxonomy::where('group', 'vademecum')
+                            ->where('type', $type)
+                            ->where('id', $value)
+                            ->first();
+        }
+
+        return Taxonomy::getOrCreate('vademecum', $type, $value);
     }
 
     protected function prepareSearchedData($elementos)

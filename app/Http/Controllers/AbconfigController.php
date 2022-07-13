@@ -2,23 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use DB;
-
-use App\Models\Media;
-use App\Models\Abconfig;
-use App\Models\Categoria;
-use App\Models\Taxonomia;
-use App\Models\Categoria_perfil;
-
-use Illuminate\Http\Request;
-
-use App\Http\Resources\ModuloResource;
-use App\Http\Resources\EscuelaResource;
-
+use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Requests\AbconfigStoreRequest;
 use App\Http\Requests\Modulo\ModuloStoreUpdateRequest;
-
-use App\Http\Controllers\ApiRest\HelperController;
+use App\Http\Resources\EscuelaResource;
+use App\Http\Resources\ModuloResource;
+use App\Models\Abconfig;
+use App\Models\Categoria;
+use App\Models\Categoria_perfil;
+use App\Models\Media;
+use App\Models\Taxonomy;
+use Illuminate\Http\Request;
 
 class AbconfigController extends Controller
 {
@@ -68,16 +62,16 @@ class AbconfigController extends Controller
 
     public function getFormSelects($compactResponse = false)
     {
-        $main_menu = Taxonomia::group('system')->type('main_menu')
-            ->select('id', 'nombre')
-            ->get();
+        $main_menu = Taxonomy::group('system')->type('main_menu')
+                            ->select('id', 'name')
+                            ->get();
         $main_menu->each(function ($item) {
             $item->active = false;
         });
 
-        $side_menu = Taxonomia::group('system')->type('side_menu')
-            ->select('id', 'nombre')
-            ->get();
+        $side_menu = Taxonomy::group('system')->type('side_menu')
+                            ->select('id', 'name')
+                            ->get();
         $side_menu->each(function ($item) {
             $item->active = false;
         });

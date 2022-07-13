@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Models\Taxonomia;
+use App\Http\Controllers\Controller;
+use App\Models\Taxonomy;
 use App\Models\Videoteca;
-
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class RestVideotecaController extends Controller
 {
@@ -59,7 +58,7 @@ class RestVideotecaController extends Controller
         $category_ids = Videoteca::select('category_id')->whereHas('modules', function ($q) use ($user) {
             $q->where('module_id', $user->config_id);
         })->where('active',1)->groupBy('category_id')->pluck('category_id');
-        $data['categorias'] = Taxonomia::whereIn('id',$category_ids)
+        $data['categorias'] = Taxonomy::whereIn('id', $category_ids)
         ->where('grupo', 'videoteca')->where('tipo', 'categoria')->get()->pluck('nombre', 'id')->toArray();
         return response()->json(compact('data'));
     }
@@ -68,7 +67,10 @@ class RestVideotecaController extends Controller
     {
         $user_id = auth()->user()->id;
 
-        $accion_visita = Taxonomia::where('grupo', 'videoteca')->where('tipo', 'accion')->where('nombre', 'view')->first();
+        $accion_visita = Taxonomy::where('group', 'videoteca')
+                                  ->where('tipo', 'accion')
+                                  ->where('nombre', 'view')
+                                  ->first();
 //        info("[storeVisit]", [$accion_visita]);
         $row = $videoteca->incrementAction($accion_visita->id, $user_id);
 

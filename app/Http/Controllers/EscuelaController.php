@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Escuela\EscuelaStoreUpdateRequest;
+use App\Http\Resources\Escuela\EscuelaSearchResource;
 use App\Models\Abconfig;
 use App\Models\Categoria;
 use App\Models\Media;
-use App\Models\Taxonomia;
-
-use App\Http\Requests\Escuela\EscuelaStoreUpdateRequest;
-use App\Http\Resources\Escuela\EscuelaSearchResource;
-use App\Http\Resources\EscuelaResource;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
