@@ -48,13 +48,17 @@ class Videoteca extends BaseModel
 
     public function categoria()
     {
-        return $this->belongsTo(Taxonomia::class, 'category_id')
-            ->select('nombre', 'id');
+        return $this->belongsTo(Taxonomy::class, 'category_id')
+                    ->select('name', 'id');
     }
 
     public function tags()
     {
-        return $this->belongsToMany(Taxonomia::class, 'videoteca_tag', 'videoteca_id', 'tag_id');
+        return $this->belongsToMany(
+                Taxonomy::class,
+                'videoteca_tag',
+                'videoteca_id',
+                'tag_id');
     }
 
     public function actions()
@@ -149,17 +153,7 @@ class Videoteca extends BaseModel
                 $videoteca->modules()->sync($data['modules'] ?? []);
             // endif;
 
-            // if (!empty($data['tags'])) :
-            //     $tags = collect();
-            //     foreach ($data['tags'] as $tagName) {
-            //         $tag = Taxonomia::firstOrCreate(
-            //             ['grupo' => 'videoteca', 'tipo' => 'tag', 'nombre' => $tagName],
-            //             ['estado' => 1]
-            //         );
-            //         $tags->push($tag->id);
-            //     }
-            //     $videoteca->tags()->sync($tags);
-            // endif;
+
 
             $tags = $this->prepareTaxonomiesData($data, 'tags', 'tag');
             $videoteca->tags()->sync($tags);
@@ -320,9 +314,14 @@ class Videoteca extends BaseModel
     {
         $value = trim($value);
 
-        if (is_numeric($value))
-            return Taxonomia::where('grupo', 'videoteca')->where('tipo', $type)->where('id', $value)->first();
+        if (is_numeric($value)) {
 
-        return Taxonomia::getOrCreate('videoteca', $type, $value);
+            return Taxonomy::where('group', 'videoteca')
+                            ->where('type', $type)
+                            ->where('id', $value)
+                            ->first();
+        }
+
+        return Taxonomy::getOrCreate('videoteca', $type, $value);
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Carrera extends Model
 {
-    
+
 
     protected $fillable = [
     	'config_id', 'nombre', 'malla_archivo', 'estado'
@@ -26,7 +26,7 @@ class Carrera extends Model
     {
         return $this->hasMany(Ciclo::class, 'carrera_id');
     }
-    
+
     public function config()
     {
         return $this->belongsTo(Abconfig::class, 'config_id');
@@ -34,9 +34,14 @@ class Carrera extends Model
 
     public function glosario_categorias()
     {
-        return $this->belongsToMany(Taxonomia::class, 'carrera_glosario_categoria', 'carrera_id', 'glosario_categoria_id');
+        return $this->belongsToMany(
+            Taxonomy::class,
+            'carrera_glosario_categoria',
+            'carrera_id',
+            'glosario_categoria_id'
+        );
     }
-    
+
     public function cursos($categoria_id)
     {
         $ciclo_ids = $this->ciclos()->pluck('id');
@@ -79,7 +84,7 @@ class Carrera extends Model
     // {
     //     $this->temas()->delete();
     //     // $this->temas()->delete();
-        
+
     //     return parent::delete();
     // }
 

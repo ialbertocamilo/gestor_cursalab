@@ -8,7 +8,7 @@ use App\Http\Resources\VademecumCategoriaResource;
 use App\Http\Resources\VademecumResource;
 use App\Models\Abconfig;
 use App\Models\Media;
-use App\Models\Taxonomia;
+use App\Models\Taxonomy;
 use App\Models\Vademecum;
 use Illuminate\Http\Request;
 
@@ -26,7 +26,7 @@ class VademecumController extends Controller
     public function getListSelects()
     {
         $modulos = Abconfig::getModulesForSelect();
-        $categorias = Taxonomia::getDataForSelect('vademecum', 'categoria');
+        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
 
         return $this->success(get_defined_vars());
     }
@@ -37,13 +37,13 @@ class VademecumController extends Controller
         $vademecum = Vademecum::search($request);
 
         $modules = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        $categories = Taxonomia::getDataForSelect('vademecum', 'categoria');
+        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
         $subcategories = [];
 
         if ($request->subcategory_id){
-            $subcategories = Taxonomia::subcategoriaVademecum($request->category_id)
-                                      ->pluck('nombre', 'id')
-                                      ->toArray();
+            $subcategories = Taxonomy::subcategoriaVademecum($request->category_id)
+                                     ->pluck('name', 'id')
+                                     ->toArray();
         }
 
         return view(
@@ -55,7 +55,7 @@ class VademecumController extends Controller
     public function import()
     {
         $modules = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        $categorias = Taxonomia::getDataForSelect('vademecum', 'categoria');
+        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
 
         return view('vademecum.import', compact('modules', 'categorias'));
     }
@@ -70,13 +70,13 @@ class VademecumController extends Controller
     public function create()
     {
         // $modulos = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        // $categorias = Taxonomia::getDataForSelect('vademecum', 'categoria');
+        // $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
         // $subcategorias = [];
 
         // return view('vademecum.create', compact('categorias', 'modulos', 'subcategorias'));
 
         $modulos = Abconfig::getModulesForSelect();
-        $categorias = Taxonomia::getDataForSelect('vademecum', 'categoria');
+        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
         $subcategorias = [];
 
         return $this->success(get_defined_vars());
@@ -100,8 +100,8 @@ class VademecumController extends Controller
         // $elemento->load('modulos');
 
         // $modulos = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        // $categorias = Taxonomia::getDataForSelect('vademecum', 'categoria');
-        // $subcategorias = Taxonomia::subcategoriaVademecum($elemento->category_id)
+        // $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        // $subcategorias = Taxonomy::subcategoriaVademecum($elemento->category_id)
         //                             ->pluck('nombre', 'id')
         //                             ->toArray();
 
@@ -113,9 +113,9 @@ class VademecumController extends Controller
         $vademecum->scorm = $vademecum->media->file ?? null;
 
         $modulos = Abconfig::getModulesForSelect();
-        $categorias = Taxonomia::getDataForSelect('vademecum', 'categoria');
-        $subcategorias = Taxonomia::subcategoriaVademecum($vademecum->category_id)
-                                    ->get(['nombre', 'id']);
+        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        $subcategorias = Taxonomy::subcategoriaVademecum($vademecum->category_id)
+                                 ->get(['nombre', 'id']);
 
         return $this->success(get_defined_vars());
     }
@@ -160,7 +160,7 @@ class VademecumController extends Controller
 
     public function categorias(Request $request)
     {
-        $query = Taxonomia::categoriaVademecum();
+        $query = Taxonomy::categoriaVademecum();
 
         if ($request->q)
             $query->where('nombre', 'like', "%{$request->q}%");
@@ -171,7 +171,7 @@ class VademecumController extends Controller
 
     public function categorias_search(Request $request)
     {
-        $query = Taxonomia::withCount('child')->categoriaVademecum();
+        $query = Taxonomy::withCount('child')->categoriaVademecum();
 
         if ($request->q)
             $query->where('nombre', 'like', "%{$request->q}%");
@@ -195,7 +195,7 @@ class VademecumController extends Controller
 
     public function categorias_store(Request $request)
     {
-        Taxonomia::create([
+        Taxonomy::create([
             'tipo' => 'categoria',
             'grupo' => 'vademecum',
             'nombre' => $request->nombre,
@@ -205,29 +205,29 @@ class VademecumController extends Controller
         return $this->success(['msg' => 'Categoría creada correctamente.']);
     }
 
-    public function categorias_edit(Taxonomia $categoria)
+    public function categorias_edit(Taxonomy $categoria)
     {
         return $this->success(get_defined_vars());
     }
 
-    public function categorias_update(Request $request, Taxonomia $categoria)
+    public function categorias_update(Request $request, Taxonomy $categoria)
     {
         $categoria->update($request->all());
 
         return $this->success(['msg' => 'Categoría actualizada correctamente.']);
     }
 
-    public function categorias_destroy(Taxonomia $categoria)
+    public function categorias_destroy(Taxonomy $categoria)
     {
         $categoria->delete();
 
         return $this->success(['msg' => 'Categoría eliminada correctamente.']);
     }
 
-    public function subcategorias(Taxonomia $categoria, Request $request)
+    public function subcategorias(Taxonomy $categoria, Request $request)
     {
-        $categoria = Taxonomia::find($category_id);
-        $query = Taxonomia::subcategoriaVademecum($category_id);
+        $categoria = Taxonomy::find($category_id);
+        $query = Taxonomy::subcategoriaVademecum($category_id);
 
         if ($request->q)
             $query->where('nombre', 'like', "%{$request->q}%");
@@ -237,9 +237,9 @@ class VademecumController extends Controller
         return view('vademecum.categorias.subcategorias.index', compact('subcategorias', 'categoria'));
     }
 
-    public function subcategorias_search(Taxonomia $categoria, Request $request)
+    public function subcategorias_search(Taxonomy $categoria, Request $request)
     {
-        $query = Taxonomia::subcategoriaVademecum($categoria->id);
+        $query = Taxonomy::subcategoriaVademecum($categoria->id);
 
         if ($request->q)
             $query->where('nombre', 'like', "%{$request->q}%");
@@ -256,14 +256,14 @@ class VademecumController extends Controller
         return $this->success($subcategorias_vademecum);
     }
 
-    public function subcategorias_create(Taxonomia $categoria)
+    public function subcategorias_create(Taxonomy $categoria)
     {
         return $this->success(get_defined_vars());
     }
 
-    public function subcategorias_store(Taxonomia $categoria, Request $request)
+    public function subcategorias_store(Taxonomy $categoria, Request $request)
     {
-        Taxonomia::create([
+        Taxonomy::create([
             'grupo' => 'vademecum',
             'tipo' => 'subcategoria',
             'nombre' => $request->nombre,
@@ -274,19 +274,19 @@ class VademecumController extends Controller
         return $this->success(['msg' => 'Sub Categoría creada correctamente.']);
     }
 
-    public function subcategorias_edit(Taxonomia $categoria, Taxonomia $subcategoria)
+    public function subcategorias_edit(Taxonomy $categoria, Taxonomy $subcategoria)
     {
         return $this->success(get_defined_vars());
     }
 
-    public function subcategorias_update(Request $request, Taxonomia $categoria, Taxonomia $subcategoria)
+    public function subcategorias_update(Request $request, Taxonomy $categoria, Taxonomy $subcategoria)
     {
         $subcategoria->update($request->all());
 
         return $this->success(['msg' => 'Sub Categoría actualizada correctamente.']);
     }
 
-    public function subcategorias_destroy(Taxonomia $categoria, Taxonomia $subcategoria)
+    public function subcategorias_destroy(Taxonomy $categoria, Taxonomy $subcategoria)
     {
         $subcategoria->delete();
 
@@ -295,7 +295,7 @@ class VademecumController extends Controller
 
     public function getSubCategoriaByCategoriaId($category_id)
     {
-        $subcategorias = Taxonomia::subcategoriaVademecum($category_id)
+        $subcategorias = Taxonomy::subcategoriaVademecum($category_id)
                                     ->pluck('nombre', 'id')
                                     ->toArray();
 
@@ -304,7 +304,7 @@ class VademecumController extends Controller
 
     public function getSubCategoriesByCategory(Request $request)
     {
-        $subcategorias = Taxonomia::subcategoriaVademecum($request->category_id)
+        $subcategorias = Taxonomy::subcategoriaVademecum($request->category_id)
                                     ->get(['nombre', 'id']);
 
         return $this->success(get_defined_vars());

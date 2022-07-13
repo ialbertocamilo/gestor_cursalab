@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
-
-use Illuminate\Http\Request;
-use App\Models\Glosario;
+use App\Models\Glossary;
 use App\Models\Matricula;
-use App\Models\Taxonomia;
-use App\Models\Usuario_rest;
+use App\Models\Taxonomy;
 use Config;
+use Illuminate\Http\Request;
 
 class RestDataController extends Controller
 {
@@ -36,7 +34,7 @@ class RestDataController extends Controller
 
             if ($select['api'] == true) :
                 $data[$select['key']] = $select;
-                $data[$select['key']]['list'] = Taxonomia::getDataForSelect('glosario', $select['key']);
+                $data[$select['key']]['list'] = Taxonomy::getDataForSelect('glosario', $select['key']);
             endif;
 
         endforeach;
@@ -58,9 +56,9 @@ class RestDataController extends Controller
     {
         $request->merge(['modulo_id' => auth()->user()->config_id, 'estado' => 1]);
 
-        $glosarios = Glosario::search($request, true);
+        $glosarios = Glossary::search($request, true);
 
-        $data = Glosario::prepareSearchedData($glosarios);
+        $data = Glossary::prepareSearchedData($glosarios);
 
         return array('error' => 0, 'data' => $data);
     }

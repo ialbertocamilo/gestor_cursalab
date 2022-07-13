@@ -47,12 +47,12 @@ class Error extends Model
 
     public function platform()
     {
-        return $this->belongsTo(Taxonomia::class, 'platform_id');
+        return $this->belongsTo(Taxonomy::class, 'platform_id');
     }
 
     public function status()
     {
-        return $this->belongsTo(Taxonomia::class, 'status_id');
+        return $this->belongsTo(Taxonomy::class, 'status_id');
     }
 
     public function getNotifierData($user, $platform_code)
@@ -71,10 +71,11 @@ class Error extends Model
     {
         $platform = cache()->rememberForever('taxonomias_platforms_' . $code,  function () use ($code) {
 
-            return Taxonomia::where('tipo', 'platform')->where('grupo', 'system')
-                        ->where('code', $code)
-                        ->where('estado', 1)
-                        ->first();
+            return Taxonomy::where('type', 'platform')
+                            ->where('group', 'system')
+                            ->where('code', $code)
+                            ->where('active', 1)
+                            ->first();
         });
 
         return $platform;
@@ -84,10 +85,11 @@ class Error extends Model
     {
         $status = cache()->rememberForever('taxonomias_error_statuses_' . $code,  function () use ($code) {
 
-            return Taxonomia::where('tipo', 'status')->where('grupo', 'error')
-                        ->where('code', $code)
-                        ->where('estado', 1)
-                        ->first();
+            return Taxonomy::where('type', 'status')
+                            ->where('group', 'error')
+                            ->where('code', $code)
+                            ->where('active', 1)
+                            ->first();
         });
 
         return $status;

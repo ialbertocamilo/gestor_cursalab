@@ -2,41 +2,63 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\ArrayObject;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Taxonomy extends BaseModel
 {
+    use SoftDeletes;
+
     // protected $rememberFor = WEEK_MINUTES;
 
-    protected $fillable = [
-        'name', 'slug', 'description', 'detail', 'active', 'group', 'type',
-        'identifier', 'key', 'code',
-        'channel_id', 'account_id', 'parent_id', 'external_id',
-    ];
+    protected $table = 'taxonomies';
 
+    protected $fillable = [
+        'external_id',
+        'external_id_es',
+        'group',
+        'type',
+        'position',
+        'code',
+        'name',
+        'path',
+        'alias',
+        'icon',
+        'color',
+        'slug',
+        'active',
+        'description',
+        'detail',
+        'parent_id',
+        'external_parent_id',
+        'external_parent_id_es',
+    ];
 
     protected $hidden = [
-        'pivot', 'created_at', 'updated_at', 'deleted_at'
+        'created_at', 'updated_at', 'deleted_at'
     ];
 
-    public function sluggable(): array
-    {
-        return [
-            'slug' => ['source' => 'name', 'onUpdate' => true, 'unique' => false]
-        ];
-    }
+
+    /*
+
+        Relationships
+
+    --------------------------------------------------------------------------*/
+
 
     public function parent()
     {
-        return $this->belongsTo(Taxonomy::class, 'parent_id')->with('parent');
+        return $this->belongsTo(Taxonomy::class, 'parent_id')
+                    ->with('parent');
     }
 
     public function children()
     {
-        return $this->hasMany(Taxonomy::class, 'parent_id')->orderBy('position')->orderBy('name')->with('children');
+        return $this->hasMany(Taxonomy::class, 'parent_id')
+                    ->orderBy('position')
+                    ->orderBy('name')
+                    ->with('children');
         // return $this->hasMany(Taxonomy::class, 'parent_id')->orderBy('position');
     }
 
@@ -45,11 +67,36 @@ class Taxonomy extends BaseModel
         return $this->hasMany(Feature::class, 'section_id');
     }
 
+    /*
+
+        Attributes
+
+    --------------------------------------------------------------------------*/
+
+
     public function setCodeAttribute($value = '')
     {
-        if (!empty ($value)) {
+        if (!empty($value)) {
             $this->attributes['code'] = $value;
         }
+    }
+
+    /*
+
+        Methods
+
+    --------------------------------------------------------------------------*/
+
+
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'name',
+                'onUpdate' => true,
+                'unique' => false
+            ]
+        ];
     }
 
     public function registerMediaConversions(Media $media = null): void
@@ -78,55 +125,19 @@ class Taxonomy extends BaseModel
 
         $fields = array_merge($default, $extraFields);
 
-        return $this->getData($group, $type, $filters, $relationship)->get($fields)->toArray();
-    }
-
-    protected function getSelectSectionData($group, $type, array $filters = [], array $extraFields = [], mixed $relationship = [])
-    {
-        $default = ['color', 'icon', 'name', 'id', 'code'];
-
-        $fields = array_merge($default, $extraFields);
-
-        return $this->getSectionData($group, $type, $filters, $relationship)->get($fields)->toArray();
-    }
-
-    protected function getSelectSubSectionData($group, $type, array $filters = [], array $extraFields = [], mixed $relationship = [])
-    {
-        $default = ['color', 'icon', 'name', 'id', 'code'];
-
-        $fields = array_merge($default, $extraFields);
-
-        return $this->getSubSectionData($group, $type, $filters, $relationship)->get($fields)->toArray();
-    }
-
-    protected function getSelectChildrenData($parent_id, $group, $type, array $selectParameters = ['id', 'name'])
-    {
-        return $this->getChildrenData($parent_id, $group, $type)->select($selectParameters)->get()->toArray();
-    }
-
-    public function getChildrenData($parent_id, $group, $type)
-    {
-        $result = Taxonomy::where('group', $group)->where('type', $type)
-            ->where('active', ACTIVE)
-            ->where('parent_id', $parent_id)
-            ->orderBy('position', 'ASC');
-
-        // return $relationship ? $result->with($relationship) : $result;
-        return $result;
-    }
-
-    protected function getFirstData($group, $type, $code)
-    {
-        $data = $this->getData($group, $type)->get();
-
-        return $data->where('code', $code)->first();
+        return $this->getData($group, $type, $filters, $relationship)
+                    ->get($fields)
+                    ->toArray();
     }
 
     protected static function getData($group, $type, $filters = [], mixed $relationship = null)
     {
-        $result = Taxonomy::where('group', $group)->where('type', $type)->where('active', ACTIVE);
+        $result = Taxonomy::where('group', $group)
+                          ->where('type', $type)
+                          ->where('active', ACTIVE);
 
         foreach ($filters as $field => $filter) {
+
             $statement = is_array($filter) ? 'whereIn' : 'where';
 
             $result->$statement($field, $filter);
@@ -137,11 +148,25 @@ class Taxonomy extends BaseModel
         return $relationship ? $result->with($relationship) : $result;
     }
 
+    protected function getSelectSectionData($group, $type, array $filters = [], array $extraFields = [], mixed $relationship = [])
+    {
+        $default = ['color', 'icon', 'name', 'id', 'code'];
+
+        $fields = array_merge($default, $extraFields);
+
+        return $this->getSectionData($group, $type, $filters, $relationship)
+                    ->get($fields)
+                    ->toArray();
+    }
+
     protected function getSectionData($group, $type, $filters = [])
     {
-        $q = Taxonomy::where('group', $group)->where('type', $type)->where('active', ACTIVE);
+        $q = Taxonomy::where('group', $group)
+                     ->where('type', $type)
+                     ->where('active', ACTIVE);
 
         foreach ($filters as $field => $filter) {
+
             $statement = is_array($filter) ? 'whereIn' : 'where';
 
             $q->$statement($field, $filter);
@@ -152,11 +177,25 @@ class Taxonomy extends BaseModel
         return $q->orderBy('position', 'ASC');
     }
 
+    protected function getSelectSubSectionData($group, $type, array $filters = [], array $extraFields = [], mixed $relationship = [])
+    {
+        $default = ['color', 'icon', 'name', 'id', 'code'];
+
+        $fields = array_merge($default, $extraFields);
+
+        return $this->getSubSectionData($group, $type, $filters, $relationship)
+                    ->get($fields)
+                    ->toArray();
+    }
+
     protected function getSubSectionData($group, $type, $filters = [])
     {
-        $q = Taxonomy::where('group', $group)->where('type', $type)->where('active', ACTIVE);
+        $q = Taxonomy::where('group', $group)
+                     ->where('type', $type)
+                     ->where('active', ACTIVE);
 
         foreach ($filters as $field => $filter) {
+
             $statement = is_array($filter) ? 'whereIn' : 'where';
 
             $q->$statement($field, $filter);
@@ -165,6 +204,34 @@ class Taxonomy extends BaseModel
         // $q->whereNull('parent_id');
 
         return $q->orderBy('position', 'ASC');
+    }
+
+    protected function getSelectChildrenData(
+        $parent_id, $group, $type, array $selectParameters = ['id', 'name']
+    )
+    {
+        return $this->getChildrenData($parent_id, $group, $type)
+                    ->select($selectParameters)
+                    ->get()
+                    ->toArray();
+    }
+
+    public function getChildrenData($parent_id, $group, $type)
+    {
+        $result = Taxonomy::where('group', $group)->where('type', $type)
+                          ->where('active', ACTIVE)
+                          ->where('parent_id', $parent_id)
+                          ->orderBy('position', 'ASC');
+
+        // return $relationship ? $result->with($relationship) : $result;
+        return $result;
+    }
+
+    protected function getFirstData($group, $type, $code)
+    {
+        $data = $this->getData($group, $type)->get();
+
+        return $data->where('code', $code)->first();
     }
 
     protected function getFirstOrCreate($group, $type, $value, $parent_id = NULL)
@@ -184,6 +251,52 @@ class Taxonomy extends BaseModel
 
         return NULL;
     }
+
+    protected function getOrCreate($group, $type, $name)
+    {
+        $name = trim($name);
+
+        $taxonomy = Taxonomy::where('group', $group)
+                             ->where('type', $type)
+                             ->where('name', $name)
+                             ->first();
+
+        if ( ! $taxonomy ) :
+
+            $data = [
+                'group' => $group,
+                'type' => $type,
+                'name' => $name,
+                'active' => 1,
+            ];
+
+            $taxonomy = Taxonomy::create($data);
+
+        endif;
+
+        return $taxonomy;
+    }
+
+    protected function getDataByGroupAndType($group, $type)
+    {
+        return Taxonomy::where('type', $type)
+                       ->where('group', $group)
+                       ->where('active', 1)
+                       ->orderBy('name', 'ASC')
+                       ->get();
+    }
+
+    protected function getDataForSelect($group, $type)
+    {
+        return Taxonomy::where('type', $type)
+                        ->where('group', $group)
+                        ->where('active', 1)
+                        ->orderBy('name', 'ASC')
+                        ->get(['name', 'id']);
+                    // ->pluck('name', 'id')
+                    // ->toArray();
+    }
+
 
     protected function searchCharacters($request, $method = 'paginate')
     {

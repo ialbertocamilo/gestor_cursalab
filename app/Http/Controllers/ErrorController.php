@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Error;
-use App\Models\Taxonomia;
-
-use Illuminate\Http\Request;
 use App\Http\Requests\ErrorAppRequest;
 use App\Http\Requests\ErrorStatusRequest;
 use App\Http\Resources\ErrorResource;
+use App\Models\Error;
+use App\Models\Taxonomy;
+use Illuminate\Http\Request;
 
 class ErrorController extends Controller
 {
@@ -23,8 +22,8 @@ class ErrorController extends Controller
 
     public function getListSelects()
     {
-        $platforms = Taxonomia::getDataForSelect('system', 'platform');
-        $statuses = Taxonomia::getDataForSelect('error', 'status');
+        $platforms = Taxonomy::getDataForSelect('system', 'platform');
+        $statuses = Taxonomy::getDataForSelect('error', 'status');
 
         return $this->success(get_defined_vars());
     }
@@ -33,7 +32,7 @@ class ErrorController extends Controller
     {
         // return $this->success(get_defined_vars());
     }
-    
+
     public function getFormSelects()
     {
         return $this->success(get_defined_vars());
@@ -46,16 +45,16 @@ class ErrorController extends Controller
         $error = Error::create($data);
 
         $msg = 'Error creado correctamente.';
-        
+
         return $this->success(compact('msg'));
     }
-    
+
     public function edit(Error $error)
     {
         $error->load('platform', 'user', 'usuario', 'status');
 
-        $platforms = Taxonomia::getDataForSelect('system', 'platform');
-        $statuses = Taxonomia::getDataForSelect('error', 'status');
+        $platforms = Taxonomy::getDataForSelect('system', 'platform');
+        $statuses = Taxonomy::getDataForSelect('error', 'status');
 
         return $this->success(get_defined_vars());
     }
@@ -63,7 +62,7 @@ class ErrorController extends Controller
     public function update(Error $error, ErrorStatusRequest $request)
     {
         $data = $request->validated();
-    
+
         $error->update($data);
 
         $msg = 'Error actualizado correctamente.';

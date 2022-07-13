@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use Config;
+use App\Http\Controllers\Controller;
 use App\Models\Abconfig;
-use App\Models\Taxonomia;
 use App\Models\Carrera;
 use App\Models\Ciclo;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Matricula;
-use App\Models\Usuario_rest;
 use App\Models\UsuarioVersiones;
+use Config;
 use Exception;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -82,7 +78,7 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             info($th);
         }
-       
+
         // Data
         $config_data = Abconfig::with('main_menu', 'side_menu')->select('id', 'color', 'duracion_dias', 'logo', 'isotipo', 'mod_agrupacion', 'mod_cronometro', 'mod_encuestas', 'mod_evaluaciones', 'mod_mainmenu', 'mod_sidemenu', 'mod_tipovalidacion', 'plantilla_diploma', 'mod_push', 'push_code')
             ->where('id', $usuario->config_id)

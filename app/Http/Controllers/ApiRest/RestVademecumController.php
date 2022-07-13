@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Models\Usuario;
-use App\Models\Taxonomia;
+use App\Http\Controllers\Controller;
+use App\Models\Taxonomy;
 use App\Models\Vademecum;
-use App\Models\UsuarioAccion;
-
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Config;
 
 class RestVademecumController extends Controller
 {
@@ -23,7 +19,10 @@ class RestVademecumController extends Controller
 
     public function storeVisit(Vademecum $elemento, Request $request)
     {
-        $accion_visita = Taxonomia::where('grupo', 'vademecum')->where('tipo', 'accion')->where('nombre', 'view')->first();
+        $accion_visita = Taxonomy::where('group', 'vademecum')
+                                  ->where('type', 'accion')
+                                  ->where('name', 'view')
+                                  ->first();
 
         $row = $elemento->incrementAction($accion_visita->id);
 
@@ -43,20 +42,22 @@ class RestVademecumController extends Controller
 
     public function getSelects()
     {
-        $data['categorias'] = Taxonomia::whereHas('vademecums', function($q){
-                                        $q->where('estado', 1);
+        $data['categorias'] = Taxonomy::whereHas('vademecums', function($q){
+                                        $q->where('active', 1);
                                     })
-                                    ->where('grupo', 'vademecum')
-                                    ->where('tipo', 'categoria')
-                                    ->get()->pluck('nombre', 'id')->toArray();
+                                    ->where('group', 'vademecum')
+                                    ->where('type', 'categoria')
+                                    ->get()
+                                    ->pluck('name', 'id')
+                                    ->toArray();
 
         return array('error' => 0, 'data' => $data);
     }
 
     public function getSubCategorias($categoria_id)
     {
-        $subcategorias = Taxonomia::subcategoriaVademecum($categoria_id)
-                                    ->select('nombre', 'id', 'parent_taxonomia_id as categoria_id')
+        $subcategorias = Taxonomy::subcategoriaVademecum($categoria_id)
+                                    ->select('name', 'id', 'parent_taxonomia_id as categoria_id')
                                     ->get();
         return response()->json(compact('subcategorias'), 200);
     }

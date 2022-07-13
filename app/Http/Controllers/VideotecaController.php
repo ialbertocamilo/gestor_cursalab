@@ -3,19 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Videoteca\VideotecaStoreRequest;
-
-use App\Models\Media;
-use App\Models\Usuario;
+use App\Http\Resources\VideotecaResource;
 use App\Models\Abconfig;
-use App\Models\Videoteca;
-use App\Models\Taxonomia;
+use App\Models\Media;
+use App\Models\Taxonomy;
+use App\Models\Usuario;
 use App\Models\UsuarioAccion;
-
+use App\Models\Videoteca;
 use Faker\Factory as Faker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\VideotecaResource;
-use function foo\func;
+
 
 class VideotecaController extends Controller
 {
@@ -31,31 +29,31 @@ class VideotecaController extends Controller
         Videoteca::truncate();
         DB::table('videoteca_module')->truncate();
         DB::table('videoteca_tag')->truncate();
-        Taxonomia::group('videoteca')->type('categoria')->forceDelete();
-        Taxonomia::group('videoteca')->type('tag')->forceDelete();
+        Taxonomy::group('videoteca')->type('categoria')->forceDelete();
+        Taxonomy::group('videoteca')->type('tag')->forceDelete();
         UsuarioAccion::where('model_type', 'App\Videoteca')->forceDelete();
 
         $fakeTags = [];
         foreach ($tags as $i => $tag) {
             $fakeTags[] = [
-                'grupo' => 'videoteca',
-                'tipo' => 'tag',
-                'estado' => 1,
-                'nombre' => $tag
+                'group' => 'videoteca',
+                'type' => 'tag',
+                'active' => 1,
+                'name' => $tag
             ];
         }
-        DB::table('taxonomias')->insert($fakeTags);
+        DB::table('taxonomies')->insert($fakeTags);
 
         $fakeCategories = [];
         foreach ($categories as $i => $categorie) {
             $fakeCategories[] = [
-                'grupo' => 'videoteca',
-                'tipo' => 'categoria',
-                'nombre' => $categorie
+                'group' => 'videoteca',
+                'type' => 'categoria',
+                'name' => $categorie
             ];
         }
 
-        DB::table('taxonomias')->insert($fakeCategories);
+        DB::table('taxonomies')->insert($fakeCategories);
 
         $fakeData = [];
         for ($i = 0; $i < $data; $i++) {
@@ -64,7 +62,7 @@ class VideotecaController extends Controller
             $fakeData[] = [
                 'title' => $faker->name,
                 'description' => $faker->paragraph,
-                'category_id' => Taxonomia::group('videoteca')->type('categoria')->inRandomOrder()->first()->id,
+                'category_id' => Taxonomy::group('videoteca')->type('categoria')->inRandomOrder()->first()->id,
                 'media_video' => $faker->sentence,
                 'media_type' => $faker->randomElement([
                     'youtube', 'vimeo',
@@ -83,7 +81,7 @@ class VideotecaController extends Controller
             $fakeData[] = [
                 'title' => $faker->name,
                 'description' => $faker->paragraph,
-                'category_id' => Taxonomia::group('videoteca')->type('categoria')->inRandomOrder()->first()->id,
+                'category_id' => Taxonomy::group('videoteca')->type('categoria')->inRandomOrder()->first()->id,
                 'media_video' => null,
                 'media_id' => $media->id,
                 'preview_id' => $preview->id,
@@ -94,22 +92,28 @@ class VideotecaController extends Controller
         DB::table('videoteca')->insert($fakeData);
 
         $videotecas = Videoteca::all();
-        $accion_visita = Taxonomia::where('grupo', 'videoteca')->where('tipo', 'accion')->where('nombre', 'view')->first();
+        $accion_visita = Taxonomy::where('group', 'videoteca')
+                                 ->where('type', 'accion')
+                                 ->where('name', 'view')
+                                 ->first();
+
         if (!$accion_visita) {
-            $accion_visita = Taxonomia::create([
-                'grupo' => 'videoteca',
-                'tipo' => 'accion',
-                'nombre' => 'view',
-                'estado' => 1
+            $accion_visita = Taxonomy::create([
+                'group' => 'videoteca',
+                'type' => 'accion',
+                'name' => 'view',
+                'active' => 1
             ]);
         }
 
         foreach ($videotecas as $videoteca) {
-            $tags_id = Taxonomia::videotecaTags()
-                ->inRandomOrder()
-                // ->limit(random_int(1, count($tags)))
-                ->limit(random_int(1, 10))
-                ->pluck('id');
+
+            $tags_id = Taxonomy::videotecaTags()
+                               ->inRandomOrder()
+                               // ->limit(random_int(1, count($tags)))
+                               ->limit(random_int(1, 10))
+                               ->pluck('id');
+
             $videoteca->tags()->sync($tags_id);
 
             $modules = ['4', '5', '6'];
@@ -132,8 +136,15 @@ class VideotecaController extends Controller
     public function getListSelects()
     {
         $modules = Abconfig::getModulesForSelect();
-        $categorias = Taxonomia::group('videoteca')->type('categoria')->orderBy('nombre', 'ASC')->get();
-        $tags = Taxonomia::group('videoteca')->type('tag')->orderBy('nombre', 'ASC')->get();
+        $categorias = Taxonomy::group('videoteca')
+                              ->type('categoria')
+                              ->orderBy('name', 'ASC')
+                              ->get();
+
+        $tags = Taxonomy::group('videoteca')
+                        ->type('tag')
+                        ->orderBy('name', 'ASC')
+                        ->get();
 
         return $this->success(get_defined_vars());
     }
@@ -141,8 +152,15 @@ class VideotecaController extends Controller
     public function create(Request $request)
     {
         $modules = Abconfig::getModulesForSelect();
-        $categorias = Taxonomia::group('videoteca')->type('categoria')->orderBy('nombre', 'ASC')->get();
-        $tags = Taxonomia::group('videoteca')->type('tag')->orderBy('nombre', 'ASC')->get();
+        $categorias = Taxonomy::group('videoteca')
+                              ->type('categoria')
+                              ->orderBy('name', 'ASC')
+                              ->get();
+
+        $tags = Taxonomy::group('videoteca')
+                        ->type('tag')
+                        ->orderBy('name', 'ASC')
+                        ->get();
 
         return $this->success(get_defined_vars());
     }
@@ -212,8 +230,15 @@ class VideotecaController extends Controller
 //        $videoteca->preview = $videoteca->preview->file;
 
         $modules = Abconfig::getModulesForSelect();
-        $categorias = Taxonomia::group('videoteca')->type('categoria')->orderBy('nombre', 'ASC')->get();
-        $tags = Taxonomia::group('videoteca')->type('tag')->orderBy('nombre', 'ASC')->get();
+        $categorias = Taxonomy::group('videoteca')
+                              ->type('categoria')
+                              ->orderBy('nombre', 'ASC')
+                              ->get();
+
+        $tags = Taxonomy::group('videoteca')
+                        ->type('tag')
+                        ->orderBy('name', 'ASC')
+                        ->get();
 
         $response = [
             'categorias' => $categorias,
@@ -270,19 +295,22 @@ class VideotecaController extends Controller
 
     public function tagsList(Request $request)
     {
-        $query = Taxonomia::videotecaTags()->select('id', 'nombre');
+        $query = Taxonomy::videotecaTags()->select('id', 'name');
 
         if ($request->q)
-            $query->where('nombre', 'like', "%{$request->q}%");
+            $query->where('name', 'like', "%{$request->q}%");
 
         $tags = $query->paginate(20);
 
         return response()->json(compact('tags'));
     }
 
-    public function tagDelete(Taxonomia $tag)
+    public function tagDelete(Taxonomy $tag)
     {
-        DB::table('videoteca_tag')->where('tag_id', $tag->id)->delete();
+        DB::table('videoteca_tag')
+          ->where('tag_id', $tag->id)
+          ->delete();
+
         $tag->delete();
         return response()->json(['msg' => 'Tag eliminado.']);
     }
@@ -290,10 +318,12 @@ class VideotecaController extends Controller
     //Categorias
     public function categoriasList(Request $request)
     {
-        $query = Taxonomia::categoriaVideoteca()->orderBy('created_at', 'DESC');
+        $query = Taxonomy::categoriaVideoteca()
+                         ->orderBy('created_at', 'DESC');
 
         if ($request->q)
-            $query->where('nombre', 'like', "%{$request->q}%");
+            $query->where('name', 'like', "%{$request->q}%");
+
         $categorias_videoteca = $query->paginate(15);
 
         return response()->json(compact('categorias_videoteca'));
@@ -307,42 +337,44 @@ class VideotecaController extends Controller
     public function categorias_store(Request $request)
     {
         $nombre = $request->nombre;
-        Taxonomia::create([
-            'tipo' => 'categoria',
-            'grupo' => 'videoteca',
-            'nombre' => $nombre,
-            'estado' => 1
+        Taxonomy::create([
+            'type' => 'categoria',
+            'group' => 'videoteca',
+            'name' => $nombre,
+            'active' => 1
         ]);
         return redirect()->route('videoteca.categorias')
-            ->with('info', 'Categoría creada.');
+                         ->with('info', 'Categoría creada.');
     }
 
     public function categorias_edit($id)
     {
-        $elemento = Taxonomia::find($id);
-        return view('videoteca.categorias.edit', compact('elemento'));
+        $elemento = Taxonomy::find($id);
+        return view(
+            'videoteca.categorias.edit', compact('elemento')
+        );
     }
 
     public function categorias_update(Request $request, $id)
     {
-        $taxonomia = Taxonomia::find($id);
-        $taxonomia->nombre = $request->nombre;
-        $taxonomia->save();
+        $taxonomy = Taxonomy::find($id);
+        $taxonomy->name = $request->nombre;
+        $taxonomy->save();
 
         return redirect()->route('videoteca.categorias')
-            ->with('info', 'Categoría actualizada.');
+                         ->with('info', 'Categoría actualizada.');
     }
 
     public function categorias_destroy($id)
     {
-        $taxonomia = Taxonomia::find($id);
-        $taxonomia->delete();
+        $taxonomy = Taxonomy::find($id);
+        $taxonomy->delete();
 
         return redirect()->route('videoteca.categorias')
-            ->with('info', 'Categoría eliminada.');
+                         ->with('info', 'Categoría eliminada.');
     }
 
-    public function tagEdit(Taxonomia $tag, Request $request)
+    public function tagEdit(Taxonomy $tag, Request $request)
     {
         $data = $request->all();
         $tag->update($data);
@@ -352,14 +384,14 @@ class VideotecaController extends Controller
     public function categoriasStore(Request $request)
     {
         $data = $request->all();
-        $data['grupo'] = 'videoteca';
-        $data['tipo'] = 'categoria';
-        $data['estado'] = 1;
-        Taxonomia::create($data);
+        $data['group'] = 'videoteca';
+        $data['type'] = 'categoria';
+        $data['active'] = 1;
+        Taxonomy::create($data);
         return $this->success(['msg' => 'Categoria creada correctamente']);
     }
 
-    public function categoriasEdit(Taxonomia $tag, Request $request)
+    public function categoriasEdit(Taxonomy $tag, Request $request)
     {
         $data = $request->all();
         $tag->update($data);
