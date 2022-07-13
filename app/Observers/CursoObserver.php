@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
-use App\Curso;
-use App\Posteo;
-use App\Resumen_x_curso;
+use App\Models\Curso;
+use App\Models\Posteo;
+use App\Models\Resumen_x_curso;
 use Illuminate\Support\Facades\DB;
 
 class CursoObserver
@@ -12,7 +12,7 @@ class CursoObserver
     /**
      * Handle the curso "created" event.
      *
-     * @param  \App\Curso  $curso
+     * @param  $curso
      * @return void
      */
     public function created(Curso $curso)
@@ -27,7 +27,7 @@ class CursoObserver
     /**
      * Handle the curso "updated" event.
      *
-     * @param  \App\Curso  $curso
+     * @param  \App\Models\Curso  $curso
      * @return void
      */
     public function updated(Curso $curso)
@@ -63,7 +63,7 @@ class CursoObserver
     /**
      * Handle the curso "deleted" event.
      *
-     * @param  \App\Curso  $curso
+     * @param  \App\Models\Curso  $curso
      * @return void
      */
     public function deleted(Curso $curso)
@@ -75,7 +75,7 @@ class CursoObserver
     /**
      * Handle the curso "restored" event.
      *
-     * @param  \App\Curso  $curso
+     * @param  \App\Models\Curso  $curso
      * @return void
      */
     public function restored(Curso $curso)
@@ -86,7 +86,7 @@ class CursoObserver
     /**
      * Handle the curso "force deleted" event.
      *
-     * @param  \App\Curso  $curso
+     * @param  \App\Models\Curso  $curso
      * @return void
      */
     public function forceDeleted(Curso $curso)

@@ -19,5 +19,18 @@ class Criterion extends BaseModel
         return $this->hasMany(CriterionValue::class);
     }
 
+    protected function getValuesForSelect($criterion_code)
+    {
+        // $criterion = Criterion::where('code', $criterion_code)->first();
+
+        return CriterionValue::whereRelation('criterion', 'code', $criterion_code)
+                        ->select('id', 'value_text as nombre')
+                        // ->where('criterion_id', $criterion->id)
+                        // ->when($config_id, function($q) use ($config_id){
+                        //     $q->where('config_id', $config_id);
+                        // })
+                        ->get();
+    }
+
 
 }

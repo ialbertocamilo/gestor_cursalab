@@ -20,9 +20,10 @@ class EncuestaResource extends JsonResource
             'id' => $this->id,
             'titulo' => $this->titulo,
             'image' => space_url($this->imagen),
-            'active' => $this->estado ? true : false,
+            'active' => $this->active,
             'anonima' => $this->anonima == 'si' ? 'Anónima' : 'No anónima',
-            'tipo' => $sections[$this->tipo] ?? '',
+            // 'tipo' => $sections[$this->tipo] ?? '',
+            'tipo' => $this->type->name ?? '',
 
             'preguntas_count' => $this->preguntas_count,
             'encuestas_preguntas_route' => route('encuestas_preguntas.list', $this->id),

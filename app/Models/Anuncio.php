@@ -7,19 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use DB;
 
 // ALTER TABLE `anuncios` 
-// ADD COLUMN `publication_starts_at` datetime(0) NULL AFTER `estado`,
+// ADD COLUMN `publication_starts_at` datetime(0) NULL AFTER `active`,
 // ADD COLUMN `publication_ends_at` datetime(0) NULL AFTER `publication_starts_at`,
-// MODIFY COLUMN `publish_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `estado`;
+// MODIFY COLUMN `publish_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `active`;
 
 // ALTER TABLE `anuncios` 
-// MODIFY COLUMN `publish_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP AFTER `estado`;
+// MODIFY COLUMN `publish_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP AFTER `active`;
 
 class Anuncio extends Model 
 {
-    
+    protected $table = 'announcements';
 
     protected $fillable = [
-    	'nombre', 'config_id', 'resumen', 'contenido', 'cod_video', 'imagen', 'archivo', 'video', 'destino', 'link', 'orden', 'estado', 'created_at', 'updated_at', 'publication_starts_at', 'publication_ends_at'
+    	'nombre', 'module_id', 'resumen', 'contenido', 'cod_video', 'imagen', 'archivo', 'video', 'destino', 'link', 'orden', 'active', 'created_at', 'updated_at', 'publication_starts_at', 'publication_ends_at'
     ];
 
     protected $dates = ['publication_starts_at', 'publication_ends_at', 'publish_date'];
@@ -37,10 +37,10 @@ class Anuncio extends Model
     //     // code...
     // }
 
-    public function setEstadoAttribute($value)
-    {
-        $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
-    }
+    // public function setEstadoAttribute($value)
+    // {
+    //     $this->attributes['active'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
+    // }
 
     public function delete()
     {
@@ -57,7 +57,7 @@ class Anuncio extends Model
             $query->where('nombre', 'like', "%$request->q%");
 
         if ($request->module)
-            $query->where('config_id', 'like', "%$request->module%");
+            $query->where('module_id', 'like', "%$request->module%");
 
         // $query->orderBy('orden','DESC');
 
@@ -85,13 +85,14 @@ class Anuncio extends Model
         return "{$start} - {$end}";
     }
 
-    protected function getPublisheds($config_id = NULL)
+    protected function getPublisheds($module_id = NULL)
     {
-        // $anuncios = DB::table('anuncios')->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date"))->where('config_id', 'like', '%"' . $config_id . '"%')->where('estado', 1)->orderBy('orden', 'DESC')->get();
-        $anuncios = DB::table('anuncios')
+        // $anuncios = DB::table('anuncios')->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date"))->where('config_id', 'like', '%"' . $config_id . '"%')->where('active', 1)->orderBy('orden', 'DESC')->get();
+        $anuncios = DB::table('announcements')
             ->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publication_starts_at,'%d/%m/%Y') AS publish_date, publication_starts_at AS inicio, publication_ends_at AS fin"))
-            ->where('config_id', 'like', '%"' . $config_id . '"%')
-            ->where('estado', 1)
+            ->where('module_id', 'like', '%"' . $module_id . '"%')
+            // ->where('module_id', $module_id)
+            ->where('active', ACTIVE)
             ->where(function($query){
                 $query->where(function($q){
                     $q->whereNull('publication_starts_at');
