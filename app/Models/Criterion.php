@@ -21,8 +21,6 @@ class Criterion extends BaseModel
 
     protected function getValuesForSelect($criterion_code)
     {
-        // $criterion = Criterion::where('code', $criterion_code)->first();
-
         return CriterionValue::whereRelation('criterion', 'code', $criterion_code)
                         ->select('id', 'value_text as nombre')
                         // ->where('criterion_id', $criterion->id)
