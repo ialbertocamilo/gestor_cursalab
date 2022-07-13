@@ -5,6 +5,7 @@ namespace App\Models\UCMigrationData;
 use App\Models\Course;
 use App\Models\School;
 use App\Models\Support\OTFConnection;
+use App\Models\Topic;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -117,12 +118,21 @@ class Migration_2 extends Model
             ->select(
                 'id', 'nombre', 'descripcion', 'imagen', 'orden',
                 'plantilla_diploma', 'reinicios_programado', 'c_evaluable', 'libre',
-                'categoria_id',
+                'categoria_id', 'requisito_id',
                 'estado', 'created_at', 'updated_at')
             ->get();
         $data = [];
 
-        foreach ($cursos as $curso) {
+    foreach ($cursos as $curso) {
+            if ($curso->requisito_id):
+
+                $data['curso_requisitos'][] = [
+                    'curso_id' => $curso->id,
+                    'curso_requisito_id' => $curso->requisito_id
+                ];
+
+            endif;
+
             $data['escuela_curso'][] = [
                 'escuela_id' => $curso->categoria_id,
                 'curso_id' => $curso->id,
@@ -169,7 +179,18 @@ class Migration_2 extends Model
 
         $this->makeChunkAndInsert($course_school, 'course_school');
 
-        // TODO: Relaciones de curso requisito
+//         TODO: Relaciones de curso requisito
+        $course_requirements = [];
+        foreach ($data['curso_requisitos'] as $relation){
+            $course = $courses->where('external_id', $relation['curso_id'])->first();
+            $course_requirement = $courses->where('external_id', $relation['curso_requisito_id'])->first();
+
+            if ($course and $course_requirement)
+                $course_requirements[] = ['course_id' => $course->id, 'course_requirement_id' => $course_requirement->id];
+
+        }
+
+        $this->makeChunkAndInsert($course_requirements, 'course_requirements');
     }
 
     protected function setTemasData()
@@ -179,7 +200,7 @@ class Migration_2 extends Model
         $temas = $db->getTable('posteos')
             ->select(
                 'id', 'nombre', 'resumen', 'imagen', 'orden',
-                'contenido', 'evaluable', 'curso_id',
+                'contenido', 'evaluable', 'curso_id', 'requisito_id',
                 'estado', 'created_at', 'updated_at')
             ->get();
         $courses = Course::all();
@@ -189,7 +210,16 @@ class Migration_2 extends Model
             $course = $courses->where('external_id', $tema->curso_id)->first();
 
             if ($course):
-                $data[] = [
+                if ($tema->requisito_id):
+
+                    $data['tema_requisitos'][] = [
+                        'tema_id' => $tema->id,
+                        'tema_requisito_id' => $tema->requisito_id
+                    ];
+
+                endif;
+
+                $data['temas'][] = [
                     'external_id' => $tema->id,
                     'course_id' => $course->id,
 
@@ -218,8 +248,17 @@ class Migration_2 extends Model
 
     protected function insertTemasData($data)
     {
-        $this->makeChunkAndInsert($data, 'topics');
+        $this->makeChunkAndInsert($data['temas'], 'topics');
 
         // TODO: Relaciones de tema requisito
+        $topics = Topic::all();
+
+        foreach ($data['tema_requisitos'] as $relation){
+            $topic = $topics->where('external_id', $relation['tema_id'])->first();
+            $topic_requirement = $topics->where('external_id', $relation['tema_requisito_id'])->first();
+
+            if ($topic and $topic_requirement)
+                $topic->update(['topic_requirement_id' => $topic_requirement->id]);
+        }
     }
 }
