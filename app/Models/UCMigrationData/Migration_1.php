@@ -77,7 +77,7 @@ class Migration_1 extends Model
                 'grupo', 'botica_id',
                 'estado', 'created_at', 'updated_at'
             )
-            // ->limit(100)
+             ->limit(100)
             ->get();
 
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');

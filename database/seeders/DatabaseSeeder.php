@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         $this->call(TaxonomySeederPoll::class);
         $this->call(TaxonomySeederQuestionType::class);
         $this->call(TaxonomySeederCourse::class);
+        $this->call(TaxonomySeederTopicEvaluationType::class);
+
 
         $this->call(BouncerSeeder::class);
         $this->call(UserSeeder::class);
