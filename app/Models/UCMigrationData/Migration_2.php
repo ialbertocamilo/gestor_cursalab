@@ -180,7 +180,6 @@ class Migration_2 extends Model
 
         $this->makeChunkAndInsert($course_school, 'course_school');
 
-//         TODO: Relaciones de curso requisito
         $course_requirements = [];
         foreach ($data['curso_requisitos'] as $relation) {
             $course = $courses->where('external_id', $relation['curso_id'])->first();
@@ -255,7 +254,6 @@ class Migration_2 extends Model
     {
         $this->makeChunkAndInsert($data['temas'], 'topics');
 
-        // TODO: Relaciones de tema requisito
         $topics = Topic::all();
 
         foreach ($data['tema_requisitos'] as $relation) {
