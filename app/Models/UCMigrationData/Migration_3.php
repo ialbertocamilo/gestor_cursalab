@@ -10,7 +10,7 @@ use App\Models\Posteo;
 use App\Models\User;
 use App\Models\Encuestas_pregunta;
 use App\Models\Support\OTFConnection;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class Migration_3 extends Model
 {
@@ -43,9 +43,9 @@ class Migration_3 extends Model
         $data = self::getResumenGeneralData();
         self::insertChunkedData($data, 'summary_users');
 
-        info('getResumenCursosData');
-        $data = self::getResumenCursosData();
-        self::insertChunkedData($data, 'summary_courses');
+        info('getAndInsertResumenCursosData');
+        self::getAndInsertResumenCursosData();
+        // self::insertChunkedData($data, 'summary_courses');
 
         info('getAndInsertResumenTemasData');
         self::getAndInsertResumenTemasData();
@@ -198,7 +198,7 @@ class Migration_3 extends Model
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
-    protected function getResumenCursosData()
+    protected function getAndInsertResumenCursosData()
     {
         $db = self::connect();
 

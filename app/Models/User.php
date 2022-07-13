@@ -105,7 +105,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function routeNotificationForFcm()
     {
         return $this->fcm_token;
-        return $this->getDeviceTokens();
+        // return $this->getDeviceTokens();
     }
 
     /**
@@ -123,6 +123,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $this->belongsToMany(CriterionValue::class);
     }
+
+    // public function criteria()
+    // {
+    //     return $this->hasManyThrough(Criterion::class, CriterionValue::class);
+    // }
 
     public function getFullnameAttribute()
     {
@@ -168,6 +173,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value==='1' OR $value === 1);
+    }
+
+    public function getCriteria()
+    {
+        $criterion_ids = $this->criterion_values()->get()->pluck('criterion_id')->toArray();
+
+        return Criterion::whereIn('id', $criterion_ids)->get();
     }
 
     // public function post()

@@ -29,7 +29,7 @@ use App\Traits\UnixTimestampSerializable;
 
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 
-use DB;
+use Illuminate\Support\Facades\DB;
 
 // class BaseModel extends Model implements HasMedia, Recordable
 class BaseModel extends Model implements Recordable

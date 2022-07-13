@@ -10,11 +10,11 @@ class Encuesta extends BaseModel
 {
     protected $table = 'polls';
     // protected $fillable = ['titulo', 'imagen', 'vigencia', 'post_id', 'estado', 'created_at', 'updated_at'];
-    protected $fillable = ['titulo', 'imagen', 'estado', 'created_at', 'updated_at', 'type_id', 'anonima'];
+    protected $fillable = ['titulo', 'imagen', 'active', 'type_id', 'anonima'];
 
     public function preguntas()
     {
-        return $this->hasMany(Encuestas_pregunta::class, 'encuesta_id');
+        return $this->hasMany(Encuestas_pregunta::class, 'poll_id');
     }
 
     public function type()
@@ -37,10 +37,10 @@ class Encuesta extends BaseModel
         return $query->paginate($request->paginate);
     }
 
-    public function setEstadoAttribute($value)
-    {
-        $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
-    }
+    // public function setEstadoAttribute($value)
+    // {
+    //     $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
+    // }
 
     public function countCoursesRelated()
     {

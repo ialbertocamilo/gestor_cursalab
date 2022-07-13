@@ -14,7 +14,7 @@ class EncuestaPreguntaResource extends JsonResource
      */
     public function toArray($request)
     {
-        $tipos = config('constantes.tipopreg');
+        // $tipos = config('constantes.tipopreg');
         // $tipos = config('data.tipo-preguntas');
 
         return [
@@ -22,8 +22,8 @@ class EncuestaPreguntaResource extends JsonResource
             'titulo' => $this->titulo,
             // 'tipo_pregunta' => $this->tipo_pregunta,
             'cantidad' => $this->getOptionsCount(),
-            'tipo_pregunta' => $tipos[$this->tipo_pregunta] ?? '',
-            'active' => $this->estado ? true : false,
+            'tipo_pregunta' => $this->type->name ?? '',
+            'active' => $this->active,
 
             'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : 'No definido',
             'updated_at' => $this->created_at ? $this->updated_at->format('d/m/Y g:i a') : 'No definido',

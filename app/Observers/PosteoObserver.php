@@ -13,7 +13,7 @@ class PosteoObserver
     /**
      * Handle the posteo "created" event.
      *
-     * @param \App\Posteo $posteo
+     * @param \App\Models\Posteo $posteo
      * @return void
      */
     public function created(Posteo $posteo)
@@ -25,7 +25,7 @@ class PosteoObserver
     /**
      * Handle the posteo "updated" event.
      *
-     * @param \App\Posteo $posteo
+     * @param \App\Models\Posteo $posteo
      * @return void
      */
     public function updated(Posteo $posteo)
@@ -84,7 +84,7 @@ class PosteoObserver
     /**
      * Handle the posteo "deleted" event.
      *
-     * @param \App\Posteo $posteo
+     * @param \App\Models\Posteo $posteo
      * @return void
      */
     public function deleted(Posteo $posteo)
@@ -95,7 +95,7 @@ class PosteoObserver
     /**
      * Handle the posteo "restored" event.
      *
-     * @param \App\Posteo $posteo
+     * @param \App\Models\Posteo $posteo
      * @return void
      */
     public function restored(Posteo $posteo)
@@ -106,7 +106,7 @@ class PosteoObserver
     /**
      * Handle the posteo "force deleted" event.
      *
-     * @param \App\Posteo $posteo
+     * @param \App\Models\Posteo $posteo
      * @return void
      */
     public function forceDeleted(Posteo $posteo)

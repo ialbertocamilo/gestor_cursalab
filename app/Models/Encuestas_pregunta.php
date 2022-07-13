@@ -14,24 +14,29 @@ class Encuestas_pregunta extends BaseModel
 
     public function encuesta()
     {
-        return $this->belongsTo('App\Encuesta', 'encuesta_id');
+        return $this->belongsTo(Encuesta::class, 'poll_id');
     }
     //
 
     public function respuestas()
     {
-        return $this->hasMany(Encuestas_respuesta::class, 'pregunta_id');
+        return $this->hasMany(Encuestas_respuesta::class, 'poll_question_id');
     }
 
-    public function respuestasGet()
+    public function type()
     {
-        return $this->hasMany(Encuestas_respuesta::class, 'pregunta_id')->get();
+        return $this->belongsTo(Taxonomy::class, 'type_id');
     }
 
-    public function setEstadoAttribute($value)
-    {
-        $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
-    }
+    // public function respuestasGet()
+    // {
+    //     return $this->hasMany(Encuestas_respuesta::class, 'pregunta_id')->get();
+    // }
+
+    // public function setEstadoAttribute($value)
+    // {
+    //     $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
+    // }
 
     // Respuestas por cada pregunta
     public function respuestasEncuesta($curso_id, $grupo, $enc_id, $pregunta_id)
@@ -63,13 +68,13 @@ class Encuestas_pregunta extends BaseModel
 
     protected function search($request)
     {
-        $query = self::query();
+        $query = self::with('type');
 
         if ($request->q)
             $query->where('titulo', 'like', "%$request->q%");
 
         if ($request->encuesta)
-            $query->where('encuesta_id', 'like', "%$request->encuesta%");
+            $query->where('poll_id', 'like', "%$request->encuesta%");
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';

@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Posteo;
+use App\Models\Posteo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

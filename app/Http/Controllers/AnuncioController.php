@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anuncio;
-use App\Models\Abconfig;
+use App\Models\Criterion;
 use App\Models\Media;
+use App\Models\User;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\AnuncioStoreRequest;
@@ -23,7 +24,8 @@ class AnuncioController extends Controller
 
     public function getListSelects()
     {
-        $modules = Abconfig::getModulesForSelect();
+        $modules = Criterion::getValuesForSelect('module');
+        // $modules = Abconfig::getModulesForSelect();
 
         return $this->success(get_defined_vars());
     }
@@ -42,7 +44,7 @@ class AnuncioController extends Controller
 
     public function create()
     {
-        $modules = Abconfig::getModulesForSelect();
+        $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
 
         return $this->success(get_defined_vars());
@@ -50,7 +52,7 @@ class AnuncioController extends Controller
 
     public function getFormSelects()
     {
-        $modules = Abconfig::select('id', 'etapa as nombre')->get();
+        $modules = Criterion::getValuesForSelect('module');
 
         return $this->success(get_defined_vars());
     }
