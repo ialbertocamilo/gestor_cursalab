@@ -19,7 +19,7 @@ use App\Models\Carrera;
 use App\Models\Usuario;
 use App\Models\Abconfig;
 use App\Models\AyudaApp;
-use App\Models\Encuesta;
+use App\Models\Poll;
 use App\Models\Pregunta;
 use App\Models\Categoria;
 use App\Models\Curricula;
@@ -649,7 +649,7 @@ class RestController extends Controller
 
     public function listaEncLibres($config_id, $user_id)
     {
-        $encs = Encuesta::where('tipo', 'libre')->where('estado', 1)->get();
+        $encs = Poll::where('tipo', 'libre')->where('estado', 1)->get();
 
         $data = [];
         foreach ($encs as $enc) {

@@ -27,8 +27,8 @@ class VademecumStoreRequest extends FormRequest
 
         return [
             'nombre' => "required|max:255|unique:vademecum,nombre,{$id},id,deleted_at,NULL",
-            'categoria_id' => 'nullable',
-            'subcategoria_id' => 'nullable',
+            'category_id' => 'nullable',
+            'subcategory_id' => 'nullable',
 
             'media' => 'nullable',
             'file_media' => 'nullable',
@@ -36,7 +36,7 @@ class VademecumStoreRequest extends FormRequest
 
             'modulos' => 'nullable',
 
-            'estado' => 'required',
+            'active' => 'required',
         ];
     }
 
@@ -44,12 +44,12 @@ class VademecumStoreRequest extends FormRequest
     {
         $data = [];
 
-        if ( ! $this->has('estado') )
-            $data['estado'] = false;
+        if ( ! $this->has('active') )
+            $data['active'] = false;
 
-        $data['categoria_id'] = $this->has('categoria') ? $this->categoria : null;
+        $data['category_id'] = $this->has('categoria') ? $this->categoria : null;
 
-        $data['subcategoria_id'] = $this->has('subcategoria') ? $this->subcategoria : null;
+        $data['subcategory_id'] = $this->has('subcategoria') ? $this->subcategoria : null;
 
         return $this->merge($data)->all();
     }

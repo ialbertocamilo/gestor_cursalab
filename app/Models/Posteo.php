@@ -37,7 +37,7 @@ class Posteo extends Model
 
     public function encuesta()
     {
-        return $this->hasMany(Encuesta::class, 'post_id');
+        return $this->hasMany(Poll::class, 'post_id');
     }
 
     public function categoria()

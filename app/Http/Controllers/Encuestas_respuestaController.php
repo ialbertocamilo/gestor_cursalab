@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Encuestas_respuesta;
+use App\Models\PollQuestionAnswer;
 use App\Models\Usuario;
 use App\Models\Pregunta;
 
@@ -18,7 +18,7 @@ class Encuestas_respuestaController extends Controller
      */
     public function index()
     {
-        $encuestas_respuestas = Encuestas_respuesta::paginate();
+        $encuestas_respuestas = PollQuestionAnswer::paginate();
 
         return view('encuestas_respuestas.index', compact('encuestas_respuestas'));
     }
@@ -29,7 +29,7 @@ class Encuestas_respuestaController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    { 
+    {
         $pregunta_array = Pregunta::select('id','pregunta')->pluck('pregunta','id' );
         $user_array = Usuario::select('id', \DB::raw("CONCAT(COALESCE(nombre,''),' ',COALESCE(ap_paterno,'')) as nombres"))->pluck('nombres','id');
         return view('encuestas_respuestas.create', compact('user_array', 'pregunta_array'));
@@ -43,13 +43,13 @@ class Encuestas_respuestaController extends Controller
      */
     public function store(Encuestas_respuestaStoreRequest $request)
     {
-        $encuestas_respuesta = Encuestas_respuesta::create($request->all());
+        $encuestas_respuesta = PollQuestionAnswer::create($request->all());
 
         return redirect()->route('encuestas_respuestas.edit', $encuestas_respuesta->id)
                 ->with('info', 'Encuestas_respuesta guardado con éxito');
     }
 
-    public function edit(Encuestas_respuesta $encuestas_respuesta)
+    public function edit(PollQuestionAnswer $encuestas_respuesta)
     {
         $pregunta_array = Pregunta::select('id','pregunta')->pluck('pregunta','id' );
         $user_array = Usuario::select('id', \DB::raw("CONCAT(COALESCE(nombre,''),' ',COALESCE(ap_paterno,'')) as nombres"))->pluck('nombres','id');
@@ -63,7 +63,7 @@ class Encuestas_respuestaController extends Controller
      * @param  \App\Encuestas_respuesta  $encuestas_respuesta
      * @return \Illuminate\Http\Response
      */
-    public function update(Encuestas_respuestaStoreRequest $request, Encuestas_respuesta $encuestas_respuesta)
+    public function update(Encuestas_respuestaStoreRequest $request, PollQuestionAnswer $encuestas_respuesta)
     {
         $encuestas_respuesta->update($request->all());
 
@@ -77,7 +77,7 @@ class Encuestas_respuestaController extends Controller
      * @param  \App\Encuestas_respuesta  $encuestas_respuesta
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Encuestas_respuesta $encuestas_respuesta)
+    public function destroy(PollQuestionAnswer $encuestas_respuesta)
     {
         $encuestas_respuesta->delete();
 

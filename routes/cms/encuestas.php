@@ -1,24 +1,25 @@
 <?php
 
-use App\Http\Controllers\EncuestaController;
+use App\Http\Controllers\PollController;
 
-Route::controller(EncuestaController::class)->group(function() {
+Route::controller(PollController::class)->group(function() {
 
-	Route::view('/', 'encuestas.list')->name('encuestas.list');
-	// Route::view('/', 'encuestas.list')->name('encuestas.list')->middleware('permission:encuestas.list');
+    Route::view('/', 'encuestas.list')->name('encuestas.list');
+    // Route::view('/', 'encuestas.list')->name('encuestas.list')->middleware('permission:encuestas.list');
 
-	Route::get('/search', 'search');
-	// Route::get('/get-list-selects', 'getListSelects');
-	Route::get('/form-selects', 'getFormSelects');
-	Route::get('/{encuesta}/search', 'search');
+    Route::get('/search', 'search');
+    // Route::get('/get-list-selects', 'getListSelects');
+    Route::get('/form-selects', 'getFormSelects');
+    Route::get('/{poll}/search', 'search');
 
-	Route::get('/create', 'create');
-	Route::post('/store', 'store');
-	Route::get('/{encuesta}/edit', 'edit');
-	Route::put('/{encuesta}/update', 'update');
+    Route::get('/create', 'create');
+    Route::post('/store', 'store');
+    Route::get('/{poll}/edit', 'edit');
+    Route::put('/{poll}/update', 'update');
 
-	Route::put('/{encuesta}/status', 'status');
-	Route::delete('/{encuesta}/destroy', 'destroy');
+    Route::put('/{poll}/status', 'status');
+    Route::delete('/{poll}/destroy', 'destroy');
 });
 
-Route::prefix('{encuesta}/preguntas')->group(base_path('routes/cms/encuestas_preguntas.php'));
+Route::prefix('/{poll}/preguntas')
+    ->group(base_path('routes/cms/encuestas_preguntas.php'));

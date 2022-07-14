@@ -10,8 +10,8 @@ use App\Models\Abconfig;
 use App\Models\Ab_config;
 use App\Models\Categoria;
 use App\Models\Matricula;
-use App\Models\Encuestas_pregunta;
-use App\Models\Encuestas_respuesta;
+use App\Models\PollQuestion;
+use App\Models\PollQuestionAnswer;
 
 use Illuminate\Http\Request;
 use App\Exports\EncuestaxgypExport;
@@ -448,7 +448,7 @@ class HomeController extends Controller
             $data['enc_id'] = $enc;
             $data['mod'] = $mod;
 
-            $data['preguntas_arr'] = Encuestas_pregunta::select('id','titulo')->pluck('titulo','id');
+            $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
             $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
@@ -470,7 +470,7 @@ class HomeController extends Controller
             $data['enc_id'] = $enc;
             $data['mod'] = $mod;
 
-            $data['preguntas_arr'] = Encuestas_pregunta::select('id','titulo')->pluck('titulo','id');
+            $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
             $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
@@ -503,7 +503,7 @@ class HomeController extends Controller
             $data['enc_id'] = $enc;
             $data['mod'] = $mod;
 
-            $data['preguntas_arr'] = Encuestas_pregunta::select('id','titulo')->pluck('titulo','id');
+            $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
             $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
@@ -525,7 +525,7 @@ class HomeController extends Controller
             $data['enc_id'] = $enc;
             $data['mod'] = $mod;
 
-            $data['preguntas_arr'] = Encuestas_pregunta::select('id','titulo')->pluck('titulo','id');
+            $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
             $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
@@ -671,7 +671,7 @@ class HomeController extends Controller
     // Resumen Encuestas - texto
     public function verEncPostText($enc, $mod, $curso,$grupo){
         if (!empty($enc)) {
-            $data = Encuestas_respuesta::with(['pregunta'=>function($q){
+            $data = PollQuestionAnswer::with(['pregunta'=>function($q){
                 $q->select('id','titulo');
             },'curso'=>function($q){
                 $q->select('id','nombre','config_id');
@@ -703,7 +703,7 @@ class HomeController extends Controller
     }
     public function exportarEncPostText($enc, $mod, $curso,$grupo){
         if (!empty($enc)) {
-            $data = Encuestas_respuesta::with(['pregunta'=>function($q){
+            $data = PollQuestionAnswer::with(['pregunta'=>function($q){
                 $q->select('id','titulo');
             },'curso'=>function($q){
                 $q->select('id','nombre','config_id');
@@ -741,7 +741,7 @@ class HomeController extends Controller
             $data['enc_id'] = $enc;
             $data['mod'] = $mod;
 
-            $data['preguntas_arr'] = Encuestas_pregunta::select('id','titulo')->pluck('titulo','id');
+            $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
             $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
@@ -762,7 +762,7 @@ class HomeController extends Controller
             $data['enc_id'] = $enc;
             $data['mod'] = $mod;
 
-            $data['preguntas_arr'] = Encuestas_pregunta::select('id','titulo')->pluck('titulo','id');
+            $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
             $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");

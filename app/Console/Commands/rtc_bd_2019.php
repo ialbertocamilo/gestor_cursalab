@@ -2,27 +2,21 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Curso;
-use App\Models\Posteo;
-use App\Models\Prueba;
-use App\Models\Visita;
-use App\Models\Carrera;
-use App\Models\Diploma;
-use App\Models\Usuario;
-use App\Models\Abconfig;
-use App\Models\Criterio;
-use App\Models\Encuesta;
-use App\Models\Reinicio;
-use App\Models\Matricula;
-use App\Models\Resumen_general;
-use App\Models\Resumen_x_curso;
-use App\Models\Matricula_criterio;
-
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Controllers\ApiRest\RestAvanceController;
+use App\Models\Abconfig;
+use App\Models\Carrera;
+use App\Models\Criterio;
+use App\Models\Diploma;
+use App\Models\Posteo;
+use App\Models\Prueba;
+use App\Models\Reinicio;
+use App\Models\Resumen_general;
+use App\Models\Resumen_x_curso;
+use App\Models\Usuario;
+use App\Models\Visita;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class rtc_bd_2019 extends Command
 {
@@ -69,7 +63,7 @@ class rtc_bd_2019 extends Command
                 $perf = DB::connection('mysql3')->table('perfiles')
                 ->where('id',$user->perfil_id)
                 ->first(['nombre','id']);
-            $carrera = Carrera::where('nombre',$perf->nombre)->where('config_id',$user->config_id)->first(['id']); 
+            $carrera = Carrera::where('nombre',$perf->nombre)->where('config_id',$user->config_id)->first(['id']);
             //CREAR USUARIO O BUSCAR USUARIO
             $user_b = Usuario::where('dni',42991214)->first();
             //MATRICULAR EN LA NUEVA BD
@@ -111,12 +105,12 @@ class rtc_bd_2019 extends Command
                 ->select('pos.nombre','pos.id as posteo_id','pos.curso_id','pos.evaluable')
                 ->where('pp.perfile_id',$perf->id)
                 ->get();
-            $helper = new HelperController(); 
+            $helper = new HelperController();
             $curso_ids = $helper->help_cursos_x_matricula($user_b->id);
             $temas_corres = Posteo::whereIn('curso_id', $curso_ids)->get(['nombre','curso_id','id','categoria_id'])->toArray();
             $plk_temas = collect($temas_corres)->pluck('nombre')->toArray();
-            // $pr = [] ;        
-            //MIGRAR DE LOS POSTEOS CON NOMBRE IGUAL       
+            // $pr = [] ;
+            //MIGRAR DE LOS POSTEOS CON NOMBRE IGUAL
             foreach($post_old as $post) {
                 if(in_array($post->nombre,$plk_temas)){
                     //MIGRAR PRUEBAS
@@ -131,7 +125,7 @@ class rtc_bd_2019 extends Command
                         Prueba::updateOrInsert(
                             ['posteo_id'=>$post_new['id'],'usuario_id'=>$user_b->id],
                             [
-                            'categoria_id'=> $post_new['categoria_id'], 
+                            'categoria_id'=> $post_new['categoria_id'],
                             'curso_id' => $post_new['curso_id'],
                             'posteo_id' => $post_new['id'],
                             'usuario_id' => $user_b->id,
@@ -146,7 +140,7 @@ class rtc_bd_2019 extends Command
                         // foreach ($enc_rpts as $enc_rpta) {
                             // $enc = DB::connection('mysql3')->table('encuestas')->where('id',$enc_rpta->encuesta_id)->first(['titulo']);
                             // $enc_new = Encuesta::where('titulo',$enc->titulo)->first(['id']);
-                            // //PREGUNTA 
+                            // //PREGUNTA
                             // $preg = DB::connection('mysql3')->table('encuestas_preguntas')->where('id',$enc_rpta->pregunta_id)->first(['titulo']);
                             // if($enc_new){
                             //     $preg_new = Encuesta::where('encuesta_id',$enc_new->id)->where('titulo',$preg->titulo)->first(['id']);
@@ -156,7 +150,7 @@ class rtc_bd_2019 extends Command
                             //             'post_id' => $post_new['id'],
                             //             'usuario_id' => $user_b->id,
                             //             ],[
-                            //             'encuesta_id' => $enc_new->id, 
+                            //             'encuesta_id' => $enc_new->id,
                             //             'curso_id' => $post->curso_id,
                             //             // 'post_id' =>
                             //             'pregunta_id' => $reg_new->id,
@@ -182,7 +176,7 @@ class rtc_bd_2019 extends Command
                             'post_id' => $post_new['id'],
                             'usuario_id' => $user_b->id,
                             ],
-                            [ 
+                            [
                             'post_id' => $post_new['id'],
                             'usuario_id' => $user_b->id,
                             'sumatoria' => $visita->sumatoria,
@@ -203,7 +197,7 @@ class rtc_bd_2019 extends Command
                             'posteo_id' => $post_new['id'],
                             'usuario_id' => $user_b->id,
                             ],
-                            [ 
+                            [
                             'posteo_id' => $post_new['id'],
                             'usuario_id' => $user_b->id,
                             'curso_id' => $post_new['curso_id'],
@@ -223,7 +217,7 @@ class rtc_bd_2019 extends Command
                             'posteo_id' => $post_new['id'],
                             'usuario_id' => $user_b->id,
                             ],
-                            [ 
+                            [
                             'posteo_id' => $post_new['id'],
                             'usuario_id' => $user_b->id,
                             'curso_id' => $post_new['curso_id'],
@@ -238,12 +232,12 @@ class rtc_bd_2019 extends Command
             //LIMPIAR TABLAS RESUMENES
             Resumen_x_curso::where('usuario_id',$user_b->id)->delete();
             Resumen_general::where('usuario_id',$user_b->id)->delete();
-            //ACTUALIZAR TABLAS RESUMENES 
-            $rest_avance = new RestAvanceController(); 
-            $ab_config = Abconfig::where('id',$user_b->config_id)->first(['mod_evaluaciones']); 
+            //ACTUALIZAR TABLAS RESUMENES
+            $rest_avance = new RestAvanceController();
+            $ab_config = Abconfig::where('id',$user_b->config_id)->first(['mod_evaluaciones']);
             $mod_eval = json_decode($ab_config->mod_evaluaciones, true);
             foreach ($curso_ids as $cur_id) {
-                // ACTUALIZAR RESUMENES 
+                // ACTUALIZAR RESUMENES
                 $rest_avance->actualizar_resumen_x_curso($user_b->id,$cur_id, $mod_eval['nro_intentos']);
             }
             $rest_avance->actualizar_resumen_general($user_b->id);
