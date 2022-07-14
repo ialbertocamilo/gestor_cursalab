@@ -15,4 +15,14 @@ class Workspace extends BaseModel
         ];
     }
 
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function schools()
+    {
+        return $this->belongsToMany(School::class);
+    }
+
 }
