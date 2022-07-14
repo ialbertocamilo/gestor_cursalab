@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Test\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +24,7 @@ use App\Http\Controllers\AuthenticationController;
 // Route::post('users/login', [AuthenticationController::class, 'login']);
 
 // Route::group(['middleware' => 'auth:api'], function () {
-    
+
 //     Route::patch('fcm_token', [AuthenticationController::class, 'updateToken']);
 
 //     Route::get('users/me', [AuthenticationController::class, 'me']);
@@ -42,3 +43,11 @@ Route::group(['prefix' => 'rest'], function () {
     Route::prefix('meetings')->group(base_path('routes/app/meetings.php'));
 });
 
+Route::controller(TestController::class)->group(function() {
+
+    Route::get('/test/users', 'users');
+    Route::get('/test/workspaces', 'workspaces');
+    Route::get('/test/schools', 'schools');
+    Route::get('/test/courses', 'courses');
+
+});
