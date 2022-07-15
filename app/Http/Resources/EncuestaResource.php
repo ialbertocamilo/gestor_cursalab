@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class EncuestaResource extends JsonResource
@@ -9,19 +10,17 @@ class EncuestaResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request $request
      * @return array
      */
     public function toArray($request)
     {
-        $sections = [ 'xcurso'=> 'Cursos', 'libre'=> 'Libre' ];
-
         return [
             'id' => $this->id,
             'titulo' => $this->titulo,
             'image' => space_url($this->imagen),
             'active' => $this->active,
-            'anonima' => $this->anonima == 'si' ? 'Anónima' : 'No anónima',
+            'anonima' => $this->anonima ? 'Anónima' : 'No anónima',
             // 'tipo' => $sections[$this->tipo] ?? '',
             'tipo' => $this->type->name ?? '',
 

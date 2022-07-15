@@ -26,14 +26,13 @@
                             v-model="resource.anonima"
                             label="Tipo"
                             return-object
-                            :rules="rules.tipo"
                         />
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultAutocomplete
                             clearable
                             :items="selects.secciones"
-                            v-model="resource.tipo"
+                            v-model="resource.type_id"
                             return-object
                             label="Sección"
                         />
@@ -53,7 +52,7 @@
 
                 <v-row align="start" align-content="center">
                     <v-col cols="4" class="d-flex justify-content-start">
-                        <DefaultToggle v-model="resource.estado"/>
+                        <DefaultToggle v-model="resource.active"/>
                     </v-col>
                 </v-row>
             </v-form>
@@ -64,7 +63,7 @@
 
 <script>
 
-const fields = ['tipo', 'anonima', 'titulo', 'estado'];
+const fields = ['type_id', 'anonima', 'titulo', 'active'];
 const file_fields = ['imagen'];
 
 
@@ -81,10 +80,10 @@ export default {
             resourceDefault: {
                 id: null,
                 titulo: '',
-                anonima: null,
-                tipo: [],
+                anonima: 0,
+                type_id: [],
                 // secciones: [],
-                estado: null,
+                active: null,
             },
             resource: {},
             selects: {
@@ -93,9 +92,7 @@ export default {
             },
 
             rules: {
-                // modulo: this.getRules(['required']),
                 titulo: this.getRules(['required', 'max:100']),
-                // dni: this.getRules(['required', 'number'])
             }
         }
     },
@@ -120,14 +117,18 @@ export default {
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = vue.resource.id
+                        ? `${base}/${vue.resource.id}/update`
+                        : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
 
             // if (validateForm && validateSelectedModules) {
             if (validateForm) {
 
-                let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+                let formData = vue.getMultipartFormData(
+                    method, vue.resource, fields, file_fields
+                );
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
@@ -151,7 +152,9 @@ export default {
             let vue = this
 
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                vue.resource = Object.assign(
+                    {}, vue.resource, vue.resourceDefault
+                )
             })
 
             // let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/search` : `form-selects`}`
@@ -164,9 +167,8 @@ export default {
                     vue.selects.secciones = data.data.secciones
 
                     if (resource) {
-                        vue.resource = data.data.encuesta
+                        vue.resource = Object.assign({}, data.data.poll)
                     }
-
                 })
             return 0;
         },

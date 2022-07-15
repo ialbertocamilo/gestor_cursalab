@@ -54,8 +54,8 @@ class PollController extends Controller
      */
     public function create()
     {
-        $secciones = config('data.encuestas.secciones');
-        $tipos = config('data.encuestas.tipos');
+        $secciones = config('data.polls.secciones');
+        $tipos = config('data.polls.tipos');
 
         return $this->success(get_defined_vars());
     }
@@ -81,8 +81,8 @@ class PollController extends Controller
 
     public function edit(Poll $poll)
     {
-        $secciones = config('data.encuestas.secciones');
-        $tipos = config('data.encuestas.tipos');
+        $secciones = config('data.polls.secciones');
+        $tipos = config('data.polls.tipos');
 
         return $this->success(get_defined_vars());
     }
