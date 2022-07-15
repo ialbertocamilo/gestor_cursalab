@@ -4,17 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Encuestas_respuesta extends BaseModel
+class PollQuestionAnswer extends BaseModel
 {
-    protected $table = 'encuestas_respuestas';
+    protected $table = 'poll_question_answers';
 
     protected $fillable = [
-    	'encuesta_id', 'curso_id', 'pregunta_id', 'usuario_id', 'respuestas', 'tipo_pregunta', 'created_at', 'updated_at'
+        'encuesta_id', 'curso_id', 'pregunta_id', 'usuario_id', 'respuestas', 'tipo_pregunta', 'created_at', 'updated_at'
     ];
 
     public function pregunta()
     {
-        return $this->belongsTo(Encuestas_pregunta::class, 'pregunta_id');
+        return $this->belongsTo(PollQuestion::class, 'pregunta_id');
     }
 
     public function curso()

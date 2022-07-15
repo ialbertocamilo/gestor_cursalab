@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Encuestas_preguntaStoreRequest extends FormRequest
+class PollStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,24 +23,21 @@ class Encuestas_preguntaStoreRequest extends FormRequest
      */
     public function rules()
     {
-        
-        $reglas = [
-            // 'encuesta_id' => 'required',
-            'titulo' => 'required',
-            'tipo_pregunta' => 'required',
-            'opciones' => 'nullable',
-            'estado' => 'required',
+        return [
+            'titulo' => 'required|min:3',
+            'imagen' => 'required',
+            'active' => 'nullable',
+            'type_id' => 'nullable',
+            'anonima' => 'nullable',
         ];
-
-        return $reglas;
     }
 
     public function validationData()
     {
         $data = [];
 
-        if ( ! $this->has('estado') )
-            $data['estado'] = false;
+        if ( ! $this->has('active') )
+            $data['active'] = false;
 
         return $this->merge($data)->all();
     }

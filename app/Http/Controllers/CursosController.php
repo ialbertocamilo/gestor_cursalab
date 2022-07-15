@@ -19,7 +19,7 @@ use App\Models\Curso;
 use App\Models\Posteo;
 use App\Models\Carrera;
 use App\Models\Abconfig;
-use App\Models\Encuesta;
+use App\Models\Poll;
 use App\Models\Pregunta;
 use App\Models\Categoria;
 use App\Models\Curricula;
@@ -539,7 +539,7 @@ class CursosController extends Controller
     ////////////////////// CURSO ENCUESTA ////////////////////////////
     public function getEncuesta(Abconfig $abconfig, Categoria $categoria, Curso $curso)
     {
-        $encuestas = Encuesta::select('id', 'titulo')->select('titulo as nombre', 'id')->get();
+        $encuestas = Poll::select('id', 'titulo')->select('titulo as nombre', 'id')->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
         $curso->encuesta_id = $curso->encuesta->encuesta_id ?? "ninguno";
         return $this->success(compact('encuestas', 'curso'));
@@ -564,7 +564,7 @@ class CursosController extends Controller
 
     public function create_CE(Curso $curso)
     {
-        $encuestas_array = Encuesta::select('id', 'titulo')->pluck('titulo', 'id');
+        $encuestas_array = Poll::select('id', 'titulo')->pluck('titulo', 'id');
         $encuestas_array->prepend('NINGUNO', '');
 
         return view('cursos.create_encuesta', compact('encuestas_array', 'curso'));
@@ -588,7 +588,7 @@ class CursosController extends Controller
     public function edit_CE(Curso $curso, Curso_encuesta $ce)
     {
 
-        $encuestas_array = Encuesta::select('id', 'titulo')->where('tipo', 'xcurso')->where('estado', 1)->pluck('titulo', 'id');
+        $encuestas_array = Poll::select('id', 'titulo')->where('tipo', 'xcurso')->where('estado', 1)->pluck('titulo', 'id');
         $encuestas_array->prepend('NINGUNO', '');
         // return $encuestas_array;
         return view('cursos.edit_encuesta', compact('curso', 'ce', 'encuestas_array'));

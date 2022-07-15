@@ -14,7 +14,7 @@ use App\Models\Matricula;
 use App\Models\Ev_abierta;
 use App\Models\Curso_encuesta;
 use App\Models\Resumen_x_curso;
-use App\Models\Encuestas_respuesta;
+use App\Models\PollQuestionAnswer;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\ApiRest\RestAvanceController;
@@ -117,10 +117,10 @@ class MigrarAvanceController extends Controller
         $migrar_encuestas = collect();
         $pruebas->each(function($prueba) use($migrar_encuestas,$posteo_origen,$posteo_destino,$migrar_pruebas,$enc_1,$enc_2){
             if(isset($enc_1) && isset($enc_2) && ($enc_1->encuesta_id == $enc_2->encuesta_id)){
-                $encs = Encuestas_respuesta::where('usuario_id', $prueba->usuario_id)->where('curso_id', $posteo_destino->curso_id)->get();
+                $encs = PollQuestionAnswer::where('usuario_id', $prueba->usuario_id)->where('curso_id', $posteo_destino->curso_id)->get();
                 // Si ya tiene encuesta no se migra
                 if(count($encs)==0){
-                    $ec_migrar = Encuestas_respuesta::where('usuario_id', $prueba->usuario_id)
+                    $ec_migrar = PollQuestionAnswer::where('usuario_id', $prueba->usuario_id)
                     ->where('curso_id', $posteo_origen->curso_id)
                     ->select('encuesta_id','pregunta_id','usuario_id','respuestas','tipo_pregunta')->get();
                     $ec_migrar->each(function($ec_m)use($posteo_destino,$migrar_encuestas){
@@ -157,7 +157,7 @@ class MigrarAvanceController extends Controller
         if($migrar_encuestas->count()>0){
             $chunks = array_chunk($migrar_encuestas->toArray(), 200);
             foreach ($chunks as $rs) {
-                Encuestas_respuesta::insert($rs);
+                PollQuestionAnswer::insert($rs);
             }
         }
         return 'ok';
@@ -213,7 +213,7 @@ class MigrarAvanceController extends Controller
         $resumenes_migrar = collect();
         $curso = Curso::where('id',$curso_destino['id'])->select('config_id')->first();
         $modulo = Abconfig::where('id',$curso->config_id)->select('mod_evaluaciones')->first();
-        $mod_eval = json_decode($modulo->mod_evaluaciones,true); 
+        $mod_eval = json_decode($modulo->mod_evaluaciones,true);
         $restAvance = new RestAvanceController();
         $resumenes->each(function($resumen) use ($curso_destino,$restAvance,$mod_eval){
             $restAvance->actualizar_resumen_x_curso($resumen->usuario_id, $curso_destino['id'], intval($mod_eval['nro_intentos']));

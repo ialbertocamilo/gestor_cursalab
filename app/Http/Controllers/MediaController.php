@@ -174,7 +174,8 @@ class MediaController extends Controller
 
             // Deletes file from remote storage
 
-            Storage::disk('do_spaces')->delete($media->file);
+            Storage::disk('do_spaces')
+                   ->delete($media->file);
         }
 
         // Deletes file from database

@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use ZipArchive;
 
-
 class Media extends Model
 {
 
@@ -60,9 +59,9 @@ class Media extends Model
 
         if (!$name) {
             $namewithextension = $file->getClientOriginalName();
-            $name = str_slug(explode('.', $namewithextension)[0]);
+            $name = Str::slug(explode('.', $namewithextension)[0]);
         } else {
-            $name = str_slug($name);
+            $name = Str::slug($name);
         }
 
         // Generate filename
@@ -74,7 +73,7 @@ class Media extends Model
         // so converts the value to Kilobytes (as an integer)
 
         try {
-            $size = floor($file->getSize() / 1024);
+            $size = round($file->getSize() / 1024);
         } catch (\Exception $exception) {
             $size = 0;
         }
@@ -119,8 +118,10 @@ class Media extends Model
         // Upload to remote storage
 
         if (!$uploaded) {
-            // $file->move($path, $fileName);
-            if (Storage::disk('do_spaces')->put($path, file_get_contents($file), 'public')) {
+
+            $result = Storage::disk('do_spaces')
+                             ->put($path, $file, 'public');
+            if ($result) {
                 $uploaded = true;
             }
         }
@@ -128,7 +129,7 @@ class Media extends Model
         // Insert Media
 
         if ($uploaded) {
-            $media = new Media;
+            $media = new \App\Models\Media();
             $media->title = $name;
             $media->file = $path;
             $media->ext = $ext;
@@ -218,7 +219,7 @@ class Media extends Model
         $query = Media::query();
 
         if ($request->q) {
-            $title = str_slug(trim($request->q));
+            $title = Str::slug(trim($request->q));
             $query->where('title', 'like', "%{$title}%");
         }
 
@@ -237,8 +238,14 @@ class Media extends Model
         }
 
         if ($request->fecha) {
-            $query->whereDate('created_at', '>=', $request->fecha[0]);
-            $query->whereDate('created_at', '<=', $request->fecha[1]);
+
+            if (isset($request->fecha[0])) {
+                $query->whereDate('created_at', '>=', $request->fecha[0]);
+            }
+
+            if (isset($request->fecha[1])) {
+                $query->whereDate('created_at', '<=', $request->fecha[1]);
+            }
         }
 
         if ($request->order_by) {

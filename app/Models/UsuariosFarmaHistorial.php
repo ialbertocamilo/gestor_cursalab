@@ -19,14 +19,14 @@ class UsuariosFarmaHistorial implements ToCollection
         $errores = [];
         $total = count($rows);
         // PROCESAR CADA DNI
-        for ($i=3; $i < $total; $i++) { 
+        for ($i=3; $i < $total; $i++) {
             if(!empty($rows[$i][1])){
                 $dni = $rows[$i][2];
                 $carrera = trim($rows[$i][8]);
                 $user = Usuario::select('id')->where('dni', $dni)->first();
                 if($user){
-                    $u_antiguo = DB::connection('mysql2')->table('hi_usuarios')->select('usuario_id')->where('dni', $dni)->first(); 
-                    $u_id_nuevo =$user->id; 
+                    $u_antiguo = DB::connection('mysql2')->table('hi_usuarios')->select('usuario_id')->where('dni', $dni)->first();
+                    $u_id_nuevo =$user->id;
                     $u_id_antiguo = $u_antiguo->usuario_id;
                     $config_id = $user->config_id;
                     $this->recuperar_data_x_dni($dni, $u_id_antiguo, $u_id_nuevo,$config_id);
@@ -47,7 +47,7 @@ class UsuariosFarmaHistorial implements ToCollection
                     // $usu_masivo =  new UsuariosMasivos();
                     // $usu_masivo->collection($rows[$i]);
                     // $user = Usuario::select('id')->where('dni', $dni)->first();
-                    // $u_antiguo = DB::connection('mysql2')->table('hi_usuarios')->select('usuario_id')->where('dni', $dni)->first(); 
+                    // $u_antiguo = DB::connection('mysql2')->table('hi_usuarios')->select('usuario_id')->where('dni', $dni)->first();
                     // //VERIFICA SI EXISTE EN FARMA HISTORIAL
                     // if($u_antiguo){
                     //     $this->recuperar_data_x_dni($dni, $u_antiguo->usuario_id, $user->id,$user->config_id);
@@ -79,7 +79,7 @@ class UsuariosFarmaHistorial implements ToCollection
         $db_name = $this->getDefaultDBName();
         $hi_db_name = $this->getHistorialDBName();
         // diplomas
-        $diplomas = DB::connection('mysql2')->table('hi_diplomas')->where('usuario_id', $u_id_antiguo)->get(); 
+        $diplomas = DB::connection('mysql2')->table('hi_diplomas')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($diplomas as $row) {
             $existe = Diploma::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('curso_id', $row->curso_id)->first();
             if(!$existe){
@@ -92,11 +92,11 @@ class UsuariosFarmaHistorial implements ToCollection
         }
 
         // encuestas_respuestas
-        $encuestas_respuestas = DB::connection('mysql2')->table('hi_encuestas_respuestas')->where('usuario_id', $u_id_antiguo)->get(); 
+        $encuestas_respuestas = DB::connection('mysql2')->table('hi_encuestas_respuestas')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($encuestas_respuestas as $row) {
-            $existe = Encuestas_respuesta::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('curso_id', $row->curso_id)->first();
+            $existe = PollQuestionAnswer::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('curso_id', $row->curso_id)->first();
             if(!$existe){
-                $new = new Encuestas_respuesta;
+                $new = new PollQuestionAnswer;
                 $new->usuario_id = $u_id_nuevo;
                 $new->encuesta_id = $row->encuesta_id;
                 $new->curso_id = $row->curso_id;
@@ -106,7 +106,7 @@ class UsuariosFarmaHistorial implements ToCollection
             }
         }
         // ev_abiertas
-        $ev_abiertas = DB::connection('mysql2')->table('hi_ev_abiertas')->where('usuario_id', $u_id_antiguo)->get(); 
+        $ev_abiertas = DB::connection('mysql2')->table('hi_ev_abiertas')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($ev_abiertas as $row) {
             $existe = Ev_abierta::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('posteo_id', $row->posteo_id)->first();
             if(!$existe){
@@ -121,7 +121,7 @@ class UsuariosFarmaHistorial implements ToCollection
         }
 
         // pruebas
-        $pruebas = DB::connection('mysql2')->table('hi_pruebas')->where('usuario_id', $u_id_antiguo)->get(); 
+        $pruebas = DB::connection('mysql2')->table('hi_pruebas')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($pruebas as $row) {
             $existe = Prueba::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('posteo_id', $row->posteo_id)->first();
             if(!$existe){
@@ -141,7 +141,7 @@ class UsuariosFarmaHistorial implements ToCollection
         }
 
         // reinicios
-        $reinicios = DB::connection('mysql2')->table('hi_reinicios')->where('usuario_id', $u_id_antiguo)->get(); 
+        $reinicios = DB::connection('mysql2')->table('hi_reinicios')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($reinicios as $row) {
             $existe = Reinicio::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('posteo_id', $row->posteo_id)->first();
             if(!$existe){
@@ -157,7 +157,7 @@ class UsuariosFarmaHistorial implements ToCollection
         }
 
         // // resumen_general
-        // $resumen_general = DB::connection('mysql2')->table('hi_resumen_general')->where('usuario_id', $u_id_antiguo)->get(); 
+        // $resumen_general = DB::connection('mysql2')->table('hi_resumen_general')->where('usuario_id', $u_id_antiguo)->get();
         // foreach ($resumen_general as $row) {
         //     $existe = Resumen_general::select('usuario_id')->where('usuario_id', $u_id_nuevo)->first();
         //     if(!$existe){
@@ -174,7 +174,7 @@ class UsuariosFarmaHistorial implements ToCollection
         // }
 
         // // resumen_x_curso
-        // $resumen_x_curso = DB::connection('mysql2')->table('hi_resumen_x_curso')->where('usuario_id', $u_id_antiguo)->get(); 
+        // $resumen_x_curso = DB::connection('mysql2')->table('hi_resumen_x_curso')->where('usuario_id', $u_id_antiguo)->get();
         // foreach ($resumen_x_curso as $row) {
         //     $existe = Resumen_x_curso::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('curso_id', $row->curso_id)->first();
         //     if(!$existe){
@@ -197,7 +197,7 @@ class UsuariosFarmaHistorial implements ToCollection
         // }
 
         // usuario_uploads
-        $usuario_uploads = DB::connection('mysql2')->table('hi_usuario_uploads')->where('usuario_id', $u_id_antiguo)->get(); 
+        $usuario_uploads = DB::connection('mysql2')->table('hi_usuario_uploads')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($usuario_uploads as $row) {
             $existe = Usuario_upload::select('usuario_id')->where('usuario_id', $u_id_nuevo)->first();
             if(!$existe){
@@ -211,7 +211,7 @@ class UsuariosFarmaHistorial implements ToCollection
         }
 
         // usuario_versiones
-        $usuario_versiones = DB::connection('mysql2')->table('hi_usuario_versiones')->where('usuario_id', $u_id_antiguo)->get(); 
+        $usuario_versiones = DB::connection('mysql2')->table('hi_usuario_versiones')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($usuario_versiones as $row) {
             $existe = Usuario_version::select('usuario_id')->where('usuario_id', $u_id_nuevo)->first();
             if(!$existe){
@@ -224,7 +224,7 @@ class UsuariosFarmaHistorial implements ToCollection
         }
 
         // visitas
-        $visitas = DB::connection('mysql2')->table('hi_visitas')->where('usuario_id', $u_id_antiguo)->get(); 
+        $visitas = DB::connection('mysql2')->table('hi_visitas')->where('usuario_id', $u_id_antiguo)->get();
         foreach ($visitas as $row) {
             $existe = Visita::select('usuario_id')->where('usuario_id', $u_id_nuevo)->where('post_id', $row->post_id)->first();
             if(!$existe){
@@ -243,14 +243,14 @@ class UsuariosFarmaHistorial implements ToCollection
     }
     private function actualizar_resumenes($u_id_nuevo,$config_id){
          // CONSULTAR LOS CURSOS MATRICULADOS
-         $helper = new HelperController(); 
+         $helper = new HelperController();
          $curso_ids = $helper->help_cursos_x_matricula($u_id_nuevo);
-         //ACTUALIZAR TABLAS RESUMENES 
+         //ACTUALIZAR TABLAS RESUMENES
          $ab_config = Abconfig::where('id',$config_id)->first(['mod_evaluaciones']);
-         $rest_avance = new RestAvanceController(); 
+         $rest_avance = new RestAvanceController();
          $mod_eval = json_decode($ab_config->mod_evaluaciones, true);
          foreach ($curso_ids as $cur_id) {
-            // ACTUALIZAR RESUMENES 
+            // ACTUALIZAR RESUMENES
             $rest_avance->actualizar_resumen_x_curso($user['usuario_id'],$cur_id, $mod_eval['nro_intentos']);
          }
          $rest_avance->actualizar_resumen_general($user['usuario_id']);

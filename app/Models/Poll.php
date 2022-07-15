@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Support\Facades\DB;
+
+class Poll extends BaseModel
+{
+    protected $table = 'polls';
+
+    protected $fillable = [
+        'type_id', 'anonima', 'titulo', 'imagen', 'active'
+    ];
+
+    /*
+
+        Relationships
+
+    --------------------------------------------------------------------------*/
+
+
+    public function questions()
+    {
+        return $this->hasMany(
+            PollQuestion::class, 'poll_id'
+        );
+    }
+
+    public function type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
+    /*
+
+        Methods
+
+    --------------------------------------------------------------------------*/
+
+    /**
+     * Searches a record according a criteria
+     *
+     * @param $request
+     * @return mixed
+     */
+    protected function search($request)
+    {
+        $query = self::withCount('questions');
+
+        if ($request->q)
+            $query->where('titulo', 'like', "%$request->q%");
+
+        $field = $request->sortBy ?? 'created_at';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $query->orderBy($field, $sort);
+
+        return $query->paginate($request->paginate);
+    }
+
+    /**
+     * Calculates the count of related courses
+     *
+     * @return int
+     */
+    public function countCoursesRelated()
+    {
+        return DB::table('course_poll')
+                   ->where('poll_id', $this->id)
+                   ->count();
+    }
+
+}
