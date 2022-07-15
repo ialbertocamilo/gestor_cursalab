@@ -34,7 +34,9 @@
                 <v-row justify="space-around" v-show="['simple', 'multiple'].includes(resource.tipo_pregunta.id)">
 
                     <v-col cols="12" class="d-flex justify-content-center align-center">
-                        <div class="label">Opciones: {{ resource.tipo_pregunta.nombre }}</div>
+                        <div class="label">
+                            Opciones: {{ resource.tipo_pregunta.nombre }}
+                        </div>
                         <v-btn
                             text icon
                             color="primary"
@@ -70,7 +72,7 @@
 
                 <v-row align="start" align-content="center">
                     <v-col cols="4" class="--d-flex --justify-content-start">
-                        <DefaultToggle v-model="resource.estado" />
+                        <DefaultToggle v-model="resource.active" />
                     </v-col>
                 </v-row>
 
@@ -82,7 +84,7 @@
 
 <script>
 
-const fields = ['titulo', 'tipo_pregunta', 'estado'];
+const fields = ['titulo', 'tipo_pregunta', 'active'];
 const array_fields = ['opciones'];
 
 export default {
@@ -98,7 +100,7 @@ export default {
             resourceDefault: {
                 id: null,
                 titulo: '',
-                estado: true,
+                active: true,
                 opciones: [],
                 // tipo_pregunta: null,
                 tipo_pregunta: {id: null, nombre: ''},
@@ -181,7 +183,9 @@ export default {
             let vue = this
 
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                vue.resource = Object.assign(
+                    {}, vue.resource, vue.resourceDefault
+                )
 
                 vue.resource.opciones = []
             })
@@ -194,9 +198,8 @@ export default {
                 vue.selects.tipos = data.data.tipos
 
                 if (resource) {
-                    // vue.resource = data.data.encuestas_pregunta
-                    Object.assign(vue.resource, data.data.encuestas_pregunta)
-                    // vue.resource.tipo_pregunta = data.data.encuestas_pregunta.tipo_pregunta
+                    vue.resource = Object.assign({}, data.data.pollquestion)
+                    vue.resource.tipo_pregunta = Object.assign({}, data.data.pollquestion.tipo_pregunta)
                 }
             })
 

@@ -11,10 +11,10 @@ return [
 
 			[	'id' => 'jerarquia_id', 'key' => 'jerarquia', 'relation' => 'jerarquia', 'name' => 'Jerarquía', 'show_values' => 1,
 				'placeholder' => 'Seleccione una jerarquía', 'multiple' => false, 'api' => true],
-			
+
 			[	'id' => 'laboratorio_id', 'key' => 'laboratorio', 'relation' => 'laboratorio', 'name' => 'Laboratorio', 'show_values' => 1,
 				'placeholder' => 'Seleccione un laboratorio', 'multiple' => false, 'api' => true],
-			
+
 			[	'id' => 'principios_activos', 'key' => 'principio_activo', 'relation' => 'principios_activos', 'name' => 'Principios Activos', 'show_values' => 4,
 				'placeholder' => null, 'multiple' => true, 'api' => true],
 
@@ -42,10 +42,10 @@ return [
 
 			[	'id' => 'contraindicaciones', 'key' => 'contraindicacion', 'relation' => 'contraindicaciones', 'name' => 'Contraindicación', 'show_values' => 5,
 				'placeholder' => null, 'multiple' => true, 'api' => false],
-				
+
 			[	'id' => 'interacciones', 'key' => 'interaccion', 'relation' => 'interacciones', 'name' => 'Interacciones Más Frecuentes', 'show_values' => 4,
 				'placeholder' => null, 'multiple' => true, 'api' => false],
-				
+
 			[	'id' => 'reacciones', 'key' => 'reaccion', 'relation' => 'reacciones', 'name' => 'Reacciones Más Frecuentes', 'show_values' => 4,
 				'placeholder' => null, 'multiple' => true, 'api' => false],
 		]
@@ -78,27 +78,27 @@ return [
 	    [ 'id' => 'ayuda', 'nombre' => 'Ayuda'],
 	],
 
-	'encuestas' => [
-		'secciones' => [ 
+	'polls' => [
+		'secciones' => [
 			['id' => 'xcurso', 'nombre' => 'Cursos'],
 			['id' =>  'libre', 'nombre' => 'Libre'],
 		],
-		'tipos' => [ 
-			['id' => 'si', 'nombre'  => 'Anónima'],
-			['id' => 'no', 'nombre' => 'No anónima'],
+		'tipos' => [
+			['id' => 1, 'nombre'  => 'Anónima'],
+			['id' => 0, 'nombre' => 'No anónima'],
 		],
 	],
 
 	'tipo-criterios' => [
-		['id' => 'Texto', 'nombre' => 'Texto' ], 
-		['id' => 'Numérico', 'nombre' => 'Numérico' ], 
-		['id' => 'Fecha', 'nombre' => 'Fecha' ], 
+		['id' => 'Texto', 'nombre' => 'Texto' ],
+		['id' => 'Numérico', 'nombre' => 'Numérico' ],
+		['id' => 'Fecha', 'nombre' => 'Fecha' ],
 	],
 
 	'soporte-estados' => [
-		['id' => 'pendiente', 'nombre' => 'Pendiente' ], 
-		['id' => 'revisando', 'nombre' => 'Revisando' ], 
-		['id' => 'solucionado', 'nombre' => 'Solucionado' ], 
+		['id' => 'pendiente', 'nombre' => 'Pendiente' ],
+		['id' => 'revisando', 'nombre' => 'Revisando' ],
+		['id' => 'solucionado', 'nombre' => 'Solucionado' ],
 	],
 
 	'tipo-preguntas' => [
@@ -117,7 +117,7 @@ return [
         ['nombre' => 'SCORM', 'id' => 'scorm'],
         ['nombre' => 'Imagen', 'id' => 'image'],
     ],
-    
+
     'cuentas-zoom-tipos' => [
     	['id' => 'PRO', 'nombre' => 'PRO'],
 		['id' => 'BUSINESS', 'nombre' => 'BUSINESS'],

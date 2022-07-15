@@ -180,7 +180,7 @@ class MediaController extends Controller
 
         // Deletes file from database
 
-        $media->delete();
+        // $media->delete();
 
 
         return $this->success([

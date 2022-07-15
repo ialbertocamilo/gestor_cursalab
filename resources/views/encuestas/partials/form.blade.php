@@ -19,10 +19,10 @@
 <?php $array1 = [ 'xcurso'=> 'PARA CURSOS', 'libre'=> 'LIBRE' ]; ?>
 
 <div class="form-group row" >
-    {{ Form::label('tipo', 'Tipo', ['class'=>'col-sm-3 form-control-label'] ) }}
+    {{ Form::label('type_id', 'Tipo', ['class'=>'col-sm-3 form-control-label'] ) }}
     <span></span>
     <div class="col-sm-9">
-        {{ Form::select('tipo', $array1, null, [ 'class' => 'form-control']) }}
+        {{ Form::select('type_id', $array1, null, [ 'class' => 'form-control']) }}
     </div>
 </div>
 
@@ -110,18 +110,19 @@
 
 @section('js')
     @parent
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script>
+<script>
 
-        $(".fecha").datepicker({
+$(".fecha").datepicker({
   dateFormat: 'yy-mm-dd',
   onSelect: function(dateText, inst) {
     $(inst).val(dateText); // Write the value in the input
   }
 });
-        $(".fecha").on('click', function() {
+
+$(".fecha").on('click', function() {
   return false;
 });
-    </script>
+</script>
 @endsection
