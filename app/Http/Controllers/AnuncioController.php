@@ -25,7 +25,7 @@ class AnuncioController extends Controller
     public function getListSelects()
     {
         $modules = Criterion::getValuesForSelect('module');
-        // $modules = Abconfig::getModulesForSelect();
+        // $modules = Criterion::getValuesForSelect('module');
 
         return $this->success(get_defined_vars());
     }
@@ -76,7 +76,7 @@ class AnuncioController extends Controller
         $config_ids = json_decode($anuncio->config_id, true);
         $anuncio->modules = Abconfig::getModulesForSelect($config_ids);
 
-        $modules = Abconfig::getModulesForSelect();
+        $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
 
         return $this->success(get_defined_vars());
