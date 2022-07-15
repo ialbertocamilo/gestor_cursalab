@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 class Usuario extends Model
 {
     protected $table = 'users';
-    
+
     use Notifiable;
 
     const TAG_ROL_ENTRENAMIENTO_ENTRENADOR = 'entrenador';
@@ -103,7 +103,7 @@ class Usuario extends Model
 
     public function rpta_encuestas()
     {
-        return $this->hasMany(Encuestas_respuesta::class, 'usuario_id');
+        return $this->hasMany(PollQuestionAnswer::class, 'usuario_id');
     }
 
     public function rpta_pruebas_dessaprob($config)
@@ -183,7 +183,7 @@ class Usuario extends Model
 
     public function encuestas_respuestas()
     {
-        return $this->hasMany(Encuestas_respuesta::class, 'usuario_id');
+        return $this->hasMany(PollQuestionAnswer::class, 'usuario_id');
     }
 
     public function diplomas()

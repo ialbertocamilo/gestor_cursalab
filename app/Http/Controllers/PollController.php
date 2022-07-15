@@ -2,45 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Encuesta;
-use App\Models\Posteo;
-use App\Models\Media;
-
-use App\Http\Requests\EncuestaStoreRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\PollStoreRequest;
 use App\Http\Resources\EncuestaResource;
+use App\Models\Media;
+use App\Models\Poll;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-class EncuestaController extends Controller
+class PollController extends Controller
 {
     public function search(Request $request)
     {
-        $encuestas = Encuesta::search($request);
+        $encuestas = Poll::search($request);
 
         EncuestaResource::collection($encuestas);
 
         return $this->success($encuestas);
     }
 
-    public function preguntas(Encuesta $encuesta)
+    public function preguntas(Poll $poll)
     {
-        $encuestas_preguntas = $encuesta->encuestas()->paginate();
+        $encuestas_preguntas = $poll->encuestas()->paginate();
         // return $encuestas_preguntas;
 
-        return view('encuestas.preguntas', compact('encuesta','encuestas_preguntas'));
+        return view('encuestas.preguntas', compact('poll','encuestas_preguntas'));
     }
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Application|Factory|View
      */
     public function index(Request $request)
     {
         if ($request->has('q')) {
             $question = $request->input('q');
             // return $question;
-            $encuestas = Encuesta::where('titulo', 'like', '%'.$question.'%')->paginate();
+            $encuestas = Poll::where('titulo', 'like', '%'.$question.'%')->paginate();
         }else{
-        $encuestas = Encuesta::paginate();
+        $encuestas = Poll::paginate();
        }
         return view('encuestas.index', compact('encuestas'));
     }
@@ -48,10 +50,10 @@ class EncuestaController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function create()
-    {    
+    {
         $secciones = config('data.encuestas.secciones');
         $tipos = config('data.encuestas.tipos');
 
@@ -61,23 +63,23 @@ class EncuestaController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param PollStoreRequest $request
+     * @return JsonResponse
      */
-    public function store(EncuestaStoreRequest $request)
+    public function store(PollStoreRequest $request)
     {
         $data = $request->validated();
 
         $data = Media::requestUploadFile($data, 'imagen');
 
-        $encuesta = Encuesta::create($data);
+        Poll::create($data);
 
         $msg = 'Encuesta creada correctamente.';
-        
+
         return $this->success(compact('msg'));
     }
 
-    public function edit(Encuesta $encuesta)
+    public function edit(Poll $poll)
     {
         $secciones = config('data.encuestas.secciones');
         $tipos = config('data.encuestas.tipos');
@@ -88,26 +90,33 @@ class EncuestaController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Encuesta  $encuesta
-     * @return \Illuminate\Http\Response
+     * @param PollStoreRequest $request
+     * @param Poll $poll
+     * @return JsonResponse
      */
-    public function update(EncuestaStoreRequest $request, Encuesta $encuesta)
+    public function update(PollStoreRequest $request, Poll $poll)
     {
         $data = $request->validated();
-    
+
         $data = Media::requestUploadFile($data, 'imagen');
 
-        $encuesta->update($data);
+        $poll->update($data);
 
         $msg = 'Encuesta actualizada correctamente.';
 
         return $this->success(compact('msg'));
     }
 
-    public function status(Encuesta $encuesta, Request $request)
+    /**
+     * Toggle poll status between 1 or 0
+     *
+     * @param Poll $poll
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(Poll $poll, Request $request)
     {
-        $encuesta->update(['estado' => !$encuesta->estado]);
+        $poll->update(['active' => !$poll->active]);
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
@@ -115,17 +124,17 @@ class EncuestaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Encuesta  $encuesta
-     * @return \Illuminate\Http\Response
+     * @param Poll $poll
+     * @return JsonResponse
      */
-    public function destroy(Encuesta $encuesta)
+    public function destroy(Poll $poll)
     {
-        // $encuesta->preguntas()->delete();
 
-        if ($encuesta->countCoursesRelated() > 0)
+        if ($poll->countCoursesRelated() > 0) {
             return $this->error('Una encuesta asociada a uno o más cursos no puede eliminarse.');
+        }
 
-        $encuesta->delete();
+        $poll->delete();
 
         return $this->success(['msg' => 'Encuesta eliminada correctamente.']);
     }
