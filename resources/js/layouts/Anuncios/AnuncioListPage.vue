@@ -40,7 +40,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                default-sort-by="publication_ends_at"
+                default-sort-by="publish_date"
                 :default-sort-desc="true"
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
@@ -80,7 +80,11 @@ import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
-    components: {AnuncioFormModal, DefaultStatusModal, DefaultDeleteModal},
+
+    components: {
+        AnuncioFormModal, DefaultStatusModal, DefaultDeleteModal
+    }
+    ,
     data() {
         return {
             dataTable: {

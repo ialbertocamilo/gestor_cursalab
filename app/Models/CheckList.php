@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use App\ChecklistRpta;
-use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\ApiRest\HelperController;
 
-class CheckList extends Model
+class CheckList extends BaseModel
 {
     protected $table = 'checklist';
 

@@ -9,6 +9,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Taxonomy extends Model
 {
+
     use SoftDeletes;
 
     // protected $rememberFor = WEEK_MINUTES;

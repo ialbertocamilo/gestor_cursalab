@@ -9,7 +9,7 @@ class Tag extends Model
     protected $table = 'tags';
 
     protected $fillable = [
-    	'nombre', 'color'
+        'nombre', 'color'
     ];
 
     public function relationships()
@@ -27,7 +27,7 @@ class Tag extends Model
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-        
+
         $query->orderBy($field, $sort);
 
         return $query->paginate($request->paginate);
