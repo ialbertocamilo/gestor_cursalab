@@ -15,9 +15,9 @@ return new class extends Migration
     {
         Schema::create('segment_course_requirements', function (Blueprint $table) {
             // $table->id();
-            
+
             $table->foreignId('segment_course_id')->nullable()->constrained('segment_courses');
-            $table->foreignId('course_id')->nullable();
+            $table->foreignId('course_id')->nullable()->constrained('courses');
         });
     }
 

@@ -13,15 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('segment_courses', function (Blueprint $table) {
+        Schema::create('segment_course', function (Blueprint $table) {
             $table->id();
-            
-            $table->foreignId('course_id')->nullable();
+
+            $table->foreignId('course_id')->nullable()->constrained('courses');
             $table->string('course_name')->nullable();
             // $table->text('')->nullable();
             $table->boolean('mandatory')->nullable()->default(true);
 
-            $table->foreignId('segment_id')->nullable();
+            $table->foreignId('segment_id')->nullable()->constrained('segments');
             $table->tinyInteger('position')->nullable();
 
             $table->smallInteger('criterion_value_count')->nullable();
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('segment_courses');
+        Schema::dropIfExists('segment_course');
     }
 };

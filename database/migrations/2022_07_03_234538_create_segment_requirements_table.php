@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('segment_requirements', function (Blueprint $table) {
             // $table->id();
-            $table->foreignId('segment_id')->nullable();
+            $table->foreignId('segment_id')->nullable()->constrained('segments');
             $table->foreignId('segment_requirement_id')->nullable()->constrained('segments');
         });
     }
