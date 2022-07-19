@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GlosarioImportExcelRequest;
-use App\Http\Requests\GlosarioStoreRequest;
+use App\Http\Requests\GlossaryStoreRequest;
 use App\Http\Resources\GlosarioResource;
 use App\Models\Abconfig;
 use App\Models\Carrera;
 use App\Models\Glossary;
 use App\Models\Taxonomy;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GlossaryController extends Controller
@@ -16,11 +17,9 @@ class GlossaryController extends Controller
 
     public function search(Request $request)
     {
-        $glosario = Glossary::search($request, false, $request->paginate);
-
-        GlosarioResource::collection($glosario);
-
-        return $this->success($glosario);
+        $glossaries = Glossary::search($request, false, $request->paginate);
+        GlosarioResource::collection($glossaries);
+        return $this->success($glossaries);
     }
 
     public function getListSelects()
@@ -98,13 +97,23 @@ class GlossaryController extends Controller
         return $selects;
     }
 
-    public function store(GlosarioStoreRequest $request)
+    /**
+     * Process request to create new glossary
+     *
+     * @param GlossaryStoreRequest $request
+     * @return JsonResponse
+     */
+    public function store(GlossaryStoreRequest $request)
     {
         $data = $request->validated();
 
         $result = Glossary::storeRequest($data);
 
-        return $this->success(['msg' => 'Glosario creado correctamente.']);
+        $message = ($result['status'] === 'success')
+                    ? 'Glosario creado correctamente.'
+                    : $result['message'];
+
+        return $this->success(['msg' => $message]);
     }
 
     public function edit(Glossary $glosario)
@@ -117,7 +126,7 @@ class GlossaryController extends Controller
         return $this->success(get_defined_vars());
     }
 
-    public function update(Glossary $glosario, GlosarioStoreRequest $request)
+    public function update(Glossary $glosario, GlossaryStoreRequest $request)
     {
         $data = $request->validated();
 

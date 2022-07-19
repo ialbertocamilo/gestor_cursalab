@@ -8,13 +8,13 @@
             <v-form ref="glosarioForm" class="mb-15">
 
                 <DefaultErrors :errors="errors" />
-                
+
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput clearable
-                                      v-model="resource.nombre"
+                                      v-model="resource.name"
                                       label="Nombre"
-                                      :rules="rules.nombre"
+                                      :rules="rules.name"
                         />
                     </v-col>
                 </v-row>
@@ -45,7 +45,7 @@
 
                 <v-row align="start" align-content="center">
                     <v-col cols="4" class="d-flex justify-content-start">
-                        <DefaultToggle v-model="resource.estado"/>
+                        <DefaultToggle v-model="resource.active"/>
                     </v-col>
                 </v-row>
             </v-form>
@@ -56,7 +56,13 @@
 
 <script>
 
-const fields = ['nombre', 'estado', 'laboratorio', 'categoria', 'jerarquia', 'advertencias', 'condicion_de_venta', 'via_de_administracion', 'grupo_farmacologico', 'dosis_adulto', 'dosis_nino', 'recomendacion_de_administracion', 'principios_activos', 'contraindicaciones', 'interacciones', 'reacciones'];
+const fields = [
+    'name', 'active', 'laboratorio', 'categoria', 'jerarquia',
+    'advertencias', 'condicion_de_venta', 'via_de_administracion',
+    'grupo_farmacologico', 'dosis_adulto', 'dosis_nino',
+    'recomendacion_de_administracion', 'principios_activos', 'contraindicaciones',
+    'interacciones', 'reacciones'
+];
 
 const array_fields = ['modulos']
 
@@ -73,8 +79,7 @@ export default {
             errors: [],
             resourceDefault: {
                 id: null,
-                nombre: '',
-
+                name: '',
                 modulos: [],
 
                 laboratorio: null,
@@ -102,7 +107,7 @@ export default {
 
             rules: {
                 // modulo: this.getRules(['max:50']),
-                nombre: this.getRules(['required', 'max:200']),
+                name: this.getRules(['required', 'max:200']),
             }
         }
     },
@@ -113,12 +118,15 @@ export default {
             vue.resetSelects()
             vue.resetValidation()
             vue.$emit('onCancel')
-        },
+        }
+        ,
         resetValidation() {
             let vue = this
             vue.$refs.glosarioForm.resetValidation()
-        },
+        }
+        ,
         confirmModal() {
+
             let vue = this
 
             vue.errors = []
@@ -129,7 +137,9 @@ export default {
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = vue.resource.id
+                        ? `${base}/${vue.resource.id}/update`
+                        : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
 
@@ -139,9 +149,11 @@ export default {
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
+
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
+
                     }).catch((error) => {
                         if (error && error.errors)
                             vue.errors = error.errors
@@ -158,6 +170,7 @@ export default {
             vue.selects.all = []
         },
         async loadData(resource) {
+
             let vue = this
 
             vue.errors = []

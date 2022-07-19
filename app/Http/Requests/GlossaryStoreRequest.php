@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GlosarioStoreRequest extends FormRequest
+class GlossaryStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class GlosarioStoreRequest extends FormRequest
         $id = $this->segment(2);
 
         return [
-            'nombre' => "required|max:255|unique:glosarios,nombre,{$id},id,deleted_at,NULL",
+            'name' => "required|max:255|unique:glossaries,name,{$id},id,deleted_at,NULL",
             'categoria' => 'nullable',
             // 'categoria' => 'required|exists:taxonomias,id,grupo,glosario,tipo,categoria,deleted_at,NULL',
             'jerarquia' => 'nullable',
@@ -46,7 +46,7 @@ class GlosarioStoreRequest extends FormRequest
             'interacciones' => 'nullable',
             'reacciones' => 'nullable',
 
-            'estado' => 'required',
+            'active' => 'required',
         ];
     }
 
@@ -54,8 +54,8 @@ class GlosarioStoreRequest extends FormRequest
     {
         $data = [];
 
-        if ( ! $this->has('estado') )
-            $data['estado'] = false;
+        if ( ! $this->has('active') )
+            $data['active'] = false;
 
         return $this->merge($data)->all();
     }
