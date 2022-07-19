@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class CheckListItem extends Model
+class CheckListItem extends BaseModel
 {
     const TIPO_ITEM = [
         'entrenador_usuario', // Actividad que evalúa el entrenador a un usuario

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class ChecklistRptaItem extends Model
+class ChecklistRptaItem extends BaseModel
 {
     protected $table = 'checklist_rptas_items';
     protected $fillable = [

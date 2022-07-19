@@ -83,7 +83,7 @@
                             clearable
                             :referenceComponent="'modalDateFilter1'"
                             :options="modalDateFilter1"
-                            v-model="resource.publication_starts_at"
+                            v-model="resource.publish_date"
                             label="Fecha inicio"
                         />
                     </v-col>
@@ -93,7 +93,7 @@
                             clearable
                             :referenceComponent="'modalDateFilter2'"
                             :options="modalDateFilter2"
-                            v-model="resource.publication_ends_at"
+                            v-model="resource.publish_date"
                             label="Fecha fin"
                         />
                     </v-col>
@@ -123,8 +123,9 @@
 
 import DefaultRichText from "../../components/globals/DefaultRichText";
 
-const fields = ['nombre', 'estado', 'destino', 'link', 'publication_starts_at', 'publication_ends_at', 'modules',
-    'contenido'];
+const fields = [
+    'nombre', 'active', 'destino', 'link', 'modules', 'contenido', 'publish_date'
+];
 const file_fields = ['imagen', 'archivo'];
 
 export default {
@@ -151,9 +152,8 @@ export default {
                 link: null,
                 modules: [],
                 destinos: null,
-                estado: true,
-                publication_starts_at: null,
-                publication_ends_at: null,
+                active: true,
+                publish_date: null,
                 contenido: ""
             },
             resource: {},

@@ -8,7 +8,7 @@ use App\Imports\GlosarioImport;
 use App\Traits\ApiResponse;
 use DB;
 
-class Glossary extends Model
+class Glossary extends BaseModel
 {
     use SoftDeletes;
     use ApiResponse;

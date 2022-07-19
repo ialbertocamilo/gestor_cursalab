@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Anuncio;
+use App\Http\Requests\AnnouncementStoreRequest;
+use App\Http\Resources\AnnouncementResource;
+use App\Models\Announcement;
 use App\Models\Criterion;
 use App\Models\Media;
-use App\Models\User;
-
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Http\Requests\AnuncioStoreRequest;
-use App\Http\Resources\AnuncioResource;
 
-class AnuncioController extends Controller
+class AnnouncementController extends Controller
 {
     public function search(Request $request)
     {
-        $anuncios = Anuncio::search($request);
+        $anuncios = Announcement::search($request);
 
-        AnuncioResource::collection($anuncios);
+        AnnouncementResource::collection($anuncios);
 
         return $this->success($anuncios);
     }
@@ -25,7 +24,6 @@ class AnuncioController extends Controller
     public function getListSelects()
     {
         $modules = Criterion::getValuesForSelect('module');
-        // $modules = Abconfig::getModulesForSelect();
 
         return $this->success(get_defined_vars());
     }
@@ -34,9 +32,9 @@ class AnuncioController extends Controller
     {
         if ($request->has('q')) {
             $question = $request->input('q');
-            $anuncios = Anuncio::where('nombre', 'like', '%'.$question.'%')->orderBy('created_at','DESC')->paginate();
+            $anuncios = Announcement::where('nombre', 'like', '%'.$question.'%')->orderBy('created_at','DESC')->paginate();
         }else{
-            $anuncios = Anuncio::orderBy('created_at','DESC')->paginate();
+            $anuncios = Announcement::orderBy('created_at','DESC')->paginate();
         }
 
         return view('anuncios.index', compact('anuncios'));
@@ -57,7 +55,13 @@ class AnuncioController extends Controller
         return $this->success(get_defined_vars());
     }
 
-    public function store(AnuncioStoreRequest $request)
+    /**
+     * Create new announcement
+     *
+     * @param AnnouncementStoreRequest $request
+     * @return JsonResponse
+     */
+    public function store(AnnouncementStoreRequest $request)
     {
         $data = $request->validated();
 
@@ -66,15 +70,21 @@ class AnuncioController extends Controller
 
         $data['config_id'] = json_encode($request->modules);
 
-        $anuncio = Anuncio::create($data);
+        $anuncio = Announcement::create($data);
 
         return $this->success(['msg' => 'Anuncio creado correctamente.']);
     }
 
-    public function edit(Anuncio $anuncio)
+    /**
+     * Process request to return announcement values
+     *
+     * @param Announcement $announcement
+     * @return JsonResponse
+     */
+    public function edit(Announcement $announcement)
     {
-        $config_ids = json_decode($anuncio->config_id, true);
-        $anuncio->modules = Abconfig::getModulesForSelect($config_ids);
+        $config_ids = json_decode($announcement->config_id, true);
+        $announcement->modules = Abconfig::getModulesForSelect($config_ids);
 
         $modules = Abconfig::getModulesForSelect();
         $destinos = config('data.destinos');
@@ -82,7 +92,14 @@ class AnuncioController extends Controller
         return $this->success(get_defined_vars());
     }
 
-    public function update(Anuncio $anuncio, AnuncioStoreRequest $request)
+    /**
+     * Process request to update announcement
+     *
+     * @param Announcement $announcement
+     * @param AnnouncementStoreRequest $request
+     * @return JsonResponse
+     */
+    public function update(Announcement $announcement, AnnouncementStoreRequest $request)
     {
         $data = $request->validated();
 
@@ -91,28 +108,41 @@ class AnuncioController extends Controller
 
         $data['config_id'] = json_encode($request->modules);
 
-        $anuncio->update($data);
+        $announcement->update($data);
 
         return $this->success(['msg' => 'Anuncio actualizado correctamente.']);
     }
 
-    public function status(Anuncio $anuncio, Request $request)
+    /**
+     * Process request to toggle value of active status (1 or 0)
+     *
+     * @param Announcement $announcement
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(Announcement $announcement, Request $request)
     {
-        $anuncio->update(['estado' => !$anuncio->estado]);
+        $announcement->update(['active' => !$announcement->active]);
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 
-    public function destroy(Anuncio $anuncio)
+    /**
+     * Process request to delete announcement record
+     *
+     * @param Announcement $announcement
+     * @return JsonResponse
+     */
+    public function destroy(Announcement $announcement)
     {
-        $anuncio->delete();
+        $announcement->delete();
 
         return $this->success(['msg' => 'Anuncio eliminado correctamente.']);
     }
 
 
     // Eliminar adjuntos
-    public function del_attached_video(Anuncio $anuncio)
+    public function del_attached_video(Announcement $anuncio)
     {
         // \File::delete(public_path().'/'.$anuncio->video);
         $anuncio->video = NULL;
@@ -121,7 +151,7 @@ class AnuncioController extends Controller
         return redirect()->back();
     }
 
-    public function del_attached_archivo(Anuncio $anuncio)
+    public function del_attached_archivo(Announcement $anuncio)
     {
         // \File::delete(public_path().'/'.$anuncio->archivo);
         $anuncio->archivo = NULL;
@@ -132,7 +162,7 @@ class AnuncioController extends Controller
 
     public function setPublicationDates()
     {
-        $anuncios = Anuncio::whereNull('publication_starts_at')->whereNull('publication_ends_at')->get();
+        $anuncios = Announcement::whereNull('publication_starts_at')->whereNull('publication_ends_at')->get();
 
         foreach ($anuncios AS $anuncio)
         {

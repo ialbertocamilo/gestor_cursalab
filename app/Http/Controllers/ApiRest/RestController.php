@@ -14,7 +14,7 @@ use App\Models\Curso;
 use App\Models\Posteo;
 use App\Models\Prueba;
 use App\Models\Visita;
-use App\Models\Anuncio;
+use App\Models\Announcement;
 use App\Models\Carrera;
 use App\Models\Usuario;
 use App\Models\Abconfig;
@@ -260,7 +260,7 @@ class RestController extends Controller
         if (is_null($config_id)) {
             $data = array('error' => 2, 'data' => null);
         } else {
-             $anuncios = Anuncio::getPublisheds($config_id);
+             $anuncios = Announcement::getPublisheds($config_id);
             // $anuncios = DB::table('anuncios')->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date"))->where('config_id', 'like', '%"' . $config_id . '"%')->where('estado', 1)->orderBy('orden', 'DESC')->get();
             $data = array('error' => 0, 'data' => $anuncios);
         }

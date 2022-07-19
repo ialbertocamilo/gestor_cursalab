@@ -4,16 +4,14 @@ namespace App\Models;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use ZipArchive;
 
-class Media extends Model
+class Media extends BaseModel
 {
 
-    use SoftDeletes;
+
 
     const DEFAULT_AUDIO_IMG = "images/default-audio-img_119.png";
     const DEFAULT_SCORM_IMG = "images/default-scorm-img_116.png";
