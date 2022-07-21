@@ -56,7 +56,7 @@ class PollQuestionController extends Controller
         // $encuesta_array = Encuesta::select('id','titulo')->pluck('titulo','id' );
         // return view('encuestas_preguntas.create', compact('encuesta_array'));
 
-        $tipos = Taxonomy::loadGroupTypes('poll', 'tipo-pregunta');
+        $tipos = Taxonomy::getDataForSelect('poll', 'tipo-pregunta');
 
         return $this->success(get_defined_vars());
     }
@@ -88,7 +88,7 @@ class PollQuestionController extends Controller
      */
     public function edit(Poll $poll, PollQuestion $pollquestion)
     {
-        $tipos = Taxonomy::loadGroupTypes('poll', 'tipo-pregunta');
+        $tipos = Taxonomy::getDataForSelect('poll', 'tipo-pregunta');
         $pollquestion->opciones = $pollquestion->formatOptions();
 
         return $this->success(get_defined_vars());

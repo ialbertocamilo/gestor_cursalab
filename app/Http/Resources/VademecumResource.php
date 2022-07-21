@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class VademecumResource extends JsonResource
@@ -9,20 +10,20 @@ class VademecumResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function toArray($request)
     {
         return [
             'id' => $this->id,
-            'nombre' => clean_html($this->nombre, 50),
-            'modulos' => $this->getModules(),
+            'name' => clean_html($this->name, 50),
+            'modules' => $this->getModules(),
             'images' => $this->getModulesImages(),
-            'active' => $this->estado ? true : false,
+            'active' => $this->active ? true : false,
 
-            'categoria_id' => $this->categoria->nombre ?? 'No definido',
-            'subcategoria_id' => $this->subcategoria->nombre ?? 'No definido',
+            'category_id' => $this->category->name ?? 'No definido',
+            'subcategory_id' => $this->subcategory->name ?? 'No definido',
 
             'scorm_route' => $this->media->file ?? '',
 
@@ -35,18 +36,25 @@ class VademecumResource extends JsonResource
     {
         $data = [];
 
-        foreach($this->modulos AS $modulo)
+        foreach($this->modules AS $module)
         {
-            $data[] = ['name' => $modulo->etapa, 'image' => space_url($modulo->logo)];
+            $data[] = [
+                'name' => $module->etapa,
+                'image' => space_url($module->logo)
+            ];
         }
 
         return $data;
     }
 
+    /**
+     * Generate a string with modules names separated by commas
+     *
+     * @return string
+     */
     public function getModules()
     {
-        $modulos = $this->modulos->pluck('etapa')->toArray();
-
-        return implode(', ', $modulos);
+        $modules = $this->modules->pluck('value_text')->toArray();
+        return implode(', ', $modules);
     }
 }

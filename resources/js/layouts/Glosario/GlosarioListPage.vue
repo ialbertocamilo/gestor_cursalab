@@ -105,7 +105,15 @@ import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
-    components: {GlosarioFormModal, GlosarioImportFormModal, CareerCategoryFormModal, DefaultStatusModal, DefaultDeleteModal},
+
+    components: {
+        GlosarioFormModal,
+        GlosarioImportFormModal,
+        CareerCategoryFormModal,
+        DefaultStatusModal,
+        DefaultDeleteModal
+    }
+    ,
     data() {
         return {
             dataTable: {
@@ -114,7 +122,7 @@ export default {
                 headers: [
                     // {text: "Banner", value: "image", align: 'center', sortable: false},
                     {text: "Módulos", value: "images", align: 'center', sortable: false},
-                    {text: "Nombre", value: "nombre"},
+                    {text: "Nombre", value: "name"},
                     {text: "Código", value: "module", align: 'left', sortable: false},
                     {text: "Categoría", value: "categoria_id", align: 'center'},
                     // {text: "Módulo", value: "module"},

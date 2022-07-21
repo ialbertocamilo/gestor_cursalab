@@ -3,11 +3,16 @@
 namespace App\Models;
 
 use App\Imports\VademecumImport;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 
-class Vademecum extends BaseModel
+class Vademecum extends Model
 {
+
+    use softdeletes;
 
     protected $table = 'vademecum';
 
@@ -40,7 +45,7 @@ class Vademecum extends BaseModel
     public function modules()
     {
         return $this->belongsToMany(
-            Abconfig::class,
+            CriterionValue::class,
             'vademecum_module',
             'vademecum_id',
             'module_id'
@@ -105,6 +110,14 @@ class Vademecum extends BaseModel
         return $row;
     }
 
+    /**
+     * Load paginated records from database
+     *
+     * @param $request
+     * @param $api
+     * @param $paginate
+     * @return LengthAwarePaginator
+     */
     protected function search($request, $api = false, $paginate = 20)
     {
         $relationships = ['modules', 'category', 'subcategory', 'media'];
@@ -138,8 +151,8 @@ class Vademecum extends BaseModel
         if ($request->q)
             $query->where('name', 'like', "%{$request->q}%");
 
-        if ($request->modulo_id)
-            $query->whereHas('modulos', function ($q) use ($request) {
+        if ($request->module_id)
+            $query->whereHas('modules', function ($q) use ($request) {
                 $q->where('id', $request->modulo_id);
             });
 
@@ -159,9 +172,7 @@ class Vademecum extends BaseModel
             $query->orderBy($field, $sort);
         }
 
-        $vademecum = $query->paginate($paginate);
-
-        return $vademecum;
+        return $query->paginate($paginate);
     }
 
     protected function searchCategories($request, $api = false, $paginate = 20)
@@ -176,31 +187,25 @@ class Vademecum extends BaseModel
         return $categorias;
     }
 
-    protected function storeRequest($data, $elemento = null)
+    protected function storeRequest($data, $item = null)
     {
         try {
 
             DB::beginTransaction();
 
-            // $taxonomia = $this->prepareTaxonomy($data, 'category_id', 'categoria');
-            // $data['category_id'] = $taxonomia->id ?? NULL;
+            if ($item) {
 
-
-            if ($elemento) :
-
-                $elemento->update($data);
-
+                $item->update($data);
                 $message = 'Registro actualizado correctamente';
 
-            else :
+            } else {
 
-                $elemento = $this->create($data);
-
+                $item = $this->create($data);
                 $message = 'Registro creado correctamente';
 
-            endif;
+            }
 
-            $elemento->modulos()->sync($data['modulos']);
+            $item->modules()->sync($data['modules']);
 
             DB::commit();
 

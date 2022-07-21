@@ -19,6 +19,7 @@ class MediaController extends Controller
 
     /**
      * Return view to list media
+     *
      * @param Request $request
      * @return Application|Factory|View
      */
@@ -36,6 +37,7 @@ class MediaController extends Controller
 
     /**
      * Generate media details
+     *
      * @param Media $multimedia
      * @return JsonResponse
      */
@@ -54,6 +56,7 @@ class MediaController extends Controller
 
     /**
      * Retrieve media list according type
+     *
      * @param Request $request
      * @return mixed
      */
@@ -105,6 +108,7 @@ class MediaController extends Controller
 
     /**
      * Return view to upload media
+     *
      * @return Application|Factory|View
      */
     public function create()
@@ -114,6 +118,7 @@ class MediaController extends Controller
 
     /**
      * File upload
+     *
      * @param Request $request
      * @return void
      */
@@ -131,6 +136,7 @@ class MediaController extends Controller
 
     /**
      * Upload multiple files
+     *
      * @param MultimediaUploadFileRequest $request
      * @return JsonResponse
      */
@@ -151,6 +157,7 @@ class MediaController extends Controller
 
     /**
      * Deletes a file
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -189,7 +196,8 @@ class MediaController extends Controller
     }
 
     /**
-     * Search media according search term
+     * Process request to load records filtered according search term
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -203,7 +211,8 @@ class MediaController extends Controller
     }
 
     /**
-     * Download external file
+     * Process request to download external file
+     *
      * @param Media $media
      * @return StreamedResponse
      */

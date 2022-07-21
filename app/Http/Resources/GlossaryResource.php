@@ -2,24 +2,25 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GlosarioResource extends JsonResource
+class GlossaryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request $request
      * @return array
      */
     public function toArray($request)
     {
         return [
             'id' => $this->id,
-            'nombre' => $this->nombre,
-            'module' => $this->getCodeModules(),
+            'name' => $this->name,
+            'modules' => $this->getCodeModules(),
             'images' => $this->getModulesImages(),
-            'active' => $this->estado ? true : false,
+            'active' => !!$this->active,
 
             'categoria_id' => $this->categoria->nombre ?? '',
 
@@ -32,9 +33,12 @@ class GlosarioResource extends JsonResource
     {
         $data = [];
 
-        foreach($this->modulos AS $modulo)
+        foreach($this->modules AS $module)
         {
-            $data[] = ['name' => $modulo->etapa, 'image' => space_url($modulo->logo)];
+            $data[] = [
+                'name' => $module->etapa,
+                'image' => space_url($module->logo)
+            ];
         }
 
         return $data;
@@ -43,12 +47,12 @@ class GlosarioResource extends JsonResource
     public function getCodeModules()
     {
         $text = '';
-        $total = count($this->modulos);
+        $total = count($this->modules);
         $i = 0;
 
-        foreach($this->modulos AS $modulo)
+        foreach($this->modules AS $module)
         {
-            $text .= '(' . $modulo->codigo_matricula . ') ' . $modulo->pivot->codigo;
+            $text .= '(' . $module->codigo_matricula . ') ' . $module->pivot->codigo;
 
             if(++$i !== $total)
             {

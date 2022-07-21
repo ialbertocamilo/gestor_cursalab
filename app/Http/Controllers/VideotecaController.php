@@ -11,6 +11,7 @@ use App\Models\Usuario;
 use App\Models\UsuarioAccion;
 use App\Models\Videoteca;
 use Faker\Factory as Faker;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -118,7 +119,7 @@ class VideotecaController extends Controller
 
             $modules = ['4', '5', '6'];
             // $modules = $faker->randomElements(['4', '5', '6']);
-            $videoteca->modules()->sync($modules);
+            $videoteca->modulos()->sync($modules);
 
             $videoteca->load('modules');
             $videoteca->load('tags');
@@ -165,6 +166,12 @@ class VideotecaController extends Controller
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function search(Request $request)
     {
         $items = Videoteca::search($request, false, $request->paginate);

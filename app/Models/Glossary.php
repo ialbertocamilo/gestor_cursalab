@@ -18,17 +18,21 @@ class Glossary extends Model
     use ApiResponse;
 
     protected $fillable = [
-        'name', 'categoria_id', 'jerarquia_id', 'laboratorio_id', 'condicion_de_venta_id', 'via_de_administracion_id',
-        'grupo_farmacologico_id', 'forma_farmaceutica_id', 'dosis_adulto_id', 'dosis_nino_id',
-        'recomendacion_de_administracion_id', 'contraindicacion_id', 'interacciones_frecuentes_id',
+        'name', 'categoria_id', 'jerarquia_id', 'laboratorio_id',
+        'condicion_de_venta_id', 'via_de_administracion_id',
+        'grupo_farmacologico_id', 'forma_farmaceutica_id', 'dosis_adulto_id',
+        'dosis_nino_id', 'recomendacion_de_administracion_id',
+        'contraindicacion_id', 'interacciones_frecuentes_id',
         'reacciones_frecuentes_id', 'advertencias_id', 'active'
     ];
 
     protected $hidden = [
-        'categoria_id', 'laboratorio_id', 'condicion_de_venta_id', 'via_de_administracion_id',
-        'grupo_farmacologico_id', 'forma_farmaceutica_id', 'dosis_adulto_id', 'dosis_nino_id',
-        'recomendacion_de_administracion_id', 'contraindicacion_id', 'interacciones_frecuentes_id',
-        'reacciones_frecuentes_id', 'advertencias_id', 'created_at', 'updated_at', 'deleted_at'
+        'laboratorio_id', 'condicion_de_venta_id',
+        'via_de_administracion_id', 'grupo_farmacologico_id',
+        'forma_farmaceutica_id', 'dosis_adulto_id', 'dosis_nino_id',
+        'recomendacion_de_administracion_id', 'contraindicacion_id',
+        'interacciones_frecuentes_id', 'reacciones_frecuentes_id',
+        'advertencias_id', 'created_at', 'updated_at', 'deleted_at'
     ];
 
     const GRUPOS = [
@@ -97,10 +101,10 @@ class Glossary extends Model
         );
     }
 
-    public function modulos()
+    public function modules()
     {
         return $this->belongsToMany(
-            GlossaryModule::class,
+            CriterionValue::class,
             'glossary_module',
             'glossary_id',
             'module_id'
@@ -198,6 +202,7 @@ class Glossary extends Model
     protected function importFromFile($data)
     {
         try {
+
             $model = (new GlosarioImport);
 
             $model->modulo_id = $data['modulo_id'];
@@ -207,8 +212,10 @@ class Glossary extends Model
 
             if ($model->failures()->count()) {
                 // request()->session()->flash('excel-errors', $model->failures());
-                return $this->errors($model->failures(), 'Se encontraron algunos errores.', 422);
-
+                return $this->errors(
+                    $model->failures(),
+                    'Se encontraron algunos errores.', 422
+                );
             }
 
         } catch (Exception $e) {
@@ -231,12 +238,12 @@ class Glossary extends Model
      */
     protected function search($request, bool $api = false, int $paginate = 20)
     {
-        $relationships = ['modulos', 'categoria'];
+        $relationships = ['modules', 'categoria'];
 
         if ($api) {
 
             $relationships = [
-                'modulos' => function ($q) use ($request) {
+                'modules' => function ($q) use ($request) {
                     if ($request->module_id)
                         $q->where('id', $request->module_id);
                 },
@@ -328,8 +335,8 @@ class Glossary extends Model
 
             }
 
-            $modulos = $this->prepareModulosData($data['modulos']);
-            $glossary->modulos()->sync($modulos);
+            $modules = $this->prepareModulosData($data['modules']);
+            $glossary->modulos()->sync($modules);
 
             $taxonomias = $this->prepareTaxonomiesData(
                 $data, 'principios_activos', 'principio_activo'
