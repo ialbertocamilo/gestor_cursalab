@@ -19,6 +19,12 @@ return new class extends Migration
             $table->string('slug');
             $table->string('description')->nullable();
 
+            // columnas de modulo
+            $table->string('logo')->nullable();
+            $table->string('plantilla_diploma')->nullable();
+
+            $table->foreignId('parent_id')->nullable()->constrained('workspaces');
+
             $table->boolean('active')->nullable()->default(true);
 
             $table->softDeletes();

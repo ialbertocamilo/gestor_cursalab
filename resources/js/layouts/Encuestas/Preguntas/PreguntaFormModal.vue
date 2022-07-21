@@ -22,20 +22,21 @@
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultSelect clearable
                                        :items="selects.tipos"
-                                       v-model="resource.tipo_pregunta"
+                                       v-model="resource.type_id"
                                        label="Tipo"
                                        return-object
-                                       :rules="rules.tipos"
+                                       :rules="rules.tipo"
                         />
                     </v-col>
 
                 </v-row>
 
-                <v-row justify="space-around" v-show="['simple', 'multiple'].includes(resource.tipo_pregunta.id)">
+                <v-row justify="space-around"
+                       v-show="['simple', 'multiple'].includes(resource.type_id)">
 
                     <v-col cols="12" class="d-flex justify-content-center align-center">
                         <div class="label">
-                            Opciones: {{ resource.tipo_pregunta.nombre }}
+                            Opciones: {{ resource.type_id }}
                         </div>
                         <v-btn
                             text icon
@@ -45,7 +46,10 @@
                             <v-icon v-text="'mdi mdi-plus-circle'"/>
                         </v-btn>
                     </v-col>
-                    <v-col cols="12" class="d-flex justify-content-center py-0" v-for="(opcion, index) in resource.opciones" :key="index">
+                    <v-col cols="12"
+                           class="d-flex justify-content-center py-0"
+                           v-for="(opcion, index) in resource.opciones"
+                           :key="index">
 
                         <v-row justify="space-around"  >
                             <v-col cols="10" class="justify-content-center">
@@ -84,7 +88,7 @@
 
 <script>
 
-const fields = ['titulo', 'tipo_pregunta', 'active'];
+const fields = ['titulo', 'type_id', 'active'];
 const array_fields = ['opciones'];
 
 export default {
@@ -102,10 +106,9 @@ export default {
                 titulo: '',
                 active: true,
                 opciones: [],
-                // tipo_pregunta: null,
-                tipo_pregunta: {id: null, nombre: ''},
+                type_id: null
             },
-            resource: {tipo_pregunta: {id: null, nombre: ''},},
+            resource: { },
             selects: {
                 tipos: [],
             },
@@ -153,14 +156,18 @@ export default {
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = vue.resource.id
+                        ? `${base}/${vue.resource.id}/update`
+                        : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
 
             // if (validateForm && validateSelectedModules) {
             if (validateForm ) {
 
-                let formData = vue.getMultipartFormData(method, vue.resource, fields, [], array_fields);
+                let formData = vue.getMultipartFormData(
+                    method, vue.resource, fields, [], array_fields
+                );
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
@@ -199,7 +206,7 @@ export default {
 
                 if (resource) {
                     vue.resource = Object.assign({}, data.data.pollquestion)
-                    vue.resource.tipo_pregunta = Object.assign({}, data.data.pollquestion.tipo_pregunta)
+                    //vue.resource.tipo_pregunta = Object.assign({}, data.data.pollquestion.tipo_pregunta)
                 }
             })
 

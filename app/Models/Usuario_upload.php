@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-
-class Usuario_upload extends Model
+class Usuario_upload extends BaseModel
 {
-    
+
 
     protected $table = 'usuario_uploads';
 

@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('supervisores', function (Blueprint $table) {
+        Schema::create('supervisors', function (Blueprint $table) {
 
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->foreignId('group_id')->nullable()->constrained('criterion_values');
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('supervisores');
+        Schema::dropIfExists('supervisors');
     }
 };

@@ -13,10 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('block_segment', function (Blueprint $table) {
+        Schema::create('user_actions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('block_id')->nullable()->constrained('blocks');
-            $table->foreignId('segment_id')->nullable()->constrained('segments');
+            $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->foreignId('type_id')->nullable()->constrained('taxonomies');
+
+            $table->morphs('model');
+            $table->integer('score')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -27,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('block_segment');
+        Schema::dropIfExists('user_actions');
     }
 };

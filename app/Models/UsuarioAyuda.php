@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class UsuarioAyuda extends Model
+class UsuarioAyuda extends BaseModel
 {
     protected $table = "usuario_ayuda";
-    
+
     protected $fillable = [
         'usuario_id',
         'motivo',
@@ -52,11 +50,11 @@ class UsuarioAyuda extends Model
             $query->where(function($qu) use ($request){
 
                 $qu->whereHas('usuario', function($q) use ($request) {
-                    
+
                     if ($request->q)
                     {
                         $q->where('nombre', 'like', "%$request->q%");
-                        
+
                         if (strlen($request->q) > 4)
                             $q->orWhere('dni', 'like', "%$request->q%");
                     }
@@ -76,7 +74,7 @@ class UsuarioAyuda extends Model
 
         if ($request->starts_at)
             $query->whereDate('created_at', '>=', $request->starts_at);
-        
+
         if ($request->ends_at)
             $query->whereDate('created_at', '<=', $request->ends_at);
 
@@ -84,7 +82,7 @@ class UsuarioAyuda extends Model
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-        
+
         $query->orderBy($field, $sort);
 
         return $query->paginate($request->paginate);

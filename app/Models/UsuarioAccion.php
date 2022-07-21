@@ -10,7 +10,7 @@ class UsuarioAccion extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'usuario_acciones';
+    protected $table = 'user_actions';
 
     protected $fillable = [
         'user_id', 'type_id', 'model_type', 'model_id', 'score'
@@ -21,7 +21,7 @@ class UsuarioAccion extends Model
     ];
 
     // Relationships
-  
+
     // public function modulos()
     // {
     //     return $this->belongsToMany(Abconfig::class, 'vademecum_modulo', 'vademecum_id', 'modulo_id');

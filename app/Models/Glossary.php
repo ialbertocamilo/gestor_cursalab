@@ -2,22 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Imports\GlosarioImport;
 use App\Traits\ApiResponse;
-use DB;
+use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
+
 
 class Glossary extends Model
 {
+
     use SoftDeletes;
     use ApiResponse;
 
     protected $fillable = [
-        'nombre', 'categoria_id', 'jerarquia_id', 'laboratorio_id', 'condicion_de_venta_id', 'via_de_administracion_id',
+        'name', 'categoria_id', 'jerarquia_id', 'laboratorio_id', 'condicion_de_venta_id', 'via_de_administracion_id',
         'grupo_farmacologico_id', 'forma_farmaceutica_id', 'dosis_adulto_id', 'dosis_nino_id',
         'recomendacion_de_administracion_id', 'contraindicacion_id', 'interacciones_frecuentes_id',
-        'reacciones_frecuentes_id', 'advertencias_id', 'estado'
+        'reacciones_frecuentes_id', 'advertencias_id', 'active'
     ];
 
     protected $hidden = [
@@ -34,7 +38,12 @@ class Glossary extends Model
         'reaccion' => 7,
     ];
 
-    // Relationships
+    /*
+
+        Relationships
+
+    --------------------------------------------------------------------------*/
+
 
     public function principios_activos()
     {
@@ -90,7 +99,12 @@ class Glossary extends Model
 
     public function modulos()
     {
-        return $this->belongsToMany(Abconfig::class, 'glosario_modulo', 'glossary_id', 'modulo_id')->withPivot('codigo');
+        return $this->belongsToMany(
+            GlossaryModule::class,
+            'glossary_module',
+            'glossary_id',
+            'module_id'
+        )->withPivot('code');
     }
 
     public function laboratorio()
@@ -175,7 +189,11 @@ class Glossary extends Model
         );
     }
 
-    // Functions
+    /*
+
+        Methods
+
+    --------------------------------------------------------------------------*/
 
     protected function importFromFile($data)
     {
@@ -193,7 +211,7 @@ class Glossary extends Model
 
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             DB::rollBack();
 
@@ -203,29 +221,39 @@ class Glossary extends Model
         return $this->success(['msg' => 'Registros ingresados correctamente.']);
     }
 
-    protected function search($request, $api = false, $paginate = 20)
+    /**
+     * Search records from database
+     *
+     * @param $request
+     * @param bool $api
+     * @param int $paginate
+     * @return LengthAwarePaginator
+     */
+    protected function search($request, bool $api = false, int $paginate = 20)
     {
         $relationships = ['modulos', 'categoria'];
 
-        if ($api) :
+        if ($api) {
 
             $relationships = [
                 'modulos' => function ($q) use ($request) {
-                    if ($request->modulo_id)
-                        $q->where('id', $request->modulo_id);
+                    if ($request->module_id)
+                        $q->where('id', $request->module_id);
                 },
-                'categoria', 'principios_activos', 'contraindicaciones', 'interacciones', 'reacciones',
-                'laboratorio', 'advertencias', 'condicion_de_venta', 'via_de_administracion', 'jerarquia',
-                'grupo_farmacologico', 'dosis_adulto', 'dosis_nino', 'recomendacion_de_administracion'
+                'categoria', 'principios_activos', 'contraindicaciones',
+                'interacciones', 'reacciones', 'laboratorio', 'advertencias',
+                'condicion_de_venta', 'via_de_administracion', 'jerarquia',
+                'grupo_farmacologico', 'dosis_adulto', 'dosis_nino',
+                'recomendacion_de_administracion'
             ];
 
-        endif;
+        }
 
         $query = Glossary::with($relationships);
 
         if ($request->q || $request->modulo_id) {
             $query->where(function ($query) use ($request) {
-                $query->where('nombre', 'like', "%{$request->q}%")
+                $query->where('name', 'like', "%{$request->q}%")
                     ->orWhereHas('modulos', function ($q) use ($request) {
                         if ($request->q)
                             $q->where('glosario_modulo.codigo', $request->q);
@@ -236,10 +264,11 @@ class Glossary extends Model
             });
         }
 
-        if ($request->modulo_id)
+        if ($request->modulo_id) {
             $query->whereHas('modulos', function ($q) use ($request) {
                 $q->where('id', $request->modulo_id);
             });
+        }
 
         if ($request->grupo_farmacologico_id)
             $query->where('grupo_farmacologico_id', $request->grupo_farmacologico_id);
@@ -250,29 +279,36 @@ class Glossary extends Model
         if ($request->laboratorio_id)
             $query->where('laboratorio_id', $request->laboratorio_id);
 
-        if ($request->estado)
-            $query->where('estado', $request->estado);
+        if ($request->active)
+            $query->where('active', $request->active);
 
         if ($request->principios_activos)
             $query->whereHas('principios_activos', function ($q) use ($request) {
                 $q->whereIn('id', $request->principios_activos);
             });
 
-        if ($api){
-            $query->orderBy('nombre', 'ASC');
-        }else{
-            $field = $request->sortBy ?? 'nombre';
-            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+        if ($api) {
 
+            $query->orderBy('name', 'ASC');
+
+        } else {
+
+            $field = $request->sortBy ?? 'name';
+            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
             $query->orderBy($field, $sort);
         }
 
-        $glosarios = $query->paginate($paginate);
-
-        return $glosarios;
+        return $query->paginate($paginate);
     }
 
-    protected function storeRequest($data, $glosario = null)
+    /**
+     * Save record in database
+     *
+     * @param $data
+     * @param $glossary
+     * @return array|string[]
+     */
+    protected function storeRequest($data, $glossary = null)
     {
         try {
 
@@ -280,39 +316,46 @@ class Glossary extends Model
 
             DB::beginTransaction();
 
-            if ($glosario) :
+            if ($glossary) {
 
-                $glosario->update($data);
-
+                $glossary->update($data);
                 $message = 'Registro actualizado correctamente';
 
-            else :
+            } else {
 
-                $glosario = $this->create($data);
-
+                $glossary = $this->create($data);
                 $message = 'Registro creado correctamente';
 
-            endif;
+            }
 
             $modulos = $this->prepareModulosData($data['modulos']);
-            $glosario->modulos()->sync($modulos);
+            $glossary->modulos()->sync($modulos);
 
-            $taxonomias = $this->prepareTaxonomiesData($data, 'principios_activos', 'principio_activo');
-            $glosario->principios_activos()->sync($taxonomias);
+            $taxonomias = $this->prepareTaxonomiesData(
+                $data, 'principios_activos', 'principio_activo'
+            );
+            $glossary->principios_activos()->sync($taxonomias);
 
-            $taxonomias = $this->prepareTaxonomiesData($data, 'interacciones', 'interaccion');
-            $glosario->interacciones()->sync($taxonomias);
+            $taxonomias = $this->prepareTaxonomiesData(
+                $data, 'interacciones', 'interaccion'
+            );
+            $glossary->interacciones()->sync($taxonomias);
 
-            $taxonomias = $this->prepareTaxonomiesData($data, 'contraindicaciones', 'contraindicacion');
-            $glosario->contraindicaciones()->sync($taxonomias);
+            $taxonomias = $this->prepareTaxonomiesData(
+                $data, 'contraindicaciones', 'contraindicacion'
+            );
+            $glossary->contraindicaciones()->sync($taxonomias);
 
-            $taxonomias = $this->prepareTaxonomiesData($data, 'reacciones', 'reaccion');
-            $glosario->reacciones()->sync($taxonomias);
+            $taxonomias = $this->prepareTaxonomiesData(
+                $data, 'reacciones', 'reaccion'
+            );
+            $glossary->reacciones()->sync($taxonomias);
 
             DB::commit();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
+            report($e);
             DB::rollBack();
 
             return ['status' => 'error', 'message' => $e->getMessage()];
@@ -344,7 +387,7 @@ class Glossary extends Model
 
             DB::commit();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             DB::rollBack();
 
@@ -434,7 +477,7 @@ class Glossary extends Model
         foreach ($data as $key => $row)
         {
             unset($data[$key]['id']);
-            unset($data[$key]['nombre']);
+            unset($data[$key]['name']);
 
             if (empty($row['codigo']))
                 unset($data[$key]);
@@ -444,27 +487,27 @@ class Glossary extends Model
         return $data;
     }
 
-    protected function prepareSearchedData($glosarios)
+    protected function prepareSearchedData($glossaries)
     {
-        $result['current_page'] = $glosarios->currentPage();
-        $result['first_page_url'] = $glosarios->url(1);
-        $result['from'] = $glosarios->firstItem();
-        $result['last_page'] = $glosarios->lastPage();
-        $result['last_page_url'] = $glosarios->url($glosarios->lastPage());
-        $result['next_page_url'] = $glosarios->nextPageUrl();
-        $result['path'] = $glosarios->getOptions()['path'];
-        $result['per_page'] = $glosarios->perPage();
-        $result['prev_page_url'] = $glosarios->previousPageUrl();
-        $result['to'] = $glosarios->lastItem();
-        $result['total'] = $glosarios->total();
+        $result['current_page'] = $glossaries->currentPage();
+        $result['first_page_url'] = $glossaries->url(1);
+        $result['from'] = $glossaries->firstItem();
+        $result['last_page'] = $glossaries->lastPage();
+        $result['last_page_url'] = $glossaries->url($glossaries->lastPage());
+        $result['next_page_url'] = $glossaries->nextPageUrl();
+        $result['path'] = $glossaries->getOptions()['path'];
+        $result['per_page'] = $glossaries->perPage();
+        $result['prev_page_url'] = $glossaries->previousPageUrl();
+        $result['to'] = $glossaries->lastItem();
+        $result['total'] = $glossaries->total();
 
         $data = [];
 
-        foreach ($glosarios as $key => $row)
+        foreach ($glossaries as $key => $row)
         {
             $modulo = $row->modulos->first();
 
-            $data[$key]['nombre'] = $row->nombre;
+            $data[$key]['name'] = $row->name;
             $data[$key]['codigo'] = $modulo->pivot->codigo ?? '';
 
             $data[$key]['categoria'] = $row->categoria->nombre ?? '';

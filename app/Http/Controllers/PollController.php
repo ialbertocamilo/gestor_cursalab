@@ -6,6 +6,7 @@ use App\Http\Requests\PollStoreRequest;
 use App\Http\Resources\EncuestaResource;
 use App\Models\Media;
 use App\Models\Poll;
+use App\Models\Taxonomy;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -54,7 +55,7 @@ class PollController extends Controller
      */
     public function create()
     {
-        $secciones = config('data.polls.secciones');
+        $secciones = Taxonomy::loadGroupTypes('poll', 'tipo');
         $tipos = config('data.polls.tipos');
 
         return $this->success(get_defined_vars());
@@ -79,9 +80,16 @@ class PollController extends Controller
         return $this->success(compact('msg'));
     }
 
+    /**
+     * Load data for edit form
+     *
+     * @param Poll $poll
+     * @return JsonResponse
+     */
     public function edit(Poll $poll)
     {
-        $secciones = config('data.polls.secciones');
+
+        $secciones = Taxonomy::loadGroupTypes('poll', 'tipo');
         $tipos = config('data.polls.tipos');
 
         return $this->success(get_defined_vars());

@@ -24,15 +24,12 @@ class PollQuestionStoreRequest extends FormRequest
     public function rules()
     {
 
-        $reglas = [
-            // 'encuesta_id' => 'required',
+        return [
             'titulo' => 'required',
-            'tipo_pregunta' => 'required',
+            'type_id' => 'required',
             'opciones' => 'nullable',
             'active' => 'required',
         ];
-
-        return $reglas;
     }
 
     public function validationData()

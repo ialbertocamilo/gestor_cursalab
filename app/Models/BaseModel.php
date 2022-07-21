@@ -2,34 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
-
-use Cviebrock\EloquentSluggable\Sluggable;
-// use Watson\Rememberable\Rememberable;
-use App\Utils\HasManySyncable;
-
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\HasMedia;
-
 use Altek\Accountant\Contracts\Recordable;
+use App\Traits\CustomAudit;
+use App\Traits\CustomCRUD;
+use App\Traits\UnixTimestampSerializable;
+use App\Utils\HasManySyncable;
+use Cviebrock\EloquentSluggable\Sluggable;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
+
+// use Watson\Rememberable\Rememberable;
 
 // use Keygen\Keygen;
-
-use App\Traits\CustomMedia;
-use App\Traits\CustomCRUD;
-use App\Traits\CustomAudit;
-use App\Traits\UnixTimestampSerializable;
-
-use GeneaLabs\LaravelModelCaching\Traits\Cachable;
-
-use Illuminate\Support\Facades\DB;
 
 // class BaseModel extends Model implements HasMedia, Recordable
 class BaseModel extends Model implements Recordable
@@ -183,8 +170,8 @@ class BaseModel extends Model implements Recordable
     // public static function bootInteractsWithMedia()
     // {
     //     static::deleting(function (HasMedia $model) {
-            
-    //         if ($model->shouldDeletePreservingMedia()) 
+
+    //         if ($model->shouldDeletePreservingMedia())
     //             return;
 
     //         $model->media()->cursor()->each(fn (Media $media) => $media->delete());
@@ -199,7 +186,7 @@ class BaseModel extends Model implements Recordable
               ->filter(
                   fn($method) => !empty($method->getReturnType()) &&
                       str_contains(
-                          $method->getReturnType(), 
+                          $method->getReturnType(),
                           'Illuminate\Database\Eloquent\Relations'
                      )
               )

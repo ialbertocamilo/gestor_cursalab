@@ -4,13 +4,10 @@ namespace App\Models;
 
 use App\Imports\VademecumImport;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 
-class Vademecum extends Model
+class Vademecum extends BaseModel
 {
-    use SoftDeletes;
 
     protected $table = 'vademecum';
 

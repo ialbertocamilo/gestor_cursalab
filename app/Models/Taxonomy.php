@@ -9,6 +9,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Taxonomy extends Model
 {
+
     use SoftDeletes;
 
     // protected $rememberFor = WEEK_MINUTES;
@@ -322,4 +323,18 @@ class Taxonomy extends Model
         return $query->paginate($request->rowsPerPage);
     }
 
+    /**
+     * Load group's types from taxonomy
+     *
+     * @param string $groupName
+     * @param string $typeName
+     * @return mixed
+     */
+    protected function loadGroupTypes(string $groupName, string $typeName) {
+
+        return Taxonomy::where('group', $groupName)
+                        ->where('type', $typeName)
+                        ->select(['id', 'name', 'name as nombre'])
+                        ->get();
+    }
 }

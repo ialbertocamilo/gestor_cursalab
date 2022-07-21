@@ -6,6 +6,7 @@ use App\Http\Requests\PollQuestionStoreRequest;
 use App\Http\Resources\PollQuestionResource;
 use App\Models\Poll;
 use App\Models\PollQuestion;
+use App\Models\Taxonomy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -50,12 +51,12 @@ class PollQuestionController extends Controller
      *
      * @return JsonResponse
      */
-    public function create(Poll $encuesta)
+    public function create(Poll $poll)
     {
         // $encuesta_array = Encuesta::select('id','titulo')->pluck('titulo','id' );
         // return view('encuestas_preguntas.create', compact('encuesta_array'));
 
-        $tipos = config('data.tipo-preguntas');
+        $tipos = Taxonomy::loadGroupTypes('poll', 'tipo-pregunta');
 
         return $this->success(get_defined_vars());
     }
@@ -87,13 +88,7 @@ class PollQuestionController extends Controller
      */
     public function edit(Poll $poll, PollQuestion $pollquestion)
     {
-        $tipos = config('data.tipo-preguntas');
-
-        $key = array_search(
-            $pollquestion->tipo_pregunta, array_column($tipos, 'id')
-        );
-
-        $pollquestion->tipo_pregunta = $tipos[$key];
+        $tipos = Taxonomy::loadGroupTypes('poll', 'tipo-pregunta');
         $pollquestion->opciones = $pollquestion->formatOptions();
 
         return $this->success(get_defined_vars());
