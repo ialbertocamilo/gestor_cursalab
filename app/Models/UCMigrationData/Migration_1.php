@@ -61,6 +61,8 @@ class Migration_1 extends Model
         $this->insertBoticasData($data);
 
         $this->insertCriterionUserData($data);
+
+        $this->insertEntrenadoresUsuarios();
     }
 
     public function setUsersData(&$result, $db)
@@ -473,5 +475,12 @@ class Migration_1 extends Model
         }
 
         $this->makeChunkAndInsert($criterion_user, 'criterion_value_user');
+    }
+
+    protected function insertEntrenadoresUsuarios()
+    {
+        $db = self::connect();
+
+//        $entrenadores = $db->getTable('')
     }
 }
