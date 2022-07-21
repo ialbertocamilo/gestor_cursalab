@@ -15,10 +15,9 @@ return new class extends Migration
     {
         Schema::create('segment_course_criterion', function (Blueprint $table) {
             // $table->id();
-            
-            $table->foreignId('segment_course_id')->nullable()->constrained('segment_courses');
+
+            $table->foreignId('segment_course_id')->nullable()->constrained('segment_course');
             $table->foreignId('criterion_value_id')->nullable()->constrained('criterion_values');
-  
         });
     }
 

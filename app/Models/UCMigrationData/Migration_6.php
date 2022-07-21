@@ -31,4 +31,10 @@ class Migration_6 extends Model
         $client_lms_data = ExternalLMSMigration6::setMigrationData6();
         ExternalDatabase6::insertMigrationData6($client_lms_data);
     }
+
+    protected function migrateData7()
+    {
+        $client_lms_data = ExternalLMSMigration6::setMigrationData7();
+        ExternalDatabase6::insertMigrationData7($client_lms_data);
+    }
 }

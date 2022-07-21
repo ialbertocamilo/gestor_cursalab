@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Course extends BaseModel
+class Course extends Model
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
@@ -69,7 +70,7 @@ class Course extends BaseModel
 
             if ($curso) :
                 $curso->update($data);
-            else:
+            else :
                 $data['libre'] = $data['categoria_modalidad'] === 'libre' ? 1 : 0;
                 $curso = self::create($data);
             endif;

@@ -24,14 +24,15 @@ class DatabaseSeeder extends Seeder
         $this->call(TaxonomySeederQuestionType::class);
         $this->call(TaxonomySeederCourse::class);
         $this->call(TaxonomySeederTopicEvaluationType::class);
+        $this->call(TaxonomySeederType::class);
 
 
         $this->call(BouncerSeeder::class);
         $this->call(UserSeeder::class);
 
-//        $this->call(SchoolSeeder::class);
-//        $this->call(CourseSeeder::class);
-//        $this->call(TopicSeeder::class);
+        //        $this->call(SchoolSeeder::class);
+        //        $this->call(CourseSeeder::class);
+        //        $this->call(TopicSeeder::class);
 
         // $this->call(AccountSeeder::class);
         // $this->call(PostSeeder::class);

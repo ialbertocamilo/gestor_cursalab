@@ -54,6 +54,140 @@ class ExternalLMSMigration6 extends Model
         return $client_LMS_data;
     }
 
+    protected function setMigrationData7()
+    {
+        $db = self::connect();
+        $client_LMS_data = [
+            'push_notifications' => [],
+            'glossaries' => [],
+            'announcements' => [],
+            'tickets' => [],
+            'faq' => [],
+        ];
+        $this->setPushNotificationsData($client_LMS_data, $db);
+        $this->setGlossariesData($client_LMS_data, $db);
+        $this->setAnnouncementsData($client_LMS_data, $db);
+        $this->setTicketsData($client_LMS_data, $db);
+        $this->setFaqData($client_LMS_data, $db);
+
+        return $client_LMS_data;
+    }
+
+    public function setPushNotificationsData(&$result, $db)
+    {
+        $temp['temp_notifications'] = $db->getTable('notificaciones_push')
+            ->select()
+            ->get();
+        foreach ($temp['temp_notifications'] as $user) {
+            $result['push_notifications'][] = [
+                'titulo' => $user->titulo,
+                'texto' => $user->texto,
+                'creador_id' => $user->creador_id,
+                'destinatarios' => $user->destinatarios,
+                'success' => $user->success,
+                'failure' => $user->failure,
+                'detalles_json' => $user->detalles_json,
+                'estado_envio' => $user->estado_envio,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+    public function setGlossariesData(&$result, $db)
+    {
+        $temp['temp_glossaries'] = $db->getTable('glosarios')
+            ->select()
+            ->get();
+        foreach ($temp['temp_glossaries'] as $user) {
+            $result['glossaries'][] = [
+                'external_id' => $user->id,
+                'name' => $user->nombre,
+                'active' => $user->estado,
+                'categoria_id' => $user->categoria_id,
+                'laboratorio_id' => $user->laboratorio_id,
+                'condicion_de_venta_id' => $user->condicion_de_venta_id,
+                'via_de_administracion_id' => $user->via_de_administracion_id,
+                'jerarquia_id' => $user->jerarquia_id,
+                'grupo_farmacologico_id' => $user->grupo_farmacologico_id,
+                'forma_farmaceutica_id' => $user->forma_farmaceutica_id,
+                'dosis_adulto_id' => $user->dosis_adulto_id,
+                'dosis_nino_id' => $user->dosis_nino_id,
+                'recomendacion_de_administracion_id' => $user->recomendacion_de_administracion_id,
+                'advertencias_id' => $user->advertencias_id,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+    public function setAnnouncementsData(&$result, $db)
+    {
+        $temp['temp_announcements'] = $db->getTable('anuncios')
+            ->select()
+            ->get();
+        foreach ($temp['temp_announcements'] as $user) {
+            $result['announcements'][] = [
+                'module_id' => $user->config_id,
+                'nombre' => $user->nombre,
+                'contenido' => $user->contenido,
+                'imagen' => $user->imagen,
+                'archivo' => $user->archivo,
+                'destino' => $user->destino,
+                'link' => $user->link,
+                'position' => $user->orden,
+                'active' => $user->estado,
+                'publish_date' => $user->publish_date,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+    public function setTicketsData(&$result, $db)
+    {
+        $temp['temp_tickets'] = $db->getTable('usuario_ayuda')
+            ->select()
+            ->get();
+        foreach ($temp['temp_tickets'] as $user) {
+            $result['tickets'][] = [
+                'external_id' => $user->id,
+                'user_id' => $user->usuario_id,
+                'reason' => $user->motivo,
+                'detail' => $user->detalle,
+                'contact' => $user->contacto,
+                'info_support' => $user->info_soporte,
+                'msg_to_user' => $user->msg_to_user,
+                'status' => $user->estado,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+    public function setFaqData(&$result, $db)
+    {
+        $temp['temp_faq'] = $db->getTable('preguntas_frec')
+            ->select()
+            ->get();
+        foreach ($temp['temp_faq'] as $user) {
+            $result['faq'][] = [
+                'title' => $user->pregunta,
+                'content' => $user->respuesta,
+                'active' => $user->estado,
+                'position' => $user->orden,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+
     public function setMediaData(&$result, $db)
     {
         $temp['temp_media'] = $db->getTable('media')
