@@ -15,13 +15,10 @@
                         <DefaultSelect
                             clearable
                             :items="selects.modules"
-                            v-model="resource.modules"
-                            label="Módulos"
-                            multiple
+                            v-model="resource.module_id"
+                            label="Módulo"
                             return-object
-                            :rules="rules.modules"
-                            :count-show-values="3"
-                            :show-select-all="false"
+                            :rules="rules.module_id"
                         />
                     </v-col>
                 </v-row>
@@ -84,25 +81,17 @@
                             :referenceComponent="'modalDateFilter1'"
                             :options="modalDateFilter1"
                             v-model="resource.publish_date"
-                            label="Fecha inicio"
-                        />
-                    </v-col>
-
-                    <v-col cols="6">
-                        <DefaultInputDate
-                            clearable
-                            :referenceComponent="'modalDateFilter2'"
-                            :options="modalDateFilter2"
-                            v-model="resource.publish_date"
-                            label="Fecha fin"
+                            label="Fecha publicación"
                         />
                     </v-col>
                 </v-row>
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultRichText
+                            clearable
                             v-model="resource.contenido"
                             label="Contenido"
+                            :rules="rules.contenido"
                         />
                     </v-col>
 
@@ -110,7 +99,7 @@
 
                 <v-row align="start" align-content="center">
                     <v-col cols="4" class="--d-flex --justify-content-start">
-                        <DefaultToggle v-model="resource.estado"/>
+                        <DefaultToggle v-model="resource.active"/>
                     </v-col>
                 </v-row>
             </v-form>
@@ -122,9 +111,11 @@
 <script>
 
 import DefaultRichText from "../../components/globals/DefaultRichText";
+import moment from "moment";
 
 const fields = [
-    'nombre', 'active', 'destino', 'link', 'modules', 'contenido', 'publish_date'
+    'nombre', 'active', 'destino', 'link', 'module_id',
+    'contenido', 'publish_date'
 ];
 const file_fields = ['imagen', 'archivo'];
 
@@ -150,22 +141,23 @@ export default {
                 file_archivo: null,
                 destino: null,
                 link: null,
-                modules: [],
+                module_id: null,
                 destinos: null,
                 active: true,
                 publish_date: null,
-                contenido: ""
+                contenido: null
             },
-            resource: {},
+            resource: { },
             selects: {
                 modules: [],
                 destinos: [],
             },
 
             rules: {
-                modules: this.getRules(['required']),
+                module_id: this.getRules(['required']),
                 nombre: this.getRules(['required', 'max:100']),
                 imagen: this.getRules(['required']),
+                contenido: this.getRules(['required'])
                 // dni: this.getRules(['required', 'number'])
             },
 
@@ -185,7 +177,8 @@ export default {
             vue.resetSelects()
             vue.resetValidation()
             vue.$emit('onCancel')
-        },
+        }
+        ,
         resetValidation() {
             let vue = this
             // if (vue.options.action !== 'edit'){
@@ -194,8 +187,10 @@ export default {
             // vue.resource.contenido = ""
             // }
             vue.$refs.anuncioForm.resetValidation()
-        },
+        }
+        ,
         confirmModal() {
+
             let vue = this
 
             vue.errors = []
@@ -206,37 +201,44 @@ export default {
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = vue.resource.id
+                        ? `${base}/${vue.resource.id}/update`
+                        : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
 
-            // if (validateForm && validateSelectedModules) {
             if (validateForm) {
 
-                let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+                let formData = vue.getMultipartFormData(
+                    method, vue.resource, fields, file_fields
+                );
 
-                vue.$http.post(url, formData)
-                    .then(({data}) => {
+                vue.$http
+                   .post(url, formData)
+                   .then(({data}) => {
+
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
-                    }).catch((error) => {
-                    if (error && error.errors)
+
+                   }).catch((error) => {
+
+                   if (error && error.errors)
                         vue.errors = error.errors
                 })
             }
 
             this.hideLoader()
-        },
+        }
+        ,
         resetSelects() {
             let vue = this
-            // Selects independientes
             vue.selects.modules = []
             vue.selects.destinos = []
-            // vue.removeFileFromDropzone(vue.resource.imagen, 'inputImagen')
-            // vue.removeFileFromDropzone(vue.resource.archivo, 'inputArchivo')
-        },
+        }
+        ,
         async loadData(resource) {
+
             let vue = this
 
             vue.errors = []
@@ -246,7 +248,9 @@ export default {
             })
 
             let base = `${vue.options.base_endpoint}`
-            let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
+            let url = resource
+                        ? `${base}/${resource.id}/edit`
+                        : `${base}/create`;
 
             await vue.$http.get(url).then(({data}) => {
 
@@ -254,12 +258,13 @@ export default {
                 vue.selects.destinos = data.data.destinos
 
                 if (resource) {
-                    vue.resource = data.data.anuncio
+                    vue.resource = Object.assign({}, data.data.announcement);
                 }
             })
 
             return 0;
-        },
+        }
+        ,
         loadSelects() {
             let vue = this
         },

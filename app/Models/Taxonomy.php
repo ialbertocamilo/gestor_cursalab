@@ -208,8 +208,20 @@ class Taxonomy extends Model
         return $q->orderBy('position', 'ASC');
     }
 
+    /**
+     * Load types from taxonomy filtered with its parent id
+     *
+     * @param $parent_id
+     * @param $group
+     * @param $type
+     * @param array $selectParameters
+     * @return mixed
+     */
     protected function getSelectChildrenData(
-        $parent_id, $group, $type, array $selectParameters = ['id', 'name']
+        $parent_id,
+        $group,
+        $type,
+        array $selectParameters = ['id', 'name', 'name as nombre']
     )
     {
         return $this->getChildrenData($parent_id, $group, $type)
@@ -288,15 +300,20 @@ class Taxonomy extends Model
                        ->get();
     }
 
-    protected function getDataForSelect($group, $type)
+    /**
+     * Load group's types from taxonomy
+     *
+     * @param string $groupName
+     * @param string $typeName
+     * @return mixed
+     */
+    protected function getDataForSelect($groupName, $typeName)
     {
-        return Taxonomy::where('type', $type)
-                        ->where('group', $group)
+        return Taxonomy::where('type', $typeName)
+                        ->where('group', $groupName)
                         ->where('active', 1)
                         ->orderBy('name', 'ASC')
-                        ->get(['name', 'id']);
-                    // ->pluck('name', 'id')
-                    // ->toArray();
+                        ->get(['name', 'id', 'name as nombre']);
     }
 
 
@@ -321,20 +338,5 @@ class Taxonomy extends Model
         $query->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->rowsPerPage);
-    }
-
-    /**
-     * Load group's types from taxonomy
-     *
-     * @param string $groupName
-     * @param string $typeName
-     * @return mixed
-     */
-    protected function loadGroupTypes(string $groupName, string $typeName) {
-
-        return Taxonomy::where('group', $groupName)
-                        ->where('type', $typeName)
-                        ->select(['id', 'name', 'name as nombre'])
-                        ->get();
     }
 }

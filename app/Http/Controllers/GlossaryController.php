@@ -4,33 +4,47 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\GlosarioImportExcelRequest;
 use App\Http\Requests\GlossaryStoreRequest;
-use App\Http\Resources\GlosarioResource;
+use App\Http\Resources\GlossaryResource;
 use App\Models\Abconfig;
 use App\Models\Carrera;
+use App\Models\Criterion;
 use App\Models\Glossary;
 use App\Models\Taxonomy;
+use App\Models\Vademecum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GlossaryController extends Controller
 {
 
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function search(Request $request)
     {
         $glossaries = Glossary::search($request, false, $request->paginate);
-        GlosarioResource::collection($glossaries);
+        GlossaryResource::collection($glossaries);
         return $this->success($glossaries);
     }
 
+    /**
+     * Get items list for select inputs
+     *
+     * @return JsonResponse
+     */
     public function getListSelects()
     {
-        $modules = Abconfig::select('id', 'etapa as nombre')->get();
-        // $modulos = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
+        $modules = Criterion::getValuesForSelect('module');
         $categories = Taxonomy::getDataForSelect('glosario', 'categoria');
         $laboratorios = Taxonomy::getDataForSelect('glosario', 'laboratorio');
         $principios_activos = Taxonomy::getDataForSelect('glosario', 'principio_activo');
 
-        return $this->success(compact('modules', 'categories'));
+        return $this->success(
+            compact('modules', 'categories')
+        );
     }
 
     public function index(Request $request)
@@ -77,6 +91,11 @@ class GlossaryController extends Controller
         return Glossary::storeCarreerCategories($request->all());
     }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return JsonResponse
+     */
     public function create()
     {
         $selects = $this->getSelectsForForm();
@@ -98,7 +117,7 @@ class GlossaryController extends Controller
     }
 
     /**
-     * Process request to create new glossary
+     * Process request to save new record
      *
      * @param GlossaryStoreRequest $request
      * @return JsonResponse
@@ -135,16 +154,29 @@ class GlossaryController extends Controller
         return $this->success(['msg' => 'Glosario actualizado correctamente.']);
     }
 
-    public function destroy(Glossary $glosario)
+    /**
+     * Process request to delete record
+     *
+     * @param Glossary $glossary
+     * @return JsonResponse
+     */
+    public function destroy(Glossary $glossary)
     {
-        $glosario->delete();
-
+        $glossary->delete();
         return $this->success(['msg' => 'Glosario eliminado correctamente.']);
     }
 
-    public function status(Glossary $glosario, Request $request)
+    /**
+     * Process request to toggle poll status between 1 or 0
+     *
+     * @param Glossary $glossary
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(Glossary $glossary, Request $request)
     {
-        $glosario->update(['estado' => !$glosario->estado]);
+
+        $glossary->update(['active' => !$glossary->active]);
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }

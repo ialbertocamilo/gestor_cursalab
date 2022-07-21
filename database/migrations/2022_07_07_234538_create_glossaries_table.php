@@ -16,9 +16,10 @@ return new class extends Migration
         Schema::create('glossaries', function (Blueprint $table) {
 
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->index();
 
             $table->string('name')->nullable();
-            
+
             $table->boolean('active')->nullable()->default(true);
 
             $table->foreignId('categoria_id')->nullable()->constrained('taxonomies');

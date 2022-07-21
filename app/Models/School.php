@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class School extends BaseModel
+class School extends Model
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma',
@@ -44,22 +45,21 @@ class School extends BaseModel
 
             if ($categoria) :
                 $categoria->update($data);
-            else:
+            else :
                 $categoria = self::create($data);
             endif;
 
-            if (!empty($data['file_imagen'])):
+            if (!empty($data['file_imagen'])) :
                 $path = Media::uploadFile($data['file_imagen']);
                 $categoria->imagen = $path;
             endif;
 
-            if (!empty($data['file_plantilla_diploma'])):
+            if (!empty($data['file_plantilla_diploma'])) :
                 $path = Media::uploadFile($data['file_plantilla_diploma']);
                 $categoria->plantilla_diploma = $path;
             endif;
 
-            if (!empty($data['nombre_ciclo_0'])):
-                (new Categoria())->guardarNombreCiclo0($categoria->id, $data['nombre_ciclo_0']);
+            if (!empty($data['nombre_ciclo_0'])) : (new Categoria())->guardarNombreCiclo0($categoria->id, $data['nombre_ciclo_0']);
             endif;
 
 
@@ -70,6 +70,5 @@ class School extends BaseModel
             DB::rollBack();
             return $e;
         }
-
     }
 }

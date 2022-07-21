@@ -21,7 +21,7 @@ class AnnouncementResource extends JsonResource
             'image' => space_url($this->imagen),
             'active' => $this->active ? true : false,
             'orden' => $this->orden,
-            'publication_date' => $this->getPublicationDate(),
+            'publish_date' => $this->getPublicationDate(),
             'created_at' => $this->created_at->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at->format('d/m/Y g:i a'),
         ];

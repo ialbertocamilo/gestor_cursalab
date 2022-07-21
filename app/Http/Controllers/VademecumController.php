@@ -7,13 +7,21 @@ use App\Http\Requests\VademecumStoreRequest;
 use App\Http\Resources\VademecumCategoriaResource;
 use App\Http\Resources\VademecumResource;
 use App\Models\Abconfig;
+use App\Models\Criterion;
 use App\Models\Media;
 use App\Models\Taxonomy;
 use App\Models\Vademecum;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class VademecumController extends Controller
 {
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function search(Request $request)
     {
         $vademecum = Vademecum::search($request, false, $request->paginate);
@@ -23,10 +31,15 @@ class VademecumController extends Controller
         return $this->success($vademecum);
     }
 
+    /**
+     * Get items list for select inputs
+     *
+     * @return JsonResponse
+     */
     public function getListSelects()
     {
-        $modulos = Abconfig::getModulesForSelect();
-        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        $modules = Criterion::getValuesForSelect('module');
+        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
 
         return $this->success(get_defined_vars());
     }
@@ -52,74 +65,71 @@ class VademecumController extends Controller
         );
     }
 
-    public function import()
-    {
-        $modules = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
-
-        return view('vademecum.import', compact('modules', 'categorias'));
-    }
-
-    public function importFile(VademecumImportExcelRequest $request)
-    {
-        $result = Vademecum::importFromFile($request->validated());
-
-        return $this->response($result);
-    }
-
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return JsonResponse
+     */
     public function create()
     {
-        // $modulos = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        // $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        // $subcategorias = [];
-
-        // return view('vademecum.create', compact('categorias', 'modulos', 'subcategorias'));
-
-        $modulos = Abconfig::getModulesForSelect();
-        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        $subcategorias = [];
+        $modules = Criterion::getValuesForSelect('module');
+        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        $subcategories = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
 
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process request to store a record
+     *
+     * @param VademecumStoreRequest $request
+     * @return JsonResponse
+     */
     public function store(VademecumStoreRequest $request)
     {
 
         $data = $request->validated();
-        $data = Media::requestUploadFileForId($data, 'media', $data['nombre'] ?? null);
+        $data = Media::requestUploadFileForId(
+            $data, 'media', $data['name'] ?? null
+        );
 
         $result = Vademecum::storeRequest($data);
+        if ($result['status'] === 'success') {
+            $message = 'Vademecum creado correctamente.';
+        } else {
+            $message = $result['message'];
+        }
 
-        // return $this->response($result);
-        return $this->success(['msg' => 'Vademecum creado correctamente.']);
+        return $this->success(['msg' => $message]);
     }
 
+    /**
+     * Process request to load data for edit form
+     *
+     * @param Vademecum $vademecum
+     * @return JsonResponse
+     */
     public function edit(Vademecum $vademecum)
     {
 
-        // $elemento->load('modulos');
-
-        // $modulos = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
-        // $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        // $subcategorias = Taxonomy::subcategoriaVademecum($elemento->category_id)
-        //                             ->pluck('nombre', 'id')
-        //                             ->toArray();
-
-
-        // return view('vademecum.edit', compact('elemento', 'categorias', 'subcategorias', 'modulos'));
-
-        $vademecum->load('modulos', 'categoria', 'subcategoria');
+        $vademecum->load('modules', 'category', 'subcategory');
 
         $vademecum->scorm = $vademecum->media->file ?? null;
 
-        $modulos = Abconfig::getModulesForSelect();
+        $modulos = Criterion::getValuesForSelect('module');
         $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        $subcategorias = Taxonomy::subcategoriaVademecum($vademecum->category_id)
-                                 ->get(['nombre', 'id']);
+        $subcategorias = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
 
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process to update the specified resource in storage.
+     *
+     * @param Vademecum $vademecum
+     * @param VademecumStoreRequest $request
+     * @return JsonResponse
+     */
     public function update(Vademecum $vademecum, VademecumStoreRequest $request)
     {
         $data = $request->validated();
@@ -133,19 +143,30 @@ class VademecumController extends Controller
         return $this->success(['msg' => 'Vademecum actualizado correctamente.']);
     }
 
+    /**
+     * Process request to toggle poll status between 1 or 0
+     *
+     * @param Vademecum $vademecum
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function status(Vademecum $vademecum, Request $request)
     {
-        $vademecum->update(['estado' => !$vademecum->estado]);
+        $vademecum->update(['active' => !$vademecum->active]);
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 
+    /**
+     * Process request to delete record
+     *
+     * @param Vademecum $vademecum
+     * @return JsonResponse
+     */
     public function destroy(Vademecum $vademecum)
     {
         $vademecum->delete();
-
         return $this->success(['msg' => 'Vademecum eliminado correctamente.']);
-        // return $this->response(['status' => 'success', 'message' => 'Eliminado correctamente']);
     }
 
     public function response($result, $route = 'vademecum.index')
@@ -304,9 +325,25 @@ class VademecumController extends Controller
 
     public function getSubCategoriesByCategory(Request $request)
     {
-        $subcategorias = Taxonomy::subcategoriaVademecum($request->category_id)
-                                    ->get(['nombre', 'id']);
+        $subcategories = Taxonomy::getSelectChildrenData(
+            $request->category_id, 'vademecum', 'subcategoria'
+        );
 
         return $this->success(get_defined_vars());
+    }
+
+    public function import()
+    {
+        $modules = Abconfig::where('active', 1)->pluck('etapa', 'id')->toArray();
+        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
+
+        return view('vademecum.import', compact('modules', 'categorias'));
+    }
+
+    public function importFile(VademecumImportExcelRequest $request)
+    {
+        $result = Vademecum::importFromFile($request->validated());
+
+        return $this->response($result);
     }
 }

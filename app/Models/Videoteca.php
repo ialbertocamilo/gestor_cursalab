@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class Videoteca extends BaseModel
@@ -30,8 +31,11 @@ class Videoteca extends BaseModel
 
     public function media()
     {
-        return $this->hasOne(Media::class, 'id', 'media_id')
-            ->select('id', 'title', 'file', 'ext');
+        return $this->hasOne(
+            Media::class,
+            'id',
+            'media_id'
+        )->select('id', 'title', 'file', 'ext');
     }
 
     public function preview()
@@ -42,8 +46,12 @@ class Videoteca extends BaseModel
 
     public function modules()
     {
-        return $this->belongsToMany(Abconfig::class, 'videoteca_module', 'videoteca_id', 'module_id')
-            ->select('etapa', 'id');
+        return $this->belongsToMany(
+            CriterionValue::class,
+            'videoteca_module',
+            'videoteca_id',
+            'module_id'
+        );
     }
 
     public function categoria()
@@ -76,13 +84,20 @@ class Videoteca extends BaseModel
         $this->attributes['active'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
     }
 
+    /**
+     * Load paginated records from database
+     *
+     * @param $request
+     * @param $api
+     * @param $paginate
+     * @return LengthAwarePaginator
+     */
     protected function search($request, $api = false, $paginate = 20)
     {
         $relationships = [
-//            'modules',
-            'media', 'categoria', 'tags', 'preview'];
+            'modules', 'media', 'categoria', 'tags', 'preview'];
 
-        if ($api) :
+        if ($api) {
             $request->active = 1;
             $relationships = [
 //                'modules' => function ($q) use ($request) {
@@ -94,7 +109,7 @@ class Videoteca extends BaseModel
                 'categoria',
                 'tags',
             ];
-        endif;
+        }
 
         $query = self::with($relationships);
 

@@ -49,6 +49,135 @@ class ExternalDatabase6 extends Model
         $this->insertAttendantsData($data);
     }
 
+    protected function insertMigrationData7($data)
+    {
+        // Require the Users Table
+        // Push Notifications
+        $this->insertPushNotificationsData($data);
+
+        // Glossaries
+        $this->insertGlossariesData($data);
+
+        // Announcements
+        // $this->insertAnnouncementsData($data);
+
+        // Tickets (Soporte)
+        $this->insertTicketsData($data);
+
+        // Preguntas Frecuentes
+        $this->insertFaqData($data);
+    }
+
+    // Push Notifications
+    public function insertPushNotificationsData($data)
+    {
+        $temp = [];
+        foreach ($data['push_notifications'] as $item) {
+
+            $creador_id = (!is_null($item['creador_id'])) ?  DB::table('users')->where('external_id', $item['creador_id'])->first('id') : null;
+
+            $item['creador_id'] = (!is_null($creador_id)) ? $creador_id->id : null;
+
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'push_notifications');
+    }
+
+    // Glossaries
+    public function insertGlossariesData($data)
+    {
+        $temp = [];
+        foreach ($data['glossaries'] as $item) {
+
+            $categoria_id = (!is_null($item['categoria_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['categoria_id'])->first('id') : null;
+
+            $laboratorio_id = (!is_null($item['laboratorio_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['laboratorio_id'])->first('id') : null;
+
+            $condicion_de_venta_id = (!is_null($item['condicion_de_venta_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['condicion_de_venta_id'])->first('id') : null;
+
+            $via_de_administracion_id = (!is_null($item['via_de_administracion_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['via_de_administracion_id'])->first('id') : null;
+
+            $jerarquia_id = (!is_null($item['jerarquia_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['jerarquia_id'])->first('id') : null;
+
+            $grupo_farmacologico_id = (!is_null($item['grupo_farmacologico_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['grupo_farmacologico_id'])->first('id') : null;
+
+            $forma_farmaceutica_id = (!is_null($item['forma_farmaceutica_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['forma_farmaceutica_id'])->first('id') : null;
+
+            $dosis_adulto_id = (!is_null($item['dosis_adulto_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['dosis_adulto_id'])->first('id') : null;
+
+            $dosis_nino_id = (!is_null($item['dosis_nino_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['dosis_nino_id'])->first('id') : null;
+
+            $recomendacion_de_administracion_id = (!is_null($item['recomendacion_de_administracion_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['recomendacion_de_administracion_id'])->first('id') : null;
+
+            $advertencias_id = (!is_null($item['advertencias_id'])) ?  DB::table('taxonomies')->where('external_id_es', $item['advertencias_id'])->first('id') : null;
+
+            $item['categoria_id'] = (!is_null($categoria_id)) ? $categoria_id->id : null;
+
+            $item['laboratorio_id'] = (!is_null($laboratorio_id)) ? $laboratorio_id->id : null;
+
+            $item['condicion_de_venta_id'] = (!is_null($condicion_de_venta_id)) ? $condicion_de_venta_id->id : null;
+
+            $item['via_de_administracion_id'] = (!is_null($via_de_administracion_id)) ? $via_de_administracion_id->id : null;
+
+            $item['jerarquia_id'] = (!is_null($jerarquia_id)) ? $jerarquia_id->id : null;
+
+            $item['grupo_farmacologico_id'] = (!is_null($grupo_farmacologico_id)) ? $grupo_farmacologico_id->id : null;
+
+            $item['forma_farmaceutica_id'] = (!is_null($forma_farmaceutica_id)) ? $forma_farmaceutica_id->id : null;
+
+            $item['dosis_adulto_id'] = (!is_null($dosis_adulto_id)) ? $dosis_adulto_id->id : null;
+
+            $item['dosis_nino_id'] = (!is_null($dosis_nino_id)) ? $dosis_nino_id->id : null;
+
+            $item['recomendacion_de_administracion_id'] = (!is_null($recomendacion_de_administracion_id)) ? $recomendacion_de_administracion_id->id : null;
+
+            $item['advertencias_id'] = (!is_null($advertencias_id)) ? $advertencias_id->id : null;
+
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'glossaries');
+    }
+
+    // Announcements
+    public function insertAnnouncementsData($data)
+    {
+        dd($data['announcements']);
+        // $this->insertChunkedData($data['announcements'], 'announcements');
+    }
+
+    // Tickets
+    public function insertTicketsData($data)
+    {
+        $temp = [];
+        foreach ($data['tickets'] as $item) {
+
+            $user_id = (!is_null($item['user_id'])) ?  DB::table('users')->where('external_id', $item['user_id'])->first('id') : null;
+
+            $item['user_id'] = (!is_null($user_id)) ? $user_id->id : null;
+
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'tickets');
+    }
+
+    // Faq
+    public function insertFaqData($data)
+    {
+        $taxonomy_id = DB::table('taxonomies')->where('type', 'faq')->first('id');
+        $taxonomy_id = (!is_null($taxonomy_id)) ? $taxonomy_id->id : null;
+
+        $temp = [];
+        foreach ($data['faq'] as $item) {
+            $item['section_id'] = $taxonomy_id;
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'posts');
+    }
+
     // Media
     public function insertMediaData($data)
     {

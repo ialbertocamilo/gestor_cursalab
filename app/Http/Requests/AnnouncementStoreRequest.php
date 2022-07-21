@@ -23,9 +23,8 @@ class AnnouncementStoreRequest extends FormRequest
      */
     public function rules()
     {
-        $reglas = [
+        return [
             'nombre' => 'required|min:3',
-            // 'imagen'=>'required|image|mimes:jpeg,png,jpg|max:5000'
             'contenido' => 'required',
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
@@ -33,23 +32,20 @@ class AnnouncementStoreRequest extends FormRequest
             'archivo' => 'nullable',
             'file_archivo' => 'nullable',
 
-            'estado' => 'nullable',
+            'active' => 'nullable',
             'destino' => 'nullable',
             'link' => 'nullable',
-            'modules' => 'nullable',
-            'publication_starts_at' => 'nullable',
-            'publication_ends_at' => 'nullable',
+            'module_id' => 'nullable',
+            'publish_date' => 'nullable'
         ];
-          // }
-        return $reglas;
     }
 
     public function validationData()
     {
         $data = [];
 
-        if ( ! $this->has('estado') )
-            $data['estado'] = false;
+        if ( ! $this->has('active') )
+            $data['active'] = false;
 
         return $this->merge($data)->all();
     }

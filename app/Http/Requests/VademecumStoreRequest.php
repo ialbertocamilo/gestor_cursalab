@@ -26,7 +26,7 @@ class VademecumStoreRequest extends FormRequest
         $id = $this->segment(2);
 
         return [
-            'nombre' => "required|max:255|unique:vademecum,nombre,{$id},id,deleted_at,NULL",
+            'name' => "required|max:255|unique:vademecum,name,{$id},id,deleted_at,NULL",
             'category_id' => 'nullable',
             'subcategory_id' => 'nullable',
 
@@ -34,7 +34,7 @@ class VademecumStoreRequest extends FormRequest
             'file_media' => 'nullable',
             // 'media_id' => 'required|exists:media,id,deleted_at,NULL',
 
-            'modulos' => 'nullable',
+            'modules' => 'nullable',
 
             'active' => 'required',
         ];
@@ -47,18 +47,14 @@ class VademecumStoreRequest extends FormRequest
         if ( ! $this->has('active') )
             $data['active'] = false;
 
-        $data['category_id'] = $this->has('categoria') ? $this->categoria : null;
+        $data['category_id'] = $this->has('category')
+                                ? $this->category
+                                : null;
 
-        $data['subcategory_id'] = $this->has('subcategoria') ? $this->subcategoria : null;
+        $data['subcategory_id'] = $this->has('subcategory')
+                                    ? $this->subcategory
+                                    : null;
 
         return $this->merge($data)->all();
     }
-
-    // public function messages()
-    // {
-    //     return [
-    //         'palabra.required' => 'El dato "palabra" es requerido',
-    //         'descripcion.required' => 'El dato "descripción" es requerido'
-    //     ];
-    // }
 }

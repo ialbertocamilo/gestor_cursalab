@@ -13,9 +13,9 @@
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
-                            v-model="resource.nombre"
+                            v-model="resource.name"
                             label="Nombre"
-                            :rules="rules.nombre"
+                            :rules="rules.name"
                         />
                     </v-col>
                 </v-row>
@@ -24,12 +24,12 @@
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultSelect
                             clearable
-                            :items="selects.modulos"
-                            v-model="resource.modulos"
+                            :items="selects.modules"
+                            v-model="resource.modules"
                             label="Módulos"
                             multiple
                             return-object
-                            :rules="rules.modulos"
+                            :rules="rules.modules"
                             :count-show-values="3"
                             :show-select-all="false"
                         />
@@ -40,22 +40,22 @@
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultSelect
                             clearable
-                            :items="selects.categorias"
-                            v-model="resource.categoria"
+                            :items="selects.categories"
+                            v-model="resource.category"
                             label="Categoría"
                             return-object
-                            :rules="rules.categorias"
-                            @onChange="loadSubCategorias"
+                            :rules="rules.categories"
+                            @onChange="loadSubCategories"
                         />
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultSelect
                             clearable
-                            :items="selects.subcategorias"
-                            v-model="resource.subcategoria"
+                            :items="selects.subcategories"
+                            v-model="resource.subcategory"
                             label="Sub Categoría"
                             return-object
-                            :rules="rules.subcategorias"
+                            :rules="rules.subcategories"
                             no-data-text="Seleccione una categoría"
                         />
                     </v-col>
@@ -66,7 +66,9 @@
                         <fieldset class="editor text-center p-2">
                             <legend>SCORM Actual</legend>
 
-                            <a :href="resource.scorm" target="_blank">{{ resource.scorm }}</a>
+                            <a :href="resource.scorm" target="_blank">
+                                {{ resource.scorm }}
+                            </a>
                         </fieldset>
                     </v-col>
                 </v-row>
@@ -86,7 +88,7 @@
 
                 <v-row align="center" align-content="center">
                     <v-col cols="4" class="--d-flex --justify-content-start">
-                        <DefaultToggle v-model="resource.estado"/>
+                        <DefaultToggle v-model="resource.active"/>
                     </v-col>
                 </v-row>
             </v-form>
@@ -97,7 +99,10 @@
 
 <script>
 
-const fields = ['nombre', 'estado', 'categoria', 'subcategoria', 'modulos', 'media'];
+const fields = [
+    'name', 'active', 'category', 'subcategory', 'modules', 'media'
+];
+
 const file_fields = ['scorm', 'media'];
 
 export default {
@@ -114,34 +119,34 @@ export default {
             resourceDefault: {
                 id: null,
 
-                nombre: '',
+                name: '',
 
-                modulos: [],
+                modules: [],
 
                 media: null,
                 media_id: null,
 
-                categoria: null,
-                subcategoria: null,
+                category: null,
+                subcategory: null,
 
-                categoria_id: null,
-                subcategoria_id: null,
+                category_id: null,
+                subcategory_id: null,
 
                 scorm: null,
                 file_scorm: null,
 
-                estado: true,
+                active: true,
             },
             resource: {},
             selects: {
-                modulos: [],
-                categorias: [],
-                subcategorias: [],
+                modules: [],
+                categories: [],
+                subcategories: [],
             },
 
             rules: {
-                modulos: this.getRules(['required']),
-                nombre: this.getRules(['required', 'max:100']),
+                name: this.getRules(['required', 'max:100']),
+                modules: this.getRules(['required']),
                 scorm: this.getRules(['required']),
                 // dni: this.getRules(['required', 'number'])
             },
@@ -161,6 +166,7 @@ export default {
             vue.$refs.vademecumForm.resetValidation()
         },
         confirmModal() {
+
             let vue = this
 
             vue.errors = []
@@ -171,82 +177,98 @@ export default {
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = vue.resource.id
+                        ? `${base}/${vue.resource.id}/update`
+                        : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
 
-            // if (validateForm && validateSelectedModules) {
             if (validateForm) {
 
                 let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
 
-                vue.$http.post(url, formData)
+                vue.$http
+                    .post(url, formData)
                     .then(({data}) => {
+
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
+
                     }).catch((error) => {
-                    if (error && error.errors)
-                        vue.errors = error.errors
+
+                        if (error && error.errors)
+                            vue.errors = error.errors
                 })
 
             }
 
             this.hideLoader()
-        },
+        }
+        ,
         resetSelects() {
             let vue = this
             // Selects independientes
-            vue.selects.modulos = []
-            vue.selects.categorias = []
-            vue.selects.subcategorias = []
+            vue.selects.modules = []
+            vue.selects.categories = []
+            vue.selects.subcategories = []
             vue.removeFileFromDropzone(vue.resource.scorm, 'inputScorm')
-        },
+        }
+        ,
         async loadData(resource) {
+
             let vue = this
 
             vue.errors = []
 
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                vue.resource = Object.assign(
+                    {}, vue.resource, vue.resourceDefault
+                )
             })
 
             let base = `${vue.options.base_endpoint}`
-            let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
+            let url = resource
+                        ? `${base}/${resource.id}/edit`
+                        : `${base}/create`;
 
             await vue.$http.get(url).then(({data}) => {
 
-                vue.selects.modulos = data.data.modulos
-                vue.selects.categorias = data.data.categorias
-                vue.selects.subcategorias = data.data.subcategorias
+                vue.selects.modules = data.data.modules
+                vue.selects.categories = data.data.categories
+                vue.selects.subcategories = data.data.subcategories
 
                 if (resource) {
-                    vue.resource = data.data.vademecum
+                    vue.resource = Object.assign({}, data.data.vademecum);
                 }
             })
 
             return 0;
         },
         loadSelects() {
+
             let vue = this
 
-            if (vue.resource.categorias && vue.resource.categorias.id)
-                vue.loadSubCategorias()
+            if (vue.resource.categories && vue.resource.categories.id)
+                vue.loadSubCategories()
         },
 
-        loadSubCategorias() {
+        loadSubCategories() {
+
             let vue = this
             let base = `${vue.options.base_endpoint}`
 
-            vue.resource.subcategoria = null
-            vue.selects.subcategorias = []
+            vue.resource.subcategory = null
+            vue.selects.subcategories = []
 
-            if (vue.resource.categoria && vue.resource.categoria.id) {
-                let url = base + `/get-subcategorias?categoria_id=${vue.resource.categoria.id}`
+            if (vue.resource.category && vue.resource.category.id) {
+
+                let url = base + `/get-subcategories?category_id=${vue.resource.category.id}`
 
                 vue.$http.get(url)
                     .then(({data}) => {
-                        vue.selects.subcategorias = data.data.subcategorias
+
+                        vue.selects.subcategories = data.data.subcategories
                     })
             }
         },

@@ -29,7 +29,12 @@ class MigrationData6 extends Command
      */
     public function handle()
     {
-        // TODO: Migrate meetings, accounts, attendants
+        $this->info(" Inicio: " . now());
+        info(" Inicio: " . now());
+
         Migration_6::migrateData6();
+
+        $this->info(" Fin: " . now());
+        info(" Fin: " . now());
     }
 }

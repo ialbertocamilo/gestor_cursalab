@@ -21,8 +21,8 @@
                     <v-col cols="3">
                         <DefaultSelect
                             clearable dense
-                            :items="selects.modulos"
-                            v-model="filters.modulo_id"
+                            :items="selects.modules"
+                            v-model="filters.module_id"
                             label="Módulos"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
@@ -30,8 +30,8 @@
                     <v-col cols="3">
                         <DefaultSelect
                             clearable dense
-                            :items="selects.categorias"
-                            v-model="filters.categoria_id"
+                            :items="selects.categories"
+                            v-model="filters.category_id"
                             label="Categorías"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
@@ -91,18 +91,21 @@ import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
-    components: {VademecumFormModal, DefaultStatusModal, DefaultDeleteModal},
+
+    components: {
+        VademecumFormModal, DefaultStatusModal, DefaultDeleteModal
+    }
+    ,
     data() {
         return {
             dataTable: {
                 endpoint: '/vademecum/search',
                 ref: 'VademecumTable',
                 headers: [
-                    {text: "Módulos", value: "images", align: 'center', sortable: false},
-                    {text: "Nombre", value: "nombre"},
-                    // {text: "Módulos", value: "modulos", sortable: false},
-                    {text: "Categoría", value: "categoria_id", align: 'center'},
-                    {text: "Sub Categoría", value: "subcategoria_id", align: 'center', sortable: false},
+                    {text: "Módulos", value: "modules", align: 'left', sortable: false},
+                    {text: "Nombre", value: "name"},
+                    {text: "Categoría", value: "category_id", align: 'center'},
+                    {text: "Sub Categoría", value: "subcategory_id", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -143,13 +146,13 @@ export default {
                 ]
             },
             selects: {
-                modulos: [],
-                categorias: [],
+                modules: [],
+                categories: [],
             },
             filters: {
                 q: '',
-                modulo_id: null,
-                categoria_id: null,
+                module_id: null,
+                category_id: null,
             },
             modalOptions: {
                 ref: 'VademecumFormModal',
@@ -173,19 +176,21 @@ export default {
                 endpoint: '',
             },
         }
-    },
+    }
+    ,
     mounted() {
         let vue = this
         vue.getSelects();
-    },
+    }
+    ,
     methods: {
         getSelects() {
             let vue = this
             const url = `/vademecum/get-list-selects`
             vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.modulos = data.data.modulos
-                    vue.selects.categorias = data.data.categorias
+                    vue.selects.modules = data.data.modules
+                    vue.selects.categories = data.data.categories
                 })
         },
         // reset(user) {

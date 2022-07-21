@@ -12,6 +12,12 @@ use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller
 {
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function search(Request $request)
     {
         $anuncios = Announcement::search($request);
@@ -21,6 +27,11 @@ class AnnouncementController extends Controller
         return $this->success($anuncios);
     }
 
+    /**
+     * Get items list for select inputs
+     *
+     * @return JsonResponse
+     */
     public function getListSelects()
     {
         $modules = Criterion::getValuesForSelect('module');
@@ -34,7 +45,7 @@ class AnnouncementController extends Controller
         if ($request->has('q')) {
             $question = $request->input('q');
             $anuncios = Announcement::where('nombre', 'like', '%'.$question.'%')->orderBy('created_at','DESC')->paginate();
-        }else{
+        } else {
             $anuncios = Announcement::orderBy('created_at','DESC')->paginate();
         }
 
@@ -57,7 +68,7 @@ class AnnouncementController extends Controller
     }
 
     /**
-     * Create new announcement
+     * Process request to create new announcement
      *
      * @param AnnouncementStoreRequest $request
      * @return JsonResponse
@@ -69,9 +80,7 @@ class AnnouncementController extends Controller
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'archivo');
 
-        $data['config_id'] = json_encode($request->modules);
-
-        $anuncio = Announcement::create($data);
+        Announcement::create($data);
 
         return $this->success(['msg' => 'Anuncio creado correctamente.']);
     }

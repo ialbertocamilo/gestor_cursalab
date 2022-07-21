@@ -15,6 +15,12 @@ use Illuminate\Http\Request;
 
 class PollController extends Controller
 {
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function search(Request $request)
     {
         $encuestas = Poll::search($request);
@@ -27,9 +33,11 @@ class PollController extends Controller
     public function preguntas(Poll $poll)
     {
         $encuestas_preguntas = $poll->encuestas()->paginate();
-        // return $encuestas_preguntas;
 
-        return view('encuestas.preguntas', compact('poll','encuestas_preguntas'));
+        return view(
+            'encuestas.preguntas',
+            compact('poll','encuestas_preguntas')
+        );
     }
     /**
      * Display a listing of the resource.
@@ -55,14 +63,14 @@ class PollController extends Controller
      */
     public function create()
     {
-        $secciones = Taxonomy::loadGroupTypes('poll', 'tipo');
+        $secciones = Taxonomy::getDataForSelect('poll', 'tipo');
         $tipos = config('data.polls.tipos');
 
         return $this->success(get_defined_vars());
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Process request to store a newly created resource in storage.
      *
      * @param PollStoreRequest $request
      * @return JsonResponse
@@ -81,7 +89,7 @@ class PollController extends Controller
     }
 
     /**
-     * Load data for edit form
+     * Process request to load data for edit form
      *
      * @param Poll $poll
      * @return JsonResponse
@@ -89,14 +97,14 @@ class PollController extends Controller
     public function edit(Poll $poll)
     {
 
-        $secciones = Taxonomy::loadGroupTypes('poll', 'tipo');
+        $secciones = Taxonomy::getDataForSelect('poll', 'tipo');
         $tipos = config('data.polls.tipos');
 
         return $this->success(get_defined_vars());
     }
 
     /**
-     * Update the specified resource in storage.
+     * Process to update the specified resource in storage.
      *
      * @param PollStoreRequest $request
      * @param Poll $poll

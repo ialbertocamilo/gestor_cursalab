@@ -10,7 +10,7 @@
                     @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
-        <!--        FILTROS-->
+        <!-- FILTROS-->
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
