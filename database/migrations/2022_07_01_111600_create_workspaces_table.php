@@ -27,7 +27,7 @@ return new class extends Migration
 
             $table->string('codigo_matricula')->nullable();
             $table->string('mod_evaluaciones')->nullable();
-            $table->string('reinicios_programados')->nullable();
+            $table->string('reinicios_programado')->nullable();
             // columnas de modulo
 
             $table->foreignId('parent_id')->nullable()->constrained('workspaces');
