@@ -63,12 +63,14 @@ class ExternalLMSMigration6 extends Model
             'announcements' => [],
             'tickets' => [],
             'faq' => [],
+            'user_actions' => [],
         ];
         $this->setPushNotificationsData($client_LMS_data, $db);
         $this->setGlossariesData($client_LMS_data, $db);
         $this->setAnnouncementsData($client_LMS_data, $db);
         $this->setTicketsData($client_LMS_data, $db);
         $this->setFaqData($client_LMS_data, $db);
+        $this->setUserActionsData($client_LMS_data, $db);
 
         return $client_LMS_data;
     }
@@ -130,7 +132,7 @@ class ExternalLMSMigration6 extends Model
             ->get();
         foreach ($temp['temp_announcements'] as $user) {
             $result['announcements'][] = [
-                'module_id' => $user->config_id,
+                'config_id' => $user->config_id,
                 'nombre' => $user->nombre,
                 'contenido' => $user->contenido,
                 'imagen' => $user->imagen,
@@ -140,6 +142,25 @@ class ExternalLMSMigration6 extends Model
                 'position' => $user->orden,
                 'active' => $user->estado,
                 'publish_date' => $user->publish_date,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+    public function setUserActionsData(&$result, $db)
+    {
+        $temp['temp_user_actions'] = $db->getTable('anuncios')
+            ->select()
+            ->get();
+        foreach ($temp['temp_user_actions'] as $user) {
+            $result['user_actions'][] = [
+                'user_id' => $user->user_id,
+                'type_id' => $user->type_id,
+                'model_type' => $user->model_type,
+                'model_id' => $user->model_id,
+                'score' => $user->score,
 
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,

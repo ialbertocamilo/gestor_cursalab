@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 
-class Videoteca extends BaseModel
+class Videoteca extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'videoteca';
 
     protected $fillable = [
@@ -29,6 +32,13 @@ class Videoteca extends BaseModel
         'created_at', 'updated_at', 'deleted_at'
     ];
 
+    /*
+
+        Relationships
+
+    --------------------------------------------------------------------------*/
+
+
     public function media()
     {
         return $this->hasOne(
@@ -40,8 +50,11 @@ class Videoteca extends BaseModel
 
     public function preview()
     {
-        return $this->hasOne(Media::class, 'id', 'preview_id')
-            ->select('id', 'title', 'file', 'ext');
+        return $this->hasOne(
+            Media::class,
+            'id',
+            'preview_id'
+        )->select('id', 'title', 'file', 'ext');
     }
 
     public function modules()
@@ -74,28 +87,52 @@ class Videoteca extends BaseModel
         return $this->morphMany(UsuarioAccion::class, 'model');
     }
 
-    protected function getViews($videoteca)
-    {
-        return $videoteca->actions()->sum('score');
-    }
+    /*
+
+        Attributes
+
+    --------------------------------------------------------------------------*/
 
     public function setActiveAttribute($value)
     {
-        $this->attributes['active'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
+        $this->attributes['active'] = (
+            $value==='true' OR
+            $value === true OR
+            $value === 1 OR
+            $value === '1'
+        );
+    }
+
+
+    /*
+
+        Methods
+
+    --------------------------------------------------------------------------*/
+
+
+    protected function getViews($videoteca)
+    {
+        return $videoteca->actions()->sum('score');
     }
 
     /**
      * Load paginated records from database
      *
      * @param $request
-     * @param $api
-     * @param $paginate
+     * @param bool $api
+     * @param int $paginate
      * @return LengthAwarePaginator
      */
-    protected function search($request, $api = false, $paginate = 20)
+    protected function search($request, bool $api = false, int $paginate = 20)
     {
         $relationships = [
-            'modules', 'media', 'categoria', 'tags', 'preview'];
+            'modules',
+            'media',
+            'categoria',
+            'tags',
+            'preview'
+        ];
 
         if ($api) {
             $request->active = 1;
@@ -135,7 +172,10 @@ class Videoteca extends BaseModel
         if ($request->no_id)
             $query->whereNotIn('id', [$request->no_id]);
 
+
+
         return $query->latest('id')->paginate($paginate);
+
     }
 
     public function incrementAction($type_id, $user_id, $quantity = 1)
@@ -209,18 +249,20 @@ class Videoteca extends BaseModel
             'contenido' => [
                 'preview' => $this->getPreview($data),
                 'tipo' => $data['media_type'],
-                'string' => in_array($data['media_type'], ['youtube', 'vimeo'], true) ?
-                    $data['media_video']
-                    : $data['media']['file']
+                'string' => in_array($data['media_type'], ['youtube', 'vimeo'], true)
+                            ? $data['media_video']
+                            : $data['media']['file']
             ],
             'tags' => $data['tags'],
             'active' => $data['active']
         ];
 
-        if (in_array('related_tags', $with, true)):
+        if (in_array('related_tags', $with, true)) {
+
             $tags = $this->getRelatedTags($data);
             $processedData['tags_related'] = $tags;
-        endif;
+
+        }
 
         return $processedData;
     }
@@ -229,10 +271,14 @@ class Videoteca extends BaseModel
     {
         $videoteca = $videoteca ?? $this;
 
-        if (!$videoteca->preview_id):
+        if (!$videoteca->preview_id) {
+
             if (in_array($videoteca->media_type, ['youtube', 'vimeo', 'video'], true)) {
+
                 $preview = Media::DEFAULT_VIDEO_IMG;
+
             } else {
+
                 switch ($videoteca->media_type) {
                     case 'audio':
                         $preview = Media::DEFAULT_AUDIO_IMG;
@@ -249,7 +295,7 @@ class Videoteca extends BaseModel
                 }
             }
             return $preview;
-        endif;
+        }
 
         return $videoteca->preview->file;
     }

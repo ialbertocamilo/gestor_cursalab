@@ -44,7 +44,7 @@
                                 :label="`Nombre`"
                                 clearable
                                 dense
-                                v-model="newCategoria.nombre"
+                                v-model="newCategoria.name"
                             />
                         </v-col>
                         <v-col cols="4">
@@ -66,16 +66,16 @@
                             <tr v-for="categoria in categorias" :key="categoria.id">
                                 <td>
                                     <v-edit-dialog
-                                        :return-value.sync="categoria.nombre"
+                                        :return-value.sync="categoria.name"
                                         cancel-text="Cancelar"
                                         save-text="Guardar"
                                         large
                                         @save="editCategoria(categoria)"
                                     >
-                                        {{ categoria.nombre }}
+                                        {{ categoria.name }}
                                         <template v-slot:input>
                                             <v-text-field
-                                                v-model="categoria.nombre"
+                                                v-model="categoria.name"
                                                 label="Edit"
                                                 single-line
                                                 counter
@@ -155,7 +155,7 @@ export default {
         return {
             crearCategoria: false,
             newCategoria: {
-                nombre: null,
+                name: null,
             },
             snackBar: {
                 open: false,
@@ -181,7 +181,7 @@ export default {
                 .then(({data}) => {
                     vue.showSnackbar(vue.snackBar, true, data.data.msg)
                     vue.getData()
-                    vue.newCategoria.nombre = null
+                    vue.newCategoria.name = null
                     vue.crearCategoria = false
                 })
         },

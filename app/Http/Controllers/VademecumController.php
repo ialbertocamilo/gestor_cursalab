@@ -11,11 +11,20 @@ use App\Models\Criterion;
 use App\Models\Media;
 use App\Models\Taxonomy;
 use App\Models\Vademecum;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class VademecumController extends Controller
 {
+    /*
+
+        Methods for Vademecum routes
+
+     -------------------------------------------------------------------------*/
+
     /**
      * Process request to load records filtered according search term
      *
@@ -44,6 +53,12 @@ class VademecumController extends Controller
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process request to for main view
+     *
+     * @param Request $request
+     * @return Application|Factory|View
+     */
     public function index(Request $request)
     {
 
@@ -66,7 +81,7 @@ class VademecumController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Process request to load data for create form
      *
      * @return JsonResponse
      */
@@ -124,7 +139,7 @@ class VademecumController extends Controller
     }
 
     /**
-     * Process to update the specified resource in storage.
+     * Process request to update the specified record
      *
      * @param Vademecum $vademecum
      * @param VademecumStoreRequest $request
@@ -169,6 +184,7 @@ class VademecumController extends Controller
         return $this->success(['msg' => 'Vademecum eliminado correctamente.']);
     }
 
+    // todo: check usage
     public function response($result, $route = 'vademecum.index')
     {
         if ($result['status'] == 'error')
@@ -179,6 +195,7 @@ class VademecumController extends Controller
             ->with('info', $result['message']);
     }
 
+    // todo: check usage
     public function categorias(Request $request)
     {
         $query = Taxonomy::categoriaVademecum();
@@ -190,18 +207,37 @@ class VademecumController extends Controller
         return view('vademecum.categorias.index', compact('categorias_vademecum'));
     }
 
+    /*
+
+        Methods for categories routes
+
+    -------------------------------------------------------------------------*/
+
+    // todo: check usage
+    public function categorias_create()
+    {
+        // return view('vademecum.categorias.create');
+    }
+
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function categorias_search(Request $request)
     {
-        $query = Taxonomy::withCount('child')->categoriaVademecum();
+
+        $query = Taxonomy::vademecumCategory()
+                         ->withCount('children');
 
         if ($request->q)
-            $query->where('nombre', 'like', "%{$request->q}%");
+            $query->where('name', 'like', "%{$request->q}%");
 
-        $field = $request->sortBy ?? 'nombre';
+        $field = $request->sortBy ?? 'name';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort);
-
         $categorias_vademecum = $query->paginate($request->paginate);
 
         VademecumCategoriaResource::collection($categorias_vademecum);
@@ -209,28 +245,42 @@ class VademecumController extends Controller
         return $this->success($categorias_vademecum);
     }
 
-    public function categorias_create()
-    {
-        // return view('vademecum.categorias.create');
-    }
-
+    /**
+     * Process request to store a record
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function categorias_store(Request $request)
     {
         Taxonomy::create([
-            'tipo' => 'categoria',
-            'grupo' => 'vademecum',
-            'nombre' => $request->nombre,
-            'estado' => 1
+            'type' => 'categoria',
+            'group' => 'vademecum',
+            'name' => $request->name,
+            'active' => 1
         ]);
 
         return $this->success(['msg' => 'Categoría creada correctamente.']);
     }
 
+    /**
+     * Process request to load data for edit form
+     *
+     * @param Taxonomy $categoria
+     * @return JsonResponse
+     */
     public function categorias_edit(Taxonomy $categoria)
     {
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process request to update the specified record
+     *
+     * @param Request $request
+     * @param Taxonomy $categoria
+     * @return JsonResponse
+     */
     public function categorias_update(Request $request, Taxonomy $categoria)
     {
         $categoria->update($request->all());
@@ -238,13 +288,25 @@ class VademecumController extends Controller
         return $this->success(['msg' => 'Categoría actualizada correctamente.']);
     }
 
+    /**
+     * Process request to delete record
+     *
+     * @param Taxonomy $categoria
+     * @return JsonResponse
+     */
     public function categorias_destroy(Taxonomy $categoria)
     {
         $categoria->delete();
-
         return $this->success(['msg' => 'Categoría eliminada correctamente.']);
     }
 
+    /*
+
+        Methods for sub categories routes
+
+    --------------------------------------------------------------------------*/
+
+    // todo: check usage
     public function subcategorias(Taxonomy $categoria, Request $request)
     {
         $categoria = Taxonomy::find($category_id);
@@ -258,14 +320,21 @@ class VademecumController extends Controller
         return view('vademecum.categorias.subcategorias.index', compact('subcategorias', 'categoria'));
     }
 
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Taxonomy $categoria
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function subcategorias_search(Taxonomy $categoria, Request $request)
     {
-        $query = Taxonomy::subcategoriaVademecum($categoria->id);
+        $query = Taxonomy::vademecumSubcategory($categoria->id);
 
         if ($request->q)
-            $query->where('nombre', 'like', "%{$request->q}%");
+            $query->where('name', 'like', "%{$request->q}%");
 
-        $field = $request->sortBy ?? 'nombre';
+        $field = $request->sortBy ?? 'name';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort);
@@ -282,24 +351,46 @@ class VademecumController extends Controller
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process request to store a record
+     *
+     * @param Taxonomy $categoria
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function subcategorias_store(Taxonomy $categoria, Request $request)
     {
         Taxonomy::create([
-            'grupo' => 'vademecum',
-            'tipo' => 'subcategoria',
-            'nombre' => $request->nombre,
-            'parent_taxonomia_id' => $categoria->id,
-            'estado' => 1
+            'group' => 'vademecum',
+            'type' => 'subcategoria',
+            'name' => $request->name,
+            'parent_id' => $categoria->id,
+            'active' => 1
         ]);
 
         return $this->success(['msg' => 'Sub Categoría creada correctamente.']);
     }
 
+    /**
+     * Process request to load data for edit form
+     *
+     * @param Taxonomy $categoria
+     * @param Taxonomy $subcategoria
+     * @return JsonResponse
+     */
     public function subcategorias_edit(Taxonomy $categoria, Taxonomy $subcategoria)
     {
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process request to update the specified record
+     *
+     * @param Request $request
+     * @param Taxonomy $categoria
+     * @param Taxonomy $subcategoria
+     * @return JsonResponse
+     */
     public function subcategorias_update(Request $request, Taxonomy $categoria, Taxonomy $subcategoria)
     {
         $subcategoria->update($request->all());
@@ -307,6 +398,13 @@ class VademecumController extends Controller
         return $this->success(['msg' => 'Sub Categoría actualizada correctamente.']);
     }
 
+    /**
+     * Process request to delete record
+     *
+     * @param Taxonomy $categoria
+     * @param Taxonomy $subcategoria
+     * @return JsonResponse
+     */
     public function subcategorias_destroy(Taxonomy $categoria, Taxonomy $subcategoria)
     {
         $subcategoria->delete();
@@ -314,6 +412,7 @@ class VademecumController extends Controller
         return $this->success(['msg' => 'Sub Categoría eliminada correctamente.']);
     }
 
+    // todo: check usage
     public function getSubCategoriaByCategoriaId($category_id)
     {
         $subcategorias = Taxonomy::subcategoriaVademecum($category_id)
@@ -323,6 +422,7 @@ class VademecumController extends Controller
         return response()->json(compact('subcategorias'), 200);
     }
 
+    // todo: check usage
     public function getSubCategoriesByCategory(Request $request)
     {
         $subcategories = Taxonomy::getSelectChildrenData(
@@ -332,6 +432,13 @@ class VademecumController extends Controller
         return $this->success(get_defined_vars());
     }
 
+    /*
+
+    Methods for imports routes
+
+    --------------------------------------------------------------------------*/
+
+    // todo: check usage
     public function import()
     {
         $modules = Abconfig::where('active', 1)->pluck('etapa', 'id')->toArray();
@@ -340,6 +447,7 @@ class VademecumController extends Controller
         return view('vademecum.import', compact('modules', 'categorias'));
     }
 
+    // todo: check usage
     public function importFile(VademecumImportExcelRequest $request)
     {
         $result = Vademecum::importFromFile($request->validated());

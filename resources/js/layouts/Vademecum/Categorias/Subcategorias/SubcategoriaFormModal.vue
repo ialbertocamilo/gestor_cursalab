@@ -9,9 +9,9 @@
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput clearable
-                                      v-model="resource.nombre"
+                                      v-model="resource.name"
                                       label="Nombre"
-                                      :rules="rules.nombre"
+                                      :rules="rules.name"
                         />
                     </v-col>
                 </v-row>
@@ -24,7 +24,7 @@
 
 <script>
 
-const fields = ['nombre'];
+const fields = ['name'];
 const file_fields = [];
 
 export default {
@@ -39,14 +39,14 @@ export default {
         return {
             resourceDefault: {
                 id: null,
-                nombre: '',
+                name: '',
             },
             resource: {},
             selects: {
             },
 
             rules: {
-                nombre: this.getRules(['required', 'max:200']),
+                name: this.getRules(['required', 'max:200']),
             },
 
         }
@@ -102,7 +102,9 @@ export default {
             })
 
             let base = `${vue.options.base_endpoint}`
-            let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
+            let url = resource
+                        ? `${base}/${resource.id}/edit`
+                        : `${base}/create`;
 
             await vue.$http.get(url).then(({data}) => {
 

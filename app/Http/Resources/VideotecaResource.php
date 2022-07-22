@@ -22,6 +22,7 @@ class VideotecaResource extends JsonResource
             'categoria' => $this->categoria,
             'media_type' => $this->media_type,
             'tags' => $this->tags,
+            'media' => $this->media,
             // 'views' => $this->actions_sum,
             'views' => Videoteca::getViews($this),
             'image' => space_url($this->getPreview()),

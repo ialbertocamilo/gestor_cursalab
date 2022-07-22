@@ -94,7 +94,7 @@
                             v-for="(row, index) in item.tags"
                             :key="index"
                     >
-                        #{{ row.nombre }}
+                        #{{ row.nombre || row.name }}
                     </v-chip>
                 </div>
             </template>

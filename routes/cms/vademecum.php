@@ -4,6 +4,10 @@ use App\Http\Controllers\VademecumController;
 
 Route::controller(VademecumController::class)->group(function() {
 
+    /*
+     * Vademecum routes
+     ======================================== */
+
     Route::view('/', 'vademecum.list')->name('vademecum.list');
     // ->middleware('permission:vademecum.index');
 
@@ -30,7 +34,9 @@ Route::controller(VademecumController::class)->group(function() {
     // ->middleware('permission:vademecum.destroy');
 
 
-    // // CATEGORIAS VADEMECUM
+    /*
+     * Categories routes
+     ======================================== */
 
     Route::prefix('categorias')->group(function () {
 
@@ -45,7 +51,9 @@ Route::controller(VademecumController::class)->group(function() {
         Route::put('/{categoria}/update', 'categorias_update');
         Route::delete('/{categoria}/destroy', 'categorias_destroy');
 
-        // SUB CATEGORIAS
+        /*
+         * Subcategories routes
+         ======================================== */
 
         Route::prefix('{categoria}/subcategorias')->group(function () {
 

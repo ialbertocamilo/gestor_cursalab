@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class VademecumCategoriaResource extends JsonResource
@@ -9,15 +10,15 @@ class VademecumCategoriaResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request $request
      * @return array
      */
     public function toArray($request)
     {
          return [
             'id' => $this->id,
-            'nombre' => clean_html($this->nombre, 100),
-            'active' => $this->estado ? true : false,
+            'nombre' => clean_html($this->name, 100),
+            'active' => $this->active ? true : false,
 
             'subcategorias_route' => route('vademecum.categorias.subcategorias.list', $this->id),
             'subcategorias_count' => $this->child_count,
