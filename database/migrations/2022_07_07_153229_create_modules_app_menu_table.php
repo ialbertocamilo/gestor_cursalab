@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('modules_app_menu', function (Blueprint $table) {
-            $table->foreignId('module_id')->nullable()->constrained('criterion_values');
+        Schema::create('workspace_app_menu', function (Blueprint $table) {
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
             $table->foreignId('menu_id')->nullable()->constrained('taxonomies');
 
             $table->tinyInteger('position')->nullable();

@@ -16,10 +16,10 @@ class TaxonomySeederType extends Seeder
     public function run()
     {
         Taxonomy::create([
-            'group' => null,
+            'group' => 'post',
             'type' => 'faq',
             'code' => 'faq',
-            'name' => null,
+            'name' => 'Preguntas Frecuentes',
             'active' => ACTIVE,
             'position' => 1,
         ]);
