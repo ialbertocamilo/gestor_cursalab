@@ -39,7 +39,7 @@
                 small
                 v-if="index < countShowValues"
             >
-                <span class="pr-2" v-text="item.nombre || item"/>
+                <span class="pr-2" v-text="item.nombre || item.name || item"/>
                 <v-icon
                     small
                     @click="parent.selectItem(item)"

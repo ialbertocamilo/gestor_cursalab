@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -89,6 +90,73 @@ class Taxonomy extends Model
 
     --------------------------------------------------------------------------*/
 
+    /**
+     * Load group's types from taxonomy
+     *
+     * @param string $groupName
+     * @param string $typeName
+     * @return mixed
+     */
+    protected function getDataForSelect(string $groupName, string $typeName)
+    {
+        return Taxonomy::where('type', $typeName)
+            ->where('group', $groupName)
+            ->where('active', 1)
+            ->orderBy('name', 'ASC')
+            ->get(['name', 'id', 'name as nombre']);
+    }
+
+    /**
+     * Load Vademecum categories
+     *
+     * @return Builder
+     */
+    protected function vademecumCategory()
+    {
+        return Taxonomy::query()
+            ->where('group', 'vademecum')
+            ->where('type', 'categoria')
+            ->where('active', ACTIVE);
+    }
+
+    /**
+     * Load Vademecum subcategories from specific category
+     *
+     * @param $categoryId
+     * @return mixed
+     */
+    protected function vademecumSubcategory($categoryId) {
+
+        return Taxonomy::getChildrenData(
+            $categoryId, 'vademecum', 'subcategoria'
+        );
+    }
+
+    /**
+     * Load Videoteca tags
+     *
+     * @return Builder
+     */
+    protected function videotecaTags()
+    {
+        return Taxonomy::query()
+                        ->where('group', 'videoteca')
+                        ->where('type', 'tag')
+                        ->where('active', ACTIVE);
+    }
+
+    /**
+     * Load Videoteca categories
+     *
+     * @return Builder
+     */
+    protected function videotecaCategories() {
+
+        return Taxonomy::query()
+                        ->where('group', 'videoteca')
+                        ->where('type', 'categoria')
+                        ->where('active', ACTIVE);
+    }
 
     public function sluggable(): array
     {
@@ -232,13 +300,10 @@ class Taxonomy extends Model
 
     public function getChildrenData($parent_id, $group, $type)
     {
-        $result = Taxonomy::where('group', $group)->where('type', $type)
+        return Taxonomy::where('group', $group)->where('type', $type)
                           ->where('active', ACTIVE)
                           ->where('parent_id', $parent_id)
                           ->orderBy('position', 'ASC');
-
-        // return $relationship ? $result->with($relationship) : $result;
-        return $result;
     }
 
     protected function getFirstData($group, $type, $code)
@@ -300,21 +365,6 @@ class Taxonomy extends Model
                        ->get();
     }
 
-    /**
-     * Load group's types from taxonomy
-     *
-     * @param string $groupName
-     * @param string $typeName
-     * @return mixed
-     */
-    protected function getDataForSelect($groupName, $typeName)
-    {
-        return Taxonomy::where('type', $typeName)
-                        ->where('group', $groupName)
-                        ->where('active', 1)
-                        ->orderBy('name', 'ASC')
-                        ->get(['name', 'id', 'name as nombre']);
-    }
 
 
     protected function searchCharacters($request, $method = 'paginate')
@@ -339,4 +389,7 @@ class Taxonomy extends Model
 
         return $query->paginate($request->rowsPerPage);
     }
+
+
+
 }

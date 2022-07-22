@@ -38,19 +38,18 @@
                             </thead>
                             <tbody>
                             <tr v-for="tag in tags" :key="tag.id">
-                                <!--                                <td>{{ tag.nombre }}</td>-->
                                 <td>
                                     <v-edit-dialog
-                                        :return-value.sync="tag.nombre"
+                                        :return-value.sync="tag.name"
                                         cancel-text="Cancelar"
                                         save-text="Guardar"
                                         large
                                         @save="editTag(tag)"
                                     >
-                                        {{ tag.nombre }}
+                                        {{ tag.name }}
                                         <template v-slot:input>
                                             <v-text-field
-                                                v-model="tag.nombre"
+                                                v-model="tag.name"
                                                 label="Edit"
                                                 single-line
                                                 counter
@@ -131,7 +130,7 @@ export default {
         return {
             creatTag: false,
             newTag: {
-              nombre: null,
+              name: null,
             },
             snackBar: {
                 open: false,

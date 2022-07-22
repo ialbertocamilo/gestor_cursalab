@@ -2,13 +2,13 @@
 
 namespace App\Models\UCMigrationData;
 
+use App\Models\Poll;
+use App\Models\PollQuestion;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Encuesta;
 use App\Models\Taxonomy;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\User;
-use App\Models\Encuestas_pregunta;
 use App\Models\Support\OTFConnection;
 use Illuminate\Support\Facades\DB;
 
@@ -96,7 +96,7 @@ class Migration_3 extends Model
 
         $preguntas = $db->getTable('encuestas_preguntas')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
-        $polls = Encuesta::all();
+        $polls = Poll::all();
 
         $data = [];
 
@@ -127,12 +127,12 @@ class Migration_3 extends Model
         $courses = Course::select('id', 'external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
         $users = User::select('id', 'external_id')->whereNull('email')->get();
-        $preguntas = Encuestas_pregunta::select('id', 'external_id')->get();
+        $preguntas = PollQuestion::select('id', 'external_id')->get();
 
         $db->getTable('encuestas_respuestas')->chunkById(2500, function ($respuestas) use ($users, $types, $courses, $preguntas) {
-            
+
             $chunk = [];
-            
+
             foreach ($respuestas as $key => $respuesta)
             {
                 $type = $types->where('code', $respuesta->tipo_pregunta)->first();
@@ -210,7 +210,7 @@ class Migration_3 extends Model
         $statuses = Taxonomy::getData('course', 'user-status')->get();
 
         $db->getTable('resumen_x_curso')->chunkById(1000, function ($rows_cursos) use ($users, $rows_reinicios, $courses, $statuses, $admins) {
-            
+
             $chunk = [];
 
             info('Start resumen_x_curso chunk');
@@ -250,7 +250,7 @@ class Migration_3 extends Model
 
                     'attempts' => $row->intentos,
                     'views' => $row->visitas,
-                    
+
                     'restarts' => $restarts,
                     'restarter_id' => $restarter->id ?? NULL,
 
@@ -295,9 +295,9 @@ class Migration_3 extends Model
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
         $db->getTable('pruebas')->chunkById(1000, function ($rows_pruebas) use ($users, $topics, $sources) {
-            
+
             $chunk = [];
-            
+
             foreach ($rows_pruebas as $row) {
                 //
                 $user = $users->where('external_id', $row->usuario_id)->first();
@@ -318,7 +318,7 @@ class Migration_3 extends Model
                     'passed' => $row->resultado,
 
                     'answers' => $row->usu_rptas,
-                    
+
                     'last_time_evaluated_at' => $row->last_ev ?? NULL,
 
                     'created_at' => $row->created_at,
@@ -332,7 +332,7 @@ class Migration_3 extends Model
         });
 
         $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(2500, function ($rows_ev_abiertas) use ($topics, $users, $sources) {
-            
+
             $chunk = [];
 
             foreach ($rows_ev_abiertas as $prueba)
@@ -396,16 +396,16 @@ class Migration_3 extends Model
                 $status = $statuses->where('code', $row->estado_tema)->first();
 
                 $data = [
-                    'downloads' => $row->descargas, 
-                    'views' => $row->sumatorias, 
-                    'status_id' => $status->id ?? NULL, 
+                    'downloads' => $row->descargas,
+                    'views' => $row->sumatorias,
+                    'status_id' => $status->id ?? NULL,
                 ];
 
                 DB::table('summary_topics')
                     ->updateOrInsert(['user_id' => $user->id ?? NULL, 'topic_id' => $topic->id ?? NULL], $data);
 
             }
-            
+
             info('summary_topics visitas chunked updateOrInsert');
         });
 
