@@ -35,7 +35,7 @@
                                         color="#C0C1ED"
                                         v-for="(carrera, index3) in modulo.carreras"
                                         v-text="carrera.carrera_nombre"
-                                        :key="index3"/>
+                                        :key="index3" />
                                 </td>
                             </tr>
                             </tbody>
@@ -50,7 +50,7 @@
                         label="Segmentación"
                     />
                     <v-row>
-                        <v-col cols="5">
+                        <v-col v-if="resource.resumen_estado" cols="5">
                             <p class="mb-0">Resumen de estados (sobre el total):</p>
                             <p class="mb-0" v-text="`Alcanzados = ${resource.resumen_estado.alcanzados || 'Data no encontrada.'}`">Alcanzados = 50</p>
                             <p class="mb-0" v-text="`No Alcanzados = ${resource.resumen_estado.no_alcanzados || 'Data no encontrada.'}`"></p>
@@ -58,7 +58,7 @@
                             <p class="mb-0" v-text="`Objetivo = ${resource.resumen_estado.objetivo || 'Data no encontrada.'}`"></p>
                         </v-col>
                         <v-col cols="7" class="d-flex flex-column">
-<!-- 
+<!--
                             <GeneralGraphic
                                 :graphic_data="grafico.envios"
                             /> -->
@@ -214,6 +214,7 @@ export default {
             let url = `${vue.options.base_endpoint}/detalle/${resource.id}`
             await vue.$http.get(url).then(({data}) => {
                 vue.resource = data;
+                console.log(data);
             })
 
             // // vue.grafico.envios.series.data =  [44, 55, 13, 33]
