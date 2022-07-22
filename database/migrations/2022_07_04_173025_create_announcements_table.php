@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('module_id')->nullable()->constrained('criterion_values');
+            $table->string('config_id')->nullable();
 
             $table->string('nombre');
 

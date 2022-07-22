@@ -59,13 +59,16 @@ class ExternalDatabase6 extends Model
         $this->insertGlossariesData($data);
 
         // Announcements
-        // $this->insertAnnouncementsData($data);
+        $this->insertAnnouncementsData($data);
 
         // Tickets (Soporte)
         $this->insertTicketsData($data);
 
         // Preguntas Frecuentes
         $this->insertFaqData($data);
+
+        // User Actions
+        // $this->insertUserActionsData($data);
     }
 
     // Push Notifications
@@ -143,8 +146,32 @@ class ExternalDatabase6 extends Model
     // Announcements
     public function insertAnnouncementsData($data)
     {
-        dd($data['announcements']);
-        // $this->insertChunkedData($data['announcements'], 'announcements');
+        $temp = [];
+        foreach ($data['announcements'] as $item) {
+
+            $config_id = json_decode($item['config_id']);
+            $id_criteria = DB::table('criteria')->where('code', 'module')->first('id');
+            $id_criteria = (!is_null($id_criteria)) ? $id_criteria->id : null;
+
+            $temp_an = array();
+            if (is_array($config_id) && count($config_id) > 0) {
+                foreach ($config_id as $config) {
+
+                    $id = DB::table('criterion_values')
+                        ->where('criterion_id', $id_criteria)
+                        ->where('external_id', $config)
+                        ->first('id');
+                    $id = (!is_null($id)) ? $id->id : null;
+
+                    array_push($temp_an, $id);
+                }
+            }
+            $item['config_id'] = json_encode($temp_an);
+
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'announcements');
     }
 
     // Tickets
@@ -176,6 +203,12 @@ class ExternalDatabase6 extends Model
         }
 
         $this->insertChunkedData($temp, 'posts');
+    }
+
+    // User Actions
+    public function insertUserActionsData($data)
+    {
+        // $this->insertChunkedData($data['user_actions'], 'user_actions');
     }
 
     // Media
