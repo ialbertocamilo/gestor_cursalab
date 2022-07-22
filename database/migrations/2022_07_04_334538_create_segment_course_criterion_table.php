@@ -18,6 +18,7 @@ return new class extends Migration
 
             $table->foreignId('segment_course_id')->nullable()->constrained('segment_course');
             $table->foreignId('criterion_value_id')->nullable()->constrained('criterion_values');
+
         });
     }
 

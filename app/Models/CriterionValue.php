@@ -24,4 +24,20 @@ class CriterionValue extends BaseModel
     {
         return $q->where('criterion_id', $criterion_id);
     }
+
+    protected function search($request = null)
+    {
+        $q = self::query();
+
+        if ($request->code)
+            $q->whereHas('criterion', fn($q) => $q->where('code', 'module'));
+
+
+        $field = $request->sortBy ?? 'position';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $q->orderBy($field, $sort);
+
+        return $q->paginate($request->paginate);
+    }
 }
