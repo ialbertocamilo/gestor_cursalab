@@ -2,6 +2,8 @@
 
 namespace App\Models\Support;
 
+use App\Models\Vademecum;
+use App\Models\Videoteca;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -68,7 +70,13 @@ class ExternalDatabase6 extends Model
         $this->insertFaqData($data);
 
         // User Actions
-        // $this->insertUserActionsData($data);
+        $this->insertUserActionsData($data);
+
+        // User Actions (Supervisores)
+        $this->insertUserActionsSupervisoresData($data);
+
+        // User Actions (Entrenadores)
+        $this->insertUserActionsEntrenadoresData($data);
     }
 
     // Push Notifications
@@ -208,7 +216,107 @@ class ExternalDatabase6 extends Model
     // User Actions
     public function insertUserActionsData($data)
     {
-        // $this->insertChunkedData($data['user_actions'], 'user_actions');
+        $temp = [];
+        foreach ($data['user_actions'] as $item) {
+
+            $user_id = (!is_null($item['user_id']))
+                ? DB::table('users')
+                ->where('external_id', $item['user_id'])
+                ->first('id')
+                : null;
+
+            $type_id = (!is_null($item['type_id']))
+                ? DB::table('taxonomies')
+                ->where('external_id_es', $item['type_id'])
+                ->first('id')
+                : null;
+
+            $item['user_id'] = (!is_null($user_id)) ? $user_id->id : null;
+            $item['type_id'] = (!is_null($type_id)) ? $type_id->id : null;
+
+            if ($item['model_type'] == 'App\Vademecum') {
+
+                $item['model_type'] = Vademecum::class;
+                $model_id = (!is_null($item['model_id']))
+                    ? DB::table('vademecum')
+                    ->where('external_id', $item['model_id'])
+                    ->first('id')
+                    : null;
+                $item['model_id'] = (!is_null($model_id)) ? $model_id->id : null;
+            } else if ($item['model_type'] == 'App\Videoteca') {
+
+                $item['model_type'] = Videoteca::class;
+                $model_id = (!is_null($item['model_id']))
+                    ? DB::table('videoteca')
+                    ->where('external_id', $item['model_id'])
+                    ->first('id')
+                    : null;
+                $item['model_id'] = (!is_null($model_id)) ? $model_id->id : null;
+            } else {
+                $item['model_type'] = null;
+                $item['model_id'] = null;
+            }
+
+            array_push($temp, $item);
+        }
+        $this->insertChunkedData($temp, 'user_actions');
+    }
+
+    // User Actions (Supervisores)
+    public function insertUserActionsSupervisoresData($data)
+    {
+        $id_criteria = DB::table('criteria')->where('code', 'group')->first('id');
+        $id_criteria = (!is_null($id_criteria)) ? $id_criteria->id : null;
+
+        $temp = [];
+        foreach ($data['supervisores'] as $item) {
+
+            $user_id = (!is_null($item['user_id']))
+                ? DB::table('users')
+                ->where('external_id', $item['user_id'])
+                ->first('id')
+                : null;
+
+            $item['user_id'] = (!is_null($user_id)) ? $user_id->id : null;
+
+            $model_id = (!is_null($item['model_id']))
+                ? DB::table('criterion_values')
+                ->where('external_id', $item['model_id'])
+                ->where('criterion_id', $id_criteria)
+                ->first('id')
+                : null;
+            $item['model_id'] = (!is_null($model_id)) ? $model_id->id : null;
+
+            array_push($temp, $item);
+        }
+        $this->insertChunkedData($temp, 'user_actions');
+    }
+
+    // User Actions (Entrenadores)
+    public function insertUserActionsEntrenadoresData($data)
+    {
+        $temp = [];
+        foreach ($data['entrenadores'] as $item) {
+
+            $entrenador_id = (!is_null($item['user_id']))
+                ?  DB::table('users')
+                ->where('external_id', $item['user_id'])
+                ->first('id')
+                : null;
+
+            $usuario_id = (!is_null($item['model_id']))
+                ?  DB::table('users')
+                ->where('external_id', $item['model_id'])
+                ->first('id')
+                : null;
+
+            $item['model_id'] = (!is_null($usuario_id)) ? $usuario_id->id : null;
+
+            $item['user_id'] = (!is_null($entrenador_id)) ? $entrenador_id->id : null;
+
+            array_push($temp, $item);
+        }
+        $this->insertChunkedData($temp, 'user_actions');
     }
 
     // Media

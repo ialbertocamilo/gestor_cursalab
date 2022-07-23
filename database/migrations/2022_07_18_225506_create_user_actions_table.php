@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
 
-            $table->morphs('model');
+            $table->nullableMorphs('model');
             $table->integer('score')->nullable();
 
             $table->timestamps();

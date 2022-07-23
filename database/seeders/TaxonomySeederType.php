@@ -23,5 +23,21 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
+        Taxonomy::create([
+            'group' => 'user',
+            'type' => 'action',
+            'code' => 'to_train',
+            'name' => 'Entrenar',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+        Taxonomy::create([
+            'group' => 'user',
+            'type' => 'action',
+            'code' => 'supervise',
+            'name' => 'Supervisar',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
     }
 }

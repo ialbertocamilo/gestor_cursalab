@@ -2,11 +2,14 @@
 
 namespace App\Models\Support;
 
+use App\Models\CriterionValue;
 use App\Models\Taxonomy;
 use App\Models\Topic;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 use DB;
+use Illuminate\Support\Facades\DB as FacadesDB;
 use Illuminate\Support\Facades\Hash;
 
 class ExternalLMSMigration6 extends Model
@@ -64,6 +67,8 @@ class ExternalLMSMigration6 extends Model
             'tickets' => [],
             'faq' => [],
             'user_actions' => [],
+            'supervisores' => [],
+            'entrenadores' => [],
         ];
         $this->setPushNotificationsData($client_LMS_data, $db);
         $this->setGlossariesData($client_LMS_data, $db);
@@ -71,6 +76,8 @@ class ExternalLMSMigration6 extends Model
         $this->setTicketsData($client_LMS_data, $db);
         $this->setFaqData($client_LMS_data, $db);
         $this->setUserActionsData($client_LMS_data, $db);
+        $this->setSupervisoresData($client_LMS_data, $db);
+        $this->setEntrenadoresData($client_LMS_data, $db);
 
         return $client_LMS_data;
     }
@@ -151,7 +158,7 @@ class ExternalLMSMigration6 extends Model
 
     public function setUserActionsData(&$result, $db)
     {
-        $temp['temp_user_actions'] = $db->getTable('anuncios')
+        $temp['temp_user_actions'] = $db->getTable('usuario_acciones')
             ->select()
             ->get();
         foreach ($temp['temp_user_actions'] as $user) {
@@ -164,6 +171,58 @@ class ExternalLMSMigration6 extends Model
 
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+    public function setSupervisoresData(&$result, $db)
+    {
+        $taxonomy_id = FacadesDB::table('taxonomies')
+            ->where('type', 'action')
+            ->where('code', 'supervise')
+            ->first('id');
+        $taxonomy_id = (!is_null($taxonomy_id)) ? $taxonomy_id->id : null;
+
+        $temp['temp_supervisores'] = $db->getTable('supervisores')
+            ->select()
+            ->get();
+
+        foreach ($temp['temp_supervisores'] as $user) {
+            $result['supervisores'][] = [
+                'user_id' => $user->usuario_id,
+                'type_id' => $taxonomy_id,
+                'model_type' => CriterionValue::class,
+                'model_id' => $user->criterio_id,
+                'score' => 0,
+
+                'created_at' => now()->toDateTimeString(),
+                'updated_at' => now()->toDateTimeString(),
+            ];
+        }
+    }
+
+    public function setEntrenadoresData(&$result, $db)
+    {
+        $taxonomy_id = FacadesDB::table('taxonomies')
+            ->where('type', 'action')
+            ->where('code', 'to_train')
+            ->first('id');
+        $taxonomy_id = (!is_null($taxonomy_id)) ? $taxonomy_id->id : null;
+
+        $temp['temp_entrenadores'] = $db->getTable('entrenadores_usuarios')
+            ->select()
+            ->get();
+
+        foreach ($temp['temp_entrenadores'] as $user) {
+            $result['entrenadores'][] = [
+                'user_id' => $user->entrenador_id,
+                'type_id' => $taxonomy_id,
+                'model_type' => User::class,
+                'model_id' => $user->usuario_id,
+                'score' => 0,
+
+                'created_at' => now()->toDateTimeString(),
+                'updated_at' => now()->toDateTimeString(),
             ];
         }
     }

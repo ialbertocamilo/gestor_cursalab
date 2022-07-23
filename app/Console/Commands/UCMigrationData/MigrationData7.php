@@ -20,7 +20,7 @@ class MigrationData7 extends Command
      * @var string
      */
     protected $description = "Migración de:
-    Tickets, Push Notifications, FAQ, Glossaries, Announcements";
+    Tickets, Push Notifications, FAQ, Glossaries, Announcements, User Actions";
 
     /**
      * Execute the console command.
