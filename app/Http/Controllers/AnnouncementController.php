@@ -35,6 +35,7 @@ class AnnouncementController extends Controller
     public function getListSelects()
     {
         $modules = Criterion::getValuesForSelect('module');
+        // $modules = Criterion::getValuesForSelect('module');
 
         return $this->success(get_defined_vars());
     }
@@ -92,6 +93,9 @@ class AnnouncementController extends Controller
      */
     public function edit(Announcement $announcement)
     {
+        $config_ids = json_decode($announcement->config_id, true);
+        $announcement->modules = Abconfig::getModulesForSelect($config_ids);
+
         $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
 

@@ -124,11 +124,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(CriterionValue::class);
     }
 
-    // public function criteria()
-    // {
-    //     return $this->hasManyThrough(Criterion::class, CriterionValue::class);
-    // }
-
     public function getFullnameAttribute()
     {
         $fullname = $this->name;
@@ -176,6 +171,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     }
 
     public function getCriteria()
+    {
+        $criterion_ids = $this->criterion_values()->get()->pluck('criterion_id')->toArray();
+
+        return Criterion::whereIn('id', $criterion_ids)->get();
+    }
+
+    public function getCriterionValue($criterion_code)
     {
         $criterion_ids = $this->criterion_values()->get()->pluck('criterion_id')->toArray();
 
