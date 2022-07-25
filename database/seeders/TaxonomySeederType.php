@@ -39,5 +39,13 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
+        Taxonomy::create([
+            'group' => 'post',
+            'type' => 'ayuda_app',
+            'code' => 'ayuda_app',
+            'name' => 'Ayuda App',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
     }
 }

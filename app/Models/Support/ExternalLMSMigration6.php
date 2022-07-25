@@ -69,6 +69,7 @@ class ExternalLMSMigration6 extends Model
             'user_actions' => [],
             'supervisores' => [],
             'entrenadores' => [],
+            'ayuda_app' => [],
         ];
         $this->setPushNotificationsData($client_LMS_data, $db);
         $this->setGlossariesData($client_LMS_data, $db);
@@ -78,6 +79,7 @@ class ExternalLMSMigration6 extends Model
         $this->setUserActionsData($client_LMS_data, $db);
         $this->setSupervisoresData($client_LMS_data, $db);
         $this->setEntrenadoresData($client_LMS_data, $db);
+        $this->setAyudaAppData($client_LMS_data, $db);
 
         return $client_LMS_data;
     }
@@ -242,6 +244,23 @@ class ExternalLMSMigration6 extends Model
                 'info_support' => $user->info_soporte,
                 'msg_to_user' => $user->msg_to_user,
                 'status' => $user->estado,
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        }
+    }
+
+    public function setAyudaAppData(&$result, $db)
+    {
+        $temp['temp_ayuda_app'] = $db->getTable('ayuda_app')
+            ->select()
+            ->get();
+        foreach ($temp['temp_ayuda_app'] as $user) {
+            $result['ayuda_app'][] = [
+                'title' => $user->nombre,
+                'content' => $user->check_text_area,
+                'position' => $user->orden,
 
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
