@@ -77,6 +77,9 @@ class ExternalDatabase6 extends Model
 
         // User Actions (Entrenadores)
         $this->insertUserActionsEntrenadoresData($data);
+
+        // Ayuda App
+        $this->insertAyudaAppData($data);
     }
 
     // Push Notifications
@@ -206,6 +209,21 @@ class ExternalDatabase6 extends Model
 
         $temp = [];
         foreach ($data['faq'] as $item) {
+            $item['section_id'] = $taxonomy_id;
+            array_push($temp, $item);
+        }
+
+        $this->insertChunkedData($temp, 'posts');
+    }
+
+    // Ayuda App
+    public function insertAyudaAppData($data)
+    {
+        $taxonomy_id = DB::table('taxonomies')->where('type', 'ayuda_app')->first('id');
+        $taxonomy_id = (!is_null($taxonomy_id)) ? $taxonomy_id->id : null;
+
+        $temp = [];
+        foreach ($data['ayuda_app'] as $item) {
             $item['section_id'] = $taxonomy_id;
             array_push($temp, $item);
         }
