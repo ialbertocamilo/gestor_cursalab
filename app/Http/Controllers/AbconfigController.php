@@ -10,8 +10,11 @@ use App\Http\Resources\ModuloResource;
 use App\Models\Abconfig;
 use App\Models\Categoria;
 use App\Models\Categoria_perfil;
+use App\Models\Criterio;
+use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\Taxonomy;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 
 class AbconfigController extends Controller
@@ -19,42 +22,47 @@ class AbconfigController extends Controller
 
     public function search(Request $request)
     {
-        $users = Abconfig::search($request);
+//        $modules = Abconfig::search($request);
+        $request->merge(['code' => 'module']);
+        $modules = CriterionValue::search($request);
 
-        ModuloResource::collection($users);
+        ModuloResource::collection($modules);
 
-        return $this->success($users);
+        return $this->success($modules);
     }
 
-    public function searchModulo(Abconfig $abconfig)
+//    public function searchModulo(Abconfig $abconfig)
+    public function searchModulo(CriterionValue $module)
     {
-        $reinicio_automatico = json_decode($abconfig->reinicios_programado);
-        $abconfig->reinicio_automatico = $reinicio_automatico->activado ?? false;
-        $abconfig->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
-        $abconfig->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
-        $abconfig->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
+        $workspace = Workspace::where('criterion_value_id', $module->id)->first();
+
+        $reinicio_automatico = json_decode($workspace->reinicios_programado);
+        $module->reinicio_automatico = $reinicio_automatico->activado ?? false;
+        $module->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
+        $module->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
+        $module->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
 
 
-        $abconfig->load('main_menu');
-        $abconfig->load('side_menu');
+        $workspace->load('main_menu');
+        $workspace->load('side_menu');
 
         $formSelects = $this->getFormSelects(true);
 
-        $formSelects['main_menu']->each(function ($item) use ($abconfig) {
-            $item->active = $abconfig->main_menu->where('id', $item->id)->first() !== NULL;
+        $formSelects['main_menu']->each(function ($item) use ($workspace) {
+            $item->active = $workspace->main_menu->where('id', $item->id)->first() !== NULL;
         });
 
-        $formSelects['side_menu']->each(function ($item) use ($abconfig) {
-            $item->active = $abconfig->side_menu->where('id', $item->id)->first() !== NULL;
+        $formSelects['side_menu']->each(function ($item) use ($workspace) {
+            $item->active = $workspace->side_menu->where('id', $item->id)->first() !== NULL;
         });
 
-        $evaluacion = json_decode($abconfig->mod_evaluaciones);
-        $abconfig->preg_x_ev = $evaluacion->preg_x_ev ?? NULL;
-        $abconfig->nota_aprobatoria = $evaluacion->nota_aprobatoria ?? NULL;
-        $abconfig->nro_intentos = $evaluacion->nro_intentos ?? NULL;
+        $evaluacion = json_decode($workspace->mod_evaluaciones);
+        $module->preg_x_ev = $evaluacion->preg_x_ev ?? NULL;
+        $module->nota_aprobatoria = $evaluacion->nota_aprobatoria ?? NULL;
+        $module->nro_intentos = $evaluacion->nro_intentos ?? NULL;
 
         return $this->success([
-            'modulo' => $abconfig,
+            'modulo' => $module,
             'main_menu' => $formSelects['main_menu'],
             'side_menu' => $formSelects['side_menu'],
         ]);

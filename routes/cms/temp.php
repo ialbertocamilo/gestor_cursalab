@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use App\Http\Controllers\ApiRest\HelperController;
 
@@ -28,7 +28,7 @@ use App\Http\Controllers\MasivoController;
 use App\Http\Controllers\ErroresMasivoController;
 use App\Http\Controllers\IncidenciaController;
 use App\Http\Controllers\DuplicarController;
-use App\Http\Controllers\NotificacionesPushFirebaseController;
+use App\Http\Controllers\PushNotificationsFirebaseController;
 use App\Http\Controllers\AyudaAppController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportesSupervisoresController;
@@ -489,7 +489,7 @@ Route::controller(MallasController::class)->group(function() {
 
 
 Route::controller(MediaController::class)->group(function() {
-	
+
 	// MEDIA
 	Route::post('media/fileupload', 'fileupload')->name('media.fileupload');
 	Route::get('media/eliminar/{id}', 'eliminar')->name('media.eliminar');
@@ -522,7 +522,7 @@ Route::controller(HomeController::class)->group(function() {
 	Route::get('export/enc_pos_text/{enc}/{mod}/{curso}/{grupo}', 'exportarEncPostText');
 	Route::get('ver/enc_lib_text/{enc}/{mod}/{curso}/{grupo}', 'verEncLibText');
 	Route::get('export/enc_lib_text/{enc}/{mod}/{curso}/{grupo}', 'exportarEncLibText');
-	
+
 
 	Route::post('/upload-image/{type}', 'uploadImage')->name('CompatibleController.image');
 });
@@ -630,17 +630,17 @@ Route::controller(IncidenciaController::class)->group(function() {
 });
 
 Route::controller(DuplicarController::class)->group(function() {
-	
+
 	// DUPLICAR DATA //
-	
+
 	Route::get('/duplicar/get_data/{tipo}/{id}', 'get_data');
 	Route::post('/duplicar/save_copy', 'save_copy');
 });
 
 // SOPORTE //
 
-Route::controller(NotificacionesPushFirebaseController::class)->group(function() {
-	
+Route::controller(PushNotificationsFirebaseController::class)->group(function() {
+
 	// NOTIFICACIONES PUSH PERSONALIZADAS DESDE EL GESTOR //
 	Route::get('notificaciones_push', 'index');
 	// ->middleware('permission:notificaciones_push.index')->name('notificaciones_push.index');

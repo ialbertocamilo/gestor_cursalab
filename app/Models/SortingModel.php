@@ -25,26 +25,30 @@ class SortingModel extends Model
         return true;
     }
 
-    protected function getLastItem($item, $filters = [])
+    protected function getLastItem($item, $filters = [], $columnName = 'orden')
     {
-        return SortingModel::getItemsInOrder($item, $filters, 'DESC', 'ASC');
+        return SortingModel::getItemsInOrder(
+            $item, $filters, 'DESC', 'ASC', $columnName
+        );
     }
 
-    protected function getLastItemOrderNumber($item, $filters = [])
+    protected function getLastItemOrderNumber($item, $filters = [], $columnName = 'orden')
     {
-        $last = SortingModel::getLastItem($item, $filters)->first();
+        $last = SortingModel::getLastItem($item, $filters, $columnName)->first();
 
-        return $last->orden;
+        return $last->$columnName;
     }
 
-    protected function getNextItemOrderNumber($item, $filters = [])
+    protected function getNextItemOrderNumber($item, $filters = [], $columnName = 'orden')
     {
-        $last = SortingModel::getLastItem($item, $filters)->first();
+        $last = SortingModel::getLastItem($item, $filters, $columnName)->first();
 
-        return $last ? $last->orden + 1 : 1;
+        return $last ? $last->$columnName + 1 : 1;
     }
 
-    protected function getItemsInOrder($item, $filters = [], $orden_sort = 'ASC', $updated_sort = 'ASC')
+    protected function getItemsInOrder(
+        $item, $filters = [], $orden_sort = 'ASC', $updated_sort = 'ASC', $columnName = 'orden'
+    )
     {
         $model = is_object($item) ? get_class($item) : $item;
 
@@ -55,37 +59,45 @@ class SortingModel extends Model
             $query->where($key, $filter);
         }
 
-        $query->orderBy('orden', $orden_sort)->orderBy('updated_at', $updated_sort);
+        $query->orderBy($columnName, $orden_sort)->orderBy('updated_at', $updated_sort);
 
         return $query;
     }
 
-    protected function reorderItems($item, $filters = [], $item_last_order = NULL)
+    protected function reorderItems(
+        $item, $filters = [], $item_last_order = NULL, $columnName = 'orden'
+    )
     {
         $updated_sort = 'DESC';
 
-        if ($item_last_order)
-        {
-            if (is_object($item))
-                $updated_sort = $item->orden > $item_last_order ? 'ASC' : 'DESC';
-        }
-        else
-        {
-            $last = SortingModel::getLastItem($item, $filters)->first();
+        if ($item_last_order) {
+
+            if (is_object($item)) {
+
+                $updated_sort = $item->$columnName > $item_last_order
+                                ? 'ASC'
+                                : 'DESC';
+            }
+
+        } else {
+
+            $last = SortingModel::getLastItem($item, $filters, $columnName)->first();
 
             if ($last->id == $item->id)
                 return true;
         }
 
-        $rows = SortingModel::getItemsInOrder($item, $filters, 'ASC', $updated_sort)->get();
+        $rows = SortingModel::getItemsInOrder(
+            $item, $filters, 'ASC', $updated_sort, $columnName
+        )->get();
 
-        foreach ($rows as $index => $row)
-        {
+        foreach ($rows as $index => $row) {
+
             $position = $index + 1;
 
-            if ( $row->orden != $position)
-            {
-                $row->update(['orden' => $position]);
+            if ($row->orden != $position) {
+
+                $row->update([$columnName => $position]);
                 // info("- {$position} => ID {$row->id} UPDATED");
             }
         }
@@ -166,7 +178,7 @@ class SortingModel extends Model
             $resource->save();
 
             DB::commit();
-            
+
         } catch (\Exception $e) {
             // info($e->getMessage());
             DB::rollBack();

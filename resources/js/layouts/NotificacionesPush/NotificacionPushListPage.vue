@@ -24,7 +24,7 @@
                             :options="modalDateFilter1"
                             v-model="filters.fecha"
                             label="Fecha"
-                            @onChange="refreshDefaultTable(dataTable, filters)" 
+                            @onChange="refreshDefaultTable(dataTable, filters)"
                         />
                     </v-col>
                     <v-col cols="12">
@@ -105,13 +105,15 @@
                 :default-sort-desc="true"
                 @detalles="openFormModal(modalDetallesOptions, $event, 'detalle', `Detalles`)"
             />
+
             <NotificacionPushFormModal
                 :ref="modalOptions.ref"
                 :options="modalOptions"
-                :modulos="selects.modulos"
+                :modules="selects.modules"
                 @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
                 @onCancel="closeFormModal(modalOptions)"
             />
+
             <NotificacionPushDetalleModal
                 :ref="modalDetallesOptions.ref"
                 :options="modalDetallesOptions"
@@ -159,7 +161,8 @@ export default {
             },
             selects: {
                 estado: [],
-                modulos: [],
+                modules: [],
+                careers: []
             },
             modalOptions: {
                 ref: 'NotificacionPushFormModal',
@@ -193,7 +196,7 @@ export default {
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.estados = data.data.estados
-                    vue.selects.modulos = data.data.modulos
+                    vue.selects.modules = data.data.modules
                 })
         },
     }

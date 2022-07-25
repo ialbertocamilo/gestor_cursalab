@@ -16,7 +16,8 @@ class ModuloResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->etapa,
+//            'name' => $this->etapa,
+            'name' => $this->value_text,
             'image' => space_url($this->logo),
             'active' => $this->estado,
 

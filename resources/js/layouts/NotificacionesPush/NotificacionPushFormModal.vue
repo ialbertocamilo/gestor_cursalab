@@ -6,9 +6,10 @@
         @onConfirm="confirmModal"
     >
         <template v-slot:content>
-            <v-form ref="form_notificacion" lazy-validation @submit.prevent="confirmModal()">
+            <v-form ref="form_notificacion" lazy-validation
+                    @submit.prevent="confirmModal()">
                 <v-card-text class="pt-0 pb-0">
-     
+
                     <v-row>
                         <v-col cols="12" class="d-flex justify-content-center">
                             <DefaultInput clearable
@@ -18,8 +19,6 @@
                                 placeholder="Ingresa un título"
                             />
                         </v-col>
-               <!--      </v-row>
-                    <v-row> -->
                         <v-col cols="12" md="12" lg="12">
                             <v-textarea
                                 label="Texto de la notificación (opcional) "
@@ -49,12 +48,12 @@
                                     >
                                         <v-list-item two-line class="box-notificacion">
                                             <v-list-item-content>
-                                                <v-list-item-title class="texto-negrita notificacion_texto">{{
-                                                    nueva_notificacion.titulo
-                                                }}</v-list-item-title>
-                                                <v-list-item-subtitle>{{
-                                                    nueva_notificacion.texto
-                                                }}</v-list-item-subtitle>
+                                                <v-list-item-title class="texto-negrita notificacion_texto">
+                                                    {{ nueva_notificacion.titulo }}
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle>
+                                                    {{ nueva_notificacion.texto }}
+                                                </v-list-item-subtitle>
                                             </v-list-item-content>
                                         </v-list-item>
                                     </v-img>
@@ -68,12 +67,12 @@
                                     <v-img src="https://www.gstatic.com/mobilesdk/190403_mobilesdk/iphone.png">
                                         <v-list-item two-line class="box-notificacion">
                                             <v-list-item-content>
-                                                <v-list-item-title class="texto-negrita notificacion_texto">{{
-                                                    nueva_notificacion.titulo
-                                                }}</v-list-item-title>
-                                                <v-list-item-subtitle>{{
-                                                    nueva_notificacion.texto
-                                                }}</v-list-item-subtitle>
+                                                <v-list-item-title class="texto-negrita notificacion_texto">
+                                                    {{ nueva_notificacion.titulo }}
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle>
+                                                    {{ nueva_notificacion.texto }}
+                                                </v-list-item-subtitle>
                                             </v-list-item-content>
                                         </v-list-item>
                                     </v-img>
@@ -103,37 +102,47 @@
                                 <thead class="">
                                     <tr>
                                         <th style="width: 5% !important">
-                                            <input type="checkbox" v-model="cbxAll" @change="allModules()" />
+                                            <input type="checkbox"
+                                                   v-model="cbxAll"
+                                                   @change="allModules()" />
                                         </th>
-                                        <th class="text-left" style="width: 20% !important">Módulo</th>
-                                        <th class="text-left" style="width: 75% !important">Carreras</th>
+                                        <th class="text-left" style="width: 20% !important">
+                                            Módulo
+                                        </th>
+                                        <th class="text-left" style="width: 75% !important">
+                                            Carreras
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(modulo, index) in modulos" :key="index">
+                                    <tr v-for="(module, index) in modules" :key="index">
                                         <td>
-                                            <input type="checkbox" v-model="modulo.modulo_selected" />
+                                            <input type="checkbox"
+                                                   v-model="module.modulo_selected" />
                                         </td>
-                                        <td>{{ modulo.etapa }}</td>
+                                        <td>
+                                            {{ module.nombre }}
+                                        </td>
                                         <td>
                                             <v-autocomplete
-                                                :items="modulo.carreras"
+                                                :items="module.carreras"
                                                 multiple
                                                 chips
                                                 dense
-                                                v-model="modulo.carreras_selected"
+                                                v-model="module.carreras_selected"
                                                 hide-details="auto"
                                                 item-text="nombre"
                                                 item-value="id"
                                                 return-object
-                                                :disabled="!modulo.modulo_selected"
+                                                :disabled="!module.modulo_selected"
                                             >
                                                 <template v-slot:prepend-item>
                                                     <v-list-item ripple @click="toggle(index)">
                                                         <v-list-item-action>
                                                             <v-icon
                                                                 :color="
-                                                                    modulo.carreras_selected.length > 0 ? 'indigo darken-4' : ''
+                                                                    module.carreras_selected.length > 0
+                                                                    ? 'indigo darken-4' : ''
                                                                 "
                                                             >
                                                                 {{ icon(index) }}
@@ -149,11 +158,12 @@
                                                 </template>
                                                 <template v-slot:selection="{ item, index }">
                                                     <v-chip v-if="index < 3">
-                                                        <span> {{ item.nombre }}</span>
+                                                        <span>{{ item.nombre }}</span>
                                                     </v-chip>
-                                                    <span v-if="index === 3" class="grey--text caption">
-                                                        (+{{ modulo.carreras_selected.length - 3 }} carrera{{
-                                                            modulo.carreras_selected.length - 3 > 1 ? "s" : ""
+                                                    <span v-if="index === 3"
+                                                          class="grey--text caption">
+                                                        (+{{ module.carreras_selected.length - 3 }} carrera{{
+                                                            module.carreras_selected.length - 3 > 1 ? "s" : ""
                                                         }})
                                                     </span>
                                                 </template>
@@ -199,7 +209,7 @@ export default {
             required: true
         },
         width: String,
-        modulos: {
+        modules: {
             type: Object | Array,
             default: []
         }
@@ -220,7 +230,7 @@ export default {
             rules: {
                 titulo: [(v) => !!v || "El título no puede ir vacío."],
             },
-            // modulos: [],
+
             notificaciones: [],
             cbxAll: false,
             overlay: false,
@@ -236,12 +246,17 @@ export default {
         // vue.getData();
     },
     computed: {
+
         existeDestinatarios() {
-            // console.log("ásd");
+
             let vue = this;
             let existe = false;
-            for (let i = 0; i < vue.modulos.length; i++) {
-                if (vue.modulos[i].modulo_selected && vue.modulos[i].carreras_selected.length > 0) {
+
+            for (let i = 0; i < vue.modules.length; i++) {
+
+                if (vue.modules[i].modulo_selected &&
+                    vue.modules[i].carreras_selected.length > 0) {
+
                     existe = true;
                     break;
                 }
@@ -255,7 +270,7 @@ export default {
         //     axios
         //         .get("/notificaciones_push/getData?page=" + vue.paginate.page)
         //         .then((res) => {
-        //             vue.modulos = res.data.modulos;
+        //             vue.modules = res.data.modules;
         //             vue.notificaciones = res.data._notificaciones;
 
         //             vue.paginate.total_paginas = res.data.paginate.total_paginas;
@@ -270,17 +285,18 @@ export default {
         // },
         allModules() {
             let vue = this;
-            vue.modulos.forEach((modulo) => {
-                modulo.modulo_selected = vue.cbxAll;
+            vue.modules.forEach((module) => {
+                module.modulo_selected = vue.cbxAll;
             });
         },
         seleccionarTodasLasCarreras(index) {
             let vue = this;
-            return vue.modulos[index].carreras_selected.length === vue.modulos[index].carreras.length;
+            return vue.modules[index].carreras_selected.length === vue.modules[index].carreras.length;
         },
         seleccionarAlgunasCarreras(index) {
             let vue = this;
-            return vue.modulos[index].carreras_selected.length > 0 && !vue.seleccionarTodasLasCarreras;
+            return  vue.modules[index].carreras_selected.length > 0 &&
+                    !vue.seleccionarTodasLasCarreras;
         },
         icon(index) {
             let vue = this;
@@ -292,9 +308,9 @@ export default {
             let vue = this;
             vue.$nextTick(() => {
                 if (vue.seleccionarTodasLasCarreras(index)) {
-                    vue.modulos[index].carreras_selected = [];
+                    vue.modules[index].carreras_selected = [];
                 } else {
-                    vue.modulos[index].carreras_selected = vue.modulos[index].carreras.slice();
+                    vue.modules[index].carreras_selected = vue.modules[index].carreras.slice();
                 }
             });
         },
@@ -306,10 +322,11 @@ export default {
             let vue = this;
             let cadena = "[";
             if (vue.existeDestinatarios) {
-                vue.modulos.forEach((mod) => {
+                vue.modules.forEach((mod) => {
                     if (mod.carreras_selected.length > 0) {
                         cadena +=
-                            '{"modulo_id":' + mod.id + ', "modulo_nombre": "' + mod.etapa + '", "carreras": [';
+                            '{"modulo_id":' + mod.id + ', "modulo_nombre": "' + mod.nombre + '", "carreras": [';
+
                         mod.carreras_selected.forEach((carr) => {
                             cadena += '{"carrera_id":' + carr.id + ', "carrera_nombre": "' + carr.nombre + '" },';
                         });
@@ -346,7 +363,10 @@ export default {
                 vue.generarJson();
                 // return;
                 axios
-                    .post("/notificaciones_push/enviarNotificacionCustom", vue.nueva_notificacion)
+                    .post(
+                        "/notificaciones_push/enviarNotificacionCustom",
+                        vue.nueva_notificacion
+                    )
                     .then((response) => {
                         // vue.$notification.success(response.data.msg, {
                         //     title: response.data.title,
@@ -370,12 +390,14 @@ export default {
                             showCloseIcn: true,
                         });
                     });
+
                 vue.getData();
                 setTimeout(() => {
                     vue.btn_disabled = false;
                     vue.closeModal();
                     // vue.hideOverlay();
                 }, 1500);
+
             } else {
                 vue.btn_disabled = false;
             }
@@ -385,7 +407,7 @@ export default {
             vue.nueva_notificacion.titulo = "";
             vue.nueva_notificacion.texto = "";
             vue.nueva_notificacion.destinatarios = [];
-            vue.modulos.forEach((mod) => {
+            vue.modules.forEach((mod) => {
                 mod.carreras_selected = [];
                 mod.modulo_selected = false;
             });

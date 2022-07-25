@@ -305,7 +305,7 @@ class Meeting extends BaseModel
             Attendant::createOrUpdatePersonalLinkMeeting($meeting, $datesHaveChanged);
 
             SourceMultimarca::insertSource($meeting->identifier,'meeting',$meeting->id);
-            
+
             DB::commit();
 
             $meeting->sendMeetingPushNotifications($attendants);
@@ -373,7 +373,7 @@ class Meeting extends BaseModel
 
             $title = '¡Hola! tienes una nueva reunión agendada';
 
-            NotificacionPush::enviar($title, $body, $tokens['added']);
+            PushNotification::enviar($title, $body, $tokens['added']);
 
         endif;
 
@@ -381,7 +381,7 @@ class Meeting extends BaseModel
 
             $title = "Se ha actualizado la fecha de la reunión: $this->name";
 
-            NotificacionPush::enviar($title, $body, $tokens['remained']);
+            PushNotification::enviar($title, $body, $tokens['remained']);
 
         endif;
     }
@@ -467,7 +467,7 @@ class Meeting extends BaseModel
         else
             $firebase_tokens = array_diff($custom_firebase_tokens, $excluded_attendants_id);
 
-        NotificacionPush::enviar($title, $body, $firebase_tokens);
+        PushNotification::enviar($title, $body, $firebase_tokens);
     }
 
     public function getFirebaseTokensFromAttendants($excluded_attendants_id = [])

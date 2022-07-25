@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\NotificacionesPushFirebaseController;
+use App\Http\Controllers\PushNotificationsFirebaseController;
 
-Route::controller(NotificacionesPushFirebaseController::class)->group(function() {
+Route::controller(PushNotificationsFirebaseController::class)->group(function() {
 
-	Route::view('/', 'notificaciones_push.list')->name('notificaciones_push.index');
+    Route::view('/', 'notificaciones_push.list')
+         ->name('notificaciones_push.index');
 
-	Route::get('/search', 'search');
-	Route::get('/get-list-selects', 'getListSelects');
-	Route::get('/detalle/{notificacion}', 'detalle');
+    Route::get('/search', 'search');
+    Route::get('/get-list-selects', 'getListSelects');
+    Route::get('/detalle/{notificacion}', 'detalle');
 
 });

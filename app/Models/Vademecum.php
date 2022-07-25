@@ -111,7 +111,7 @@ class Vademecum extends Model
     }
 
     /**
-     * Load paginated records from database
+     * Load filtered paginated records from database
      *
      * @param $request
      * @param $api

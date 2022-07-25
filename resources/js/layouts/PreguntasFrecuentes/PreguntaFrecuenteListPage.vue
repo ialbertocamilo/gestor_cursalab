@@ -14,7 +14,7 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
-               
+
                     <v-col cols="3">
                         <DefaultInput clearable dense
                                       v-model="filters.q"
@@ -65,16 +65,20 @@ import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
-    components: {PreguntaFrecuenteFormModal, DefaultStatusModal, DefaultDeleteModal},
+
+    components: {
+        PreguntaFrecuenteFormModal, DefaultStatusModal, DefaultDeleteModal
+    }
+    ,
     data() {
         return {
             dataTable: {
                 endpoint: '/preguntas-frecuentes/search',
                 ref: 'PreguntaFrecuenteTable',
                 headers: [
-                    {text: "Orden", value: "orden",  align: 'center', model: "Pregunta_frecuente"},
-                    {text: "Pregunta", value: "pregunta"},
-                    {text: "Respuesta", value: "respuesta"},
+                    {text: "Orden", value: "position",  align: 'center', model: "Pregunta_frecuente"},
+                    {text: "Pregunta", value: "title"},
+                    {text: "Respuesta", value: "content"},
                     {text: "Fecha de creación", value: "created_at", align: 'center'},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
@@ -144,7 +148,7 @@ export default {
     methods: {
         getSelects() {
             let vue = this
-           
+
         },
         // reset(user) {
         //     let vue = this

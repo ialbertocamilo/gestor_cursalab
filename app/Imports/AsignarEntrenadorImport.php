@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Models\ChecklistRpta;
-use App\Models\NotificacionPush;
+use App\Models\PushNotification;
 use App\Models\Usuario;
 use App\Models\EntrenadorUsuario;
 
