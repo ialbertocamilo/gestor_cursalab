@@ -50,4 +50,5 @@ Route::controller(TestController::class)->group(function() {
     Route::get('/test/schools', 'schools');
     Route::get('/test/courses', 'courses');
 
+    Route::get('/test/blocks', 'blocks');
 });

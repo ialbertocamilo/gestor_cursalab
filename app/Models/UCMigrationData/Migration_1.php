@@ -2,8 +2,10 @@
 
 namespace App\Models\UCMigrationData;
 
+use App\Models\Block;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
+use App\Models\Segment;
 use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
 use App\Models\User;
@@ -62,7 +64,7 @@ class Migration_1 extends Model
 
         $this->insertCriterionUserData($data);
 
-        $this->insertEntrenadoresUsuarios();
+        $this->insertSegmentacionCarrerasCiclosData();
     }
 
     public function setUsersData(&$result, $db)
@@ -527,10 +529,48 @@ class Migration_1 extends Model
         $this->makeChunkAndInsert($criterion_user, 'criterion_value_user');
     }
 
-    protected function insertEntrenadoresUsuarios()
+    public function insertSegmentacionCarrerasCiclosData()
     {
         $db = self::connect();
 
-        //        $entrenadores = $db->getTable('')
+        $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
+        $curriculas = $db->getTable('curricula')
+            ->whereIn('carrera_id', $carreras_values->pluck('external_id'))
+            ->get();
+        $ciclos_old = $db->getTable('ciclos')->get();
+
+        foreach ($carreras_values as $career) {
+
+            $ciclos_old_ids = $curriculas->whereIn('carrera_id', $career->external_id)->pluck('ciclo_id');
+            $ciclos = $ciclos_old->whereIn('id', $ciclos_old_ids);
+
+            $program = [
+                'name' => "Programa: $career->value_text",
+                'description' => $career->description,
+            ];
+            $block = Block::create($program);
+
+            $block->criterion_values()->syncWithoutDetaching([$career->id]);
+
+            foreach ($ciclos as $ciclo) {
+                $segment = Segment::create(['name' => "Ruta de aprendizaje: $ciclo->nombre"]);
+                $ciclo_value = $ciclos_values->where('value_text', $ciclo->nombre)->first();
+
+                // $block->block_segments->insert([
+                $block_segment_id = DB::table('block_segment')->insertGetId([
+                    'block_id' => $block->id,
+                    'segment_id' => $segment->id
+                ]);
+
+                if ($ciclo_value):
+                    DB::table('block_segment_criterion_value')->insert([
+                        'block_segment_id' => $block_segment_id,
+                        'criterion_value_id' => $ciclo_value->id
+                    ]);
+                endif;
+            }
+        }
     }
+
 }

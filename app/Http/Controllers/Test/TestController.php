@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Test;
 
 use App\Http\Controllers\Controller;
+use App\Models\Block;
 use App\Models\Course;
 use App\Models\School;
 use App\Models\User;
@@ -45,11 +46,32 @@ class TestController extends Controller
 
     public function users()
     {
-        $users = User::withWhereHas('criterion_values', function ($q){
+        $users = User::withWhereHas('criterion_values', function ($q) {
             $q->select('id', 'value_text');
         })
             ->limit(10)->get();
 
         return $this->success($users);
+    }
+
+    public function blocks()
+    {
+        $blocks = Block::query()
+            ->withWhereHas('segments', function ($q) {
+                $q->select('segments.id', 'segments.name');
+            })
+            ->withCount('criterion_values')
+            ->limit(10)->get();
+
+        $programs = [];
+        foreach ($blocks as $block) {
+            $programs[] = [
+                'name' => $block->name,
+                'criterion_values_count' => $block->criterion_values_count,
+                'roadmap' => $block->segments,
+            ];
+        }
+
+        return $this->success($programs);
     }
 }
