@@ -12,7 +12,7 @@ use App\Http\Resources\BlockResource;
 
 class LearningBlockController extends Controller
 {
-    public function search()
+    public function search(Request $request)
     {
         $blocks = Block::search($request);
 

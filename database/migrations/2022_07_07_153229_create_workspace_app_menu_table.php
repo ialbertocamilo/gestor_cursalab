@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('modules_app_menu');
+        Schema::dropIfExists('workspace_app_menu');
     }
 };

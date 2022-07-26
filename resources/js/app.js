@@ -92,6 +92,7 @@ Vue.component("soporte-layout", require("./layouts/Soporte/SoporteListPage.vue")
 Vue.component("soporte-ayuda-layout", require("./layouts/Soporte/Ayudas/AyudaListPage.vue"));
 
 // Gestor views
+Vue.component("blocks-layout", require("./layouts/Blocks/BlockListPage"));
 Vue.component("tag-layout", require("./layouts/Tags/TagListPage"));
 Vue.component("error-layout", require("./layouts/Errores/ErrorListPage"));
 Vue.component("usuario-layout", require("./layouts/Usuario/UsuarioListPage"));

@@ -4,7 +4,7 @@ use App\Http\Controllers\LearningBlockController;
 
 Route::controller(LearningBlockController::class)->group(function() {
 
-	Route::view('/', 'meetings.blocks.list')->name('blocks.list');
+	Route::view('/', 'learning.blocks.list')->name('blocks.list');
 	// ->middleware('permission:blocks.list');
 
 	Route::get('/search', 'search');

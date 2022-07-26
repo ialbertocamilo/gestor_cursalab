@@ -17,7 +17,7 @@ class TaxonomySeederType extends Seeder
     {
         Taxonomy::create([
             'group' => 'post',
-            'type' => 'faq',
+            'type' => 'section',
             'code' => 'faq',
             'name' => 'Preguntas Frecuentes',
             'active' => ACTIVE,
@@ -41,7 +41,7 @@ class TaxonomySeederType extends Seeder
         ]);
         Taxonomy::create([
             'group' => 'post',
-            'type' => 'ayuda_app',
+            'type' => 'section',
             'code' => 'ayuda_app',
             'name' => 'Ayuda App',
             'active' => ACTIVE,
