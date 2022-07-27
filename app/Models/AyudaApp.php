@@ -17,7 +17,12 @@ class AyudaApp extends Model
 
     public function setCheckTextAreaAttribute($value)
     {
-        $this->attributes['check_text_area'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
+        $this->attributes['check_text_area'] = (
+            $value ==='true' OR
+            $value === true OR
+            $value === 1 OR
+            $value === '1'
+        );
     }
 
     protected function search($request)
@@ -29,7 +34,7 @@ class AyudaApp extends Model
 
         $field = $request->sortBy ?? 'orden';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-        
+
         $query->orderBy($field, $sort);
 
         return $query->paginate($request->paginate);

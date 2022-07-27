@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use DB;
-use App\Models\Curso;
-use App\Models\Carrera;
-use App\Models\Usuario;
-use App\Models\Abconfig;
+use App\Exports\EncuestaxgypExport;
 use App\Models\Ab_config;
-use App\Models\Categoria;
-use App\Models\Matricula;
+use App\Models\Criterion;
+use App\Models\Curso;
+use App\Models\Poll;
 use App\Models\PollQuestion;
 use App\Models\PollQuestionAnswer;
-
+use App\Models\Usuario;
 use Illuminate\Http\Request;
-use App\Exports\EncuestaxgypExport;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -64,7 +61,7 @@ class HomeController extends Controller
             $cad2 = " AND u.config_id = '".$mod."'";
 
             // filtra lista de cursos
-            $cursos = \DB::select( \DB::raw("SELECT c.id AS id,  c.nombre AS nombre, cat.nombre AS escuela, m.codigo_matricula FROM cursos c INNER JOIN categorias cat ON cat.id = c.categoria_id INNER JOIN ab_config m ON m.id = c.config_id  WHERE categoria_id IN (SELECT id FROM categorias WHERE config_id = ".$mod.") AND c.id IN (SELECT curso_id FROM encuestas_respuestas GROUP BY curso_id) ORDER BY c.nombre"));
+            $cursos = DB::select( DB::raw("SELECT c.id AS id,  c.nombre AS nombre, cat.nombre AS escuela, m.codigo_matricula FROM cursos c INNER JOIN categorias cat ON cat.id = c.categoria_id INNER JOIN ab_config m ON m.id = c.config_id  WHERE categoria_id IN (SELECT id FROM categorias WHERE config_id = ".$mod.") AND c.id IN (SELECT curso_id FROM encuestas_respuestas GROUP BY curso_id) ORDER BY c.nombre"));
 
             $ep_result['cursos'] = $cursos;
         }
@@ -72,7 +69,7 @@ class HomeController extends Controller
         if ($curso_id != '' && $curso_id != 'ALL') {
             $cad3 = " AND er.curso_id = '".$curso_id."'";
             // filtra lista de grupos
-            $grupos = \DB::select( \DB::raw("SELECT grupo,grupo_nombre FROM usuarios WHERE id IN (SELECT usuario_id FROM encuestas_respuestas WHERE curso_id = ".$curso_id." AND tipo_pregunta = 'califica') GROUP BY grupo order by grupo_nombre asc"));
+            $grupos = DB::select( DB::raw("SELECT grupo,grupo_nombre FROM usuarios WHERE id IN (SELECT usuario_id FROM encuestas_respuestas WHERE curso_id = ".$curso_id." AND tipo_pregunta = 'califica') GROUP BY grupo order by grupo_nombre asc"));
 
             $ep_result['grupos'] = $grupos;
         }
@@ -92,7 +89,7 @@ class HomeController extends Controller
         // }
 
         // consulta maestra
-        $ep_result['pgtas'] = \DB::select( \DB::raw("
+        $ep_result['pgtas'] = DB::select( DB::raw("
             SELECT ep.id, ep.encuesta_id, ep.titulo, er.curso_id, u.config_id, u.grupo, ep.tipo_pregunta
             FROM encuestas_preguntas ep
             INNER JOIN encuestas_respuestas er ON er.encuesta_id = ep.encuesta_id
@@ -148,7 +145,7 @@ class HomeController extends Controller
         // }
 
         // consulta maestra
-        $ep_result['pgtas'] = \DB::select( \DB::raw("
+        $ep_result['pgtas'] = DB::select( DB::raw("
             SELECT er.curso_id, er.encuesta_id, er.pregunta_id, er.tipo_pregunta
             FROM encuestas_respuestas er
             INNER JOIN usuarios u ON u.id = er.usuario_id
@@ -170,13 +167,16 @@ class HomeController extends Controller
 
         $cursos = [];
         $grupos = [];
-        $encuestas = \DB::select( \DB::raw("SELECT id, titulo,tipo FROM encuestas WHERE estado = 1"));
-        $modulos = \DB::select( \DB::raw("SELECT id, etapa FROM ab_config WHERE estado = 1"));
+        $encuestas = Poll::where('active', 1)->select()->get();
+        $modulos = Criterion::getValuesForSelect('module');
 
         // $enc_libres = \DB::select( \DB::raw("SELECT id, titulo FROM encuestas WHERE id IN (SELECT encuesta_id FROM encuestas_respuestas WHERE curso_id <= 0 ) "));
         $enc_libres = [];
 
-        $data = array('modulos'=>$modulos, 'encuestas'=>$encuestas);
+        $data = [
+            'modulos' => $modulos,
+            'encuestas' => $encuestas
+        ];
 
         // Filto
         if ($request->input('t') == 'epc') { // encuesta por curso
@@ -186,11 +186,14 @@ class HomeController extends Controller
             $curso_id= $request->input('p');
             $gru = $request->input('g');
 
-            $enc_preg_res = $this->encuesta_filtrada_data($enc_id, $mod, $curso_id, $gru, 'califica');
+            $enc_preg_res = $this->encuesta_filtrada_data(
+                $enc_id, $mod, $curso_id, $gru, 'califica'
+            );
 
             if ($mod != '' && $mod != 'ALL') {
                 $cursos = $enc_preg_res['cursos'];
             }
+
             if ($curso_id != '' && $curso_id != 'ALL') {
                 $grupos = $enc_preg_res['grupos'];
             }
@@ -198,7 +201,13 @@ class HomeController extends Controller
             $ec_pgtas = $enc_preg_res['pgtas'];
 
             // return $data;
-            $data = array('modulos'=>$modulos, 'encuestas'=>$encuestas, 'cursos'=>$cursos, 'grupos'=>$grupos, 'ec_pgtas'=>$ec_pgtas);
+            $data = [
+                'modulos' => $modulos,
+                'encuestas' => $encuestas,
+                'cursos' => $cursos,
+                'grupos' => $grupos,
+                'ec_pgtas' => $ec_pgtas
+            ];
         }
 
         return view('resumen_encuesta.index', $data);
@@ -212,7 +221,7 @@ class HomeController extends Controller
         if ($encuesta != '' && $encuesta != 'ALL') {
             $cad1 = "WHERE ce.encuesta_id = '".$encuesta."'";
         }
-        $encuestas = \DB::select( \DB::raw("SELECT id, etapa FROM ab_config WHERE id IN
+        $encuestas = DB::select( DB::raw("SELECT id, etapa FROM ab_config WHERE id IN
                                                 (SELECT c.config_id FROM curso_encuesta ce
                                                 INNER JOIN cursos c
                                                 ON ce.curso_id = c.id
@@ -240,7 +249,7 @@ class HomeController extends Controller
 
         // $cursos = \DB::select( \DB::raw("SELECT c.id AS id, CONCAT_WS ('///', c.nombre, cat.nombre) AS curso_escuela , c.nombre AS nombre, cat.nombre AS escuela FROM cursos c INNER JOIN categorias cat ON cat.id = c.categoria_id  WHERE categoria_id IN (SELECT id FROM categorias WHERE config_id = ".$mod.") AND c.id IN (SELECT curso_id FROM encuestas_respuestas GROUP BY curso_id) ORDER BY c.nombre"));
 
-        $cursos = \DB::select( \DB::raw("SELECT c.id, c.nombre, cat.nombre AS escuela, m.codigo_matricula FROM cursos c
+        $cursos = DB::select( DB::raw("SELECT c.id, c.nombre, cat.nombre AS escuela, m.codigo_matricula FROM cursos c
                                             INNER JOIN categorias cat ON cat.id = c.categoria_id
                                             INNER JOIN ab_config m ON m.id = c.config_id
                                             INNER JOIN curso_encuesta e
@@ -268,7 +277,7 @@ class HomeController extends Controller
 
         // return $curso;
         // if ($tipo == 'epc') {
-            $grupos = \DB::select( \DB::raw("
+            $grupos = DB::select( DB::raw("
                 SELECT grupo,grupo_nombre FROM usuarios
                 WHERE id IN (
                     SELECT usuario_id FROM encuestas_respuestas
@@ -312,7 +321,7 @@ class HomeController extends Controller
         }
 
         // consulta maestra
-        $rptas = \DB::select( \DB::raw("
+        $rptas = DB::select( DB::raw("
             SELECT er.id, er.pregunta_id, er.respuestas
             FROM encuestas_respuestas er
             INNER JOIN usuarios u ON u.id = er.usuario_id
@@ -451,7 +460,7 @@ class HomeController extends Controller
             $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
-            $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
+            $cate_cursos = DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
             $data['categorias_arr'] = collect($cate_cursos)->pluck('nombre','id');
 
             $enc_preg_res = $this->encuesta_filtrada_x_curso($enc, $mod, $curso, $grupo, 'califica');
@@ -473,7 +482,7 @@ class HomeController extends Controller
             $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
-            $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
+            $cate_cursos = DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
             $data['categorias_arr'] = collect($cate_cursos)->pluck('nombre','id');
 
             $enc_preg_res = $this->encuesta_filtrada_x_curso($enc, $mod, $curso, $grupo, 'califica');
@@ -506,7 +515,7 @@ class HomeController extends Controller
             $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
-            $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
+            $cate_cursos = DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
             $data['categorias_arr'] = collect($cate_cursos)->pluck('nombre','id');
 
             $enc_preg_res = $this->encuesta_filtrada_x_curso($enc, $mod, $curso, $grupo, 'califica');
@@ -528,7 +537,7 @@ class HomeController extends Controller
             $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
-            $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
+            $cate_cursos = DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
             $data['categorias_arr'] = collect($cate_cursos)->pluck('nombre','id');
 
             $enc_preg_res = $this->encuesta_filtrada_x_curso($enc, $mod, $curso, $grupo, 'califica');
@@ -744,7 +753,7 @@ class HomeController extends Controller
             $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
-            $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
+            $cate_cursos = DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
             $data['categorias_arr'] = collect($cate_cursos)->pluck('nombre','id');
 
             $enc_preg_res = $this->encuesta_filtrada_x_curso($enc, $mod, $curso, $grupo, 'texto');
@@ -765,7 +774,7 @@ class HomeController extends Controller
             $data['preguntas_arr'] = PollQuestion::select('id','titulo')->pluck('titulo','id');
 
             $data['cursos_arr'] = Curso::select('id','nombre')->pluck('nombre','id');
-            $cate_cursos = \DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
+            $cate_cursos = DB::select( "SELECT c.nombre, cu.id FROM categorias c JOIN cursos cu ON c.id = cu.categoria_id");
             $data['categorias_arr'] = collect($cate_cursos)->pluck('nombre','id');
 
             $enc_preg_res = $this->encuesta_filtrada_x_curso($enc, $mod, $curso, $grupo, 'texto');
@@ -827,7 +836,7 @@ class HomeController extends Controller
         }
 
         // consulta maestra
-        $rptas = \DB::select( \DB::raw("
+        $rptas = DB::select( DB::raw("
             SELECT er.id, er.respuestas
             FROM encuestas_respuestas er
             INNER JOIN usuarios u ON u.id = er.usuario_id

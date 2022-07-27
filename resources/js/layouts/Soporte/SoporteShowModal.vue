@@ -13,7 +13,7 @@
                     {{ resource.id }}
                 </v-col>
             </v-row>
-   
+
             <v-row justify="space-around">
                 <v-col cols="4" class="d-flex justify-content-start">
                     <strong>Usuario</strong>
@@ -37,7 +37,7 @@
                     <strong>Estado</strong>
                 </v-col>
                 <v-col cols="8" class="d-flex justify-content-center">
-                    {{ resource.estado }}
+                    {{ resource.status.text }}
                 </v-col>
             </v-row>
 
@@ -46,7 +46,7 @@
                     <strong>Motivo</strong>
                 </v-col>
                 <v-col cols="8" class="d-flex justify-content-center">
-                    {{ resource.motivo }}
+                    {{ resource.reason }}
                 </v-col>
             </v-row>
 
@@ -55,7 +55,7 @@
                     <strong>Detalle</strong>
                 </v-col>
                 <v-col cols="8" class="d-flex justify-content-center">
-                    {{ resource.detalle }}
+                    {{ resource.detail }}
                 </v-col>
             </v-row>
 
@@ -64,7 +64,7 @@
                     <strong>Info Soporte</strong>
                 </v-col>
                 <v-col cols="8" class="d-flex justify-content-center">
-                    {{ resource.info_soporte }}
+                    {{ resource.info_support }}
                 </v-col>
             </v-row>
 
@@ -98,7 +98,7 @@
             </v-row>
 
         </template>
-       
+
     </DefaultDialog>
 </template>
 
@@ -116,13 +116,12 @@ export default {
         return {
             resourceDefault: {
                 id: null,
-                usuario: '',
-                estado: null,
+                user: '',
+                status: null,
                 msg_to_user: '',
-                info_soporte: '',
+                info_support: '',
             },
-            resource: {},
-            
+            resource: {}
         }
     },
     methods: {
@@ -136,16 +135,19 @@ export default {
         },
         confirmModal() {
             let vue = this
-            
+
         },
         resetSelects() {
             let vue = this
         },
         async loadData(resource) {
+
             let vue = this
-            
+
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                vue.resource = Object.assign(
+                    {}, vue.resource, vue.resourceDefault
+                )
             })
 
             let base = `${vue.options.base_endpoint}`
@@ -155,7 +157,8 @@ export default {
                 .then(({data}) => {
 
                     if (resource) {
-                        vue.resource = data.data.usuario_ayuda
+                        vue.resource = Object.assign({}, data.data.ticket);
+                        vue.resource.user = Object.assign({}, data.data.ticket.user);
                     }
 
                 })

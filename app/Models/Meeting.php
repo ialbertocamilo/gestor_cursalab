@@ -31,7 +31,11 @@ class Meeting extends BaseModel
         'raw_data_response' => 'array',
     ];
 
-    // Relationships
+    /*
+
+        Relationships
+
+    --------------------------------------------------------------------------*/
 
     public function type()
     {
@@ -84,7 +88,11 @@ class Meeting extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'device_model_id');
     }
 
-    // Scopes
+    /*
+
+        Scopes
+
+    --------------------------------------------------------------------------*/
 
     public function scopeBetweenScheduleDates($query, $dates)
     {
@@ -109,7 +117,11 @@ class Meeting extends BaseModel
         });
     }
 
-    // Helpers
+    /*
+
+        Helpers
+
+    --------------------------------------------------------------------------*/
 
     public function attendantsWithFirstLogintAt()
     {
@@ -196,7 +208,11 @@ class Meeting extends BaseModel
     }
 
 
-    // Functions
+    /*
+
+        Methods
+
+    --------------------------------------------------------------------------*/
 
     public function getRealPercetageOfAttendees()
     {

@@ -10,9 +10,9 @@
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex-- justify-content-center">
                         <DefaultInput clearable
-                                      v-model="resource.nombre"
+                                      v-model="resource.title"
                                       label="Nombre"
-                                      :rules="rules.nombre"
+                                      :rules="rules.title"
                         />
                     </v-col>
 
@@ -22,16 +22,16 @@
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
-                            v-model="resource.orden"
+                            v-model="resource.position"
                             label="Orden"
                             type="number"
                             min="1"
                             :max="resource.default_order"
-                            :rules="rules.orden"
+                            :rules="rules.position"
                         />
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-start">
-                            
+
                             <!-- label="Agregar Detalle" -->
                         <DefaultToggle v-model="resource.check_text_area"
                             active-label="Con detalle"
@@ -49,7 +49,7 @@
 
 // import DefaultRichText from "../../components/globals/DefaultRichText";
 
-const fields = ['nombre', 'check_text_area', 'orden'];
+const fields = ['title', 'check_text_area', 'position'];
 const file_fields = [];
 
 export default {
@@ -62,11 +62,12 @@ export default {
         width: String
     },
     data() {
+
         return {
             resourceDefault: {
                 id: null,
-                nombre: '',
-                orden: 1,
+                title: '',
+                position: 1,
                 default_order: 1,
                 check_text_area: true,
             },
@@ -77,13 +78,14 @@ export default {
 
             rules: {
                 // modules: this.getRules(['required']),
-                nombre: this.getRules(['required', 'max:250']),
-                orden: this.getRules(['required', 'number']),
+                title: this.getRules(['required', 'max:250']),
+                position: this.getRules(['required', 'number']),
             },
 
         }
     },
     methods: {
+
         closeModal() {
             let vue = this
             // vue.options.open = false
@@ -96,6 +98,7 @@ export default {
             vue.$refs.ayudaForm.resetValidation()
         },
         confirmModal() {
+
             let vue = this
             this.showLoader()
 
@@ -103,14 +106,18 @@ export default {
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = vue.resource.id
+                        ? `${base}/${vue.resource.id}/update`
+                        : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
 
             // if (validateForm && validateSelectedModules) {
             if (validateForm) {
 
-                let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+                let formData = vue.getMultipartFormData(
+                    method, vue.resource, fields, file_fields
+                );
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
@@ -129,22 +136,29 @@ export default {
             // vue.removeFileFromDropzone(vue.resource.imagen, 'inputImagen')
         },
         async loadData(resource) {
+
             let vue = this
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
 
             let base = `${vue.options.base_endpoint}`
-            let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
+            let url = resource
+                        ? `${base}/${resource.id}/edit`
+                        : `${base}/create`;
 
             await vue.$http.get(url).then(({data}) => {
 
                 // vue.selects.modules = data.data.modules
 
                 if (resource) {
-                    vue.resource = data.data.ayuda_app
+
+                    vue.resource = Object.assign({}, data.data.post)
+                    console.log(data.data.post);
+
                 } else {
-                    vue.resource.orden = data.data.default_order
+
+                    vue.resource.position = data.data.default_order
                     vue.resource.default_order = data.data.default_order
                 }
             })
