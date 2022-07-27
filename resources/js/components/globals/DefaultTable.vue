@@ -233,6 +233,114 @@
                 </div>
             </template>
 
+            <template v-slot:item.custom_block="{item, header}">
+              
+
+                <v-expansion-panels flat class="custom-expansion-block">
+                    <v-expansion-panel>
+                      <v-expansion-panel-header v-slot="{ open }">
+                        <v-row no-gutters>
+                          <v-col cols="4">
+                            {{ item.name }}
+                          </v-col>
+                          <v-col
+                            cols="8"
+                            class="text--secondary"
+                          >
+                            <v-fade-transition leave-absolute>
+                              <span v-if="open">Creado el {{ item.created_at }}</span>
+                              <v-row
+                                v-else
+                                no-gutters
+                                style="width: 100%"
+
+                              >
+                                <v-col cols="6">
+
+                                    <v-chip
+                                        class="default-chip ml-2 my-1"
+                                        x-small
+                                        color="primary"
+                                        active-class="default-chip"
+                                        v-for="(criterion_value, ind) in item.criterion_values"
+                                        :key="'block-value-' + ind"
+                                    >
+                                        {{ criterion_value.value_text }}
+                                        <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
+                                    </v-chip>
+                                  
+                                </v-col>
+                                <v-col cols="6">
+                                    <v-chip
+                                        class="default-chip ml-2 my-1"
+                                        x-small
+                                        color="primary"
+                                        active-class="default-chip"
+                                    >
+                                        {{ item.segments_count }} rutas
+                                        <v-icon x-small class="ml-1">mdi-book</v-icon>
+                                    </v-chip>
+
+                                </v-col>
+                              </v-row>
+                            </v-fade-transition>
+                          </v-col>
+                        </v-row>
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content v-if="item.segments_count">
+                        <v-row
+                            justify="space-around"
+                            no-gutters
+                            v-for="(block_segment, i) in item.block_segments"
+                            :key="'segment-' + i"
+                            class="segments"
+                        >
+                          <v-col cols="6">
+                            {{ block_segment.segment.name }}
+                            <!-- #{{ segment.id }} -->
+                          </v-col>
+
+                          <v-col cols="3">
+
+                            <v-chip
+                                class="default-chip ml-2 my-1"
+                                x-small
+                                color="primary"
+                                active-class="default-chip"
+                                v-for="(value, index) in block_segment.criterion_values"
+                                :key="'segment-value-' + index"
+                            >
+                                {{ value.value_text }}
+                                <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
+                            </v-chip>
+
+                            <!-- {{ segment.id }} -->
+                            
+                          </v-col>
+
+                          <v-col cols="3">
+
+                            <v-chip
+                                class="default-chip ml-2 my-1"
+                                x-small
+                                color="primary"
+                                active-class="default-chip"
+                            >
+
+                                {{ block_segment.segment.courses.length }} cursos
+                                <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
+                            </v-chip>
+
+                            <!-- {{ segment.id }} -->
+                            
+                          </v-col>
+                        </v-row>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                </v-expansion-panels>
+
+            </template>
+
             <template v-slot:item.custom_error="{item, header}">
                 <p class="my-0"><strong>{{ item.custom_error.title }}</strong></p>
                 <p class="my-0"><small>{{ item.custom_error.subtitle }}</small></p>

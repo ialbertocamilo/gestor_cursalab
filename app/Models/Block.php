@@ -25,7 +25,8 @@ class Block extends BaseModel
 
     protected function search($request)
     {
-        $query = self::with('segments', 'criterion_values.criterion')
+        $query = self::with(['block_segments' => ['criterion_values.criterion', 'segment.courses'], 'criterion_values.criterion'])
+        // $query = self::with('block_segments.criterion_values.criterion', 'criterion_values.criterion')
                         ->withCount(['segments' => function($q) { $q->where('active', ACTIVE); }, 'criterion_values']);
 
         if ($request->q) {

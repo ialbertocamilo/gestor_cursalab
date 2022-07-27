@@ -4,29 +4,7 @@
         <header class="page-header mt-5 py-0 mx-8">
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
-                    Programas
-                    <v-spacer/>
-
-          <!--           <DefaultInfoTooltip left
-                        text="Recuerda cumplir con el horario de <br> inicio y final de tu programa." /> -->
-
-
-                    <DefaultModalButton
-                        label="Crear programa"
-                        @click="openFormModal(modalFormOptions)"/>
-                </v-card-title>
-            </div>
-        </header>
-
-        <section class="client section-list">
-            <div class="container-fluid">
-                <div class="row">
-
-                    <div class="col-sm-12">
-
-                        <v-card class="card" elevation="0">
-                            <v-card-text>
-                                <v-row class="justify-content-start">
+                    <v-row class="justify-content-start">
                                  
                                     <!-- <v-col cols="3">
                                         <DefaultSelect
@@ -52,7 +30,7 @@
                                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                                         />
                                     </v-col> -->
-                                    <v-col cols="3">
+                                    <v-col cols="6">
                                         <DefaultInput
                                             clearable
                                             v-model="filters.q"
@@ -65,6 +43,28 @@
                                     </v-col>
 
                                 </v-row>
+                    <v-spacer/>
+
+          <!--           <DefaultInfoTooltip left
+                        text="Recuerda cumplir con el horario de <br> inicio y final de tu programa." /> -->
+
+
+                    <DefaultModalButton
+                        label="Crear programa"
+                        @click="openFormModal(modalFormOptions)"/>
+                </v-card-title>
+            </div>
+        </header>
+
+        <section class="client section-list">
+            <div class="container-fluid">
+                <div class="row">
+
+                    <div class="col-sm-12">
+
+                        <v-card class="card" elevation="0">
+                            <v-card-text>
+                                
                                 <v-row class="justify-content-start">
                                     <v-col cols="12">
                                         <DefaultTable
@@ -116,13 +116,15 @@ export default {
                 // {text: "ID", value: "id", align: 'center', sortable: false},
                 // {text: "Tipo", value: "type", sortable: false},
                 // {text: "Nombre", value: "name"},
-                {text: "Nombre", value: "name", sortable: false},
-                // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},
-                // {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
-                {text: "Estado", value: "status", sortable: false, align: 'center',},
-                // {text: "Duración", value: "duration", align: 'center', sortable: false},
-                {text: "Fecha de creación", value: "created_at", align: 'center',},
-                {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                {text: "", value: "custom_block", sortable: false},
+                // {text: "Criterios", value: "criterion_values_count", sortable: false},
+                // {text: "Rutas", value: "segments_count", sortable: false},
+                // // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},
+                // // {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
+                // {text: "Estado", value: "status", sortable: false, align: 'center',},
+                // // {text: "Duración", value: "duration", align: 'center', sortable: false},
+                // {text: "Fecha de creación", value: "created_at", align: 'center',},
+                // {text: "Opciones", value: "actions", align: 'center', sortable: false},
             ],
             actions: [
                 {
@@ -248,3 +250,18 @@ export default {
     }
 }
 </script>
+
+<style type="text/css">
+    .custom-expansion-block.theme--light.v-expansion-panels .v-expansion-panel {
+        background-color: inherit !important; 
+        color: inherit !important; 
+    }
+
+    .custom-expansion-block .segments {
+
+        border: 1px solid #cfcfcf;
+        padding: 10px;
+        margin: 10px auto;
+
+    }
+</style>

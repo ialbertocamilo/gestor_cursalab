@@ -2,8 +2,14 @@
 
 namespace App\Models;
 
-class BlockSegment extends BaseModel
+use Illuminate\Database\Eloquent\Model;
+
+class BlockSegment extends Model
 {
+    protected $table = 'block_segment';
+
+    protected $with = ['segment'];
+
     public function block()
     {
         return $this->belongsTo(Block::class);

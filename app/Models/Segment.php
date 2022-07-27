@@ -10,12 +10,17 @@ class Segment extends BaseModel
 
     public function courses()
     {
-        return $this->belongsToMany(Course::class);
+        return $this->belongsToMany(Course::class, 'segment_course');
     }
 
     public function requirements()
     {
         return $this->hasMany(SegmentRequirement::class);
+    }
+
+    public function criterion_values()
+    {
+        return $this->belongsToMany(CriterionValue::class);
     }
 
     protected function search($request)

@@ -23,6 +23,7 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
+        
         Taxonomy::create([
             'group' => 'user',
             'type' => 'action',
@@ -31,6 +32,7 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
+        
         Taxonomy::create([
             'group' => 'user',
             'type' => 'action',
@@ -39,6 +41,7 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
+        
         Taxonomy::create([
             'group' => 'post',
             'type' => 'section',

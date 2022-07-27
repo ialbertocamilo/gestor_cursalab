@@ -32,6 +32,7 @@ class CreatePostsTable extends Migration
             $table->foreignId('user_id')->nullable();
 
             $table->boolean('active')->nullable()->default(true);
+            // $table->boolean('enable_field')->nullable()->default(true);
 
             $table->timestamps();
             $table->softDeletes();
