@@ -42,15 +42,16 @@ import AyudaFormModal from "./AyudaFormModal";
 import DefaultDeleteModal from "../../Default/DefaultDeleteModal";
 
 export default {
-    components: {AyudaFormModal, DefaultDeleteModal},
+    components: { AyudaFormModal, DefaultDeleteModal
+    },
     data() {
         return {
             dataTable: {
                 endpoint: '/soporte/formulario-ayuda/search',
                 ref: 'AyudaTable',
                 headers: [
-                    {text: "Orden", value: "orden",  align: 'center', model: "AyudaApp"},
-                    {text: "Nombre", value: "nombre", align: 'left', sortable: true},
+                    {text: "Orden", value: "position",  align: 'center', model: "AyudaApp"},
+                    {text: "Nombre", value: "title", align: 'left', sortable: true},
                     {text: "Detalle", value: "check_text_area", align: 'center', sortable: true},
                     {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     // {text: "Fecha de actualización", value: "updated_at", align: 'center', sortable: true},

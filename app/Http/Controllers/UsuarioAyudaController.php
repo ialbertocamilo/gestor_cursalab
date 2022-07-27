@@ -2,37 +2,108 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Usuario;
-use App\Models\Abconfig;
-use App\Models\UsuarioAyuda;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Notifications\UsuarioAyudaNotification;
-
 use App\Http\Resources\UsuarioAyudaResource;
+use App\Models\Criterion;
+use App\Models\Ticket;
+use App\Models\UsuarioAyuda;
+use App\Notifications\UsuarioAyudaNotification;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UsuarioAyudaController extends Controller
 {
-    // public function index(){
-    //     return view('usuario_ayuda.index');
-    // }
 
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function search(Request $request)
     {
-        $ayudas = UsuarioAyuda::search($request);
+        $tickets = Ticket::search($request);
 
-        UsuarioAyudaResource::collection($ayudas);
+        UsuarioAyudaResource::collection($tickets);
 
-        return $this->success($ayudas);
+        return $this->success($tickets);
     }
 
+    /**
+     * Get items list for select inputs
+     *
+     * @return JsonResponse
+     */
     public function getListSelects()
     {
-        $modulos = Abconfig::getModulesForSelect();
+        $modulos = Criterion::getValuesForSelect('module');
         $estados = config('data.soporte-estados');
 
         return $this->success(get_defined_vars());
     }
+
+    /**
+     * Process request to show ticket details
+     *
+     * @param Request $request
+     * @param Ticket $ticket
+     * @return JsonResponse
+     */
+    public function show(Request $request, Ticket $ticket)
+    {
+        $request->merge(['view' => 'show']);
+
+        $ticket = new UsuarioAyudaResource($ticket);
+
+        return $this->success(compact('ticket'));
+    }
+
+    /**
+     * Process request to load data for edit form
+     *
+     * @param Ticket $ticket
+     * @return JsonResponse
+     */
+    public function edit(Ticket $ticket)
+    {
+        $estados = config('data.soporte-estados');
+        $ticket->load('user');
+
+        $key = array_search(
+            $ticket->estado,
+            array_column($estados, 'id')
+        );
+
+        $ticket->estado = $estados[$key];
+
+        return $this->success(get_defined_vars());
+    }
+
+    /**
+     *
+     * @param Request $request
+     * @param Ticket $ticket
+     * @return JsonResponse
+     */
+    public function update(Request $request, Ticket $ticket)
+    {
+        if ($ticket->status == 'solucionado') {
+            return $this->error('El ticket ya ha sido solucionado y no puede modificarse.');
+        }
+
+        $ticket->status = $request->all()['status'];
+        $ticket->save();
+
+        if ($ticket->status == 'solucionado' && $ticket->user)
+        {
+            $user = $ticket->user;
+
+            $user->notify(new UsuarioAyudaNotification($ticket));
+            return $this->success(['msg' => 'Ticket solucionado y notificado correctamente.']);
+        }
+
+        return $this->success(['msg' => 'Ticket actualizado correctamente.']);
+    }
+
 
     public function getData(Request $request){
         // $data = $request->all();
@@ -85,46 +156,5 @@ class UsuarioAyudaController extends Controller
         //     }
         // }
         // return response()->json(compact('data'));
-    }
-
-    public function edit(UsuarioAyuda $usuario_ayuda)
-    {
-        $estados = config('data.soporte-estados');
-
-        $key = array_search($usuario_ayuda->estado, array_column($estados, 'id'));
-
-        $usuario_ayuda->estado = $estados[$key]; 
-
-        return $this->success(get_defined_vars());
-    }
-
-    public function show(Request $request, UsuarioAyuda $usuario_ayuda)
-    {
-        $request->merge(['view' => 'show']);
-
-        $usuario_ayuda = new UsuarioAyudaResource($usuario_ayuda);
-
-        return $this->success(compact('usuario_ayuda'));
-    }
-
-    public function update(Request $request, UsuarioAyuda $usuario_ayuda)
-    {
-        if($usuario_ayuda->estado == 'solucionado')
-            return $this->error('El ticket ya ha sido solucionado y no puede modificarse.');
-
-        $usuario_ayuda->update($request->all());
-
-        if($usuario_ayuda->estado == 'solucionado')
-        {
-            $user = $usuario_ayuda->usuario;
-
-            if($user)
-            {
-                $user->notify(new UsuarioAyudaNotification($usuario_ayuda));
-                return $this->success(['msg' => 'Ticket solucionado y notificado correctamente.']);
-            }
-        }
-        
-        return $this->success(['msg' => 'Ticket actualizado correctamente.']);
     }
 }

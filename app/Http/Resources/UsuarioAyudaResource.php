@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UsuarioAyudaResource extends JsonResource
@@ -9,7 +10,7 @@ class UsuarioAyudaResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request $request
      * @return array
      */
     public function toArray($request)
@@ -17,17 +18,18 @@ class UsuarioAyudaResource extends JsonResource
         $estados = config('constantes.soporte-estados');
         $colors = config('constantes.soporte-estados-colors');
 
-        $view = $request->view == 'show' ? 'show' : 'search';
-
         $data = [
             'id' => $this->id,
-            'estado' => $estados[$this->estado] ?? 'No definido',
-            'status' => ['text' => $estados[$this->estado] ?? 'No definido', 'color' => $colors[$this->estado] ?? 'white'],
-            'motivo' => clean_html($this->motivo, 60),
-            'detalle' => $this->detalle,
-            'dni' => $this->usuario->dni ?? '',
-            'nombre' => $this->usuario->nombre ?? '',
-            'image' => space_url($this->usuario->config->logo ?? ''),
+            'estado' => $estados[$this->status] ?? 'No definido',
+            'status' => [
+                'text' => $estados[$this->status] ?? 'No definido',
+                'color' => $colors[$this->status] ?? 'white'
+            ],
+            'reason' => clean_html($this->reason, 60),
+            'detail' => $this->detail,
+            'dni' => '', // $this->user->dni ?? '',
+            'nombre' => $this->user->name ?? '',
+            'image' => '', //space_url($this->usuario->config->logo ?? ''),
 
             'created_at' => $this->created_at->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at->format('d/m/Y g:i a'),
@@ -35,8 +37,8 @@ class UsuarioAyudaResource extends JsonResource
 
         if ($request->view == 'show')
         {
-            $data['motivo'] = $this->motivo;
-            $data['info_soporte'] = $this->info_soporte;
+            $data['reason'] = $this->reason;
+            $data['info_support'] = $this->info_support;
             $data['msg_to_user'] = $this->msg_to_user;
         }
 

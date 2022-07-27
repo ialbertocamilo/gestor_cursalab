@@ -204,7 +204,7 @@ class ExternalDatabase6 extends Model
     // Faq
     public function insertFaqData($data)
     {
-        $taxonomy_id = DB::table('taxonomies')->where('type', 'faq')->first('id');
+        $taxonomy_id = DB::table('taxonomies')->where('type', 'section')->where('code', 'faq')->first('id');
         $taxonomy_id = (!is_null($taxonomy_id)) ? $taxonomy_id->id : null;
 
         $temp = [];
@@ -219,7 +219,7 @@ class ExternalDatabase6 extends Model
     // Ayuda App
     public function insertAyudaAppData($data)
     {
-        $taxonomy_id = DB::table('taxonomies')->where('type', 'ayuda_app')->first('id');
+        $taxonomy_id = DB::table('taxonomies')->where('type', 'section')->where('code', 'ayuda_app')->first('id');
         $taxonomy_id = (!is_null($taxonomy_id)) ? $taxonomy_id->id : null;
 
         $temp = [];

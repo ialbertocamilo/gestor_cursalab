@@ -22,11 +22,11 @@ class AyudaAppStoreRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {       
+    {
         $reglas = [
             // 'imagen'=>'required|image|mimes:jpeg,png,jpg|max:5000'
-            'nombre' => 'required|max:250',
-            'orden' => 'nullable',
+            'title' => 'required|max:250',
+            'position' => 'nullable',
             'check_text_area' => 'required',
         ];
 

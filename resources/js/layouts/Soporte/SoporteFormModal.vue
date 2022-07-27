@@ -13,7 +13,7 @@
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultAutocomplete clearable
                                              :items="selects.estados"
-                                             v-model="resource.estado"
+                                             v-model="resource.status"
                                              return-object
                                              label="Estado"
                         />
@@ -52,7 +52,7 @@
 
 <script>
 
-const fields = ['estado', 'info_soporte', 'msg_to_user'];
+const fields = ['status', 'info_soporte', 'msg_to_user'];
 const file_fields = [];
 
 export default {
@@ -68,17 +68,18 @@ export default {
             errors: [],
             resourceDefault: {
                 id: null,
-                estado: {nombre: ''},
+                status: {nombre: ''},
                 msg_to_user: '',
                 info_soporte: '',
             },
-            resource: {estado: {nombre: ''},},
+            resource: {
+                status: {nombre: ''},},
             selects: {
                 estados: [],
             },
 
             rules: {
-                estado: this.getRules(['required']),
+                status: this.getRules(['required']),
                 msg_to_user: this.getRules(['required', 'max:250']),
                 info_soporte: this.getRules(['required', 'max:250']),
                 // dni: this.getRules(['required', 'number'])
@@ -160,7 +161,7 @@ export default {
                     vue.selects.estados = data.data.estados
 
                     if (resource) {
-                        vue.resource = data.data.usuario_ayuda
+                        vue.resource = Object.assign({}, data.data.ticket)
                     }
 
                 })

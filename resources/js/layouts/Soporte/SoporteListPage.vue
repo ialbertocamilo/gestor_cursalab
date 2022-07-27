@@ -24,7 +24,7 @@
                     <v-col >
                         <DefaultSelect clearable dense
                                        :items="selects.estados"
-                                       v-model="filters.estado"
+                                       v-model="filters.status"
                                        label="Estados"
                                        @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
@@ -94,16 +94,21 @@ import SoporteFormModal from "./SoporteFormModal";
 import SoporteShowModal from "./SoporteShowModal";
 
 export default {
-    components: {SoporteFormModal, SoporteShowModal},
+    components: {
+        SoporteFormModal,
+        SoporteShowModal
+    }
+    ,
     data() {
         return {
             dateFilterStart: {
                 open: false,
-            },
-
+            }
+            ,
             dateFilterEnd: {
                 open: false,
-            },
+            }
+            ,
             dataTable: {
                 endpoint: '/soporte/search',
                 ref: 'SoporteTable',
@@ -112,7 +117,7 @@ export default {
                     {text: "Módulo", value: "image", align: 'center', sortable: false},
                     {text: "DNI", value: "dni", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre", sortable: false},
-                    {text: "Motivo", value: "motivo"},
+                    {text: "Motivo", value: "reason"},
                     {text: "Estado", value: "status", align: 'center',},
                     {text: "Fecha de registro", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
@@ -153,10 +158,9 @@ export default {
             filters: {
                 q: '',
                 modulo: null,
-                estado: null,
+                status: null,
                 starts_at: null,
-                ends_at: null,
-                estado: null,
+                ends_at: null
             },
             modalOptions: {
                 ref: 'SoporteFormModal',

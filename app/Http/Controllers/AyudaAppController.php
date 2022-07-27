@@ -3,13 +3,118 @@
 namespace App\Http\Controllers;
 
 use App\Models\AyudaApp;
+use App\Models\Post;
 use App\Models\SortingModel;
 use App\Http\Resources\AyudaAppResource;
 use App\Http\Requests\AyudaAppStoreRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class AyudaAppController extends Controller
 {
+
+    /**
+     * Process request to load records filtered according search term
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function search(Request $request)
+    {
+
+        $posts = Post::search($request);
+
+        AyudaAppResource::collection($posts);
+
+        return $this->success($posts);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param Post $post
+     * @return JsonResponse
+     */
+    public function destroy(Post $post)
+    {
+
+        $post->delete();
+        return $this->success(['msg' => 'Ayuda eliminada correctamente.']);
+    }
+
+    /**
+     * Process request to load data for edit form
+     *
+     * @param Post $post
+     * @return JsonResponse
+     */
+    public function edit(Post $post)
+    {
+        $post->default_order = SortingModel::getLastItemOrderNumber(
+            Post::class, [], 'position'
+        );
+
+        return $this->success(get_defined_vars());
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return JsonResponse
+     */
+    public function create()
+    {
+        $default_order = SortingModel::getNextItemOrderNumber(
+            Post::class, [], 'position'
+        );
+
+        return $this->success(get_defined_vars());
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param AyudaAppStoreRequest $request
+     * @return JsonResponse
+     */
+    public function store(AyudaAppStoreRequest $request)
+    {
+        $data = $request->validated();
+        $post = Post::create($data);
+        SortingModel::reorderItems(
+            $post, [], null, 'position'
+        );
+
+        return $this->success(['msg' => 'AyudaApp creada correctamente.']);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param AyudaAppStoreRequest $request
+     * @param Post $post
+     * @return JsonResponse
+     */
+    public function update(AyudaAppStoreRequest $request, Post $post)
+    {
+        $data = $request->validated();
+
+        $last_order = $post->position;
+
+        $post->update($data);
+
+        SortingModel::reorderItems($post, [], $last_order, 'position');
+
+        return $this->success(['msg' => 'Ayuda actualizada correctamente.']);
+    }
+
+
+
+
+
+
+
 
     public function getData(){
         $lista_ayuda = AyudaApp::select('id','nombre','orden','check_text_area')->orderBy('orden')->get();
@@ -29,86 +134,4 @@ class AyudaAppController extends Controller
         AyudaApp::whereIn('id',$data_delete)->delete();
         return response()->json(['result'=>'ok']);
     }
-
-
-
-    public function search(Request $request)
-    {
-        $ayudas = AyudaApp::search($request);
-
-        AyudaAppResource::collection($ayudas);
-
-        return $this->success($ayudas);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        $default_order = SortingModel::getNextItemOrderNumber(AyudaApp::class);
-
-        return $this->success(get_defined_vars());
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(AyudaAppStoreRequest $request)
-    {
-        $data = $request->validated();
-
-        $ayuda = AyudaApp::create($data);
-
-        SortingModel::reorderItems($ayuda);
-
-        return $this->success(['msg' => 'AyudaApp creada correctamente.']);
-    }
-
-    public function edit(AyudaApp $ayuda_app)
-    {
-        $ayuda_app->default_order = SortingModel::getLastItemOrderNumber(AyudaApp::class);
-
-        return $this->success(get_defined_vars());
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\AyudaApp  $ayuda_app
-     * @return \Illuminate\Http\Response
-     */
-    public function update(AyudaAppStoreRequest $request, AyudaApp $ayuda_app)
-    {
-        $data = $request->validated();
-    
-        $last_order = $ayuda_app->orden;
-        
-        $ayuda_app->update($data);
-
-        SortingModel::reorderItems($ayuda_app, [], $last_order);
-
-        return $this->success(['msg' => 'Ayuda actualizada correctamente.']);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\AyudaApp  $ayuda
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(AyudaApp $ayuda_app)
-    {
-        // \File::delete(public_path().'/'.$ayuda_app->imagen);
-        $ayuda_app->delete();
-
-        return $this->success(['msg' => 'Ayuda eliminada correctamente.']);
-    }
-
 }
