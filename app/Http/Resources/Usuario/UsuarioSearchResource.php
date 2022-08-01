@@ -16,12 +16,12 @@ class UsuarioSearchResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'nombre' => $this->nombre,
-            'image' => space_url($this->config->logo),
+            'nombre' => $this->fullname,
+            'image' => space_url($this->config?->logo) ?? 'No logo',
             'dni' => $this->dni,
-            'module' => $this->config->etapa,
-            'active' => !!$this->estado,
-            'pruebas_desaprobadas' => $this->rpta_pruebas_dessaprob($this->config) ? true : false,
+            'module' => $this->config->etapa ?? 'No module',
+            'active' => !!$this->active,
+//            'pruebas_desaprobadas' => $this->rpta_pruebas_dessaprob($this->config) ? true : false,
             'reporte_route' => route('exportar.node', ['dni' => $this->dni]),
             'carrera' => $this->matricula_presente->carrera->nombre ?? '----',
             'ciclo_actual' => $this->matricula_presente->ciclo->nombre ?? '---',

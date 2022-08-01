@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string('username')->nullable();
             $table->string('code')->nullable();
 
+            $table->string('document')->nullable();
+
             $table->string('password');
 
             $table->boolean('active')->nullable()->default(true);

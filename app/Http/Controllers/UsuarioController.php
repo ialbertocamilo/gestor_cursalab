@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\Usuario\UsuarioSearchResource;
+use App\Models\Criterion;
+use App\Models\CriterionValue;
+use App\Models\User;
 use Auth;
 
 use App\Models\Cargo;
@@ -41,7 +44,8 @@ class UsuarioController extends Controller
 
     public function search(Request $request)
     {
-        $users = Usuario::search($request);
+//        $users = Usuario::search($request);
+        $users = User::search($request);
 
         UsuarioSearchResource::collection($users);
 
@@ -50,12 +54,17 @@ class UsuarioController extends Controller
 
     public function getListSelects()
     {
-        $modules = Abconfig::select('id', 'etapa as nombre')->get();
-//        $carreras = Carrera::select('id', 'nombre')->get();
+//        $modules = Abconfig::select('id', 'etapa as nombre')->get();
+        $modules = CriterionValue::getListForSelect(criterion_code: 'module');
+//        $criteria = Criterion::getValuesForSelect(criterion_code: 'module');
+//        $criteria = Criterion::with('values:id,value_text')
+//            ->select('id', 'name', 'code')
+//            ->get();
+
 
         return $this->success([
             'modules' => $modules,
-//            'carreras' => $carreras,
+//            'criteria' => $criteria,
         ]);
     }
 
@@ -89,10 +98,22 @@ class UsuarioController extends Controller
 
     public function getFormSelects($compactResponse = false)
     {
-        $modules = Abconfig::select('id', 'etapa as nombre')->get();
-        $cargos = Cargo::select('id', 'nombre')->pluck('nombre');
+//        $modules = Abconfig::select('id', 'etapa as nombre')->get();
 
-        $response = compact('modules', 'cargos');
+        $criteria = Criterion::query()
+            ->with([
+                'values' => function ($q) {
+                    $q->with('parents:id,criterion_id,value_text')
+                        ->select('id', 'criterion_id', 'exclusive_criterion_id', 'value_text', 'parent_id');
+                }
+            ])
+            ->select('id', 'name', 'code', 'parent_id')
+            ->get();
+
+//        $cargos = Cargo::select('id', 'nombre')->pluck('nombre');
+
+//        $response = compact('modules', 'cargos');
+        $response = compact('criteria');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -332,14 +353,15 @@ class UsuarioController extends Controller
         }
 
         $modulos = Abconfig::all(['id', 'etapa']);
-        $grupos = Criterio::where('tipo_criterio_id' ,1)->get(['id', 'valor']);
-        $grupo_sistema = Grupo::select('id','nombre')->get('nombre','id' );
-        $boticas =  $query_boticas->select('id as botica_id', 'criterio_id', DB::raw(" CONCAT('[', codigo_local, ']', ' - ',nombre) as botica_nombre"), 'config_id')->get();
+        $grupos = Criterio::where('tipo_criterio_id', 1)->get(['id', 'valor']);
+        $grupo_sistema = Grupo::select('id', 'nombre')->get('nombre', 'id');
+        $boticas = $query_boticas->select('id as botica_id', 'criterio_id', DB::raw(" CONCAT('[', codigo_local, ']', ' - ',nombre) as botica_nombre"), 'config_id')->get();
         $cargos = $query_cargos->get();
         $grupos_x_carr = 0;
 
-        return response()->json(compact('grupos', 'modulos', 'grupo_sistema', 'matriculas_pasadas', 'carrera_usuario', 'grupo_usuario','grupos_x_carrera', 'boticas', 'cargos'), 200);
+        return response()->json(compact('grupos', 'modulos', 'grupo_sistema', 'matriculas_pasadas', 'carrera_usuario', 'grupo_usuario', 'grupos_x_carrera', 'boticas', 'cargos'), 200);
     }
+
     public function getCarrerasxGrupo($grupo_id, $config_id)
     {
         // $grupo = Criterio::where('id', $grupo_id)->first();
@@ -395,7 +417,7 @@ class UsuarioController extends Controller
         //                     ->groupBy('curricula.ciclo_id')
         //                     ->get(['ciclos.id', 'ciclos.nombre as ciclo', 'ciclos.secuencia', 'ciclos.estado']);
         $ciclo_final = collect();
-        $only_one_ciclo = count($ciclos)===1;
+        $only_one_ciclo = count($ciclos) === 1;
         foreach ($ciclos as $ciclo) {
             $ciclo_final->push([
                 'matricula_id' => 0,
@@ -404,7 +426,7 @@ class UsuarioController extends Controller
                 'secuencia' => $ciclo->secuencia,
                 'grupo' => $botica->criterio->valor ?? 'Seleccione una botica',
                 'carrera' => $carrera->nombre,
-                'estado' => !$only_one_ciclo && ($ciclo->estado == 0 ||  strtoupper($ciclo->nombre)=='CICLO 0') ? false : true
+                'estado' => !$only_one_ciclo && ($ciclo->estado == 0 || strtoupper($ciclo->nombre) == 'CICLO 0') ? false : true
             ]);
         }
         return $this->success(compact('ciclo_final'));
@@ -414,7 +436,7 @@ class UsuarioController extends Controller
     public function getDataCiclo($ciclo_id, $carrera_id, $grupo_id)
     {
         $error = 0;
-        if ($ciclo_id == "0" || $carrera_id ==  "0" || $grupo_id == "0") {
+        if ($ciclo_id == "0" || $carrera_id == "0" || $grupo_id == "0") {
             $msg = 'Debe seleccionar los campos : GRUPO, CARRERA y CICLO.';
             $error++;
             return response()->json(['msg' => $msg, 'error' => $error], 200);
@@ -422,15 +444,15 @@ class UsuarioController extends Controller
         $ciclo_seleccionado = Ciclo::find($ciclo_id, ['secuencia']);
         if ($ciclo_seleccionado->secuencia == 0) {
             $ciclos = Ciclo::where('carrera_id', $carrera_id)
-                            ->where('secuencia', '<=', $ciclo_seleccionado->secuencia)
-                            ->orderBy('secuencia')
-                            ->get(['id', 'nombre', 'secuencia']);
+                ->where('secuencia', '<=', $ciclo_seleccionado->secuencia)
+                ->orderBy('secuencia')
+                ->get(['id', 'nombre', 'secuencia']);
         } else {
             $ciclos = Ciclo::where('carrera_id', $carrera_id)
-                            ->where('secuencia', '>', 0)
-                            ->where('secuencia', '<=', $ciclo_seleccionado->secuencia)
-                            ->orderBy('secuencia')
-                            ->get(['id', 'nombre', 'secuencia']);
+                ->where('secuencia', '>', 0)
+                ->where('secuencia', '<=', $ciclo_seleccionado->secuencia)
+                ->orderBy('secuencia')
+                ->get(['id', 'nombre', 'secuencia']);
         }
         $carrera = Carrera::find($carrera_id, ['nombre']);
         $grupo = Criterio::find($grupo_id, ['valor']);
@@ -467,7 +489,7 @@ class UsuarioController extends Controller
 
         if (!is_null($request->password)) {
             $data['password'] = Hash::make($request->password);
-        }else{
+        } else {
             $data['password'] = $usuario->password;
         }
         $data['grupo'] = $request->curr_grupo_id;
@@ -475,17 +497,17 @@ class UsuarioController extends Controller
         $usuario->update($data);
 
         //Consultar dias de configuracion
-         $dias = $usuario->config->duracion_dias;
-         date_default_timezone_set('America/Lima');
+        $dias = $usuario->config->duracion_dias;
+        date_default_timezone_set('America/Lima');
         //insertar vigencia
         $vigencia = $usuario->vigencia;
         $vigencia->usuario_id = $usuario->id;
         $vigencia->fecha_inicio = date('Y-m-d');
-        $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio. ' + '.$dias.' days'));
+        $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio . ' + ' . $dias . ' days'));
         $vigencia->save();
 
 
-        if (isset($request->curr_carrera) && isset($request->curr_ciclos)  && $request->curr_carrera != "0" && $request->curr_ciclos != "0") {
+        if (isset($request->curr_carrera) && isset($request->curr_ciclos) && $request->curr_carrera != "0" && $request->curr_ciclos != "0") {
             // SABER EL NUMERO DE MATRICULAS DEL USUARIO
             $matricula = Matricula::select('id')->where('usuario_id', $usuario->id)->get();
             $ciclo = Ciclo::select('id', 'carrera_id', 'nombre', 'secuencia')->where('id', $request->curr_ciclos)->first();
@@ -495,12 +517,12 @@ class UsuarioController extends Controller
              * CAMBIO LA PRESENTE A 0
              * SI LA SECUENCIA DE CICLO DE LA PRESENTE ES 0, LA MATRICULA CAMBIA A ESTADO 0
              */
-            if (count($matricula)>0) {
+            if (count($matricula) > 0) {
                 $matricula_presente = Matricula::select('id', 'ciclo_id')->where('usuario_id', $usuario->id)->where('presente', 1)->first();
                 // dd($matricula_presente);
                 $matricula_presente->presente = 0;
-                $ciclo_presente = Ciclo::select('id', 'carrera_id', 'secuencia')->where('id',$matricula_presente->ciclo_id)->first();
-                if($ciclo_presente->secuencia == 0){
+                $ciclo_presente = Ciclo::select('id', 'carrera_id', 'secuencia')->where('id', $matricula_presente->ciclo_id)->first();
+                if ($ciclo_presente->secuencia == 0) {
                     $matricula_presente->estado = 0;
                 }
                 $matricula_presente->save();
@@ -508,16 +530,16 @@ class UsuarioController extends Controller
 
             // SELECCIONAR TODOS LOS CICLOS DE LA CARRERA
             $ciclosxCarrera = Ciclo::where('carrera_id', $request->curr_carrera)
-                                ->where('secuencia' , '>',0)
-                                ->where('secuencia' , '<=', $ciclo->secuencia)
-                                ->get(['secuencia', 'id']);
-            $_ciclosxCarrera= collect();
+                ->where('secuencia', '>', 0)
+                ->where('secuencia', '<=', $ciclo->secuencia)
+                ->get(['secuencia', 'id']);
+            $_ciclosxCarrera = collect();
             foreach ($ciclosxCarrera as $c) {
                 $_ciclosxCarrera->push($c->id);
             }
             // RESTAR A TODOS EN LOS QUE YA SE ENCUENTRA MATRICULADOS Y QUE SEAN MAYOR QUE 0
             $ciclos_matriculados = Matricula::where('usuario_id', $usuario->id)->get(['secuencia_ciclo', 'ciclo_id']);
-            $_ciclos_matriculados= collect();
+            $_ciclos_matriculados = collect();
             foreach ($ciclos_matriculados as $cm) {
                 $cm->presente = 0;
                 $cm->save();
@@ -562,7 +584,7 @@ class UsuarioController extends Controller
 
         // return back()->with('info', 'Eliminado Correctamente');
 
-        \File::delete(public_path().'/'.$usuario->imagen);
+        \File::delete(public_path() . '/' . $usuario->imagen);
         $matriculas = Matricula::where('usuario_id', $usuario->id)->select(['id']);
         foreach ($matriculas as $matricula) {
             \Log::info($matricula->id);
@@ -578,25 +600,26 @@ class UsuarioController extends Controller
 
 
     // RESETEO DE USUARIOS
-    public function reset(Usuario $usuario){
+    public function reset(Usuario $usuario)
+    {
 
-        $config  = $usuario->config;
+        $config = $usuario->config;
         $mod_eval = json_decode($config->mod_evaluaciones, true);
         // lista temas evaluados
-        $temas = \DB::select( \DB::raw("SELECT t.id, t.nombre FROM pruebas p
+        $temas = \DB::select(\DB::raw("SELECT t.id, t.nombre FROM pruebas p
                                                 INNER JOIN posteos t ON t.id = p.posteo_id
-                                                WHERE p.usuario_id = ".$usuario->id."
+                                                WHERE p.usuario_id = " . $usuario->id . "
                                                 AND p.resultado = 0
-                                                AND p.intentos >= ".$mod_eval['nro_intentos']."
+                                                AND p.intentos >= " . $mod_eval['nro_intentos'] . "
                                                 ORDER BY p.id DESC"));
 
         // lista cursos evaluados
-        $cursos = \DB::select( \DB::raw("SELECT c.id, c.nombre FROM pruebas p
+        $cursos = \DB::select(\DB::raw("SELECT c.id, c.nombre FROM pruebas p
                                                 INNER JOIN posteos t ON t.id = p.posteo_id
                                                 INNER JOIN cursos c ON c.id = t.curso_id
-                                                WHERE p.usuario_id = ".$usuario->id."
+                                                WHERE p.usuario_id = " . $usuario->id . "
                                                 AND p.resultado = 0
-                                                AND p.intentos >= ".$mod_eval['nro_intentos']."
+                                                AND p.intentos >= " . $mod_eval['nro_intentos'] . "
                                                 GROUP BY t.curso_id
                                                 ORDER BY p.id DESC"));
 
@@ -607,24 +630,25 @@ class UsuarioController extends Controller
 
 
     // Reiniciar
-    public function reset_x_tema(Usuario $usuario, Request $request){
+    public function reset_x_tema(Usuario $usuario, Request $request)
+    {
         if ($request->has('p')) {
             $posteo_id = $request->input('p');
             // $prueba_reinicio = $usuario->rpta_pruebas()->where('posteo_id', $posteo_id)->delete();
             $prueba_reinicio = Prueba::where('usuario_id', $usuario->id)->where('posteo_id', $posteo_id)
-                                    ->update([
-                                        'intentos' => 0,
-                                        // 'rptas_ok' => NULL,
-                                        // 'rptas_fail' => NULL,
-                                        // 'nota' => NULL,
-                                        // 'resultado' => 0,
-                                        // 'usu_rptas' => NULL,
-                                        'fuente' => 'reset']);
+                ->update([
+                    'intentos' => 0,
+                    // 'rptas_ok' => NULL,
+                    // 'rptas_fail' => NULL,
+                    // 'nota' => NULL,
+                    // 'resultado' => 0,
+                    // 'usu_rptas' => NULL,
+                    'fuente' => 'reset']);
             //PONER ESTADO EN DESARROLLO
-            $posteo = Posteo::where('id',$posteo_id)->select('curso_id')->first();
-            $posteos = Posteo::where('curso_id',$posteo->curso_id)->select('id')->get();
-            if(count($posteos)==1){
-                $res = Resumen_x_curso::where('usuario_id',$usuario->id)->where('curso_id',$posteo->curso_id)->update([
+            $posteo = Posteo::where('id', $posteo_id)->select('curso_id')->first();
+            $posteos = Posteo::where('curso_id', $posteo->curso_id)->select('id')->get();
+            if (count($posteos) == 1) {
+                $res = Resumen_x_curso::where('usuario_id', $usuario->id)->where('curso_id', $posteo->curso_id)->update([
                     'estado' => 'desarrollo',
                 ]);
             }
@@ -636,14 +660,13 @@ class UsuarioController extends Controller
                 $dip = new Reinicio;
                 $dip->tipo = 'por_tema';
                 $dip->usuario_id = $usuario->id;
-                $dip->posteo_id =  $posteo_id;
+                $dip->posteo_id = $posteo_id;
                 $dip->curso_id = $posteo->curso_id;
-                $dip->admin_id =  $user->id;
-                $dip->acumulado =  1;
+                $dip->admin_id = $user->id;
+                $dip->acumulado = 1;
                 $dip->save();
 
-            }
-            else{
+            } else {
                 $res->acumulado = $res->acumulado + 1;
                 $res->save();
             }
@@ -654,43 +677,43 @@ class UsuarioController extends Controller
         return $this->error('No se pudo completar el reinicio');
     }
 
-    public function reset_x_curso(Usuario $usuario, Request $request){
+    public function reset_x_curso(Usuario $usuario, Request $request)
+    {
         if ($request->has('c')) {
             $curso_id = $request->input('c');
 
-            $pruebas = \DB::select( \DB::raw("SELECT p.id FROM pruebas p
+            $pruebas = \DB::select(\DB::raw("SELECT p.id FROM pruebas p
                                                     INNER JOIN posteos t ON t.id = p.posteo_id
                                                     INNER JOIN cursos c ON c.id = t.curso_id
-                                                    WHERE p.usuario_id = ".$usuario->id."
-                                                    AND c.id = ".$curso_id."
+                                                    WHERE p.usuario_id = " . $usuario->id . "
+                                                    AND c.id = " . $curso_id . "
                                                     "));
-                                                    //AND p.resultado = 0
+            //AND p.resultado = 0
 
             // $rptas = $usuario->rpta_pruebas()->whereIn('id', collect($prueba_reinicio)->pluck('id'))->delete();
 
             $prueba_reinicio = Prueba::whereIn('id', collect($pruebas)->pluck('id'))
-                                    ->update([
-                                        'intentos' => 0,
-                                        // 'rptas_ok' => NULL,
-                                        // 'rptas_fail' => NULL,
-                                        // 'nota' => NULL,
-                                        //  'resultado' => 0,
-                                        //  'usu_rptas' => NULL,
-                                         'fuente' => 'reset']);
+                ->update([
+                    'intentos' => 0,
+                    // 'rptas_ok' => NULL,
+                    // 'rptas_fail' => NULL,
+                    // 'nota' => NULL,
+                    //  'resultado' => 0,
+                    //  'usu_rptas' => NULL,
+                    'fuente' => 'reset']);
 
             // Registrar reinicios
             $user = \Auth::user();
-            $res = Reinicio::where('usuario_id', $usuario->id)->where('curso_id', $curso_id)->where('tipo','por_curso')->first();
+            $res = Reinicio::where('usuario_id', $usuario->id)->where('curso_id', $curso_id)->where('tipo', 'por_curso')->first();
             if (!$res) {
                 $dip = new Reinicio;
                 $dip->tipo = 'por_curso';
                 $dip->usuario_id = $usuario->id;
-                $dip->curso_id =  $curso_id;
-                $dip->admin_id =  $user->id;
-                $dip->acumulado =  1;
+                $dip->curso_id = $curso_id;
+                $dip->admin_id = $user->id;
+                $dip->acumulado = 1;
                 $dip->save();
-            }
-            else{
+            } else {
                 $res->acumulado = $res->acumulado + 1;
                 $res->save();
             }
@@ -702,22 +725,23 @@ class UsuarioController extends Controller
         return $this->error('No se pudo completar el reinicio');
     }
 
-    public function reset_total(Usuario $usuario){
+    public function reset_total(Usuario $usuario)
+    {
         // $rptas = $usuario->rpta_pruebas()->get();
         // $rptas = $usuario->rpta_encuestas()->delete();
 
         // $rptas = $usuario->rpta_pruebas()->delete();
 
         $rptas = $usuario->rpta_pruebas()
-                        ->update([
-                            'intentos' => 0,
-                            // 'rptas_ok' => NULL,
-                            // 'rptas_fail' => NULL,
-                            // 'nota' => NULL,
-                            //  'resultado' => NULL,
-                            //  'usu_rptas' => NULL,
-                              'fuente' => 'reset'
-                              ]);
+            ->update([
+                'intentos' => 0,
+                // 'rptas_ok' => NULL,
+                // 'rptas_fail' => NULL,
+                // 'nota' => NULL,
+                //  'resultado' => NULL,
+                //  'usu_rptas' => NULL,
+                'fuente' => 'reset'
+            ]);
 
         // Registrar reinicios
         $user = \Auth::user();
@@ -726,11 +750,10 @@ class UsuarioController extends Controller
             $dip = new Reinicio;
             $dip->tipo = 'total';
             $dip->usuario_id = $usuario->id;
-            $dip->admin_id =  $user->id;
-            $dip->acumulado =  1;
+            $dip->admin_id = $user->id;
+            $dip->acumulado = 1;
             $dip->save();
-        }
-        else{
+        } else {
             $res->acumulado = $res->acumulado + 1;
             $res->save();
         }
@@ -747,7 +770,7 @@ class UsuarioController extends Controller
             $already_exist = Usuario::where('dni', trim($request->usuario['dni']))->first();
 
             if ($already_exist)
-                return response()->json(['error'=>true,'msg'=> 'El DNI ya ha sido registrado.'], 422);
+                return response()->json(['error' => true, 'msg' => 'El DNI ya ha sido registrado.'], 422);
 
             $modulo = Abconfig::findOrFail($request->usuario['modulo']['id']);
 
@@ -764,15 +787,15 @@ class UsuarioController extends Controller
             $nuevo_usuario->botica_id = $request->usuario['botica']['id'];
 //            $botica = Botica::with('criterio')->where('id', $request->usuario['botica_id'])->first();
             $botica = Botica::with('criterio')->where('id', $request->usuario['botica']['id'])->first();
-            $nuevo_usuario->botica =  $botica->nombre;
+            $nuevo_usuario->botica = $botica->nombre;
             $nuevo_usuario->grupo = $botica->criterio_id;
             $nuevo_usuario->grupo_nombre = $botica->criterio->valor;
             $nuevo_usuario->dni = $request->usuario['dni'];
-            $nuevo_usuario->password =  Hash::make($request->usuario['password']);
-            $nuevo_usuario->sexo =  $request->usuario['sexo'] == 'M' ? 'MASCULINO': 'FEMENINO';
-            $nuevo_usuario->cargo =  $request->usuario['cargo'];
+            $nuevo_usuario->password = Hash::make($request->usuario['password']);
+            $nuevo_usuario->sexo = $request->usuario['sexo'] == 'M' ? 'MASCULINO' : 'FEMENINO';
+            $nuevo_usuario->cargo = $request->usuario['cargo'];
 
-            $nuevo_usuario->estado =  $request->usuario['estado'];
+            $nuevo_usuario->estado = $request->usuario['estado'];
             $nuevo_usuario->save();
 
             // //Consultar dias de configuracion
@@ -798,9 +821,9 @@ class UsuarioController extends Controller
                 $matricula->ciclo_id = $ciclo['id'];
                 $matricula->secuencia_ciclo = $ciclo['secuencia'];
                 $matricula->presente = ($ultimo_ciclo_activo['id'] == $ciclo['id']) ? 1 : 0;
-                if(count($ciclos_activos) == 1 && $ciclo['estado'] == true ){
+                if (count($ciclos_activos) == 1 && $ciclo['estado'] == true) {
                     $matricula->estado = 1;
-                }else if ($ciclo['secuencia'] == 0) {
+                } else if ($ciclo['secuencia'] == 0) {
                     $matricula->estado = 0;
                 } else {
                     $matricula->estado = $ciclo['estado'] ? 1 : 0;
@@ -813,10 +836,10 @@ class UsuarioController extends Controller
             }
             $hel = new HelperController();
             Resumen_general::insert([
-                'usuario_id'=> $nuevo_usuario->id,
+                'usuario_id' => $nuevo_usuario->id,
                 'cur_asignados' => count($hel->help_cursos_x_matricula($nuevo_usuario->id)),
             ]);
-            return $this->success(['msg'=> 'Usuario creado con éxito.']);
+            return $this->success(['msg' => 'Usuario creado con éxito.']);
 //            return response()->json(['msg'=> 'Usuario creado con éxito.'], 200);
         } else {
             // return $request->all();
@@ -825,28 +848,27 @@ class UsuarioController extends Controller
 //            $usuario_editar->config_id = $request->usuario['modulo'];
             $usuario_editar->nombre = $request->usuario['nombre'];
             // $usuario_editar->grupo_id = $request->usuario['grupo_sistema'];
-            if ($usuario_editar->dni !== trim($request->usuario['dni']))
-            {
+            if ($usuario_editar->dni !== trim($request->usuario['dni'])) {
                 $already_exist = Usuario::where('dni', trim($request->usuario['dni']))->first();
 
                 if ($already_exist)
-                    return response()->json(['msg'=> 'El DNI ya ha sido registrado.'], 422);
+                    return response()->json(['msg' => 'El DNI ya ha sido registrado.'], 422);
 
                 $usuario_editar->dni = trim($request->usuario['dni']);
             }
 
-            if ( isset($request->usuario['password']) AND $request->usuario['password'] != "") {
-                $usuario_editar->password =  Hash::make($request->usuario['password']);
+            if (isset($request->usuario['password']) and $request->usuario['password'] != "") {
+                $usuario_editar->password = Hash::make($request->usuario['password']);
             }
 
-            $usuario_editar->sexo =  $request->usuario['sexo'] == 'M' ? 'MASCULINO': 'FEMENINO';
-            $usuario_editar->cargo =  $request->usuario['cargo'];
-            $usuario_editar->estado =  $request->usuario['estado'];
+            $usuario_editar->sexo = $request->usuario['sexo'] == 'M' ? 'MASCULINO' : 'FEMENINO';
+            $usuario_editar->cargo = $request->usuario['cargo'];
+            $usuario_editar->estado = $request->usuario['estado'];
 //            $usuario_editar->botica_id =  $request->usuario['botica_id'];
             $usuario_editar->botica_id = $request->usuario['botica']['id'];
 //            $botica = Botica::with('criterio')->where('id', $request->usuario['botica_id'])->first();
             $botica = Botica::with('criterio')->where('id', $request->usuario['botica']['id'])->first();
-            $usuario_editar->botica =  $botica->nombre;
+            $usuario_editar->botica = $botica->nombre;
             $usuario_editar->grupo = $botica->criterio_id;
             $usuario_editar->grupo_nombre = $botica->criterio->valor;
             $usuario_editar->save();
@@ -869,9 +891,9 @@ class UsuarioController extends Controller
             foreach ($ciclos as $ciclo) {
                 $matricula = Matricula::find($ciclo['matricula_id']);
                 $matricula->presente = ($ultimo_ciclo_activo['id'] == $ciclo['id']) ? 1 : 0;
-                if(count($ciclos_activos) == 1 && $ciclo['estado'] == true ){
+                if (count($ciclos_activos) == 1 && $ciclo['estado'] == true) {
                     $matricula->estado = 1;
-                }else if ($ciclo['secuencia'] == 0) {
+                } else if ($ciclo['secuencia'] == 0) {
                     $matricula->estado = 0;
                 } else {
                     $matricula->estado = $ciclo['estado'] ? 1 : 0;
@@ -881,18 +903,18 @@ class UsuarioController extends Controller
             $helper = new HelperController();
             $curso_ids_matricula = $helper->help_cursos_x_matricula($usuario_editar->id);
             //LIMPIAR TABLAS RESUMENES
-            Resumen_x_curso::where('usuario_id',$usuario_editar->id)->whereNotIn('curso_id',$curso_ids_matricula)->update(['estado_rxc'=>0]);
+            Resumen_x_curso::where('usuario_id', $usuario_editar->id)->whereNotIn('curso_id', $curso_ids_matricula)->update(['estado_rxc' => 0]);
             // Resumen_general::where('usuario_id',$usuario_editar->id)->delete();
             //ACTUALIZAR TABLAS RESUMENES
             $rest_avance = new RestAvanceController();
-            $ab_conf = Abconfig::select('mod_evaluaciones')->where('id',$request->usuario['modulo'])->first(['mod_evaluaciones']);
+            $ab_conf = Abconfig::select('mod_evaluaciones')->where('id', $request->usuario['modulo'])->first(['mod_evaluaciones']);
             $mod_eval = json_decode($ab_conf->mod_evaluaciones, true);
             foreach ($curso_ids_matricula as $cur_id) {
                 // ACTUALIZAR RESUMENES
-                $rest_avance->actualizar_resumen_x_curso($usuario_editar->id,$cur_id, $mod_eval['nro_intentos']);
+                $rest_avance->actualizar_resumen_x_curso($usuario_editar->id, $cur_id, $mod_eval['nro_intentos']);
             }
             $rest_avance->actualizar_resumen_general($usuario_editar->id);
-            return $this->success(['msg'=> 'Usuario actualizado con éxito.']);
+            return $this->success(['msg' => 'Usuario actualizado con éxito.']);
 //            return response()->json(['msg'=> 'Usuario actualizado con éxito.'], 200);
 
         }
@@ -904,25 +926,25 @@ class UsuarioController extends Controller
         $helper = new HelperController();
         $cursos_id = $helper->help_cursos_x_matricula($usuario_id);
         $categorias = Categoria::with([
-                                    'cursos' => function($query) use($cursos_id){
-                                        $query->select('cursos.nombre as nom_curso', 'cursos.categoria_id', 'cursos.id');
-                                        $query->whereIn('cursos.id', $cursos_id);
-                                        $query->where('cursos.estado', 1);
-                                    }
-                                ])
-                                ->where('categorias.estado', 1)
-                                ->get(['categorias.nombre', 'categorias.id', 'categorias.id']);
+            'cursos' => function ($query) use ($cursos_id) {
+                $query->select('cursos.nombre as nom_curso', 'cursos.categoria_id', 'cursos.id');
+                $query->whereIn('cursos.id', $cursos_id);
+                $query->where('cursos.estado', 1);
+            }
+        ])
+            ->where('categorias.estado', 1)
+            ->get(['categorias.nombre', 'categorias.id', 'categorias.id']);
         $matricula_actual = Matricula::join('carreras', 'carreras.id', 'matricula.carrera_id')
-                            ->join('ciclos', 'ciclos.id', 'matricula.ciclo_id')
-                            ->where('presente', 1)
-                            ->where('usuario_id', $usuario_id)
-                            ->first(['carreras.nombre as nom_carrera', 'ciclos.nombre as nom_ciclo']);
+            ->join('ciclos', 'ciclos.id', 'matricula.ciclo_id')
+            ->where('presente', 1)
+            ->where('usuario_id', $usuario_id)
+            ->first(['carreras.nombre as nom_carrera', 'ciclos.nombre as nom_ciclo']);
         $usuario_id = Usuario::join('criterios', 'criterios.id', 'usuarios.grupo')
-                                ->where('usuarios.id', $usuario_id )
-                                ->first(['criterios.valor as nom_grupo']);
+            ->where('usuarios.id', $usuario_id)
+            ->first(['criterios.valor as nom_grupo']);
         $_categorias = collect();
         foreach ($categorias as $categoria) {
-            if (count($categoria->cursos)> 0) {
+            if (count($categoria->cursos) > 0) {
                 $_categorias->push($categoria);
             }
         }
@@ -932,12 +954,13 @@ class UsuarioController extends Controller
         return response()->json($data, 200);
     }
 
-    public function status($usuario_id){
+    public function status($usuario_id)
+    {
         $user = Usuario::find($usuario_id);
-        $estado = ($user->estado == 1) ? 0 : 1 ;
+        $estado = ($user->estado == 1) ? 0 : 1;
         $user->estado = $estado;
         $user->save();
-        return back()->with(['info'=> 'Estado actualizado con éxito.']);
+        return back()->with(['info' => 'Estado actualizado con éxito.']);
     }
 
     public function updateStatus(Usuario $usuario, Request $request)
@@ -947,155 +970,157 @@ class UsuarioController extends Controller
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 
-     //**************************************************** REINICIO MASIVOS DE NOTAS POR CURSO ********************************************************/
-     public function index_reinicios()
-     {
-         return view('masivo.index_reinicios');
-     }
+    //**************************************************** REINICIO MASIVOS DE NOTAS POR CURSO ********************************************************/
+    public function index_reinicios()
+    {
+        return view('masivo.index_reinicios');
+    }
 
-     public function reinicios_data()
-     {
-         $modulos = Abconfig::where('estado', 1)->get();
-         $categorias = Categoria::where('estado', 1)->get();
-         return response()->json(compact('modulos', 'categorias'), 200);
-     }
+    public function reinicios_data()
+    {
+        $modulos = Abconfig::where('estado', 1)->get();
+        $categorias = Categoria::where('estado', 1)->get();
+        return response()->json(compact('modulos', 'categorias'), 200);
+    }
 
-     public function buscarCursosxEscuela($categoria_id)
-     {
-         $cursos = Curso::where('categoria_id', $categoria_id)->where('estado', 1)->get();
-         return response()->json(compact('cursos'), 200);
-     }
+    public function buscarCursosxEscuela($categoria_id)
+    {
+        $cursos = Curso::where('categoria_id', $categoria_id)->where('estado', 1)->get();
+        return response()->json(compact('cursos'), 200);
+    }
 
-     public function buscarTemasxCurso($curso_id)
-     {
-         $posteos = Posteo::where('curso_id', $curso_id)->where('estado', 1)->get();
-         return response()->json(compact('posteos'), 200);
-     }
+    public function buscarTemasxCurso($curso_id)
+    {
+        $posteos = Posteo::where('curso_id', $curso_id)->where('estado', 1)->get();
+        return response()->json(compact('posteos'), 200);
+    }
 
-     public function validarReinicioIntentos(Request $request)
-     {
-         $tipo     = $request->tipo; // TODOS o SOLO DESAPROBADOS
-         $admin    = $request->admin;
-         $config = Abconfig::select('mod_evaluaciones')->where('id', $request->modulo)->first();
-         $mod_eval = json_decode($config->mod_evaluaciones, true);
-         $data     = $this->validarDetallesReinicioIntentosMasivo($request->curso, $request->tema, $request->modulo, $tipo, $mod_eval, $admin['id']);
-         return response()->json([
-             'data'      => $data,
-             'mod_eval'  => $mod_eval
-         ], 200);
-     }
+    public function validarReinicioIntentos(Request $request)
+    {
+        $tipo = $request->tipo; // TODOS o SOLO DESAPROBADOS
+        $admin = $request->admin;
+        $config = Abconfig::select('mod_evaluaciones')->where('id', $request->modulo)->first();
+        $mod_eval = json_decode($config->mod_evaluaciones, true);
+        $data = $this->validarDetallesReinicioIntentosMasivo($request->curso, $request->tema, $request->modulo, $tipo, $mod_eval, $admin['id']);
+        return response()->json([
+            'data' => $data,
+            'mod_eval' => $mod_eval
+        ], 200);
+    }
 
 
-     public function validarDetallesReinicioIntentosMasivo($curso_id, $posteo_id, $modulo_id, $tipo, $mod_eval, $admin_id)
-     {
-         $query_usuarios = Prueba::with('usuario')
-                                 ->where('pruebas.fuente');
+    public function validarDetallesReinicioIntentosMasivo($curso_id, $posteo_id, $modulo_id, $tipo, $mod_eval, $admin_id)
+    {
+        $query_usuarios = Prueba::with('usuario')
+            ->where('pruebas.fuente');
 
-         if ($posteo_id == null) $query_usuarios->where('pruebas.curso_id', $curso_id); // Por Curso
-         else $query_usuarios->where('pruebas.posteo_id', $posteo_id); // Por Tema
+        if ($posteo_id == null) $query_usuarios->where('pruebas.curso_id', $curso_id); // Por Curso
+        else $query_usuarios->where('pruebas.posteo_id', $posteo_id); // Por Tema
 
-         if($tipo['id'] == 1) { // Solo desaprobados
-             $query_usuarios->where('pruebas.resultado', 0)
-                            ->where('pruebas.intentos', '>=', $mod_eval['nro_intentos'] );
-         }
+        if ($tipo['id'] == 1) { // Solo desaprobados
+            $query_usuarios->where('pruebas.resultado', 0)
+                ->where('pruebas.intentos', '>=', $mod_eval['nro_intentos']);
+        }
 
-         $usuarios = $query_usuarios->orderBy('pruebas.nota')->get();
+        $usuarios = $query_usuarios->orderBy('pruebas.nota')->get();
 
-         foreach ($usuarios as $key => $usuario) {
-             $usuario->selected = false;
-         }
-         return [
-             'pruebas'        => $usuarios,
-             'count_usuarios' => $usuarios->count()
-         ];
-     }
+        foreach ($usuarios as $key => $usuario) {
+            $usuario->selected = false;
+        }
+        return [
+            'pruebas' => $usuarios,
+            'count_usuarios' => $usuarios->count()
+        ];
+    }
 
-     public function reiniciarIntentosMasivos(Request $request)
-     {
-         $admin      = $request->admin;
-         $config = Abconfig::select('mod_evaluaciones')->where('id', $request->modulo)->first();
-         $mod_eval = json_decode($config->mod_evaluaciones, true);
-         $usuarios   = $request->usuarios;
-         $count_usuarios = count($usuarios);
-         if ($request->tema == null) {
-             $curso  = Curso::where('id', $request->curso)->first();
-             $data   = $this->reinicioMasivoxCurso($request->curso, $request->modulo, $mod_eval, $admin['id'], $usuarios);
-             $msg    = "Se reiniciaron los intentos de ".$count_usuarios." usuario(s) para el curso $curso->nombre.";
-         } else {
-             $tema   = Posteo::where('id', $request->tema)->first();
-             $data   = $this->reinicioMasivoxTema($request->tema, $request->curso, $request->modulo, $mod_eval, $admin['id'], $usuarios);
-             $msg    = "Se reiniciaron los intentos de ".$count_usuarios." usuario(s) para el tema $tema->nombre.";
-         }
-         return response()->json([
-             'data'      => $data,
-             'mod_eval'  => $mod_eval,
-             'msg'       => $msg
-         ], 200);
-     }
+    public function reiniciarIntentosMasivos(Request $request)
+    {
+        $admin = $request->admin;
+        $config = Abconfig::select('mod_evaluaciones')->where('id', $request->modulo)->first();
+        $mod_eval = json_decode($config->mod_evaluaciones, true);
+        $usuarios = $request->usuarios;
+        $count_usuarios = count($usuarios);
+        if ($request->tema == null) {
+            $curso = Curso::where('id', $request->curso)->first();
+            $data = $this->reinicioMasivoxCurso($request->curso, $request->modulo, $mod_eval, $admin['id'], $usuarios);
+            $msg = "Se reiniciaron los intentos de " . $count_usuarios . " usuario(s) para el curso $curso->nombre.";
+        } else {
+            $tema = Posteo::where('id', $request->tema)->first();
+            $data = $this->reinicioMasivoxTema($request->tema, $request->curso, $request->modulo, $mod_eval, $admin['id'], $usuarios);
+            $msg = "Se reiniciaron los intentos de " . $count_usuarios . " usuario(s) para el tema $tema->nombre.";
+        }
+        return response()->json([
+            'data' => $data,
+            'mod_eval' => $mod_eval,
+            'msg' => $msg
+        ], 200);
+    }
 
-     public function reinicioMasivoxCurso($curso_id, $modulo_id, $mod_eval, $admin_id, $usuarios)
-     {
-         // $rest = new RestAvanceController;
-         foreach ($usuarios as $key => $usuario) {
-             $usuario_id      = $usuario['usuario']['id'];
-             $posteosIds        = Prueba::join('posteos', 'posteos.id', 'pruebas.posteo_id')
-                                     ->join('cursos', 'cursos.id', 'posteos.curso_id')
-                                     ->where('pruebas.usuario_id', $usuario_id)
-                                     ->where('cursos.id', $curso_id)
-                                     ->pluck('pruebas.posteo_id');
-             $prueba_reinicio = Prueba::reinicioIntentosMasivos($posteosIds, $usuario_id);
-             // $visita          = Visita::where('usuario_id', $usuario_id)
-             //                         ->whereIn('post_id', $posteosIds)
-             //                         ->update([
-             //                                 'tipo_tema' => "",
-             //                                 'estado_tema' => ""
-             //                             ]);
+    public function reinicioMasivoxCurso($curso_id, $modulo_id, $mod_eval, $admin_id, $usuarios)
+    {
+        // $rest = new RestAvanceController;
+        foreach ($usuarios as $key => $usuario) {
+            $usuario_id = $usuario['usuario']['id'];
+            $posteosIds = Prueba::join('posteos', 'posteos.id', 'pruebas.posteo_id')
+                ->join('cursos', 'cursos.id', 'posteos.curso_id')
+                ->where('pruebas.usuario_id', $usuario_id)
+                ->where('cursos.id', $curso_id)
+                ->pluck('pruebas.posteo_id');
+            $prueba_reinicio = Prueba::reinicioIntentosMasivos($posteosIds, $usuario_id);
+            // $visita          = Visita::where('usuario_id', $usuario_id)
+            //                         ->whereIn('post_id', $posteosIds)
+            //                         ->update([
+            //                                 'tipo_tema' => "",
+            //                                 'estado_tema' => ""
+            //                             ]);
 
-             // $rest->actualizar_resumen_x_curso($usuario_id, $curso_id, (int) $mod_eval['nro_intentos']);
-             // $rest->actualizar_resumen_general($usuario_id);
-             $reinicio = $this->actualizarReiniciosxReinicioIntentosMasivo('por_curso', $curso_id, $usuario_id, $admin_id);
-         }
-     }
+            // $rest->actualizar_resumen_x_curso($usuario_id, $curso_id, (int) $mod_eval['nro_intentos']);
+            // $rest->actualizar_resumen_general($usuario_id);
+            $reinicio = $this->actualizarReiniciosxReinicioIntentosMasivo('por_curso', $curso_id, $usuario_id, $admin_id);
+        }
+    }
 
-     public function reinicioMasivoxTema($posteo_id, $curso_id, $modulo_id, $mod_eval, $admin_id, $usuarios)
-     {
-         // $rest = new RestAvanceController;
-         foreach ($usuarios as $key => $usuario) {
-             $usuario_id      = $usuario['usuario']['id'];
-             $prueba_reinicio = Prueba::reinicioIntentosMasivos([$posteo_id], $usuario_id);
-             // $visita          = Visita::where('usuario_id', $usuario_id)
-             //                         ->where('post_id', $posteo_id)
-             //                         ->update([
-             //                                 'tipo_tema' => "",
-             //                                 'estado_tema' => ""
-             //                             ]);
+    public function reinicioMasivoxTema($posteo_id, $curso_id, $modulo_id, $mod_eval, $admin_id, $usuarios)
+    {
+        // $rest = new RestAvanceController;
+        foreach ($usuarios as $key => $usuario) {
+            $usuario_id = $usuario['usuario']['id'];
+            $prueba_reinicio = Prueba::reinicioIntentosMasivos([$posteo_id], $usuario_id);
+            // $visita          = Visita::where('usuario_id', $usuario_id)
+            //                         ->where('post_id', $posteo_id)
+            //                         ->update([
+            //                                 'tipo_tema' => "",
+            //                                 'estado_tema' => ""
+            //                             ]);
 
-             // $rest->actualizar_resumen_x_curso($usuario_id, $curso_id, (int) $mod_eval['nro_intentos']);
-             // $rest->actualizar_resumen_general($usuario_id);
-             $reinicio = $this->actualizarReiniciosxReinicioIntentosMasivo('por_tema', $posteo_id, $usuario_id, $admin_id);
-         }
-     }
+            // $rest->actualizar_resumen_x_curso($usuario_id, $curso_id, (int) $mod_eval['nro_intentos']);
+            // $rest->actualizar_resumen_general($usuario_id);
+            $reinicio = $this->actualizarReiniciosxReinicioIntentosMasivo('por_tema', $posteo_id, $usuario_id, $admin_id);
+        }
+    }
 
-     public function actualizarReiniciosxReinicioIntentosMasivo($tipo, $recurso_id, $usuario_id, $admin_id)
-     {
-         switch ($tipo) {
-             case 'por_tema': $reinicio  = Reinicio::where('usuario_id', $usuario_id)->where('posteo_id', $recurso_id)->first();
-                 break;
-             case 'por_curso': $reinicio = Reinicio::where('usuario_id', $usuario_id)->where('curso_id', $recurso_id)->first();
-                 break;
-         }
-         if (!$reinicio) {
-             $reinicio             = new Reinicio;
-             $reinicio->tipo       = $tipo;
-             $reinicio->usuario_id = $usuario_id;
-             if ($tipo == 'por_tema')       $reinicio->posteo_id = $recurso_id;
-             else if ($tipo == 'por_curso') $reinicio->curso_id  = $recurso_id;
-             $reinicio->admin_id   = $admin_id;
-             $reinicio->acumulado  = 1;
-         } else {
-             $reinicio->acumulado  = $reinicio->acumulado + 1;
-         }
-         $reinicio->save();
-     }
-     //**************************************************** REINICIO MASIVOS DE NOTAS POR CURSO ********************************************************/
+    public function actualizarReiniciosxReinicioIntentosMasivo($tipo, $recurso_id, $usuario_id, $admin_id)
+    {
+        switch ($tipo) {
+            case 'por_tema':
+                $reinicio = Reinicio::where('usuario_id', $usuario_id)->where('posteo_id', $recurso_id)->first();
+                break;
+            case 'por_curso':
+                $reinicio = Reinicio::where('usuario_id', $usuario_id)->where('curso_id', $recurso_id)->first();
+                break;
+        }
+        if (!$reinicio) {
+            $reinicio = new Reinicio;
+            $reinicio->tipo = $tipo;
+            $reinicio->usuario_id = $usuario_id;
+            if ($tipo == 'por_tema') $reinicio->posteo_id = $recurso_id;
+            else if ($tipo == 'por_curso') $reinicio->curso_id = $recurso_id;
+            $reinicio->admin_id = $admin_id;
+            $reinicio->acumulado = 1;
+        } else {
+            $reinicio->acumulado = $reinicio->acumulado + 1;
+        }
+        $reinicio->save();
+    }
+    //**************************************************** REINICIO MASIVOS DE NOTAS POR CURSO ********************************************************/
 }

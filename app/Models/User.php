@@ -153,7 +153,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function getAgeAttribute()
     {
-        if ( isset($this->attributes['birthdate']) )
+        if (isset($this->attributes['birthdate']))
             return Carbon::parse($this->attributes['birthdate'])->age;
 
         return null;
@@ -161,13 +161,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setPasswordAttribute($value)
     {
-        if ( ! empty ($value) )
+        if (!empty ($value))
             $this->attributes['password'] = bcrypt($value);
     }
 
     public function setActiveAttribute($value)
     {
-        $this->attributes['active'] = ($value==='1' OR $value === 1);
+        $this->attributes['active'] = ($value === '1' or $value === 1);
     }
 
     public function getCriteria()
@@ -191,7 +191,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function type()
     {
-       return $this->belongsTo(Taxonomy::class, 'type_id');
+        return $this->belongsTo(Taxonomy::class, 'type_id');
     }
 
     // public function job_position()
@@ -225,14 +225,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     // }
 
 
-
     protected function storeRequestFull($data = [], $user = null)
     {
         try {
 
             DB::beginTransaction();
 
-            if ( $user ) :
+            if ($user) :
 
                 $user->update($data);
 
@@ -242,7 +241,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             endif;
 
-            if ($user->isNotA('superadmin') AND $user->isNotA('developer'))
+            if ($user->isNotA('superadmin') and $user->isNotA('developer'))
                 Bouncer::sync($user)->roles($data['roles'] ?? []);
 
             // $user->accounts()->sync($data['accounts'] ?? []);
@@ -263,15 +262,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     protected function search($request)
     {
-        $query = self::with('job_position', 'country', 'type', 'gender', 'media');
+        $query = self::query();
 
-        if ($request->filters)
-        {
-            foreach($request->filters AS $key => $filter)
-            {
-                if ($key == 'q')
-                {
-                    $query->where(function($q) use ($filter){
+        if ($request->q) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', "%$request->q%");
+                $q->orWhere('lastname', 'like', "%$request->q%");
+                $q->orWhere('surname', 'like', "%$request->q%");
+                $q->orWhere('email', 'like', "%$request->q%");
+            });
+        }
+
+        if ($request->filters) {
+            foreach ($request->filters as $key => $filter) {
+                if ($key == 'q') {
+                    $query->where(function ($q) use ($filter) {
                         $q->where('name', 'like', "%$filter%");
                         $q->orWhere('lastname', 'like', "%$filter%");
                         $q->orWhere('surname', 'like', "%$filter%");
