@@ -18,6 +18,7 @@ class BlockResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name , // DEV
             'open' => false , // DEV
+            // 'workspace_session' => session('workspace') , // DEV
             // 'custom_meeting_name' => $this->name,
             // 'type' => $this->type->name,
             // 'host' => $this->host->nombre ?? 'No definido',
