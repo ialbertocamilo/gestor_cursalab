@@ -20,9 +20,25 @@ class CriterionValue extends BaseModel
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_relationship', 'criterion_value_id', 'criterion_value_parent_id');
     }
 
-    public function scopeParentsByCriterionID($q, $criterion_id)
+    protected function getListForSelect($criterion_code = null, $criterion_id = null)
     {
-        return $q->where('criterion_id', $criterion_id);
+        $value_param = 'value_text';
+
+        return self::query()
+            ->select('id', "$value_param as name")
+            ->when($criterion_code ?? null,
+                function ($q) use ($criterion_code) {
+                    $q->whereHas('criterion',
+                        fn($q) => $q->where('code', $criterion_code)
+                    );
+                })
+            ->when($criterion_id ?? null,
+                function ($q) use ($criterion_id) {
+                    $q->whereHas('criterion',
+                        fn($q) => $q->where('id', $criterion_id)
+                    );
+                })
+            ->get();
     }
 
     protected function search($request = null)

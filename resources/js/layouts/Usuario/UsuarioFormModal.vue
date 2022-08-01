@@ -7,96 +7,71 @@
     >
         <template v-slot:content>
             <v-form ref="UsuarioForm">
-                <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-end py-0">
-                        <p class="mb-0" style="font-size: .9375rem; line-height: 1;">{{
-                                resource.grupo_sistema_nombre
-                            }}</p>
+
+                <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="d-flex justify-content-between pb-0">
+                        <strong>Información de usuario</strong>
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultSelect
-                            clearable
-                            :items="selects.modules"
-                            v-model="resource.modulo"
-                            label="Módulos"
-                            @onChange="loadBoticas"
-                            :disabled="options.action === 'edit'"
-                            return-object
-                            :rules="rules.modulo"
-                        />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultAutocomplete
-                            clearable
-                            :items="selects.boticas"
-                            v-model="resource.botica"
-                            return-object
-                            label="Botica"
-                            :disabled="options.action === 'edit'"
-                            @onChange="loadCiclos"
-                            no-data-text="Seleccione un módulo"
-                            :rules="rules.botica"
-                        />
+                    <v-col cols="12" class="py-0">
+                        <DefaultDivider/>
                     </v-col>
                 </v-row>
                 <v-row justify="space-around">
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="4" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
-                            v-model="resource.nombre"
-                            label="Nombres y Apellidos"
+                            v-model="resource.name"
+                            label="Nombres"
                             :rules="rules.nombre"
                         />
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="4" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
-                            v-model="resource.dni"
-                            label="Documento de identidad"
-                            :rules="rules.dni"
+                            v-model="resource.lastname"
+                            label="Apellido Paterno"
+                            :rules="rules.nombre"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.surname"
+                            label="Apellido Materno"
+                            :rules="rules.nombre"
                         />
                     </v-col>
                 </v-row>
+
                 <v-row justify="space-around">
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.email"
+                            label="Correo electrónico"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.document"
+                            label="Identificador"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
                             v-model="resource.password"
                             label="Contraseña"
                         />
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultSelect
-                            clearable
-                            :items="selects.genres"
-                            v-model="resource.sexo"
-                            label="Género"
-                            :rules="rules.genero"
-                        />
-                    </v-col>
                 </v-row>
-                <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultAutocomplete
-                            clearable
-                            :items="selects.cargos"
-                            v-model="resource.cargo"
-                            open-up
-                            label="Cargo"
-                            :rules="rules.cargo"
-                        />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-start flex-column">
-                        <DefaultToggle v-model="resource.estado"/>
-                    </v-col>
-                </v-row>
-
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
-                           @click="showMatricula = !showMatricula"
+                           @click="sections.showCriteria = !sections.showCriteria"
                            style="cursor: pointer">
-                        <strong>Configurar Matrícula</strong>
-                        <v-icon v-text="showMatricula ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
+                        <strong>Criterios</strong>
+                        <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
                     </v-col>
                     <v-col cols="12" class="py-0">
                         <DefaultDivider/>
@@ -107,28 +82,31 @@
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
 
                         <v-expand-transition>
-                            <UsuarioMatriculaSection
-                                v-show="showMatricula"
-                                ref="MatriculaSection"
+                            <UsuarioCriteriaSection
+                                v-show="sections.showCriteria"
+                                ref="CriteriaSection"
                                 :options="options"
                                 :usuario="resource"
-                                :carreras="selects.carreras"
+                                :criteria_list="criteria_list"
                             />
                         </v-expand-transition>
 
                     </v-col>
 
                 </v-row>
+
+                <div style="height: 500px"></div>
+
             </v-form>
         </template>
     </DefaultDialog>
 </template>
 
 <script>
-import UsuarioMatriculaSection from "./UsuarioMatriculaSection";
+import UsuarioCriteriaSection from "./UsuarioCriteriaSection";
 
 export default {
-    components: {UsuarioMatriculaSection},
+    components: {UsuarioCriteriaSection},
     props: {
         options: {
             type: Object,
@@ -138,25 +116,20 @@ export default {
     },
     data() {
         return {
+            sections: {
+                showCriteria: false
+            },
             showMatricula: false,
+            criteria_list: [],
             resourceDefault: {
                 id: null,
-                config_id: null,
-                botica_id: null,
-                nombre: '',
-                dni: null,
-                password: null,
-                sexo: null,
-                cargo: null,
-                estado: false,
-                grupo_nombre: null,
-                grupo_sistema_nombre: '',
-                matriculas_pasadas: [],
-                matricula_presente: null,
-                carrera: null,
-                modulo: null,
-                botica: null,
-                ciclos: [],
+                name: '',
+                lastname: '',
+                surname: '',
+                email: '',
+                document: '',
+
+                criteria: {}
             },
             resource: {},
             selects: {
@@ -191,7 +164,7 @@ export default {
     },
     mounted() {
         let vue = this
-        vue.showMatricula = vue.options.action === 'edit' ? false : true;
+        vue.sections.showCriteria = vue.options.action === 'edit'
     },
     methods: {
         closeModal() {
@@ -249,14 +222,12 @@ export default {
         },
         async loadData(resource) {
             let vue = this
-            vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-            })
+
             let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/search` : `form-selects`}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.modules = data.data.modules
-                    vue.selects.cargos = data.data.cargos
+                    vue.criteria_list = data.data.criteria
+
                     if (resource) {
                         vue.resource = data.data.usuario
                         vue.resource.ciclos = vue.resource.matriculas_pasadas
@@ -267,49 +238,8 @@ export default {
         },
         loadSelects() {
             let vue = this
-            if (vue.resource.modulo && vue.resource.modulo.id)
-                vue.loadBoticas()
-
-            if (vue.resource.botica && vue.resource.botica.criterio)
-                vue.loadCarreras()
-        },
-        loadBoticas() {
-            let vue = this
-            if (!vue.resource.modulo) {
-                vue.selects.boticas = []
-                vue.selects.carreras = []
-                return
-            }
-            let url = `/boticas/search-no-paginate?config_id=${vue.resource.modulo.id}`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.boticas = data.data.boticas
-                })
-
-            this.loadCarreras()
-        },
-        loadCarreras() {
-            let vue = this
-            // if (!vue.resource.botica || !vue.resource.botica.criterio) {
-            // if (!vue.resource.botica || !vue.resource.botica.criterio) {
-            // vue.selects.carreras = []
-            // return
-            // }
-
-            const modulo_id = vue.resource.modulo.id
-            const botica_id = vue.resource.botica ? vue.resource.botica.id : 0
-            let url = `${vue.options.base_endpoint}/${modulo_id}/${botica_id}/carreras-x-grupo`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.carreras = data.carreras
-                })
-
 
         },
-        loadCiclos() {
-            let vue = this
-            vue.$refs['MatriculaSection'].loadCiclos();
-        }
     }
 }
 </script>

@@ -15,6 +15,7 @@
                             @onChange="setCarreras"
                             v-model="filters.module"
                             label="Módulos"
+                            item-text="name"
                         />
                     </v-col>
                     <v-col cols="12">
@@ -68,6 +69,7 @@
                             v-model="filters.module"
                             label="Módulos"
                             @onChange="refreshDefaultTable(dataTable, filters, 1); setCarreras()"
+                            item-text="name"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -153,11 +155,11 @@ export default {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
                 headers: [
-                    {text: "Módulo", value: "image", align: 'center', sortable: false},
+                    // {text: "Módulo", value: "image", align: 'center', sortable: false},
                     {text: "Nombres y Apellidos", value: "nombre"},
-                    {text: "Documento", value: "dni", align: 'left', sortable: false},
-                    {text: "Carrera", value: "carrera", sortable: false},
-                    {text: "Ciclo", value: "ciclo_actual", align: 'center', sortable: false},
+                    // {text: "Documento", value: "dni", align: 'left', sortable: false},
+                    // {text: "Carrera", value: "carrera", sortable: false},
+                    // {text: "Ciclo", value: "ciclo_actual", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -254,8 +256,8 @@ export default {
     methods: {
         getSelects() {
             let vue = this
-            
-            let uri = window.location.search.substring(1); 
+
+            let uri = window.location.search.substring(1);
             let params = new URLSearchParams(uri);
             let param_modulo = params.get("modulo");
 
@@ -270,7 +272,7 @@ export default {
                         this.setCarreras()
                         vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
-            
+
         },
         reset(user) {
             let vue = this
