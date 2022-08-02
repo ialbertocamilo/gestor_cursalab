@@ -36,10 +36,17 @@ function convert($number)
     return number_format($total) . "MB";
 }
 
-
-function clean_html($text, $limit = 100)
+/**
+ * Remove HTML tags and limit string to characters count
+ *
+ * @param string|null $text
+ * @param int $limit
+ * @return string
+ */
+function clean_html(?string $text, int $limit = 100)
 {
-    return Str::limit(strip_tags($text), $limit);
+
+    return substr(strip_tags($text), 0, $limit);
 }
 
 function secret($value)

@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\ApiRest\HelperController;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Curso extends Model
 {
     protected $table = 'courses';
-    
+
     protected $fillable = [
         'config_id', 'categoria_id', 'duplicado_id', 'nombre', 'descripcion', 'imagen', 'estado',
         'orden', 'requisito_id', 'c_evaluable', 'libre', 'reinicios_programado', 'plantilla_diploma'

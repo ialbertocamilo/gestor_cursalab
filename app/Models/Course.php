@@ -13,6 +13,20 @@ class Course extends Model
         'position', 'scheduled_restarts', 'active'
     ];
 
+    /*
+
+        Relationships
+
+    --------------------------------------------------------------------------*/
+
+
+    public function schools() {
+
+        return $this->belongsToMany(
+            School::class,
+            'course_school'
+        );
+    }
 
     public function topics()
     {

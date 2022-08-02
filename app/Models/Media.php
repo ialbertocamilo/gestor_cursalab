@@ -225,17 +225,21 @@ class Media extends Model
         }
 
         if ($request->tipo) {
-            $exts = [];
-            $extensions = config('constantes.extensiones');
+            if ($request->tipo[0] != null) {
 
-            foreach ($request->tipo as $tipo) {
-                if ($tipo and isset($extensions[$tipo]))
-                    foreach ($extensions[$tipo] as $ext) {
-                        $exts[] = $ext;
+                $exts = [];
+                $extensions = config('constantes.extensiones');
+
+                foreach ($request->tipo as $tipo) {
+                    if ($tipo and isset($extensions[$tipo])) {
+                        foreach ($extensions[$tipo] as $ext) {
+                            $exts[] = $ext;
+                        }
                     }
-            }
+                }
 
-            $query->whereIn('ext', $exts);
+                $query->whereIn('ext', $exts);
+            }
         }
 
         if ($request->fecha) {
