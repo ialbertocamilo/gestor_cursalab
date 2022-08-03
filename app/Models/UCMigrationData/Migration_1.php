@@ -548,29 +548,56 @@ class Migration_1 extends Model
             $program = [
                 'name' => "Programa: $career->value_text",
                 'description' => $career->description,
+                'parent' => true,
             ];
+
             $block = Block::create($program);
 
-            $block->criterion_values()->syncWithoutDetaching([$career->id]);
+            $this->createSegmentValue($block, $career);
+
+            // $segment = $block->segments()->create(['name' => $block->name]);
+
+            // $segment->values()->create([
+            //     'criterion_id' => $career->parent_id,
+            //     'criterion_value_id' => $career->id,
+            //     'type' => 1,
+            // ]);
+            // $segment->values()->syncWithoutDetaching([$career->id]);
 
             foreach ($ciclos as $ciclo) {
-                $segment = Segment::create(['name' => "Ruta de aprendizaje: $ciclo->nombre"]);
+                $child = Block::create(['name' => "Ruta de aprendizaje: $ciclo->nombre"]);
                 $ciclo_value = $ciclos_values->where('value_text', $ciclo->nombre)->first();
 
-                // $block->block_segments->insert([
-                $block_segment_id = DB::table('block_segment')->insertGetId([
-                    'block_id' => $block->id,
-                    'segment_id' => $segment->id
-                ]);
+                $block->children()->syncWithoutDetaching([$child->id]);
 
-                if ($ciclo_value):
-                    DB::table('block_segment_criterion_value')->insert([
-                        'block_segment_id' => $block_segment_id,
-                        'criterion_value_id' => $ciclo_value->id
-                    ]);
+                // $block->block_segments->insert([
+                // $block_segment_id = DB::table('blocks_children')->insertGetId([
+                //     'block_id' => $block->id,
+                //     'block_child_id' => $child->id
+                // ]);
+
+                if ($ciclo_value) :
+
+                    $this->createSegmentValue($child, $ciclo_value);
+
+                    // DB::table('block_segment_criterion_value')->insert([
+                    //     'block_segment_id' => $block_segment_id,
+                    //     'criterion_value_id' => $ciclo_value->id
+                    // ]);
                 endif;
             }
         }
+    }
+
+    public function createSegmentValue($model, $criterion_value)
+    {
+        $segment = $model->segments()->create(['name' => $model->name]);
+
+        $segment->values()->create([
+            'criterion_id' => $criterion_value->parent_id,
+            'criterion_value_id' => $criterion_value->id,
+            'type' => 1,
+        ]);
     }
 
 }

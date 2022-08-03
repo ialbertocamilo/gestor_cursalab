@@ -29,9 +29,9 @@ class CreateAccountsTable extends Migration
             $table->text('sdk_token')->nullable();
             $table->text('zak_token')->nullable();
 
-            $table->foreignId('service_id')->nullable()->index()->constrained('taxonomies');
-            $table->foreignId('plan_id')->nullable()->index()->constrained('taxonomies');
-            $table->foreignId('type_id')->nullable()->index()->constrained('taxonomies');
+            $table->foreignId('service_id')->nullable()->constrained('taxonomies');
+            $table->foreignId('plan_id')->nullable()->constrained('taxonomies');
+            $table->foreignId('type_id')->nullable()->constrained('taxonomies');
             // $table->morphs('model');
 
             $table->text('description')->nullable();

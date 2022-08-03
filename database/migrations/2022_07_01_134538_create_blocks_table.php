@@ -18,6 +18,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->nullable();
             $table->string('description')->nullable();
+            
+            $table->foreignId('user_id')->nullable();
+
+            $table->boolean('mandatory')->nullable()->default(true);
+            $table->boolean('parent')->nullable()->default(false);
+            
+            $table->unsignedInteger('position')->nullable();
 
             $table->smallInteger('criterion_value_count')->nullable();
 

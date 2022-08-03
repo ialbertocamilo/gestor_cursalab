@@ -13,10 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('block_criterion_value', function (Blueprint $table) {
+        Schema::create('requirements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('block_id')->nullable()->constrained('blocks');
-            $table->foreignId('criterion_value_id')->nullable()->constrained('criterion_values');
+
+            $table->nullableMorphs('model');
+            $table->nullableMorphs('requirement');
+
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -27,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('block_criterion_value');
+        Schema::dropIfExists('requirements');
     }
 };

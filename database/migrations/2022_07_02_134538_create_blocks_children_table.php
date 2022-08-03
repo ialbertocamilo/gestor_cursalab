@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('block_segment', function (Blueprint $table) {
+        Schema::create('blocks_children', function (Blueprint $table) {
             $table->id();
             $table->foreignId('block_id')->nullable()->constrained('blocks');
-            $table->foreignId('segment_id')->nullable()->constrained('segments');
+            $table->foreignId('block_child_id')->nullable()->constrained('blocks');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('block_segment');
+        Schema::dropIfExists('blocks_children');
     }
 };

@@ -15,20 +15,13 @@ return new class extends Migration
     {
         Schema::create('segments', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('slug')->nullable();
-            $table->string('description')->nullable();
-            
-            $table->foreignId('user_id')->nullable();
+            $table->string('name')->nullable();
+            $table->nullableMorphs('model');
 
-            $table->boolean('mandatory')->nullable()->default(true);
+            $table->boolean('active')->nullable();
 
-            $table->smallInteger('criterion_value_count')->nullable();
-
-            $table->boolean('active')->nullable()->default(true);
-
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
