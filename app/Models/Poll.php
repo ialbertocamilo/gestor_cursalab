@@ -70,4 +70,23 @@ class Poll extends BaseModel
                    ->count();
     }
 
+    /**
+     * Load active course polls
+     *
+     * @return void
+     */
+    protected function loadCoursePolls() {
+
+        $taxonomy = Taxonomy::getFirstData('poll', 'tipo', 'xcurso');
+        if ($taxonomy) {
+
+            return Poll::where('active', 1)
+                    ->where('type_id', $taxonomy->id)
+                    ->select()
+                    ->get();
+
+        } else {
+            return [];
+        }
+    }
 }

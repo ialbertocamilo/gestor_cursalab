@@ -7,6 +7,7 @@ use App\Http\Resources\FaqsResource;
 use App\Models\Post;
 use App\Models\Pregunta_frecuente;
 use App\Models\SortingModel;
+use App\Models\Taxonomy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,8 @@ class FaqsController extends Controller
      */
     public function search(Request $request)
     {
-        $faqs = Post::search($request);
+        $taxonomy = Taxonomy::getFirstData('post', 'section', 'faq');
+        $faqs = Post::search($request, $taxonomy->id);
 
         FaqsResource::collection($faqs);
 
@@ -51,7 +53,15 @@ class FaqsController extends Controller
      */
     public function store(FaqsStoreRequest $request)
     {
-        $faq = Post::create($request->validated());
+        // Retrieve taxonomy id for FAQ
+
+        $taxonomy = Taxonomy::getFirstData('post', 'section', 'faq');
+
+        // Set data to store
+
+        $data = $request->validated();
+        $data['section_id'] = $taxonomy->id;
+        $faq = Post::create($data);
 
         SortingModel::reorderItems(
             $faq, [], null, 'position'

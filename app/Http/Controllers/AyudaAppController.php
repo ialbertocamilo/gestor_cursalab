@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\SortingModel;
 use App\Http\Resources\AyudaAppResource;
 use App\Http\Requests\AyudaAppStoreRequest;
+use App\Models\Taxonomy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,7 +24,9 @@ class AyudaAppController extends Controller
     public function search(Request $request)
     {
 
-        $posts = Post::search($request);
+        // Retrieve taxonomy id for AyudaApp
+        $taxonomy = Taxonomy::getFirstData('post', 'section', 'ayuda_app');
+        $posts = Post::search($request, $taxonomy->id);
 
         AyudaAppResource::collection($posts);
 
@@ -80,7 +83,14 @@ class AyudaAppController extends Controller
      */
     public function store(AyudaAppStoreRequest $request)
     {
+        // Retrieve taxonomy id for AyudaApp
+
+        $taxonomy = Taxonomy::getFirstData('post', 'section', 'ayuda_app');
+
+        // Set data to store
+        
         $data = $request->validated();
+        $data['section_id'] = $taxonomy->id;
         $post = Post::create($data);
         SortingModel::reorderItems(
             $post, [], null, 'position'

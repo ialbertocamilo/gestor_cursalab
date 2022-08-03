@@ -3,13 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Exports\EncuestaxgypExport;
-use App\Models\Ab_config;
+use App\Models\Course;
 use App\Models\Criterion;
 use App\Models\Curso;
 use App\Models\Poll;
 use App\Models\PollQuestion;
 use App\Models\PollQuestionAnswer;
+use App\Models\Taxonomy;
 use App\Models\Usuario;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +23,73 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class HomeController extends Controller
 {
+
+    public function loadCoursePolls() {
+
+
+
+    }
+
+    public function loadModules() {
+
+        // Load modules list
+
+        $_modules = Criterion::getValuesForSelect('module');
+
+        // Add the "etapa" key for every single module
+
+        foreach ($_modules as &$module) {
+            $module['etapa'] = $module['nombre'];
+        }
+
+        return $_modules;
+    }
+
+    public function loadGroups() {
+
+        $groups = Criterion::getValuesForSelect('group');
+
+        // Add the "etapa" key for every single module
+
+        foreach ($groups as &$group) {
+            $group['group'] = $group['id'];
+            $group['grupo_nombre'] = $group['nombre'];
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @param $moduleId
+     * @param $pollId
+     * @return Builder[]|Collection
+     */
+    public function loadCourses($moduleId = null, $pollId = null) {
+
+        if ($pollId) {
+
+            return Course::join('course_poll', 'course_poll.course_id', '=', 'courses.id')
+                ->where('course_poll.poll_id', $pollId)
+                ->select([
+                    'courses.id',
+                    'courses.name as nombre',
+                    DB::raw('"Nombre escuela" as escuela'),
+                    DB::raw('"000" as codigo_matricula'),
+                ])
+                ->get();
+
+        } else {
+
+            return Course::select([
+                'id',
+                'name as nombre',
+                DB::raw('"Nombre escuela" as escuela'),
+                DB::raw('"000" as codigo_matricula'),
+            ])
+            ->get();
+        }
+    }
+
     /**
      * Create a new controller instance.
      *
@@ -43,7 +116,9 @@ class HomeController extends Controller
     }
 
     /************************************** ENCUESTAS RESUMEN ***********************************/
-    public function encuesta_filtrada_data($enc_id, $mod, $curso_id, $gru, $tipopreg){
+    public function encuesta_filtrada_data(
+        $enc_id, $mod, $curso_id, $gru, $tipopreg
+    ){
         $cad1 = " WHERE 1 ";
         $cad2 = "";
         $cad3 = "";
@@ -61,17 +136,14 @@ class HomeController extends Controller
             $cad2 = " AND u.config_id = '".$mod."'";
 
             // filtra lista de cursos
-            $cursos = DB::select( DB::raw("SELECT c.id AS id,  c.nombre AS nombre, cat.nombre AS escuela, m.codigo_matricula FROM cursos c INNER JOIN categorias cat ON cat.id = c.categoria_id INNER JOIN ab_config m ON m.id = c.config_id  WHERE categoria_id IN (SELECT id FROM categorias WHERE config_id = ".$mod.") AND c.id IN (SELECT curso_id FROM encuestas_respuestas GROUP BY curso_id) ORDER BY c.nombre"));
+            $cursos = $this->loadCourses();
 
             $ep_result['cursos'] = $cursos;
         }
         // filtro curso
         if ($curso_id != '' && $curso_id != 'ALL') {
             $cad3 = " AND er.curso_id = '".$curso_id."'";
-            // filtra lista de grupos
-            $grupos = DB::select( DB::raw("SELECT grupo,grupo_nombre FROM usuarios WHERE id IN (SELECT usuario_id FROM encuestas_respuestas WHERE curso_id = ".$curso_id." AND tipo_pregunta = 'califica') GROUP BY grupo order by grupo_nombre asc"));
-
-            $ep_result['grupos'] = $grupos;
+            $ep_result['grupos'] = $this->loadGroups();
         }
         // filtro grupo
         if ($gru != '' && $gru != 'ALL') {
@@ -84,25 +156,55 @@ class HomeController extends Controller
 
         // el group by
         $elgroupby = "";
-        // if ($tipopreg == 'califica') {
-        //     $elgroupby = "GROUP BY ep.id";
-        // }
 
         // consulta maestra
-        $ep_result['pgtas'] = DB::select( DB::raw("
-            SELECT ep.id, ep.encuesta_id, ep.titulo, er.curso_id, u.config_id, u.grupo, ep.tipo_pregunta
-            FROM encuestas_preguntas ep
-            INNER JOIN encuestas_respuestas er ON er.encuesta_id = ep.encuesta_id
-            INNER JOIN usuarios u ON u.id = er.usuario_id
-            ".$cad1."
-            ".$cad2."
-            ".$cad3."
-            ".$cad4."
-            ".$cad5."
-            ".$elgroupby."
-            GROUP BY ep.id"));
+//        $ep_result['pgtas'] = DB::select( DB::raw("
+//            SELECT
+//                ep.id,
+//                ep.encuesta_id,
+//                ep.titulo,
+//                er.curso_id,
+//                u.config_id,
+//                u.grupo,
+//                ep.tipo_pregunta
+//            FROM encuestas_preguntas ep
+//            INNER JOIN encuestas_respuestas er
+//                ON er.encuesta_id = ep.encuesta_id
+//            INNER JOIN usuarios u ON u.id = er.usuario_id
+//            ".$cad1."
+//            ".$cad2."
+//            ".$cad3."
+//            ".$cad4."
+//            ".$cad5."
+//            ".$elgroupby."
+//            GROUP BY ep.id"));
 
-        // dd($ep_result['pgtas']);
+        $ep_result['pgtas'] = DB::select(
+            DB::raw("
+                SELECT
+                    quest.id,
+                    quest.poll_id encuesta_id,
+                    quest.titulo,
+                    ans.course_id curso_id,
+                    -- u.config_id,
+                    '' as config_id,
+                    -- u.grupo,
+                    'el grup' as grupo,
+                    -- quest.tipo_pregunta
+                    'tipopreg' as tipo_pregunta
+                FROM poll_questions quest
+                INNER JOIN poll_question_answers ans
+                    ON ans.poll_question_id = quest.id
+                INNER JOIN users u ON u.id = ans.user_id
+                -- ".$cad1."
+                -- ".$cad2."
+                -- ".$cad3."
+                -- ".$cad4."
+                -- ".$cad5."
+                -- ".$elgroupby."
+                GROUP BY quest.id"
+            )
+        );
 
         return $ep_result;
     }
@@ -162,24 +264,30 @@ class HomeController extends Controller
         return $ep_result;
     }
 
-    // Encuestas
+
+    /**
+     * Process request to load polls data
+     *
+     * @param Request $request
+     * @return Application|Factory|View
+     */
     public function encuestas(Request $request){
 
         $cursos = [];
         $grupos = [];
-        $encuestas = Poll::where('active', 1)->select()->get();
-        $modulos = Criterion::getValuesForSelect('module');
 
-        // $enc_libres = \DB::select( \DB::raw("SELECT id, titulo FROM encuestas WHERE id IN (SELECT encuesta_id FROM encuestas_respuestas WHERE curso_id <= 0 ) "));
-        $enc_libres = [];
+        // todo: filter polls according workspace?
+        $polls = Poll::loadCoursePolls();
+        $modules = $this->loadModules();
 
         $data = [
-            'modulos' => $modulos,
-            'encuestas' => $encuestas
+            'modulos' => $modules,
+            'encuestas' => $polls
         ];
 
-        // Filto
-        if ($request->input('t') == 'epc') { // encuesta por curso
+        // Load polls data with filter
+
+        if ($request->input('t') == 'epc') { // polls by course
 
             $enc_id = $request->input('encuesta');
             $mod = $request->input('mod');
@@ -200,65 +308,95 @@ class HomeController extends Controller
 
             $ec_pgtas = $enc_preg_res['pgtas'];
 
-            // return $data;
+            // Returns polls data only
+
             $data = [
-                'modulos' => $modulos,
-                'encuestas' => $encuestas,
+                'modulos' => $modules,
+                'encuestas' => $polls,
                 'cursos' => $cursos,
                 'grupos' => $grupos,
                 'ec_pgtas' => $ec_pgtas
             ];
         }
 
+        // Returns polls results view
+
         return view('resumen_encuesta.index', $data);
     }
 
-    // SELECT Encuestas - cambia "encuesta"
+
+    /**
+     * Process request to load list of modules
+     *
+     * @param Request $request
+     * @return mixed
+     */
     public function cambiar_encuesta_mod(Request $request)
     {
-        $encuesta = $request->input('encuesta');
-        $cad1 = "";
-        if ($encuesta != '' && $encuesta != 'ALL') {
-            $cad1 = "WHERE ce.encuesta_id = '".$encuesta."'";
-        }
-        $encuestas = DB::select( DB::raw("SELECT id, etapa FROM ab_config WHERE id IN
-                                                (SELECT c.config_id FROM curso_encuesta ce
-                                                INNER JOIN cursos c
-                                                ON ce.curso_id = c.id
-                                                ".$cad1."
-                                                GROUP BY c.config_id)"
-                                            ));
 
-        return $encuestas;
+        $pollId = $request->input('encuesta');
+        return $this->loadModules();
+
+
+
+//        $encuesta = $request->input('encuesta');
+//        $cad1 = "";
+//        if ($encuesta != '' && $encuesta != 'ALL') {
+//            $cad1 = "WHERE ce.encuesta_id = '".$encuesta."'";
+//        }
+//        $encuestas = \DB::select( \DB::raw(
+//            "SELECT id, etapa FROM ab_config WHERE id IN
+//                (SELECT c.config_id FROM curso_encuesta ce
+//                INNER JOIN cursos c
+//                ON ce.curso_id = c.id
+//                ".$cad1."
+//                GROUP BY c.config_id)"
+//        ));
+//
+//        return $encuestas;
     }
-    // SELECT Encuestas - select cambia "curso"
+
+    /**
+     * Process request to load courses list
+     *
+     * @param Request $request
+     * @return array
+     */
     public function cambia_curso(Request $request)
     {
-        $mod = $request->input('mod');
-        $encuesta = $request->input('encuesta');
+        $moduleId = $request->input('mod');
+        $pollId = $request->input('encuesta');
 
-        $cad1 = " WHERE 1 ";
-        $cad2 = "";
+//        $cad1 = " WHERE 1 ";
+//        $cad2 = "";
+//
+//        if ($moduleId != '' && $moduleId != 'ALL') {
+//            $cad1 = " WHERE c.config_id = '".$moduleId."' ";
+//        }
+//        if ($pollId != '' && $pollId != 'ALL') {
+//            $cad2 = " AND e.encuesta_id = '".$pollId."' ";
+//        }
+//
+//
+//        $cursos = DB::select(
+//            DB::raw(
+//                "SELECT c.id, c.nombre, cat.nombre AS escuela, m.codigo_matricula
+//                FROM cursos c
+//                INNER JOIN categorias cat ON cat.id = c.categoria_id
+//                INNER JOIN ab_config m ON m.id = c.config_id
+//                INNER JOIN curso_encuesta e
+//                ON e.curso_id = c.id
+//                ".$cad1."
+//                ".$cad2."
+//                AND c.id IN (
+//                    SELECT curso_id FROM encuestas_respuestas GROUP BY curso_id
+//                )
+//                ORDER BY c.orden"
+//            )
+//        );
 
-        if ($mod != '' && $mod != 'ALL') {
-            $cad1 = " WHERE c.config_id = '".$mod."' ";
-        }
-        if ($encuesta != '' && $encuesta != 'ALL') {
-            $cad2 = " AND e.encuesta_id = '".$encuesta."' ";
-        }
 
-        // $cursos = \DB::select( \DB::raw("SELECT c.id AS id, CONCAT_WS ('///', c.nombre, cat.nombre) AS curso_escuela , c.nombre AS nombre, cat.nombre AS escuela FROM cursos c INNER JOIN categorias cat ON cat.id = c.categoria_id  WHERE categoria_id IN (SELECT id FROM categorias WHERE config_id = ".$mod.") AND c.id IN (SELECT curso_id FROM encuestas_respuestas GROUP BY curso_id) ORDER BY c.nombre"));
-
-        $cursos = DB::select( DB::raw("SELECT c.id, c.nombre, cat.nombre AS escuela, m.codigo_matricula FROM cursos c
-                                            INNER JOIN categorias cat ON cat.id = c.categoria_id
-                                            INNER JOIN ab_config m ON m.id = c.config_id
-                                            INNER JOIN curso_encuesta e
-                                            ON e.curso_id = c.id
-                                            ".$cad1."
-                                            ".$cad2."
-                                            AND c.id IN (SELECT curso_id FROM encuestas_respuestas GROUP BY curso_id)
-                                            ORDER BY c.orden"
-                                        ));
+        $cursos = $this->loadCourses($moduleId, $pollId);
 
         return $cursos;
     }
@@ -275,22 +413,7 @@ class HomeController extends Controller
             $cad1 = " WHERE curso_id = ".$curso;
         }
 
-        // return $curso;
-        // if ($tipo == 'epc') {
-            $grupos = DB::select( DB::raw("
-                SELECT grupo,grupo_nombre FROM usuarios
-                WHERE id IN (
-                    SELECT usuario_id FROM encuestas_respuestas
-                    ".$cad1."
-                    AND tipo_pregunta = 'califica')
-                GROUP BY grupo order by grupo_nombre asc"
-            ));
-        // }
-        // else{
-        //     $grupos = \DB::select( \DB::raw("SELECT id, grupo FROM usuarios WHERE id IN (SELECT usuario_id FROM encuestas_respuestas WHERE curso_id <= 0 AND tipo_pregunta = 'califica') GROUP BY grupo"));
-        // }
-        return $grupos;
-        // return response()->json(['success'=>'Got Simple Ajax Request.']);
+        return $this->loadGroups();
     }
 
     // ENCUESTAS - RESUMEN CALIFICA

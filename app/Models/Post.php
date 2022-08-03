@@ -47,14 +47,19 @@ class Post extends BaseModel
 
 
     /**
-     * Load filtered paginated records from databa
+     * Load filtered paginated records from database
      *
      * @param $request
+     * @param null $section_id
      * @return LengthAwarePaginator
      */
-    protected function search($request)
+    protected function search($request, $section_id = null)
     {
-        $query = self::query();
+        if ($section_id) {
+            $query = self::where('section_id', $section_id);
+        } else {
+            $query = self::query();
+        }
 
         if ($request->q) {
             $query->where('title', 'like', "%$request->q%");

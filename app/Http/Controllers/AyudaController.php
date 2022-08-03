@@ -10,6 +10,7 @@ use App\Http\Requests\AyudaStoreRequest;
 use App\Http\Resources\AyudaResource;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class AyudaController extends Controller
 {
@@ -25,7 +26,7 @@ class AyudaController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return void
      */
     public function index(Request $request)
     {
@@ -42,7 +43,7 @@ class AyudaController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -54,8 +55,8 @@ class AyudaController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param AyudaStoreRequest $request
+     * @return Response
      */
     public function store(AyudaStoreRequest $request)
     {
@@ -82,16 +83,16 @@ class AyudaController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Ayuda  $ayuda
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function update(AyudaStoreRequest $request, Ayuda $ayuda)
     {
         $data = $request->validated();
-    
+
         $data = Media::requestUploadFile($data, 'imagen');
 
         $last_order = $ayuda->orden;
-        
+
         $ayuda->update($data);
 
         SortingModel::reorderItems($ayuda, [], $last_order);
@@ -110,13 +111,13 @@ class AyudaController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Ayuda  $ayuda
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(Ayuda $ayuda)
     {
         // \File::delete(public_path().'/'.$ayuda->imagen);
         $ayuda->delete();
-        
+
         return $this->success(['msg' => 'Ayuda eliminada correctamente.']);
     }
 }
