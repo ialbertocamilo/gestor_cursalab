@@ -14,7 +14,6 @@ use App\Http\Controllers\HomeController;
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
 <script>
     coloresFondo = [
-        'rgba(255, 99, 132, 0.4)',
         'rgba(54, 162, 235, 0.4)',
         'rgba(255, 235, 59, 0.4)',
         'rgba(153, 102, 255, 0.4)',
@@ -45,12 +44,12 @@ use App\Http\Controllers\HomeController;
     @include('layouts.user-header')
     {{--    <v-app >--}}
     <section class="section-list" style="padding: 20px 0 10px 0 ;">
-{{--        <v-card flat class="elevation-0">--}}
-{{--            <v-card-title>--}}
-{{--                Resumen de encuestas--}}
-{{--                <v-spacer/>--}}
-{{--            </v-card-title>--}}
-{{--        </v-card>--}}
+        {{--        <v-card flat class="elevation-0">--}}
+        {{--            <v-card-title>--}}
+        {{--                Resumen de encuestas--}}
+        {{--                <v-spacer/>--}}
+        {{--            </v-card-title>--}}
+        {{--        </v-card>--}}
         <div class="elevation-0 v-card v-card--flat v-sheet theme--light">
             <div class="v-card__title">
                 Resultados de encuestas

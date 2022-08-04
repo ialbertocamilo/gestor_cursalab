@@ -15,9 +15,9 @@
                     <v-tab
                         :href="'#modulo-' + modulo.id"
                         class="primary--text"
-                        v-for="modulo in selects.modulos" :key="modulo.id"
+                        v-for="modulo in selects.modulos"
+                        :key="modulo.id"
                     >
-                        <!-- <v-icon>mdi-phone</v-icon> -->
                         <span>
                             {{ modulo.nombre.replace('Capacitación ', '') }}
                         </span>
@@ -33,7 +33,11 @@
                     >
                         <v-card flat class="mt-5">
                             <v-row justify="space-around">
-                                <v-col cols="6" class="d-flex justify-content-center" v-for="carrera in carreras" :key="'modulo-' + index + '-carrera-' + carrera.id" >
+                                <v-col cols="6"
+                                       class="d-flex justify-content-center"
+                                       v-for="carrera in carreras"
+                                       :key="'modulo-' + index + '-carrera-' + carrera.id"
+                                >
                                     <DefaultSelect
                                         clearable
                                         :items="selects.categorias"
@@ -120,7 +124,9 @@ export default {
                 // let formData = vue.getMultipartFormData(method, vue.resource, fields, [], array_fields);
 
                 // vue.$http.post(url, formData)
-                vue.$http.post(url, {'modulos_carreras' : vue.resource.modulos_carreras, '_method' : method})
+                vue.$http.post(
+                        url,
+                    {'modulos_carreras' : vue.resource.modulos_carreras, '_method' : method})
                     .then(({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
@@ -135,8 +141,10 @@ export default {
             // Selects independientes
             vue.selects.modulos = []
             vue.selects.categorias = []
-        },
+        }
+        ,
         async loadData(resource) {
+
             let vue = this
 
             vue.$nextTick(() => {

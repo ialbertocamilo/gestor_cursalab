@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 
@@ -108,7 +109,12 @@ class Glossary extends Model
             'glossary_module',
             'glossary_id',
             'module_id'
-        )->withPivot('code');
+        );
+    }
+
+    public function glossary_module() {
+
+        return $this->hasMany(GlossaryModule::class);
     }
 
     public function laboratorio()
@@ -183,7 +189,7 @@ class Glossary extends Model
     }
 
 
-    public function setEstadoAttribute($value)
+    public function setActiveAttribute($value)
     {
         $this->attributes['active'] = (
             $value==='true' OR
@@ -199,15 +205,19 @@ class Glossary extends Model
 
     --------------------------------------------------------------------------*/
 
+    /**
+     * Insert data from Excel file into database
+     *
+     * @param $data
+     * @return JsonResponse
+     */
     protected function importFromFile($data)
     {
         try {
 
-            $model = (new GlosarioImport);
-
+            $model = new GlosarioImport;
             $model->modulo_id = $data['modulo_id'];
             $model->categoria_id = $data['categoria_id'];
-
             $model->import($data['file_excel']);
 
             if ($model->failures()->count()) {
@@ -258,23 +268,14 @@ class Glossary extends Model
 
         $query = Glossary::with($relationships);
 
-        if ($request->q || $request->modulo_id) {
-            $query->where(function ($query) use ($request) {
-                $query->where('name', 'like', "%{$request->q}%")
-                    ->orWhereHas('modulos', function ($q) use ($request) {
-                        if ($request->q)
-                            $q->where('glosario_modulo.codigo', $request->q);
-
-                        if ($request->modulo_id)
-                            $q->where('id', $request->modulo_id);
-                    });
-            });
+        if ($request->q) {
+            $query->where('name', 'like', "%{$request->q}%");
         }
 
         if ($request->modulo_id) {
-            $query->whereHas('modulos', function ($q) use ($request) {
-                $q->where('id', $request->modulo_id);
-            });
+
+            $query->join('glossary_module', 'glossary_module.glossary_id', '=', 'glossaries.id')
+                  ->where('glossary_module.module_id', $request->modulo_id);
         }
 
         if ($request->grupo_farmacologico_id)
@@ -332,11 +333,24 @@ class Glossary extends Model
 
                 $glossary = $this->create($data);
                 $message = 'Registro creado correctamente';
-
             }
 
-            $modules = $this->prepareModulosData($data['modules']);
-            $glossary->modulos()->sync($modules);
+            // Save modules
+
+            $modules = [];
+            if (isset($data['modulos'])) {
+                foreach ($data['modulos'] as $module) {
+                    if (isset($module['code'])) {
+                        $modules[] = [
+                            'glossary_id' => $glossary->id,
+                            'module_id' => $module['id'],
+                            'code' => $module['code']
+                        ];
+                    }
+                }
+            }
+            $glossary->glossary_module()->delete();
+            GlossaryModule::insert($modules);
 
             $taxonomias = $this->prepareTaxonomiesData(
                 $data, 'principios_activos', 'principio_activo'
@@ -450,9 +464,9 @@ class Glossary extends Model
         if (is_numeric($value)) {
 
             return Taxonomy::where('group', 'glosario')
-                ->where('type', $type)
-                ->where('id', $value)
-                ->first();
+                           ->where('type', $type)
+                           ->where('id', $value)
+                           ->first();
         }
 
         return Taxonomy::getOrCreate('glosario', $type, $value);
@@ -462,19 +476,19 @@ class Glossary extends Model
     {
         $ids = [];
 
-        if (!empty($data[$key])) :
+        if (!empty($data[$key])) {
 
-            foreach ($data[$key] as $i => $value) :
+            foreach ($data[$key] as $i => $value) {
 
                 $taxonomia = $this->getOrCreateTaxonomyByValue($type, $value);
 
-                if ($taxonomia) :
-                    $ids[$taxonomia->id] = ['glossary_group_id' => Glossary::GRUPOS[$type]];
-                endif;
-
-            endforeach;
-
-        endif;
+                if ($taxonomia) {
+                    $ids[$taxonomia->id] = [
+                        'glossary_group_id' => Glossary::GRUPOS[$type]
+                    ];
+                }
+            }
+        }
 
         return $ids;
     }
@@ -486,7 +500,7 @@ class Glossary extends Model
             unset($data[$key]['id']);
             unset($data[$key]['name']);
 
-            if (empty($row['codigo']))
+            if (empty($row['code']))
                 unset($data[$key]);
         }
 
@@ -539,17 +553,19 @@ class Glossary extends Model
         return $result;
     }
 
-    protected function getModulesWithCode($modulos = NULL)
+    protected function getModulesWithCode($glossaryModules)
     {
-        $modules = Abconfig::getModulesForSelect();
 
-        foreach($modules AS $key => $module)
-        {
-            $modulo = $modulos ? $modulos->where('id', $module->id)->first() : NULL;
+        $modules = Criterion::getValuesForSelect('module');
 
-            $modules[$key]['codigo'] = $modulo->pivot->codigo ?? '';
-            $modules[$key]['modulo_id'] = $module->id;
+        $glossaryModules = $glossaryModules->toArray();
+        foreach ($glossaryModules as $module) {
+
+            $_module = $modules->find($module['module_id']);
+            $_module->code = $module['code'] ?? '';
         }
+
+
 
         return $modules;
     }

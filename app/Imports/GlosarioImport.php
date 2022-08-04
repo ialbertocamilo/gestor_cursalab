@@ -28,41 +28,44 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
         $name = trim($row['descripcion']);
         $code = trim($row['codigo']);
 
-        $glosario = Glossary::where('nombre', $name)->first();
+        $glossary = Glossary::where('name', $name)->first();
 
-        if ( $glosario ) :
+        if ( $glossary ) {
 
-            $module = $glosario->modulos()->wherePivot('modulo_id', $this->modulo_id)->first();
+            $module = $glossary->modules()
+                               ->wherePivot('module_id', $this->modulo_id)
+                               ->first();
 
-            if ( $module ) :
+            if ($module) {
 
-                if ( $module->pivot->codigo != $code ):
+                if ($module->pivot->codigo != $code) {
 
                     $name = $name . ' DUPLICATED-NAME-' . now()->format('Y-m-dH:i:s');
 
                     // Crear nuevo glosario
-                    $glosario = $this->createGlosario($name, $code, $row);
 
-                endif;
+                    $glossary = $this->createGlossary($name, $code, $row);
+                }
 
-            else:
+            } else {
 
                 // Relacionar glosario con el módulo
-                $glosario->modulos()->attach($this->modulo_id, ['codigo' => $code]);
 
-            endif;
+                $glossary->modules()
+                         ->attach($this->modulo_id, ['code' => $code]);
+            }
 
-        else:
+        } else {
 
             // Crear nuevo glosario
-            $glosario = $this->createGlosario($name, $code, $row);
 
-        endif;
+            $glossary = $this->createGlossary($name, $code, $row);
+        }
     }
 
-    public function createGlosario($name, $code, $row)
+    public function createGlossary($name, $code, $row)
     {
-        $data['nombre'] = $name;
+        $data['name'] = $name;
         $data['categoria_id'] = $this->categoria_id;
 
         $data['laboratorio_id'] = $this->getTaxonomyId($row, 'laboratorio');
@@ -75,46 +78,51 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
         $data['recomendacion_de_administracion_id'] = $this->getTaxonomyId($row, 'recomendacion_de_administracion');
         $data['advertencias_id'] = $this->getTaxonomyId($row, 'advertencias');
 
-        $data['estado'] = 1;
+        $data['active'] = 1;
 
-        $glosario = Glossary::create($data);
+        $glossary = Glossary::create($data);
 
         $principios_activos = $this->getPrincipiosActivos($row);
 
         if ( $principios_activos )
-            $glosario->principios_activos()->attach($principios_activos);
+            $glossary->principios_activos()->attach($principios_activos);
 
         $contraindicaciones = $this->getTaxonomiesId($row, 'contraindicacion');
 
         if ( $contraindicaciones )
-            $glosario->contraindicaciones()->attach($contraindicaciones);
+            $glossary->contraindicaciones()->attach($contraindicaciones);
 
         $interacciones = $this->getTaxonomiesId($row, 'interaccion', 'interacciones_frecuentes');
 
         if ( $interacciones )
-            $glosario->interacciones()->attach($interacciones);
+            $glossary->interacciones()->attach($interacciones);
 
         $reacciones = $this->getTaxonomiesId($row, 'reaccion', 'reacciones_frecuentes');
 
         if ( $reacciones )
-            $glosario->reacciones()->attach($reacciones);
+            $glossary->reacciones()->attach($reacciones);
 
-        $glosario->modulos()->attach($this->modulo_id, ['codigo' => $code]);
+        $glossary->modules()->attach($this->modulo_id, ['code' => $code]);
 
-        return $glosario;
+        return $glossary;
     }
 
     public function getPrincipiosActivos($row)
     {
         $principios_activos = [];
 
-        for ($i = 1; $i <= 5; $i++ ):
+        for ($i = 1; $i <= 5; $i++ ) {
 
-            $pa_id = $this->getTaxonomyId($row, 'principio_activo', 'principio_activo_' . $i);
+            $principioActivoId = $this->getTaxonomyId(
+                $row, 'principio_activo', 'principio_activo_' . $i
+            );
 
-            if ( $pa_id )
-                $principios_activos[$pa_id] = ['glosario_grupo_id' => Glossary::GRUPOS['principio_activo'] ];
-        endfor;
+            if ($principioActivoId) {
+                $principios_activos[$principioActivoId] = [
+                    'glossary_group_id' => Glossary::GRUPOS['principio_activo']
+                ];
+            }
+        }
 
         return $principios_activos;
     }
@@ -135,9 +143,11 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
 
                 $id = $this->getTaxonomyId($new, $type);
 
-                if ( $id ) :
-                    $ids[$id] = ['glosario_grupo_id' => Glossary::GRUPOS[$type]];
-                endif;
+                if ( $id ) {
+                    $ids[$id] = [
+                        'glossary_group_id' => Glossary::GRUPOS[$type]
+                    ];
+                }
 
             endforeach;
 
@@ -150,14 +160,14 @@ class GlosarioImport implements WithHeadingRow, OnEachRow, WithValidation, WithC
     {
         $fieldname = $fieldname ?? $type;
 
-        if ( ! empty($row[$fieldname]) ) :
+        if ( ! empty($row[$fieldname]) ) {
 
             $name = trim($row[$fieldname]);
             $taxonomy = Taxonomy::getOrCreate('glosario', $type, $name);
 
             return $taxonomy->id;
 
-        endif;
+        }
 
         return null;
     }

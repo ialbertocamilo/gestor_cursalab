@@ -18,11 +18,11 @@ class GlossaryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'modules' => $this->getCodeModules(),
+            'module' => $this->getCodeModules(),
             'images' => $this->getModulesImages(),
             'active' => !!$this->active,
 
-            'categoria_id' => $this->categoria->nombre ?? '',
+            'categoria_id' => $this->categoria->name ?? '',
 
             'created_at' => $this->created_at->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at->format('d/m/Y g:i a'),
@@ -36,7 +36,7 @@ class GlossaryResource extends JsonResource
         foreach($this->modules AS $module)
         {
             $data[] = [
-                'name' => $module->etapa,
+                'name' => $module->value_text,
                 'image' => space_url($module->logo)
             ];
         }
@@ -46,21 +46,19 @@ class GlossaryResource extends JsonResource
 
     public function getCodeModules()
     {
-        $text = '';
-        $total = count($this->modules);
-        $i = 0;
+        $codes = [];
+        $glossaryModules = $this->glossary_module->toArray();
 
-        foreach($this->modules AS $module)
-        {
-            $text .= '(' . $module->codigo_matricula . ') ' . $module->pivot->codigo;
+        if (count($glossaryModules) > 0) {
 
-            if(++$i !== $total)
-            {
-                $text .= " - ";
+            foreach ($glossaryModules as $module) {
+                $codes[] = $module['code'];
             }
 
-        }
+            return '(' . implode('-', $codes) . ')';
 
-        return $text;
+        } else {
+            return '';
+        }
     }
 }
