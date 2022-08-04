@@ -9,7 +9,7 @@
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
                     :label="'Escuela'"
-                    @click="openCRUDPage(`/modulos/${modulo_id}/escuelas/create`)"/>
+                    @click="openCRUDPage(`/escuelas/create`)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -81,17 +81,16 @@ import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DuplicarCursos from './DuplicarCursos';
 
 export default {
-    props: ['modulo_id', 'modulo_name'],
+    props: ['workspace_id', 'workspace_name'],
     components: {EscuelaFormModal, EscuelaValidacionesModal, DialogConfirm, DefaultStatusModal, DuplicarCursos},
     data() {
         let vue = this
         return {
             breadcrumbs: [
-                {title: 'Módulos', text: `${this.modulo_name}`, disabled: false, href: '/modulos'},
                 {title: 'Escuelas', text: null, disabled: true, href: ''},
             ],
             dataTable: {
-                endpoint: '/modulos/' + vue.modulo_id + '/escuelas/search',
+                endpoint: '/escuelas/search',
                 ref: 'escuelasTable',
                 headers: [
                     {text: "Orden", value: "orden", align: 'center', model: 'Categoria'},
@@ -159,7 +158,7 @@ export default {
             modalStatusOptions: {
                 ref: 'EscuelaStatusModal',
                 open: false,
-                base_endpoint: '/modulos/' + vue.modulo_id + '/escuelas',
+                base_endpoint: '/modulos/' + vue.workspace_id + '/escuelas',
                 contentText: '¿Desea cambiar de estado a este registro?',
                 endpoint: '',
             },
@@ -174,7 +173,7 @@ export default {
         let vue = this
         // vue.getSelects();
 
-        vue.filters.module = vue.modulo_id
+        vue.filters.module = vue.workspace_id
     },
     methods: {
         getSelects() {
@@ -201,7 +200,7 @@ export default {
         },
         confirmDelete() {
             let vue = this
-            let url = `/modulos/${vue.modulo_id}/escuelas/${vue.delete_model.id}`
+            let url = `/modulos/${vue.workspace_id}/escuelas/${vue.delete_model.id}`
 
             vue.$http.delete(url)
                 .then(({data}) => {

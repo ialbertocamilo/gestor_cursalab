@@ -16,8 +16,8 @@
                                 dense
                                 label="Nombre"
                                 placeholder="Ingrese un nombre"
-                                v-model="resource.nombre"
-                                :rules="rules.nombre"
+                                v-model="resource.name"
+                                :rules="rules.name"
                                 show-required
                             />
                         </v-col>
@@ -26,8 +26,8 @@
                                 dense
                                 label="Orden"
                                 placeholder="Orden"
-                                v-model="resource.orden"
-                                :rules="rules.orden"
+                                v-model="resource.position"
+                                :rules="rules.position"
                                 show-required
                             />
                         </v-col>
@@ -38,7 +38,7 @@
                                 dense
                                 label="Descripción"
                                 placeholder="Ingrese una descripción"
-                                v-model="resource.descripcion"
+                                v-model="resource.description"
                             />
                         </v-col>
                         <v-col cols="12">
@@ -130,7 +130,7 @@
                     </v-row>
                     <v-row>
                         <v-col cols="2">
-                            <DefaultToggle v-model="resource.estado"/>
+                            <DefaultToggle v-model="resource.active"/>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -153,8 +153,8 @@
     </section>
 </template>
 <script>
-const fields = ['nombre', 'reinicios_programado', 'estado', 'orden', 'imagen', 'plantilla_diploma', 'config_id', 'categoria_id',
-    'descripcion', 'requisito_id'];
+const fields = ['name', 'reinicios_programado', 'active', 'position', 'imagen', 'plantilla_diploma', 'config_id', 'categoria_id',
+    'description', 'requisito_id'];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 
@@ -163,18 +163,18 @@ export default {
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         return {
-            base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos`,
+            base_endpoint: `/escuelas/${this.categoria_id}/cursos`,
             resourceDefault: {
-                nombre: null,
-                descripcion: null,
-                orden: null,
+                name: null,
+                description: null,
+                position: null,
                 imagen: null,
                 plantilla_diploma: null,
                 file_imagen: null,
                 file_plantilla_diploma: null,
                 config_id: this.modulo_id,
                 categoria_id: this.categoria_id,
-                estado: false,
+                active: false,
                 requisito_id: null,
                 reinicio_automatico: false,
                 reinicio_automatico_dias: null,
@@ -183,8 +183,8 @@ export default {
             },
             resource: {},
             rules: {
-                nombre: this.getRules(['required']),
-                orden: this.getRules(['required', 'number']),
+                name: this.getRules(['required']),
+                position: this.getRules(['required', 'number']),
             },
             selects: {
                 requisito_id: []

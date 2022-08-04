@@ -20,8 +20,8 @@ class Course extends Model
     --------------------------------------------------------------------------*/
 
 
-    public function schools() {
-
+    public function schools()
+    {
         return $this->belongsToMany(
             School::class,
             'course_school'
@@ -53,22 +53,17 @@ class Course extends Model
         return $this->hasMany(Update_usuarios::class, 'curso_id');
     }
 
-    protected function search($request, $paginate = 15)
+    protected static function search($request, $paginate = 15)
     {
-        $q = self::with([
-            'update_usuarios' => function ($q_update) {
-                $q_update->whereIn('estado', [0, 1]);
-            }
-        ])
-            ->withCount('topics', 'poll');
+        $q = self::join('course_school', 'course_school.course_id', '=', 'courses.id')->withCount(['topics', 'poll']);
 
-        if ($request->schoold_id)
-            $q->where('school_id', $request->school_id);
+        if ($request->school_id)
+            $q->where('course_school.school_id', $request->school_id);
 
         if ($request->q)
-            $q->where('nombre', 'like', "%$request->q%");
+            $q->where('courses.name', 'like', "%$request->q%");
 
-        $field = $request->sortBy ?? 'orden';
+        $field = $request->sortBy ?? 'courses.position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $q->orderBy($field, $sort);

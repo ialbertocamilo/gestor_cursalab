@@ -24,14 +24,14 @@ class EscuelaStoreUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'config_id' => 'required',
-            'nombre' => 'required',
+            // 'config_id' => 'required',
+            'name' => 'required',
             'modalidad' => 'required',
             'nombre_ciclo_0' => 'nullable',
-            'orden' => 'required',
-            'estado' => 'required',
+            'position' => 'required',
+            'active' => 'required',
 
-            'reinicios_programado' => 'nullable',
+            'scheduled_restarts' => 'nullable',
 
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',

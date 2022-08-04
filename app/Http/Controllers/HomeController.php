@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\EncuestaxgypExport;
 use App\Models\Course;
 use App\Models\Criterion;
+use App\Models\CriterionValue;
 use App\Models\Curso;
 use App\Models\Poll;
 use App\Models\PollQuestion;
@@ -117,8 +118,9 @@ class HomeController extends Controller
 
     /************************************** ENCUESTAS RESUMEN ***********************************/
     public function encuesta_filtrada_data(
-        $enc_id, $mod, $curso_id, $gru, $tipopreg
+        $pollId, $module, $course_id, $group, $tipopreg
     ){
+
         $cad1 = " WHERE 1 ";
         $cad2 = "";
         $cad3 = "";
@@ -128,56 +130,44 @@ class HomeController extends Controller
         $ep_result = [];
 
         // filtro encuesta
-        if ($enc_id != '' && $enc_id != 'ALL') {
-            $cad1 = " WHERE ep.encuesta_id = '".$enc_id."'";
+        if ($pollId != '' && $pollId != 'ALL') {
+            $cad1 = " WHERE quest.poll_id = '".$pollId."'";
         }
-        // firltro modulo
-        if ($mod != '' && $mod != 'ALL') {
-            $cad2 = " AND u.config_id = '".$mod."'";
+
+        // filtro modulo
+        if ($module != '' && $module != 'ALL') {
 
             // filtra lista de cursos
             $cursos = $this->loadCourses();
-
             $ep_result['cursos'] = $cursos;
         }
+
         // filtro curso
-        if ($curso_id != '' && $curso_id != 'ALL') {
-            $cad3 = " AND er.curso_id = '".$curso_id."'";
+        if ($course_id != '' && $course_id != 'ALL') {
+            $cad3 = " AND ans.course_id = '".$course_id."'";
             $ep_result['grupos'] = $this->loadGroups();
         }
+
         // filtro grupo
-        if ($gru != '' && $gru != 'ALL') {
-            $cad4 = " AND u.grupo = '".$gru."'";
+        if ($group != '' && $group != 'ALL') {
+            $groupCriterion = Criterion::where('code', 'group')->first();
+            // get criterion value id
+            $criterionValue = CriterionValue::where('value_text', $group)
+                                       ->where('criterion_id', $groupCriterion->id)
+                                       ->first();
+            $cad4 = " AND crit_val_u.criterion_value_id = " . $criterionValue->id;
         }
 
         if ($tipopreg != "") {
-            $cad5 = " AND ep.tipo_pregunta = '".$tipopreg."'";
+            // Get id of 'tipo-pregunta' taxonomy
+            $taxonomyTipoPregunta = Taxonomy::getFirstData(
+                'poll', 'tipo-pregunta', $tipopreg
+            );
+            $cad5 = " AND quest.type_id = " . $taxonomyTipoPregunta->id;
         }
 
         // el group by
         $elgroupby = "";
-
-        // consulta maestra
-//        $ep_result['pgtas'] = DB::select( DB::raw("
-//            SELECT
-//                ep.id,
-//                ep.encuesta_id,
-//                ep.titulo,
-//                er.curso_id,
-//                u.config_id,
-//                u.grupo,
-//                ep.tipo_pregunta
-//            FROM encuestas_preguntas ep
-//            INNER JOIN encuestas_respuestas er
-//                ON er.encuesta_id = ep.encuesta_id
-//            INNER JOIN usuarios u ON u.id = er.usuario_id
-//            ".$cad1."
-//            ".$cad2."
-//            ".$cad3."
-//            ".$cad4."
-//            ".$cad5."
-//            ".$elgroupby."
-//            GROUP BY ep.id"));
 
         $ep_result['pgtas'] = DB::select(
             DB::raw("
@@ -186,22 +176,21 @@ class HomeController extends Controller
                     quest.poll_id encuesta_id,
                     quest.titulo,
                     ans.course_id curso_id,
-                    -- u.config_id,
                     '' as config_id,
-                    -- u.grupo,
-                    'el grup' as grupo,
+                    '' as grupo, -- getting group name implies more JOINS, this is temporary solution
                     -- quest.tipo_pregunta
-                    'tipopreg' as tipo_pregunta
+                    '" . $tipopreg . "' as tipo_pregunta
                 FROM poll_questions quest
-                INNER JOIN poll_question_answers ans
-                    ON ans.poll_question_id = quest.id
+                INNER JOIN poll_question_answers ans ON ans.poll_question_id = quest.id
                 INNER JOIN users u ON u.id = ans.user_id
-                -- ".$cad1."
-                -- ".$cad2."
-                -- ".$cad3."
-                -- ".$cad4."
-                -- ".$cad5."
-                -- ".$elgroupby."
+                INNER JOIN criterion_value_user crit_val_u ON crit_val_u.user_id = u.id
+
+                    ".$cad1."
+                    ".$cad2."
+                    ".$cad3."
+                    ".$cad4."
+                    ".$cad5."
+                    ".$elgroupby."
                 GROUP BY quest.id"
             )
         );
@@ -289,20 +278,20 @@ class HomeController extends Controller
 
         if ($request->input('t') == 'epc') { // polls by course
 
-            $enc_id = $request->input('encuesta');
-            $mod = $request->input('mod');
-            $curso_id= $request->input('p');
-            $gru = $request->input('g');
+            $pollId = $request->input('encuesta');
+            $module = $request->input('mod');
+            $courseId = $request->input('p');
+            $groupId = $request->input('g');
 
             $enc_preg_res = $this->encuesta_filtrada_data(
-                $enc_id, $mod, $curso_id, $gru, 'califica'
+                $pollId, $module, $courseId , $groupId, 'califica'
             );
 
-            if ($mod != '' && $mod != 'ALL') {
+            if ($module != '' && $module != 'ALL') {
                 $cursos = $enc_preg_res['cursos'];
             }
 
-            if ($curso_id != '' && $curso_id != 'ALL') {
+            if ($courseId  != '' && $courseId  != 'ALL') {
                 $grupos = $enc_preg_res['grupos'];
             }
 
@@ -418,7 +407,9 @@ class HomeController extends Controller
 
     // ENCUESTAS - RESUMEN CALIFICA
     // public static function resumenCalifica($curso_id, $grupo, $enc_id, $pregunta_id){
-    public static function resumenCalifica($pregunta_id, $mod, $curso_id, $grupo){
+    public static function resumenCalifica(
+        $pollQuestionId, $mod, $courseId, $grupo
+    ){
 
 
         $cad1 = " WHERE 1 ";
@@ -427,59 +418,59 @@ class HomeController extends Controller
         $cad4 = "";
 
         // filtro
-        if ($pregunta_id != '' && $pregunta_id != 'ALL') {
-            $cad1 = " WHERE er.pregunta_id = '".$pregunta_id."'";
+        if ($pollQuestionId != '' && $pollQuestionId != 'ALL') {
+            $cad1 = " WHERE ans.poll_question_id = '".$pollQuestionId."'";
         }
         // filtro
         if ($mod != '' && $mod != 'ALL') {
-            $cad2 = " AND u.config_id = '".$mod."'";
+            //$cad2 = " AND u.config_id = '".$mod."'";
         }
         // filtro
-        if ($curso_id != '' && $curso_id != 'ALL') {
-            $cad3 = " AND er.curso_id = '".$curso_id."'";
+        if ($courseId != '' && $courseId != 'ALL') {
+            $cad3 = " AND ans.course_id = '".$courseId."'";
         }
         // filtro
         if ($grupo != '' && $grupo != 'ALL') {
-            $cad4 = " AND u.grupo = '".$grupo."'";
+            $groupCriterion = Criterion::where('code', 'group')->first();
+            // get criterion value id
+            $criterionValue = CriterionValue::where('value_text', $grupo)
+                                        ->where('criterion_id', $groupCriterion->id)
+                                        ->first();
+            $cad4 = " AND crit_val_u.criterion_value_id = " . $criterionValue->id;
         }
+
+//        $rptas = DB::select( DB::raw("
+//            SELECT er.id, er.pregunta_id, er.respuestas
+//            FROM encuestas_respuestas er
+//            INNER JOIN usuarios u ON u.id = er.usuario_id
+//            ".$cad1."
+//            ".$cad2."
+//            ".$cad3."
+//            ".$cad4."
+//            AND er.tipo_pregunta = 'califica'"
+//        ));
+
+        // Get id of 'tipo-pregunta' taxonomy
+        $taxonomyTipoPregunta = Taxonomy::getFirstData(
+            'poll', 'tipo-pregunta', 'califica'
+        );
 
         // consulta maestra
         $rptas = DB::select( DB::raw("
-            SELECT er.id, er.pregunta_id, er.respuestas
-            FROM encuestas_respuestas er
-            INNER JOIN usuarios u ON u.id = er.usuario_id
+            SELECT
+                   ans.id,
+                   ans.poll_question_id pregunta_id,
+                   ans.respuestas
+            FROM poll_question_answers ans
+            INNER JOIN poll_questions quest ON ans.poll_question_id = quest.id
+            INNER JOIN users u ON u.id = ans.user_id
+            INNER JOIN criterion_value_user crit_val_u ON crit_val_u.user_id = u.id
             ".$cad1."
             ".$cad2."
             ".$cad3."
             ".$cad4."
-            AND er.tipo_pregunta = 'califica'"
+            AND quest.type_id = " . $taxonomyTipoPregunta->id
         ));
-
-
-        ///
-
-        // $where_grupo = "u.grupo = '".$grupo."' ";
-        // if ($grupo == 'ALL') {
-        //     $where_grupo = '1';
-        // }
-        // $usuario_ids = \DB::table('encuestas_respuestas AS er')
-        //                                     ->join('usuarios AS u', 'u.id', '=', 'er.usuario_id')
-        //                                     ->select('u.id')
-        //                                     // ->where("u.grupo", $grupo)
-        //                                     ->where("er.curso_id", $curso_id)
-        //                                     ->where('er.encuesta_id', $enc_id)
-        //                                     ->whereRaw($where_grupo)
-        //                                     ->groupBy('er.usuario_id')
-        //                                     ->pluck('u.id')->toArray();
-        // $tot_usu_x_enc = count($usuario_ids);
-
-        // $rptas = \DB::table('encuestas_respuestas')
-        //                                     ->select('*')
-        //                                     ->where("curso_id", $curso_id)
-        //                                     ->where('pregunta_id', $pregunta_id)
-        //                                     ->whereIn('usuario_id', $usuario_ids)
-        //                                     ->where('tipo_pregunta', 'califica')
-        //                                     ->get();
 
         // $tot_rptas = $rptas->count();
         $tot_rptas = 0;

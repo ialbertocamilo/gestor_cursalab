@@ -28,28 +28,30 @@ use App\Models\Curso_encuesta;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\ApiRest\HelperController;
+use App\Models\Course;
+use App\Models\School;
 
 class CursosController extends Controller
 {
 
-    public function search(Abconfig $abconfig, Categoria $categoria, Request $request)
+    public function search(School $escuela, Request $request)
     {
-        $request->categoria_id = $categoria->id;
-        $cursos = Curso::search($request);
+        $request->school_id = $escuela->id;
 
+        $cursos = Course::search($request);
         CursoSearchResource::collection($cursos);
 
         return $this->success($cursos);
     }
 
-    public function searchCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso)
+    public function searchCurso(School $escuela, Course $curso)
     {
-        $reinicio_automatico = json_decode($curso->reinicios_programado);
+        $reinicio_automatico = json_decode($curso->scheduled_restarts);
         $curso->reinicio_automatico = $reinicio_automatico->activado ?? false;
         $curso->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
         $curso->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
         $curso->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
-        $requisitos = $this->getFormSelects($abconfig, $categoria, $curso, true);
+        $requisitos = []; // $this->getFormSelects($abconfig, $escuela, $curso, true);
         $curso->makeHidden('reinicios_programado');
         return $this->success([
             'curso' => $curso,
@@ -63,7 +65,7 @@ class CursosController extends Controller
         $data['categoria_modalidad'] = $categoria->modalidad;
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-//        dd($data);
+        //        dd($data);
         $curso = Curso::storeRequest($data);
 
         $msg = 'Curso creado correctamente.';
@@ -76,7 +78,7 @@ class CursosController extends Controller
         $validate = Curso::validateCursoRequisito($data, $curso);
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-//        dd($data);
+        //        dd($data);
 
         if (!$validate['validate'])
             return $this->success(compact('validate'), 422);
@@ -95,9 +97,9 @@ class CursosController extends Controller
 
     public function getFormSelects(Abconfig $abconfig, Categoria $categoria, Curso $curso = null, $compactResponse = false)
     {
-//        info("CATEGORIA :: {$categoria->id}");
-//        info("CURSO :: {$curso->id}");
-//        info("LIBRE :: {$curso->libre}");
+        //        info("CATEGORIA :: {$categoria->id}");
+        //        info("CURSO :: {$curso->id}");
+        //        info("LIBRE :: {$curso->libre}");
         $query = DB::table('cursos AS c')
             ->select(DB::raw('c.id, c.nombre, c.orden, u.carrera_id'))
             ->join('curricula AS u', 'c.id', '=', 'u.curso_id')
@@ -108,7 +110,7 @@ class CursosController extends Controller
             $query->whereNotIn('c.id', [$curso->id])
                 ->where('c.libre', $curso->libre);
         }
-//        info($query->toSql());
+        //        info($query->toSql());
         $result = $query->get();
 
         $requisitos = collect();
@@ -407,9 +409,11 @@ class CursosController extends Controller
         Curso::find($curso->id)->update($data);
         if ($move_curso) {
             DB::table('cursos')->where('id', $curso->id)->update(
-                ['categoria_id' => $data['move_categoria_id'],
+                [
+                    'categoria_id' => $data['move_categoria_id'],
                     'requisito_id' => null,
-                ]);
+                ]
+            );
             DB::table('posteos')->where('curso_id', $curso->id)->update(['categoria_id' => $data['move_categoria_id']]);
             DB::table('ev_abiertas')->where('curso_id', $curso->id)->update(['categoria_id' => $data['move_categoria_id']]);
             DB::table('pruebas')->where('curso_id', $curso->id)->update(['categoria_id' => $data['move_categoria_id']]);
@@ -556,8 +560,10 @@ class CursosController extends Controller
 
         $curso_encuesta = Curso_encuesta::updateOrCreate(
             ['curso_id' => $curso->id],
-            ['encuesta_id' => $data['encuesta_id']
-            ]);
+            [
+                'encuesta_id' => $data['encuesta_id']
+            ]
+        );
 
         return $this->success(['msg' => 'Encuesta actualizada.']);
     }
@@ -621,13 +627,13 @@ class CursosController extends Controller
         if ($request->withValidations == 0) {
 
             $validate = Curso::validateCursoEliminar($curso);
-//        dd($validate);
+            //        dd($validate);
 
             if (!$validate['validate'])
                 return $this->success(compact('validate'), 422);
         }
 
-       $curso->delete();
+        $curso->delete();
 
         $response = [
             'curso' => $curso,
@@ -643,14 +649,13 @@ class CursosController extends Controller
     {
         $data = $request->validated();
         $validate = Curso::validateMoverCurso($curso);
-//        dd($validate);
+        //        dd($validate);
         if (!$validate['validate'])
             return $this->success(compact('validate'), 422);
 
         $curso = Curso::moverCurso($curso, $data['escuela_id']);
 
         return $this->success(['msg' => 'El curso se movió correctamente.']);
-
     }
 
     public function updateStatus(Abconfig $abconfig, Categoria $categoria, Curso $curso, Request $request)
@@ -659,7 +664,7 @@ class CursosController extends Controller
         if ($request->withValidations == 0) {
 
             $validate = Curso::validateUpdateStatus($curso, $estado);
-//        dd($validate);
+            //        dd($validate);
 
             if (!$validate['validate'])
                 return $this->success(compact('validate'), 422);
@@ -672,7 +677,7 @@ class CursosController extends Controller
             'msg' => 'Estado actualizado con éxito.',
         ];
 
-        $response['messages'] = Curso::getMessagesActions($curso );
+        $response['messages'] = Curso::getMessagesActions($curso);
 
         return $this->success($response);
     }

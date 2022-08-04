@@ -28,8 +28,8 @@
                                 label="Nombre"
                                 placeholder="Ingrese un nombre"
                                 show-required
-                                v-model="resource.nombre"
-                                :rules="rules.nombre"
+                                v-model="resource.name"
+                                :rules="rules.name"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -38,8 +38,8 @@
                                 label="Orden"
                                 show-required
                                 placeholder="Orden"
-                                v-model="resource.orden"
-                                :rules="rules.orden"
+                                v-model="resource.position"
+                                :rules="rules.position"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -130,7 +130,7 @@
 <!--                            <DefaultFormLabel-->
 <!--                                label="Estado"-->
 <!--                            />-->
-                            <DefaultToggle v-model="resource.estado"/>
+                            <DefaultToggle v-model="resource.active"/>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -146,25 +146,25 @@
     </section>
 </template>
 <script>
-const fields = ['nombre', 'nombre_ciclo_0', 'estado', 'orden', 'config_id',
+const fields = ['name', 'nombre_ciclo_0', 'active', 'position', 'config_id',
     'imagen', 'reinicios_programado', 'modalidad'];
 const file_fields = ['imagen','plantilla_diploma'];
 export default {
     props: ["modulo_id", 'categoria_id'],
     data() {
         return {
-            base_endpoint: `/modulos/${this.modulo_id}/escuelas`,
+            base_endpoint: `/escuelas`,
             resourceDefault: {
                 modalidad: null,
                 config_id: this.modulo_id,
-                nombre: null,
+                name: null,
                 nombre_ciclo_0: null,
                 imagen: null,
                 plantilla_diploma:null,
                 file_imagen: null,
                 file_plantilla_diploma:null,
-                orden: null,
-                estado: false,
+                position: null,
+                active: false,
                 reinicio_automatico: false,
                 reinicio_automatico_dias: null,
                 reinicio_automatico_horas: null,
@@ -172,9 +172,9 @@ export default {
             },
             resource: {},
             rules: {
-                nombre: this.getRules(['required']),
+                name: this.getRules(['required']),
                 modalidad: this.getRules(['required']),
-                orden: this.getRules(['required', 'number']),
+                position: this.getRules(['required', 'number']),
             },
             selects: {
                 modalidad: [

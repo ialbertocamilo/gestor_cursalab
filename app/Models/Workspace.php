@@ -27,4 +27,18 @@ class Workspace extends BaseModel
         return $this->belongsToMany(School::class);
     }
 
+    protected static function search($request)
+    {
+        $query = self::where('id', $request->id)->withCount(['schools']);
+
+        if ($request->q)
+            $query->where('name', 'like', "%$request->q%");
+
+        $field = $request->sortBy ?? 'id';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $query->orderBy($field, $sort);
+
+        return $query->paginate($request->paginate);
+    }
 }

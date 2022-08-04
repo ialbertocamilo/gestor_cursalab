@@ -3,7 +3,7 @@
         attach
         hide-details="auto"
         outlined multiple
-        item-text="nombre"
+        :item-text="itemText"
         item-value="id"
         :rules="rules"
         v-model="localSelected"
@@ -18,7 +18,8 @@
             <v-list-item three-line>
                 <v-list-item-content>
                     <v-list-item-title>
-                        <span class="subheading pr-1" v-text="'Se agregará el siguiente elemento:'"/>
+                        <span class="subheading pr-1"
+                              v-text="'Se agregará el siguiente elemento:'"/>
                         <v-chip
                             label
                             small
@@ -31,7 +32,8 @@
                 </v-list-item-content>
             </v-list-item>
         </template>
-        <template v-slot:selection="{ attrs, item, parent, selected, index }" v-if="multiple">
+        <template v-slot:selection="{ attrs, item, parent, selected, index }"
+                  v-if="multiple">
             <v-chip
                 v-bind="attrs"
                 :input-value="selected"
@@ -95,6 +97,10 @@ export default {
         countShowValues: {
             type: Number,
             default: 1
+        },
+        itemText: {
+            type: String,
+            default: 'nombre'
         }
     },
     created() {

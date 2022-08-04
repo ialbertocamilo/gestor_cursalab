@@ -5,6 +5,7 @@
                    @onConfirm="confirmModal"
     >
         <template v-slot:content>
+
             <v-form ref="glosarioForm" class="mb-15">
 
                 <DefaultErrors :errors="errors" />
@@ -20,25 +21,33 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                    <v-col cols="4" class="d-flex justify-content-center" v-for="modulo in resource.modulos" :key="modulo.id">
-                        <DefaultInput clearable
-                                      v-model="modulo.codigo"
-                                      :label="'Código - ' + modulo.nombre.replace('Capacitación ', '')"
-                                      :rules="rules.modulo"
+                    <v-col cols="4"
+                           class="d-flex justify-content-center"
+                           v-for="modulo in resource.modulos"
+                           :key="modulo.id">
+                        <DefaultInput
+                          clearable
+                          v-model="modulo.code"
+                          :label="'Código - ' + modulo.nombre.replace('Capacitación ', '')"
+                          :rules="rules.modulo"
                         />
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" v-for="select in selects.all" :key="select.id">
+                <v-row justify="space-around"
+                       v-for="select in selects.all"
+                       :key="select.id">
                     <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultSelectOrCreate clearable
-                                             :items="select.list"
-                                             v-model="resource[select.relation]"
-                                             return-object
-                                             :multiple="select.multiple"
-                                             :count-show-values="select.show_values"
-                                             :label="select.name"
-                                             :show-select-all="false"
+                        <DefaultSelectOrCreate
+                            clearable
+                            :itemText="'name'"
+                            :items="select.list"
+                            v-model="resource[select.relation]"
+                            return-object
+                            :multiple="select.multiple"
+                            :count-show-values="select.show_values"
+                            :label="select.name"
+                            :show-select-all="false"
                         />
                     </v-col>
                 </v-row>
@@ -60,8 +69,8 @@ const fields = [
     'name', 'active', 'laboratorio', 'categoria', 'jerarquia',
     'advertencias', 'condicion_de_venta', 'via_de_administracion',
     'grupo_farmacologico', 'dosis_adulto', 'dosis_nino',
-    'recomendacion_de_administracion', 'principios_activos', 'contraindicaciones',
-    'interacciones', 'reacciones'
+    'recomendacion_de_administracion', 'principios_activos',
+    'contraindicaciones', 'interacciones', 'reacciones'
 ];
 
 const array_fields = ['modulos']
@@ -145,7 +154,9 @@ export default {
 
             if (validateForm ) {
 
-                let formData = vue.getMultipartFormData(method, vue.resource, fields, [], array_fields);
+                let formData = vue.getMultipartFormData(
+                    method, vue.resource, fields, [], array_fields
+                );
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
@@ -162,13 +173,15 @@ export default {
             }
 
             this.hideLoader()
-        },
+        }
+        ,
         resetSelects() {
             let vue = this
             // Selects independientes
             vue.selects.modulos = []
             vue.selects.all = []
-        },
+        }
+        ,
         async loadData(resource) {
 
             let vue = this
@@ -180,19 +193,22 @@ export default {
             })
 
             let base = `${vue.options.base_endpoint}`
-            let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
+            let url = resource
+                        ? `${base}/${resource.id}/edit`
+                        : `${base}/create`;
 
             // let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/search` : `form-selects`}`
             await vue.$http.get(url)
                 .then(({data}) => {
+
                     vue.selects.all = data.data.selects
 
                     if (resource) {
-                        vue.resource = data.data.glosario
-                        vue.resource.modulos = data.data.modulos
 
-                        // console.log(vue.resource)
-                    }else{
+                        vue.resource = Object.assign({}, data.data.glossary);
+                        vue.resource.modulos = data.data.modulos;
+
+                    } else {
                         vue.resource.modulos = data.data.modulos
                     }
 
