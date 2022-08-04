@@ -27,7 +27,7 @@
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/modulos/${modulo_id}/escuelas/${categoria_id}/cursos/create`)"/>
+                    @click="openCRUDPage(`/modulos/${modulo_id}/escuelas/${escuela_id}/cursos/create`)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -72,7 +72,7 @@
                 @onCancel="closeFormModal(modalMoverCurso)"
                 @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
                 :modulo_id="modulo_id"
-                :curso_escuela="categoria_id"
+                :curso_escuela="escuela_id"
             />
             <DialogConfirm
                 :ref="modalDeleteOptions.ref"
@@ -111,23 +111,17 @@ import DefaultStatusModal from "../Default/DefaultStatusModal";
 
 export default {
     components: {CursosEncuestaModal, MoverCursoModal, DialogConfirm, CursoValidacionesModal, DefaultStatusModal},
-    props: ['modulo_id', 'modulo_name', 'categoria_id', 'categoria_name'],
+    props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name'],
     data() {
         let vue = this
 
         return {
             breadcrumbs: [
-                {title: 'Módulos', text: `${this.modulo_name}`, disabled: false, href: '/modulos'},
-                {
-                    title: 'Escuelas',
-                    text: `${this.categoria_name}`,
-                    disabled: false,
-                    href: `/modulos/${this.modulo_id}/escuelas`
-                },
+                {title: 'Escuelas', text: `${this.escuela_name}`, disabled: false, href: `/escuelas`},
                 {title: 'Cursos', text: null, disabled: true, href: ''},
             ],
             dataTable: {
-                endpoint: `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/search`,
+                endpoint: `/escuelas/${vue.escuela_id}/cursos/search`,
                 ref: 'cursosTable',
                 headers: [
                     {text: "Orden", value: "orden", align: 'center', model: 'Curso'},
@@ -189,12 +183,12 @@ export default {
             modalCursoEncuesta: {
                 ref: 'CursoEncuestaModal',
                 open: false,
-                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos`,
+                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.escuela_id}/cursos`,
             },
             modalMoverCurso: {
                 ref: 'MoverCursoModal',
                 open: false,
-                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos`,
+                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.escuela_id}/cursos`,
             },
             modalDeleteOptions: {
                 ref: 'EscuelaDeleteModal',
@@ -206,7 +200,7 @@ export default {
             modalStatusOptions: {
                 ref: 'CursoStatusModal',
                 open: false,
-                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos`,
+                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.escuela_id}/cursos`,
                 contentText: '¿Desea cambiar de estado a este registro?',
                 endpoint: '',
             },
@@ -238,7 +232,7 @@ export default {
         // vue.getSelects();
 
         vue.filters.module = vue.modulo_id
-        vue.filters.category = vue.categoria_id
+        vue.filters.category = vue.escuela_id
     },
     methods: {
         getSelects() {
@@ -267,7 +261,7 @@ export default {
         confirmDelete(withValidations = true) {
             let vue = this
             vue.showLoader()
-            let url = `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.delete_model.id}`
+            let url = `/modulos/${vue.modulo_id}/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}`
 
             if (!withValidations) {
                 url += '?withValidations=1'

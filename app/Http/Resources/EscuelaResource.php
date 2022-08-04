@@ -14,20 +14,20 @@ class EscuelaResource extends JsonResource
      */
     public function toArray($request)
     {
-        $modalidades = config( 'constantes.modalidad' );
+        $modalidades = config('constantes.modalidad');
 
         return [
             'id' => $this->id,
-            'name' => $this->nombre,
+            'name' => $this->name,
             'image' => space_url($this->imagen),
-            'active' => $this->estado ? true : false,
-            'orden' => $this->orden,
+            'active' => $this->active ? true : false,
+            'orden' => $this->position,
 
             'modalidad' => $modalidades[$this->modalidad] ?? '',
 
-            'cursos_count' => $this->cursos_count,
+            'cursos_count' => $this->courses_count,
 
-             'cursos_route' => route('modulos.escuelas.cursos', [$this->config_id, $this->id ]),
+            'cursos_route' => route('modulos.escuelas.cursos', [$this->config_id, $this->id]),
         ];
     }
 }

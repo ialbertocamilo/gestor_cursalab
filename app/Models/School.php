@@ -24,12 +24,15 @@ class School extends Model
 
     protected static function search($request)
     {
-        $query = self::withCount(['cursos']);
+        $query = self::join('school_workspace', 'school_workspace.school_id', '=', 'schools.id')->withCount(['courses']);
+
+        if ($request->workspace_id)
+            $query->where('school_workspace.workspace_id', $request->workspace_id);
 
         if ($request->q)
-            $query->where('nombre', 'like', "%$request->q%");
+            $query->where('schools.name', 'like', "%$request->q%");
 
-        $field = $request->sortBy ?? 'orden';
+        $field = $request->sortBy ?? 'schools.position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort);
@@ -37,35 +40,35 @@ class School extends Model
         return $query->paginate($request->paginate);
     }
 
-    protected static function storeRequest($data, $categoria = null)
+    protected static function storeRequest($data, $escuela = null)
     {
         try {
 
             DB::beginTransaction();
 
-            if ($categoria) :
-                $categoria->update($data);
+            if ($escuela) :
+                $escuela->update($data);
             else :
-                $categoria = self::create($data);
+                $escuela = self::create($data);
             endif;
 
             if (!empty($data['file_imagen'])) :
                 $path = Media::uploadFile($data['file_imagen']);
-                $categoria->imagen = $path;
+                $escuela->imagen = $path;
             endif;
 
             if (!empty($data['file_plantilla_diploma'])) :
                 $path = Media::uploadFile($data['file_plantilla_diploma']);
-                $categoria->plantilla_diploma = $path;
+                $escuela->plantilla_diploma = $path;
             endif;
 
-            if (!empty($data['nombre_ciclo_0'])) : (new Categoria())->guardarNombreCiclo0($categoria->id, $data['nombre_ciclo_0']);
-            endif;
+            // if (!empty($data['nombre_ciclo_0'])) : (new Categoria())->guardarNombreCiclo0($escuela->id, $data['nombre_ciclo_0']);
+            // endif;
 
 
-            $categoria->save();
+            $escuela->save();
             DB::commit();
-            return $categoria;
+            return $escuela;
         } catch (\Exception $e) {
             DB::rollBack();
             return $e;

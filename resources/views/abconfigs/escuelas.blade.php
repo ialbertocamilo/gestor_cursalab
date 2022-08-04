@@ -2,6 +2,10 @@
 
 @section('content')
     <v-app>
-        <escuela-layout modulo_id="{{ request()->segment(2) }}"/>
+        @php
+            $worskpace = session('workspace');
+            $workspace_id = is_array($worskpace) ? $worskpace['id'] : null;
+        @endphp
+        <escuela-layout workspace_id="{{ $workspace_id }}" />
     </v-app>
 @endsection

@@ -1,15 +1,15 @@
 @extends('layouts.appback')
 
 @section('content')
-<v-app>
-    @include('layouts.user-header')
+    <v-app>
+        @include('layouts.user-header')
 
-    @php
-        $categoria = request()->segment(5) ?? null
-    @endphp
-    <escuela-form-page
-        modulo_id="{{request()->segment(2)}}"
-        categoria_id="{{$categoria}}"
-    />
-</v-app>
+        @php
+            $worskpace = session('workspace');
+            $workspace_id = is_array($worskpace) ? $worskpace['id'] : null;
+
+            $escuela = request()->segment(3) ?? null;
+        @endphp
+        <escuela-form-page modulo_id="{{ $workspace_id }}" categoria_id="{{ $escuela }}" />
+    </v-app>
 @endsection

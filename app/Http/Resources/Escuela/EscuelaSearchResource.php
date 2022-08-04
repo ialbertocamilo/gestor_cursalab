@@ -14,21 +14,21 @@ class EscuelaSearchResource extends JsonResource
      */
     public function toArray($request)
     {
-        $modalidades = config( 'constantes.modalidad' );
+        $modalidades = config('constantes.modalidad');
 
         return [
             'id' => $this->id,
-            'nombre' => $this->nombre,
+            'nombre' => $this->name,
             'image' => space_url($this->imagen),
-            'active' => $this->estado,
-            'orden' => $this->orden,
+            'active' => $this->active,
+            'orden' => $this->position,
 
             'modalidad' => $modalidades[$this->modalidad] ?? '',
 
-            'edit_route' => route('escuelas.edit', [$this->config_id, $this->id ]),
-            'cursos_count' => $this->cursos_count,
+            'edit_route' =>  route('escuelas.edit', [$this->id]),
+            'cursos_count' => $this->courses_count,
 
-            'cursos_route' => route('cursos.list', [$this->config_id, $this->id ]),
+            'cursos_route' => route('cursos.list', [$this->id]),
         ];
     }
 }

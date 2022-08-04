@@ -4,14 +4,9 @@
     <v-app>
         @include('layouts.user-header')
         @php
-            $modulo = \App\Models\Abconfig::find(request()->segment(2));
-            $escuela = \App\Models\Categoria::find(request()->segment(4));
+            // $modulo = \App\Models\Workspace::find(request()->segment(2));
+            $escuela = \App\Models\School::find(request()->segment(2));
         @endphp
-        <curso-layout
-            modulo_id="{{ request()->segment(2) }}"
-            modulo_name="{{ $modulo->etapa ?? ''  }}"
-            categoria_id="{{ request()->segment(4) }}"
-            categoria_name="{{ $escuela->nombre ?? '' }}"
-        />
+        <curso-layout escuela_id="{{ request()->segment(2) }}" escuela_name="{{ $escuela->name ?? '' }}" />
     </v-app>
 @endsection

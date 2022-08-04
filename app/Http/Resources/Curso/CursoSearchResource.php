@@ -16,20 +16,20 @@ class CursoSearchResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'nombre' => $this->nombre,
+            'nombre' => $this->name,
             'image' => space_url($this->imagen),
-            'orden' => $this->orden,
-            'temas_count' => $this->temas_count,
-            'encuesta_count' => $this->encuesta_count,
-            'active' => $this->estado,
-            'config_id' => $this->categoria->config_id,
+            'orden' => $this->position,
+            'temas_count' => $this->topics_count,
+            'encuesta_count' => $this->poll_count,
+            'active' => $this->active,
+            'config_id' => '',
 
             'custom_curso_nombre' => '',
 
-            'actualizaciones' => $this->getActualizaciones(),
+            'actualizaciones' => '',
 
-            'edit_route' => route('cursos.editCurso', [$this->config_id, $this->categoria_id, $this->id]),
-            'temas_route' => route('temas.list', [$this->config_id, $this->categoria_id, $this->id]),
+            'edit_route' => route('cursos.editCurso', [$request->school_id, $this->id]),
+            'temas_route' => '', //route('temas.list', [$this->config_id, $this->school_id, $this->id]),
         ];
     }
 }

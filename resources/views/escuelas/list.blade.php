@@ -4,11 +4,10 @@
     <v-app>
         @include('layouts.user-header')
         @php
-            $modulo = \App\Models\Abconfig::find(request()->segment(2));
+            $worskpace = session('workspace');
+            $workspace_id = is_array($worskpace) ? $worskpace['id'] : null;
+            $workspace_name = is_array($worskpace) ? $worskpace['name'] : '';
         @endphp
-        <escuela-layout
-            modulo_id="{{ request()->segment(2) }}"
-            modulo_name="{{ $modulo->etapa ?? ''  }}"
-        />
+        <escuela-layout workspace_id="{{ $workspace_id }}" workspace_name="{{ $workspace_name ?? '' }}" />
     </v-app>
 @endsection

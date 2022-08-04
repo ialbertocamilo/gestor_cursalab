@@ -41,11 +41,11 @@ Route::get('tools/dnc/{iduser}/{idvideo}', 'GestorController@descargaCertificado
 Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', 'GestorController@verCertificadoEscuela');
 Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', 'GestorController@descargaCertificadoEscuela');
 /**************************** ADJUNTAR ARCHIVOS **************************************/
-Route::group(['middleware' => ['jwt.verify']], function() {
+Route::group(['middleware' => ['jwt.verify']], function () {
     Route::get('adjuntar_archivo', 'ApiRest\AdjuntarArchivosController@index')->name('adjuntar_archivo');
 });
 /*Información entra de la app-web*/
-Route::get('informacion_app', function(){
+Route::get('informacion_app', function () {
     return view('informacion_app');
 });
 
@@ -57,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('common')->group(base_path('routes/cms/common.php'));
     Route::prefix('usuarios')->group(base_path('routes/cms/usuarios.php'));
     Route::prefix('modulos')->group(base_path('routes/cms/modulos.php'));
+    Route::prefix('escuelas')->group(base_path('routes/cms/escuelas.php'));
     Route::prefix('programas')->group(base_path('routes/cms/blocks.php'));
     Route::prefix('media')->group(base_path('routes/cms/media.php'));
     Route::prefix('anuncios')->group(base_path('routes/cms/anuncios.php'));

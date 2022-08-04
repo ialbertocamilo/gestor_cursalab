@@ -8,15 +8,15 @@ use Illuminate\Support\Facades\DB;
 
 class Categoria extends Model
 {
-    
+
 
     protected $fillable = [
-    	'config_id', 'nombre', 'descripcion', 'imagen', 'estado', 'orden', 'modalidad','color','reinicios_programado','plantilla_diploma'
+        'config_id', 'nombre', 'descripcion', 'imagen', 'estado', 'orden', 'modalidad', 'color', 'reinicios_programado', 'plantilla_diploma'
     ];
 
     public function setEstadoAttribute($value)
     {
-        $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
+        $this->attributes['estado'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
     }
 
     public function temas()
@@ -73,11 +73,10 @@ class Categoria extends Model
 
     public function guardarNombreCiclo0($categoria_id, $nombre)
     {
-        if ( !empty($nombre) )
-        {
+        if (!empty($nombre)) {
             $nombre_ciclo_0 = DB::table('nombre_escuelas')->where('escuela_id', $categoria_id)->first();
             if ($nombre_ciclo_0) {
-                $nombre_ciclo_0 = DB::table('nombre_escuelas')->where('escuela_id', $categoria_id)->update(['nombre'=> $nombre]);
+                $nombre_ciclo_0 = DB::table('nombre_escuelas')->where('escuela_id', $categoria_id)->update(['nombre' => $nombre]);
             } else {
                 $nombre_ciclo_0 = DB::table('nombre_escuelas')->insert([
                     'escuela_id' => $categoria_id,
@@ -95,22 +94,21 @@ class Categoria extends Model
 
             if ($categoria) :
                 $categoria->update($data);
-            else:
+            else :
                 $categoria = self::create($data);
             endif;
 
-            if (!empty($data['file_imagen'])):
+            if (!empty($data['file_imagen'])) :
                 $path = Media::uploadFile($data['file_imagen']);
                 $categoria->imagen = $path;
             endif;
 
-            if (!empty($data['file_plantilla_diploma'])):
+            if (!empty($data['file_plantilla_diploma'])) :
                 $path = Media::uploadFile($data['file_plantilla_diploma']);
                 $categoria->plantilla_diploma = $path;
             endif;
 
-            if (!empty($data['nombre_ciclo_0'])):
-                (new Categoria())->guardarNombreCiclo0($categoria->id, $data['nombre_ciclo_0']);
+            if (!empty($data['nombre_ciclo_0'])) : (new Categoria())->guardarNombreCiclo0($categoria->id, $data['nombre_ciclo_0']);
             endif;
 
 
@@ -121,7 +119,6 @@ class Categoria extends Model
             DB::rollBack();
             return $e;
         }
-
     }
 
     protected function validateEscuelaEliminar($escuela)
@@ -131,7 +128,7 @@ class Categoria extends Model
 
             return [
                 'validate' => false,
-//                'data' => $validate,
+                //                'data' => $validate,
                 'type' => 'validate_posteo_eliminar',
                 'title' => 'Ocurrió un problema'
             ];
@@ -139,6 +136,4 @@ class Categoria extends Model
 
         return ['validate' => true];
     }
-
-
 }

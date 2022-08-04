@@ -7,34 +7,40 @@ use App\Http\Resources\Escuela\EscuelaSearchResource;
 use App\Models\Abconfig;
 use App\Models\Categoria;
 use App\Models\Media;
+use App\Models\School;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class EscuelaController extends Controller
 {
-    public function search(Abconfig $abconfig, Request $request)
+    public function search(Workspace $abconfig, Request $request)
     {
-        $request->modulo_id = $abconfig->id;
-        $escuelas = Categoria::search($request);
+        $worskpace = session('workspace');
+        $workspace_id = (is_array($worskpace)) ? $worskpace['id'] : null;
+
+        $request->workspace_id = $workspace_id;
+
+        $escuelas = School::search($request);
 
         EscuelaSearchResource::collection($escuelas);
 
         return $this->success($escuelas);
     }
 
-    public function searchCategoria(Abconfig $abconfig, Categoria $categoria)
+    public function searchCategoria(Abconfig $abconfig, School $escuela)
     {
-        $reinicio_automatico = json_decode($categoria->reinicios_programado);
-        $categoria->reinicio_automatico = $reinicio_automatico->activado ?? false;
-        $categoria->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
-        $categoria->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
-        $categoria->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
-        $nombre_ciclo_0 = DB::table('nombre_escuelas')->where('escuela_id', $categoria->id)->first();
-        $categoria->nombre_ciclo_0 = $nombre_ciclo_0->nombre ?? null;
-        $categoria->makeHidden('reinicios_programado');
+        $reinicio_automatico = json_decode($escuela->scheduled_restarts);
+        $escuela->reinicio_automatico = $reinicio_automatico->activado ?? false;
+        $escuela->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
+        $escuela->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
+        $escuela->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
+        // $nombre_ciclo_0 = DB::table('nombre_escuelas')->where('escuela_id', $escuela->id)->first();
+        // $escuela->nombre_ciclo_0 = $nombre_ciclo_0->nombre ?? null;
+        $escuela->makeHidden('reinicios_programado');
 
         return $this->success([
-            'escuela' => $categoria,
+            'escuela' => $escuela,
         ]);
     }
 
@@ -47,7 +53,7 @@ class EscuelaController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
-//        dd($data);
+        //        dd($data);
 
         $escuela = Categoria::storeRequest($data);
 
@@ -55,16 +61,15 @@ class EscuelaController extends Controller
         return $this->success(compact('escuela', 'msg'));
     }
 
-    public function update(EscuelaStoreUpdateRequest $request, Abconfig $abconfig, Categoria $categoria)
+    public function update(EscuelaStoreUpdateRequest $request, Abconfig $abconfig, School $escuela)
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
-//        dd($data);
 
-        $escuela = Categoria::storeRequest($data, $categoria);
+        $escuela_save = School::storeRequest($data, $escuela);
 
         $msg = 'Escuela actualizada correctamente.';
-        return $this->success(compact('escuela', 'msg'));
+        return $this->success(compact('escuela_save', 'msg'));
     }
 
     public function destroyEscuela(Abconfig $abconfig, Categoria $categoria)
@@ -82,7 +87,7 @@ class EscuelaController extends Controller
 
     public function updateStatus(Abconfig $abconfig, Categoria $categoria)
     {
-//        return $categoria;
+        //        return $categoria;
 
         $estado = ($categoria->estado == 1) ? 0 : 1;
         $categoria->estado = $estado;
