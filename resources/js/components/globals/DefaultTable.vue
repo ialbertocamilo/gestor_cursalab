@@ -277,7 +277,7 @@
                                         color="primary"
                                         active-class="default-chip"
                                     >
-                                        {{ item.segments_count }} rutas
+                                        {{ item.children_count }} rutas
                                         <v-icon x-small class="ml-1">mdi-book</v-icon>
                                     </v-chip>
 
@@ -287,16 +287,16 @@
                           </v-col>
                         </v-row>
                       </v-expansion-panel-header>
-                      <v-expansion-panel-content v-if="item.segments_count">
+                      <v-expansion-panel-content v-if="item.children_count">
                         <v-row
                             justify="space-around"
                             no-gutters
-                            v-for="(block_segment, i) in item.block_segments"
+                            v-for="(row, i) in item.block_children"
                             :key="'segment-' + i"
                             class="segments"
                         >
                           <v-col cols="6">
-                            {{ block_segment.segment.name }}
+                            {{ row.child.name }}
                             <!-- #{{ segment.id }} -->
                           </v-col>
 
@@ -307,10 +307,10 @@
                                 x-small
                                 color="primary"
                                 active-class="default-chip"
-                                v-for="(value, index) in block_segment.criterion_values"
+                                v-for="(segment, index) in row.child.segments"
                                 :key="'segment-value-' + index"
                             >
-                                {{ value.value_text }}
+                                {{ segment.name }}
                                 <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
                             </v-chip>
 
@@ -327,7 +327,7 @@
                                 active-class="default-chip"
                             >
 
-                                {{ block_segment.segment.courses.length }} cursos
+                                {{ row.child.courses.length }} cursos
                                 <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
                             </v-chip>
 

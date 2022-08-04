@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAccountsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -16,6 +16,7 @@ class CreateAccountsTable extends Migration
         Schema::create('segments_values', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('segment_id')->nullable()->constrained('segments');
             $table->foreignId('criterion_id')->nullable()->constrained('criteria');
             $table->foreignId('criterion_value_id')->nullable()->constrained('criterion_values');
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
@@ -39,4 +40,4 @@ class CreateAccountsTable extends Migration
     {
         Schema::drop('segments_values');
     }
-}
+};

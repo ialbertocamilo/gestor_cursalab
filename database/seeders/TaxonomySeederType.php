@@ -15,6 +15,8 @@ class TaxonomySeederType extends Seeder
      */
     public function run()
     {
+        // POSTS
+
         Taxonomy::create([
             'group' => 'post',
             'type' => 'section',
@@ -24,6 +26,18 @@ class TaxonomySeederType extends Seeder
             'position' => 1,
         ]);
         
+        
+        Taxonomy::create([
+            'group' => 'post',
+            'type' => 'section',
+            'code' => 'ayuda_app',
+            'name' => 'Ayuda App',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        // ACTIONS
+
         Taxonomy::create([
             'group' => 'user',
             'type' => 'action',
@@ -39,16 +53,36 @@ class TaxonomySeederType extends Seeder
             'code' => 'supervise',
             'name' => 'Supervisar',
             'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        // ACTIONS
+
+        Taxonomy::create([
+            'group' => 'criterion',
+            'type' => 'type',
+            'code' => 'default',
+            'name' => 'Default',
+            'active' => ACTIVE,
             'position' => 1,
         ]);
         
         Taxonomy::create([
-            'group' => 'post',
-            'type' => 'section',
-            'code' => 'ayuda_app',
-            'name' => 'Ayuda App',
+            'group' => 'criterion',
+            'type' => 'type',
+            'code' => 'date',
+            'name' => 'Fecha',
             'active' => ACTIVE,
-            'position' => 1,
+            'position' => 2,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'criterion',
+            'type' => 'type',
+            'code' => 'number',
+            'name' => 'Numérico',
+            'active' => ACTIVE,
+            'position' => 3,
         ]);
     }
 }

@@ -25,6 +25,11 @@ class BlockChild extends Model
         return $this->morphMany(Segment::class, 'model');
     }
 
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'blocks_courses', 'block_id');
+    }
+
     // public function criterion_values()
     // {
     //     return $this->belongsToMany(CriterionValue::class);

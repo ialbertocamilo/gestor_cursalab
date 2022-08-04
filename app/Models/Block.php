@@ -10,18 +10,23 @@ class Block extends BaseModel
 
     public function children()
     {
-        return $this->belongsToMany(Block::class, 'blocks_children', 'block_child_id', 'block_id');
+        return $this->belongsToMany(Block::class, 'blocks_children', 'block_id', 'block_child_id');
     }
 
     public function block_children()
     {
-        return $this->hasMany(BlockChild::class, 'block_child_id');
+        return $this->hasMany(BlockChild::class, 'block_id');
     }
 
     public function segments()
     {
         return $this->morphMany(Segment::class, 'model');
         // return $this->belongsToMany(CriterionValue::class);
+    }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'blocks_courses');
     }
 
     // public function segments()
@@ -43,7 +48,7 @@ class Block extends BaseModel
     {
         // $query = self::with(['block_segments' => ['criterion_values.criterion', 'segment.courses'], 'criterion_values.criterion'])
         //                 ->withCount(['segments' => function($q) { $q->where('active', ACTIVE); }, 'criterion_values']);
-        $query = self::with(['block_children' => ['segments.criterion', 'segment.courses'], 'criterion_values.criterion'])
+        $query = self::with(['block_children' => ['segments.values.criterion', 'child' => ['courses', 'segments.values.criterion_value.criterion']]])
                         ->withCount(['children' => function($q) { $q->where('active', ACTIVE); }, 'segments']);
 
         $query->where('parent', 1);
@@ -64,7 +69,7 @@ class Block extends BaseModel
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $query->orderBy($field, $sort);
+        $query->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->paginate);
     }

@@ -5,7 +5,7 @@ namespace App\Models;
 class Segment extends BaseModel
 {
     protected $fillable = [
-        'name', 'description', 'criterion_value_count', 'active'
+        'name', 'description', 'active'
     ];
 
     // public function courses()

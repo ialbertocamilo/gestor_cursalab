@@ -533,6 +533,8 @@ class Migration_1 extends Model
     {
         $db = self::connect();
 
+        $default = Taxonomy::getFirstData('criterion', 'type', 'default');
+
         $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
         $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
         $curriculas = $db->getTable('curricula')
@@ -553,7 +555,7 @@ class Migration_1 extends Model
 
             $block = Block::create($program);
 
-            $this->createSegmentValue($block, $career);
+            $this->createSegmentValue($block, $career, $default);
 
             // $segment = $block->segments()->create(['name' => $block->name]);
 
@@ -578,7 +580,7 @@ class Migration_1 extends Model
 
                 if ($ciclo_value) :
 
-                    $this->createSegmentValue($child, $ciclo_value);
+                    $this->createSegmentValue($child, $ciclo_value, $default);
 
                     // DB::table('block_segment_criterion_value')->insert([
                     //     'block_segment_id' => $block_segment_id,
@@ -589,14 +591,14 @@ class Migration_1 extends Model
         }
     }
 
-    public function createSegmentValue($model, $criterion_value)
+    public function createSegmentValue($model, $criterion_value, $criterion_type)
     {
         $segment = $model->segments()->create(['name' => $model->name]);
 
         $segment->values()->create([
-            'criterion_id' => $criterion_value->parent_id,
+            'criterion_id' => $criterion_value->criterion_id,
             'criterion_value_id' => $criterion_value->id,
-            'type' => 1,
+            'type_id' => $criterion_type->id,
         ]);
     }
 
