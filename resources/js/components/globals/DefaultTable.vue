@@ -277,9 +277,38 @@
                                         color="primary"
                                         active-class="default-chip"
                                     >
+                                        {{ item.segments_count }} segmentos
+                                        <v-icon x-small class="ml-1">mdi-star</v-icon>
+                                    </v-chip>
+                                    <v-chip
+                                        class="default-chip ml-2 my-1"
+                                        x-small
+                                        color="primary"
+                                        active-class="default-chip"
+                                    >
                                         {{ item.children_count }} rutas
                                         <v-icon x-small class="ml-1">mdi-book</v-icon>
                                     </v-chip>
+
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        :title="action.text"
+                                        @click="doAction(action, item)"
+                                    >
+                                        <v-badge
+                                            v-if="(action.count && item[action.count])"
+                                            :color="item.active ? 'primary': 'grey'"
+                                            :content="item[action.count]"
+                                        >
+                                            <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
+                                            <br> <span class="table-default-icon-title" v-text="action.text"/>
+                                        </v-badge>
+
+                                        <template v-else>
+                                            <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
+                                            <br> <span class="table-default-icon-title" v-text="action.text"/>
+                                        </template>
+                                    </button>
 
                                 </v-col>
                               </v-row>
@@ -302,16 +331,17 @@
 
                           <v-col cols="3">
 
+                                <!-- v-for="(segment, index) in row.child.segments" -->
                             <v-chip
                                 class="default-chip ml-2 my-1"
                                 x-small
                                 color="primary"
                                 active-class="default-chip"
-                                v-for="(segment, index) in row.child.segments"
                                 :key="'segment-value-' + index"
                             >
-                                {{ segment.name }}
-                                <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
+                                <!-- {{ row.child.segments_count }} segmentos -->
+                                {{ row.child.segments.length }} segmentos
+                                <v-icon x-small class="ml-1">mdi-star</v-icon>
                             </v-chip>
 
                             <!-- {{ segment.id }} -->
