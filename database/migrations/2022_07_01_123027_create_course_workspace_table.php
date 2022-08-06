@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('school_workspace', function (Blueprint $table) {
-            $table->foreignId('school_id')->nullable()->constrained('schools');
+        Schema::create('course_workspace', function (Blueprint $table) {
+            $table->foreignId('course_id')->nullable()->constrained('courses');
 
             $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('school_workspace');
+        Schema::dropIfExists('course_workspace');
     }
 };
