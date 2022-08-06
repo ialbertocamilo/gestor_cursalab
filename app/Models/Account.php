@@ -111,13 +111,13 @@ class Account extends BaseModel
     protected function getAvailablesForMeeting($type, $dates, $meeting = NULL, $method = 'get')
     {
         $accounts = self::where('type_id', $type->id)
-            ->where('active', ACTIVE)
-            ->whereDoesntHave('meetings', function ($query) use ($dates, $meeting) {
-                $query->excludeMeeting($meeting);
-                $query->betweenScheduleDates($dates);
-                $query->ofReservedStatus();
-            })
-            ->$method();
+                        ->where('active', ACTIVE)
+                        ->whereDoesntHave('meetings', function ($query) use ($dates, $meeting) {
+                            $query->excludeMeeting($meeting);
+                            $query->betweenScheduleDates($dates);
+                            $query->ofReservedStatus();
+                        })
+                        ->$method();
 
         return $accounts;
     }

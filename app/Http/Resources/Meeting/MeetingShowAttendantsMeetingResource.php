@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Meeting;
 
 use App\Services\MeetingService;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class MeetingShowAttendantsMeetingResource extends JsonResource
@@ -10,7 +11,7 @@ class MeetingShowAttendantsMeetingResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request $request
      * @return array
      */
     public function toArray($request)
@@ -21,12 +22,13 @@ class MeetingShowAttendantsMeetingResource extends JsonResource
         // $idsCoHostCareers = MeetingService::getIdsCoHostCareers();
         // $isCoHost = in_array($carrera->id, $idsCoHostCareers);
 
+
         return [
             'id' => $this->id,
-            'usuario_id' => $this->usuario->id,
-            'dni' => $this->usuario->dni,
-            'nombre' => $this->usuario->nombre,
-            'config' => $this->usuario->config,
+            'usuario_id' => $this->usuario ? $this->usuario->id : '',
+            'dni' => $this->usuario ? $this->usuario->dni : '',
+            'nombre' => $this->usuario ? $this->usuario->nombre : '',
+            'config' => $this->usuario ? $this->usuario->config : '',
 
             'carrera' => $carrera->nombre ?? 'No definido',
             'isCoHost' => $this->type->code === 'cohost',
@@ -40,7 +42,7 @@ class MeetingShowAttendantsMeetingResource extends JsonResource
             'online' => $this->online,
             'present_at_first_call' => $this->present_at_first_call,
             'present_at_middle_call' => $this->present_at_middle_call,
-            'present_at_last_call' => $this->present_at_last_call,
-        ];;
+            'present_at_last_call' => $this->present_at_last_call
+        ];
     }
 }

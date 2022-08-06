@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Session;
 
 class Usuario extends Model
 {
@@ -274,25 +276,39 @@ class Usuario extends Model
 
     }
 
-    protected function getCurrentHosts()
+    /**
+     * Get host users
+     *
+     * @param bool $idsOnly When true load users ids only
+     * @return mixed
+     */
+    protected function getCurrentHosts($idsOnly = false): mixed
     {
-        $hosts_id = Carrera::getHostIds();
+        // todo: criterion values should come from workspace configuration
+        $criterionValues = [6, 17]; // ids from "Monitor de Ventas"
 
-        $hosts = Usuario::whereHas('matricula_presente', function ($q) use($hosts_id) {
-            $q->whereHas('carrera', function ($q2) use($hosts_id) {
-                $q2->whereIn('id', $hosts_id);
-            });
-        })
-            ->with('config:id,logo')
-            ->select(
-                DB::raw("CONCAT(dni, ' - ', nombre) as name"),
-                // "nombre as name",
-                "id", "dni", "config_id")
-            ->where('estado', ACTIVE)
-            ->get()->toArray();
+        // Load users who met specific criterion values (in this case careers)
 
-        return $hosts;
+        $users = User::join('criterion_value_user as crit_val_us', 'users.id', '=', 'crit_val_us.user_id')
+                     ->whereIn('crit_val_us.criterion_value_id', $criterionValues);
+
+
+        if ($idsOnly) {
+            return $users->pluck('id')->toArray();
+        } else {
+            $users = $users->get();
+            if (count($users) <= 0) {
+                // todo: this is only for testing purposes, remove when
+                // host configuration is ready
+                Auth::check();
+                return [Auth::user()];
+            }
+            return $users;
+        }
     }
 
+    protected function getCurrentHostsIds() {
 
+        return $this->getCurrentHosts(true);
+    }
 }
