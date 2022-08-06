@@ -26,7 +26,7 @@
                 <!--                    :label="'Actividad'"-->
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
-                    @click="openCRUDPage(`/modulos/${modulo_id}/escuelas/${categoria_id}/cursos/${curso_id}/temas/create`)"
+                    @click="openCRUDPage(`/escuelas/${school_id}/cursos/${course_id}/temas/create`)"
                     :label="'Tema'"/>
             </v-card-title>
         </v-card>
@@ -91,18 +91,17 @@ import TemaValidacionesModal from "./TemaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 export default {
     components: {DialogConfirm, TemaValidacionesModal, DefaultStatusModal},
-    props: ['modulo_id', 'modulo_name', 'categoria_id', 'categoria_name', 'curso_id', 'curso_name'],
+    props: ['school_id', 'school_name', 'course_id', 'course_name'],
     data() {
         let vue = this
         return {
             breadcrumbs: [
-                {title: 'Módulos', text: `${this.modulo_name}`, disabled: false, href: '/modulos'},
-                {title: 'Escuelas', text: `${this.categoria_name}`, disabled: false, href: `/modulos/${this.modulo_id}/escuelas`},
-                {title: 'Cursos', text: `${this.curso_name}`, disabled: false, href: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos`},
+                {title: 'Escuelas', text: `${this.school_name}`, disabled: false, href: `/escuelas`},
+                {title: 'Cursos', text: `${this.course_name}`, disabled: false, href: `/escuelas/${this.school_id}/cursos`},
                 {title: 'Temas', text: null, disabled: true, href: ''},
             ],
             dataTable: {
-                endpoint: `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/search`,
+                endpoint: `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/search`,
                 ref: 'cursosTable',
                 headers: [
                     {text: "Orden", value: "orden", align: 'center', model: 'Curso'},
@@ -184,7 +183,7 @@ export default {
             modalStatusOptions: {
                 ref: 'CursoStatusModal',
                 open: false,
-                base_endpoint: `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas`,
+                base_endpoint: `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas`,
                 contentText: '¿Desea cambiar de estado a este registro?',
                 endpoint: '',
             },
@@ -194,9 +193,9 @@ export default {
         let vue = this
         // vue.getSelects();
 
-        vue.filters.module = vue.modulo_id
-        vue.filters.category = vue.categoria_id
-        vue.filters.curso = vue.curso_id
+        // vue.filters.module = vue.modulo_id
+        vue.filters.category = vue.school_id
+        vue.filters.curso = vue.course_id
     },
     methods: {
         getSelects() {
@@ -225,7 +224,7 @@ export default {
         confirmDelete(withValidations = true) {
             let vue = this
             vue.showLoader()
-            let url = `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.delete_model.id}`
+            let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.delete_model.id}`
 
             if (!withValidations){
                 url += '?withValidations=1'

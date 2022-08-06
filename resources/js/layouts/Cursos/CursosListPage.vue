@@ -27,7 +27,7 @@
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/modulos/${modulo_id}/escuelas/${escuela_id}/cursos/create`)"/>
+                    @click="openCRUDPage(`/escuelas/${escuela_id}/cursos/create`)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -124,7 +124,6 @@ export default {
                 endpoint: `/escuelas/${vue.escuela_id}/cursos/search`,
                 ref: 'cursosTable',
                 headers: [
-                    {text: "Orden", value: "orden", align: 'center', model: 'Curso'},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombres", value: "custom_curso_nombre", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
@@ -145,19 +144,11 @@ export default {
                         method_name: 'encuesta'
                     },
                     {
-                        text: "Mover Curso",
-                        icon: 'mdi mdi-repeat',
-                        type: 'action',
-                        method_name: 'mover_curso'
-                    },
-                    {
                         text: "Actualizar Estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
                     },
-                ],
-                more_actions: [
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
@@ -170,7 +161,7 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
-                ]
+                ],
             },
             selects: {
                 modules: []

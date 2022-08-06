@@ -4,17 +4,11 @@
     <v-app>
         @include('layouts.user-header')
         @php
-            $modulo = \App\Models\Abconfig::find(request()->segment(2));
-            $escuela = \App\Models\Categoria::find(request()->segment(4));
-            $curso = \App\Models\Curso::find(request()->segment(6));
+            // $modulo = \App\Models\Abconfig::find(request()->segment(2));
+            $school = \App\Models\School::find(request()->segment(2));
+            $curso = \App\Models\Course::find(request()->segment(4));
         @endphp
-        <tema-layout
-            modulo_id="{{ request()->segment(2) }}"
-            modulo_name="{{ $modulo->etapa ?? ''  }}"
-            categoria_id="{{ request()->segment(4) }}"
-            categoria_name="{{ $escuela->nombre ?? '' }}"
-            curso_id="{{ request()->segment(6) }}"
-            curso_name="{{ $curso->nombre ?? '' }}"
-        />
+        <tema-layout school_id="{{ request()->segment(2) }}" school_name="{{ $school->name ?? '' }}"
+            course_id="{{ request()->segment(4) }}" course_name="{{ $curso->name ?? '' }}" />
     </v-app>
 @endsection

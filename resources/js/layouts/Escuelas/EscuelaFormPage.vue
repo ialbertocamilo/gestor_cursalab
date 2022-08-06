@@ -10,18 +10,7 @@
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="EscuelaForm">
-                    <v-row justify="center" align="start">
-                        <v-col cols="6">
-                            <DefaultSelect
-                                dense
-                                label="Modalidad"
-                                show-required
-                                placeholder="Seleccione una modalidad"
-                                v-model="resource.modalidad"
-                                :items="selects.modalidad"
-                                :rules="rules.modalidad"
-                            />
-                        </v-col>
+                    <v-row align="start">
                         <v-col cols="6">
                             <DefaultInput
                                 dense
@@ -30,24 +19,6 @@
                                 show-required
                                 v-model="resource.name"
                                 :rules="rules.name"
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultInput
-                                dense
-                                label="Orden"
-                                show-required
-                                placeholder="Orden"
-                                v-model="resource.position"
-                                :rules="rules.position"
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultInput
-                                dense
-                                label="Nombre Ciclo 0"
-                                placeholder="Ingrese un nombre para el Ciclo 0"
-                                v-model="resource.nombre_ciclo_0"
                             />
                         </v-col>
                     </v-row>

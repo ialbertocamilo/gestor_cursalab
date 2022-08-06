@@ -20,14 +20,18 @@ use App\Http\Resources\Posteo\PosteoPreguntasResource;
 use App\Http\Requests\TemaPregunta\TemaPreguntaStoreRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaDeleteRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaImportRequest;
+use App\Models\Course;
+use App\Models\Post;
+use App\Models\School;
+use App\Models\Topic;
 
 class TemaController extends Controller
 {
-    public function search(Abconfig $abconfig, Categoria $categoria, Curso $curso, Request $request)
+    public function search(School $escuela, Course $curso, Request $request)
     {
-        $request->categoria_id = $categoria->id;
-        $request->curso_id = $curso->id;
-        $temas = Posteo::search($request);
+        $request->school_id = $escuela->id;
+        $request->course_id = $curso->id;
+        $temas = Topic::search($request);
 
         PosteoSearchResource::collection($temas);
 
@@ -36,10 +40,10 @@ class TemaController extends Controller
 
     public function searchTema(Abconfig $abconfig, Categoria $categoria, Curso $curso, Posteo $tema)
     {
-//        $tema->media = json_decode($tema->media);
+        //        $tema->media = json_decode($tema->media);
 
         $tema->load('rel_tag');
-        $tema->media = MediaTema::where('tema_id',$tema->id)->orderBy('orden')->get();
+        $tema->media = MediaTema::where('tema_id', $tema->id)->orderBy('orden')->get();
         // $tema->medias;
         $tags = Tag::whereIn('id', $tema->rel_tag->pluck('tag_id') ?? [])->select('id', 'nombre')->get();
         $tema->tags = $tags;
@@ -81,7 +85,7 @@ class TemaController extends Controller
 
         $response = [
             'tema' => $tema,
-            'msg' =>' Tema creado correctamente.'
+            'msg' => ' Tema creado correctamente.'
         ];
 
         $response['messages'] = Posteo::getMessagesActions($tema, $data, 'Tema creado con éxito');
@@ -96,7 +100,7 @@ class TemaController extends Controller
 
         $validate = Posteo::validateTemaUpdateStatus($tema, $data['estado']);
 
-//        dd($validate, $data['estado']);
+        //        dd($validate, $data['estado']);
         if (!$validate['validate'])
             return $this->success(compact('validate'), 422);
 
@@ -104,7 +108,7 @@ class TemaController extends Controller
 
         $response = [
             'tema' => $tema,
-            'msg' =>' Tema actualizado correctamente.'
+            'msg' => ' Tema actualizado correctamente.'
         ];
 
         $response['messages'] = Posteo::getMessagesActions($tema, $data, 'Tema actualizado con éxito');
@@ -116,7 +120,7 @@ class TemaController extends Controller
     {
         if ($request->withValidations == 0) {
             $validate = Posteo::validateTemaEliminar($tema, $curso);
-//        dd($validate);
+            //        dd($validate);
 
             if (!$validate['validate'])
                 return $this->success(compact('validate'), 422);
@@ -130,7 +134,7 @@ class TemaController extends Controller
 
         $response = [
             'tema' => $tema,
-            'msg' =>' Tema eliminado correctamente.'
+            'msg' => ' Tema eliminado correctamente.'
         ];
 
         $response['messages'] = Posteo::getMessagesActions($tema, [], 'Tema eliminado con éxito');
@@ -155,7 +159,7 @@ class TemaController extends Controller
 
         $response = [
             'tema' => $tema,
-            'msg' =>' Estado actualizado con éxito.'
+            'msg' => ' Estado actualizado con éxito.'
         ];
 
         $response['messages'] = Posteo::getMessagesActions($tema, [], 'Tema actualizado con éxito');
@@ -219,7 +223,7 @@ class TemaController extends Controller
         $tipo_pregunta = $tema->tipo_ev == 'calificada' ? 'selecciona' : 'texto';
         $tema_preguntas = $tema->preguntas->where('tipo_pregunta', $tipo_pregunta)->where('estado', '1');
 
-        if ($tema_preguntas->count() === 0):
+        if ($tema_preguntas->count() === 0) :
             $tema->estado = 0;
             $tema->save();
         endif;
@@ -246,9 +250,9 @@ class TemaController extends Controller
     {
         $pregunta->delete();
 
-//        $tema_evaluable = Posteo::where('curso_id', $curso->id)->where('evaluable', 'si')->first();
-//        $curso->c_evaluable = $tema_evaluable ? 'si' : 'no';
-//        $curso->save();
+        //        $tema_evaluable = Posteo::where('curso_id', $curso->id)->where('evaluable', 'si')->first();
+        //        $curso->c_evaluable = $tema_evaluable ? 'si' : 'no';
+        //        $curso->save();
 
         // Si se elimina la última pregunta del tema, según su tipo de evaluación ($tipo_pregunta)
         // se inactivará el tema
@@ -256,7 +260,7 @@ class TemaController extends Controller
         $tipo_pregunta = $tema->tipo_ev == 'calificada' ? 'selecciona' : 'texto';
         $tema_preguntas = $tema->preguntas->where('tipo_pregunta', $tipo_pregunta)->where('estado', '1');
 
-        if ($tema_preguntas->count() === 0):
+        if ($tema_preguntas->count() === 0) :
             $tema->estado = 0;
             $tema->save();
         endif;
@@ -265,5 +269,4 @@ class TemaController extends Controller
             'msg' => 'Eliminado correctamente.'
         ]);
     }
-
 }

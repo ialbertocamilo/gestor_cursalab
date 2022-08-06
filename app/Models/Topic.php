@@ -24,4 +24,22 @@ class Topic extends BaseModel
     {
         return $this->belongsTo(Topic::class);
     }
+
+    protected static function search($request, $paginate = 15)
+    {
+        $q = self::withCount(['questions'])->where('course_id', $request->course_id);
+        // $q = self::withCount('preguntas')
+        //     ->where('categoria_id', $request->categoria_id)
+        //     ->where('course_id', $request->course_id);
+
+        if ($request->q)
+            $q->where('name', 'like', "%$request->q%");
+
+        $field = $request->sortBy ?? 'position';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $q->orderBy($field, $sort);
+
+        return $q->paginate($request->paginate);
+    }
 }
