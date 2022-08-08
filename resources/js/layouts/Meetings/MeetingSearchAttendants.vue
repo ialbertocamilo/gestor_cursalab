@@ -102,7 +102,8 @@
                                                 @input="changeDisableAddBtn(item)"
                                             />
                                             <DefaultLogoImage
-                                                :image="item.config.logo" class="mx-2"
+                                                :image="item.config.logo"
+                                                class="mx-2"
                                                 max-width="70"
                                             />
                                             {{ item.dni }} - {{ item.nombre }}
@@ -216,12 +217,15 @@ export default {
     },
     methods: {
         onCancel() {
+
             let vue = this
             vue.errors = []
             vue.resetValidation()
             vue.$emit('onCancel')
+
         },
         resetValidation() {
+
             let vue = this
 
             vue.resource = null
@@ -234,6 +238,7 @@ export default {
             vue.disable_add_btn = true
         },
         onConfirm() {
+
             let vue = this
             vue.errors = []
 
@@ -241,12 +246,14 @@ export default {
             const count_selected_attendants = selected_attendants.length
 
             if (count_selected_attendants > 0) {
+
                 vue.msgAttendantsAdded = `Se agregó <strong>${count_selected_attendants}</strong> asistente${count_selected_attendants > 0 ? 's' : ''} `
                 setTimeout(() => {
                     vue.msgAttendantsAdded = null
                 }, 2000)
                 vue.$emit('onConfirm', selected_attendants)
                 vue.disable_add_btn = true
+
             }
         },
         loadData(resource) {
@@ -254,11 +261,13 @@ export default {
             vue.resetValidation()
         },
         loadSelects() {
+
             let vue = this
 
             let url = `${vue.options.base_endpoint}/get-selects-search-filters?`
             vue.$http.get(url)
                 .then(({data}) => {
+
                     let _data = data.data
                     vue.selects.modules = _data.modulos
 

@@ -10,7 +10,7 @@
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="CursoForm">
-                    <v-row justify="center">
+                    <v-row >
                         <v-col cols="6">
                             <DefaultInput
                                 dense
@@ -18,16 +18,6 @@
                                 placeholder="Ingrese un nombre"
                                 v-model="resource.name"
                                 :rules="rules.name"
-                                show-required
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultInput
-                                dense
-                                label="Orden"
-                                placeholder="Orden"
-                                v-model="resource.position"
-                                :rules="rules.position"
                                 show-required
                             />
                         </v-col>

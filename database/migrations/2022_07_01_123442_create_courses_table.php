@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('description')->nullable();
 
             $table->string('imagen')->nullable();
-            // $table->string('plantilla_diploma');
+            $table->string('plantilla_diploma')->nullable();
 
             // $table->string('modalidad');
             $table->boolean('freely_eligible')->nullable()->default(false);

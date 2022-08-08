@@ -16,18 +16,30 @@
 
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.name" label="Nombre" :rules="rules.name"/>
+                        <DefaultInput
+                            v-model="resource.name"
+                            label="Nombre"
+                            :rules="rules.name"/>
                     </v-col>
 
                     <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultSelect :items="selects.types" v-model="resource.type" label="Tipo"
-                                       item-text="name" return-object :rules="rules.type"
-                                       :disabled="resource.status && resource.status.code == 'in-progress'"/>
+                        <DefaultSelect
+                           :items="selects.types"
+                           v-model="resource.type"
+                           label="Tipo"
+                           item-text="name"
+                           return-object
+                           :rules="rules.type"
+                           :disabled="resource.status && resource.status.code == 'in-progress'"/>
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultAutocomplete
-                            :items="selects.hosts" v-model="resource.host" label="Anfitrión"
-                            item-text="name" return-object :rules="rules.host"
+                            :items="selects.hosts"
+                            v-model="resource.host"
+                            label="Anfitrión"
+                            item-text="name"
+                            return-object
+                            :rules="rules.host"
                             @onChange="changeHost"
                         />
                     </v-col>
@@ -115,11 +127,11 @@
                         <div class="box-meeting-search-attendants" style="min-height: min-content !important;">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="item-meeting-search-attendants-results">
-                                    <DefaultLogoImage
-                                        :image="resource.host.config.logo "
-                                        class="mx-2"
-                                        max-width="70"
-                                    />
+<!--                                    <DefaultLogoImage-->
+<!--                                        :image="resource.host.config.logo "-->
+<!--                                        class="mx-2"-->
+<!--                                        max-width="70"-->
+<!--                                    />-->
                                     {{ resource.host.name ? '' : resource.host.dni + ' - ' }}
                                     {{ resource.host.nombre || resource.host.name }}
                                     <!--                                    ({{ resource.host.apellido_paterno }}
@@ -238,12 +250,13 @@
                 :ref="modalSearchAttendants.ref"
                 @onCancel="closeFormModal(modalSearchAttendants)"
                 @onConfirm="addAttendants"
-                :host_config_id="resource.host ? resource.host.config.id : null"
-                :data="{date: resource.date,
-                time: resource.time,
-                duration: resource.duration,
-                meeting_id: resource.id || null,
-                host_id: resource.host ? resource.host.id : null}"
+                :data="{
+                    date: resource.date,
+                    time: resource.time,
+                    duration: resource.duration,
+                    meeting_id: resource.id || null,
+                    host_id: resource.host ? resource.host.id : null
+                }"
             />
         </template>
     </DefaultDialog>

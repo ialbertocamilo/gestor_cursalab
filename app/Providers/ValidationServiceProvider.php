@@ -2,17 +2,15 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
-use Validator;
-
-use App\Models\Attendant;
-use App\Models\Taxonomy;
-use App\Models\Meeting;
-use App\Models\Usuario;
 use App\Models\Account;
+use App\Models\Attendant;
+use App\Models\Meeting;
+use App\Models\Taxonomy;
 use App\Models\User;
+use App\Models\Usuario;
+use Carbon\Carbon;
+use Illuminate\Support\ServiceProvider;
+use Validator;
 
 class ValidationServiceProvider extends ServiceProvider
 {
@@ -77,12 +75,15 @@ class ValidationServiceProvider extends ServiceProvider
         });
 
         Validator::extend('available_for_meeting', function ($attribute, $value, $parameters, $validator) {
+return true;
             $data = $validator->getData();
 
             $meeting_id = $parameters[0] ?? NULL;
 
             $usuario = Usuario::find($value);
-            $dates = Account::getDatesToSchedule($data['starts_at'], $data['finishes_at'], 0);
+            $dates = Account::getDatesToSchedule(
+                $data['starts_at'], $data['finishes_at'], 0
+            );
 
             $meeting = $meeting_id ? Meeting::find($meeting_id) : NULL;
 

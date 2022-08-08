@@ -5,12 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GlosarioImportExcelRequest;
 use App\Http\Requests\GlossaryStoreRequest;
 use App\Http\Resources\GlossaryResource;
-use App\Models\Abconfig;
 use App\Models\Carrera;
 use App\Models\Criterion;
+use App\Models\CriterionValue;
 use App\Models\Glossary;
 use App\Models\Taxonomy;
-use App\Models\Vademecum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -215,8 +214,29 @@ class GlossaryController extends Controller
     public function carreerCategories()
     {
         $modulos = Criterion::getValuesForSelect('module');
-        $carreras = Criterion::getValuesForSelect('career');
         $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
+
+//        $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
+//                                  ->select('id', 'value_text as nombre')
+//                                  ->where('active', ACTIVE)
+//                                  ->groupBy('parent_id')
+//                                  ->get();
+
+        $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
+                                    ->select('id', 'value_text as nombre')
+                                    ->where('active', ACTIVE)
+                                    ->get();
+        $carreras = $carreras->groupBy('parent_id');
+
+//        foreach ($carreras as $carrera) {
+//            $carrera->glosario_categorias = [];
+//        }
+
+//        $carreras = Carrera::with('glosario_categorias:id,nombre')
+//                           ->where('estado', 1)
+//                           ->get(['id', 'config_id', 'nombre']);
+//
+//        $carreras = $carreras->groupBy('config_id');
 
         return $this->success(get_defined_vars());
     }

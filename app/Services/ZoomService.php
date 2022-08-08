@@ -2,15 +2,12 @@
 
 namespace App\Services;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
-use App\Traits\ApiResponse;
-use GuzzleHttp\Client;
-use Carbon\Carbon;
-
-use App\Models\Error;
-use App\Models\Usuario;
 use App\Models\Attendant;
+use App\Models\Error;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class ZoomService extends MeetingService
 {
@@ -47,6 +44,7 @@ class ZoomService extends MeetingService
 //            info("AFTER RESPONSE");
 //            info($response);
         } catch (\Exception $e) {
+
             info($e);
 
             $message = $this->getCustomMessage($account, $path);
@@ -80,13 +78,14 @@ class ZoomService extends MeetingService
         $config = config('zoom.requests.meeting.create');
         $method = ($meeting and $meeting->identifier) ? 'patch' : 'post';
         $url = ($meeting and $meeting->identifier) ? "/users/{$account->identifier}/meetings/$meeting->identifier" : "/users/{$account->identifier}/meetings";
+        $startTimestamp = strtotime($data['starts_at'] ?? $meeting->starts_at);
 
         $data_zoom = array_replace_recursive($config, [
             'topic' => $data['name'] ?? $meeting->name,
             'agenda' => $data['description'] ?? $meeting->description ?? '',
             'duration' => $data['duration'] ?? $meeting->duration,
-            'password' => $meeting->password ?? str_random(10),
-            'start_time' => date('Y-m-d\TH:i:s', strtotime($data['starts_at'] ?? $meeting->starts_at)),
+            'password' => $meeting->password ?? Str::random(10),
+            'start_time' => date('Y-m-d\TH:i:s', $startTimestamp)
         ]);
 
         $result = $this->send($account, $url, $data_zoom, $method);
@@ -193,14 +192,19 @@ class ZoomService extends MeetingService
 //        info('meeting->identifier');
 //        info($meeting->identifier);
         foreach ($chunks as $chunk) {
+
             $data = [
                 'auto_approve' => true,
                 'registrants' => $this->setDataForRegistrants($chunk),
             ];
+
             $temp = $this->batchRegistration($meeting, $data)['registrants'];
             foreach ($temp as $item) {
+
                 $usuario_id = $this->getIdFromBatchResult($item);
-                $attendant = $attendants->where('usuario_id', $usuario_id)->first();
+                $attendant = $attendants->where('usuario_id', $usuario_id)
+                                        ->first();
+
                 $result[$attendant->id] = [
                     'link' => $item['join_url'],
                     'identifier' => $item['registrant_id'],

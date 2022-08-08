@@ -59,23 +59,24 @@ class CursosController extends Controller
         ]);
     }
 
-    public function storeCurso(Abconfig $abconfig, Categoria $categoria, CursosStoreUpdateRequest $request)
+    public function storeCurso(School $escuela, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $data['categoria_modalidad'] = $categoria->modalidad;
+        $data['school_id'] = $escuela->id;
+        // $data['categoria_modalidad'] = $escuela->modalidad;
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-        //        dd($data);
-        $curso = Curso::storeRequest($data);
+        // dd($data);
+        $curso = Course::storeRequest($data);
 
         $msg = 'Curso creado correctamente.';
         return $this->success(compact('curso', 'msg'));
     }
 
-    public function updateCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso, CursosStoreUpdateRequest $request)
+    public function updateCurso(School $escuela, Course $curso, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $validate = Curso::validateCursoRequisito($data, $curso);
+        $validate = Course::validateCursoRequisito($data, $curso);
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
         //        dd($data);
@@ -83,7 +84,7 @@ class CursosController extends Controller
         if (!$validate['validate'])
             return $this->success(compact('validate'), 422);
 
-        $curso = Curso::storeRequest($data, $curso);
+        $curso = Course::storeRequest($data, $curso);
 
         $response = [
             'curso' => $curso,

@@ -216,9 +216,18 @@ class Meeting extends BaseModel
 
     public function getRealPercetageOfAttendees()
     {
-        $division = $this->attendantsWithFirstLogintAt()->count() / $this->attendants()->count();
+        $attendants = $this->attendants()->count();
 
-        return number_format((float)$division * 100, 2);
+        // When there are attendants, calculate the percentage
+
+        if ($attendants > 0) {
+
+            $division = $this->attendantsWithFirstLogintAt()->count() / $attendants;
+            return number_format((float)$division * 100, 2);
+
+        } else {
+            return 0;
+        }
     }
 
     protected function search($request, $method = 'paginate')
@@ -275,7 +284,9 @@ class Meeting extends BaseModel
     {
         try {
 
-            $dates = Account::getDatesToSchedule($data['starts_at'], $data['finishes_at']);
+            $dates = Account::getDatesToSchedule(
+                $data['starts_at'], $data['finishes_at']
+            );
 
             $status = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
             $type = Taxonomy::find($data['type_id']);
@@ -285,10 +296,13 @@ class Meeting extends BaseModel
 
             DB::beginTransaction();
 
-            if ($meeting) :
+            if ($meeting) {
 
                 if ($datesHaveChanged || $meeting->typeHasChanged($type)) {
-                    $account = Account::getOneAvailableForMeeting($type, $dates, $meeting);
+
+                    $account = Account::getOneAvailableForMeeting(
+                        $type, $dates, $meeting
+                    );
                     $account->createOrUpdateMeetingService($data, $meeting);
                     $data['account_id'] = $account->id;
 
@@ -298,7 +312,7 @@ class Meeting extends BaseModel
 //                info($data);
                 $meeting->update($data);
 
-            else:
+            } else {
 
                 $account = Account::getOneAvailableForMeeting($type, $dates);
 
@@ -312,28 +326,34 @@ class Meeting extends BaseModel
 
                 $meeting = Meeting::create($data);
 
-            endif;
+            }
 
-            $data['attendants'][] = Attendant::mergeHostToAttendants($meeting, $host);
+            $data['attendants'][] = Attendant::mergeHostToAttendants(
+                $meeting, $host
+            );
 
             $attendants = $meeting->attendants()->sync($data['attendants']);
 
-            Attendant::createOrUpdatePersonalLinkMeeting($meeting, $datesHaveChanged);
+            Attendant::createOrUpdatePersonalLinkMeeting(
+                $meeting, $datesHaveChanged
+            );
 
-            SourceMultimarca::insertSource($meeting->identifier,'meeting',$meeting->id);
+            // Insert meeting in master database
+            
+//            SourceMultimarca::insertSource(
+//                $meeting->identifier,'meeting', $meeting->id
+//            );
 
             DB::commit();
 
             $meeting->sendMeetingPushNotifications($attendants);
-
             $meeting->sendMeetingEmails();
 
         } catch (\Exception $e) {
 
+            dd($e);
             DB::rollBack();
-
             Error::storeAndNotificateException($e, request());
-
             abort(errorExceptionServer());
         }
 
@@ -371,9 +391,14 @@ class Meeting extends BaseModel
 
     public function getAttendantTokens($attendants)
     {
-        $added = !empty($attendants['created'][0]) ? Usuario::asAttendantsWithToken($attendants['created'][0])->pluck('token_firebase') : [];
-        $remained = !empty($attendants['updated']) ? Usuario::asAttendantsWithToken($attendants['updated'])->pluck('token_firebase') : [];
-
+//        $added = !empty($attendants['created'][0])
+//                    ? Usuario::asAttendantsWithToken($attendants['created'][0])->pluck('token_firebase')
+//                    : [];
+//
+//        $remained = !empty($attendants['updated'])
+//                    ? Usuario::asAttendantsWithToken($attendants['updated'])->pluck('token_firebase')
+//                    : [];
+        $added = []; $remained = [];
         return compact('added', 'remained');
     }
 

@@ -80,7 +80,7 @@ class Course extends Model
             if ($curso) :
                 $curso->update($data);
             else :
-                $data['libre'] = $data['categoria_modalidad'] === 'libre' ? 1 : 0;
+                // $data['libre'] = $data['categoria_modalidad'] === 'libre' ? 1 : 0;
                 $curso = self::create($data);
             endif;
 
