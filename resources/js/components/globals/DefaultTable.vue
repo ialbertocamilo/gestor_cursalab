@@ -290,7 +290,7 @@
                                         <v-icon x-small class="ml-1">mdi-book</v-icon>
                                     </v-chip>
 
-                                    <button
+                          <!--           <button
                                         type="button" class="btn btn-md"
                                         :title="action.text"
                                         @click="doAction(action, item)"
@@ -309,7 +309,7 @@
                                             <br> <span class="table-default-icon-title" v-text="action.text"/>
                                         </template>
                                     </button>
-
+ -->
                                 </v-col>
                               </v-row>
                             </v-fade-transition>
@@ -337,7 +337,6 @@
                                 x-small
                                 color="primary"
                                 active-class="default-chip"
-                                :key="'segment-value-' + index"
                             >
                                 <!-- {{ row.child.segments_count }} segmentos -->
                                 {{ row.child.segments.length }} segmentos
