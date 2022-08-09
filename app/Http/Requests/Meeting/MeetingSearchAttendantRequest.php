@@ -3,10 +3,9 @@
 namespace App\Http\Requests\Meeting;
 
 use App\Http\Requests\ApiFormRequest;
-
 use Illuminate\Foundation\Http\FormRequest;
 
-class MeetingSearchAttendantRequest extends ApiFormRequest
+class MeetingSearchAttendantRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -42,7 +41,9 @@ class MeetingSearchAttendantRequest extends ApiFormRequest
     public function validationData()
     {
         $data['starts_at'] = "{$this->date} {$this->time}:00";
-        $data['finishes_at'] = carbonFromFormat($data['starts_at'])->addMinutes($this->duration ?? 0)->format('Y-m-d H:i:s');
+        $data['finishes_at'] = carbonFromFormat($data['starts_at'])
+                                ->addMinutes($this->duration ?? 0)
+                                ->format('Y-m-d H:i:s');
 
         return $this->merge($data)->all();
     }

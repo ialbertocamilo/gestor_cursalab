@@ -24,7 +24,9 @@ class MeetingRequest extends FormRequest
      */
     public function rules()
     {
-        $meeting_id = $this->method() == 'PUT' ? $this->segment(2) : 'NULL';
+        $meeting_id = ($this->method() == 'PUT')
+                        ? $this->segment(2)
+                        : 'NULL';
 
         $rules = [
             'name' => 'required|min:5|max:255',
@@ -39,11 +41,8 @@ class MeetingRequest extends FormRequest
             'embed' => 'required',
 
             'attendants' => 'required',
-            // 'attendants.*.usuario_id' => 'required',
 
             'description' => 'nullable',
-
-//            'password' => 'required',
         ];
 
         return $rules;
@@ -59,8 +58,6 @@ class MeetingRequest extends FormRequest
         $data['embed'] = false;
 
         $data['attendants'] = $this->list_attendants;
-
-//        $data['password'] = str_random(16);
 
         return $this->merge($data)->all();
     }

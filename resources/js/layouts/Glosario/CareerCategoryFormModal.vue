@@ -33,10 +33,11 @@
                     >
                         <v-card flat class="mt-5">
                             <v-row justify="space-around">
-                                <v-col cols="6"
-                                       class="d-flex justify-content-center"
-                                       v-for="carrera in carreras"
-                                       :key="'modulo-' + index + '-carrera-' + carrera.id"
+                                <v-col
+                                   cols="6"
+                                   class="d-flex justify-content-center"
+                                   v-for="carrera in carreras"
+                                   :key="'modulo-' + index + '-carrera-' + carrera.id"
                                 >
                                     <DefaultSelect
                                         clearable
@@ -95,6 +96,10 @@ export default {
         }
     },
     methods: {
+        log(a) {
+            console.log(a);
+            return '';
+        },
         closeModal() {
             let vue = this
             // vue.options.open = false
@@ -126,7 +131,10 @@ export default {
                 // vue.$http.post(url, formData)
                 vue.$http.post(
                         url,
-                    {'modulos_carreras' : vue.resource.modulos_carreras, '_method' : method})
+                    {
+                        'modulos_carreras' : vue.resource.modulos_carreras,
+                        '_method' : method
+                    })
                     .then(({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)

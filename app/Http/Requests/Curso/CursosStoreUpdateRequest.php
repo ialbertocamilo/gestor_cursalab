@@ -26,10 +26,10 @@ class CursosStoreUpdateRequest extends FormRequest
         return [
             'config_id' => 'required',
             'categoria_id' => 'required',
-            'nombre' => 'required',
+            'name' => 'required',
             'descripcion' => 'nullable',
-            'orden' => 'required',
-            'estado' => 'required',
+            'position' => 'nullable',
+            'active' => 'required',
             'requisito_id' => 'nullable',
 
             'reinicios_programado' => 'nullable',

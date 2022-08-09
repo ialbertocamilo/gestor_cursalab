@@ -16,16 +16,16 @@ class PosteoSearchResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'nombre' => $this->nombre,
-            'tipo_evaluacion' => $this->getTipoEvaluacion(),
+            'nombre' => $this->name,
+            'tipo_evaluacion' => '', //$this->getTipoEvaluacion(),
             'image' => space_url($this->imagen),
-            'active' => (bool)$this->estado,
-            'orden' => $this->orden,
-            'es_evaluable' => $this->evaluable === 'si',
-            'preguntas_count' => $this->preguntas_count,
+            'active' => (bool)$this->active,
+            'orden' => $this->position,
+            'es_evaluable' => $this->assessable === 1,
+            'preguntas_count' => $this->questions_count,
 
-            'edit_route' => route('temas.editTema', [$this->categoria->config_id, $this->categoria_id, $this->curso_id, $this->id]),
-            'evaluacion_route' => route('temas.preguntas_list', [$this->categoria->config_id, $this->categoria_id, $this->curso_id, $this->id]),
+            'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $this->id]),
+            'evaluacion_route' => route('temas.preguntas_list', [$request->school_id, $request->course_id, $this->id]),
         ];
     }
 }

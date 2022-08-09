@@ -7,12 +7,18 @@ use App\Http\Resources\Meeting\MeetingShowAttendantsMeetingResource;
 use App\Imports\Meeting\AttendantsFormImport;
 use App\Services\ZoomService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HigherOrderWhenProxy;
 use Maatwebsite\Excel\Facades\Excel;
 use function foo\func;
 
 class Attendant extends BaseModel
 {
+
+    protected $table = 'attendants';
+
     protected $fillable = [
         'meeting_id', 'usuario_id',
         'link', 'total_logins', 'total_logouts', 'total_duration',
@@ -25,6 +31,11 @@ class Attendant extends BaseModel
     public function usuario()
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function meeting()
@@ -78,76 +89,87 @@ class Attendant extends BaseModel
         return 0;
     }
 
-    protected function getMeetingAttendants($data)
+    /**
+     * Search attendants
+     *
+     * @param $filters
+     * @return array|Builder[]|Collection|HigherOrderWhenProxy[]
+     */
+    protected function searchAttendants($filters)
     {
-        $attendants = self::with(['usuario.config:id,etapa,logo', 'type',
-            'usuario.matricula_presente.carrera',
-            'meeting' => function ($q) use ($data) {
-                $q->betweenScheduleDates($data);
-                $q->ofReservedStatus();
-                $q->excludeMeeting($data['meeting_id'] ?? null);
-            }])
-            ->when($data['exclude_type_id'] ?? NULL, function ($q) use ($data) {
-                $q->where('type_id', '<>', $data['exclude_type_id']);
-            })
-            ->where('meeting_id', $data['meeting_id'])
-            ->get();
+        // Log data
 
-        $attendants = MeetingShowAttendantsMeetingResource::collection($attendants);
+        info($filters);
 
-        return $attendants;
-    }
+        // Get filters
 
-    protected function searchAttendants($data)
-    {
-//        info($data);
-        $attendants = Usuario::with(['config:id,etapa,logo',
-            'invitations.meeting' => function ($q) use ($data) {
-                $q->betweenScheduleDates($data);
-                $q->ofReservedStatus();
-                $q->excludeMeeting($data['meeting_id'] ?? null);
-            }])
-            ->when($data['usuarios_id'] ?? null, function ($q) use ($data) {
-                $q->whereIn('id', $data['usuarios_id']);
-            })
-            ->when($data['usuarios_dni'] ?? null, function ($q) use ($data) {
-                $q->whereIn('dni', $data['usuarios_dni']);
-            })
-            ->when($data['q'] ?? null, function ($q) use ($data) {
-                $q->where(function ($q_where) use ($data) {
-                    $q_where->where('email', 'like', "%{$data['q']}%");
-                    $q_where->orWhere('nombre', 'like', "%{$data['q']}%");
-                    $q_where->orWhere('dni', 'like', "%{$data['q']}%");
-                });
-            })
-            ->when($data['grupos_id'] ?? null, function ($q) use ($data) {
-                $q->whereHas('matricula_presente', function ($q2) use ($data) {
-                    $q2->whereHas('matricula_criterio', function ($q3) use ($data) {
-                        $q3->whereIn('matricula_criterio.criterio_id', $data['grupos_id']);
-                    });
-                });
-            })
-            ->when($data['config_id'] ?? null, function ($q) use ($data) {
-                $q->where('config_id', $data['config_id']);
-            })
-            ->when($data['exclude_host_id'] ?? null, function ($q) use ($data) {
-                $q->where('id', '<>', $data['exclude_host_id']);
-            })
-            ->select('id', 'dni', 'nombre', 'config_id')
-            ->orderBy('config_id')
-            ->orderBy('nombre')
-            ->where('estado', ACTIVE)
-            ->get();
+        $moduleId = $filters['config_id'] ?? '';
 
-        return $attendants;
+        // User columns to be shown
+
+        $visibleColumns = [
+            'id',
+            'name as nombre',
+            DB::raw('"" as dni'),
+            DB::raw($moduleId ? "$moduleId as config_id" :  "'' as config_id")
+        ];
+
+        // Generate query
+
+        $query = User::select($visibleColumns)
+                     ->join('criterion_value_user as cvu', 'cvu.user_id', '=', 'users.id')
+                     ->orderBy('name')
+                     ->where('active', ACTIVE);
+
+
+        // Filter by module
+
+        $query->when($moduleId, function ($q) use ($moduleId) {
+            $q->where('cvu.criterion_value_id', $moduleId);
+        });
+
+        // Filter by group ids
+
+//        $query->when($filters['grupos_id'] ?? null, function ($q) use ($filters) {
+//            $q->whereIn('cvu.criterion_value_id', $filters['grupos_id']);
+//        });
+
+        // Exclude host user id
+
+        $query->when($filters['exclude_host_id'] ?? null, function ($q) use ($filters) {
+            $q->where('users.id', '<>', $filters['exclude_host_id']);
+        });
+
+        // Filter by search term
+
+        $query->when($filters['q'] ?? null, function ($q) use ($filters) {
+
+            $term = $filters['q'];
+
+            $q->where(function ($q_where) use ($term) {
+                $q_where->where('users.email', 'like', "%{$term}%");
+                $q_where->orWhere('users.name', 'like', "%{$term}%");
+                $q_where->orWhere('users.document', 'like', "%{$term}%");
+            });
+        });
+
+        // Load attendats
+
+        return $query->get();
     }
 
     protected function filterEmptyMeetingInvitations(&$attendants)
     {
         foreach ($attendants as $attendant) {
-            foreach ($attendant->invitations as $key => $invitation) {
-                if (!$invitation->meeting)
-                    $attendant->invitations->pull($key);
+
+            if ($attendant->invitations) {
+
+                foreach ($attendant->invitations as $key => $invitation) {
+
+                    if (!$invitation->meeting) {
+                        $attendant->invitations->pull($key);
+                    }
+                }
             }
         }
 
@@ -159,10 +181,13 @@ class Attendant extends BaseModel
         if (self::meetingsAsHost($usuario, $dates, $meeting)) return false;
 
 //        return self::meetingsAsParticipant($user->usuario, $dates, $meeting) ? false : true;
-        return self::meetingsAsParticipant($usuario, $dates, $meeting) ? false : true;
+        return self::meetingsAsParticipant($usuario, $dates, $meeting)
+                ? false : true;
     }
 
-    protected function meetingsAsHost($usuario, $dates, $meeting = NULL, $method = 'count')
+    protected function meetingsAsHost(
+        $usuario, $dates, $meeting = NULL, $method = 'count'
+    )
     {
         $query = Meeting::where('host_id', $usuario->id);
 
@@ -174,7 +199,9 @@ class Attendant extends BaseModel
         return $query->$method();
     }
 
-    protected function meetingsAsParticipant($usuario, $dates, $meeting = NULL, $method = 'count')
+    protected function meetingsAsParticipant(
+        $usuario, $dates, $meeting = NULL, $method = 'count'
+    )
     {
         $query = Meeting::query();
 
@@ -246,13 +273,18 @@ class Attendant extends BaseModel
         return true;
     }
 
-    protected function createOrUpdatePersonalLinkMeeting($meeting, $datesHaveChanged)
+    protected function createOrUpdatePersonalLinkMeeting(
+        $meeting, $datesHaveChanged
+    )
     {
 
         switch ($meeting->account->service->code) {
+
             case 'zoom':
+
                 $q_attendants = $meeting->attendants()->with('usuario');
 //                if (!($meeting->status->code === 'scheduled' and $datesHaveChanged)){
+
                 $q_attendants->whereNull('link');
 //                }
                 $attendants = $q_attendants->get();
@@ -261,10 +293,13 @@ class Attendant extends BaseModel
 //                info($attendants->pluck('id'));
 //                info($attendants->pluck('usuario.dni'));
 
-                $result = ZoomService::prepareBatchAttendantsData($meeting, $attendants);
-//                info("", $result);
+                $result = ZoomService::prepareBatchAttendantsData(
+                    $meeting, $attendants
+                );
+
                 foreach ($result as $attendant_id => $attendant_data) {
-                    Attendant::where('id', $attendant_id)->update($attendant_data);
+                    Attendant::where('id', $attendant_id)
+                             ->update($attendant_data);
                 }
                 break;
 
@@ -275,15 +310,16 @@ class Attendant extends BaseModel
             case 'vimeo':
                 // TODO $result = VimeoService::createOrUpdateMeeting($this, $data, $meeting);
                 break;
-
-            default:
-                break;
         }
     }
 
     protected function getMeetingAttendantsForMeeting($meeting)
     {
-        $user_type = Taxonomy::getFirstData('meeting', 'user', 'host');
+        $user_type = Taxonomy::getFirstData(
+            'meeting',
+            'user',
+            'host'
+        );
 
         $data = [
             'starts_at' => $meeting->starts_at,
@@ -293,5 +329,26 @@ class Attendant extends BaseModel
         ];
 
         return Attendant::getMeetingAttendants($data);
+    }
+
+    protected function getMeetingAttendants($data)
+    {
+        $attendants = self::with([
+            'usuario',
+            'type',
+            //'usuario.matricula_presente.carrera',
+            'meeting' => function ($q) use ($data) {
+                $q->betweenScheduleDates($data);
+                $q->ofReservedStatus();
+                $q->excludeMeeting($data['meeting_id'] ?? null);
+            }
+       ])
+        ->when($data['exclude_type_id'] ?? NULL, function ($q) use ($data) {
+            $q->where('type_id', '<>', $data['exclude_type_id']);
+        })
+        ->where('meeting_id', $data['meeting_id'])
+        ->get();
+
+        return MeetingShowAttendantsMeetingResource::collection($attendants);
     }
 }

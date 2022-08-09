@@ -56,7 +56,7 @@
                                     'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
                                 images_upload_handler: images_upload_handler,
                             }"/>
-                            
+
                         </v-col>
                         <v-col cols="4">
                             <DefaultSelectOrUploadMultimedia
@@ -246,7 +246,7 @@ export default {
     data() {
         return {
             drag: false,
-            base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos/${this.curso_id}/temas`,
+            base_endpoint: `/escuelas/${this.categoria_id}/cursos/${this.curso_id}/temas`,
             resourceDefault: {
                 curso_id: this.curso_id,
                 config_id: this.modulo_id,

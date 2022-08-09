@@ -100,7 +100,7 @@ class Carrera extends Model
     protected function getHostIds()
     {
         return Carrera::whereIn('nombre',
-            ["Monitor de Ventas"]
+            [""]
         )->pluck('id')->toArray();
     }
 }

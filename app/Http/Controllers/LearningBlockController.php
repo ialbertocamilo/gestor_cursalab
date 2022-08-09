@@ -21,4 +21,13 @@ class LearningBlockController extends Controller
         return $this->success($blocks);
     }
 
+    // public function create(Request $request)
+    // {
+    //     $blocks = Block::search($request);
+
+    //     BlockResource::collection($blocks);
+
+    //     return $this->success($blocks);
+    // }
+
 }

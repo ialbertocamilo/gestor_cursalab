@@ -2,35 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Account;
-use App\Models\Meeting;
-use App\Models\Usuario;
-use App\Models\Abconfig;
-use App\Models\Criterio;
-use App\Models\Taxonomy;
-use App\Models\Attendant;
-use App\Models\Usuario_rest;
-use App\Models\SourceMultimarca;
-use App\Exports\EventosExport;
-use App\Services\MeetingService;
-
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-
-use App\Http\Requests\MeetingRequest;
-use App\Exports\Meeting\MeetingExport;
-
-use App\Http\Resources\MeetingResource;
-use App\Exports\EventosAsistentesExport;
-
-use App\Http\Requests\MeetingFinishRequest;
 use App\Exports\Meeting\GeneralMeetingsExport;
-use App\Exports\Meeting\MeetingAttendantsExport;
+use App\Exports\Meeting\MeetingExport;
 use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
-use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
 use App\Http\Requests\Meeting\MeetingUploadAttendantsFormRequest;
+use App\Http\Requests\MeetingFinishRequest;
+use App\Http\Requests\MeetingRequest;
+use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Http\Resources\MeetingResource;
+use App\Models\Attendant;
+use App\Models\Criterion;
+use App\Models\Meeting;
+use App\Models\SourceMultimarca;
+use App\Models\Taxonomy;
+use App\Models\Usuario;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MeetingController extends Controller
 {
@@ -51,27 +39,47 @@ class MeetingController extends Controller
         return $this->success(get_defined_vars());
     }
 
+    /**
+     * Process request to load modules and groups
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function getSelectSearchFilters(Request $request)
     {
-        $modulos = Abconfig::select('id', 'etapa as nombre')->get();
-
-        $grupos = Criterio::getGruposForSelect($request->all());
+        $modulos = Criterion::getValuesForSelect('module');
+        $grupos = Criterion::getValuesForSelect('group');
 
         return $this->success(compact('grupos', 'modulos'));
     }
 
+    /**
+     * Process request to load data for form selects
+     *
+     * @param false $compactResponse
+     * @return array|JsonResponse
+     */
     public function getFormSelects($compactResponse = false)
     {
+
         $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
         $user_types = Taxonomy::getSelectData('meeting', 'user');
         $types = Taxonomy::getSelectData('meeting', 'type');
         $hosts = Usuario::getCurrentHosts();
 
-        $response = compact('types', 'hosts', 'user_types', 'default_meeting_type');
+        $response = compact(
+            'types', 'hosts', 'user_types', 'default_meeting_type'
+        );
 
         return $compactResponse ? $response : $this->success($response);
     }
 
+    /**
+     * Process request to create a new meeting
+     *
+     * @param MeetingRequest $request
+     * @return JsonResponse
+     */
     public function store(MeetingRequest $request)
     {
         $meeting = Meeting::storeRequest($request->validated());
@@ -83,7 +91,9 @@ class MeetingController extends Controller
     {
         $meeting->load('type', 'host.config');
 
-        extract($this->getFormSelects(true), EXTR_OVERWRITE);
+        extract(
+            $this->getFormSelects(true), EXTR_OVERWRITE
+        );
 
         $duplicate = [
             'type' => $meeting->type,
@@ -92,12 +102,24 @@ class MeetingController extends Controller
             'description' => $meeting->description,
         ];
 
-        return $this->success(compact('types', 'user_types', 'hosts', 'duplicate'));
+        return $this->success(
+            compact(
+                'types',
+                'user_types',
+                'hosts',
+                'duplicate'
+            )
+        );
     }
 
     public function edit(Meeting $meeting)
     {
-        $meeting->load('type', 'host.config', 'status');
+        $meeting->load(
+            'type',
+//            'host.config',
+            'host',
+            'status'
+        );
 
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
 
@@ -115,15 +137,29 @@ class MeetingController extends Controller
         return $this->success(['msg' => 'Reunión actualizada correctamente.']);
     }
 
+    /**
+     * Process request to load meeting details
+     *
+     * @param Meeting $meeting
+     * @return JsonResponse
+     */
     public function show(Meeting $meeting)
     {
-        $meeting->load('type', 'host.config', 'status', 'user');
+        $meeting->load(
+            'type',
+            //'host.config', // user is no longer related to meeting
+            'status',
+            'user'
+        );
 
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
         $meeting->attendants_count = $meeting->attendants()->count();
-        $meeting->real_attendants_count = $meeting->attendants()->whereNotNull('first_login_at')->count();
+        $meeting->real_attendants_count = $meeting
+                                            ->attendants()
+                                            ->whereNotNull('first_login_at')
+                                            ->count();
+
         $meeting->real_percentage_attendees = $meeting->getRealPercetageOfAttendees();
-        // $meeting->duration = $meeting->getTotalDuration();
         $meeting->download_ready = $meeting->checkIfDataIsReady();
         $meeting->getDatesFormatted();
         $meeting->isMasterOrAdminCursalab = auth()->user()->isMasterOrAdminCursalab();
@@ -153,6 +189,12 @@ class MeetingController extends Controller
         return $this->success(['msg' => 'Se finalizó la reunión correctamente.']);
     }
 
+    /**
+     * Process request to cancel meeting
+     *
+     * @param Meeting $meeting
+     * @return JsonResponse
+     */
     public function cancel(Meeting $meeting)
     {
         $meeting->cancel();
@@ -161,9 +203,18 @@ class MeetingController extends Controller
     }
 
 
+    /**
+     * Process request to delete record
+     *
+     * @param Meeting $meeting
+     * @return JsonResponse
+     */
     public function destroy(Meeting $meeting)
     {
-        SourceMultimarca::destroySource('meeting',$meeting->id,$meeting->identifier);
+//        SourceMultimarca::destroySource(
+//            'meeting', $meeting->id, $meeting->identifier
+//        );
+
         $meeting->delete();
 
         return $this->success(['msg' => 'Se eliminó la reunión correctamente.']);
@@ -241,14 +292,17 @@ class MeetingController extends Controller
 
     }
 
+    /**
+     * Process request to search attendants
+     *
+     * @param MeetingSearchAttendantRequest $request
+     * @return JsonResponse
+     */
     public function searchAttendants(MeetingSearchAttendantRequest $request)
     {
-        $data = $request->validated();
-
-        $attendants = Attendant::searchAttendants($data);
-
+        $filters = $request->validated();
+        $attendants = Attendant::searchAttendants($filters);
         $attendants = MeetingSearchAttendantsResource::collection($attendants);
-
         Attendant::filterEmptyMeetingInvitations($attendants);
 
         return $this->success(compact('attendants'));
