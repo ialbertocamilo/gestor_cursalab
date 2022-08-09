@@ -370,6 +370,133 @@
 
             </template>
 
+
+            <template v-slot:item.custom_block_courses="{item, header}">
+
+                <v-expansion-panels flat class="custom-expansion-block">
+                    <v-expansion-panel>
+                      <v-expansion-panel-header v-slot="{ open }">
+                        <v-row no-gutters>
+                          <v-col cols="3">
+                            <v-img src="/img/logo.png" class="" style="width: 85%;" />
+                          </v-col>
+                          <v-col
+                            cols="9"
+                            class="text--secondary"
+                          >
+                            <v-fade-transition leave-absolute>
+                              <v-row
+                                no-gutters
+                                style="width: 100%"
+
+                              >
+                                <v-col cols="8">
+                                    <h5>{{ item.name }}</h5>
+
+                                    <span >Creado el {{ item.created_at }}</span>
+
+                                    <br />
+
+                                    <v-chip
+                                        class="default-chip mt-3"
+                                        x-small
+                                        color="primary"
+                                        active-class="default-chip"
+                                    >
+                                        {{ item.segments_count }} segmentos
+                                        <v-icon x-small class="ml-1">mdi-star</v-icon>
+                                    </v-chip>
+                                    <v-chip
+                                        class="default-chip ml-2 mt-3"
+                                        x-small
+                                        color="primary"
+                                        active-class="default-chip"
+                                    >
+                                        {{ item.children_count }} rutas
+                                        <v-icon x-small class="ml-1">mdi-book</v-icon>
+                                    </v-chip>
+
+                                </v-col>
+                                <v-col cols="4">
+                                    <v-chip
+                                        class="default-chip ml-2 my-1"
+                                        x-small
+                                        color="primary"
+                                        active-class="default-chip"
+                                    >
+                                        {{ item.segments_count }} segmentos
+                                        <v-icon x-small class="ml-1">mdi-star</v-icon>
+                                    </v-chip>
+                                    <v-chip
+                                        class="default-chip ml-2 my-1"
+                                        x-small
+                                        color="primary"
+                                        active-class="default-chip"
+                                    >
+                                        {{ item.children_count }} rutas
+                                        <v-icon x-small class="ml-1">mdi-book</v-icon>
+                                    </v-chip>
+
+                                </v-col>
+                              </v-row>
+                            </v-fade-transition>
+                          </v-col>
+                        </v-row>
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content v-if="item.children_count">
+                        <v-row
+                            justify="space-around"
+                            no-gutters
+                            v-for="(row, i) in item.block_children"
+                            :key="'segment-' + i"
+                            class="segments"
+                        >
+                          <v-col cols="6">
+                            {{ row.child.name }}
+                            <!-- #{{ segment.id }} -->
+                          </v-col>
+
+                          <v-col cols="3">
+
+                                <!-- v-for="(segment, index) in row.child.segments" -->
+                            <v-chip
+                                class="default-chip ml-2 my-1"
+                                x-small
+                                color="primary"
+                                active-class="default-chip"
+                            >
+                                <!-- {{ row.child.segments_count }} segmentos -->
+                                {{ row.child.segments.length }} segmentos
+                                <v-icon x-small class="ml-1">mdi-star</v-icon>
+                            </v-chip>
+
+                            <!-- {{ segment.id }} -->
+                            
+                          </v-col>
+
+                          <v-col cols="3">
+
+                            <v-chip
+                                class="default-chip ml-2 my-1"
+                                x-small
+                                color="primary"
+                                active-class="default-chip"
+                            >
+
+                                {{ row.child.courses.length }} cursos
+                                <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
+                            </v-chip>
+
+                            <!-- {{ segment.id }} -->
+                            
+                          </v-col>
+                        </v-row>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                </v-expansion-panels>
+
+            </template>
+
             <template v-slot:item.custom_error="{item, header}">
                 <p class="my-0"><strong>{{ item.custom_error.title }}</strong></p>
                 <p class="my-0"><small>{{ item.custom_error.subtitle }}</small></p>

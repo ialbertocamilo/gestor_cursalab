@@ -12,8 +12,8 @@ Route::controller(LearningBlockController::class)->group(function() {
 	// Route::get('/form-selects', 'getFormSelects');
 
 	// Route::get('/create', 'create');
-	Route::view('/create', 'learning.blocks.form-data')->name('blocks.form');
-	Route::view('/create-rutas', 'learning.blocks.form-courses')->name('blocks.form');
+	Route::view('/crear', 'learning.blocks.form-data')->name('blocks.form');
+	Route::view('/crear-rutas', 'learning.blocks.form-courses')->name('blocks.form');
 
 	Route::post('/store', 'store');
 

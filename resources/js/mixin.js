@@ -539,6 +539,10 @@ export default {
                     vue.hideLoader()
                     return false
                 });
+        },
+        openLink(url)
+        {
+            window.location.href = url
         }
     }
 };

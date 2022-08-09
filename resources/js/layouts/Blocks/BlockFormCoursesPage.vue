@@ -5,8 +5,12 @@
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
 
+                    <DefaultSimpleBreadcrumbs :breadcrumbs="breadcrumbs"/>
+
+                    <v-spacer/>
+
                     <DefaultModalButton
-                        label="Crear programa"
+                        label="Agregar ruta"
                         @click="openFormModal(modalFormOptions)"/>
                 </v-card-title>
             </div>
@@ -65,6 +69,12 @@ export default {
     // components: {BlockDetailModal, BlockFormModal, BlockFinishModal, BlockDirectionsModal,},
     props: ['usuario_id'],
     data: () => ({
+
+        breadcrumbs: [
+            {title: 'Datos', disabled: false, href: `/programas/crear`},
+            {title: 'Rutas y cursos', disabled: false, href: '/programas/crear-rutas'},
+        ],
+
         dataTable: {
             endpoint: '/programas/search',
             ref: 'BlockTable',
@@ -72,7 +82,7 @@ export default {
                 // {text: "ID", value: "id", align: 'center', sortable: false},
                 // {text: "Tipo", value: "type", sortable: false},
                 // {text: "Nombre", value: "name"},
-                {text: "", value: "custom_block", sortable: false},
+                {text: "", value: "custom_block_courses", sortable: false},
                 // {text: "Criterios", value: "criterion_values_count", sortable: false},
                 // {text: "Rutas", value: "segments_count", sortable: false},
                 // // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},

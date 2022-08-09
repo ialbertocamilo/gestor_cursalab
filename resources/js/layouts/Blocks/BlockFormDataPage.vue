@@ -4,12 +4,17 @@
         <header class="page-header mt-5 py-0 mx-8">
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
+
+               <!--      <h4>Datos / </h4>
+                    <h4> Rutas y cursos</h4> -->
+
+                    <DefaultSimpleBreadcrumbs :breadcrumbs="breadcrumbs"/>
                    
                     <v-spacer/>
 
                     <DefaultModalButton
                         label="Siguiente"
-                        @click="openFormModal(modalFormOptions)"/>
+                        @click="openLink('/programas/crear-rutas')" />
                 </v-card-title>
             </div>
         </header>
@@ -37,9 +42,9 @@
                                     <v-col cols="6">
                                         <DefaultInput
                                             dense
-                                            label="Orden"
-                                            placeholder="Orden"
-                                            v-model="resource.position"
+                                            label="Código"
+                                            placeholder="Código"
+                                            v-model="resource.code"
                                             show-required
                                         />
                                     </v-col>
@@ -47,10 +52,11 @@
 
                                  <v-row>
                                     <v-col cols="12">
-                                        <DefaultInput
+                                        <DefaultTextArea
                                             dense
                                             label="Descripción"
                                             placeholder="Ingrese una descripción"
+                                            type="textarea"
                                             v-model="resource.description"
                                         />
                                     </v-col>
@@ -93,6 +99,11 @@ export default {
     // components: {BlockDetailModal, BlockFormModal, BlockFinishModal, BlockDirectionsModal,},
     props: ['usuario_id'],
     data: () => ({
+
+        breadcrumbs: [
+            {title: 'Datos', disabled: false, href: `/programas/crear`},
+            {title: 'Rutas y cursos', disabled: false, href: '/programas/crear-rutas'},
+        ],
 
         resourceDefault: {
             name: null,

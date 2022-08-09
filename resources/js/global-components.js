@@ -29,6 +29,7 @@ import RequiredFieldSymbol from "./components/globals/RequiredFieldSymbol";
 import DefaultDeleteBtnIcon from "./components/globals/DefaultDeleteBtnIcon"
 import DefaultErrors from "./components/globals/DefaultErrors"
 import DefaultBreadcrumbs from "./components/globals/DefaultBreadcrumbs";
+import DefaultSimpleBreadcrumbs from "./components/globals/DefaultSimpleBreadcrumbs";
 import DefaultSimpleMessageAlert from "./components/globals/DefaultSimpleMessageAlert";
 
 export default {
@@ -66,6 +67,7 @@ export default {
         DefaultErrors,
 
         DefaultBreadcrumbs,
+        DefaultSimpleBreadcrumbs,
 
         DefaultSimpleMessageAlert,
     },
