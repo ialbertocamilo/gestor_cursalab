@@ -130,7 +130,10 @@ class Meeting extends BaseModel
 
     public function datesHaveChanged($dates)
     {
-        return ($this->starts_at != $dates['starts_at'] || $this->finishes_at != $dates['finishes_at']);
+        return (
+            $this->starts_at != $dates['starts_at'] ||
+            $this->finishes_at != $dates['finishes_at']
+        );
     }
 
     public function typeHasChanged($type)
@@ -334,12 +337,12 @@ class Meeting extends BaseModel
 
             $attendants = $meeting->attendants()->sync($data['attendants']);
 
-            Attendant::createOrUpdatePersonalLinkMeeting(
-                $meeting, $datesHaveChanged
-            );
+//            Attendant::createOrUpdatePersonalLinkMeeting(
+//                $meeting, $datesHaveChanged
+//            );
 
             // Insert meeting in master database
-            
+
 //            SourceMultimarca::insertSource(
 //                $meeting->identifier,'meeting', $meeting->id
 //            );

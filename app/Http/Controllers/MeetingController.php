@@ -91,7 +91,9 @@ class MeetingController extends Controller
     {
         $meeting->load('type', 'host.config');
 
-        extract($this->getFormSelects(true), EXTR_OVERWRITE);
+        extract(
+            $this->getFormSelects(true), EXTR_OVERWRITE
+        );
 
         $duplicate = [
             'type' => $meeting->type,
@@ -100,12 +102,24 @@ class MeetingController extends Controller
             'description' => $meeting->description,
         ];
 
-        return $this->success(compact('types', 'user_types', 'hosts', 'duplicate'));
+        return $this->success(
+            compact(
+                'types',
+                'user_types',
+                'hosts',
+                'duplicate'
+            )
+        );
     }
 
     public function edit(Meeting $meeting)
     {
-        $meeting->load('type', 'host.config', 'status');
+        $meeting->load(
+            'type',
+//            'host.config',
+            'host',
+            'status'
+        );
 
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
 
@@ -131,11 +145,20 @@ class MeetingController extends Controller
      */
     public function show(Meeting $meeting)
     {
-        $meeting->load('type', 'host.config', 'status', 'user');
+        $meeting->load(
+            'type',
+            //'host.config', // user is no longer related to meeting
+            'status',
+            'user'
+        );
 
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
         $meeting->attendants_count = $meeting->attendants()->count();
-        $meeting->real_attendants_count = $meeting->attendants()->whereNotNull('first_login_at')->count();
+        $meeting->real_attendants_count = $meeting
+                                            ->attendants()
+                                            ->whereNotNull('first_login_at')
+                                            ->count();
+
         $meeting->real_percentage_attendees = $meeting->getRealPercetageOfAttendees();
         $meeting->download_ready = $meeting->checkIfDataIsReady();
         $meeting->getDatesFormatted();
@@ -166,6 +189,12 @@ class MeetingController extends Controller
         return $this->success(['msg' => 'Se finalizó la reunión correctamente.']);
     }
 
+    /**
+     * Process request to cancel meeting
+     *
+     * @param Meeting $meeting
+     * @return JsonResponse
+     */
     public function cancel(Meeting $meeting)
     {
         $meeting->cancel();
@@ -174,9 +203,18 @@ class MeetingController extends Controller
     }
 
 
+    /**
+     * Process request to delete record
+     *
+     * @param Meeting $meeting
+     * @return JsonResponse
+     */
     public function destroy(Meeting $meeting)
     {
-        SourceMultimarca::destroySource('meeting',$meeting->id,$meeting->identifier);
+//        SourceMultimarca::destroySource(
+//            'meeting', $meeting->id, $meeting->identifier
+//        );
+
         $meeting->delete();
 
         return $this->success(['msg' => 'Se eliminó la reunión correctamente.']);

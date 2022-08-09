@@ -16,9 +16,9 @@ class MeetingShowAttendantsMeetingResource extends JsonResource
      */
     public function toArray($request)
     {
-        $usuario = $this->usuario;
+
 //        info($usuario);
-        $carrera = $usuario->matricula_presente->carrera ?? null;
+        $carrera = null; // $usuario->matricula_presente->carrera ?? null;
         // $idsCoHostCareers = MeetingService::getIdsCoHostCareers();
         // $isCoHost = in_array($carrera->id, $idsCoHostCareers);
 
@@ -26,8 +26,8 @@ class MeetingShowAttendantsMeetingResource extends JsonResource
         return [
             'id' => $this->id,
             'usuario_id' => $this->usuario ? $this->usuario->id : '',
-            'dni' => $this->usuario ? $this->usuario->dni : '',
-            'nombre' => $this->usuario ? $this->usuario->nombre : '',
+            'dni' => $this->usuario ? $this->usuario->document : '',
+            'nombre' => $this->usuario ? $this->usuario->name : '',
             'config' => $this->usuario ? $this->usuario->config : '',
 
             'carrera' => $carrera->nombre ?? 'No definido',
@@ -35,7 +35,10 @@ class MeetingShowAttendantsMeetingResource extends JsonResource
             'type_id' => $this->type_id,
 
             'invitations' => $this->invitations,
-            'invitations_count' => $this->invitations ? $this->invitations->count() : 0,
+            'invitations_count' => $this->invitations
+                                    ? $this->invitations->count()
+                                    : 0
+            ,
             'link' => $this->link,
 
             'total_duration' => $this->total_duration ?? 0,
