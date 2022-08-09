@@ -194,7 +194,7 @@ return [
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\ChartServiceProvider::class,
+        // App\Providers\ChartServiceProvider::class,
         App\Providers\ValidationServiceProvider::class,
 
         // Jenssegers\Mongodb\MongodbServiceProvider::class,

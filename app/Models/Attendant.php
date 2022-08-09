@@ -316,7 +316,9 @@ class Attendant extends BaseModel
     protected function getMeetingAttendantsForMeeting($meeting)
     {
         $user_type = Taxonomy::getFirstData(
-            'meeting', 'user', 'host'
+            'meeting',
+            'user',
+            'host'
         );
 
         $data = [
@@ -331,18 +333,21 @@ class Attendant extends BaseModel
 
     protected function getMeetingAttendants($data)
     {
-        $attendants = self::with(['usuario.config:id,etapa,logo', 'type',
-            'usuario.matricula_presente.carrera',
+        $attendants = self::with([
+            'usuario',
+            'type',
+            //'usuario.matricula_presente.carrera',
             'meeting' => function ($q) use ($data) {
                 $q->betweenScheduleDates($data);
                 $q->ofReservedStatus();
                 $q->excludeMeeting($data['meeting_id'] ?? null);
-            }])
-            ->when($data['exclude_type_id'] ?? NULL, function ($q) use ($data) {
-                $q->where('type_id', '<>', $data['exclude_type_id']);
-            })
-            ->where('meeting_id', $data['meeting_id'])
-            ->get();
+            }
+       ])
+        ->when($data['exclude_type_id'] ?? NULL, function ($q) use ($data) {
+            $q->where('type_id', '<>', $data['exclude_type_id']);
+        })
+        ->where('meeting_id', $data['meeting_id'])
+        ->get();
 
         return MeetingShowAttendantsMeetingResource::collection($attendants);
     }

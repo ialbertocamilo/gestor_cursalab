@@ -173,7 +173,7 @@
                                                 <v-icon small v-text="'mdi-trash-can'"/>
                                             </v-btn>
                                             <DefaultLogoImage
-                                                :image="item.config.logo"
+                                                :image="item.config ? item.config.logo : ''"
                                                 class="mx-2"
                                                 max-width="70"
                                             />

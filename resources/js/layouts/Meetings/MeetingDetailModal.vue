@@ -10,7 +10,6 @@
             <v-card tile elevation="0" class="--my-3">
                 <v-card-text class="pb-0">
 
-
                     <v-tabs
                         v-model="tab"
                         centered
@@ -28,7 +27,10 @@
                         <v-tab href="#attendants">
                             Lista de invitados
                             <v-chip color="primary" x-small class="ml-3 px-2">
-                                {{ resource.attendants ? resource.attendants.length + 1 : 0 }}
+                                {{ resource.attendants
+                                    ? resource.attendants.length + 1
+                                    : 0
+                                }}
                             </v-chip>
                             <!-- <v-icon>mdi-account-multiple</v-icon> -->
                         </v-tab>
@@ -270,7 +272,7 @@
                         >
                             <v-card flat>
                                 <v-row>
-                                    <v-col cols="12" v-if="resource.host">
+                                    <v-col v-if="resource.host" cols="12" >
                                         <div class="box-meeting-search-attendants"
                                              style="min-height: min-content !important;">
                                             <div class="d-flex justify-content-between align-items-center">
@@ -282,8 +284,8 @@
                                                         max-width="70"
                                                     />
                                                     <div class="clickable--">
-                                                        {{ resource.host.dni }} -
-                                                        {{ resource.host.nombre }}
+                                                        {{ resource.host.document }} -
+                                                        {{ resource.host.name }}
                                                     </div>
                                                 </div>
                                                 <div class="item-options-meeting-search-attendants-results"
@@ -318,7 +320,9 @@
                                 <v-row justify="start" align="start">
                                     <v-col cols="12">
                                         <div class="box-meeting-search-attendants ">
-                                            <DefaultOverlay :value="overlay.box_attendants" absolute :opacity="0.2"/>
+                                            <DefaultOverlay :value="overlay.box_attendants"
+                                                            absolute
+                                                            :opacity="0.2"/>
                                             <v-virtual-scroll
                                                 :bench="0"
                                                 :items="resource.attendants"
@@ -329,8 +333,11 @@
                                                     <v-row no-gutters>
                                                         <v-col cols="8">
                                                             <div class="item-meeting-search-attendants-results">
+
+                                                                <!-- User's module logo -->
+
                                                                 <DefaultLogoImage
-                                                                    :image="item.config.logo"
+                                                                    :image="item.config ? item.config.logo : ''"
                                                                     class="mx-2"
                                                                     max-width="70"
                                                                 />
@@ -343,10 +350,13 @@
                                                                     }}
                                                                 </div>
 
-                                                                <v-icon class="ml-2" small v-text="'mdi-circle'"
+                                                                <v-icon v-if="resource.status.code === 'in-progress' && item.online == 1"
+                                                                        class="ml-2"
+                                                                        small
+                                                                        v-text="'mdi-circle'"
                                                                         color="green"
                                                                         title="En línea"
-                                                                        v-if="resource.status.code === 'in-progress' && item.online == 1"/>
+                                                                />
                                                             </div>
                                                         </v-col>
                                                         <v-col cols="4" class="d-flex justify-content-end">
@@ -383,8 +393,9 @@
                                                 v-if="resource.status.code === 'in-progress'"
                                         />
                                         <small v-if="resource.report_generated_at_formatted"
-                                               :title="resource.report_generated_at_formatted">Última actualización
-                                            {{ resource.report_generated_at_diff }}</small>
+                                               :title="resource.report_generated_at_formatted">
+                                            Última actualización {{ resource.report_generated_at_diff }}
+                                        </small>
                                         <v-tooltip
                                             v-if="resource.status.code === 'in-progress' || isMasterOrAdminCursalab"
                                             bottom>
@@ -1115,7 +1126,7 @@ export default {
             await vue.$http.get(url)
                 .then(({data}) => {
                     let _data = data.data
-                    vue.resource = _data.meeting
+                    vue.resource = Object.assign({}, _data.meeting)
                     vue.isMasterOrAdminCursalab = _data.meeting.isMasterOrAdminCursalab
                 })
             return 0;
@@ -1126,9 +1137,9 @@ export default {
             vue.$http.get(url)
                 .then(({data}) => {
                     let _data = data.data
-                    // console.log(_data)
+
                     vue.isMasterOrAdminCursalab = _data.isMasterOrAdminCursalab
-                    console.log(vue.isMasterOrAdminCursalab)
+
                     let guestsVsAttendees = _data.stats['guestsVsAttendees']
                     let averageTimeInMeeting = _data.stats['averageTimeInMeeting']
                     let attendeesPerCallAssistance = _data.stats['attendeesPerCallAssistance']
