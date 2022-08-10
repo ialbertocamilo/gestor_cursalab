@@ -119,12 +119,12 @@ class Posteo extends Model
 
             if ($tema) :
                 $tema->update($data);
-            else:
+            else :
                 $tema = self::create($data);
             endif;
 
             $tema->medias()->delete();
-            if (!empty($data['medias'])):
+            if (!empty($data['medias'])) :
                 $medias = array();
                 $now = date('Y-m-d H:i:s');
                 foreach ($data['medias'] as $index => $media) {
@@ -133,7 +133,7 @@ class Posteo extends Model
                     //     $valor = env('DO_URL') . '/' .$valor;
                     // }
                     $medias[] = [
-                        'orden'=>($index+1),
+                        'orden' => ($index + 1),
                         'tema_id' => $tema->id,
                         'valor' => $valor,
                         'titulo' => $media['titulo'] ?? '',
@@ -147,7 +147,7 @@ class Posteo extends Model
                 DB::table('media_temas')->insert($medias);
             endif;
 
-            if (!empty($data['tags'])):
+            if (!empty($data['tags'])) :
                 $tema->rel_tag()->delete();
                 $tempTags = [];
                 foreach ($data['tags'] as $tag) {
@@ -161,7 +161,7 @@ class Posteo extends Model
             endif;
 
 
-            if (!empty($data['file_imagen'])):
+            if (!empty($data['file_imagen'])) :
                 $path = Media::uploadFile($data['file_imagen']);
                 $tema->imagen = $path;
             endif;
@@ -181,15 +181,17 @@ class Posteo extends Model
             info($e);
             return $e;
         }
-
     }
 
     protected function search_preguntas($request, $tema)
     {
-        $tipo_preg = ($tema->tipo_ev === 'calificada') ? 'selecciona' : 'texto';
 
-        $q = Pregunta::where('post_id', $request->tema_id)
-            ->where('tipo_pregunta', $tipo_preg);
+        // $tax_type_eval = Taxonomy::where('group', 'topic')->where('type', 'evaluation-type')->where('id', $tema->type_evaluation_id)->get();
+
+        // $tipo_preg = ($tax_type_eval->code === 'qualified') ? 'selecciona' : 'texto';
+
+        $q = Question::where('topic_id', $tema->id)
+            ->where('type_id', $tema->type_evaluation_id);
 
         if ($request->q)
             $q->where('pregunta', 'like', "%$request->q%");
@@ -202,26 +204,26 @@ class Posteo extends Model
         $req_cursos = Curso::select('id', 'nombre')->where('requisito_id', $tema->curso_id)->get();
         $req_temas = Posteo::select('id', 'nombre')->where('requisito_id', $tema->id)->get();
         $temas_activos = Posteo::where('curso_id', $tema->curso_id)->where('estado', 1)->count();
-//        info("TEMAS ACTIVOS :: $temas_activos");
-//        info("REQUISITOS CURSOS COUNT :: {$req_cursos->count()}");
-//        info("REQUISITOS TEMAS COUNT :: {$req_temas->count()}");
+        //        info("TEMAS ACTIVOS :: $temas_activos");
+        //        info("REQUISITOS CURSOS COUNT :: {$req_cursos->count()}");
+        //        info("REQUISITOS TEMAS COUNT :: {$req_temas->count()}");
 
         if ($temas_activos === 1 || $req_cursos->count() > 0) :
-//        if ($temas_activos === 1 && $tema->estado == 1) :
+            //        if ($temas_activos === 1 && $tema->estado == 1) :
 
-//            if (($req_cursos->count() > 0 || $req_temas->count() > 0)) :
+            //            if (($req_cursos->count() > 0 || $req_temas->count() > 0)) :
 
             $validate = collect();
 
-//                if ($temas_activos === 1 && $tema->estado === 1) {
-////                info("validacion1");
-//                    $validacion = $this->avisoInactivacionCurso($tema, 'eliminas');
-//                    $validate->push($validacion);
-//                }
+            //                if ($temas_activos === 1 && $tema->estado === 1) {
+            ////                info("validacion1");
+            //                    $validacion = $this->avisoInactivacionCurso($tema, 'eliminas');
+            //                    $validate->push($validacion);
+            //                }
 
-//                if ($temas_activos === 1 && $req_cursos->count() > 0) :
+            //                if ($temas_activos === 1 && $req_cursos->count() > 0) :
             if ($req_cursos->count() > 0 && $tema->estado === 1) :
-//                info("validacion2");
+                //                info("validacion2");
                 $validacion = $this->validateReqCursos($req_cursos, $tema, 'eliminar');
                 $validate->push($validacion);
             endif;
@@ -245,7 +247,7 @@ class Posteo extends Model
                 'title' => 'Alerta',
                 'show_confirm' => !($count > 0)
             ];
-//            endif;
+        //            endif;
         endif;
 
         return ['validate' => true];
@@ -257,36 +259,36 @@ class Posteo extends Model
         $req_cursos = Curso::select('id', 'nombre')->where('requisito_id', $tema->curso->id)->get();
         $req_temas = Posteo::select('id', 'nombre')->where('requisito_id', $tema->id)->get();
 
-//        info("REQUISITOS CURSOS COUNT :: {$req_cursos->count()}");
-//        info("TEMAS ACTIVOS :: {$temas_activos->count()}");
-//        info("REQUISITOS TEMAS COUNT :: {$req_temas->count()}");
-//        info("TEMA ESTADO :: {$tema->estado}");
-//        info("CAMBIAR A ESTADO " . (int )($estado));
+        //        info("REQUISITOS CURSOS COUNT :: {$req_cursos->count()}");
+        //        info("TEMAS ACTIVOS :: {$temas_activos->count()}");
+        //        info("REQUISITOS TEMAS COUNT :: {$req_temas->count()}");
+        //        info("TEMA ESTADO :: {$tema->estado}");
+        //        info("CAMBIAR A ESTADO " . (int )($estado));
 
         if ((($temas_activos->count() === 1 && $tema->estado == 1)
-                || $req_cursos->count() > 0
-                || $req_temas->count() > 0) && !$estado) :
-//        if ($temas_activos->count() === 1 && $tema->estado == 1):
+            || $req_cursos->count() > 0
+            || $req_temas->count() > 0) && !$estado) :
+            //        if ($temas_activos->count() === 1 && $tema->estado == 1):
 
-//            if (($req_cursos->count() > 0 || $req_temas->count() > 0) && !$estado) :
+            //            if (($req_cursos->count() > 0 || $req_temas->count() > 0) && !$estado) :
 
             $validate = collect();
 
-//                if ($temas_activos->count() === 1 && $tema->estado == 1):
-////                info("validacion1");
-//                    $validacion = $this->avisoInactivacionCurso($tema);
-//                    $validate->push($validacion);
-//                endif;
+            //                if ($temas_activos->count() === 1 && $tema->estado == 1):
+            ////                info("validacion1");
+            //                    $validacion = $this->avisoInactivacionCurso($tema);
+            //                    $validate->push($validacion);
+            //                endif;
 
             if (($temas_activos->count() == 1 && $tema->estado == 1) && $req_cursos->count() > 0) :
-//                if ($req_cursos->count() > 0) :
-//                info("validacion2");
+                //                if ($req_cursos->count() > 0) :
+                //                info("validacion2");
                 $validacion = $this->validateReqCursos($req_cursos, $tema);
                 $validate->push($validacion);
             endif;
 
             if ($req_temas->count() > 0) :
-//                info("validacion3");
+                //                info("validacion3");
                 $validacion = $this->validateReqTemas($req_temas, $tema);
                 $validate->push($validacion);
             endif;
@@ -304,7 +306,7 @@ class Posteo extends Model
                 'title' => 'Alerta',
                 'show_confirm' => !($count > 0)
             ];
-//            endif;
+        //            endif;
 
         endif;
 
@@ -369,7 +371,7 @@ class Posteo extends Model
             (isset($data['estado']) && $data['estado'] == 1) ||
             // Al actualizar desde lisitado (estado) o desde formulario (estado o evaluable)
             ($tema->wasChanged('estado') || $tema->wasChanged('evaluable'))
-        ):
+        ) :
 
             $messages[] = [
                 'title' => $title,

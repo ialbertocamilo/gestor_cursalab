@@ -4,12 +4,19 @@ namespace App\Models;
 
 class MediaTema extends BaseModel
 {
+    protected $table = 'media_topics';
+
     protected $fillable = [
-      'tema_id', 'valor', 'embed', 'descarga', 'titulo', 'orden'
+        'topic_id', 'title', 'value', 'embed', 'downloadable', 'position'
     ];
 
     protected $casts = [
         'embed' => 'boolean',
-        'descarga' => 'boolean',
+        'downloadable' => 'boolean',
     ];
+
+    // public function type()
+    // {
+    //     return $this->belongsTo(Taxonomy::class, 'type_id');
+    // }
 }

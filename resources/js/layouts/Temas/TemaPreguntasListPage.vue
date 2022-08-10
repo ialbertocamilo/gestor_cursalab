@@ -96,29 +96,28 @@ export default {
         let vue = this
         return {
             breadcrumbs: [
-                {title: 'Módulos', text: `${this.modulo_name}`, disabled: false, href: '/modulos'},
                 {
                     title: 'Escuelas',
                     text: `${this.categoria_name}`,
                     disabled: false,
-                    href: `/modulos/${this.modulo_id}/escuelas`
+                    href: `/escuelas`
                 },
                 {
                     title: 'Cursos',
                     text: `${this.curso_name}`,
                     disabled: false,
-                    href: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos`
+                    href: `/escuelas/${this.categoria_id}/cursos`
                 },
                 {
                     title: 'Temas',
                     text: `${this.tema_name}`,
                     disabled: false,
-                    href: `/modulos/${this.modulo_id}/escuelas/${this.categoria_id}/cursos/${this.curso_id}/temas`
+                    href: `/escuelas/${this.categoria_id}/cursos/${this.curso_id}/temas`
                 },
                 {title: 'Evaluaciones', text: null, disabled: true, href: ''},
             ],
             dataTable: {
-                endpoint: `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas/search`,
+                endpoint: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas/search`,
                 ref: 'temaPreguntasTable',
                 headers: [
                     {text: "Pregunta", value: "custom_tema_preguntas_pregunta", align: 'start', sortable: false},
@@ -155,7 +154,7 @@ export default {
             modalOptions: {
                 ref: 'TemaPreguntasModal',
                 open: false,
-                base_endpoint: `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas`,
+                base_endpoint: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas`,
                 resource: 'Pregunta',
                 confirmLabel: 'Guardar'
             },
@@ -165,7 +164,7 @@ export default {
             modalTemaPreguntasImport: {
                 ref: 'TemaPreguntasImport',
                 open: false,
-                base_endpoint: `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas/import`,
+                base_endpoint: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas/import`,
                 resource: '',
                 confirmLabel: 'Guardar',
                 title: 'Importar Evaluación',
@@ -200,7 +199,7 @@ export default {
         },
         confirmDelete() {
             let vue = this
-            let url = `/modulos/${vue.modulo_id}/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas/${vue.delete_model.id}`
+            let url = `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas/${vue.delete_model.id}`
 
             vue.$http.delete(url)
                 .then(({data}) => {

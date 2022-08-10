@@ -53,9 +53,8 @@ class EscuelaController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
-        //        dd($data);
 
-        $escuela = Categoria::storeRequest($data);
+        $escuela = School::storeRequest($data);
 
         $msg = 'Escuela creado correctamente.';
         return $this->success(compact('escuela', 'msg'));

@@ -17,8 +17,8 @@ class PosteoPreguntasResource extends JsonResource
         return [
             'id' => $this->id,
             'custom_tema_preguntas_pregunta' => clean_html($this->pregunta),
-            'active' => (bool)$this->estado,
-            'tipo_pregunta' => ucfirst($this->tipo_pregunta),
+            'active' => (bool)$this->active,
+            'tipo_pregunta' => $this->type->name,
         ];
     }
 }
