@@ -27,6 +27,10 @@ class Course extends Model
             'course_school'
         );
     }
+    public function workspace()
+    {
+        return $this->belongsToMany(Workspace::class);
+    }
 
     public function topics()
     {
@@ -51,6 +55,11 @@ class Course extends Model
     public function update_usuarios()
     {
         return $this->hasMany(Update_usuarios::class, 'curso_id');
+    }
+
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
     }
 
     protected static function search($request, $paginate = 15)
@@ -83,6 +92,8 @@ class Course extends Model
                 // $data['libre'] = $data['categoria_modalidad'] === 'libre' ? 1 : 0;
                 $curso = self::create($data);
             endif;
+
+            $curso->workspace()->sync($data['workspace_id']);
 
             $curso->save();
             DB::commit();

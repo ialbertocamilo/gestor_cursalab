@@ -2,7 +2,9 @@
 
 namespace App\Models\UCMigrationData;
 
+use App\Models\Block;
 use App\Models\Course;
+use App\Models\CriterionValue;
 use App\Models\School;
 use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
@@ -52,9 +54,15 @@ class Migration_2 extends Model
 
     protected function migrateTemas()
     {
-        $temas_Data = self::setTemasData();
+        $temas_data = self::setTemasData();
 
-        self::insertTemasData($temas_Data);
+        self::insertTemasData($temas_data);
+    }
+
+    protected function migrateCurricula()
+    {
+
+        self::insertCurriculaData();
     }
 
     protected function setEscuelasData()
@@ -96,19 +104,7 @@ class Migration_2 extends Model
     {
         $this->makeChunkAndInsert($data, 'schools');
 
-        $uc_workspace = Workspace::where('slug', 'universidad-corporativa')->first();
 
-        $schools = School::all();
-        $school_workspace = [];
-
-        foreach ($schools as $school) {
-            $school_workspace[] = [
-                'workspace_id' => $uc_workspace->id,
-                'school_id' => $school->id,
-            ];
-        }
-
-        $this->makeChunkAndInsert($school_workspace, 'school_workspace');
     }
 
     protected function setCursosData()
@@ -177,7 +173,6 @@ class Migration_2 extends Model
                 $course_school[] = ['course_id' => $course->id, 'school_id' => $school->id];
 
         }
-
         $this->makeChunkAndInsert($course_school, 'course_school');
 
         $course_requirements = [];
@@ -185,12 +180,29 @@ class Migration_2 extends Model
             $course = $courses->where('external_id', $relation['curso_id'])->first();
             $course_requirement = $courses->where('external_id', $relation['curso_requisito_id'])->first();
 
-            if ($course and $course_requirement)
-                $course_requirements[] = ['course_id' => $course->id, 'course_requirement_id' => $course_requirement->id];
+            if ($course and $course_requirement) {
+                $course_requirements[] = [
+                    'model_type' => Course::class,
+                    'model_id' => $course->id,
+                    'requirement_type' => Course::class,
+                    'requirement_id' => $course_requirement->id
+                ];
+            }
+        }
+        $this->makeChunkAndInsert($course_requirements, 'requirements');
 
+        $uc_workspace = Workspace::where('slug', 'universidad-corporativa')->first();
+        $courses = Course::all();
+        $course_workspace = [];
+
+        foreach ($courses as $course) {
+            $course_workspace[] = [
+                'workspace_id' => $uc_workspace->id,
+                'course_id' => $course->id,
+            ];
         }
 
-        $this->makeChunkAndInsert($course_requirements, 'course_requirements');
+        $this->makeChunkAndInsert($course_workspace, 'course_workspace');
     }
 
     protected function setTemasData()
@@ -255,13 +267,74 @@ class Migration_2 extends Model
         $this->makeChunkAndInsert($data['temas'], 'topics');
 
         $topics = Topic::all();
+        $topic_requirements = [];
 
         foreach ($data['tema_requisitos'] as $relation) {
             $topic = $topics->where('external_id', $relation['tema_id'])->first();
             $topic_requirement = $topics->where('external_id', $relation['tema_requisito_id'])->first();
 
-            if ($topic and $topic_requirement)
-                $topic->update(['topic_requirement_id' => $topic_requirement->id]);
+            if ($topic and $topic_requirement) {
+                $topic_requirements[] = [
+                    'model_type' => Topic::class,
+                    'model_id' => $topic->id,
+                    'requirement_type' => Topic::class,
+                    'requirement_id' => $topic_requirement->id
+                ];
+            }
+        }
+        $this->makeChunkAndInsert($topic_requirements, 'requirements');
+    }
+
+    public function insertCurriculaData()
+    {
+        $db = self::connect();
+
+        $all_courses = Course::all();
+        $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+//        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
+        $curriculas = $db->getTable('curricula')
+            ->join('ciclos', 'ciclos.id', '=', 'curricula.ciclo_id')
+            ->select('curricula.carrera_id', 'ciclo_id', 'curso_id', 'ciclos.nombre')->get();
+        $programs = Block::with(
+            'segments.values.criterion_value',
+            'block_children.child.segments.values.criterion_value')
+            ->whereHas('block_children')->get();
+
+        foreach ($programs as $program) {
+            $program_criterion_values = collect();
+            $program->segments->each(function ($segment) use ($program_criterion_values) {
+                $segment->values->each(function ($value) use ($program_criterion_values) {
+                    $program_criterion_values->push($value->criterion_value->id);
+                });
+            });
+//            info("# RUTAS DEL PROGRAMA " . $program->block_children->count());
+            foreach ($program->block_children as $block_child) {
+                $block_child_criterion_values = collect();
+                $block_child->child->segments->each(function ($segment) use ($block_child_criterion_values) {
+                    $segment->values->each(function ($value) use ($block_child_criterion_values) {
+                        $block_child_criterion_values->push($value->criterion_value->value_text);
+                    });
+                });
+
+                $career = $carreras_values->where('id', $program_criterion_values->first())->first();
+                $ciclo_value_text = $block_child_criterion_values->first();
+
+                $cursos_curriculas = $curriculas->where('carrera_id', $career->external_id)
+                    ->where('nombre', $ciclo_value_text);
+//                info("  # CURRICULAS ENCONTRADAS " . $cursos_curriculas->count());
+                $courses = $all_courses->whereIn('external_id', $cursos_curriculas->pluck('curso_id'));
+//                info("      # CURSOS DEL PROGRAMA " . $courses->count());
+
+                $block_child->child->courses()->syncWithoutDetaching($courses->pluck('id'));
+//                dd($program_criterion_values->first(), $block_child_criterion_values->first());
+//                dd($block_child_criterion_values->first());
+//                dd($career, $ciclo);
+//                dd($program->name, $block_child->child->name);
+//                dd($career->external_id, $ciclo->external_id);
+//                dd($cursos_curriculas->pluck('curso_id')->count());
+//                dd($courses->pluck('id')->count());
+//                dd($program_criterion_values->toArray(), $block_child_criterion_values->toArray(), $courses->pluck('id')->toArray());
+            }
         }
     }
 }

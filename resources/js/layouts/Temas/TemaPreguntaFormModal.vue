@@ -120,7 +120,7 @@
                         </table>
                     </v-col>
                     <v-col cols="12">
-                        <DefaultToggle v-model="resource.estado"/>
+                        <DefaultToggle v-model="resource.active"/>
                     </v-col>
                 </v-row>
             </v-form>
@@ -156,7 +156,7 @@ export default {
                 pregunta: "",
                 respuestas: [],
                 rpta_ok: null,
-                estado: false,
+                active: false,
                 nuevasRptas: "",
             },
             resource: {},

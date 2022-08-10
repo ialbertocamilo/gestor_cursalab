@@ -309,7 +309,6 @@ export default {
             }
         },
         getRules(arrayRules) {
-            let vue = this;
             let tempRules = [];
             arrayRules.forEach((labelRule) => {
                 if (labelRule.indexOf("required") > -1) {

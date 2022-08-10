@@ -51,11 +51,15 @@ class Block extends BaseModel
 
         // $query = self::with(['block_children' => ['segments.values.criterion', 'child' => ['courses', 'segments.values.criterion_value.criterion']]])
         $query = self::with(['block_children' => ['segments.values.criterion', 'child' => ['courses', 'segments']]])
-                        ->withCount([
-                            'children' => function($q) { $q->where('active', ACTIVE); },
-                            'segments' => function($q) { $q->where('active', ACTIVE); },
-                            // 'block_children.child.segments' => function($q) { $q->where('active', ACTIVE); },
-                        ]);
+            ->withCount([
+                'children' => function ($q) {
+                    $q->where('active', ACTIVE);
+                },
+                'segments' => function ($q) {
+                    $q->where('active', ACTIVE);
+                },
+                // 'block_children.child.segments' => function($q) { $q->where('active', ACTIVE); },
+            ]);
 
         $query->where('parent', 1);
 
@@ -79,5 +83,4 @@ class Block extends BaseModel
 
         return $query->paginate($request->paginate);
     }
-
 }

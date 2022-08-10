@@ -10,16 +10,22 @@ Route::controller(UsuarioController::class)->group(function () {
 
 	Route::get('/search', 'search');
 	Route::get('/get-list-selects', 'getListSelects');
-	Route::get('/{usuario}/search', 'searchUser');
+
 	Route::get('/form-selects', 'getFormSelects');
-	Route::put('/{usuario}/status', 'updateStatus');
 
-	Route::get('{usuario}/reset', 'reset')->name('usuarios.reset');
-	Route::post('{usuario}/reset_x_tema', 'reset_x_tema')->name('usuarios.reset_x_tema');
-	Route::post('{usuario}/reset_x_curso', 'reset_x_curso')->name('usuarios.reset_x_curso');
-	Route::post('{usuario}/reset_total', 'reset_total')->name('usuarios.reset_total');
+	Route::post('/store', 'store');
+    Route::get('/{user}/edit', 'edit');
+    Route::put('/{user}/update', 'update');
+//    Route::get('/{user}/show', 'show');
 
-	Route::get('/{usuario}/cursos-x-usuario', 'getCursosxUsuario');
+    Route::put('/{user}/status', 'updateStatus');
+
+	Route::get('{user}/reset', 'reset')->name('usuarios.reset');
+	Route::post('{user}/reset_x_tema', 'reset_x_tema')->name('usuarios.reset_x_tema');
+	Route::post('{user}/reset_x_curso', 'reset_x_curso')->name('usuarios.reset_x_curso');
+	Route::post('{user}/reset_total', 'reset_total')->name('usuarios.reset_total');
+
+	Route::get('/{user}/courses-by-user', 'getCoursesByUser');
 
 	Route::get('/{modulo}/{botica}/carreras-x-grupo', 'getCarrerasxModuloxBotica');
 	Route::get('/{carrera}/{botica}/ciclos-x-carrera', 'getCiclosxCarrera');

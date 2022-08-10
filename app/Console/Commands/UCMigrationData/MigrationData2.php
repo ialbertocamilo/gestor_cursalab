@@ -37,6 +37,7 @@ class MigrationData2 extends Command
         Migration_2::migrateEscuelas();
         Migration_2::migrateCursos();
         Migration_2::migrateTemas();
+        Migration_2::migrateCurricula();
 
         $this->info(" Fin: " . now());
         info(" Fin: " . now());
