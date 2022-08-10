@@ -20,6 +20,11 @@ class CriterionValue extends BaseModel
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_relationship', 'criterion_value_id', 'criterion_value_parent_id');
     }
 
+    public function workspaces()
+    {
+        return $this->belongsToMany(Workspace::class);
+    }
+
     protected function getListForSelect($criterion_code = null, $criterion_id = null)
     {
         $value_param = 'value_text';

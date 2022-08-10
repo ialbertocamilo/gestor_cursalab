@@ -7,7 +7,7 @@
         <template v-slot:content>
             <v-form ref="accountForm" class="--mb-15">
 
-                <DefaultErrors :errors="errors"/>
+                <DefaultErrors :errors="errors" />
 
                 <v-row justify="space-around">
                     <!-- <v-col cols="6" class="d-flex justify-content-center"> -->
@@ -16,9 +16,9 @@
                     <v-col cols="12" class="d-flex justify-content-center">
                         <!-- <DefaultInput v-model="resource.email" label="Correo" :rules="rules.email" /> -->
 
+                            <!-- hide-delimiter-background -->
                         <v-carousel
                             height="500"
-                            hide-delimiter-background
                             show-arrows-on-hover
                           >
                             <v-carousel-item
@@ -26,7 +26,7 @@
                               :key="i"
                             >
 
-                                <segment :segment="segment" :criteria="criteria"/>
+                                <segment :segment="segment" :criteria="criteria" class="pt-8"/>
                             <!--   <v-sheet
                                 :color="colors[i]"
                                 height="100%"
@@ -44,11 +44,24 @@
                             </v-carousel-item>
                           </v-carousel>
                     </v-col>
+                    <v-col cols="12" class="d-flex justify-content-center">
+                        <v-btn
+                            class="white-text font-bold btn-agregar-curricula"
+                            color="#1867c0"
+                            @click="addSegmentation()"
+                        >
+                            <!-- :disabled="
+                                escuela.curso_seleccionado == null ||
+                                escuela.curso_seleccionado == '' 
+                            " -->
+                            Agregar segmentación
+                        </v-btn>
+                    </v-col>
                 </v-row>
 
                
 
-                <v-subheader class="mt-5 px-0"><strong>Configuración de tokens</strong></v-subheader>
+             <!--    <v-subheader class="mt-5 px-0"><strong>Configuración de tokens</strong></v-subheader>
 
                 <v-divider class="mt-0" />
 
@@ -65,7 +78,7 @@
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultInput v-model="resource.refresh_token" label="Refresh token" :rules="rules.refresh_token" />
                     </v-col>
-                </v-row>
+                </v-row> -->
 
                 <!-- <v-subheader class="mt-5"><strong>Datos adicionales</strong></v-subheader> -->
 
@@ -154,13 +167,15 @@ export default {
                 sdk_token: null,
                 zak_token: null,
             },
-            resource: {},
-            segments: {},
-            selects: {
-                types: [],
-                services: [],
-                plans: [],
+            // resource: {},
+            segments: [],
+            segment: {
+                name: 'XXX',
+                model_type: 'XX',
+                model_id: 'X',
+                criteria_selected: [],
             },
+            criteria: [],
 
             rules: {
                 // text: this.getRules(['required', 'max:255']),
@@ -183,6 +198,35 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.accountForm.resetValidation()
+        },
+        async addSegmentation() {
+            let vue = this;
+            // let curso_seleccionado = vue.modulos[index1].categorias[index2].curso_seleccionado;
+            // // 
+            // let modulo_id = vue.modulos[index1].id;
+            // let tipos_criterios = [];
+            // await axios
+            //     .get(`/curricula/tc_s/${vue.modulos[index1].id}`)
+            //     .then((res) => {
+            //         tipos_criterios = res.data.data;
+            //     })
+            //     .catch((err) => {
+            //         console.log(err);
+            //     });
+
+            // let id = vue.modulos[index1].categorias[index2].curricula.length + 1;
+
+            // vue.nuevaCurricula = Object.assign({}, this.nuevaCurricula, {
+            //     curricula_id: `n-${id}`,
+            //     curso_id: curso_seleccionado,
+            //     tipos_criterio_seleccionado: [],
+            //     tipos_criterios: tipos_criterios,
+            //     modulo_id: modulo_id,
+            //     loading: false,
+            // });
+
+            vue.segments.push(vue.segment);
+            // vue.nuevaCurricula = {};
         },
         confirmModal() {
             let vue = this
@@ -239,12 +283,8 @@ export default {
 
                 let _data = data.data
 
-                vue.selects.types = _data.types
-                vue.selects.plans = _data.plans
-                vue.selects.services = _data.services
-
-                if (resource)
-                    vue.resource = _data.account
+                vue.segments = _data.segments
+                vue.criteria = _data.criteria
             })
 
             return 0;

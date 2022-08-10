@@ -46,13 +46,13 @@
 					attach
 					outlined
 					hide-details="auto"
-					:items="segment.criteria"
+					:items="criteria"
 					item-text="name"
 					item-id="id"
 					v-model="segment.criteria_selected"
-					:menu-props="{ top: true, offsetY: true }"
 					placeholder="Seleccione los criterios"
 				>
+					<!-- :menu-props="{ top: true, offsetY: true }" -->
 					<template v-slot:selection="{ item }">
 						<v-chip
 							style="font-size: 0.9rem !important; color: white !important"

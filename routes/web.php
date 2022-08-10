@@ -59,6 +59,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('modulos')->group(base_path('routes/cms/modulos.php'));
     Route::prefix('escuelas')->group(base_path('routes/cms/escuelas.php'));
     Route::prefix('programas')->group(base_path('routes/cms/blocks.php'));
+    Route::prefix('segments')->group(base_path('routes/cms/segments.php'));
     Route::prefix('media')->group(base_path('routes/cms/media.php'));
     Route::prefix('anuncios')->group(base_path('routes/cms/anuncios.php'));
     Route::prefix('ayudas')->group(base_path('routes/cms/ayudas.php'));
