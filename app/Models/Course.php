@@ -53,6 +53,11 @@ class Course extends Model
         return $this->hasMany(Update_usuarios::class, 'curso_id');
     }
 
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
+    }
+
     protected static function search($request, $paginate = 15)
     {
         $q = self::join('course_school', 'course_school.course_id', '=', 'courses.id')->withCount(['topics', 'poll']);

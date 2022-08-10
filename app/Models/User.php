@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Laravel\Passport\HasApiTokens;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
 use NotificationChannels\WebPush\HasPushSubscriptions;
@@ -33,7 +35,6 @@ use Illuminate\Support\Str;
 use Spatie\Image\Manipulations;
 
 use Bouncer;
-use DB;
 
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
@@ -62,7 +63,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'name', 'lastname', 'surname', 'username', 'slug', 'alias',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
-        'document_number', 'ruc',
+        'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token',
     ];
@@ -224,6 +225,66 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     //    return $this->belongsTo(Taxonomy::class, 'district_id');
     // }
 
+    public function getAllPermissionsAttribute()
+    {
+        $permissions = [];
+        // foreach (Permission::all() as $permission) {
+        //     if (\Auth::user()->can($permission->slug)) {
+        //         $permissions[] = $permission->slug;
+        //     }
+        // }
+        return $permissions;
+    }
+
+    // /**
+    //  * Route notifications for the Slack channel.
+    //  *
+    //  * @param \Illuminate\Notifications\Notification $notification
+    //  * @return string
+    //  */
+    // public function routeNotificationForSlack($notification)
+    // {
+    //     return config('slack.routes.support');
+    // }
+
+    public function customHasRole($role)
+    {
+        // return $this->roles()->where('slug', $role)->first();
+    }
+
+    public function isMasterOrAdminCursalab()
+    {
+        // return $this->customHasRole('master') || $this->customHasRole('gestor-lamedia');
+        return true;
+    }
+
+    protected function storeRequest($data, $user = null)
+    {
+        try {
+
+            DB::beginTransaction();
+
+            if ($user) :
+
+                $user->update($data);
+
+            else:
+
+                $user = self::create($data);
+
+            endif;
+
+            $user->criterion_values()->sync(array_values($data['criterion_list']) ?? []);
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            info($e);
+            DB::rollBack();
+            Error::storeAndNotificateException($e, request());
+            abort(errorExceptionServer());
+        }
+    }
 
     protected function storeRequestFull($data = [], $user = null)
     {
@@ -315,36 +376,128 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function getAllPermissionsAttribute()
+    public function setCurrentCourses()
     {
-        $permissions = [];
-        // foreach (Permission::all() as $permission) {
-        //     if (\Auth::user()->can($permission->slug)) {
-        //         $permissions[] = $permission->slug;
-        //     }
-        // }
-        return $permissions;
+        $user = $this;
+        $user->load('criterion_values:id,value_text');
+        // TODO: No considerar criterion_values que se excluyan (ciclo 0)
+
+        $user_criterion_values_id = $user->criterion_values->pluck('id');
+        $all_programs = Block::with('segments.values.criterion_value',
+            'block_children.child.segments.values.criterion_value',
+            'block_children.child.courses.segments.values.criterion_value'
+        )
+            ->where('parent', 1)
+            ->where('active', ACTIVE)
+            ->get();
+
+        $programs = collect();
+        foreach ($all_programs as $program) {
+
+            $program_segment_valid = false;
+
+            if ($program->segments->count() === 0) :
+
+                $program_segment_valid = true;
+
+            else:
+
+                foreach ($program->segments as $segment) {
+
+                    $program_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
+                    $program_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $program_segment_criterion_values_id);
+
+                    if ($program_segment_valid) break;
+                }
+
+            endif;
+
+            if ($program_segment_valid):
+
+                $blocks = collect();
+
+                foreach ($program->block_children as $block_child) {
+
+                    $block_segment_valid = false;
+
+                    if ($block_child->child->segments->count() === 0) :
+
+                        $block_segment_valid = true;
+
+                    else:
+
+                        foreach ($block_child->child->segments as $segment) {
+
+                            $block_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
+                            $block_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $block_segment_criterion_values_id);
+
+                            if ($block_segment_valid) break;
+                        }
+
+                    endif;
+
+                    if ($block_segment_valid) :
+
+                        $courses = collect();
+
+                        foreach ($block_child->child->courses as $course) {
+
+                            if ($course->segments->count() === 0) :
+
+                                $courses->push([
+                                    'id' => $course->id,
+                                    'name' => $course->name,
+                                    'position' => $course->position
+                                ]);
+
+                            else:
+
+                                foreach ($course->segments as $segment) {
+
+                                    $course_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
+                                    $course_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $course_segment_criterion_values_id);
+
+                                    if ($course_segment_valid) :
+
+                                        $courses->push([
+                                            'id' => $course->id,
+                                            'name' => $course->name,
+                                            'position' => $course->position
+                                        ]);
+                                        break;
+
+                                    endif;
+                                }
+
+                            endif;
+                        }
+
+                        $blocks->push([
+                            'id' => $block_child->child->id,
+                            'name' => $block_child->child->name,
+                            'courses_count' => $courses->count(),
+                            'courses' => $courses->sortBy('position')->values()->all()
+                        ]);
+                    endif;
+
+                }
+                $programs->push([
+                    'id' => $program->id,
+                    'name' => $program->name,
+                    'blocks' => $blocks,
+                ]);
+
+            endif;
+        }
+
+//        $user->courses = $programs;
+        $user->courses = $courses;
     }
 
-    // /**
-    //  * Route notifications for the Slack channel.
-    //  *
-    //  * @param \Illuminate\Notifications\Notification $notification
-    //  * @return string
-    //  */
-    // public function routeNotificationForSlack($notification)
-    // {
-    //     return config('slack.routes.support');
-    // }
-
-    public function customHasRole($role)
+    public function validateSegmentationForUser(Collection $user_criterion_values, Collection $segment_values): bool
     {
-        // return $this->roles()->where('slug', $role)->first();
-    }
+        $intersection = $user_criterion_values->intersect($segment_values);
 
-    public function isMasterOrAdminCursalab()
-    {
-        // return $this->customHasRole('master') || $this->customHasRole('gestor-lamedia');
-        return true;
+        return $intersection->count() === $segment_values->count();
     }
 }

@@ -8,6 +8,8 @@
         <template v-slot:content>
             <v-form ref="UsuarioForm">
 
+                <DefaultErrors :errors="errors"/>
+
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
                         <strong>Información de usuario</strong>
@@ -16,13 +18,14 @@
                         <DefaultDivider/>
                     </v-col>
                 </v-row>
+
                 <v-row justify="space-around">
                     <v-col cols="4" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
                             v-model="resource.name"
                             label="Nombres"
-                            :rules="rules.nombre"
+                            :rules="rules.name"
                         />
                     </v-col>
                     <v-col cols="4" class="d-flex justify-content-center">
@@ -30,7 +33,7 @@
                             clearable
                             v-model="resource.lastname"
                             label="Apellido Paterno"
-                            :rules="rules.nombre"
+                            :rules="rules.lastname"
                         />
                     </v-col>
                     <v-col cols="4" class="d-flex justify-content-center">
@@ -38,7 +41,7 @@
                             clearable
                             v-model="resource.surname"
                             label="Apellido Materno"
-                            :rules="rules.nombre"
+                            :rules="rules.surname"
                         />
                     </v-col>
                 </v-row>
@@ -56,6 +59,7 @@
                             clearable
                             v-model="resource.document"
                             label="Identificador"
+                            :rules="rules.document"
                         />
                     </v-col>
                     <v-col cols="4" class="d-flex justify-content-center">
@@ -66,6 +70,7 @@
                         />
                     </v-col>
                 </v-row>
+
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                            @click="sections.showCriteria = !sections.showCriteria"
@@ -80,22 +85,17 @@
 
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
-
                         <v-expand-transition>
                             <UsuarioCriteriaSection
                                 v-show="sections.showCriteria"
                                 ref="CriteriaSection"
                                 :options="options"
-                                :usuario="resource"
-                                :criteria_list="criteria_list"
+                                :user="resource"
+                                :criterion_list="criterion_list"
                             />
                         </v-expand-transition>
-
                     </v-col>
-
                 </v-row>
-
-                <div style="height: 500px"></div>
 
             </v-form>
         </template>
@@ -116,11 +116,11 @@ export default {
     },
     data() {
         return {
+            errors: [],
             sections: {
                 showCriteria: false
             },
-            showMatricula: false,
-            criteria_list: [],
+            criterion_list: [],
             resourceDefault: {
                 id: null,
                 name: '',
@@ -129,36 +129,15 @@ export default {
                 email: '',
                 document: '',
 
-                criteria: {}
+                criterion_list: {},
             },
             resource: {},
-            selects: {
-                genres: ['M', 'F'],
-                modules: [],
-                boticas: [],
-                groups: [],
-                cargos: [],
-                carreras: []
-                // [
-                //     {id: 1, nombre: "MASCULINO"},
-                //     {id: 2, nombre: "FEMENINO"}
-                // ]
-            },
-            matriculaModalOptions: {
-                open: false,
-                ref: 'UsuarioMatriculaModal',
-                base_endpoint: '/usuarios',
-                title: 'Matrícula del Usuario',
-                hideCancelBtn: true,
-                confirmLabel: 'Cerrar',
-            },
+            selects: {},
             rules: {
-                modulo: this.getRules(['required']),
-                botica: this.getRules(['required']),
-                genero: this.getRules(['required']),
-                cargo: this.getRules(['required']),
-                nombre: this.getRules(['required', 'max:100', 'text']),
-                dni: this.getRules(['required', 'number', 'min:8'])
+                name: this.getRules(['required', 'max:100', 'text']),
+                lastname: this.getRules(['required', 'max:100', 'text']),
+                surname: this.getRules(['required', 'max:100', 'text']),
+                document: this.getRules(['required', 'number', 'min:8']),
             }
         }
     },
@@ -183,54 +162,71 @@ export default {
             vue.showLoader()
             const validateForm = vue.validateForm('UsuarioForm')
 
-            if (validateForm) {
+            const edit = vue.options.action === 'edit'
+            const base = `${vue.options.base_endpoint}`
+            const method = edit ? 'put' : 'post';
 
-                let url = `${vue.options.base_endpoint}/crear`
-                let data = {
-                    accion: vue.options.action === 'edit' ? 1 : 0,
-                    usuario: vue.resource,
-                    ciclos: vue.resource.ciclos,
-                    carrera_id: vue.resource.carrera ? vue.resource.carrera.id : 0,
-                    grupo: vue.resource.botica.criterio.id
-                }
-                vue.$http.post(url, data)
+            if (validateForm) {
+                let url = edit ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+                let data = vue.resource
+                vue.parseCriterionValues()
+
+                vue.$http[method](url, data)
                     .then(({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         vue.hideLoader()
                     })
-            } else {
-                const validateMatricula = !!vue.resource.carrera
-                if (!validateMatricula)
-                    vue.showMatricula = true
+                    .catch((error) => {
+                        vue.hideLoader()
 
+                        if (error && error.errors)
+                            vue.errors = error.errors
+                    })
+            } else {
                 vue.hideLoader()
             }
         },
+        parseCriterionValues() {
+            let vue = this
+            let temp = []
+
+            vue.criterion_list.forEach(criterion => {
+                if (criterion.multiple) {
+                    vue.resource.criterion_list[criterion.code].forEach(value => {
+                        temp.push(value)
+                    })
+                } else {
+                    temp.push(vue.resource.criterion_list[criterion.code])
+                }
+            })
+
+            vue.resource.criterion_list = temp;
+        },
         resetSelects() {
             let vue = this
-            // Selects independientes
-            vue.selects.modules = []
-            vue.selects.cargos = []
-            // Selects dependientes
-            vue.selects.boticas = []
-            vue.selects.groups = []
-            vue.selects.carreras = []
-            // CLOSE MATRICULA SECTION
-            vue.showMatricula = false
+            // CLOSE CRITERIA SECTION
+            vue.sections.showCriteria = false
         },
         async loadData(resource) {
             let vue = this
 
-            let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/search` : `form-selects`}`
+            vue.$nextTick(() => {
+                vue.resource = JSON.parse(JSON.stringify(vue.resourceDefault))
+            })
+
+            let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/edit` : `form-selects`}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.criteria_list = data.data.criteria
-
+                    vue.criterion_list = data.data.criteria
+                    vue.criterion_list.forEach(criterion => {
+                        // vue.resource.criterion_list[`${criterion.code}`] = null
+                        let criterion_default_value = criterion.multiple ? [] : null
+                        Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
+                    })
                     if (resource) {
                         vue.resource = data.data.usuario
-                        vue.resource.ciclos = vue.resource.matriculas_pasadas
                     }
 
                 })

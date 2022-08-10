@@ -18,41 +18,16 @@
                             item-text="name"
                         />
                     </v-col>
-                    <v-col cols="12">
-                        <DefaultAutocomplete
-                            clearable
-                            placeholder="Seleccione una Carrera"
-                            label="Carrera"
-                            @onChange="setCiclos"
-                            :items="selects.carreras"
-                            v-model="filters.carrera"
-                        />
-                    </v-col>
-                    <v-col cols="12">
-                        <DefaultAutocomplete
-                            placeholder="Seleccione una Ciclo"
-                            label="Ciclo"
-                            :items="selects.ciclos"
-                            v-model="filters.ciclos"
-                            multiple
-                            :count-show-values="3"
-                        />
-                    </v-col>
                 </v-row>
             </template>
         </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
-            <!--            Título con breadcumb-->
-            <!--            TODO: Add breadcumb-->
             <v-card-title>
                 Usuarios
                 <v-spacer/>
-                <!--       <DefaultActivityButton
-                          :label="'Actividad'"
-                          @click="activity"/> -->
-
-                <DefaultActivityButton :label="'Reinicios masivos'"
-                                       @click="goToReiniciosMasivos"/>
+                <DefaultActivityButton
+                    :label="'Reinicios masivos'"
+                    @click="goToReiniciosMasivos"/>
                 <DefaultModalButton
                     :label="'Usuario'"
                     @click="openFormModal(modalOptions, null, 'create')"/>
@@ -98,7 +73,7 @@
                 @edit="openFormModal(modalOptions, $event, 'edit')"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
-                @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `CURSOS DE ${$event.nombre} - ${$event.dni}`)"
+                @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `CURSOS DE ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `REINICIAR AVANCE DE ${$event.nombre}`)"
             />
             <UsuarioFormModal
@@ -155,11 +130,8 @@ export default {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
                 headers: [
-                    // {text: "Módulo", value: "image", align: 'center', sortable: false},
                     {text: "Nombres y Apellidos", value: "nombre"},
-                    // {text: "Documento", value: "dni", align: 'left', sortable: false},
-                    // {text: "Carrera", value: "carrera", sortable: false},
-                    // {text: "Ciclo", value: "ciclo_actual", align: 'center', sortable: false},
+                    {text: "Documento", value: "document", align: 'left', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -170,27 +142,11 @@ export default {
                         route: 'reporte_route',
                         route_type: 'external'
                     },
-
-                    {
-                        text: "Cursos",
-                        icon: 'mdi mdi-notebook-multiple',
-                        type: 'action',
-                        method_name: 'cursos'
-                    },
-                    {
-                        text: "Editar",
-                        icon: 'mdi mdi-pencil',
-                        type: 'action',
-                        method_name: 'edit'
-                    },
+                    {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
+                    {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
                 ],
                 more_actions: [
-                    {
-                        text: "Actualizar Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
-                    },
+                    {text: "Actualizar Estado", icon: 'fa fa-circle', type: 'action', method_name: 'status'},
                     {
                         text: "Reiniciar",
                         icon: 'fas fa-history',
@@ -270,7 +226,7 @@ export default {
 
                     if (param_modulo)
                         this.setCarreras()
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
 
         },
@@ -301,7 +257,7 @@ export default {
                 })
 
         },
-        setCiclos(){
+        setCiclos() {
             let vue = this
             vue.filters.ciclos = []
 

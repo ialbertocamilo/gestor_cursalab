@@ -1,21 +1,20 @@
 <template>
-    <!--    <v-card class="usuario-sΩection-matricula">-->
-
-    <div class="usuario-section-matricula">
+    <div class="w-100">
         <v-row justify="start">
-            <v-col cols="4" v-for="criterion in criteria_list" :key="criterion.id">
-                <DefaultAutocomplete
-                    placeholder="Elige una opción"
-                    :label="criterion.name"
-                    :items="criterion.values"
-                    item-text="value_text"
-                    v-model="usuario.criteria_list[criterion.code]"
-                />
+            <v-col cols="4" v-for="criterion in criterion_list" :key="criterion.id">
+                <div v-if="TypeOf(user.criterion_list[criterion.code]) !== 'undefined'">
+                    <DefaultAutocomplete
+                        :multiple="!!criterion.multiple"
+                        placeholder="Elige una opción"
+                        :label="criterion.name"
+                        :items="criterion.values"
+                        item-text="value_text"
+                        v-model="user.criterion_list[criterion.code]"
+                    />
+                </div>
             </v-col>
         </v-row>
     </div>
-    <!--    </v-card>-->
-
 </template>
 
 
@@ -26,15 +25,14 @@ export default {
             type: Object,
             required: true
         },
-        usuario: {
+        user: {
             type: Object,
             required: true
         },
-        criteria_list: {
-            type: Array,
+        criterion_list: {
+            type: Array | Object,
             required: true
         }
-
     },
     data() {
         return {
@@ -61,8 +59,3 @@ export default {
     }
 }
 </script>
-<style>
-.usuario-section-matricula {
-    width: 100%;
-}
-</style>
