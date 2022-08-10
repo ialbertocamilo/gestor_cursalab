@@ -26,7 +26,7 @@
             </div>
             <div v-else-if="options.action === 'validacionFormPage'">
                 <div
-                    v-if="resource && resource.hide_tipo_ev === 'calificada' && resource.evaluable === 'no'">
+                    v-if="resource && resource.hide_tipo_ev === 'qualified' && resource.evaluable === 'no'">
                     Estas a punto de cambiar el tipo de evaluación de evaluable calificada a no evaluable. Recuerda
                     que es necesario si el avance se mantendrá o se borrará.<br/>
                     <div>

@@ -7,9 +7,34 @@
         </v-card>
         <!--        <DefaultDivider/>-->
         <br>
+        <!-- <v-card flat elevation="0">
+            <v-card-title>
+                Cursos: {{ curso_id ? 'Editar' : 'Crear' }}
+            </v-card-title>
+        </v-card>
+        <br> -->
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="CursoForm">
+                    <v-row>
+                        <v-col cols="6">
+                            <DefaultAutocomplete
+                                dense
+                                label="Workspace"
+                                v-model="resource.requisito_id"
+                                :items="selects.requisito_id"
+                                custom-items
+                                clearable
+                            >
+                                <template v-slot:customItems="{item}">
+                                    <v-list-item-content>
+                                        <v-list-item-title v-html="item.nombre"/>
+                                        <v-list-item-subtitle class="list-cursos-carreras" v-html="item.carreras"/>
+                                    </v-list-item-content>
+                                </template>
+                            </DefaultAutocomplete>
+                        </v-col>
+                    </v-row>
                     <v-row >
                         <v-col cols="6">
                             <DefaultInput

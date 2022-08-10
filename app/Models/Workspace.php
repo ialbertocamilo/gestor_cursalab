@@ -26,10 +26,14 @@ class Workspace extends BaseModel
     {
         return $this->belongsToMany(School::class);
     }
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class);
+    }
 
     protected static function search($request)
     {
-        $query = self::where('id', $request->id)->withCount(['schools']);
+        $query = self::where('id', $request->id)->withCount(['schools', 'courses']);
 
         if ($request->q)
             $query->where('name', 'like', "%$request->q%");

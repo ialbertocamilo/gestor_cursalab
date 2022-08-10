@@ -26,9 +26,9 @@ class EscuelaStoreUpdateRequest extends FormRequest
         return [
             // 'config_id' => 'required',
             'name' => 'required',
-            'modalidad' => 'required',
+            'modalidad' => 'nullable',
             'nombre_ciclo_0' => 'nullable',
-            'position' => 'required',
+            'position' => 'nullable',
             'active' => 'required',
 
             'scheduled_restarts' => 'nullable',

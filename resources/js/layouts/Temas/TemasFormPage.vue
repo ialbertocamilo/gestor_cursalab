@@ -2,7 +2,7 @@
     <section class="section-list">
         <v-card flat elevation="0">
             <v-card-title>
-                Temas: {{ tema_id ? 'Editar' : 'Crear' }}
+                Temas: {{ topic_id ? 'Editar' : 'Crear' }}
             </v-card-title>
         </v-card>
         <!--        <DefaultDivider/>-->
@@ -20,6 +20,7 @@
                                 v-model="resource.requisito_id"
                                 :items="selects.requisitos"
                                 clearable
+                                item-text="name"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -28,21 +29,21 @@
                                 label="Nombre"
                                 show-required
                                 placeholder="Ingrese un nombre"
-                                v-model="resource.nombre"
-                                :rules="rules.nombre"
+                                v-model="resource.name"
+                                :rules="rules.name"
                             />
                         </v-col>
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="8">
                             <!-- <DefaultRichText
-                                v-model="resource.contenido"
+                                v-model="resource.content"
                                 label="Contenido"
                                 :height="225"
                             /> -->
                             <editor
                             api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
-                            v-model="resource.contenido"
+                            v-model="resource.content"
                             :init="{
                                 content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
                                 height: 175,
@@ -74,21 +75,21 @@
                                 dense
                                 show-required
                                 label="Evaluable"
-                                v-model="resource.evaluable"
-                                :items="selects.evaluable"
-                                :rules="rules.evaluable"
+                                v-model="resource.assessable"
+                                :items="selects.assessable"
+                                :rules="rules.assessable"
                                 @onChange="validateTipoEv"
                             />
                         </v-col>
                         <v-col cols="4">
                             <DefaultSelect
                                 dense
-                                :show-required="resource.evaluable === 'si'"
+                                :show-required="resource.assessable === 'si'"
                                 label="Tipo Evaluación"
                                 v-model="resource.tipo_ev"
                                 :items="selects.tipo_ev"
-                                :rules="resource.evaluable === 'no' ? [] : rules.tipo_ev"
-                                :disabled="resource.evaluable === 'no' || !resource.evaluable"
+                                :rules="resource.assessable === 'no' ? [] : rules.tipo_ev"
+                                :disabled="resource.assessable === 'no' || !resource.assessable"
                                 @onChange="showAlertEvaluacion"
                             />
                         </v-col>
@@ -97,8 +98,8 @@
                                 dense
                                 show-required
                                 label="Orden"
-                                v-model="resource.orden"
-                                :rules="rules.orden"
+                                v-model="resource.position"
+                                :rules="rules.position"
                             />
                         </v-col>
                     </v-row>
@@ -143,17 +144,17 @@
                                         <td>
                                             <div class="multimedia-box"
                                                  style="height: 40px !important; width: 40px !important;">
-                                                <i :class="mixin_multimedias.find(el => el.type === media.tipo).icon || 'mdi mdi-loading'"/>
+                                                <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
                                             </div>
                                         </td>
                                         <td>
                                             <DefaultInput
-                                                v-model="media.titulo"
+                                                v-model="media.title"
                                                 placeholder="Ingrese un título"
                                                 dense
                                             />
                                         </td>
-                                        <td>{{ media.valor || media.file.name }}</td>
+                                        <td>{{ media.value || media.file.name }}</td>
                                         <td>
                                             <div class="d-flex justify-content-center">
                                                 <DefaultToggle v-model="media.embed" no-label :disabled="media.disabled"
@@ -163,9 +164,9 @@
                                         <td>
                                             <div class="d-flex justify-content-center">
                                                 <DefaultToggle
-                                                    v-model="media.descarga"
+                                                    v-model="media.downloadable"
                                                     no-label
-                                                    :disabled="['youtube', 'vimeo', 'scorm'].includes(media.tipo)"
+                                                    :disabled="['youtube', 'vimeo', 'scorm'].includes(media.type_id)"
                                                 />
                                             </div>
                                         </td>
@@ -180,7 +181,7 @@
                         </v-col>
 
                     </v-row>
-                    <v-row>
+                    <!-- <v-row>
                         <v-col cols="7">
                             <DefaultAutocomplete
                                 multiple
@@ -195,14 +196,14 @@
                                 :max-values-selected="3"
                             />
                         </v-col>
-                    </v-row>
+                    </v-row> -->
                     <v-row>
                         <v-col cols="5">
                             <DefaultToggle
-                                v-model="resource.estado"
-                                :disabled="resource && resource.evaluable === 'si' && resource.cant_preguntas_evaluables_activas === 0"/>
+                                v-model="resource.active"
+                                :disabled="resource && resource.assessable === 'si' && resource.cant_preguntas_evaluables_activas === 0"/>
                             <small
-                                v-if="resource && resource.evaluable === 'si' && resource.cant_preguntas_evaluables_activas === 0"
+                                v-if="resource && resource.assessable === 'si' && resource.cant_preguntas_evaluables_activas === 0"
                                 v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
                         </v-col>
                     </v-row>
@@ -237,39 +238,39 @@ import TemaValidacionesModal from "./TemaValidacionesModal";
 import Editor from "@tinymce/tinymce-vue";
 
 
-const fields = ['nombre', 'estado', 'orden', 'imagen', 'curso_id', 'config_id', 'categoria_id',
-    'tema_id', 'contenido', 'evaluable', 'tipo_ev', 'tags', 'requisito_id'];
+const fields = ['name', 'active', 'position', 'imagen', 'course_id', 'config_id', 'school_id',
+    'topic_id', 'content', 'assessable', 'tipo_ev', 'tags', 'requisito_id'];
 const file_fields = ['imagen'];
 export default {
     components: {editor: Editor,TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal},
-    props: ["modulo_id", 'categoria_id', 'curso_id', 'tema_id'],
+    props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
     data() {
         return {
             drag: false,
-            base_endpoint: `/escuelas/${this.categoria_id}/cursos/${this.curso_id}/temas`,
+            base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
             resourceDefault: {
-                curso_id: this.curso_id,
+                course_id: this.course_id,
                 config_id: this.modulo_id,
-                categoria_id: this.categoria_id,
-                nombre: null,
+                school_id: this.school_id,
+                name: null,
                 requisito_id: null,
                 resumen: null,
-                contenido: null,
+                content: null,
                 imagen: null,
                 file_imagen: null,
-                evaluable: null,
+                assessable: null,
                 tipo_ev: null,
-                orden: null,
+                position: null,
                 media: [],
                 tags: [],
-                estado: false,
+                active: false,
                 hide_evaluable: null,
                 hide_tipo_ev: null,
                 disabled_estado_toggle: false,
                 cant_preguntas_evaluables_activas: 0
             },
             selects: {
-                evaluable: [
+                assessable: [
                     {id: 'si', nombre: 'Si'},
                     {id: 'no', nombre: 'No'},
                 ],
@@ -282,10 +283,10 @@ export default {
             },
             resource: {},
             rules: {
-                nombre: this.getRules(['required']),
-                evaluable: this.getRules(['required']),
+                name: this.getRules(['required']),
+                assessable: this.getRules(['required']),
                 tipo_ev: this.getRules(['required']),
-                orden: this.getRules(['required', 'number']),
+                position: this.getRules(['required', 'number']),
             },
             loadingActionBtn: false,
             modalTemasValidaciones: {
@@ -343,26 +344,26 @@ export default {
         },
         async validate() {
             let vue = this
-            if (vue.tema_id !== '') {
+            if (vue.topic_id !== '') {
 
-                if (vue.resource.hide_evaluable !== vue.resource.evaluable || vue.resource.hide_tipo_ev !== vue.resource.tipo_ev) {
+                if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.tipo_ev) {
                     let data = {
                         tema: vue.resource.id,
-                        curso: vue.resource.curso_id,
+                        curso: vue.resource.course_id,
                         modulo: vue.modulo_id,
-                        escuela: vue.resource.categoria_id, //falta
+                        escuela: vue.resource.school_id, //falta
                         grupo: [],
                         cursos_libres: false,
                         UsuariosActivos: true,
                         UsuariosInactivos: false,
                         url: 'temas_noevaluables'
                     }
-                    if (vue.resource.hide_evaluable === 'no' || vue.resource.hide_tipo_ev === 'calificada') {
+                    if (vue.resource.hide_evaluable === 'no' || vue.resource.hide_tipo_ev === 'qualified') {
                         data.carrera = []
                         data.ciclo = []
                         data.temasActivos = true
                         data.temasInactivos = true
-                        if (vue.resource.hide_tipo_ev === 'calificada') {
+                        if (vue.resource.hide_tipo_ev === 'qualified') {
                             // Mostrar modal con check y opcion de descarga (endpoint notas por temas)
                             data.aprobados = true;
                             data.desaprobados = true;
@@ -370,14 +371,14 @@ export default {
                             data.variantes = false;
                             data.url = 'notas_tema';
                         }
-                    } else if (vue.resource.hide_tipo_ev === 'abierta') {
+                    } else if (vue.resource.hide_tipo_ev === 'open') {
                         // endpoint evaluaciones abiertas)
                         data.variantes = false;
                         data.url = 'evaluaciones_abiertas';
                     }
                     await vue.cleanModalTemasValidaciones()
                     vue.modalTemasValidaciones.hideConfirmBtn = false
-                    // const cancelLabel = (vue.resource && vue.resource.hide_tipo_ev === 'calificada' && vue.resource.evaluable === 'no') ? 'Cerrar' : 'Entendido'
+                    // const cancelLabel = (vue.resource && vue.resource.hide_tipo_ev === 'qualified' && vue.resource.assessable === 'no') ? 'Cerrar' : 'Entendido'
                     vue.modalTemasValidaciones.cancelLabel = 'Cerrar'
                     await vue.openFormModal(vue.modalTemasValidaciones, data, 'validacionFormPage', 'Atención')
                     return
@@ -409,8 +410,8 @@ export default {
                 return
             }
 
-            const edit = vue.tema_id !== ''
-            let url = `${vue.base_endpoint}/${edit ? `update/${vue.tema_id}` : 'store'}`
+            const edit = vue.topic_id !== ''
+            let url = `${vue.base_endpoint}/${edit ? `update/${vue.topic_id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
@@ -499,13 +500,15 @@ export default {
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
-            let url = `${vue.base_endpoint}/${vue.tema_id === '' ? 'form-selects' : `search/${vue.tema_id}`}`
+            let url = `${vue.base_endpoint}/${vue.topic_id === '' ? 'form-selects' : `search/${vue.topic_id}`}`
             await vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.tags = data.data.tags
                     vue.selects.requisitos = data.data.requisitos
-                    if (vue.tema_id !== '') {
+                    if (vue.topic_id !== '') {
                         vue.resource = Object.assign({}, data.data.tema)
+                        console.log(vue.resource);
+                        vue.resource.assessable = (vue.resource.assessable == 1) ? 'si':'no';
                     }
                 })
             return 0;
@@ -529,11 +532,11 @@ export default {
             vue.resource.tipo_ev = null
             vue.resetFormValidation('TemaForm')
 
-            // Si se está creando un tema y es evaluable = 'si'
+            // Si se está creando un tema y es assessable = 'si'
             // no se puede activar hasta que tenga una evalacion
             if (vue.resource.cant_preguntas_evaluables_activas === 0) {
                 vue.resource.disabled_estado_toggle = true;
-                vue.resource.estado = false;
+                vue.resource.active = false;
             }
         },
         verifyDisabledMediaEmbed() {

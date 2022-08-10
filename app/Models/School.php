@@ -11,6 +11,10 @@ class School extends Model
         'name', 'description', 'imagen', 'plantilla_diploma',
         'position', 'scheduled_restarts', 'active'
     ];
+    public function setActiveAttribute($value)
+    {
+        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
+    }
 
     public function workspace()
     {
@@ -24,10 +28,10 @@ class School extends Model
 
     protected static function search($request)
     {
-        $query = self::join('school_workspace', 'school_workspace.school_id', '=', 'schools.id')->withCount(['courses']);
+        $query = self::withCount(['courses']);
 
-        if ($request->workspace_id)
-            $query->where('school_workspace.workspace_id', $request->workspace_id);
+        // if ($request->workspace_id)
+        //     $query->where('school_workspace.workspace_id', $request->workspace_id);
 
         if ($request->q)
             $query->where('schools.name', 'like', "%$request->q%");
