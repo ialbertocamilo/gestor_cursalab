@@ -62,6 +62,11 @@ class CursosController extends Controller
     public function storeCurso(School $escuela, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
+
+        $worskpace = session('workspace');
+        $workspace_id = (is_array($worskpace)) ? $worskpace['id'] : null;
+
+        $data['workspace_id'] = $workspace_id;
         $data['school_id'] = $escuela->id;
         // $data['categoria_modalidad'] = $escuela->modalidad;
         $data = Media::requestUploadFile($data, 'imagen');

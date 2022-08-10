@@ -7,7 +7,7 @@
         @php
             $tema = request()->segment(7) ?? null;
         @endphp
-        <tema-form-page modulo_id="{{ request()->segment(2) }}" categoria_id="{{ request()->segment(2) }}"
-            curso_id="{{ request()->segment(4) }}" tema_id="{{ $tema }}" />
+        <tema-form-page school_id="{{ request()->segment(2) }}" course_id="{{ request()->segment(4) }}"
+            topic_id="{{ $tema }}" />
     </v-app>
 @endsection

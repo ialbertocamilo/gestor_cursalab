@@ -28,7 +28,7 @@ class TemaPreguntaStoreRequest extends FormRequest
             'pregunta' => 'required',
             'nuevasRptas' => 'required',
             'rpta_ok' => 'required',
-            'estado' => 'required',
+            'active' => 'required',
         ];
     }
 }

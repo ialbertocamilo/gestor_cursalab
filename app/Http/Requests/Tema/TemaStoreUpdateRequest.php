@@ -24,15 +24,15 @@ class TemaStoreUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'nombre' => 'required',
-            'resumen' => 'nullable',
-            'contenido' => 'nullable',
-            'estado' => 'required',
-            'orden' => 'required',
-            'categoria_id' => 'required',
-            'curso_id' => 'required',
+            'name' => 'required',
+            'description' => 'nullable',
+            'content' => 'nullable',
+            'active' => 'required',
+            'position' => 'required',
+            'categoria_id' => 'nullable',
+            'course_id' => 'required',
 
-//            'media' => 'nullable',
+            //            'media' => 'nullable',
 
             'new_medias' => 'nullable',
             'medias' => 'nullable',
@@ -40,9 +40,9 @@ class TemaStoreUpdateRequest extends FormRequest
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
 
-            'evaluable' => 'required',
-            'tipo_ev' => 'nullable',
-            'requisito_id' => 'nullable',
+            'assessable' => 'required',
+            'type_evaluation_id ' => 'nullable',
+            'topic_requirement_id ' => 'nullable',
             'tags' => 'nullable',
             'check_tipo_ev' => 'nullable'
 
@@ -51,9 +51,9 @@ class TemaStoreUpdateRequest extends FormRequest
 
     public function validationData()
     {
-        $estado = ($this->estado==='true' OR $this->estado === true OR $this->estado === 1 OR $this->estado === '1' );
+        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
 
-        $data['estado'] = $estado;
+        $data['active'] = $active;
 
         return $this->merge($data)->all();
     }

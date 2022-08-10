@@ -111,12 +111,12 @@ export default {
                         type: 'route',
                         route: 'edit_route'
                     },
-                    {
-                        text: "Duplicar",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'duplicate'
-                    },
+                    // {
+                    //     text: "Duplicar",
+                    //     icon: 'fa fa-circle',
+                    //     type: 'action',
+                    //     method_name: 'duplicate'
+                    // },
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',

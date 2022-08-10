@@ -51,7 +51,7 @@
 
                     <DefaultModalButton
                         label="Crear programa"
-                        @click="openFormModal(modalFormOptions)"/>
+                        @click="openLink('/programas/crear')"/>
                 </v-card-title>
             </div>
         </header>
