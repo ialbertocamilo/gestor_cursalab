@@ -13,6 +13,10 @@
                     <v-spacer/>
 
                     <DefaultModalButton
+                        label="Segmentación"
+                        @click="openFormModal(modalFormOptions)" />
+
+                    <DefaultModalButton
                         label="Siguiente"
                         @click="openLink('/programas/crear-rutas')" />
                 </v-card-title>
@@ -86,16 +90,27 @@
             </div>
 
         </section>
+
+        <SegmentFormModal
+            :options="modalFormOptions"
+            width="75vw"
+            :ref="modalFormOptions.ref"
+            @onCancel="closeSimpleModal(modalFormOptions)"
+            @onConfirm="closeFormModal(modalFormOptions, dataTable, filters)"
+        />
+
     </div>
+
 
 </template>
 
 <script>
 import BlockDetailModal from "./BlockDetailModal";
+import SegmentFormModal from "./SegmentFormModal";
 // import BlockFormModal from "./BlockFormModal";
 
 export default {
-    components: {BlockDetailModal},
+    components: {BlockDetailModal, SegmentFormModal},
     // components: {BlockDetailModal, BlockFormModal, BlockFinishModal, BlockDirectionsModal,},
     props: ['usuario_id'],
     data: () => ({
@@ -145,11 +160,11 @@ export default {
             hideCancelBtn: true
         },
         modalFormOptions: {
-            ref: 'BlockFormlModal',
+            ref: 'SegmentFormModal',
             open: false,
-            base_endpoint: '/programas',
+            base_endpoint: '/segments',
             confirmLabel: 'Guardar',
-            resource: 'programa',
+            resource: 'segmentación',
         },
         // modalFormDuplicateOptions: {
         //     ref: 'BlockFormlModal',

@@ -23,6 +23,11 @@ class Segment extends BaseModel
     //     return $this->belongsToMany(CriterionValue::class);
     // }
 
+    public function model()
+    {
+        return $this->morphTo();
+    }
+
     public function values()
     {
         return $this->hasMany(SegmentValue::class);

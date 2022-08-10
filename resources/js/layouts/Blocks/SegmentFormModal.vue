@@ -10,45 +10,47 @@
                 <DefaultErrors :errors="errors"/>
 
                 <v-row justify="space-around">
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.name" label="Nombre" :rules="rules.name" />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.email" label="Correo" :rules="rules.email" />
-                    </v-col>
-                </v-row>
-
-                <v-row justify="space-around">
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.username" label="User" :rules="rules.username" />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.password" label="Contraseña" :rules="rules.password" type="password" />
-                    </v-col>
-                </v-row>
-
-                <v-row align="center" align-content="center">
-                    <v-col cols="4" class="d-flex justify-content-center">
-                        <DefaultSelect :items="selects.services" v-model="resource.service" label="Servicio" item-text="name" return-object :rules="rules.service" />
-                    </v-col>
-                    <v-col cols="4" class="d-flex justify-content-center">
-                        <DefaultSelect :items="selects.plans" v-model="resource.plan" label="Plan" item-text="name" return-object :rules="rules.plan" />
-                    </v-col>
-                    <v-col cols="4" class="d-flex justify-content-center">
-                        <DefaultSelect :items="selects.types" v-model="resource.type" label="Tipo" item-text="name" return-object :rules="rules.type" />
-                    </v-col>
-                </v-row>
-
-                <v-row justify="space-around">
+                    <!-- <v-col cols="6" class="d-flex justify-content-center"> -->
+                        <!-- <DefaultInput v-model="resource.name" label="Nombre" :rules="rules.name" /> -->
+                    <!-- </v-col> -->
                     <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.identifier" label="Identificador" :rules="rules.identifier" />
+                        <!-- <DefaultInput v-model="resource.email" label="Correo" :rules="rules.email" /> -->
+
+                        <v-carousel
+                            height="500"
+                            hide-delimiter-background
+                            show-arrows-on-hover
+                          >
+                            <v-carousel-item
+                              v-for="(segment, i) in segments"
+                              :key="i"
+                            >
+
+                                <segment :segment="segment" :criteria="criteria"/>
+                            <!--   <v-sheet
+                                :color="colors[i]"
+                                height="100%"
+                              >
+                                <v-row
+                                  class="fill-height"
+                                  align="center"
+                                  justify="center"
+                                >
+                                  <div class="text-h2">
+                                    {{ slide }} Slide
+                                  </div>
+                                </v-row>
+                              </v-sheet> -->
+                            </v-carousel-item>
+                          </v-carousel>
                     </v-col>
                 </v-row>
 
+               
 
-                <v-subheader class="mt-5"><strong>Configuración de tokens</strong></v-subheader>
+                <v-subheader class="mt-5 px-0"><strong>Configuración de tokens</strong></v-subheader>
 
-                <v-divider class="mx-3" />
+                <v-divider class="mt-0" />
 
                 <v-row justify="space-around">
                     <v-col cols="6" class="d-flex justify-content-center">
@@ -67,50 +69,20 @@
 
                 <!-- <v-subheader class="mt-5"><strong>Datos adicionales</strong></v-subheader> -->
 
-                <v-divider class="mx-3" />
+  <!--               <v-divider class="mx-3" />
 
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultTextArea v-model="resource.description" label="Descripción" :rows="4" />
                     </v-col>
-                </v-row>
-
-               <!--  <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="d-flex justify-content-between pb-0"
-                           @click="showConfigTokens = !showConfigTokens"
-                           style="cursor: pointer">
-                        <strong>Configurar SDK y ZAK Tokens</strong>
-                        <v-icon v-text="showConfigTokens ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
-                    </v-col>
-                    <v-col cols="12" class="py-0">
-                        <DefaultDivider/>
-                    </v-col>
                 </v-row> -->
 
-     <!--            <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="d-flex justify-content-center pt-0">
-
-                        <v-expand-transition>
-                            <v-row justify="space-around" align="start" align-content="center" v-show="showConfigTokens">
-                                <v-col cols="12" class="d-flex justify-content-center">
-                                    <DefaultTextArea v-model="resource.sdk_token" label="SDK Token" :disabled="true" :rows="4" />
-                                </v-col>
-                                <v-col cols="12" class="d-flex justify-content-start">
-                                    <DefaultTextArea v-model="resource.zak_token" label="ZAK Token" :disabled="true" :rows="5"/>
-                                </v-col>
-                            </v-row>
-                        </v-expand-transition>
-
-                    </v-col>
-
-                </v-row> -->
-
-                <v-row align="center" align-content="center">
+<!--                 <v-row align="center" align-content="center">
                     <v-col cols="6" class="--d-flex --justify-content-start">
                         <DefaultToggle v-model="resource.active" />
                     </v-col>
                 </v-row>
-
+ -->
             </v-form>
         </template>
 
@@ -119,9 +91,15 @@
 
 <script>
 
-const fields = ['name', 'email', 'username', 'password', 'key', 'secret', 'token', 'refresh_token', 'identifier', 'sdk_token', 'zak_token', 'service', 'plan', 'type', 'description', 'active'];
+const fields = ['name', 'email', 'username', 'password', 'key', 'secret', 'token', 'active'];
+
+import Segment from "./Segment";
 
 export default {
+
+    components: {
+        Segment,
+    },
     props: {
         options: {
             type: Object,
@@ -131,6 +109,22 @@ export default {
     },
     data() {
         return {
+            colors: [
+              'indigo',
+              'warning',
+              'pink darken-2',
+              'red lighten-1',
+              'deep-purple accent-4',
+            ],
+            slides: [
+              'First',
+              'Second',
+              'Third',
+              'Fourth',
+              'Fifth',
+            ],
+
+
             errors: [],
             showConfigTokens: false,
             resourceDefault: {
@@ -161,6 +155,7 @@ export default {
                 zak_token: null,
             },
             resource: {},
+            segments: {},
             selects: {
                 types: [],
                 services: [],
