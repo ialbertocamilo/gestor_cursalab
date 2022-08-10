@@ -490,8 +490,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             endif;
         }
 
-//        $user->courses = $programs;
-        $user->courses = $courses;
+        $user->courses = $programs;
+//        $user->courses = $courses;
     }
 
     public function validateSegmentationForUser(Collection $user_criterion_values, Collection $segment_values): bool
