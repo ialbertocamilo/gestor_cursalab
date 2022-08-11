@@ -45,4 +45,11 @@ class Workspace extends BaseModel
 
         return $query->paginate($request->paginate);
     }
+
+    /**
+     * Get the current workspace id
+     */
+    public static function getCurrentWorkspaceId(): ?int {
+        return null;
+    }
 }

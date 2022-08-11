@@ -120,8 +120,7 @@ class Media extends Model
 
         if (!$uploaded) {
 
-            $result = Storage::disk('do_spaces')
-                             ->put($path, file_get_contents($file), 'public');
+            $result = Storage::put($path, file_get_contents($file), 'public');
             if ($result) {
                 $uploaded = true;
             }

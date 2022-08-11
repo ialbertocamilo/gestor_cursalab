@@ -81,12 +81,17 @@ class Prueba extends Model
 
             $data['time'] = now();
 
-            $data['data'] = DB::select( DB::raw("SELECT DATE(p.created_at) AS fechita, count(*) as cant FROM pruebas p
-                                                WHERE p.usuario_id NOT IN (".$usuarios_id.")
-                                                ".$condition."
-                                                AND DATE(p.created_at) >= ( CURDATE() - INTERVAL 20 DAY )
-                                                GROUP BY fechita
-                                                ORDER BY fechita"));
+            $data['data'] = DB::select(
+                DB::raw(
+                    "SELECT DATE(p.created_at) AS fechita, count(*) as cant
+                    FROM pruebas p
+                    WHERE p.usuario_id NOT IN (".$usuarios_id.")
+                    ".$condition."
+                    AND DATE(p.created_at) >= ( CURDATE() - INTERVAL 20 DAY )
+                    GROUP BY fechita
+                    ORDER BY fechita"
+                )
+            );
             return $data;
         });
 

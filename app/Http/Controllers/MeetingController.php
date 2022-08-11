@@ -211,9 +211,9 @@ class MeetingController extends Controller
      */
     public function destroy(Meeting $meeting)
     {
-//        SourceMultimarca::destroySource(
-//            'meeting', $meeting->id, $meeting->identifier
-//        );
+        SourceMultimarca::destroySource(
+            'meeting', $meeting->id, $meeting->identifier
+        );
 
         $meeting->delete();
 
