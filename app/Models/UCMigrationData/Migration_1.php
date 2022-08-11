@@ -3,8 +3,10 @@
 namespace App\Models\UCMigrationData;
 
 use App\Models\Block;
+use App\Models\Course;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
+use App\Models\School;
 use App\Models\Segment;
 use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
@@ -37,7 +39,7 @@ class Migration_1 extends Model
         $db = self::connect();
         $client_LMS_data = [
             'users' => [], 'carreras' => [], 'ciclos' => [], 'grupos' => [],
-            'boticas' => [], 'modulos' => []
+            'boticas' => [], 'modulos' => [], 'courses' => [], 'schools' => []
         ];
 
         $this->setUsersData($client_LMS_data, $db);
@@ -46,6 +48,9 @@ class Migration_1 extends Model
         $this->setCiclosData($client_LMS_data, $db);
         $this->setGruposData($client_LMS_data, $db);
         $this->setBoticasData($client_LMS_data, $db);
+
+//        $this->setSchoolsData($client_LMS_data, $db);
+//        $this->setCoursesData($client_LMS_data, $db);
 
         return $client_LMS_data;
     }
@@ -65,6 +70,9 @@ class Migration_1 extends Model
         $this->insertCriterionUserData($data);
 
         $this->insertSegmentacionCarrerasCiclosData();
+
+//        $this->insertSchoolData($data);
+//        $this->insertCourseData($data);
     }
 
     public function setUsersData(&$result, $db)
@@ -107,7 +115,7 @@ class Migration_1 extends Model
                 'name' => $user->nombre,
 
                 'email' => $user->email,
-                'code' => $user->dni,
+                'document' => $user->dni,
 
                 'type_id' => $type_client->id,
                 'workspace_id' => $uc_workspace->id,
@@ -332,6 +340,63 @@ class Migration_1 extends Model
         $result['boticas'] = array_chunk($result['boticas'], self::CHUNK_LENGTH, true);
     }
 
+    public function setSchoolsData(&$result, $db)
+    {
+        $temp['schools'] = $db->getTable('categorias')
+            ->select('id', 'nombre', 'descripcion', 'imagen', 'plantilla_diploma',
+                'orden', 'reinicios_programado',
+                'estado', 'created_at', 'updated_at')
+            ->get();
+
+        foreach ($temp['schools'] as $escuela) {
+            $result['schools'][] = [
+                'external_id' => $escuela->id,
+
+                'name' => $escuela->nombre,
+                'description' => $escuela->descripcion,
+                'imagen' => $escuela->imagen,
+                'plantilla_diploma' => $escuela->plantilla_diploma,
+                'scheduled_restarts' => $escuela->reinicios_programado,
+                'position' => $escuela->orden,
+
+                'active' => $escuela->estado,
+                'created_at' => $escuela->created_at,
+                'updated_at' => $escuela->updated_at,
+            ];
+        }
+
+        $result['schools'] = array_chunk($result['schools'], self::CHUNK_LENGTH, true);
+    }
+
+    public function setCoursesData(&$result, $db)
+    {
+        $temp['courses'] = $db->getTable('cursos')
+            ->select('id', 'nombre', 'descripcion', 'imagen', 'plantilla_diploma',
+                'orden', 'reinicios_programado', 'c_evaluable', 'libre',
+                'estado', 'created_at', 'updated_at')
+            ->get();
+
+        foreach ($temp['courses'] as $escuela) {
+            $result['courses'][] = [
+                'external_id' => $escuela->id,
+
+                'name' => $escuela->nombre,
+                'description' => $escuela->descripcion,
+                'imagen' => $escuela->imagen,
+                'plantilla_diploma' => $escuela->plantilla_diploma,
+                'freely_eligible' => $escuela->libre,
+                'assessable' => $escuela->c_evaluable,
+                'scheduled_restarts' => $escuela->reinicios_programado,
+                'position' => $escuela->orden,
+
+                'active' => $escuela->estado,
+                'created_at' => $escuela->created_at,
+                'updated_at' => $escuela->updated_at,
+            ];
+        }
+
+        $result['courses'] = array_chunk($result['courses'], self::CHUNK_LENGTH, true);
+    }
 
     public function insertChunkedData($table_name, $data)
     {
@@ -365,9 +430,6 @@ class Migration_1 extends Model
         }
 
         $this->makeChunkAndInsert($temp, 'criterion_value_workspace');
-
-        // TODO: Crear cada modulo como workspace
-        // TODO: Agregando todos sus campos de logo, plantilla_diploma ....
 
         foreach ($data['modulo_subworkspace'] as $modulo_subworkspace) {
             $criterion_value = $modules_values->where('external_id', $modulo_subworkspace['external_id'])->first();
@@ -501,8 +563,16 @@ class Migration_1 extends Model
                     $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $career->id];
 
                     // Push ciclos
-                    foreach ($ciclos as $ciclo)
-                        $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $ciclo->id];
+                    foreach ($usuario_matriculas as $matricula){
+                        if ($matricula->estado){
+                            $ciclo = $ciclos_values->whereIn('position', $matricula->secuencia_ciclo)->first();
+                            $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $ciclo->id];
+                        }
+                    }
+//                    foreach ($ciclos as $ciclo){
+//                        $matricula = $matriculas->where('usuario_id', $user->external_id);
+//                        $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $ciclo->id];
+//                    }
 
                 endif;
 
@@ -602,4 +672,34 @@ class Migration_1 extends Model
         ]);
     }
 
+    public function insertSchoolData($data)
+    {
+        $this->insertChunkedData('schools', $data['schools']);
+    }
+
+    public function insertCourseData($data)
+    {
+        $this->insertChunkedData('courses', $data['courses']);
+
+        $db = self::connect();
+        $courses_value = Course::all();
+        $schools_value = School::all();
+        $uc_cursos = $db->getTable('cursos')->select('id', 'categoria_id')->get();
+        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+
+        $course_school = [];
+        $course_workspace = [];
+        foreach ($uc_cursos as $curso) {
+            $course = $courses_value->where('external_id', $curso->id)->first();
+            $school = $schools_value->where('external_id', $curso->categoria_id)->first();
+
+            if ($course and $school){
+                $course_school[] = ['course_id' => $course->id, 'school_id' => $school->id];
+                $course_workspace[] = ['course_id' => $course->id, 'workspace_id' => $uc_workspace->id];
+            }
+        }
+
+        $this->makeChunkAndInsert($course_school, 'course_school');
+        $this->makeChunkAndInsert($course_workspace, 'course_workspace');
+    }
 }

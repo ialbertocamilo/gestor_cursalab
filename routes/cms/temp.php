@@ -384,13 +384,13 @@ Route::controller(UsuarioController::class)->group(function() {
 	// ->middleware('permission:usuarios.index');
 	Route::get('usuarios/create', 'create')->name('usuarios.create');
 	// ->middleware('permission:usuarios.create');
-	Route::put('usuarios/{usuario}', 'update')->name('usuarios.update');
+//	Route::put('usuarios/{usuario}', 'update')->name('usuarios.update');
 	// ->middleware('permission:usuarios.edit');
 	Route::delete('usuarios/{usuario}', 'destroy')->name('usuarios.destroy');
 	// ->middleware('permission:usuarios.destroy');
 	Route::patch('usuarios/{usuario}', 'status')->name('usuarios.status');
 	// ->middleware('permission:usuarios.edit');
-	Route::get('usuarios/{usuario}/edit', 'edit')->name('usuarios.edit');
+//	Route::get('usuarios/{usuario}/edit', 'edit')->name('usuarios.edit');
 	// ->middleware('permission:usuarios.edit');
 
 	// USUARIOS RESET MASIVO

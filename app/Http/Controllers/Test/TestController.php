@@ -46,12 +46,17 @@ class TestController extends Controller
 
     public function users()
     {
-        $users = User::withWhereHas('criterion_values', function ($q) {
-            $q->select('id', 'value_text');
-        })
-            ->limit(10)->get();
+//        $users = User::withWhereHas('criterion_values', function ($q) {
+//            $q->select('id', 'value_text');
+//        })
+//            ->limit(10)->get();
+//
+//        return $this->success($users);
+        $user = User::find(38);
 
-        return $this->success($users);
+        $user->setCurrentCourses();
+
+        return $this->success($user);
     }
 
     public function blocks()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserStoreRequest;
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
@@ -44,7 +45,6 @@ class UsuarioController extends Controller
 
     public function search(Request $request)
     {
-//        $users = Usuario::search($request);
         $users = User::search($request);
 
         UsuarioSearchResource::collection($users);
@@ -54,52 +54,42 @@ class UsuarioController extends Controller
 
     public function getListSelects()
     {
-//        $modules = Abconfig::select('id', 'etapa as nombre')->get();
         $modules = CriterionValue::getListForSelect(criterion_code: 'module');
-//        $criteria = Criterion::getValuesForSelect(criterion_code: 'module');
-//        $criteria = Criterion::with('values:id,value_text')
-//            ->select('id', 'name', 'code')
-//            ->get();
-
 
         return $this->success([
             'modules' => $modules,
-//            'criteria' => $criteria,
         ]);
     }
 
-    public function searchUser(Usuario $usuario)
+    public function edit(User $user)
     {
-        $matriculas_pasadas = Matricula::join('carreras', 'carreras.id', 'matricula.carrera_id')
-            ->join('ciclos', 'ciclos.id', 'matricula.ciclo_id')
-            ->join('matricula_criterio', 'matricula_criterio.matricula_id', 'matricula.id')
-            ->join('criterios', 'criterios.id', 'matricula_criterio.criterio_id')
-            ->where('matricula.usuario_id', $usuario->id)
-            ->select('criterios.valor as grupo', 'carreras.nombre as carrera', 'ciclos.nombre as ciclo',
-                'matricula.estado as estado', 'matricula.secuencia_ciclo as secuencia', 'matricula.id as matricula_id',
-                'ciclos.id as id')
-            ->orderBy('matricula.secuencia_ciclo')
-            ->get();
-        $usuario->load('modulo');
-        $usuario->load('botica.criterio');
-        $usuario->load('matricula_presente.carrera');
-        $usuario->grupo_sistema_nombre = $usuario->grupo_sistema->nombre ?? "GS no defnido";
-        $usuario->matriculas_pasadas = $matriculas_pasadas;
-        $usuario->password = null;
+        $criterion_grouped = $user->criterion_values()->with('criterion')->get()
+            ->groupBy('criterion.code')->toArray();
 
-        $formSelects = $this->getFormSelects(true);
-
+        $criterion_list = [];
+        foreach ($criterion_grouped as $code => $criterion_values) {
+            if (count($criterion_values) === 1) {
+                $criterion_list[$code] = $criterion_values[0]['id'];
+            } else if(count($criterion_values) > 1){
+                foreach ($criterion_values as $criterion_value) {
+                    $criterion_list[$code][] = [
+                        'id' => $criterion_value['id'],
+                        'value_text' => $criterion_value['value_text']
+                    ];
+                }
+            }
+        }
+        $user->criterion_list = $criterion_list;
+//        $user->criterion_list = $criterion_grouped;
         return $this->success([
-            'usuario' => $usuario,
-            'modules' => $formSelects['modules'],
-            'cargos' => $formSelects['cargos']
+            'usuario' => $user,
+            'criteria' => $this->getFormSelects(true)
         ]);
     }
 
     public function getFormSelects($compactResponse = false)
     {
-//        $modules = Abconfig::select('id', 'etapa as nombre')->get();
-
+        $current_workspace = session('workspace');
         $criteria = Criterion::query()
             ->with([
                 'values' => function ($q) {
@@ -107,213 +97,25 @@ class UsuarioController extends Controller
                         ->select('id', 'criterion_id', 'exclusive_criterion_id', 'value_text', 'parent_id');
                 }
             ])
-            ->select('id', 'name', 'code', 'parent_id')
+            ->whereHas('workspaces', function ($q) use ($current_workspace) {
+                $q->whereIn('id', [$current_workspace['id']]);
+            })
+            ->select('id', 'name', 'code', 'parent_id', 'multiple')
+            ->orderBy('position')
             ->get();
 
-//        $cargos = Cargo::select('id', 'nombre')->pluck('nombre');
-
-//        $response = compact('modules', 'cargos');
         $response = compact('criteria');
 
-        return $compactResponse ? $response : $this->success($response);
+        return $compactResponse ? $criteria : $this->success($response);
     }
 
-
-    public function index(Request $request)
+    public function store(UserStoreRequest $request)
     {
-        // return $request->all();
-        $query = Usuario::orderBy('usuarios.nombre');
-        $question = $request->input('q');
+        $data = $request->validated();
 
+        User::storeRequest($data);
 
-        if ($request->has('q')) {
-            $question = $request->input('q');
-            $usuarios = Usuario::whereRaw('nombre like ? or dni like ?', ["%$question%", "%$question%"])->paginate(100);
-        } else {
-            $usuarios = Usuario::paginate(100);
-        }
-
-
-        // if ($request->has('ciclo_usuario') && $request->ciclo_usuario > 0) {
-        //     $query->join('matricula', 'matricula.usuario_id', 'usuarios.id');
-        //     $query->where('matricula.carrera_id', $request->carrera_usuario);
-        //     $query->where('matricula.ciclo_id', $request->ciclo_usuario);
-        //     $query->where('matricula.estado', 1);
-        // } else {
-        //     if ($request->has('carrera_usuario') && $request->carrera_usuario > 0) {
-        //         $query->join('matricula', 'matricula.usuario_id', 'usuarios.id');
-        //         $query->where('matricula.carrera_id', $request->carrera_usuario);
-        //         $query->where('matricula.estado', 1);
-        //     } else {
-        //         if ($request->has('modulo_usuario') && $request->modulo_usuario > 0) {
-        //             $query->where('usuarios.modulo_usuario', $request->modulo_usuario);
-        //         }
-        //     }
-        // }
-
-        // if ($request->has('q') && $question!= "") {
-        //     $query->where(function($query) use($question) {
-        //         $query->whereRaw('nombre like ? or dni like ?', ["%$question%","%$question%"]);
-        //     });
-        // }
-        // if ($request->has('grupo_usuario') && $request->input('grupo_usuario') > 0 ) {
-        //     $query->join('criterios','criterios.id', 'usuarios.grupo');
-        //     $query->where('usuarios.grupo', $request->input('grupo_usuario'));
-        // }
-
-        // $query->groupBy('usuarios.id');
-
-        // $usuarios = $query->paginate(100);
-        // dd($usuarios);
-
-        $config_arr = Abconfig::select('id', 'etapa')->pluck('etapa', 'id');
-        $grupos = Criterio::where('tipo_criterio', 'GRUPO')->pluck('valor', 'id');
-
-        // $usuarios_master = UsuarioMaster::get();
-        // return $usuarios_master;
-        return view('usuarios.index', compact('usuarios', 'config_arr', 'grupos'));
-    }
-
-
-    public function create()
-    {
-        // $grupos = Criterio::pluck('valor', 'id');
-        // $grupos->put('0','Seleccione un valor');
-        // $grupos = $grupos->sortKeys();
-
-        $grupo_array = Grupo::select('id', 'nombre')->pluck('nombre', 'id');
-        $config_query = Abconfig::select('id', 'etapa')->orderBy('id');
-        $config_array = $config_query->pluck('etapa', 'id');
-
-        // $first_config = $config_query->first();
-        // if($first_config){
-        //     $carreras = Carrera::where('estado', 1)->where('config_id', $first_config->id)->orderBy('nombre')->get();
-        // }else{
-        //     $carreras = Carrera::where('estado', 1)->orderBy('nombre')->get();
-        // }
-
-        return view('usuarios.create', compact('config_array', 'grupo_array'));
-    }
-
-
-    public function store(UsuarioStoreRequest $request)
-    {
-        if ($request->errores > 0) {
-            // return response()->json(['msg' => 'Rellene todos los campos requeridos.'], 200, $headers);
-            $request->curr_grupo_id = 0;
-            return redirect()->back()->withInput($request->all())->withErrors(['msg' => 'Debe asignar una matricula para registrar al usuario.']);
-        }
-
-        $data = $request->all();
-        $data['password'] = Hash::make($request->password);
-        $data['rol'] = 'default';
-        $data['grupo'] = $request->curr_grupo_id;
-
-        $usuario = Usuario::create($data);
-
-        //Consultar dias de configuracion
-        $dias = $usuario->config->duracion_dias;
-        date_default_timezone_set('America/Lima');
-        //insertar vigencia
-        $vigencia = new Usuario_vigencia;
-        $vigencia->usuario_id = $usuario->id;
-        $vigencia->fecha_inicio = date('Y-m-d');
-        $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio . ' + ' . $dias . ' days'));
-        $vigencia->save();
-
-        if (isset($request->curr_carrera) && isset($request->curr_ciclos) && $request->curr_carrera != "0" && $request->curr_ciclos != "0") {
-            // SABER EL NUMERO DE MATRICULAS DEL USUARIO
-            $matricula = Matricula::select('id')->where('usuario_id', $usuario->id)->get();
-            $ciclo = Ciclo::select('id', 'carrera_id', 'secuencia')->where('id', $request->curr_ciclos)->first();
-            /**
-             * 1 O MAS MATRICULAS
-             * CAMBIO LA PRESENTE A 0
-             * SI LA SECUENCIA DE CICLO DE LA PRESENTE ES 0, LA MATRICULA CAMBIA A ESTADO 0
-             */
-            if (count($matricula) > 0) {
-                $matricula_presente = Matricula::select('id', 'ciclo_id')->where('usuario_id', $usuario->id)->where('presente', 1)->first();
-                $matricula_presente->presente = 0;
-                $ciclo_presente = Ciclo::select('id', 'carrera_id', 'secuencia')->where('id', $matricula_presente->ciclo_id)->first();
-                if ($ciclo_presente->secuencia == 0) {
-                    $matricula_presente->estado = 0;
-                }
-                $matricula_presente->save();
-            }
-            if ($ciclo->secuencia > 0) {
-                $ciclos_crear = Ciclo::where('carrera_id', $request->curr_carrera)
-                    ->where('secuencia', '>', 0)
-                    ->where('secuencia', '<=', $ciclo->secuencia)
-                    ->orderBy('secuencia')
-                    ->get(['id', 'nombre', 'secuencia']);
-                $i = 0;
-                $len = count($ciclos_crear);
-                foreach ($ciclos_crear as $ciclo_crear) {
-                    // CREO MATRICULA
-                    $matricula = new Matricula;
-                    $matricula->usuario_id = $usuario->id;
-                    $matricula->carrera_id = $request->curr_carrera;
-                    $matricula->ciclo_id = $ciclo_crear->id;
-                    $matricula->secuencia_ciclo = $ciclo_crear->secuencia;
-                    $matricula->presente = ($i == $len - 1) ? 1 : 0;
-                    $matricula->estado = 1;
-                    $matricula->save();
-                    DB::table('matricula_criterio')->insert([
-                        'matricula_id' => $matricula->id,
-                        'criterio_id' => $request->curr_grupo_id
-                    ]);
-                    $i++;
-                }
-            } else {
-                $matricula = new Matricula;
-                $matricula->usuario_id = $usuario->id;
-                $matricula->carrera_id = $request->curr_carrera;
-                $matricula->ciclo_id = $ciclo->id;
-                $matricula->secuencia_ciclo = $ciclo->secuencia;
-                $matricula->presente = 1;
-                $matricula->estado = 1;
-                $matricula->save();
-                DB::table('matricula_criterio')->insert([
-                    'matricula_id' => $matricula->id,
-                    'criterio_id' => $request->curr_grupo_id
-                ]);
-            }
-        }
-
-        return redirect()->route('usuarios.index')
-            ->with('info', 'Usuario guardado con éxito');
-    }
-
-    public function edit(Usuario $usuario)
-    {
-
-        // $usuario->load('grupo_sistema');
-
-        $grupos = Criterio::pluck('valor', 'id');
-        $grupos->put('0', 'Seleccione un grupo');
-        $grupos = $grupos->sortKeys();
-
-        $matricula = Matricula::where('usuario_id', $usuario->id)->first();
-
-        $matriculas_pasadas = Matricula::join('carreras', 'carreras.id', 'matricula.carrera_id')
-            ->join('ciclos', 'ciclos.id', 'matricula.ciclo_id')
-            ->join('matricula_criterio', 'matricula_criterio.matricula_id', 'matricula.id')
-            ->join('criterios', 'criterios.id', 'matricula_criterio.criterio_id')
-            ->where('matricula.usuario_id', $usuario->id)
-            ->select('criterios.valor as grupo', 'carreras.nombre as carrera', 'ciclos.nombre as ciclo',
-                'matricula.estado as estado', 'matricula.secuencia_ciclo as secuencia')
-            ->orderBy('matricula.secuencia_ciclo')
-            ->get();
-
-        $config_array = Abconfig::select('id', 'etapa')->pluck('etapa', 'id');
-        $grupo_array = Grupo::select('id', 'nombre')->pluck('nombre', 'id');
-        $config_query = Abconfig::select('id', 'etapa')->orderBy('id');
-        // $carreras = Carrera::where('estado', 1)->where('config_id', $usuario->config_id)->orderBy('nombre')->get();
-
-        $config_array = $config_query->pluck('etapa', 'id');
-
-        $usuario->grupo_sistema_nombre = $usuario->grupo_sistema->nombre ?? "GS no definido";
-
-        return view('usuarios.edit', compact('usuario', 'config_array', 'grupo_array', 'grupos', 'matriculas_pasadas'));
+        return $this->success(['msg' => 'Usuario creado correctamente.']);
     }
 
     public function getInitialData($usuario_id)
@@ -380,7 +182,6 @@ class UsuarioController extends Controller
 
     public function getCarrerasxModulo($config_id)
     {
-
         $carreras = Carrera::where('config_id', $config_id)->get(['nombre', 'id']);
         return response()->json(compact('carreras'), 200);
     }
@@ -475,105 +276,114 @@ class UsuarioController extends Controller
         return response()->json(compact('ciclo_agregar'), 200);
     }
 
-    public function update(UsuarioStoreRequest $request, Usuario $usuario)
+    public function update(UserStoreRequest $request, User $user)
     {
-        if ($request->errores > 0) {
-            $request->curr_grupo_id = 0;
-            return redirect()->back()->withInput($request->all())->withErrors(['msg' => 'Debe asignar una matricula para registrar al usuario.']);
-        }
+        $data = $request->validated();
 
-        $data = $request->all();
-        // GUARDAR DATOS PREVIOS
-        $dni_previo = $usuario->dni;
-        $email_previo = $usuario->email;
+//        dd($data);
 
-        if (!is_null($request->password)) {
-            $data['password'] = Hash::make($request->password);
-        } else {
-            $data['password'] = $usuario->password;
-        }
-        $data['grupo'] = $request->curr_grupo_id;
+        User::storeRequest($data, $user);
 
-        $usuario->update($data);
-
-        //Consultar dias de configuracion
-        $dias = $usuario->config->duracion_dias;
-        date_default_timezone_set('America/Lima');
-        //insertar vigencia
-        $vigencia = $usuario->vigencia;
-        $vigencia->usuario_id = $usuario->id;
-        $vigencia->fecha_inicio = date('Y-m-d');
-        $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio . ' + ' . $dias . ' days'));
-        $vigencia->save();
-
-
-        if (isset($request->curr_carrera) && isset($request->curr_ciclos) && $request->curr_carrera != "0" && $request->curr_ciclos != "0") {
-            // SABER EL NUMERO DE MATRICULAS DEL USUARIO
-            $matricula = Matricula::select('id')->where('usuario_id', $usuario->id)->get();
-            $ciclo = Ciclo::select('id', 'carrera_id', 'nombre', 'secuencia')->where('id', $request->curr_ciclos)->first();
-            // dd($ciclo);
-            /**
-             * 1 O MAS MATRICULAS
-             * CAMBIO LA PRESENTE A 0
-             * SI LA SECUENCIA DE CICLO DE LA PRESENTE ES 0, LA MATRICULA CAMBIA A ESTADO 0
-             */
-            if (count($matricula) > 0) {
-                $matricula_presente = Matricula::select('id', 'ciclo_id')->where('usuario_id', $usuario->id)->where('presente', 1)->first();
-                // dd($matricula_presente);
-                $matricula_presente->presente = 0;
-                $ciclo_presente = Ciclo::select('id', 'carrera_id', 'secuencia')->where('id', $matricula_presente->ciclo_id)->first();
-                if ($ciclo_presente->secuencia == 0) {
-                    $matricula_presente->estado = 0;
-                }
-                $matricula_presente->save();
-            }
-
-            // SELECCIONAR TODOS LOS CICLOS DE LA CARRERA
-            $ciclosxCarrera = Ciclo::where('carrera_id', $request->curr_carrera)
-                ->where('secuencia', '>', 0)
-                ->where('secuencia', '<=', $ciclo->secuencia)
-                ->get(['secuencia', 'id']);
-            $_ciclosxCarrera = collect();
-            foreach ($ciclosxCarrera as $c) {
-                $_ciclosxCarrera->push($c->id);
-            }
-            // RESTAR A TODOS EN LOS QUE YA SE ENCUENTRA MATRICULADOS Y QUE SEAN MAYOR QUE 0
-            $ciclos_matriculados = Matricula::where('usuario_id', $usuario->id)->get(['secuencia_ciclo', 'ciclo_id']);
-            $_ciclos_matriculados = collect();
-            foreach ($ciclos_matriculados as $cm) {
-                $cm->presente = 0;
-                $cm->save();
-                $_ciclos_matriculados->push($cm->ciclo_id);
-            }
-            $resta = $_ciclosxCarrera->diff($_ciclos_matriculados);
-            $ciclos_restantes = $resta->all();
-            $ciclos_restantes2 = Ciclo::whereIn('id', $ciclos_restantes)->get(['id', 'nombre', 'secuencia']);
-
-            $i = 0;
-            $len = count($ciclos_restantes2);
-            // CREAR MATRICULA Y MATRICULA CRITERIO DE LOS RESTANTES
-            foreach ($ciclos_restantes2 as $ciclo_restante) {
-                $matricula = new Matricula;
-                $matricula->usuario_id = $usuario->id;
-                $matricula->carrera_id = $request->curr_carrera;
-                $matricula->ciclo_id = $ciclo_restante->id;
-                $matricula->secuencia_ciclo = $ciclo_restante->secuencia;
-                $matricula->presente = ($i == $len - 1) ? 1 : 0;;
-                $matricula->estado = 1;
-                $matricula->save();
-                // GUARDAR EN TABLA MATRICULA CRITERIO LA NUEVA MATRICULA
-                DB::table('matricula_criterio')->insert([
-                    'matricula_id' => $matricula->id,
-                    'criterio_id' => $request->curr_grupo_id
-                ]);
-                $i++;
-            }
-        }
-
-        return redirect()->route('usuarios.index')
-            ->with('info', 'Usuario actualizado con éxito');
+        return $this->success(['msg' => 'Usuario actualizado correctamente.']);
     }
-
+//    public function update(UsuarioStoreRequest $request, Usuario $usuario)
+//    {
+//        if ($request->errores > 0) {
+//            $request->curr_grupo_id = 0;
+//            return redirect()->back()->withInput($request->all())->withErrors(['msg' => 'Debe asignar una matricula para registrar al usuario.']);
+//        }
+//
+//        $data = $request->all();
+//        // GUARDAR DATOS PREVIOS
+//        $dni_previo = $usuario->dni;
+//        $email_previo = $usuario->email;
+//
+//        if (!is_null($request->password)) {
+//            $data['password'] = Hash::make($request->password);
+//        } else {
+//            $data['password'] = $usuario->password;
+//        }
+//        $data['grupo'] = $request->curr_grupo_id;
+//
+//        $usuario->update($data);
+//
+//        //Consultar dias de configuracion
+//        $dias = $usuario->config->duracion_dias;
+//        date_default_timezone_set('America/Lima');
+//        //insertar vigencia
+//        $vigencia = $usuario->vigencia;
+//        $vigencia->usuario_id = $usuario->id;
+//        $vigencia->fecha_inicio = date('Y-m-d');
+//        $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio . ' + ' . $dias . ' days'));
+//        $vigencia->save();
+//
+//
+//        if (isset($request->curr_carrera) && isset($request->curr_ciclos) && $request->curr_carrera != "0" && $request->curr_ciclos != "0") {
+//            // SABER EL NUMERO DE MATRICULAS DEL USUARIO
+//            $matricula = Matricula::select('id')->where('usuario_id', $usuario->id)->get();
+//            $ciclo = Ciclo::select('id', 'carrera_id', 'nombre', 'secuencia')->where('id', $request->curr_ciclos)->first();
+//            // dd($ciclo);
+//            /**
+//             * 1 O MAS MATRICULAS
+//             * CAMBIO LA PRESENTE A 0
+//             * SI LA SECUENCIA DE CICLO DE LA PRESENTE ES 0, LA MATRICULA CAMBIA A ESTADO 0
+//             */
+//            if (count($matricula) > 0) {
+//                $matricula_presente = Matricula::select('id', 'ciclo_id')->where('usuario_id', $usuario->id)->where('presente', 1)->first();
+//                // dd($matricula_presente);
+//                $matricula_presente->presente = 0;
+//                $ciclo_presente = Ciclo::select('id', 'carrera_id', 'secuencia')->where('id', $matricula_presente->ciclo_id)->first();
+//                if ($ciclo_presente->secuencia == 0) {
+//                    $matricula_presente->estado = 0;
+//                }
+//                $matricula_presente->save();
+//            }
+//
+//            // SELECCIONAR TODOS LOS CICLOS DE LA CARRERA
+//            $ciclosxCarrera = Ciclo::where('carrera_id', $request->curr_carrera)
+//                ->where('secuencia', '>', 0)
+//                ->where('secuencia', '<=', $ciclo->secuencia)
+//                ->get(['secuencia', 'id']);
+//            $_ciclosxCarrera = collect();
+//            foreach ($ciclosxCarrera as $c) {
+//                $_ciclosxCarrera->push($c->id);
+//            }
+//            // RESTAR A TODOS EN LOS QUE YA SE ENCUENTRA MATRICULADOS Y QUE SEAN MAYOR QUE 0
+//            $ciclos_matriculados = Matricula::where('usuario_id', $usuario->id)->get(['secuencia_ciclo', 'ciclo_id']);
+//            $_ciclos_matriculados = collect();
+//            foreach ($ciclos_matriculados as $cm) {
+//                $cm->presente = 0;
+//                $cm->save();
+//                $_ciclos_matriculados->push($cm->ciclo_id);
+//            }
+//            $resta = $_ciclosxCarrera->diff($_ciclos_matriculados);
+//            $ciclos_restantes = $resta->all();
+//            $ciclos_restantes2 = Ciclo::whereIn('id', $ciclos_restantes)->get(['id', 'nombre', 'secuencia']);
+//
+//            $i = 0;
+//            $len = count($ciclos_restantes2);
+//            // CREAR MATRICULA Y MATRICULA CRITERIO DE LOS RESTANTES
+//            foreach ($ciclos_restantes2 as $ciclo_restante) {
+//                $matricula = new Matricula;
+//                $matricula->usuario_id = $usuario->id;
+//                $matricula->carrera_id = $request->curr_carrera;
+//                $matricula->ciclo_id = $ciclo_restante->id;
+//                $matricula->secuencia_ciclo = $ciclo_restante->secuencia;
+//                $matricula->presente = ($i == $len - 1) ? 1 : 0;;
+//                $matricula->estado = 1;
+//                $matricula->save();
+//                // GUARDAR EN TABLA MATRICULA CRITERIO LA NUEVA MATRICULA
+//                DB::table('matricula_criterio')->insert([
+//                    'matricula_id' => $matricula->id,
+//                    'criterio_id' => $request->curr_grupo_id
+//                ]);
+//                $i++;
+//            }
+//        }
+//
+//        return redirect()->route('usuarios.index')
+//            ->with('info', 'Usuario actualizado con éxito');
+//    }
 
     public function destroy(Usuario $usuario)
     {
@@ -920,38 +730,11 @@ class UsuarioController extends Controller
         }
     }
 
-
-    public function getCursosxUsuario($usuario_id)
+    public function getCoursesByUser(User $user)
     {
-        $helper = new HelperController();
-        $cursos_id = $helper->help_cursos_x_matricula($usuario_id);
-        $categorias = Categoria::with([
-            'cursos' => function ($query) use ($cursos_id) {
-                $query->select('cursos.nombre as nom_curso', 'cursos.categoria_id', 'cursos.id');
-                $query->whereIn('cursos.id', $cursos_id);
-                $query->where('cursos.estado', 1);
-            }
-        ])
-            ->where('categorias.estado', 1)
-            ->get(['categorias.nombre', 'categorias.id', 'categorias.id']);
-        $matricula_actual = Matricula::join('carreras', 'carreras.id', 'matricula.carrera_id')
-            ->join('ciclos', 'ciclos.id', 'matricula.ciclo_id')
-            ->where('presente', 1)
-            ->where('usuario_id', $usuario_id)
-            ->first(['carreras.nombre as nom_carrera', 'ciclos.nombre as nom_ciclo']);
-        $usuario_id = Usuario::join('criterios', 'criterios.id', 'usuarios.grupo')
-            ->where('usuarios.id', $usuario_id)
-            ->first(['criterios.valor as nom_grupo']);
-        $_categorias = collect();
-        foreach ($categorias as $categoria) {
-            if (count($categoria->cursos) > 0) {
-                $_categorias->push($categoria);
-            }
-        }
+        $user->setCurrentCourses();
 
-        $data = array('categorias' => $_categorias, 'nom_grupo' => $usuario_id->nom_grupo, 'nom_carrera' => $matricula_actual->nom_carrera, 'nom_ciclo' => $matricula_actual->nom_ciclo);
-
-        return response()->json($data, 200);
+        return $this->success(compact('user'));
     }
 
     public function status($usuario_id)
@@ -963,9 +746,10 @@ class UsuarioController extends Controller
         return back()->with(['info' => 'Estado actualizado con éxito.']);
     }
 
-    public function updateStatus(Usuario $usuario, Request $request)
+    public function updateStatus(User $user)
     {
-        $usuario->update(['estado' => !$usuario->estado]);
+        info(!$user->active);
+        $user->update(['active' => !$user->active]);
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }

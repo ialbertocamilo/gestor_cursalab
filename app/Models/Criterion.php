@@ -22,6 +22,11 @@ class Criterion extends BaseModel
         return $this->hasMany(CriterionValue::class);
     }
 
+    public function workspaces()
+    {
+        return $this->belongsToMany(Workspace::class);
+    }
+
     protected function getValuesForSelect($criterion_code)
     {
         return CriterionValue::whereRelation('criterion', 'code', $criterion_code)

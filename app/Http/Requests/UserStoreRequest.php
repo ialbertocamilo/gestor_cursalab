@@ -23,24 +23,30 @@ class UserStoreRequest extends FormRequest
      */
     public function rules()
     {
+        $id = $this->isMethod('post') ? 'NULL' : $this->segment(3);
+        $pass = $this->isMethod('post') ? 'required' : 'nullable';
 
-        // Para EDITAR
-        if ($this->method() == 'PUT'){
-            $reglas = [
-                'name' => 'required',
-                'email' => 'required|email|unique:users'
-                
-            ];
-        }
-        else{
-            //pARA CREAR
-            $reglas = [
-                'name' => 'required',
-                'email' => 'required|email|unique:users',
-                'password' => 'required'
-            ];
-          }
-          return $reglas;
+        $rules = [
+            'name' => 'required|min:5|max:255',
+            'lastname' => 'required|min:5|max:255',
+            'surname' => 'required|min:5|max:255',
+            'password' => "{$pass}|max:255",
+
+//            'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
+            'email' => "nullable|email|max:255",
+            'document' => 'required|min:8',
+
+            'criterion_list' => 'nullable',
+        ];
+
+        return $rules;
+    }
+
+    public function validationData()
+    {
+        $this->mergeIfMissing(['active' => INACTIVE]);
+
+        return $this->all();
     }
 
     public function messages()
@@ -51,8 +57,6 @@ class UserStoreRequest extends FormRequest
             'email.required' => 'El dato "correo" es requerido',
             'email.email' => 'El dato "correo " debe tener formato abc@ejemplo.com',
             'email.unique' => 'Este correo ya ha sido regitrado: intente con otro'
-            
-            
         ];
     }
 }
