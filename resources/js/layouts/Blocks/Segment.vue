@@ -1,5 +1,6 @@
 <template>
-	<v-card elevation="0" style="padding-left: 14px !important; padding-right: 14px !important">
+	<!-- <v-card elevation="0" style="padding-left: 14px !important; padding-right: 14px !important"> -->
+	<div class="px-4">
 
 <!-- 		<v-dialog persistent max-width="400" v-model="dialog_eliminar">
 			<v-card>
@@ -36,10 +37,10 @@
 		</v-dialog> -->
 
 
-		<v-row class="pt-2 pb-4">
+		<!-- <v-row class="pt-2 pb-4"> -->
 
-			<v-col cols="12" md="9" lg="9" style="padding-left: 0">
-				<v-autocomplete
+			<v-col cols="12" md="12" lg="12">
+				<default-autocomplete
 					dense
 					multiple
 					return-object
@@ -63,7 +64,7 @@
 						</v-chip>
 
 					</template>
-				</v-autocomplete>
+				</default-autocomplete>
 			</v-col>
 
 	<!-- 		<v-col cols="12" md="2" lg="2" class="vertical-align justify-end">
@@ -78,7 +79,7 @@
 				</v-btn>
 			</v-col> -->
 
-		</v-row>
+		<!-- </v-row> -->
 
 <!-- 		<v-row justify="center">
 			<v-overlay
@@ -101,20 +102,22 @@
 			</v-overlay>
 		</v-row> -->
 
+			<v-col cols="12" md="9" lg="9" style="padding-left: 0">
 
-		<segment-values
-			v-for="(criterion, index) in segment.criteria_selected"
-			:key="index"
-			:criterion="criterion"
-			@agregarRangoItems="agregarRango($event)"
-		/>
+				<segment-values
+					v-for="(criterion, index) in segment.criteria_selected"
+					:key="index"
+					:criterion="criterion"
+					@agregarRangoItems="agregarRango($event)"
+				/>
+			</v-col>
 			<!-- :criteria="criteria" -->
 			<!-- :segment_id="segment.id" -->
 			<!-- :curso_id="segment.curso_id" -->
 
 		<!-- <v-divider></v-divider> -->
 		<!-- {{ addDissabledChild }} -->
-	</v-card>
+	</div>
 </template>
 
 <script>

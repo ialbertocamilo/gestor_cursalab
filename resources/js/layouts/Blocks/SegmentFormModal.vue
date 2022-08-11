@@ -17,33 +17,37 @@
                         <!-- <DefaultInput v-model="resource.email" label="Correo" :rules="rules.email" /> -->
 
                             <!-- hide-delimiter-background -->
-                        <v-carousel
-                            height="500"
-                            show-arrows-on-hover
-                          >
-                            <v-carousel-item
-                              v-for="(segment, i) in segments"
-                              :key="i"
-                            >
+                <v-carousel
+                    height="500"
+                    show-arrows-on-hover
+                    light
+                  >
+                    <v-carousel-item
+                      v-for="(segment, i) in segments"
+                      :key="i"
+                    >
 
-                                <segment :segment="segment" :criteria="criteria" class="pt-8"/>
-                            <!--   <v-sheet
-                                :color="colors[i]"
-                                height="100%"
-                              >
-                                <v-row
-                                  class="fill-height"
-                                  align="center"
-                                  justify="center"
-                                >
-                                  <div class="text-h2">
-                                    {{ slide }} Slide
-                                  </div>
-                                </v-row>
-                              </v-sheet> -->
-                            </v-carousel-item>
-                          </v-carousel>
+                        <!-- :color="colors[0]" -->
+                        <v-sheet
+                            height="100%"
+                        >
+                            <segment :segment="segment" :criteria="criteria" class="mx-5" />
+                       <!--  <v-row
+                          class="fill-height"
+                          align="center"
+                          justify="center"
+                        >
+                          <div class="text-h2">
+                            {{ slide }} Slide
+                          </div>
+                        </v-row> -->
+                      </v-sheet>
+                    </v-carousel-item>
+                  </v-carousel>
                     </v-col>
+                </v-row>
+
+                <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <v-btn
                             class="white-text font-bold btn-agregar-curricula"
