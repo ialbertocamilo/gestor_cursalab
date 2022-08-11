@@ -28,7 +28,10 @@ class Visita extends Model
         $cache_name = 'visitas_usuarios_por_fecha-v2';
 
         $usuarios_id = Usuario::getUsuariosExcluidosDeGraficos();
-        $usuarios_id = ($usuarios_id) ? implode(',', $usuarios_id) : '';
+        $usuarios_id = ($usuarios_id)
+                        ? implode(',', $usuarios_id)
+                        : '';
+
 
         $condition = '';
 
@@ -46,12 +49,16 @@ class Visita extends Model
 
             $data['time'] = now();
 
-            $data['data'] = DB::select( DB::raw("SELECT DATE(p.created_at) AS fechita, count(*) as cant FROM visitas p
-                                        WHERE p.usuario_id NOT IN (".$usuarios_id.")
-                                        ".$condition."
-                                        AND DATE(p.created_at) >= ( CURDATE() - INTERVAL 20 DAY )
-                                        GROUP BY fechita
-                                        ORDER BY fechita") );
+            $data['data'] = DB::select(
+                DB::raw("SELECT DATE(p.created_at) AS fechita, count(*) as cant
+                    FROM visitas p
+                    WHERE p.usuario_id NOT IN (".$usuarios_id.")
+                    ".$condition."
+                    AND DATE(p.created_at) >= ( CURDATE() - INTERVAL 20 DAY )
+                    GROUP BY fechita
+                    ORDER BY fechita"
+                )
+            );
             return $data;
         });
 

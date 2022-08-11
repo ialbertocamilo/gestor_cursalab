@@ -232,9 +232,14 @@ class Usuario extends Model
 
         $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS, function () {
 
-            $carreras = Carrera::select('id')->where('contar_en_graficos', 0)->pluck('id');
+            $carreras = Carrera::select('id')
+                                ->where('contar_en_graficos', 0)
+                                ->pluck('id');
 
-            return Matricula::select('usuario_id')->whereIn('carrera_id', $carreras)->pluck('usuario_id')->toArray();
+            return Matricula::select('usuario_id')
+                            ->whereIn('carrera_id', $carreras)
+                            ->pluck('usuario_id')
+                            ->toArray();
         });
 
         return $result;
@@ -296,14 +301,7 @@ class Usuario extends Model
         if ($idsOnly) {
             return $users->pluck('id')->toArray();
         } else {
-            $users = $users->get();
-            if (count($users) <= 0) {
-                // todo: this is only for testing purposes, remove when
-                // host configuration is ready
-                Auth::check();
-                return [Auth::user()];
-            }
-            return $users;
+            return $users->get();
         }
     }
 

@@ -9,22 +9,22 @@
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
-        <v-card flat class="elevation-0 mb-4">
-            <v-card-text>
-                <v-row class="justify-content-start">
-                    <v-col cols="5">
-                        <DefaultSelect
-                            dense
-                            label="Módulo"
-                            :items="selects.modulo"
-                            v-model="filters.modulo"
-                            @onChange="getEstadisticas"
-                        />
-                    </v-col>
-                </v-row>
+<!--        <v-card flat class="elevation-0 mb-4">-->
+<!--            <v-card-text>-->
+<!--                <v-row class="justify-content-start">-->
+<!--                    <v-col cols="5">-->
+<!--                        <DefaultSelect-->
+<!--                            dense-->
+<!--                            label="Módulo"-->
+<!--                            :items="selects.modulo"-->
+<!--                            v-model="filters.modulo"-->
+<!--                            @onChange="getEstadisticas"-->
+<!--                        />-->
+<!--                    </v-col>-->
+<!--                </v-row>-->
 
-            </v-card-text>
-        </v-card>
+<!--            </v-card-text>-->
+<!--        </v-card>-->
         <v-card flat class="elevation-0 mb-4 bg-transparent">
             <v-row>
                 <v-col  v-for="(value, key) in apiData.estadisticas" :key="key">

@@ -2,20 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use DB;
-
-use App\Models\Curso;
-use App\Models\Posteo;
-use App\Models\Visita;
+use App\Models\Criterion;
 use App\Models\Prueba;
-use App\Models\Carrera;
-use App\Models\Usuario;
-use App\Models\Abconfig;
-use App\Models\Categoria;
-use App\Models\Matricula;
-
+use App\Models\Visita;
+use App\Models\Workspace;
+use App\Services\DashboardService;
 use Carbon\Carbon;
-
+use DB;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -30,50 +26,44 @@ class DashboardController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * Process request to render dashboard view
+     *
+     * @param Request $request
+     * @return Application|Factory|View
+     */
     public function index(Request $request)
     {
+
         if ($request->refresh == 'true')
             cache()->flush();
 
-        $modulo_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getCurrentWorkspaceId();
 
         $cache_name = 'dashboard_cards';
-        $cache_name .= $modulo_id ? "-modulo-{$modulo_id}" : '';
+        $cache_name .= $workspaceId ? "-modulo-{$workspaceId}" : '';
 
-        $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA, function () use ($modulo_id) {
+        $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
+            function () use ($workspaceId) {
 
             $data['time'] = now();
 
             $data['totales'] = [
 
-                'temas' => Posteo::when($modulo_id, function($q) use ($modulo_id){
-                                $q->whereHas('curso', function($query) use ($modulo_id){
-                                    $query->where('config_id', $modulo_id);
-                                });
-                            })->count(),
+                'temas' => DashboardService::countTopics($workspaceId),
 
-                'cursos' => Curso::when($modulo_id, function($q) use ($modulo_id){
-                                $q->where('config_id', $modulo_id);
-                            })->count(),
+                'cursos' => DashboardService::countCourses($workspaceId),
 
-                'usuarios' => Usuario::where('rol', 'default')->when($modulo_id, function($q) use ($modulo_id){
-                                $q->where('config_id', $modulo_id);
-                            })->count(),
+                'usuarios' => DashboardService::countUsers($workspaceId),
 
-                'usuarios_activos' => Usuario::where('estado', 1)->where('rol', 'default')->when($modulo_id, function($q) use ($modulo_id){
-                                $q->where('config_id', $modulo_id);
-                            })->count(),
+                'usuarios_activos' => DashboardService::countActiveUsers($workspaceId),
 
-                'temas_evaluables' => Posteo::when($modulo_id, function($q) use ($modulo_id){
-                                $q->whereHas('curso', function($query) use ($modulo_id){
-                                    $query->where('config_id', $modulo_id);
-                                });
-                            })->where('evaluable', 'si')->count(),
+                'temas_evaluables' => DashboardService::countAssessableTopics($workspaceId)
             ];
 
             $data['data'] = [
-                'modulos' => Abconfig::select('id', 'etapa', 'logo')->get(),
-                'categorias' => Categoria::select('id', 'nombre')->pluck('nombre', 'id'),
+                'modulos' => Criterion::getValuesForSelect('module'),
+                'categorias' => []//Categoria::select('id', 'nombre')->pluck('nombre', 'id'),
             ];
 
             return $data;

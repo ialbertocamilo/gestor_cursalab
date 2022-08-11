@@ -158,7 +158,7 @@ function bytesToMB($bytes)
 function space_url($path)
 {
     if ($path)
-        return Storage::disk('do_spaces')->url($path);
+        return Storage::url($path);
 
     return '';
 }

@@ -337,15 +337,15 @@ class Meeting extends BaseModel
 
             $attendants = $meeting->attendants()->sync($data['attendants']);
 
-//            Attendant::createOrUpdatePersonalLinkMeeting(
-//                $meeting, $datesHaveChanged
-//            );
+            Attendant::createOrUpdatePersonalLinkMeeting(
+                $meeting, $datesHaveChanged
+            );
 
             // Insert meeting in master database
 
-//            SourceMultimarca::insertSource(
-//                $meeting->identifier,'meeting', $meeting->id
-//            );
+            SourceMultimarca::insertSource(
+                $meeting->identifier,'meeting', $meeting->id
+            );
 
             DB::commit();
 
@@ -394,14 +394,14 @@ class Meeting extends BaseModel
 
     public function getAttendantTokens($attendants)
     {
-//        $added = !empty($attendants['created'][0])
-//                    ? Usuario::asAttendantsWithToken($attendants['created'][0])->pluck('token_firebase')
-//                    : [];
-//
-//        $remained = !empty($attendants['updated'])
-//                    ? Usuario::asAttendantsWithToken($attendants['updated'])->pluck('token_firebase')
-//                    : [];
-        $added = []; $remained = [];
+        $added = !empty($attendants['created'][0])
+                    ? Usuario::asAttendantsWithToken($attendants['created'][0])->pluck('token_firebase')
+                    : [];
+
+        $remained = !empty($attendants['updated'])
+                    ? Usuario::asAttendantsWithToken($attendants['updated'])->pluck('token_firebase')
+                    : [];
+
         return compact('added', 'remained');
     }
 
