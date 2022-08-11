@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Criterion;
+use App\Models\CriterionValue;
 use App\Models\Curso;
 use App\Models\Posteo;
 use App\Models\SummaryTopic;
@@ -174,4 +176,53 @@ class  DashboardService {
         return $result;
     }
 
+    /**
+     * Load total of passed users by "botica"
+     *
+     * @param null $workspaceId
+     * @return mixed
+     */
+    public static function loadTopBoticas($workspaceId): mixed
+    {
+        $cache_name = 'pruebas_top_boticas-v2';
+        $cache_name .= $workspaceId ? "-modulo-{$workspaceId}" : '';
+
+        // List of ids from users to be excluded in query.
+        // In the old version of the app, users' careers
+        // with the "contar_en_graficos" value were excluded,
+        // Since that field no longer exists, the array in empty
+
+        $excludedUsersIds = [];
+
+        // get criterion values ids of "boticas"
+
+        $boticas = Criterion::getValuesForSelect('botica');
+        $boticasIds = $boticas->pluck('id')->toArray();
+
+        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS,
+            function () use ($workspaceId, $excludedUsersIds, $boticasIds) {
+
+            $data['time'] = now();
+
+            $data['data'] = SummaryTopic::query()
+                ->join('users', 'users.id', '=', 'summary_topics.user_id')
+                ->join('criterion_value_user', 'users.id', '=', 'criterion_value_user.user_id')
+                ->join('criterion_values', 'criterion_values.id', '=', 'criterion_value_user.criterion_value_id')
+                ->whereNotIn('users.id', $excludedUsersIds)
+                ->whereIn('criterion_value_user.criterion_value_id', $boticasIds)
+                ->where('summary_topics.passed', 1)
+                ->where('users.workspace_id', $workspaceId)
+                ->where('users.active', 1)
+                // group by botica
+                ->groupBy('criterion_value_user.criterion_value_id')
+                ->orderBy('total_usuarios', 'DESC')
+                ->limit(10)
+                ->selectRaw('COUNT(users.id) as total_usuarios, criterion_values.value_text AS botica')
+                ->get(['total_usuarios', 'botica']);
+
+            return $data;
+        });
+
+        return $result;
+    }
 }
