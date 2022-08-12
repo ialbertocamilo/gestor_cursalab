@@ -3,6 +3,7 @@
                    :width="width"
                    @onCancel="closeModal"
                    @onConfirm="confirmModal"
+                   persistent
     >
         <template v-slot:content>
             <v-form ref="accountForm" class="--mb-15">
@@ -21,9 +22,10 @@
                     height="500"
                     show-arrows-on-hover
                     light
+                    v-model="steps"
                   >
                     <v-carousel-item
-                      v-for="(segment, i) in segments"
+                      v-for="(row, i) in segments"
                       :key="i"
                     >
 
@@ -31,7 +33,7 @@
                         <v-sheet
                             height="100%"
                         >
-                            <segment :segment="segment" :criteria="criteria" class="mx-5" />
+                            <segment :segment="row" :criteria="criteria" class="mx-5" :options="options" />
                        <!--  <v-row
                           class="fill-height"
                           align="center"
@@ -126,6 +128,8 @@ export default {
     },
     data() {
         return {
+            steps: 0,
+
             colors: [
               'indigo',
               'warning',
@@ -133,6 +137,7 @@ export default {
               'red lighten-1',
               'deep-purple accent-4',
             ],
+
             slides: [
               'First',
               'Second',
@@ -149,36 +154,11 @@ export default {
 
                 name: null,
 
-                email: '',
-                username: '',
-                password: '',
 
-                key: null,
-                secret: null,
-                identifier: null,
-
-                type: null,
-                service: null,
-                plan: null,
-
-                token: null,
-                refresh_token: null,
-
-                active: true,
-
-                description: '',
-
-                sdk_token: null,
                 zak_token: null,
             },
             // resource: {},
             segments: [],
-            segment: {
-                name: 'XXX',
-                model_type: 'XX',
-                model_id: 'X',
-                criteria_selected: [],
-            },
             criteria: [],
 
             rules: {
@@ -202,6 +182,14 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.accountForm.resetValidation()
+        },
+        getNewSegment() {
+            return {
+                name: 'XXX',
+                model_type: 'XX',
+                model_id: 'X',
+                criteria_selected: [],
+            }
         },
         async addSegmentation() {
             let vue = this;
@@ -229,7 +217,19 @@ export default {
             //     loading: false,
             // });
 
-            vue.segments.push(vue.segment);
+            // console.log('vue.segment')
+            // console.log(vue.segment)
+
+            vue.segments.push(this.getNewSegment());
+
+            console.log('vue.segments.length')
+            console.log(vue.segments.length)
+
+            vue.steps = vue.segments.length -1
+
+            console.log('vue.segments')
+            console.log(vue.segments)
+
             // vue.nuevaCurricula = {};
         },
         confirmModal() {

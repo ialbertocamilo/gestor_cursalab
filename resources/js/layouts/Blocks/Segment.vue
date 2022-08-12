@@ -39,33 +39,21 @@
 
 		<!-- <v-row class="pt-2 pb-4"> -->
 
-			<v-col cols="12" md="12" lg="12">
-				<default-autocomplete
-					dense
-					multiple
-					return-object
-					attach
-					outlined
-					hide-details="auto"
-					:items="criteria"
-					item-text="name"
-					item-id="id"
-					v-model="segment.criteria_selected"
-					placeholder="Seleccione los criterios"
-				>
-					<!-- :menu-props="{ top: true, offsetY: true }" -->
-					<template v-slot:selection="{ item }">
-						<v-chip
-							style="font-size: 0.9rem !important; color: white !important"
-							color="#796aee"
-							small
-						>
-							{{ item.name }}
-						</v-chip>
+		<v-col cols="12" md="12" lg="12">
+		
+			<DefaultAutocomplete
+			return-object
+				dense
+				label="Criterios"
+				v-model="segment.criteria_selected"
+				:items="new_criteria"
+				multiple
+				item-text="name"
+				item-id="id"
+				:count-show-values="4"
+		    />
 
-					</template>
-				</default-autocomplete>
-			</v-col>
+		</v-col>
 
 	<!-- 		<v-col cols="12" md="2" lg="2" class="vertical-align justify-end">
 				<v-btn color="#796aee" class="txt-white-bold" @click="dialog_guardar = true">
@@ -102,7 +90,7 @@
 			</v-overlay>
 		</v-row> -->
 
-			<v-col cols="12" md="9" lg="9" style="padding-left: 0">
+			<v-col cols="12" md="12" lg="12">
 
 				<segment-values
 					v-for="(criterion, index) in segment.criteria_selected"
@@ -126,9 +114,10 @@
   	components: {
   		SegmentValues,
   	},
-  	props: ["segment", 'criteria'],
+  	props: ["segment", 'criteria', 'options'],
   	data() {
   		return {
+  			new_criteria: [],
   			absolute: true,
   			loading_guardar: false,
   			dialog_eliminar: false,
@@ -163,6 +152,14 @@
   		setTimeout(() => {
   			vue.segment.loading = false;
   		}, 1200);
+
+  		vue.loadData()
+
+  		// let x = Object.assign({}, vue.criteria)
+
+  		// console.log('vue.criteria mounted')
+  		// console.log(vue.criteria)
+  		// vue.new_criteria = x
   	},
   	methods: {
   		agregarRango(data) {
@@ -172,6 +169,27 @@
   			);
   			criterion.rangos_seleccionados = data.rangos_seleccionados;
   		},
+  		async loadData(resource) {
+            let vue = this
+            // vue.errors = []
+
+            // vue.$nextTick(() => {
+            //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+            // })
+
+            let base = `${vue.options.base_endpoint}`
+            let url = `${base}/create`;
+
+            await vue.$http.get(url).then(({data}) => {
+
+                let _data = data.data
+
+                // vue.segments = _data.segments
+                vue.new_criteria = _data.criteria
+            })
+
+            return 0;
+        },
   		// borrarCurricula() {
   		// 	let vue = this;
   		// 	if (vue.segment.segment_id[0] == "n") {

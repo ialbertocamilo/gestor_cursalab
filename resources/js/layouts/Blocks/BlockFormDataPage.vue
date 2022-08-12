@@ -93,7 +93,7 @@
 
         <SegmentFormModal
             :options="modalFormOptions"
-            width="75vw"
+            width="65vw"
             :ref="modalFormOptions.ref"
             @onCancel="closeSimpleModal(modalFormOptions)"
             @onConfirm="closeFormModal(modalFormOptions, dataTable, filters)"

@@ -150,8 +150,7 @@
               item-text="value_text"
               item-id="id"
               :count-show-values="4"
-          >
-          </DefaultAutocomplete>
+         />
 
 			</v-col>
 		</v-row>
