@@ -84,12 +84,12 @@
                         <v-col cols="4">
                             <DefaultSelect
                                 dense
-                                :show-required="resource.assessable === 'si'"
+                                :show-required="resource.assessable === 1"
                                 label="Tipo Evaluación"
                                 v-model="resource.tipo_ev"
                                 :items="selects.tipo_ev"
-                                :rules="resource.assessable === 'no' ? [] : rules.tipo_ev"
-                                :disabled="resource.assessable === 'no' || !resource.assessable"
+                                :rules="resource.assessable === 0 ? [] : rules.tipo_ev"
+                                :disabled="resource.assessable === 0 || !resource.assessable"
                                 @onChange="showAlertEvaluacion"
                             />
                         </v-col>
@@ -201,9 +201,9 @@
                         <v-col cols="5">
                             <DefaultToggle
                                 v-model="resource.active"
-                                :disabled="resource && resource.assessable === 'si' && resource.cant_preguntas_evaluables_activas === 0"/>
+                                :disabled="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"/>
                             <small
-                                v-if="resource && resource.assessable === 'si' && resource.cant_preguntas_evaluables_activas === 0"
+                                v-if="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"
                                 v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
                         </v-col>
                     </v-row>
@@ -271,12 +271,12 @@ export default {
             },
             selects: {
                 assessable: [
-                    {id: 'si', nombre: 'Si'},
-                    {id: 'no', nombre: 'No'},
+                    {id: 1, nombre: 'Si'},
+                    {id: 0, nombre: 'No'},
                 ],
                 tipo_ev: [
-                    {id: 'calificada', nombre: 'Calificada'},
-                    {id: 'abierta', nombre: 'Abierta'},
+                    {id: 'qualified', nombre: 'Calificada'},
+                    {id: 'open', nombre: 'Abierta'},
                 ],
                 tags: [],
                 requisitos: []
@@ -477,12 +477,12 @@ export default {
                 if (el.file)
                     formData.append(`medias[${index}][file]`, el.file)
                 else
-                    formData.append(`medias[${index}][valor]`, el.valor)
+                    formData.append(`medias[${index}][valor]`, el.value)
 
-                formData.append(`medias[${index}][titulo]`, el.titulo)
-                formData.append(`medias[${index}][tipo]`, el.tipo)
+                formData.append(`medias[${index}][titulo]`, el.title)
+                formData.append(`medias[${index}][tipo]`, el.type_id)
                 formData.append(`medias[${index}][embed]`, Number(el.embed))
-                formData.append(`medias[${index}][descarga]`, Number(el.descarga))
+                formData.append(`medias[${index}][descarga]`, Number(el.downloadable))
             })
         },
         deleteMedia(media_index) {
@@ -508,21 +508,20 @@ export default {
                     if (vue.topic_id !== '') {
                         vue.resource = Object.assign({}, data.data.tema)
                         console.log(vue.resource);
-                        vue.resource.assessable = (vue.resource.assessable == 1) ? 'si':'no';
+                        vue.resource.assessable = (vue.resource.assessable == 1) ? 1:0;
                     }
                 })
             return 0;
         },
         addMultimedia(multimedia) {
             let vue = this
-            // console.log(multimedia)
             vue.resource.media.push({
-                titulo: multimedia.titulo,
-                valor: multimedia.valor || null,
+                title: multimedia.titulo,
+                value: multimedia.valor || null,
                 file: multimedia.file || null,
-                tipo: multimedia.type,
+                type_id: multimedia.type,
                 embed: true,
-                descarga: false,
+                downloadable: false,
                 disabled: false,
             })
             vue.verifyDisabledMediaEmbed();
@@ -554,7 +553,7 @@ export default {
         async showAlertEvaluacion() {
             let vue = this
             vue.modalTemasValidaciones.hideConfirmBtn = true
-            const tipo_ev = vue.resource.tipo_ev === 'calificada' ? 'calificada' : 'abierta'
+            const tipo_ev = vue.resource.tipo_ev === 'qualified' ? 'Calificada' : 'Abierta'
             const data = {
                 data: [
                     {

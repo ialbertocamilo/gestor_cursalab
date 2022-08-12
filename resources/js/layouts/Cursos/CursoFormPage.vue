@@ -16,7 +16,7 @@
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="CursoForm">
-                    <v-row>
+                    <!-- <v-row>
                         <v-col cols="6">
                             <DefaultAutocomplete
                                 dense
@@ -34,7 +34,7 @@
                                 </template>
                             </DefaultAutocomplete>
                         </v-col>
-                    </v-row>
+                    </v-row> -->
                     <v-row >
                         <v-col cols="6">
                             <DefaultInput
@@ -103,14 +103,14 @@
                                             <DefaultToggle
                                                 active-label="Automático"
                                                 inactive-label="Manual"
-                                                v-model="resource.reinicio_automatico"
+                                                v-model="resource.scheduled_restarts"
                                             />
                                         </v-col>
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Días"
-                                                v-model="resource.reinicio_automatico_dias"
-                                                :disabled="!resource.reinicio_automatico"
+                                                v-model="resource.scheduled_restarts_dias"
+                                                :disabled="!resource.scheduled_restarts"
                                                 type="number"
                                                 dense
                                             />
@@ -118,8 +118,8 @@
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Horas"
-                                                v-model="resource.reinicio_automatico_horas"
-                                                :disabled="!resource.reinicio_automatico"
+                                                v-model="resource.scheduled_restarts_horas"
+                                                :disabled="!resource.scheduled_restarts"
                                                 type="number"
                                                 dense
                                             />
@@ -127,8 +127,8 @@
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Minutos"
-                                                v-model="resource.reinicio_automatico_minutos"
-                                                :disabled="!resource.reinicio_automatico"
+                                                v-model="resource.scheduled_restarts_minutos"
+                                                :disabled="!resource.scheduled_restarts"
                                                 type="number"
                                                 dense
                                             />
@@ -191,10 +191,10 @@ export default {
                 categoria_id: this.categoria_id,
                 active: false,
                 requisito_id: null,
-                reinicio_automatico: false,
-                reinicio_automatico_dias: null,
-                reinicio_automatico_horas: null,
-                reinicio_automatico_minutos: 1,
+                scheduled_restarts: false,
+                scheduled_restarts_dias: null,
+                scheduled_restarts_horas: null,
+                scheduled_restarts_minutos: 1,
             },
             resource: {},
             rules: {
@@ -235,10 +235,10 @@ export default {
     computed: {
         showErrorReinicios() {
             let vue = this
-            const reinicio = vue.resource.reinicio_automatico
-            const dias = vue.resource.reinicio_automatico_dias
-            const horas = vue.resource.reinicio_automatico_horas
-            const minutos = vue.resource.reinicio_automatico_minutos
+            const reinicio = vue.resource.scheduled_restarts
+            const dias = vue.resource.scheduled_restarts_dias
+            const horas = vue.resource.scheduled_restarts_horas
+            const minutos = vue.resource.scheduled_restarts_minutos
             if (!reinicio) {
                 return false
             }
@@ -280,22 +280,31 @@ export default {
                 .then(async ({data}) => {
                     const messages = (data.data.messages) ? data.data.messages : null;
                     this.hideLoader()
-                    if (messages && messages.data.length > 0) {
-                        // console.log(messages.data)
-                        await vue.cleanModalCursoValidaciones()
-                        vue.modalCursoValidaciones.hideCancelBtn = true
-                        vue.modalCursoValidaciones.confirmLabel = 'Entendido'
-                        vue.modalCursoValidaciones.persistent = true
-                        vue.modalCursoValidaciones.showCloseIcon = false
 
-                        await vue.openFormModal(vue.modalCursoValidaciones, messages, 'messagesActions', 'Aviso')
-                    } else {
-                        vue.showAlert(data.data.msg)
-                        setTimeout(() => vue.closeModal(), 2000)
+                    if(data.message === "422"){
+                        await vue.cleanModalCursoValidaciones()
+                        vue.loadingActionBtn = false
+                        vue.modalCursoValidaciones.hideConfirmBtn = true
+                        vue.modalCursoValidaciones.cancelLabel = 'Entendido'
+                        await vue.openFormModal(vue.modalCursoValidaciones, data.data.validate, data.data.validate.type, data.data.validate.title)
+                    }
+                    else{
+                        if (messages && messages.data.length > 0) {
+                            await vue.cleanModalCursoValidaciones()
+                            vue.modalCursoValidaciones.hideCancelBtn = true
+                            vue.modalCursoValidaciones.confirmLabel = 'Entendido'
+                            vue.modalCursoValidaciones.persistent = true
+                            vue.modalCursoValidaciones.showCloseIcon = false
+
+                            await vue.openFormModal(vue.modalCursoValidaciones, messages, 'messagesActions', 'Aviso')
+
+                        } else {
+                            vue.showAlert(data.data.msg)
+                            setTimeout(() => vue.closeModal(), 2000)
+                        }
                     }
                 })
                 .catch(async ({data}) => {
-                    // console.log('PAGE ERROR DATA ::', data)
                     await vue.cleanModalCursoValidaciones()
                     vue.loadingActionBtn = false
                     vue.modalCursoValidaciones.hideConfirmBtn = true
@@ -310,15 +319,15 @@ export default {
         },
         getJSONReinicioProgramado(formData) {
             let vue = this
-            const minutes = parseInt(vue.resource.reinicio_automatico_minutos) +
-                (parseInt(vue.resource.reinicio_automatico_horas) * 60) +
-                (parseInt(vue.resource.reinicio_automatico_dias) * 1440)
+            const minutes = parseInt(vue.resource.scheduled_restarts_minutos) +
+                (parseInt(vue.resource.scheduled_restarts_horas) * 60) +
+                (parseInt(vue.resource.scheduled_restarts_dias) * 1440)
             const data = {
-                activado: vue.resource.reinicio_automatico,
+                activado: vue.resource.scheduled_restarts,
                 tiempo_en_minutos: minutes,
-                reinicio_dias: vue.resource.reinicio_automatico_dias,
-                reinicio_horas: vue.resource.reinicio_automatico_horas,
-                reinicio_minutos: vue.resource.reinicio_automatico_minutos,
+                reinicio_dias: vue.resource.scheduled_restarts_dias,
+                reinicio_horas: vue.resource.scheduled_restarts_horas,
+                reinicio_minutos: vue.resource.scheduled_restarts_minutos,
             }
             let json = JSON.stringify(data)
             formData.append('reinicios_programado', json)

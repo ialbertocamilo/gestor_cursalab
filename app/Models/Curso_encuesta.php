@@ -8,32 +8,32 @@ use Illuminate\Database\Eloquent\Model;
 
 class Curso_encuesta extends Model
 {
-    protected $table = 'curso_encuesta';
+    protected $table = 'course_poll';
 
     protected $fillable = [
-        'curso_id', 'encuesta_id'
+        'course_id', 'poll_id'
     ];
 
     public $timestamps = false;
 
     public function curso()
     {
-        return $this->belongsTo(Curso::class, 'curso_id');
+        return $this->belongsTo(Course::class, 'course_id');
     }
 
     public function encuesta()
     {
-        return $this->belongsTo(Poll::class, 'encuesta_id');
+        return $this->belongsTo(Poll::class, 'poll_id');
     }
 
-    public static function getEncuestaPendiente($usuario_id,$curso_id)
+    public static function getEncuestaPendiente($usuario_id, $course_id)
     {
-         $estado = null;
-         $rxc= Resumen_x_curso::where('usuario_id',$usuario_id)->where('estado','enc_pend')->where('curso_id',$curso_id)->select('estado')->first();
-         if($rxc){
-            $curso_encuesta = Curso_encuesta::where('curso_id',$curso_id)->first();
-            $estado =  $curso_encuesta ? $curso_encuesta->encuesta_id : null;
-         }
-         return $estado;
+        $estado = null;
+        $rxc = Resumen_x_curso::where('usuario_id', $usuario_id)->where('estado', 'enc_pend')->where('course_id', $course_id)->select('estado')->first();
+        if ($rxc) {
+            $curso_encuesta = Curso_encuesta::where('course_id', $course_id)->first();
+            $estado =  $curso_encuesta ? $curso_encuesta->poll_id : null;
+        }
+        return $estado;
     }
 }

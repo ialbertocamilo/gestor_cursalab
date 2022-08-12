@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\ApiResponse;
 use DB;
+use Illuminate\Support\Facades\App;
 
 class SortingModel extends Model
 {
@@ -28,7 +29,11 @@ class SortingModel extends Model
     protected function getLastItem($item, $filters = [], $columnName = 'orden')
     {
         return SortingModel::getItemsInOrder(
-            $item, $filters, 'DESC', 'ASC', $columnName
+            $item,
+            $filters,
+            'DESC',
+            'ASC',
+            $columnName
         );
     }
 
@@ -47,15 +52,17 @@ class SortingModel extends Model
     }
 
     protected function getItemsInOrder(
-        $item, $filters = [], $orden_sort = 'ASC', $updated_sort = 'ASC', $columnName = 'orden'
-    )
-    {
+        $item,
+        $filters = [],
+        $orden_sort = 'ASC',
+        $updated_sort = 'ASC',
+        $columnName = 'orden'
+    ) {
         $model = is_object($item) ? get_class($item) : $item;
 
         $query = $model::query();
 
-        foreach ($filters as $key => $filter)
-        {
+        foreach ($filters as $key => $filter) {
             $query->where($key, $filter);
         }
 
@@ -65,9 +72,11 @@ class SortingModel extends Model
     }
 
     protected function reorderItems(
-        $item, $filters = [], $item_last_order = NULL, $columnName = 'orden'
-    )
-    {
+        $item,
+        $filters = [],
+        $item_last_order = NULL,
+        $columnName = 'orden'
+    ) {
         $updated_sort = 'DESC';
 
         if ($item_last_order) {
@@ -75,10 +84,9 @@ class SortingModel extends Model
             if (is_object($item)) {
 
                 $updated_sort = $item->$columnName > $item_last_order
-                                ? 'ASC'
-                                : 'DESC';
+                    ? 'ASC'
+                    : 'DESC';
             }
-
         } else {
 
             $last = SortingModel::getLastItem($item, $filters, $columnName)->first();
@@ -88,7 +96,11 @@ class SortingModel extends Model
         }
 
         $rows = SortingModel::getItemsInOrder(
-            $item, $filters, 'ASC', $updated_sort, $columnName
+            $item,
+            $filters,
+            'ASC',
+            $updated_sort,
+            $columnName
         )->get();
 
         foreach ($rows as $index => $row) {
@@ -107,23 +119,20 @@ class SortingModel extends Model
 
     protected function getNextAndPreviousItem($items, $request, $query)
     {
-        $query_next = clone($query);
-        $query_prev = clone($query);
+        $query_next = clone ($query);
+        $query_prev = clone ($query);
 
-        if ( $items->currentPage() > 1 AND $items->lastPage() > $items->currentPage())
-        {
+        if ($items->currentPage() > 1 and $items->lastPage() > $items->currentPage()) {
             $items->_previous = $this->getNextOrPreviousItem('previous', $items->first(), $request, $query_prev);
             $items->_next = $this->getNextOrPreviousItem('next', $items->last(), $request, $query_next);
         }
 
-        if ( $items->currentPage() == 1 AND $items->lastPage() != 1 )
-        {
+        if ($items->currentPage() == 1 and $items->lastPage() != 1) {
             $items->_previous = NULL;
             $items->_next = $this->getNextOrPreviousItem('next', $items->last(), $request, $query_next);
         }
 
-        if ( $items->lastPage() == $items->currentPage() )
-        {
+        if ($items->lastPage() == $items->currentPage()) {
             $items->_previous = $this->getNextOrPreviousItem('previous', $items->first(), $request, $query_prev);
             $items->_next = NULL;
         }
@@ -136,7 +145,7 @@ class SortingModel extends Model
         $operator = $action == 'next' ? '>' : '<';
         $order    = $action == 'next' ? 'asc' : 'desc';
 
-        if($item != null){
+        if ($item != null) {
             $query->where('orden', $operator, $item->orden);
             $query->orderBy('orden', $order);
         }
@@ -150,11 +159,11 @@ class SortingModel extends Model
 
             DB::beginTransaction();
 
-            $model = "App\\$request->model";
-
+            $model = "App" . '\\' . "Models" . '\\' . $request->model;
+            $model = app($model);
             $resource = $model::find($request->id);
 
-            $field = $request->field ?? 'orden';
+            $field = $request->field ?? 'position';
             $action = $request->action;
 
 
@@ -164,21 +173,19 @@ class SortingModel extends Model
             //         return $this->error('No es posible bajar de posición', 422);
             // }
 
-            $new_orden = $action == 'up' ? $resource->orden + 1 : $resource->orden - 1;
+            $new_orden = $action == 'up' ? $resource->position + 1 : $resource->position - 1;
 
-            $next_resource = $model::where('orden', $new_orden)->first();
+            $next_resource = $model::where('position', $new_orden)->first();
 
-            if ($next_resource)
-            {
-                $next_resource->orden = $resource->orden;
+            if ($next_resource) {
+                $next_resource->position = $resource->position;
                 $next_resource->save();
             }
 
-            $resource->orden = $new_orden;
+            $resource->position = $new_orden;
             $resource->save();
 
             DB::commit();
-
         } catch (\Exception $e) {
             // info($e->getMessage());
             DB::rollBack();

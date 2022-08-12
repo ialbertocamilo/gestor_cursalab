@@ -42,14 +42,10 @@ class TemaController extends Controller
 
     public function searchTema(School $escuela, Course $curso, Topic $tema)
     {
-        // $q = Question::whereHas('type', function ($t) use ($tema) {
-        //     $t->where('type_id', $tema->type_evaluation_id);
-        // })
-        //     ->where('topic_id', $tema->id);
         $tema->media = MediaTema::where('topic_id', $tema->id)->orderBy('position')->get();
         $tema->tags = [];
 
-        $tema->hide_evaluable = ($tema->assessable == 1) ? 'si' : 'no';
+        $tema->hide_evaluable = ($tema->assessable == 1) ? 1 : 0;
 
         $tema->hide_tipo_ev = '';
         if (!is_null($tema->type_evaluation_id)) {
@@ -67,6 +63,7 @@ class TemaController extends Controller
             $tema->cant_preguntas_evaluables_activas = $preguntas_evaluables->count();
         }
         $form_selects = $this->getFormSelects($escuela, $curso, $tema, true);
+        $tema->tipo_ev = $tema->hide_tipo_ev;
 
         return $this->success([
             'tema' => $tema,
@@ -104,33 +101,33 @@ class TemaController extends Controller
         return $this->success($response);
     }
 
-    public function update(TemaStoreUpdateRequest $request, Abconfig $abconfig, Categoria $categoria, Curso $curso, Posteo $tema)
+    public function update(TemaStoreUpdateRequest $request, School $escuela, Course $curso, Topic $tema)
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
 
-        $validate = Posteo::validateTemaUpdateStatus($tema, $data['estado']);
+        $validate = Topic::validateTemaUpdateStatus($escuela, $curso, $tema, $data['active']);
 
         //        dd($validate, $data['estado']);
         if (!$validate['validate'])
             return $this->success(compact('validate'), 422);
 
-        $tema = Posteo::storeRequest($data, $tema);
+        $tema = Topic::storeRequest($data, $tema);
 
         $response = [
             'tema' => $tema,
             'msg' => ' Tema actualizado correctamente.'
         ];
 
-        $response['messages'] = Posteo::getMessagesActions($tema, $data, 'Tema actualizado con éxito');
+        $response['messages'] = Topic::getMessagesActions($tema, $data, 'Tema actualizado con éxito');
 
         return $this->success($response);
     }
 
-    public function destroy(Abconfig $abconfig, Categoria $categoria, Curso $curso, Posteo $tema, Request $request)
+    public function destroy(School $escuela, Course $curso, Topic $tema, Request $request)
     {
         if ($request->withValidations == 0) {
-            $validate = Posteo::validateTemaEliminar($tema, $curso);
+            $validate = Topic::validateTemaEliminar($tema, $curso);
             //        dd($validate);
 
             if (!$validate['validate'])
@@ -139,7 +136,7 @@ class TemaController extends Controller
 
         $tema->delete();
 
-        $tema_evaluable = Posteo::where('curso_id', $curso->id)->where('evaluable', 'si')->first();
+        $tema_evaluable = Topic::where('curso_id', $curso->id)->where('evaluable', 'si')->first();
         $curso->c_evaluable = $tema_evaluable ? 'si' : 'no';
         $curso->save();
 
@@ -148,24 +145,24 @@ class TemaController extends Controller
             'msg' => ' Tema eliminado correctamente.'
         ];
 
-        $response['messages'] = Posteo::getMessagesActions($tema, [], 'Tema eliminado con éxito');
+        $response['messages'] = Topic::getMessagesActions($tema, [], 'Tema eliminado con éxito');
 
         return $this->success($response);
     }
 
-    public function updateStatus(Abconfig $abconfig, Categoria $categoria, Curso $curso, Posteo $tema, Request $request)
+    public function updateStatus(School $escuela, Course $curso, Topic $tema, Request $request)
     {
-        $estado = !(($tema->estado === 1));
+        $active = !(($tema->active === 1));
 
         if ($request->withValidations == 0) {
-            $validate = Posteo::validateTemaUpdateStatus($tema, $estado);
+            $validate = Topic::validateTemaUpdateStatus($escuela, $curso, $tema, $active);
             //        dd($validate);
 
             if (!$validate['validate'])
                 return $this->success(compact('validate'), 422);
         }
 
-        $tema->estado = $estado;
+        $tema->active = $active;
         $tema->save();
 
         $response = [
@@ -173,7 +170,7 @@ class TemaController extends Controller
             'msg' => ' Estado actualizado con éxito.'
         ];
 
-        $response['messages'] = Posteo::getMessagesActions($tema, [], 'Tema actualizado con éxito');
+        $response['messages'] = Topic::getMessagesActions($tema, [], 'Tema actualizado con éxito');
 
         return $this->success($response);
     }

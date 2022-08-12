@@ -29,6 +29,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Models\Course;
+use App\Models\Requirement;
 use App\Models\School;
 
 class CursosController extends Controller
@@ -46,13 +47,18 @@ class CursosController extends Controller
 
     public function searchCurso(School $escuela, Course $curso)
     {
-        $reinicio_automatico = json_decode($curso->scheduled_restarts);
-        $curso->reinicio_automatico = $reinicio_automatico->activado ?? false;
-        $curso->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
-        $curso->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
-        $curso->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
-        $requisitos = []; // $this->getFormSelects($abconfig, $escuela, $curso, true);
+        $scheduled_restarts = json_decode($curso->scheduled_restarts);
+        $curso->scheduled_restarts = $scheduled_restarts->activado ?? false;
+        $curso->scheduled_restarts_dias = $scheduled_restarts->reinicio_dias ?? 0;
+        $curso->scheduled_restarts_horas = $scheduled_restarts->reinicio_horas ?? 0;
+        $curso->scheduled_restarts_minutos = $scheduled_restarts->reinicio_minutos ?? 0;
+        $requisitos =  $this->getFormSelects($escuela, $curso, true);
         $curso->makeHidden('reinicios_programado');
+
+        $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($curso) {
+            $query->where('id', $curso->id);
+        })->first();
+        $curso->requisito_id = (!is_null($req_curso)) ? $req_curso->requirement_id : '';
         return $this->success([
             'curso' => $curso,
             'requisitos' => $requisitos
@@ -68,10 +74,10 @@ class CursosController extends Controller
 
         $data['workspace_id'] = $workspace_id;
         $data['school_id'] = $escuela->id;
-        // $data['categoria_modalidad'] = $escuela->modalidad;
+
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-        // dd($data);
+
         $curso = Course::storeRequest($data);
 
         $msg = 'Curso creado correctamente.';
@@ -81,71 +87,46 @@ class CursosController extends Controller
     public function updateCurso(School $escuela, Course $curso, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $validate = Course::validateCursoRequisito($data, $curso);
+        $validate = Course::validateCursoRequisito($data, $escuela, $curso);
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-        //        dd($data);
+
+        $worskpace = session('workspace');
+        $workspace_id = (is_array($worskpace)) ? $worskpace['id'] : null;
+
+        $data['workspace_id'] = $workspace_id;
+        $data['school_id'] = $escuela->id;
+        $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
 
         if (!$validate['validate'])
             return $this->success(compact('validate'), 422);
 
-        $curso = Course::storeRequest($data, $curso);
-
+        $response_curso = Course::storeRequest($data, $curso);
         $response = [
-            'curso' => $curso,
+            'curso' => $response_curso,
             'msg' => 'Curso actualizado correctamente.',
         ];
 
-        $response['messages'] = Curso::getMessagesActions($curso);
+        $response['messages'] = Course::getMessagesActions($curso);
 
         return $this->success($response);
     }
 
-    public function getFormSelects(Abconfig $abconfig, Categoria $categoria, Curso $curso = null, $compactResponse = false)
+    public function getFormSelects(School $escuela, Course $curso = null, $compactResponse = false)
     {
-        //        info("CATEGORIA :: {$categoria->id}");
-        //        info("CURSO :: {$curso->id}");
-        //        info("LIBRE :: {$curso->libre}");
-        $query = DB::table('cursos AS c')
-            ->select(DB::raw('c.id, c.nombre, c.orden, u.carrera_id'))
-            ->join('curricula AS u', 'c.id', '=', 'u.curso_id')
-            ->where('c.categoria_id', $categoria->id)
-            ->where('c.estado', 1)
-            ->orderBy('c.orden');
-        if ($curso) {
-            $query->whereNotIn('c.id', [$curso->id])
-                ->where('c.libre', $curso->libre);
-        }
-        //        info($query->toSql());
-        $result = $query->get();
+
+        $req_cursos = Course::join('course_school', 'course_school.course_id', '=', 'courses.id')
+            ->where('school_id', $escuela->id)
+            ->where('course_id', '!=', $curso->id)
+            ->get();
 
         $requisitos = collect();
-        $last_id = 0;
-        $last_nombre = "";
-        $carreras_cad = "";
-        $carrera_array = Carrera::select('id', 'nombre')->pluck('nombre', 'id');
-        $elem_sin_valores = [
-            "id" => null,
-            "nombre" => null,
-            "carrera_id" => null,
-            "requisito_id" => null
-        ];
-        $result->push((object)$elem_sin_valores);
-        foreach ($result as $requisito) {
-            if (!empty($requisito)) {
-                if ($last_id > 0 && $last_id != $requisito->id) {
-                    $requisitos->push([
-                        'id' => $last_id,
-                        'nombre' => "[$last_id] $last_nombre",
-                        'carreras' => substr($carreras_cad, 0, -3)
-                    ]);
-                    $carreras_cad = "";
-                }
-                $carreras_cad .= $carrera_array[$requisito->carrera_id] ?? "";
-                $carreras_cad .= " | ";
-                $last_id = $requisito->id;
-                $last_nombre = $requisito->nombre;
-            }
+        foreach ($req_cursos as $req) {
+            $requisitos->push((object)[
+                'id' => $req->id,
+                'nombre' => $req->name,
+                'carreras' => ''
+            ]);
         }
 
 
@@ -154,7 +135,6 @@ class CursosController extends Controller
 
     public function temas(Categoria $categoria, Curso $curso, Request $request)
     {
-        // $posteos = $curso->temas()->orderBy('orden')->paginate();
         $posteos = $curso->temas()->orderBy('orden')->paginate();
         foreach ($posteos as $posteo) {
             if ($posteo->tipo_ev) {
@@ -495,17 +475,17 @@ class CursosController extends Controller
     }
 
 
-    public function destroy(Categoria $categoria, Curso $curso)
+    public function destroy(School $escuela, Course $curso)
     {
         // \File::delete(public_path().'/'.$curso->imagen);
-        $q_requisito = Curso::select('id', 'nombre')->where('requisito_id', $curso->id)->get();
+        $q_requisito = Course::select('id', 'name')->where('requisito_id', $curso->id)->get();
         if (count($q_requisito) > 0) {
             $li = "<ul>";
             foreach ($q_requisito as $req) {
                 $li = $li . "<li class='ml-4 mt-2'>" . $req->nombre . "</li>";
             }
             $li = $li . "</ul>";
-            return redirect()->route('categorias.cursos', [$categoria->config->id, $categoria->id])
+            return redirect()->route('categorias.cursos', [$escuela->id, $escuela->id])
                 ->with('modal-info', '<strong>No se puede eliminar este Curso.</strong> <br>
                 Para poder eliminar este curso es necesario quitar el requisito en los siguientes cursos' . $li);
         }
@@ -547,7 +527,7 @@ class CursosController extends Controller
 
 
     ////////////////////// CURSO ENCUESTA ////////////////////////////
-    public function getEncuesta(Abconfig $abconfig, Categoria $categoria, Curso $curso)
+    public function getEncuesta(School $escuela, Course $curso)
     {
         $encuestas = Poll::select('id', 'titulo')->select('titulo as nombre', 'id')->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
@@ -555,21 +535,15 @@ class CursosController extends Controller
         return $this->success(compact('encuestas', 'curso'));
     }
 
-    public function storeUpdateEncuesta(Abconfig $abconfig, Categoria $categoria, Curso $curso, CursoEncuestaStoreUpdate $request)
+    public function storeUpdateEncuesta(School $escuela, Course $curso, CursoEncuestaStoreUpdate $request)
     {
         $data = $request->validated();
-
         if ($data['encuesta_id'] === "ninguno") {
             $curso->encuesta->delete();
             return $this->success(['msg' => 'Encuesta removida.']);
         }
 
-        $curso_encuesta = Curso_encuesta::updateOrCreate(
-            ['curso_id' => $curso->id],
-            [
-                'encuesta_id' => $data['encuesta_id']
-            ]
-        );
+        $curso->polls()->sync($data['encuesta_id']);
 
         return $this->success(['msg' => 'Encuesta actualizada.']);
     }
@@ -628,12 +602,11 @@ class CursosController extends Controller
         return redirect()->route('categorias.cursos', [$curso->categoria->config->id, $curso->categoria->id])->with('info', 'Eliminado Correctamente');
     }
 
-    public function destroyCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso, Request $request)
+    public function destroyCurso(School $escuela, Course $curso, Request $request)
     {
         if ($request->withValidations == 0) {
 
-            $validate = Curso::validateCursoEliminar($curso);
-            //        dd($validate);
+            $validate = Course::validateCursoEliminar($escuela, $curso);
 
             if (!$validate['validate'])
                 return $this->success(compact('validate'), 422);
@@ -664,18 +637,17 @@ class CursosController extends Controller
         return $this->success(['msg' => 'El curso se movió correctamente.']);
     }
 
-    public function updateStatus(Abconfig $abconfig, Categoria $categoria, Curso $curso, Request $request)
+    public function updateStatus(School $escuela, Course $curso, Request $request)
     {
-        $estado = ($curso->estado == 1) ? 0 : 1;
+        $active = ($curso->active == 1) ? 0 : 1;
         if ($request->withValidations == 0) {
 
-            $validate = Curso::validateUpdateStatus($curso, $estado);
-            //        dd($validate);
+            $validate = Course::validateUpdateStatus($escuela, $curso, $active);
 
             if (!$validate['validate'])
                 return $this->success(compact('validate'), 422);
         }
-        $curso->estado = $estado;
+        $curso->active = $active;
         $curso->save();
 
         $response = [
@@ -683,7 +655,7 @@ class CursosController extends Controller
             'msg' => 'Estado actualizado con éxito.',
         ];
 
-        $response['messages'] = Curso::getMessagesActions($curso);
+        $response['messages'] = Course::getMessagesActions($curso);
 
         return $this->success($response);
     }
