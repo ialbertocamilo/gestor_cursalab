@@ -174,12 +174,12 @@ export default {
             modalCursoEncuesta: {
                 ref: 'CursoEncuestaModal',
                 open: false,
-                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.escuela_id}/cursos`,
+                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
             },
             modalMoverCurso: {
                 ref: 'MoverCursoModal',
                 open: false,
-                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.escuela_id}/cursos`,
+                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
             },
             modalDeleteOptions: {
                 ref: 'EscuelaDeleteModal',
@@ -191,7 +191,7 @@ export default {
             modalStatusOptions: {
                 ref: 'CursoStatusModal',
                 open: false,
-                base_endpoint: `/modulos/${this.modulo_id}/escuelas/${this.escuela_id}/cursos`,
+                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
                 contentText: '¿Desea cambiar de estado a este registro?',
                 endpoint: '',
             },
@@ -252,7 +252,7 @@ export default {
         confirmDelete(withValidations = true) {
             let vue = this
             vue.showLoader()
-            let url = `/modulos/${vue.modulo_id}/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}`
+            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}`
 
             if (!withValidations) {
                 url += '?withValidations=1'

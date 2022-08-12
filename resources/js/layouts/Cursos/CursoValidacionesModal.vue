@@ -17,13 +17,16 @@
                     </ul>
                 </div>
             </div>
-            <!--            <div v-if="options.action === 'validate_mover_curso'">-->
-            <!--                <strong>No se puede mover  este curso.</strong> <br>-->
-            <!--                Para poder mover este curso es necesario quitar el requisito en los siguientes cursos:-->
-            <!--                <ul class="mt-1">-->
-            <!--                    <li v-for="curso in validateData.data" v-html="curso"/>-->
-            <!--                </ul>-->
-            <!--            </div>-->
+            <div
+                v-if="['validate_curso_requisito'].includes(options.action)">
+                <div>
+                    <strong>No se puede desactivar este curso.</strong><br>
+                        Para poder desactivar este curso es necesario quitar el requisito en los siguientes cursos
+                    <ul class="mt-1">
+                        <li v-for="(item, i) in validateData.data" :key="i" v-html="item"/>
+                    </ul>
+                </div>
+            </div>
         </template>
     </DefaultDialog>
 </template>
@@ -70,7 +73,6 @@ export default {
         },
         async loadData(validateData) {
             let vue = this
-            // console.log('VALIDATE DATA :: ', validateData)
             vue.validateData = validateData
 
             return 0;

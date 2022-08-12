@@ -19,7 +19,7 @@ class CursoSearchResource extends JsonResource
             'nombre' => $this->name,
             'image' => space_url($this->imagen),
             'temas_count' => $this->topics_count,
-            'encuesta_count' => $this->poll_count,
+            'encuesta_count' => $this->polls_count,
             'active' => $this->active,
             'config_id' => '',
 

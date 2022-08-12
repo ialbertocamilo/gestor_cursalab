@@ -104,7 +104,7 @@ export default {
                 endpoint: `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/search`,
                 ref: 'cursosTable',
                 headers: [
-                    {text: "Orden", value: "orden", align: 'center', model: 'Curso'},
+                    {text: "Orden", value: "orden", align: 'center', model: 'Topic'},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre"},
                     {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},

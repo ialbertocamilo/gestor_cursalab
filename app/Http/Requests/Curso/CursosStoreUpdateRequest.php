@@ -24,10 +24,8 @@ class CursosStoreUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'config_id' => 'required',
-            'categoria_id' => 'required',
             'name' => 'required',
-            'descripcion' => 'nullable',
+            'description' => 'nullable',
             'position' => 'nullable',
             'active' => 'required',
             'requisito_id' => 'nullable',

@@ -22,13 +22,19 @@ class Poll extends BaseModel
     public function questions()
     {
         return $this->hasMany(
-            PollQuestion::class, 'poll_id'
+            PollQuestion::class,
+            'poll_id'
         );
     }
 
     public function type()
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
+    public function course()
+    {
+        return $this->belongsToMany(Course::class);
     }
 
     /*
@@ -66,8 +72,8 @@ class Poll extends BaseModel
     public function countCoursesRelated()
     {
         return DB::table('course_poll')
-                   ->where('poll_id', $this->id)
-                   ->count();
+            ->where('poll_id', $this->id)
+            ->count();
     }
 
     /**
@@ -75,19 +81,21 @@ class Poll extends BaseModel
      *
      * @return void
      */
-    protected function loadCoursePolls() {
+    protected function loadCoursePolls()
+    {
 
         $taxonomy = Taxonomy::getFirstData(
-            'poll', 'tipo', 'xcurso'
+            'poll',
+            'tipo',
+            'xcurso'
         );
         if ($taxonomy) {
 
             $polls = Poll::where('active', 1)
-                         ->where('type_id', $taxonomy->id)
-                         ->get();
+                ->where('type_id', $taxonomy->id)
+                ->get();
 
             return $polls;
-
         } else {
             return [];
         }

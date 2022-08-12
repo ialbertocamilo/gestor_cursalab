@@ -42,6 +42,14 @@ class Topic extends Model
     {
         return $this->hasMany(MediaTema::class, 'topic_id');
     }
+    public function models()
+    {
+        return $this->morphMany(Requirement::class, 'model');
+    }
+    public function requirements()
+    {
+        return $this->morphMany(Requirement::class, 'requirement');
+    }
 
     protected static function search($request, $paginate = 15)
     {
@@ -156,5 +164,89 @@ class Topic extends Model
             'title' => 'Aviso',
             'data' => $messages
         ];
+    }
+
+    protected function validateTemaUpdateStatus($escuela, $curso, $tema, $estado)
+    {
+        $temas_activos = Topic::where('course_id', $tema->course_id)->where('active', 1)->get();
+
+        $req_cursos = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($tema) {
+            $query->where('id', $tema->course->id);
+        })->get();
+        $req_temas = Requirement::whereHasMorph('model', [Topic::class], function ($query) use ($tema) {
+            $query->where('id', $tema->id);
+        })->get();
+
+        if ((($temas_activos->count() === 1 && $tema->estado == 1)
+            || $req_cursos->count() > 0
+            || $req_temas->count() > 0) && !$estado) :
+
+            $validate = collect();
+
+            if (($temas_activos->count() == 1 && $tema->estado == 1) && $req_cursos->count() > 0) :
+
+                $validacion = $this->validateReqCursos($req_cursos, $escuela, $curso, $tema);
+                $validate->push($validacion);
+            endif;
+
+            if ($req_temas->count() > 0) :
+
+                $validacion = $this->validateReqTemas($req_temas, $escuela, $curso, $tema);
+                $validate->push($validacion);
+            endif;
+
+            if ($validate->count() === 0) return ['validate' => true];
+
+            // Si existe algún tema que impida el envío de formulario (show_confirm = false)
+            // no mostrar el botón de "Confirmar"
+            $count = $validate->where('show_confirm', false)->count();
+
+            return [
+                'validate' => false,
+                'data' => $validate->toArray(),
+                'title' => 'Alerta',
+                'show_confirm' => !($count > 0)
+            ];
+        //            endif;
+
+        endif;
+
+        return ['validate' => true];
+    }
+
+    public function validateReqTemas($req_temas, $escuela, $curso,  $tema, $verb = 'desactivar')
+    {
+        $temp = [
+            'title' => "No se puede {$verb} este tema.",
+            'subtitle' => "Para poder {$verb} este tema es necesario quitar o cambiar el requisito en los siguientes temas:",
+            'show_confirm' => false,
+            'type' => 'req_tema_validate'
+        ];
+        $list2 = [];
+        foreach ($req_temas as $req) {
+            $requisito = Topic::where('id', $req->requirement_id)->first();
+            $route = route('temas.editTema', [$escuela->id, $curso->id, $requisito->id]);
+            $list2[] = "<a href='{$route}' target='_blank'>" . $requisito->name . "</a>";
+        }
+        $temp['list'] = $list2;
+        return $temp;
+    }
+
+    public function validateReqCursos($req_cursos, $escuela, $curso, $tema, $verb = 'desactivar')
+    {
+        $temp = [
+            'title' => "No se puede {$verb} este tema.",
+            'subtitle' => "Para poder {$verb} este tema es necesario quitar o cambiar el requisito en los siguientes cursos:",
+            'show_confirm' => false,
+            'type' => 'req_curso_validate'
+        ];
+        $list1 = [];
+        foreach ($req_cursos as $req) {
+            $requisito = Course::where('id', $req->requirement_id)->first();
+            $route = route('cursos.editCurso', [$escuela->id, $requisito->id]);
+            $list1[] = "<a href='{$route}' target='_blank'>" . $requisito->name . "</a>";
+        }
+        $temp['list'] = $list1;
+        return $temp;
     }
 }
