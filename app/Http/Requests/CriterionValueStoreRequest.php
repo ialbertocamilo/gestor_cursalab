@@ -30,6 +30,8 @@ class CriterionValueStoreRequest extends FormRequest
         return [
             'name' => "required|min:3|unique:criterion_values,{$column_name},{$id},id",
             'criterion_id' => "required",
+
+            'workspace_id' => "nullable",
         ];
     }
 
@@ -37,8 +39,10 @@ class CriterionValueStoreRequest extends FormRequest
     {
         $this->mergeIfMissing(['criterion_id' => $this->segment(2)]);
 
+        $workspace_id = $this->workspace_id ?? session('workspace')['id'] ?? null;
+        $data['workspace_id'] = $workspace_id;
 
-       return $this->all();
+        return $this->merge($data)->all();
     }
 //
     public function messages()

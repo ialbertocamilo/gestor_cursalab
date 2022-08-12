@@ -13,6 +13,10 @@ class CriterionController extends Controller
 {
     public function search(Request $request)
     {
+//        $current_workspace = session('workspace');
+        $current_workspace_id = $request->workspace_id ?? session('workspace')['id'] ?? null;;
+        $request->merge(['workspace_id'=> $current_workspace_id]);
+
         $criteria = Criterion::search($request);
 
         CriterionResource::collection($criteria);
@@ -51,11 +55,10 @@ class CriterionController extends Controller
     {
         $data = $request->validated();
 
-//        $validate = Criterion::validationsOnUpdate($criterion, $data);
-
-        //        dd($validate, $data['estado']);
-//        if (!$validate['validate'])
-//            return $this->success(compact('validate'), 422);
+//        $validations = Criterion::validationsOnUpdate($criterion, $data);
+//
+//        if (count($validations['list']) > 0)
+//            return $this->success(compact('validations'), 'Ocurrió un error' , 422);
 
         Criterion::storeRequest($data, $criterion);
 

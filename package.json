@@ -30,15 +30,16 @@
         "gsap": "^3.8.0",
         "mime-types": "^2.1.32",
         "moment": "^2.26.0",
+        "node-sass": "^4.14.0",
         "prismjs": "^1.27.0",
         "vue-apexcharts": "^1.6.2",
+        "vue-router": "^3.5.3",
         "vue2-datepicker": "^3.9.1",
         "vue2-dropzone": "^3.6.0",
         "vue2-timepicker": "^1.1.6",
         "vuedraggable": "^2.24.3",
         "vuetify": "2.3.7",
         "vuex": "^3.6.2",
-        "vue-router": "^3.5.3",
         "xlsx": "^0.17.3"
     }
 }

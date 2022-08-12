@@ -13,6 +13,8 @@ class CriterionValueController extends Controller
     public function search(Request $request, Criterion $criterion)
     {
         $request->merge(['criterion_id' => $criterion->id]);
+        $current_workspace_id = $request->workspace_id ?? session('workspace')['id'] ?? null;;
+        $request->merge(['workspace_id'=> $current_workspace_id]);
 
         $criteria = CriterionValue::search($request);
 

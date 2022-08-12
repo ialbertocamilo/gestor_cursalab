@@ -30,6 +30,7 @@
                             label="Tipo de Criterio"
                             return-object
                             :rules="rules.data_types"
+                            :disabled="options.action === 'edit'"
                         />
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center">
@@ -51,7 +52,9 @@
                         <DefaultToggle
                             v-model="resource.multiple"
                             type="multiple"
-                            label="¿Selección múltiple?"/>
+                            label="¿Selección múltiple?"
+                            :disabled="options.action === 'edit'"
+                        />
                     </v-col>
 
                 </v-row>
@@ -61,6 +64,14 @@
                 </v-row>
 
             </v-form>
+            <CriterionValidationsModal
+                ref="CriterionValidationsModal"
+                :width="validationsModal.width"
+                :options="validationsModal"
+                @onCancel="closeFormModal(validationsModal)"
+                @onConfirm="confirmModal"
+                :resource="resource"
+            />
         </template>
 
     </DefaultDialog>
@@ -68,10 +79,13 @@
 
 <script>
 
+import CriterionValidationsModal from "./CriterionValidationsModal";
+
 const fields = ['name', 'multiple', 'field_id', 'position'];
 const file_fields = [];
 
 export default {
+    components: {CriterionValidationsModal},
     props: {
         options: {
             type: Object,
@@ -101,6 +115,20 @@ export default {
                 name: this.getRules(['required', 'max:150']),
                 // dni: this.getRules(['required', 'number'])
             },
+            validationsModal: {},
+            validationsModalDefault: {
+                ref: 'CriterionValidationsModal',
+                width: '50vw',
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: false,
+                hideCancelBtn: false,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'CriterionValidations',
+                persistent: false,
+                showCloseIcon: true
+            },
         }
     },
     methods: {
@@ -128,21 +156,37 @@ export default {
 
             let method = edit ? 'PUT' : 'POST';
 
-            // if (validateForm && validateSelectedModules) {
             if (validateForm) {
 
                 let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
 
                 vue.$http.post(url, formData)
-                    .then(({data}) => {
+                    .then(async ({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
                     })
-                    .catch((error) => {
+                    .catch(async (error) => {
                         if (error && error.errors)
                             vue.errors = error.errors
+
+                        if (error && error.data.validations) {
+                            await vue.cleanValidationsModal()
+                            let validations = error.data.validations;
+
+                            if (validations.show_confirm) {
+                                vue.validationsModal.hideConfirmBtn = false
+                                vue.validationsModal.hideCancelBtn = false
+                                vue.validationsModal.cancelLabel = 'Cancelar'
+                                vue.validationsModal.confirmLabel = 'Confirmar'
+                            } else {
+                                vue.validationsModal.hideConfirmBtn = true
+                                vue.validationsModal.cancelLabel = 'Entendido'
+                            }
+
+                            await vue.openFormModal(vue.validationsModal, validations, 'validateUpdateCriterion', validations.title)
+                        }
                     })
             }
 
@@ -180,6 +224,12 @@ export default {
         },
         loadSelects() {
             let vue = this
+        },
+        async cleanValidationsModal() {
+            let vue = this
+            await vue.$nextTick(() => {
+                vue.validationsModal = Object.assign({}, vue.validationsModal, vue.validationsModalDefault)
+            })
         },
     }
 }

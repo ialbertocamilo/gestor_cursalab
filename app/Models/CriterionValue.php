@@ -50,14 +50,16 @@ class CriterionValue extends BaseModel
 
     protected function search($request = null)
     {
-        $q = self::query();
+        $q = self::with('criterion.field_type');
 
         if ($request->code)
-            $q->whereHas('criterion', fn($q) => $q->where('code', 'module'));
+            $q->whereHas('criterion', fn($q) => $q->where('code', $request->code));
 
         if ($request->criterion_id)
             $q->where('criterion_id', $request->criterion_id);
 
+        if ($request->workspace_id)
+            $q->whereRelation('workspaces', 'id', $request->workspace_id);
 
         $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -83,10 +85,13 @@ class CriterionValue extends BaseModel
 
             endif;
 
+            if ($data['workspace_id'])
+                $model->workspaces()->syncWithoutDetaching([$data['workspace_id']]);
 
             DB::commit();
 
         } catch (\Exception $e) {
+//            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
@@ -109,7 +114,7 @@ class CriterionValue extends BaseModel
 
     public function getCriterionValueColumnName(): string
     {
-        return self::getColumnName($this->criterion->field_type->code);
+        return self::getColumnName($this->criterion->field_type->code ?? 'xx');
     }
 
 
