@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class TipoCriterioStoreRequest extends FormRequest
+class CriterionStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,24 +25,22 @@ class TipoCriterioStoreRequest extends FormRequest
     {
         $id = $this->method() == 'PUT' ? $this->segment(2) : 'NULL';
 
-        $reglas = [
-            'nombre' => "required|max:150|min:3|unique:tipo_criterios,nombre,{$id},id",
-            // 'nombre' => 'required',
-            'nombre_plural' => 'required',
-            'data_type' => 'required',
-            'orden' => 'required',
-            'obligatorio' => 'required',
+        $rules = [
+            'name' => "required|max:150|min:3|unique:criteria,name,{$id},id",
+            'field_id' => 'required',
+            'position' => 'required',
+            'multiple' => 'required',
         ];
 
-        return $reglas;
+        return $rules;
     }
 
     public function validationData()
     {
         $data = [];
+        $multiple = ($this->multiple === 'true' or $this->multiple === true or $this->multiple === 1 or $this->multiple === '1');
 
-        if ( ! $this->has('obligatorio') )
-            $data['obligatorio'] = false;
+        $data['multiple'] = $multiple;
 
         return $this->merge($data)->all();
     }

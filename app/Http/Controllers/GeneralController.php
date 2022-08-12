@@ -139,14 +139,20 @@ class GeneralController extends Controller
         return $this->success(compact('data'));
     }
 
-    public function getTopBoticas(Request $request)
+    /**
+     * Process request to load total of passed users by "botica"
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function loadTopBoticas(Request $request)
     {
         if ($request->refresh === 'true')
             cache()->flush();
 
-        $modulo_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getCurrentWorkspaceId();
 
-        $response = Prueba::getTopBoticas($modulo_id);
+        $response = DashboardService::loadTopBoticas($workspaceId);
 
         $result = $response['data']->toArray();
 

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
+
 class CriterionValue extends BaseModel
 {
     protected $fillable = [
@@ -53,6 +55,9 @@ class CriterionValue extends BaseModel
         if ($request->code)
             $q->whereHas('criterion', fn($q) => $q->where('code', 'module'));
 
+        if ($request->criterion_id)
+            $q->where('criterion_id', $request->criterion_id);
+
 
         $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -61,4 +66,51 @@ class CriterionValue extends BaseModel
 
         return $q->paginate($request->paginate);
     }
+
+    protected function storeRequest($data, $model = null, $files = [])
+    {
+        try {
+
+            DB::beginTransaction();
+
+            if ($model) :
+
+                $model->update($data);
+
+            else:
+
+                $model = self::create($data);
+
+            endif;
+
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Error::storeAndNotificateException($e, request());
+            abort(errorExceptionServer());
+        }
+    }
+
+    protected function getColumnName($match): string
+    {
+        return match ($match) {
+            'date' => 'value_date',
+            'number' => 'value_integer',
+            default => 'value_text',
+        };
+    }
+
+    protected function getCriterionValueColumnNameByCriterion(Criterion $criterion = null): string
+    {
+      return self::getColumnName($criterion->field_type->code);
+    }
+
+    public function getCriterionValueColumnName(): string
+    {
+        return self::getColumnName($this->criterion->field_type->code);
+    }
+
+
 }

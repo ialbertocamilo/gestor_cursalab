@@ -65,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('ayudas')->group(base_path('routes/cms/ayudas.php'));
     Route::prefix('cargos')->group(base_path('routes/cms/cargos.php'));
     Route::prefix('boticas')->group(base_path('routes/cms/boticas.php'));
-    Route::prefix('tipo-criterios')->group(base_path('routes/cms/tipo_criterios.php'));
+    Route::prefix('criterios')->group(base_path('routes/cms/criteria.php'));
     Route::prefix('encuestas')->group(base_path('routes/cms/encuestas.php'));
     Route::prefix('glosario')->group(base_path('routes/cms/glosario.php'));
     Route::prefix('vademecum')->group(base_path('routes/cms/vademecum.php'));
