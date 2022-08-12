@@ -1,15 +1,11 @@
 <template>
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
-            <!--            Título con breadcumb-->
-            <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Tipo Criterios
+                Criterios
                 <v-spacer/>
-                <!--  <DefaultActivityButton :label="'Actividad'"
-                                        @click="activity"/> -->
                 <DefaultModalButton
-                    :label="'Tipo Criterio'"
+                    :label="'Criterio'"
                     @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
@@ -35,7 +31,6 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event)"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Cambiar de estado al tipo de criterio')"
             />
 
             <TipoCriterioFormModal
@@ -52,20 +47,20 @@
 
 
 <script>
-import TipoCriterioFormModal from "./TipoCriterioFormModal";
+import TipoCriterioFormModal from "./CriterionFormModal";
 
 export default {
     components: {TipoCriterioFormModal},
     data() {
         return {
             dataTable: {
-                endpoint: '/tipo-criterios/search',
+                endpoint: '/criterios/search',
                 ref: 'TipoCriterioTable',
                 headers: [
-                    {text: "Orden", value: "orden", align: 'center', model: "TipoCriterio", sortable: false},
-                    {text: "Nombre", value: "nombre"},
-                    {text: "Nombre Plural", value: "nombre_plural"},
-                    {text: "Tipo", value: "data_type"},
+                    {text: "Orden", value: "position", align: 'center', model: "TipoCriterio", sortable: false},
+                    {text: "Nombre", value: "name"},
+                    // {text: "Nombre Plural", value: "nombre_plural"},
+                    {text: "Tipo", value: "data_type", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -76,8 +71,8 @@ export default {
                         // method_name: 'edit'
                         type: 'route',
                         // method_name: 'reset',
-                        count: 'criterios_count',
-                        route: 'criterios_route'
+                        count: 'values_count',
+                        route: 'values_route'
                     },
 
                     {
@@ -108,7 +103,7 @@ export default {
             modalOptions: {
                 ref: 'TipoCriterioFormModal',
                 open: false,
-                base_endpoint: '/tipo-criterios',
+                base_endpoint: '/criterios',
                 resource: 'Tipo Criterio',
                 confirmLabel: 'Guardar',
             },
@@ -132,7 +127,6 @@ export default {
             console.log('activity')
         },
         confirmModal() {
-            // TODO: Call store or update USER
         },
     }
 

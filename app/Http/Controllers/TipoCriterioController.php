@@ -6,8 +6,8 @@ use App\Models\TipoCriterio;
 use App\Models\SortingModel;
 use Illuminate\Http\Request;
 
-use App\Http\Resources\TipoCriterioResource;
-use App\Http\Requests\TipoCriterioStoreRequest;
+use App\Http\Resources\CriterionResource;
+use App\Http\Requests\CriterionStoreRequest;
 
 class TipoCriterioController extends Controller
 {
@@ -15,11 +15,11 @@ class TipoCriterioController extends Controller
     {
         $tipo_criterios = TipoCriterio::search($request);
 
-        TipoCriterioResource::collection($tipo_criterios);
+        CriterionResource::collection($tipo_criterios);
 
         return $this->success($tipo_criterios);
     }
-    
+
     public function index()
     {
         // //Obteniendo datos de la tabla tipo criterios
@@ -55,7 +55,7 @@ class TipoCriterioController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(TipoCriterioStoreRequest $request)
+    public function store(CriterionStoreRequest $request)
     {
         $data = $request->validated();
         $tipo_criterio = TipoCriterio::create($data);
@@ -97,12 +97,12 @@ class TipoCriterioController extends Controller
      * @param  \App\TipoCriterio  $tipoCriterio
      * @return \Illuminate\Http\Response
      */
-    public function update(TipoCriterioStoreRequest $request, TipoCriterio $tipo_criterio)
+    public function update(CriterionStoreRequest $request, TipoCriterio $tipo_criterio)
     {
         $data = $request->validated();
-    
+
         $last_order = $tipo_criterio->orden;
-        
+
         $tipo_criterio->update($data);
 
         SortingModel::reorderItems($tipo_criterio, [], $last_order);

@@ -38,23 +38,23 @@
                 </v-tooltip>
             </template>
 
-            <template v-slot:item.orden="{item, header}">
+            <template v-slot:item.position="{item, header}">
                 <div class="d-flex flex-column align-items-center">
                     <v-btn
                         text icon
                         color="primary"
                         @click="changeOrder(item, 'up', header.model, header.field)"
-                        v-show="!dataTable.filters && item.orden && (!sortParams.sortBy || sortParams.sortBy == 'orden')"
+                        v-show="!dataTable.filters && item.position && (!sortParams.sortBy || sortParams.sortBy == 'position')"
                         :disabled="pagination.actual_page == 1 && rows.indexOf(item) == 0"
                     >
                         <v-icon v-text="'mdi-chevron-up'"/>
                     </v-btn>
-                    <span v-text="item.orden"/>
+                    <span v-text="item.position"/>
                     <v-btn
                         text icon
                         color="primary"
                         @click="changeOrder(item, 'down', header.model, header.field)"
-                        v-show="!dataTable.filters && item.orden && (!sortParams.sortBy || sortParams.sortBy == 'orden')"
+                        v-show="!dataTable.filters && item.position && (!sortParams.sortBy || sortParams.sortBy == 'position')"
                         :disabled="pagination.actual_page == pagination.total_pages && rows.indexOf(item) + 1 == rows.length"
                     >
                         <v-icon v-text="'mdi-chevron-down'"/>
@@ -234,7 +234,7 @@
             </template>
 
             <template v-slot:item.custom_block="{item, header}">
-              
+
 
                 <v-expansion-panels flat class="custom-expansion-block">
                     <v-expansion-panel>
@@ -268,7 +268,7 @@
                                         {{ criterion_value.value_text }}
                                         <!-- <v-icon x-small class="ml-1">mdi-book</v-icon> -->
                                     </v-chip>
-                                  
+
                                 </v-col>
                                 <v-col cols="6">
                                     <v-chip
@@ -344,7 +344,7 @@
                             </v-chip>
 
                             <!-- {{ segment.id }} -->
-                            
+
                           </v-col>
 
                           <v-col cols="3">
@@ -361,7 +361,7 @@
                             </v-chip>
 
                             <!-- {{ segment.id }} -->
-                            
+
                           </v-col>
                         </v-row>
                       </v-expansion-panel-content>
@@ -471,7 +471,7 @@
                             </v-chip>
 
                             <!-- {{ segment.id }} -->
-                            
+
                           </v-col>
 
                           <v-col cols="3">
@@ -488,7 +488,7 @@
                             </v-chip>
 
                             <!-- {{ segment.id }} -->
-                            
+
                           </v-col>
                         </v-row>
                       </v-expansion-panel-content>
@@ -815,7 +815,7 @@ export default {
 
         },
         // changeOrder(model_name, item, subir, prop_name = 'orden') {
-        changeOrder(item, action, model, field = 'orden') {
+        changeOrder(item, action, model, field = 'position') {
 
             let vue = this
 

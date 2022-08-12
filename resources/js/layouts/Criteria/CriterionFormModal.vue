@@ -1,45 +1,59 @@
 <template>
-    <DefaultDialog :options="options"
-                   :width="width"
-                   @onCancel="closeModal"
-                   @onConfirm="confirmModal"
+    <DefaultDialog
+        :options="options"
+        :width="width"
+        @onCancel="closeModal"
+        @onConfirm="confirmModal"
     >
         <template v-slot:content>
-            <v-form ref="criterioForm">
+            <v-form ref="tipoCriterioForm">
+
+                <DefaultErrors :errors="errors"/>
+
                 <v-row justify="space-around">
-
-                    <DefaultErrors :errors="errors" />
-
                     <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultSelect clearable
-                                       :items="selects.modulos"
-                                       v-model="resource.modulo"
-                                       label="Módulo"
-                                       return-object
-                                       :rules="rules.modulos"
+                        <DefaultInput
+                            clearable
+                            v-model="resource.name"
+                            label="Nombre"
+                            :rules="rules.name"
                         />
                     </v-col>
-
-                   <!--  <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultSelect clearable
-                                       :items="selects.tipos"
-                                       v-model="resource.tipo"
-                                       label="Tipo"
-                                       return-object
-                                       :rules="rules.tipos"
-                        />
-                    </v-col>
-         -->
                 </v-row>
 
-                <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultInput clearable
-                                      v-model="resource.valor"
-                                      label="Nombre"
-                                      :rules="rules.valor"
+                <v-row align="start">
+                    <v-col cols="6" class="d-flex justify-content-center">
+                        <DefaultSelect
+                            clearable
+                            :items="selects.data_types"
+                            v-model="resource.field_id"
+                            label="Tipo de Criterio"
+                            return-object
+                            :rules="rules.data_types"
                         />
                     </v-col>
+                    <v-col cols="6" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.position"
+                            label="Orden"
+                            type="number"
+                            min="1"
+                            :max="resource.default_position"
+                        />
+                    </v-col>
+
+                </v-row>
+
+                <v-row align="start" align-content="center">
+
+                    <v-col cols="6">
+                        <DefaultToggle
+                            v-model="resource.multiple"
+                            type="multiple"
+                            label="¿Selección múltiple?"/>
+                    </v-col>
+
                 </v-row>
 
                 <v-row justify="space-around">
@@ -54,7 +68,7 @@
 
 <script>
 
-const fields = ['valor', 'tipo', 'modulo'];
+const fields = ['name', 'multiple', 'field_id', 'position'];
 const file_fields = [];
 
 export default {
@@ -68,25 +82,25 @@ export default {
     data() {
         return {
             errors: [],
-
             resourceDefault: {
                 id: null,
-                valor: '',
-                modulo: null,
+                name: '',
                 tipo: null,
+                field_id: null,
+                multiple: false,
+                position: 1,
+                default_position: 1,
             },
             resource: {},
             selects: {
-                modulos: [],
-                tipos: [],
+                data_types: [],
             },
 
             rules: {
-                modulo: this.getRules(['required']),
-                tipo: this.getRules(['required']),
-                valor: this.getRules(['required', 'max:100']),
+                data_types: this.getRules(['required']),
+                name: this.getRules(['required', 'max:150']),
+                // dni: this.getRules(['required', 'number'])
             },
-
         }
     },
     methods: {
@@ -99,14 +113,14 @@ export default {
         },
         resetValidation() {
             let vue = this
-            vue.$refs.criterioForm.resetValidation()
+            vue.$refs['tipoCriterioForm'].resetValidation()
         },
         confirmModal() {
             let vue = this
 
             vue.errors = []
 
-            const validateForm = vue.validateForm('criterioForm')
+            const validateForm = vue.validateForm('tipoCriterioForm')
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
@@ -115,7 +129,7 @@ export default {
             let method = edit ? 'PUT' : 'POST';
 
             // if (validateForm && validateSelectedModules) {
-            if (validateForm ) {
+            if (validateForm) {
 
                 let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
 
@@ -136,9 +150,7 @@ export default {
         },
         resetSelects() {
             let vue = this
-            // Selects independientes
-            vue.selects.modulos = []
-            vue.selects.tipos = []
+            vue.selects.data_types = []
         },
         async loadData(resource) {
             let vue = this
@@ -150,23 +162,25 @@ export default {
             })
 
             let base = `${vue.options.base_endpoint}`
-            let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
+            let url = resource ? `${base}/${resource.id}/edit` : `${base}/form-selects`;
 
             await vue.$http.get(url).then(({data}) => {
 
-                vue.selects.modulos = data.data.modulos
-                vue.selects.tipos = data.data.tipos
+                vue.selects.data_types = data.data.data_types
 
                 if (resource) {
-                    vue.resource = data.data.criterio
+                    vue.resource = data.data.criterion
+                } else {
+                    vue.resource.position = data.data.default_position
+                    vue.resource.default_position = data.data.default_position
                 }
             })
 
             return 0;
         },
         loadSelects() {
+            let vue = this
         },
-
     }
 }
 </script>

@@ -108,8 +108,8 @@ Vue.component("tema-preguntas-layout", require("./layouts/Temas/TemaPreguntasLis
 Vue.component("tema-form-page",require("./layouts/Temas/TemasFormPage"));
 Vue.component("anuncio-layout", require("./layouts/Anuncios/AnuncioListPage"));
 Vue.component("cargo-layout", require("./layouts/Cargos/CargoListPage"));
-Vue.component("tipo-criterio-layout", require("./layouts/TipoCriterios/TipoCriterioListPage"));
-Vue.component("criterio-layout", require("./layouts/TipoCriterios/Criterios/CriterioListPage"));
+Vue.component("criterion-layout", require("./layouts/Criteria/CriterionListPage"));
+Vue.component("criterion-value-layout", require("./layouts/Criteria/CriterionValues/CriterionValueListPage"));
 Vue.component("encuesta-layout", require("./layouts/Encuestas/EncuestaListPage"));
 Vue.component("incidencia-layout", require("./layouts/Incidencias/IncidenciaListPage"));
 Vue.component(

@@ -13,29 +13,32 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
-                    <v-col >
-                        <DefaultSelect clearable dense
-                                       :items="selects.modulos"
-                                       v-model="filters.modulo"
-                                       label="Módulos"
-                                       @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                    <v-col>
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.modulos"
+                            v-model="filters.modulo"
+                            label="Módulos"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
-                    <v-col >
-                        <DefaultSelect clearable dense
-                                       :items="selects.estados"
-                                       v-model="filters.status"
-                                       label="Estados"
-                                       @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                    <v-col>
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.estados"
+                            v-model="filters.status"
+                            label="Estados"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
-                    <v-col >
-                        <DefaultInput clearable dense
-                                      v-model="filters.q"
-                                      label="Buscar por DNI, nombre, ticket..."
-                                      @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                                      append-icon="mdi-magnify"
-                                      @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                    <v-col>
+                        <DefaultInput
+                            clearable dense
+                            v-model="filters.q"
+                            label="Buscar por DNI, nombre, ticket..."
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            append-icon="mdi-magnify"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col>
@@ -64,24 +67,27 @@
                 </v-row>
             </v-card-text>
 
-            <DefaultTable :ref="dataTable.ref"
-                          :data-table="dataTable"
-                          :filters="filters"
-                          @edit="openFormModal(modalOptions, $event, null, 'Editar Ticket')"
-                          @show="openFormModal(modalShowOptions, $event, null, 'Detalle de Ticket')"
+            <DefaultTable
+                :ref="dataTable.ref"
+                :data-table="dataTable"
+                :filters="filters"
+                @edit="openFormModal(modalOptions, $event, null, 'Editar Ticket')"
+                @show="openFormModal(modalShowOptions, $event, null, 'Detalle de Ticket')"
             />
 
-            <SoporteFormModal width="40vw"
-                              :ref="modalOptions.ref"
-                              :options="modalOptions"
-                              @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
-                              @onCancel="closeFormModal(modalOptions)"
+            <SoporteFormModal
+                width="40vw"
+                :ref="modalOptions.ref"
+                :options="modalOptions"
+                @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalOptions)"
             />
 
-           <SoporteShowModal width="40vw"
-                              :ref="modalShowOptions.ref"
-                              :options="modalShowOptions"
-                              @onCancel="closeFormModal(modalShowOptions)"
+            <SoporteShowModal
+                width="40vw"
+                :ref="modalShowOptions.ref"
+                :options="modalShowOptions"
+                @onCancel="closeFormModal(modalShowOptions)"
             />
 
         </v-card>

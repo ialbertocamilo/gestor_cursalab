@@ -7,8 +7,8 @@ use App\Models\Abconfig;
 use App\Models\Criterio;
 use App\Models\TipoCriterio;
 
-use App\Http\Resources\CriterioResource;
-use App\Http\Requests\CriterioStoreRequest;
+use App\Http\Resources\CriterionValueResource;
+use App\Http\Requests\CriterionValueStoreRequest;
 
 use Illuminate\Http\Request;
 
@@ -18,7 +18,7 @@ class CriteriosController extends Controller
     {
         $criterios = Criterio::search($request);
 
-        CriterioResource::collection($criterios);
+        CriterionValueResource::collection($criterios);
 
         return $this->success($criterios);
     }
@@ -41,8 +41,8 @@ class CriteriosController extends Controller
         $modulos = Abconfig::select('etapa','id')->get();
         return response()->json([
             'data' => $criterios->items(),
-            'modulos' => $modulos, 
-            'pagina_actual' => $criterios->currentPage(), 
+            'modulos' => $modulos,
+            'pagina_actual' => $criterios->currentPage(),
             'total_paginas' => $criterios->lastPage(),
         ], 200);
     }
@@ -66,7 +66,7 @@ class CriteriosController extends Controller
         return $this->success(get_defined_vars());
     }
 
-    public function store(TipoCriterio $tipo_criterio, CriterioStoreRequest $request)
+    public function store(TipoCriterio $tipo_criterio, CriterionValueStoreRequest $request)
     {
         $data = $request->validated();
 
@@ -76,16 +76,16 @@ class CriteriosController extends Controller
         $criterio = Criterio::create($data);
 
         $msg = 'Criterio creado correctamente.';
-        
+
         return $this->success(compact('msg'));
     }
 
-    public function update(TipoCriterio $tipo_criterio, Criterio $criterio, CriterioStoreRequest $request)
+    public function update(TipoCriterio $tipo_criterio, Criterio $criterio, CriterionValueStoreRequest $request)
     {
         $data = $request->validated();
 
         $valor_changed = $criterio->valor != trim($data['valor']);
-    
+
         $criterio->update($data);
 
         if ($valor_changed)
@@ -101,8 +101,8 @@ class CriteriosController extends Controller
     //     $data = $request->all();
     //     $error = false;
     //     $mensaje = 'Este criterio ya existe';
-    //     //Verificar si existe 
-    //     if($data['id']!=0){ 
+    //     //Verificar si existe
+    //     if($data['id']!=0){
     //         $existe = Criterio::where('id',trim($data['id']))->select('valor')->first();
     //         $error = ($existe) ?  false : true ;
     //         $mensaje = 'El criterio no se puede editar.';
@@ -120,7 +120,7 @@ class CriteriosController extends Controller
     //             $error = true ;
     //         }
     //     }
-    //     if(!$error){ 
+    //     if(!$error){
     //         if($data['id']!=0){
     //             $user_bot = Usuario::where('grupo',$data['id'])->update([
     //                 'grupo_nombre' => $data['valor'],
@@ -128,7 +128,7 @@ class CriteriosController extends Controller
     //         }
     //         $botica = Criterio::updateOrCreate(
     //             ['id' => $data['id']],
-    //             ['valor' => $data['valor'], 
+    //             ['valor' => $data['valor'],
     //             'config_id' => $data['config_id'],
     //             'tipo_criterio' => $data['tipo_criterio'],
     //             'tipo_criterio_id'=>1]
@@ -142,8 +142,8 @@ class CriteriosController extends Controller
             $q->select('id','etapa');
         }],'usuarios')->where('valor','like','%'.$botica_nombre.'%')->withCount('usuarios')->paginate(15);
         return response()->json([
-            'data' => $criterios->items(), 
-            'pagina_actual' => $criterios->currentPage(), 
+            'data' => $criterios->items(),
+            'pagina_actual' => $criterios->currentPage(),
             'total_paginas' => $criterios->lastPage(),
         ], 200);
     }
