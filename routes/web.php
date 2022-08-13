@@ -80,6 +80,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('videoteca')->group(base_path('routes/cms/videoteca.php'));
     Route::prefix('roles')->group(base_path('routes/cms/roles.php'));
     Route::prefix('entrenamiento')->group(base_path('routes/cms/entrenamiento.php'));
+    Route::prefix('workspaces')->group(base_path('routes/cms/workspaces.php'));
     Route::prefix('/')->group(base_path('routes/cms/reportes.php'));
     // Route::prefix('reportes')->group(base_path('routes/cms/reportes.php'));
     // Route::prefix('exportar')->group(base_path('routes/cms/reportes-exportar.php'));
