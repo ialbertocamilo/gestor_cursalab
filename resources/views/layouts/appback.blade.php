@@ -3,6 +3,20 @@
 @endphp
 @include('layouts.header')
 
+<?php
+
+    // Generate CSS classes for sidebar and content wrapper
+
+    $sidebarClasses = '';
+    $contentClasses = '';
+    if (isset($fullScreen)) {
+        if ($fullScreen) {
+            $sidebarClasses = 'd-none';
+            $contentClasses = 'w-100';
+        }
+    }
+?>
+
 <script>
     // Lista de permisos para usar en Vue
     // https://mmccaff.github.io/2018/11/03/laravel-permissions-in-vue-components/
@@ -23,7 +37,7 @@
 <div id="app">
     <div class="d-flex align-items-stretch">
 
-        <div class="nav-container">
+        <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
 {{--                <v-app>--}}
                     <side-menu />
@@ -36,7 +50,7 @@
             <b>Lo sentimos, la resolución de pantalla es muy pequeña para trabajar en el gestor. Es necesario ingresar desde una PC o laptop y recomendable tener el navegador a pantalla completa.</b>
           </p>
         </div>
-        <div class="content-inner pb-0">
+        <div class="content-inner pb-0 <?= $contentClasses ?>">
 
             @if(session('info'))
                 <div class="row box-alerta">

@@ -1,16 +1,17 @@
 <template>
-    <section class="section-list">
-        <v-card flat class="elevation-0 mb-4">
-            <v-card-title>
-                Editar workspace
-                <v-spacer />
-            </v-card-title>
-        </v-card>
+    <DefaultDialog
+        :options="options"
+        :width="width"
+        @onCancel="closeModal"
+        @onConfirm="confirmModal"
+    >
+        <template v-slot:content>
 
-        <v-card flat class="elevation-0 mb-4">
+            <DefaultErrors :errors="errors"/>
+
             <v-form ref="workspaceForm">
                 <v-row class="justify-content-center pt-4">
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <DefaultInput
                             clearable
                             v-model="resource.name"
@@ -18,7 +19,7 @@
                             :rules="rules.name"
                         />
                     </v-col>
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <DefaultInput
                             clearable
                             v-model="resource.name"
@@ -28,66 +29,169 @@
                     </v-col>
                 </v-row>
                 <v-row class="justify-content-center">
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <v-img :src="resource.logo" contain aspect-ratio="2"
                                :lazy-src="`/img/loader.gif`"
                         />
                         <div class="d-flex justify-content-center">
-                            <DefaultModalButton
+                            <DefaultButton
                                 label="Seleccionar logotipo"
-                                @click="openFormModal(modalDropzoneWorkspace, null, showMessage, `Subir archivo`)"
+                                @click="openFormModal(workspaceDropzoneModalOptions, rowData = null, action = null, title = 'Seleccionar logotipo')"
                                 />
                         </div>
                     </v-col>
-                    <v-col cols="4" >
+                    <v-col cols="6" >
                         <v-img :src="resource.logo_negativo"
                                contain aspect-ratio="2"
                                :lazy-src="`/img/loader.gif`"
                         />
                         <div class="d-flex justify-content-center">
-                            <DefaultButton label="Seleccionar logotipo negativo"
-                                           @click="showMessage"/>
+                            <DefaultButton
+                                label="Seleccionar logotipo negativo"
+
+                                />
                         </div>
                     </v-col>
                 </v-row>
-                <v-row class="justify-content-center pb-4 mt-4">
-                    <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultButton
-                            label="Guardar"
-                            icon="mdi-content-save"
-                            @click="showMessage" />
+                <v-row>
+                    <v-col>
+                        <v-subheader class="mt-4 px-0">
+                            <strong>Criterios</strong>
+                        </v-subheader>
+
+                        <v-alert
+                            border="top"
+                            colored-border
+                            type="info"
+                            elevation="2"
+                        >
+                           Aquí van las indicaciones sobre los criterios.
+                        </v-alert>
+
+                        <v-divider class="mt-0"/>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="6">
+                        <v-subheader class="mb-3 px-0">
+                            <strong>Obligatorios</strong>
+                        </v-subheader>
+                        <v-checkbox
+
+                            :label="'ÁREA (requerido)'"
+                        ></v-checkbox>
+                        <v-checkbox
+
+                            :label="'SEDE (requerido)'"
+                        ></v-checkbox>
+                        <v-checkbox
+
+                            :label="'PUESTO (requerido)'"
+                        ></v-checkbox>
+                        <v-checkbox
+
+                            :label="'GÉNERO (requerido)'"
+                        ></v-checkbox>
+                        <v-checkbox
+
+                            :label="'GRUPO (requerido)'"
+                        ></v-checkbox>
+                        <v-checkbox
+
+                            :label="'ORGANIZACIÓN (requerido)'"
+                        ></v-checkbox>
+                        <v-checkbox
+
+                            :label="'UNIDAD DE NEGOCIO (requerido)'"
+                        ></v-checkbox>
+                        <v-checkbox
+
+                            :label="'TIPO DE BONO (requerido)'"
+                        ></v-checkbox>
+                    </v-col>
+                    <v-col cols="6">
+
+                        <v-subheader class="mb-3 px-0">
+                            <strong>Personalizados</strong>
+                        </v-subheader>
+
+                        <v-checkbox
+                            :label="'CARRERA (opcional)'"
+                        ></v-checkbox>
+                        <v-checkbox
+                            :label="'CICLO (opcional)'"
+                        ></v-checkbox>
+                        <v-checkbox
+                            :label="'BOTICA (opcional)'"
+                        ></v-checkbox>
+                        <v-checkbox
+                            :label="'GRUPO (opcional)'"
+                        ></v-checkbox>
+                        <v-checkbox
+                            :label="'CLASIFICACIÓN EDV (opcional)'"
+                        ></v-checkbox>
+                        <v-checkbox
+                            :label="'DEPARTAMENTO NIVEL 5 (opcional)'"
+                        ></v-checkbox>
+                        <v-checkbox
+                            :label="'DEPARTAMENTO NIVEL 6 (opcional)'"
+                        ></v-checkbox>
                     </v-col>
                 </v-row>
             </v-form>
-        </v-card>
-    </section>
+
+
+        <!--
+            Modals
+        ======================================== -->
+
+        <WorkspaceDropzone
+            :options="workspaceDropzoneModalOptions"
+            width="50vw"
+            :ref="workspaceDropzoneModalOptions.ref"
+            @onCancel="closeSimpleModal(workspaceDropzoneModalOptions)"
+            @onConfirm=""
+        />
+        </template>
+    </DefaultDialog>
 </template>
 
 <script>
 
-import DropzoneWorkspace from "./WorkspaceDropzone";
+import WorkspaceDropzone from "./WorkspaceDropzone";
 
 export default {
     components: {
-        DropzoneWorkspace
+        WorkspaceDropzone
     }
     ,
-    data() {
-
-        return {
-            resourceDefault: {
-                name: '',
-                logo: '',
-                logo_negativo: ''
-            }
-            ,
-            resource: { }
-            ,
-            rules: {
-                name: this.getRules(['required', 'max:255']),
-            }
+    props: {
+        options: {
+            type: Object,
+            required: true
+        },
+        width: String
+    },
+    data: () => ({
+        errors: [],
+        resourceDefault: {
+            name: '',
+            logo: '',
+            logo_negativo: ''
         }
-    }
+        ,
+        resource: {}
+        ,
+        rules: {
+            //name: this.getRules(['required', 'max:255']),
+        }
+        ,
+        workspaceDropzoneModalOptions: {
+            ref: 'WorkspaceDropzone',
+            open: false,
+            confirmLabel: 'Guardar'
+        }
+    })
     ,
     mounted() {
 
@@ -95,16 +199,18 @@ export default {
     }
     ,
     methods: {
-        showMessage () {
-            window.alert('it workssss');
+        resetValidation() {
+            let vue = this
+            //vue.resetFormValidation('workspaceForm')
         }
         ,
-        modalDropzoneWorkspace: {
-            ref: 'DropzoneWorkspace',
-            open: false,
-            confirmLabel: 'Subir',
-            base_endpoint: '/multimedia',
-            cancelLabel: 'Cerrar',
+        closeModal() {
+            let vue = this;
+            vue.$emit('onCancel')
+        }
+        ,
+        confirmModal() {
+
         }
         ,
         /**
@@ -145,7 +251,9 @@ export default {
                     vue.loading = false
                 })
         */
-        }
+        },
+        loadSelects() {
+        },
     }
 }
 </script>

@@ -1,35 +1,42 @@
 <template>
-    <div>
-        <v-alert
-            border="left"
-            dense
-            outlined
-            class="m-1"
-            type="warning"
-            v-if="errorFileType"
-            transition="scale-transition"
-        >
-            Tipo de contenido no permitido
-        </v-alert>
-        <vue-dropzone
-            ref="myVueDropzone" id="dropzone"
-            :options="dropzoneOptions"
-            :useCustomSlot="true"
-            v-on:vdropzone-file-added="addedFile"
-            v-on:vdropzone-queue-complete="onQueueComplete"
-            v-on:vdropzone-upload-progress="viewProgress"
-            v-on:vdropzone-success="uploadSuccess"
-            v-on:vdropzone-complete="onComplete"
-            v-on:vdropzone-error="uploadError"
-            v-on:vdropzone-removed-file="fileRemoved"
-        >
-            <div class="dropzone-custom-content">
-                <v-icon>mdi-upload</v-icon>
-                <div class="subtitle">{{ hint }}</div>
-                <br>
-            </div>
-        </vue-dropzone>
-    </div>
+    <DefaultDialog
+        :options="options"
+        :width="width"
+        @onCancel="closeModal"
+        @onConfirm="confirmModal"
+    >
+        <template v-slot:content>
+            <v-alert
+                border="left"
+                dense
+                outlined
+                class="m-1"
+                type="warning"
+                v-if="errorFileType"
+                transition="scale-transition"
+            >
+                Tipo de contenido no permitido
+            </v-alert>
+            <vue-dropzone
+                ref="myVueDropzone" id="dropzone"
+                :options="dropzoneOptions"
+                :useCustomSlot="true"
+                v-on:vdropzone-file-added="addedFile"
+                v-on:vdropzone-queue-complete="onQueueComplete"
+                v-on:vdropzone-upload-progress="viewProgress"
+                v-on:vdropzone-success="uploadSuccess"
+                v-on:vdropzone-complete="onComplete"
+                v-on:vdropzone-error="uploadError"
+                v-on:vdropzone-removed-file="fileRemoved"
+            >
+                <div class="dropzone-custom-content">
+                    <v-icon>mdi-upload</v-icon>
+                    <div class="subtitle">{{ hint }}</div>
+                    <br>
+                </div>
+            </vue-dropzone>
+        </template>
+    </DefaultDialog>
 </template>
 
 <script>
@@ -38,8 +45,15 @@ import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
 
 export default {
-    components: {vueDropzone: vue2Dropzone},
+    components: { vueDropzone: vue2Dropzone },
     props: {
+        options: {
+            type: Object,
+            required: true
+        }
+        ,
+        width: String
+        ,
         hint: {
             type: String,
             default: 'Suba o arrastre el archivo'
@@ -119,6 +133,27 @@ export default {
         },
         removeAll() {
             this.$refs.myVueDropzone.removeAllFiles()
+        }
+        ,
+        closeModal() {
+            let vue = this;
+            vue.$emit('onCancel')
+        }
+        ,
+        confirmModal() {
+
+        }
+        ,
+        loadData() {
+
+        }
+        ,
+        resetValidation() {
+
+        }
+        ,
+        loadSelects() {
+
         }
     }
 }
