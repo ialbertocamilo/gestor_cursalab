@@ -16,8 +16,8 @@ class EscuelaController extends Controller
 {
     public function search(Workspace $abconfig, Request $request)
     {
-        $worskpace = session('workspace');
-        $workspace_id = (is_array($worskpace)) ? $worskpace['id'] : null;
+        $workspace = session('workspace');
+        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         $request->workspace_id = $workspace_id;
 

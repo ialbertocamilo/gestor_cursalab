@@ -28,20 +28,27 @@ class School extends Model
 
     protected static function search($request)
     {
-        $query = self::withCount(['courses']);
+        $courses = Course::whereHas('workspace', function ($t) use ($request) {
+            $t->where('workspace_id', $request->workspace_id);
+        })->get('id');
 
-        // if ($request->workspace_id)
-        //     $query->where('school_workspace.workspace_id', $request->workspace_id);
+        $escuelas = School::whereHas('courses', function ($j) use ($courses) {
+            $j->whereIn('course_id', $courses->pluck('id'));
+        })->withCount(['courses' => function ($c) use ($request) {
+            $c->whereHas('workspace', function ($r) use ($request) {
+                $r->where('workspace_id', $request->workspace_id);
+            });
+        }]);
 
         if ($request->q)
-            $query->where('schools.name', 'like', "%$request->q%");
+            $escuelas->where('schools.name', 'like', "%$request->q%");
 
         $field = $request->sortBy ?? 'schools.position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $query->orderBy($field, $sort);
+        $escuelas->orderBy($field, $sort);
 
-        return $query->paginate($request->paginate);
+        return $escuelas->paginate($request->paginate);
     }
 
     protected static function storeRequest($data, $escuela = null)
