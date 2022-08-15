@@ -84,7 +84,7 @@ class Course extends Model
 
     protected static function search($request, $paginate = 15)
     {
-        $q = self::join('course_school', 'course_school.course_id', '=', 'courses.id')->withCount(['topics', 'polls']);
+        $q = self::join('course_school', 'course_school.course_id', '=', 'courses.id')->withCount(['topics', 'polls', 'segments']);
 
         if ($request->school_id)
             $q->where('course_school.school_id', $request->school_id);

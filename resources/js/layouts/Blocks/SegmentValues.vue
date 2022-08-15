@@ -104,7 +104,7 @@
 		<!-- 	<v-col cols="12" md="2" lg="2" class="p-0 vertical-align">
 				<div class="label-tipo_criterio">{{ criterion.name }}</div>
 			</v-col> -->
-			<v-col cols="12" md="12" lg="12" class="p-0 vertical-align">
+			<v-col cols="12" md="12" lg="12" class="p-0 px-3 vertical-align">
 				<!-- <default-autocomplete
 					v-model="criterion.values_selected"
 					:items="criterion.values"
@@ -142,6 +142,7 @@
 				</default-autocomplete> -->
 
 				<DefaultAutocomplete
+							return-object
               dense
               :label="criterion.name"
               v-model="criterion.values_selected"

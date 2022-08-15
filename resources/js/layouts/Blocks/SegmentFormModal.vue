@@ -34,7 +34,7 @@
 
                             <!-- hide-delimiter-background -->
                 <v-carousel
-                    height="500"
+                    height="450"
                     show-arrows-on-hover
                     light
                     v-model="steps"
@@ -146,11 +146,7 @@ export default {
             showConfigTokens: false,
             resourceDefault: {
                 id: null,
-
                 name: null,
-
-
-                zak_token: null,
             },
             // resource: {},
             segments: [],
@@ -232,19 +228,23 @@ export default {
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            // let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = `${base}/store`;
 
-            let method = edit ? 'PUT' : 'POST';
+            // let method = edit ? 'PUT' : 'POST';
+            let method = 'POST';
 
-            console.log('vue.segments STORE')
-            console.log(vue.segments)
+            // console.log('vue.segments STORE')
+            console.log('vue.resource.id')
+            console.log(vue.resource)
+            console.log(vue.resource.id)
             // if (validateForm && validateSelectedModules) {
             if (validateForm ) {
 
                 // let formData = vue.getMultipartFormData(method, vue.segments, fields);
                 let formData = JSON.stringify({ 
                     model_type: vue.model_type,
-                    model_id: vue.model_id,
+                    model_id: vue.resource.id,
                     segments: vue.segments
                 });
 
@@ -272,14 +272,26 @@ export default {
             let vue = this
             vue.errors = []
 
-            vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-            })
+            // vue.$nextTick(() => {
+            //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+            // })
+
+            vue.resource = resource
+
+            // console.log('vue.resource.id')
+            // console.log(vue.resource)
+            // console.log(vue.resource.id)
 
             let base = `${vue.options.base_endpoint}`
             let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
 
-            await vue.$http.get(url, {model_type: vue.model_type, model_id: vue.model_id}).then(({data}) => {
+            console.log('resource.id')
+            console.log(resource)
+            console.log(resource.id)
+
+            url = url + '?model_type=' + vue.model_type + '&model_id=' + resource.id
+
+            await vue.$http.get(url).then(({data}) => {
 
                 let _data = data.data
 

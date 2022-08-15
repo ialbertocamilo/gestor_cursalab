@@ -42,7 +42,7 @@
 		<v-col cols="12" md="12" lg="12">
 		
 			<DefaultAutocomplete
-			return-object
+				return-object
 				dense
 				label="Criterios"
 				v-model="segment.criteria_selected"
@@ -54,6 +54,8 @@
 		    />
 
 		</v-col>
+    
+    	<v-divider class="mx-3"/> 
 
 	<!-- 		<v-col cols="12" md="2" lg="2" class="vertical-align justify-end">
 				<v-btn color="#796aee" class="txt-white-bold" @click="dialog_guardar = true">
