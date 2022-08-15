@@ -12,6 +12,12 @@ class CriterionValue extends BaseModel
         'position', 'active', 'description',
     ];
 
+    // protected $visible = ['id', 'criterion_id', 'parent_id', 
+    //     'value_text', 'value_date', 'value_datetime', 'value_boolean', 'value_decimal', 'value_integer',
+    //     'position', ];
+
+    protected $hidden = ['parent_id', 'exclusive_criterion_id', 'description', 'active', 'created_at', 'updated_at', 'deleted_at'];
+
     public function criterion()
     {
         return $this->belongsTo(Criterion::class);

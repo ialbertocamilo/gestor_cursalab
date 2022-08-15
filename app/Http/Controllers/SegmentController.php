@@ -27,8 +27,9 @@ class SegmentController extends Controller
     {
         $workspace = session('workspace');
 
-        $criteria = Criterion::with(['values' => function($q) use ($workspace){
+        $criteria = Criterion::select('id', 'name', 'position', 'code')->with(['values' => function($q) use ($workspace){
                 $values = CriterionValue::whereRelation('workspaces', 'id', $workspace['id'])->get();
+                // $q->select('id', 'value_text', 'position');
                 $q->whereIn('id', $values->pluck('id')->toArray());
             }])
             ->whereHas('workspaces', function($q) use ($workspace){
@@ -36,22 +37,34 @@ class SegmentController extends Controller
             })
             ->get();
 
-        $segments = Segment::with(['values' => ['type', 'criterion', 'criterion_value']])
-            ->where('model_type', $request->model_type)
-            ->where('model_id', $request->model_id)
-            ->get();
+        if ($request->model_type AND $request->model_id) {
 
-        foreach ($segments as $key => $segment)
-        {
-            // $grouped = $segment->values->groupBy('criterion_id');
-            $criteria_selected = $segment->values->unique('criterion');
+            $segments = Segment::with(['values' => ['type:id,name,code', 'criterion:id,name,code,position', 'criterion_value:id,value_text,code']])
+                ->where('model_type', $request->model_type)
+                ->where('model_id', $request->model_id)
+                ->get();
 
-            $segment->criteria_selected = $criteria_selected;
+            foreach ($segments as $key => $segment)
+            {
+                // $grouped = $segment->values->groupBy('criterion_id');
+                $criteria_selected = $segment->values->unique('criterion');
+
+                $segment->criteria_selected = $criteria_selected;
+            }
+
+        } else {
+            $segments = [];
         }
 
         // SegmentResource::collection($blocks);
 
         return $this->success(compact('criteria', 'segments'));
+    }
+
+    public function store(Request $request)
+    {
+        
+        info($request->all());
     }
 
 }

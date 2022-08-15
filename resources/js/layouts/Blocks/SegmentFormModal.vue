@@ -11,6 +11,21 @@
                 <DefaultErrors :errors="errors" />
 
                 <v-row justify="space-around">
+                    <v-col cols="12" class="d-flex justify-content-end">
+                        <v-btn
+                            class="-"
+                            @click="addSegmentation()"
+                        >
+                            <!-- :disabled="
+                                escuela.curso_seleccionado == null ||
+                                escuela.curso_seleccionado == '' 
+                            " -->
+                            Agregar segmentación
+                        </v-btn>
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around">
                     <!-- <v-col cols="6" class="d-flex justify-content-center"> -->
                         <!-- <DefaultInput v-model="resource.name" label="Nombre" :rules="rules.name" /> -->
                     <!-- </v-col> -->
@@ -49,21 +64,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-center">
-                        <v-btn
-                            class="white-text font-bold btn-agregar-curricula"
-                            color="#1867c0"
-                            @click="addSegmentation()"
-                        >
-                            <!-- :disabled="
-                                escuela.curso_seleccionado == null ||
-                                escuela.curso_seleccionado == '' 
-                            " -->
-                            Agregar segmentación
-                        </v-btn>
-                    </v-col>
-                </v-row>
+                
 
                
 
@@ -124,7 +125,9 @@ export default {
             type: Object,
             required: true
         },
-        width: String
+        width: String,
+        model_type: String,
+        model_id: Number,
     },
     data() {
         return {
@@ -136,14 +139,6 @@ export default {
               'pink darken-2',
               'red lighten-1',
               'deep-purple accent-4',
-            ],
-
-            slides: [
-              'First',
-              'Second',
-              'Third',
-              'Fourth',
-              'Fifth',
             ],
 
 
@@ -185,9 +180,9 @@ export default {
         },
         getNewSegment() {
             return {
-                name: 'XXX',
-                model_type: 'XX',
-                model_id: 'X',
+                // name: 'XXX',
+                // model_type: this.model_type,
+                // model_id: this.model_id,
                 criteria_selected: [],
             }
         },
@@ -222,13 +217,7 @@ export default {
 
             vue.segments.push(this.getNewSegment());
 
-            console.log('vue.segments.length')
-            console.log(vue.segments.length)
-
             vue.steps = vue.segments.length -1
-
-            console.log('vue.segments')
-            console.log(vue.segments)
 
             // vue.nuevaCurricula = {};
         },
@@ -247,10 +236,17 @@ export default {
 
             let method = edit ? 'PUT' : 'POST';
 
+            console.log('vue.segments STORE')
+            console.log(vue.segments)
             // if (validateForm && validateSelectedModules) {
             if (validateForm ) {
 
-                let formData = vue.getMultipartFormData(method, vue.resource, fields);
+                // let formData = vue.getMultipartFormData(method, vue.segments, fields);
+                let formData = JSON.stringify({ 
+                    model_type: vue.model_type,
+                    model_id: vue.model_id,
+                    segments: vue.segments
+                });
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
@@ -283,7 +279,7 @@ export default {
             let base = `${vue.options.base_endpoint}`
             let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
 
-            await vue.$http.get(url).then(({data}) => {
+            await vue.$http.get(url, {model_type: vue.model_type, model_id: vue.model_id}).then(({data}) => {
 
                 let _data = data.data
 
