@@ -3,8 +3,8 @@
 @section('content')
     <v-app>
         @php
-            $worskpace = session('workspace');
-            $workspace_id = is_array($worskpace) ? $worskpace['id'] : null;
+            $workspace = session('workspace');
+            $workspace_id = is_array($workspace) ? $workspace['id'] : null;
         @endphp
         <escuela-layout workspace_id="{{ $workspace_id }}" />
     </v-app>
