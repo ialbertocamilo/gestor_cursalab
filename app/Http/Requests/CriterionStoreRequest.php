@@ -30,6 +30,8 @@ class CriterionStoreRequest extends FormRequest
             'field_id' => 'required',
             'position' => 'required',
             'multiple' => 'required',
+
+            'workspace_id' => 'nullable'
         ];
 
         return $rules;
@@ -39,8 +41,10 @@ class CriterionStoreRequest extends FormRequest
     {
         $data = [];
         $multiple = ($this->multiple === 'true' or $this->multiple === true or $this->multiple === 1 or $this->multiple === '1');
+        $workspace_id = $this->workspace_id ?? session('workspace')['id'] ?? null;
 
         $data['multiple'] = $multiple;
+        $data['workspace_id'] = $workspace_id;
 
         return $this->merge($data)->all();
     }

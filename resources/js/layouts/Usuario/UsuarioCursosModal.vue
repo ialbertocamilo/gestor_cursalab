@@ -7,7 +7,7 @@
         no-padding-card-text
     >
         <template v-slot:content>
-            <v-row justify="space-around" class="mt-5" no-gutters>
+            <v-row justify="space-around" class="mt-5" no-gutters v-if="resource.courses.length>0">
 
                 <v-col cols="12" class="d-flex justify-content-center">
                     <v-chip class="mr-2 my-2" color="primary" label>

@@ -145,6 +145,12 @@ Vue.component("supervisores-layout", require("./layouts/Supervisores/Supervisore
 
 Vue.component("homeview", require("./layouts/General/DashboardView"));
 
+// Workspaces
+
+Vue.component('workspaces-form-layout', require('./layouts/Workspaces/WorkspacesForm'));
+Vue.component('workspaces-list-layout', require('./layouts/Workspaces/WorkspacesList'));
+Vue.component('workspaces-configuration-layout', require('./layouts/Workspaces/WorkspacesConfigurationList'));
+
 // Side Menu
 Vue.component("side-menu", require("./layouts/SideMenu"));
 Vue.component(

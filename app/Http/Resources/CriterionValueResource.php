@@ -15,6 +15,7 @@ class CriterionValueResource extends JsonResource
     public function toArray($request)
     {
         $criterion_value = $this;
+        info($criterion_value->id);
         $column_name = $criterion_value->getCriterionValueColumnName();
 
         return [

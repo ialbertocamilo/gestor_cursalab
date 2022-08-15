@@ -143,8 +143,8 @@ export default {
                     {
                         title:"Criterios",
                         icon:"fas fa-clipboard-list",
-                        path:"/tipo-criterios",
-                        subpaths:["tipo-criterios"],
+                        path:"/criterios",
+                        subpaths:["criterios", "valores"],
                         selected:false,
                         // permission:"criterios.index"
                     },

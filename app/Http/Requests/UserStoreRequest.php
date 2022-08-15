@@ -23,17 +23,16 @@ class UserStoreRequest extends FormRequest
      */
     public function rules()
     {
-        $id = $this->isMethod('post') ? 'NULL' : $this->segment(3);
+        $id = $this->isMethod('post') ? 'NULL' : $this->segment(2);
         $pass = $this->isMethod('post') ? 'required' : 'nullable';
 
         $rules = [
-            'name' => 'required|min:5|max:255',
+            'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:5|max:255',
             'surname' => 'required|min:5|max:255',
             'password' => "{$pass}|max:255",
 
-//            'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
-            'email' => "nullable|email|max:255",
+            'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
             'document' => 'required|min:8',
 
             'criterion_list' => 'nullable',

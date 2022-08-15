@@ -54,10 +54,19 @@ class Criterion extends BaseModel
 
     protected function search($request)
     {
-        $query = self::withCount('values');
+        $criterion_values_id = CriterionValue::whereRelation('workspaces', 'id', $request->workspace_id)->pluck('id')->toArray();
+        $query = self::withCount([
+            'values' => function ($q) use ($request, $criterion_values_id) {
+                if ($request->workspace_id)
+                    $q->whereIn('id', $criterion_values_id);
+            }
+        ]);
 
         if ($request->q)
-            $query->where('nombre', 'like', "%$request->q%");
+            $query->where('name', 'like', "%$request->q%");
+
+        if ($request->workspace_id)
+            $query->whereRelation('workspaces', 'id', $request->workspace_id);
 
         $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -83,6 +92,9 @@ class Criterion extends BaseModel
 
             endif;
 
+            if ($data['workspace_id'])
+                $model->workspaces()->syncWithoutDetaching([$data['workspace_id']]);
+
 
             DB::commit();
 
@@ -97,29 +109,28 @@ class Criterion extends BaseModel
     {
         $validations = collect();
 
-        $type_was_changed = $this->wasFieldTypeChanged($criterion, $request);
+        $type_was_changed = $this->wasFieldIdChanged($criterion, $request);
         if ($type_was_changed['ok']) $validations->push($type_was_changed);
-
 
         $show_confirm = !($validations->where('show_confirm', false)->count() > 0);
 
         return [
-            'validations' => $validations->toArray(),
-            'title' => 'Alerta',
+            'list' => $validations->toArray(),
+            'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
             'show_confirm' => $show_confirm
         ];
     }
 
-    public function wasFieldTypeChanged($criterion, $request): array
+    public function wasFieldIdChanged($criterion, $request): array
     {
-        $temp['ok'] = $criterion->field_id !== $request['field_id'];
+        $temp['ok'] = $criterion->field_id != $request['field_id'];
+
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = "No se puede cambiar el tipo de valor del criterio.";
-        $temp['subtitle'] = "Para poder cambiar el tipo de valor del criterio es necesario quitar o cambiar el requisito en los siguientes cursos:";
+        $temp['subtitle'] = "Para poder cambiar el tipo de valor del criterio es necesario ...";
         $temp['show_confirm'] = false;
-        $temp['type'] = 'field_type_changed';
-
+        $temp['type'] = 'field_id_was_changed';
 
         return $temp;
     }

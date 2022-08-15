@@ -72,20 +72,7 @@ export default {
                 name: this.getRules(['required', 'max:100']),
             },
 
-            modalValidaciones: {},
-            modalValidacionesDefault: {
-                ref: 'TemaValidacionesModal',
-                width: '50vw',
-                open: false,
-                base_endpoint: '',
-                hideConfirmBtn: false,
-                hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'TemasValidaciones',
-                persistent: false,
-                showCloseIcon: true
-            },
+
 
         }
     },
@@ -126,19 +113,11 @@ export default {
                         vue.$emit('onConfirm')
                         this.hideLoader()
                     })
-                    .catch(async ({data}) => {
-                        await vue.cleanModalValidaciones()
-                        vue.loadingActionBtn = false
-                        if (data.validate.show_confirm) {
-                            vue.modalTemasValidaciones.hideConfirmBtn = false
-                            vue.modalTemasValidaciones.hideCancelBtn = false
-                            vue.modalTemasValidaciones.cancelLabel = 'Cancelar'
-                            vue.modalTemasValidaciones.confirmLabel = 'Confirmar'
-                        } else {
-                            vue.modalTemasValidaciones.hideConfirmBtn = true
-                            vue.modalTemasValidaciones.cancelLabel = 'Entendido'
-                        }
-                        await vue.openFormModal(vue.modalTemasValidaciones, data.validate, 'validateUpdateCriterion', data.validate.title)
+                    .catch(async (error) => {
+                        vue.hideLoader()
+
+                        if (error && error.errors)
+                            vue.errors = error.errors
                     })
             }
 
@@ -174,12 +153,7 @@ export default {
         },
         loadSelects() {
         },
-        async cleanModalValidaciones() {
-            let vue = this
-            await vue.$nextTick(() => {
-                vue.modalValidaciones = Object.assign({}, vue.modalValidaciones, vue.modalValidacionesDefault)
-            })
-        },
+
 
     }
 }
