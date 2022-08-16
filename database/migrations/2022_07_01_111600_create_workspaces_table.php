@@ -23,6 +23,8 @@ return new class extends Migration
 
             // columnas de modulo
             $table->string('logo')->nullable();
+            $table->string('logo_negativo')->nullable();
+            $table->string('url_powerbi')->nullable();
             $table->string('plantilla_diploma')->nullable();
 
             $table->string('codigo_matricula')->nullable();
