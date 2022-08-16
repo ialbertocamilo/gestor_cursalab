@@ -1,4 +1,4 @@
-@extends('layouts.appback')
+@extends('layouts.appback', ['fullScreen' => true])
 
 @section('morecss')
 
@@ -9,4 +9,5 @@
     <v-app>
         <workspaces-list-layout></workspaces-list-layout>
     </v-app>
+
 @endsection

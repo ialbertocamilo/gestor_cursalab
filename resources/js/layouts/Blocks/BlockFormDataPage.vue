@@ -94,6 +94,8 @@
         <SegmentFormModal
             :options="modalFormOptions"
             width="65vw"
+            model_type="App\Models\Block"
+            :model_id="null"
             :ref="modalFormOptions.ref"
             @onCancel="closeSimpleModal(modalFormOptions)"
             @onConfirm="closeFormModal(modalFormOptions, dataTable, filters)"

@@ -24,7 +24,7 @@
             <div class="col-8">
 
                 <h1>
-                    Bienvenido(a) a WeConect 2.0
+                    Bienvenido(a) a WeConnect 2.0
                 </h1>
                 <h3>
                     Ingresa a un workspace para administrar  su contenido
@@ -39,8 +39,12 @@
 <!--                    <v-icon class="stats-icon">mdi-logout</v-icon>-->
                 </div>
 
-                <div class="configurations-button-wrapper">
-                    Configuraciones
+                <div class="configurations-button-wrapper"
+                     >
+                    <span @click="toggleConfiguration()"
+                          style="cursor: pointer">
+                        Configuraciones
+                    </span>
                     <v-icon class="stats-icon">mdi-cog</v-icon>
                 </div>
             </div>
@@ -74,7 +78,8 @@
                                      class="logo"
                                      alt="">
 
-                                <div class="edit-button">
+                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
+                                     class="edit-button">
                                     <v-icon color="white" size="16px">
                                         mdi-square-edit-outline
                                     </v-icon>
@@ -106,7 +111,8 @@
                                      class="logo"
                                      alt="">
 
-                                <div class="edit-button">
+                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
+                                     class="edit-button">
                                     <v-icon color="white" size="16px">
                                         mdi-square-edit-outline
                                     </v-icon>
@@ -138,7 +144,8 @@
                                      class="logo"
                                      alt="">
 
-                                <div class="edit-button">
+                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
+                                     class="edit-button">
                                     <v-icon color="white" size="16px">
                                         mdi-square-edit-outline
                                     </v-icon>
@@ -170,7 +177,8 @@
                                      class="logo"
                                      alt="">
 
-                                <div class="edit-button">
+                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
+                                     class="edit-button">
                                     <v-icon color="white" size="16px">
                                         mdi-square-edit-outline
                                     </v-icon>
@@ -203,8 +211,11 @@
             Configurations title
         ======================================== -->
 
-        <v-row class="justify-content-center mt-3 pt-3 pb-3">
-            <div class="col-10">
+        <v-row
+            ref="configurationTitle"
+            class="justify-content-center mt-3 pt-3 pb-3">
+            <div class="col-10"
+                 :class="{ 'd-none': !configurationIsVisible }">
                 <h2>
                     <b>
                         Configuración
@@ -217,7 +228,8 @@
             Configurations
         ======================================== -->
 
-        <v-row class="justify-content-center mb-5">
+        <v-row :class="{ 'd-none': !configurationIsVisible }"
+               class="justify-content-center mb-5">
             <v-col cols="10" class="configurations-wrapper">
                 <v-row class="justify-content-center pt-5">
                     <div class="col-3">
@@ -303,21 +315,101 @@
             </v-col>
         </v-row>
 
+        <!--
+            Modals
+        ======================================== -->
+
+        <WorkspacesForm
+            :options="workspaceFormModalOptions"
+            width="60vw"
+            :ref="workspaceFormModalOptions.ref"
+            @onCancel="closeSimpleModal(workspaceFormModalOptions)"
+            @onConfirm=""
+        />
+
     </div>
 </template>
 
 <script>
-export default {
-    data() {
 
-    }
+import WorkspacesForm from "./WorkspacesForm";
+
+export default {
+    components: {
+        WorkspacesForm
+    },
+    data: () => ({
+        configurationIsVisible: false
+        ,
+        workspaceFormModalOptions: {
+            ref: 'WorkspacesForm',
+            open: false,
+            confirmLabel: 'Guardar'
+        }
+    })
     ,
     mounted() {
 
     }
     ,
     methods: {
+        /**
+         * Show/hide configuration, also when configuration
+         * is shown scroll to its position
+         */
+        toggleConfiguration () {
 
+            // Scroll to configuration's element position,
+            // only if it is hidden, since it value is
+            // gonna change  to visible
+
+            if (!this.configurationIsVisible) {
+
+                // Calculates configuration's position
+
+                let el = this.$refs.configurationTitle;
+                let position = el.getBoundingClientRect().top +
+                               document.documentElement.scrollTop;
+
+                this.scrollToSmoothly(position,500);
+            }
+
+            // Toggle flag to hide configuration
+
+            this.configurationIsVisible = !this.configurationIsVisible;
+        }
+        ,
+        /**
+         * Scroll to provided position with animation
+         *
+         * @param {number} pos position in pixels
+         * @param {number} duration animation duration in miliseconds
+         */
+        scrollToSmoothly(pos, duration) {
+
+            let currentPos = window.pageYOffset;
+            let start = null;
+            if (duration == null) duration = 500;
+            pos = +pos, duration = +duration;
+
+            window.requestAnimationFrame(function step(currentTime) {
+
+                start = !start ? currentTime : start;
+                let progress = currentTime - start;
+
+                if (currentPos < pos) {
+                    window.scrollTo(0, ((pos - currentPos) * progress / duration) + currentPos);
+                } else {
+                    window.scrollTo(0, currentPos - ((currentPos - pos) * progress / duration));
+                }
+
+                if (progress < duration) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    window.scrollTo(0, pos);
+                }
+            });
+        }
     }
 }
 </script>
@@ -325,15 +417,7 @@ export default {
 <style scoped>
 
 .wrapper {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
     background: white;
-    overflow-y: auto;
-    overflow-x: hidden;
-    z-index: 999;
 }
 
 .user-button-wrapper button {
@@ -395,9 +479,16 @@ h3 {
 
 .workspaces-wrapper,
 .configurations-wrapper {
-    padding: 56px 50px 56px 50px;
     background: #F8F8FB;
     border-radius: 6px;
+}
+
+.workspaces-wrapper{
+    padding: 56px 50px 56px 50px;
+}
+
+.configurations-wrapper {
+    padding: 56px 50px 56px 50px;
 }
 
 .workspace .row {
@@ -432,6 +523,12 @@ h3 {
     height: 30px;
     border-bottom-left-radius: 7px;
     cursor: pointer;
+    opacity: 0;
+    transition: opacity 500ms;
+}
+
+.workspace:hover .logo-wrapper .edit-button {
+    opacity: 1;
 }
 
 .workspace .button-wrapper {
@@ -466,23 +563,36 @@ h3 {
     color: white;
 }
 
-.stats {
+.workspace .stats {
     font-family: 'Roboto', serif;
     font-style: normal;
     line-height: 13px;
     background-color: rgba(165, 166, 246, 0.2);
 }
 
-.stats .icon {
+.workspace .stats .number,
+.workspace .stats .label
+{
+    opacity: 0;
+    transition: opacity 800ms;
+}
+
+.workspace:hover .stats .number,
+.workspace:hover .stats .label
+{
+    opacity: 1;
+}
+
+.workspace .stats .icon {
     color: #5d5fef;
 }
 
-.stats .number {
+.workspace .stats .number {
     font-size: 16px;
     font-weight: 800;
 }
 
-.stats .label {
+.workspace .stats .label {
     font-size: 13px;
 }
 

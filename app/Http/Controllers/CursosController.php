@@ -37,6 +37,10 @@ class CursosController extends Controller
 
     public function search(School $escuela, Request $request)
     {
+        $workspace = session('workspace');
+        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
+
+        $request->workspace_id = $workspace_id;
         $request->school_id = $escuela->id;
 
         $cursos = Course::search($request);
@@ -69,8 +73,8 @@ class CursosController extends Controller
     {
         $data = $request->validated();
 
-        $worskpace = session('workspace');
-        $workspace_id = (is_array($worskpace)) ? $worskpace['id'] : null;
+        $workspace = session('workspace');
+        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         $data['workspace_id'] = $workspace_id;
         $data['school_id'] = $escuela->id;
@@ -91,8 +95,8 @@ class CursosController extends Controller
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        $worskpace = session('workspace');
-        $workspace_id = (is_array($worskpace)) ? $worskpace['id'] : null;
+        $workspace = session('workspace');
+        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         $data['workspace_id'] = $workspace_id;
         $data['school_id'] = $escuela->id;
