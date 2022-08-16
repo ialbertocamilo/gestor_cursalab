@@ -54,7 +54,7 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => true,
-            'root'   => env('AWS_CURSALAB_CLIENT_NAME_FOLDER'),
+            'root' => env('AWS_CURSALAB_CLIENT_NAME_FOLDER'),
         ],
 
         'do_spaces' => [
