@@ -5,8 +5,8 @@
 			<v-card>
 				<v-card-title class="default-dialog-title"> Eliminar bloque </v-card-title>
 				<v-card-text class="py-5">
-					¿Está seguro de eliminar esta bloque de segmentación? <br />
-					Esta acción no puede revertirse.
+					¿Está seguro de eliminar este bloque de segmentación? <br />
+					Después de guardar, esta acción no podrá revertirse.
 				</v-card-text>
 				<v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
 					<DefaultModalActionButton
@@ -63,7 +63,7 @@
   	components: {
   		SegmentValues,
   	},
-  	props: ["segment", 'criteria', 'options'],
+  	props: ["segment", "segments", 'criteria', 'options'],
   	data() {
   		return {
   			new_criteria: [],
@@ -142,41 +142,8 @@
   		borrarBloque(segment) {
   			let vue = this;
 
-            let key = segments.find(obj => {
-			  return obj.id === segment.id
-			});
-
-			delete segments[key]
-
-  			// if (vue.segment.segment_id[0] == "n") {
-  			// 	vue.$notification.success(`Bloque eliminado correctamente.`, {
-  			// 		timer: 10,
-  			// 		showLeftIcn: false,
-  			// 		showCloseIcn: true,
-  			// 	});
-  			// 	vue.$emit("borrar_segment");
-  			// 	return;
-  			// }
-  			// vue.dialog_eliminar = false;
-  			// vue.segment.loading = true;
-  			// vue.loading_guardar = true;
-
-  			// axios
-  			// 	.delete(`/segment/eliminar/${vue.segment.segment_id}`)
-  			// 	.then((res) => {
-  			// 		vue.$notification.success(`${res.data.msg}`, {
-  			// 			timer: 10,
-  			// 			showLeftIcn: false,
-  			// 			showCloseIcn: true,
-  			// 		});
-  			// 		vue.segment.loading = false;
-  			// 		vue.loading_guardar = false;
-
-  			// 		vue.$emit("borrar_segment");
-  			// 	})
-  			// 	.catch((err) => {
-  			// 		console.log(err);
-  			// 	});
+  			vue.$emit("borrar_segment", segment);
+  			vue.dialog_eliminar = false;
   		},
   	},
   };

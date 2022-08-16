@@ -46,7 +46,7 @@
 
                                     <v-divider class="mx-12" /> 
 
-                                    <segment :segment="row" :criteria="criteria" class="mx-5" :options="options" />
+                                    <segment :segments="segments" :segment="row" :criteria="criteria" class="mx-5" :options="options" @borrar_segment="borrarBloque"/>
                                <!--  <v-row
                                   class="fill-height"
                                   align="center"
@@ -139,6 +139,15 @@ export default {
             vue.segments.push(this.getNewSegment());
 
             vue.steps = vue.segments.length - 1
+        },
+        borrarBloque(segment) {
+
+            let vue = this;
+            
+            vue.segments = vue.segments.filter((obj, idx) => {
+                 return obj.id != segment.id
+            });
+
         },
         confirmModal() {
             let vue = this
