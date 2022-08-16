@@ -16,12 +16,13 @@ return new class extends Migration
         Schema::create('media', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('external_id')->nullable()->index();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces'); // reference creation
             $table->string('title');
             $table->string('description')->nullable();
             $table->string('file');
             $table->string('ext');
 
-            $table->integer('size')->nullable();
+            $table->unsignedBigInteger('size')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

@@ -24,7 +24,7 @@ class Media extends Model
     protected $table = 'media';
 
     protected $fillable = [
-        'title', 'description', 'file', 'ext', 'status', 'external_id', 'size'
+        'title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id'
     ];
 
     /*
@@ -71,9 +71,10 @@ class Media extends Model
 
         // rand(1000, 9999) old random
         $str_random = Str::random(15);
+        $workspace_id = session('workspace')['id'] ?? NULL;
 
         // workspace creation reference
-        $workspace_code = 'wrkspc-' . (session('workspace')['id'] ?? 'x');
+        $workspace_code = 'wrkspc-' . ($workspace_id ?? 'x');
         $name = $workspace_code . '-' . $name . '-' . date('YmdHis') . '-' . $str_random;
         $fileName = $name . '.' . $ext;
 
@@ -141,6 +142,7 @@ class Media extends Model
             $media->file = $path;
             $media->ext = $ext;
             $media->size = $size;
+            $media->workspace_id = $workspace_id;
             $media->save();
         }
 
