@@ -51,4 +51,5 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
 
     Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
     Route::prefix('topics')->group(base_path('routes/app/topics.php'));
+    // Route::prefix('topics')->group(base_path('routes/app/topics.php'));
 });
