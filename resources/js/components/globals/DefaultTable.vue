@@ -378,7 +378,7 @@
                       <v-expansion-panel-header v-slot="{ open }">
                         <v-row no-gutters>
                           <v-col cols="3">
-                            <v-img src="/img/logo.png" class="" style="width: 85%;" />
+                            <v-img src="/img/logo_color.png" class="" style="width: 85%;" />
                           </v-col>
                           <v-col
                             cols="9"

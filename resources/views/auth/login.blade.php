@@ -11,7 +11,7 @@
   <div class="content_login_form">
     <div class="form-holder has-shadow">
       <div class="logo mt-5">
-        <img src="img/logo.png" alt="..." class="img-fluid">
+        <img src="img/logo_color.png" alt="..." class="img-fluid">
       </div>
 
       <div class="titulo text-center mt-5 mb-5">
