@@ -61,7 +61,7 @@
               <div id="logo">
                 <a href="#">
                   <!-- <img class="img-fluid" src="https://gestor.universidadcorporativafp.com.pe/images/1867057438.png" data-retina="true"> -->
-                  <img class="img-fluid" src="img/logo.png" data-retina="true" width="150"> 
+                  <img class="img-fluid" src="img/logo_color.png" data-retina="true" width="150"> 
                 </a>
               </div>
           </div>
@@ -147,7 +147,7 @@
             </div>
             <div class="credits col-lg-5 col-md-12 text-center">
               <p class=" credits_content">
-                <img src="img/logo.png" class="img-fluid" data-retina="true" alt="" style="filter: brightness(0) invert(1);" width="150">
+                <img src="img/logo_color.png" class="img-fluid" data-retina="true" alt="" style="filter: brightness(0) invert(1);" width="150">
               </p>
             </div>
           </div>

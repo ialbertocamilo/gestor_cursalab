@@ -368,7 +368,7 @@ class Error extends Model
 
     public function errorIsFaviconIco($uri)
     {
-        return $uri == '/favicon.ico';
+        return $uri == '/favicon.png';
     }
 
     public function errorIsJSMaps($uri, $filename)
