@@ -104,7 +104,7 @@ export default {
                 ref: 'TipoCriterioFormModal',
                 open: false,
                 base_endpoint: '/criterios',
-                resource: 'Tipo Criterio',
+                resource: 'Criterio',
                 confirmLabel: 'Guardar',
             },
 

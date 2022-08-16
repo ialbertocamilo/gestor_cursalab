@@ -5,7 +5,7 @@
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
 <!--                Criterios-->
                 <v-spacer/>
-                <DefaultModalButton :label="'Criterio'" @click="openFormModal(modalOptions)"/>
+                <DefaultModalButton :label="'Valor de Criterio'" @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -100,7 +100,7 @@ export default {
                 ref: 'CriterioFormModal',
                 open: false,
                 base_endpoint: '/criterios/' + vue.criterion_id + '/valores',
-                resource: 'Criterio',
+                resource: 'Valor de Criterio',
                 confirmLabel: 'Guardar',
             },
             modalDeleteOptions: {

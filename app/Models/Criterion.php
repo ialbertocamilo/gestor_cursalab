@@ -21,7 +21,7 @@ class Criterion extends BaseModel
     public function sluggable(): array
     {
         return [
-            'code' => ['source' => 'name', 'onUpdate' => true, 'unique' => true]
+//            'code' => ['source' => 'name', 'onUpdate' => true, 'unique' => true]
         ];
     }
 

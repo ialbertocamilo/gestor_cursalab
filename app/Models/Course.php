@@ -27,6 +27,7 @@ class Course extends Model
             'course_school'
         );
     }
+
     public function workspace()
     {
         return $this->belongsToMany(Workspace::class);
@@ -324,5 +325,83 @@ class Course extends Model
         $list[] = "Todos los temas del curso: <strong> {$curso->nombre}</strong>, se encuentra inactivos.";
         $temp['list'] = $list;
         return $temp;
+    }
+
+    protected function getCourseStatusByUser(User $user, Course $course) : array
+    {
+        return [
+            'percentage' => 0,
+            'available' => true,
+            'survey_id' => null,
+            'survey_available' => true,
+            'survey_enabled' => true,
+            'solved_survey' => true,
+            'exists_summary_course' => true,
+            'assigned_topics' => 0,
+            'completed_topics' => 0,
+        ];
+    }
+
+    protected function sortBySchoolAppByUser($user, $courses_id): array
+    {
+        $schools = School::withWhereHas('courses', function ($q) use ($courses_id) {
+            $q->whereIn('id', $courses_id)
+                ->where('active', ACTIVE)
+                ->select('id', 'name', 'description', 'assessable');
+        })
+            ->select('id', 'name')
+            ->get();
+        $data = [];
+
+        foreach ($schools as $school) {
+            $courses = [];
+            $completed = 0;
+            $assigned = 0;
+            $school_percentage = 0;
+            $status = '';
+            $last_course = null;
+
+            foreach ($school->courses as $course) {
+                $topics = [];
+                $assigned++;
+
+                $course_status = self::getCourseStatusByUser($user, $course);
+
+
+                $courses[] = [
+                    'id' => $course->id,
+                    'nombre' => $course->name,
+                    'descripcion' => $course->description,
+                    'imagen' => $course->imagen,
+//                    'requisito_id' => $course->requisito_id,
+                    'c_evaluable' => $course->assessable,
+                    'porcentaje' => $course_status['percentage'],
+                    'disponible' => $course_status['available'],
+//                    'status' => $arr_estados_cursos[$course_status['status']],
+                    'encuesta' => $course_status['survey_available'],
+                    'encuesta_habilitada' => $course_status['survey_enabled'],
+                    'encuesta_resuelta' => $course_status['solved_survey'],
+                    'encuesta_id' => $course_status['survey_id'],
+                    'temas_asignados' => $course_status['exists_summary_course'] ?
+                        $course_status['assigned_topics'] :
+                        $course->topics->where('active', ACTIVE)->count(),
+                    'temas_completados' => $course_status['completed_topics'],
+                    'temas' => $topics
+                ];
+            }
+
+            $data[] = [
+                'categoria_id' => $school->id,
+                'categoria' => $school->name,
+                'completados' => $completed,
+                'asignados' => $assigned,
+                'porcentaje' => $school_percentage,
+                'estado' => $status,
+                'ultimo_curso' => $last_course,
+                "cursos" => $courses
+            ];
+        }
+
+        return $data;
     }
 }
