@@ -26,7 +26,7 @@ class Announcement extends BaseModel
     ];
 
     protected $dates = [
-       'publish_date'
+        'publish_date'
     ];
 
     /*
@@ -83,23 +83,22 @@ class Announcement extends BaseModel
     public function getPublicationDate()
     {
 
-          if ( is_null($this->publish_date) ) {
-              return 'Indefinido';
-          }
+        if (is_null($this->publish_date)) {
+            return 'Indefinido';
+        }
 
         return $this->publish_date->format('d/m/Y');
     }
 
     protected function getPublisheds($module_id = NULL)
     {
-
         return DB::table('announcements')
             ->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date"))
-            ->where('module_id', 'like', '%"' . $module_id . '"%')
+            ->where('config_id', 'like', "%$module_id%")
             ->where('active', ACTIVE)
-            ->where(function($query){
+            ->where(function ($query) {
 
-                $query->where(function($q){
+                $query->where(function ($q) {
                     $q->whereNull('publish_date');
                     $q->orWhereDate('publish_date', '<=', date('Y-m-d'));
                 });

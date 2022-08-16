@@ -183,11 +183,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return Criterion::whereIn('id', $criterion_ids)->get();
     }
 
-    public function user_relations()
-    {
-        return $this->belongsToMany(User::class);
-    }
-
     // public function post()
     // {
     //     return $this->hasMany(Post::class);
@@ -197,36 +192,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
-
-    // public function job_position()
-    // {
-    //    return $this->belongsTo(Taxonomy::class, 'job_position_id');
-    // }
-
-    // public function area()
-    // {
-    //    return $this->belongsTo(Taxonomy::class, 'area_id');
-    // }
-
-    // public function gender()
-    // {
-    //    return $this->belongsTo(Taxonomy::class, 'gender_id');
-    // }
-
-    // public function document_type()
-    // {
-    //    return $this->belongsTo(Taxonomy::class, 'document_type_id');
-    // }
-
-    // public function country()
-    // {
-    //    return $this->belongsTo(Country::class);
-    // }
-
-    // public function district()
-    // {
-    //    return $this->belongsTo(Taxonomy::class, 'district_id');
-    // }
 
     public function getAllPermissionsAttribute()
     {
@@ -261,10 +226,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return true;
     }
 
-    public function isSupervisor() : bool
+    public function isSupervisor(): bool
     {
-        return !!$this->user_relations()->where('relation_type_id', 'entrenador')->first();
+        $supervise_action = Taxonomy::getFirstData('user', 'action', 'supervise');
+        $is_supervisor = DB::table('user_relationships')
+            ->where('user_id', $this->id)
+            ->where('model_type', User::class)
+            ->where('relation_type_id', $supervise_action->id)
+            ->get();
+
+        return count($is_supervisor) > 0;
     }
+
+    public function getTrainingRole()
+    {
+        $user = $this;
+
+//        $training_role =
+
+        return null;
+    }
+
+
 
     protected function storeRequest($data, $user = null)
     {
@@ -503,10 +486,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             endif;
         }
 
-        if($return_courses_id) return $courses_id;
+        if ($return_courses_id) return $courses_id;
 
         $user->courses = $programs;
-//        $user->courses = $courses;
     }
 
     public function validateSegmentationForUser(Collection $user_criterion_values, Collection $segment_values): bool
@@ -516,9 +498,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $intersection->count() === $segment_values->count();
     }
 
-    public function updateUserDeviceVersion()
+    public function updateUserDeviceVersion($request): void
     {
+        $user = $this;
+        ($request['os'] == "android" || $request['os'] == "ios") ? $user->$request['os']++ : $user->windows++;
+        if($request['os'] && $request['version']){
+            $field = "v-{$request['os']}";
+            $user->$field = $request['version'];
+        }
 
+        $user->save();
     }
 
 }
