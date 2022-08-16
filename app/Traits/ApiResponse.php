@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
 trait ApiResponse
@@ -23,6 +24,15 @@ trait ApiResponse
         return response()->json(get_defined_vars(), $http_code);
     }
 
+    public function successApp($data, int $code = ResponseAlias::HTTP_OK): JsonResponse
+    {
+        return response()->json($data, $code);
+    }
+
+    public function errorApp($data, $code = 500)
+    {
+        return response()->json($data, $code);
+    }
     // static function notification(mixed $data, mixed $message, mixed $message_type = 'notification', int $http_code = 200)
     // {
     //     $instance = new self(data: $data, message_text: $message, message_type: $message_type);

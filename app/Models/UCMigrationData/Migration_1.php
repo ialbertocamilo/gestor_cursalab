@@ -4,6 +4,7 @@ namespace App\Models\UCMigrationData;
 
 use App\Models\Block;
 use App\Models\Course;
+use App\Models\Criterio;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\School;
@@ -420,10 +421,13 @@ class Migration_1 extends Model
     {
         $this->insertChunkedData('criterion_values', $data['modulos']);
 
+        $module = Criterion::where('code', 'module')->first();
         $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
-        $temp = [];
-
         $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+
+        DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $module->id]);
+
+        $temp = [];
 
         foreach ($modules_values as $module) {
             $temp[] = ['workspace_id' => $uc_workspace->id, 'criterion_value_id' => $module->id];
@@ -451,77 +455,108 @@ class Migration_1 extends Model
     {
         $this->insertChunkedData('criterion_values', $data['carreras']);
 
+        $career = Criterion::where('code', 'career')->first();
         $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
         $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+        DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $career->id]);
 
         $temp = [];
+        $criterion_values_workspace = [];
         foreach ($data['modulo_carrera'] as $relation) {
             $module = $modules_values->where('external_id', $relation['config_id'])->first();
             $career = $carreras_values->where('external_id', $relation['carrera_id'])->first();
-            //            $carrera = $carreras_values->where('value_text', $relation['nombre'])->first();
 
-            if ($module and $career)
+            if ($module and $career) {
                 $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $career->id];
+                $criterion_values_workspace[] = ['criterion_value_id' => $career->id, 'workspace_id' => $uc_workspace->id];
+            }
         }
 
         $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
+        $this->makeChunkAndInsert($criterion_values_workspace, 'criterion_value_workspace');
     }
 
     public function insertCiclosData($data)
     {
         $this->insertChunkedData('criterion_values', $data['grouped_ciclos']);
 
+        $ciclo = Criterion::where('code', 'ciclo')->first();
         $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
         $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
+        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+
+        DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $ciclo->id]);
 
         $temp = [];
+        $criterion_values_workspace = [];
         foreach ($data['ciclos_all'] as $relation) {
             $ciclo = $ciclos_values->where('value_text', $relation['ciclo_nombre'])->first();
             $career = $carreras_values->where('external_id', $relation['carrera_id'])->first();
 
-            if ($ciclo and $career)
+            if ($ciclo and $career) {
                 $temp[] = ['criterion_value_parent_id' => $career->id, 'criterion_value_id' => $ciclo->id];
+                $criterion_values_workspace[] = ['criterion_value_id' => $ciclo->id, 'workspace_id' => $uc_workspace->id];
+            }
         }
 
         $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
+        $this->makeChunkAndInsert($criterion_values_workspace, 'criterion_value_workspace');
     }
 
     public function insertGruposData($data)
     {
         $this->insertChunkedData('criterion_values', $data['grupos']);
 
+        $group = Criterion::where('code', 'group')->first();
         $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
         $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
+        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+
+        DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $group->id]);
 
         $temp = [];
+        $criterion_values_workspace = [];
         foreach ($data['grupo_carrera'] as $relation) {
             $module = $modules_values->where('external_id', $relation['config_id'])->first();
             $group = $grupos_values->where('external_id', $relation['grupo_id'])->first();
 
-            if ($module and $group)
+            if ($module and $group) {
                 $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $group->id];
+                $criterion_values_workspace[] = ['criterion_value_id' => $group->id, 'workspace_id' => $uc_workspace->id];
+            }
         }
 
         $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
+        $this->makeChunkAndInsert($criterion_values_workspace, 'criterion_value_workspace');
+
     }
 
     public function insertBoticasData($data)
     {
         $this->insertChunkedData('criterion_values', $data['boticas']);
 
+        $botica = Criterion::where('code', 'botica')->first();
         $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
         $boticas_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'botica'))->get();
+        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+
+        DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $botica->id]);
 
         $temp = [];
+        $criterion_values_workspace = [];
         foreach ($data['grupo_botica'] as $relation) {
             $group = $grupos_values->where('external_id', $relation['grupo_id'])->first();
             $botica = $boticas_values->where('external_id', $relation['botica_id'])->first();
 
-            if ($group and $botica)
+            if ($group and $botica){
                 $temp[] = ['criterion_value_parent_id' => $group->id, 'criterion_value_id' => $botica->id];
+                $criterion_values_workspace[] = ['criterion_value_id' => $botica->id, 'workspace_id' => $uc_workspace->id];
+            }
         }
 
         $this->makeChunkAndInsert($temp, 'criterion_value_relationship');
+        $this->makeChunkAndInsert($criterion_values_workspace, 'criterion_value_workspace');
     }
 
     public function insertCriterionUserData($data)
@@ -563,8 +598,8 @@ class Migration_1 extends Model
                     $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $career->id];
 
                     // Push ciclos
-                    foreach ($usuario_matriculas as $matricula){
-                        if ($matricula->estado){
+                    foreach ($usuario_matriculas as $matricula) {
+                        if ($matricula->estado) {
                             $ciclo = $ciclos_values->whereIn('position', $matricula->secuencia_ciclo)->first();
                             $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $ciclo->id];
                         }
@@ -693,7 +728,7 @@ class Migration_1 extends Model
             $course = $courses_value->where('external_id', $curso->id)->first();
             $school = $schools_value->where('external_id', $curso->categoria_id)->first();
 
-            if ($course and $school){
+            if ($course and $school) {
                 $course_school[] = ['course_id' => $course->id, 'school_id' => $school->id];
                 $course_workspace[] = ['course_id' => $course->id, 'workspace_id' => $uc_workspace->id];
             }

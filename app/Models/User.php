@@ -125,6 +125,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(CriterionValue::class);
     }
 
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class);
+    }
+
     public function getFullnameAttribute()
     {
         $fullname = $this->name;
@@ -144,13 +149,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return $lastnames;
     }
-
-    // public function getImageAttribute()
-    // {
-    //     $image = $this->getFirstMediaToForm('logo');
-
-    //     return $image['media_placeholder'] ?? '';
-    // }
 
     public function getAgeAttribute()
     {
@@ -183,6 +181,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $criterion_ids = $this->criterion_values()->get()->pluck('criterion_id')->toArray();
 
         return Criterion::whereIn('id', $criterion_ids)->get();
+    }
+
+    public function user_relations()
+    {
+        return $this->belongsToMany(User::class);
     }
 
     // public function post()
@@ -256,6 +259,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         // return $this->customHasRole('master') || $this->customHasRole('gestor-lamedia');
         return true;
+    }
+
+    public function isSupervisor() : bool
+    {
+        return !!$this->user_relations()->where('relation_type_id', 'entrenador')->first();
     }
 
     protected function storeRequest($data, $user = null)
@@ -375,7 +383,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function setCurrentCourses()
+    public function setCurrentCourses($return_courses_id = false)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text');
@@ -389,6 +397,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('parent', 1)
             ->where('active', ACTIVE)
             ->get();
+
+        $courses_id = [];
 
         $programs = collect();
         foreach ($all_programs as $program) {
@@ -449,6 +459,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                                     'position' => $course->position
                                 ]);
 
+                                $courses_id[] = $course->id;
+
                             else:
 
                                 foreach ($course->segments as $segment) {
@@ -463,6 +475,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                                             'name' => $course->name,
                                             'position' => $course->position
                                         ]);
+
+                                        $courses_id[] = $course->id;
                                         break;
 
                                     endif;
@@ -489,6 +503,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             endif;
         }
 
+        if($return_courses_id) return $courses_id;
+
         $user->courses = $programs;
 //        $user->courses = $courses;
     }
@@ -499,4 +515,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return $intersection->count() === $segment_values->count();
     }
+
+    public function updateUserDeviceVersion()
+    {
+
+    }
+
 }

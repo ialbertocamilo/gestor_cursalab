@@ -1,10 +1,7 @@
 <?php
 
-use App\Http\Controllers\Test\TestController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\ApiRest\AuthController;
 use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\AuthenticationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,17 +35,20 @@ use App\Http\Controllers\AuthenticationController;
 
 // });
 
-Route::group(['prefix' => 'rest'], function () {
+Route::group(['prefix' => 'auth'], function () {
 
-    Route::prefix('meetings')->group(base_path('routes/app/meetings.php'));
+    Route::post('/login', [AuthController::class, 'login']);
+
 });
 
-Route::controller(TestController::class)->group(function() {
+Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
 
-    Route::get('/test/users', 'users');
-    Route::get('/test/workspaces', 'workspaces');
-    Route::get('/test/schools', 'schools');
-    Route::get('/test/courses', 'courses');
+    Route::prefix('anuncios')->group(base_path('routes/app/announcements.php'));
 
-    Route::get('/test/blocks', 'blocks');
+
+    Route::prefix('meetings')->group(base_path('routes/app/meetings.php'));
+
+
+    Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
+    Route::prefix('topics')->group(base_path('routes/app/topics.php'));
 });

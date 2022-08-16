@@ -30,12 +30,18 @@ return new class extends Migration
 
             $table->string('document')->nullable();
 
-
             $table->string('password');
 
             $table->boolean('active')->nullable()->default(true);
 
             $table->string('token_firebase')->nullable();
+
+            $table->string('v_android')->nullable();
+            $table->string('v_ios')->nullable();
+            $table->string('android')->nullable();
+            $table->string('ios')->nullable();
+            $table->string('huawei')->nullable();
+            $table->string('windows')->nullable();
 
             $table->rememberToken();
 
