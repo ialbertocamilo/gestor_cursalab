@@ -7,7 +7,7 @@ class SegmentValue extends BaseModel
     protected $table = 'segments_values';
 
     protected $fillable = [
-        'name', 'criterion_id', 'criterion_value_id', 'type_id', 'starts_at', 'finishes_at'
+        'criterion_id', 'criterion_value_id', 'type_id', 'starts_at', 'finishes_at'
     ];
 
     // public function courses()

@@ -56,6 +56,7 @@
                 @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
                 @delete="deleteCurso($event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
 
             />
             <CursosEncuestaModal
@@ -98,6 +99,17 @@
                 @onCancel="closeFormModal(modalStatusOptions, dataTable, filters); closeFormModal(modalStatusOptions); closeFormModal(modalDeleteOptions)"
                 @onError="onErrorUpdateStatusCurso"
             />
+
+            <SegmentFormModal
+                :options="modalFormSegmentationOptions"
+                width="55vw"
+                model_type="App\Models\Course"
+                :model_id="null"
+                :ref="modalFormSegmentationOptions.ref"
+                @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -108,9 +120,10 @@ import MoverCursoModal from "./MoverCursoModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
+import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
-    components: {CursosEncuestaModal, MoverCursoModal, DialogConfirm, CursoValidacionesModal, DefaultStatusModal},
+    components: {CursosEncuestaModal, MoverCursoModal, DialogConfirm, CursoValidacionesModal, DefaultStatusModal, SegmentFormModal},
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name'],
     data() {
         let vue = this
@@ -142,6 +155,13 @@ export default {
                         type: 'action',
                         count: 'encuesta_count',
                         method_name: 'encuesta'
+                    },
+                    {
+                        text: "Segmentación",
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'segments_count',
+                        method_name: 'segmentation'
                     },
                     {
                         text: "Actualizar Estado",
@@ -215,6 +235,14 @@ export default {
                 confirmLabel: 'Confirmar',
                 cancelLabel: 'Cancelar',
                 resource: 'CursosValidaciones',
+            },
+            modalFormSegmentationOptions: {
+                ref: 'SegmentFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: '/segments',
+                confirmLabel: 'Guardar',
+                resource: 'segmentación',
             },
         }
     },

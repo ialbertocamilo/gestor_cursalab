@@ -1,14 +1,14 @@
 <template>
 	<div>
 		<v-row style="padding: 10px 0px 10px 0px !important" v-if="criterion.input_type == 'Fecha'">
-			<v-col cols="12" md="2" lg="2" class="p-0 vertical-align">
+			<!-- <v-col cols="12" md="2" lg="2" class="p-0 vertical-align">
 				<div class="label-tipo_criterio">{{ criterion.name }}</div>
 			</v-col>
 			<v-col cols="12" md="1" lg="1" class="p-0 vertical-align">
 				<div class="label-fecha">Rangos:</div>
-			</v-col>
+			</v-col> -->
 
-			<v-col cols="12" md="2" lg="2" class="p-0 vertical-align">
+			<v-col cols="12" md="3" lg="3" class="p-0 vertical-align">
 				<date-picker
 					confirm
 					confirm-text="Agregar rango"
@@ -23,7 +23,7 @@
 					value-type="YYYY-MM-DD"
 				></date-picker>
 			</v-col>
-			<v-col cols="12" md="7" lg="7" class="p-0 vertical-align">
+			<v-col cols="12" md="9" lg="9" class="p-0 vertical-align">
 				<default-autocomplete
 					attach
 					dense
@@ -56,9 +56,9 @@
 					</template>
 				</default-autocomplete>
 			</v-col>
-			<v-col cols="12" md="2" lg="2" class="p-0 vertical-align"> </v-col>
+			<!-- <v-col cols="12" md="2" lg="2" class="p-0 vertical-align"> </v-col> -->
 
-			<v-col cols="12" md="1" lg="1" class="p-0 vertical-align">
+			<!-- <v-col cols="12" md="1" lg="1" class="p-0 vertical-align">
 				<div class="label-fecha">Fechas:</div>
 			</v-col>
 			<v-col cols="12" md="9" lg="9" class="p-0 vertical-align">
@@ -97,60 +97,24 @@
 						</span>
 					</template>
 				</default-autocomplete>
-			</v-col>
+			</v-col> -->
 		</v-row>
 
 		<v-row style="padding: 10px 0px 10px 0px !important" v-else>
-		<!-- 	<v-col cols="12" md="2" lg="2" class="p-0 vertical-align">
-				<div class="label-tipo_criterio">{{ criterion.name }}</div>
-			</v-col> -->
-			<v-col cols="12" md="12" lg="12" class="p-0 vertical-align">
-				<!-- <default-autocomplete
-					v-model="criterion.values_selected"
-					:items="criterion.values"
-					attach
-					dense
-					outlined
-					color="#796aee"
-					hide-details="auto"
-					clear-icon="mdi-cancel"
-					placeholder="Escriba un texto para filtrar los criterios X"
-					item-text="name"
-					item-value="id"
-					multiple
-					return-object
-					:search-input.sync="search"
-					:loading="criterion.loading"
-					no-data-text="No hay criterios que coincidan con el filtro, prueba con otro."
-					chips
-				>
-					<template v-slot:selection="{ item, index }">
-						<v-chip
-							style="font-size: 0.9rem !important; color: white !important"
-							color="#796aee"
-							v-if="index < 3"
-							small
-						>
-							{{ item.name }}
-						</v-chip>
-						<span v-if="index === 3" class="grey--text caption">
-							(+{{ criterion.values_selected.length - 3 }} seleccionado{{
-								criterion.values_selected.length - 3 > 1 ? "s" : ""
-							}})
-						</span>
-					</template>
-				</default-autocomplete> -->
+
+			<v-col cols="12" md="12" lg="12" class="p-0 px-3 vertical-align">
 
 				<DefaultAutocomplete
-              dense
-              :label="criterion.name"
-              v-model="criterion.values_selected"
-              :items="criterion.values"
-              multiple
-              item-text="value_text"
-              item-id="id"
-              :count-show-values="4"
-         />
+					return-object
+		              dense
+		              :label="criterion.name"
+		              v-model="criterion.values_selected"
+		              :items="criterion.values"
+		              multiple
+		              item-text="value_text"
+		              item-id="id"
+		              :count-show-values="4"
+		         />
 
 			</v-col>
 		</v-row>

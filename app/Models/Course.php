@@ -88,7 +88,7 @@ class Course extends Model
             $t->where('workspace_id', $request->workspace_id);
         })->whereHas('schools', function ($t) use ($request) {
             $t->where('school_id', $request->school_id);
-        })->withCount(['topics', 'polls']);
+        })->withCount(['topics', 'polls', 'segments']);
 
         if ($request->q)
             $q->where('courses.name', 'like', "%$request->q%");
