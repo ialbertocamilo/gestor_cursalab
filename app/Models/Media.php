@@ -65,9 +65,16 @@ class Media extends Model
             $name = Str::slug($name);
         }
 
+        $name = Str::of($name)->limit(200);
+
         // Generate filename
 
-        $name = $name . '-' . date('YmdHis') . '-' . rand(1000, 9999);
+        // rand(1000, 9999) old random
+        $str_random = Str::random(15);
+
+        // workspace creation reference
+        $workspace_code = 'wrkspc-' . (session('workspace')['id'] ?? 'x');
+        $name = $workspace_code . '-' . $name . '-' . date('YmdHis') . '-' . $str_random;
         $fileName = $name . '.' . $ext;
 
         // Get file size, Laravel returns the value in bytes,
