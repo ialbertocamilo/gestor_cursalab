@@ -11,7 +11,7 @@
 				<v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
 					<DefaultModalActionButton
                     	@cancel="dialog_eliminar = false"
-                    	@confirm="borrarBloque"
+                    	@confirm="borrarBloque(segment)"
                     />
 				</v-card-actions>
 			</v-card>
@@ -139,37 +139,44 @@
 
             return 0;
         },
-  		borrarBloque() {
+  		borrarBloque(segment) {
   			let vue = this;
-  			if (vue.segment.segment_id[0] == "n") {
-  				vue.$notification.success(`Bloque eliminado correctamente.`, {
-  					timer: 10,
-  					showLeftIcn: false,
-  					showCloseIcn: true,
-  				});
-  				vue.$emit("borrar_segment");
-  				return;
-  			}
-  			vue.dialog_eliminar = false;
-  			vue.segment.loading = true;
-  			vue.loading_guardar = true;
 
-  			axios
-  				.delete(`/segment/eliminar/${vue.segment.segment_id}`)
-  				.then((res) => {
-  					vue.$notification.success(`${res.data.msg}`, {
-  						timer: 10,
-  						showLeftIcn: false,
-  						showCloseIcn: true,
-  					});
-  					vue.segment.loading = false;
-  					vue.loading_guardar = false;
+            let key = segments.find(obj => {
+			  return obj.id === segment.id
+			});
 
-  					vue.$emit("borrar_segment");
-  				})
-  				.catch((err) => {
-  					console.log(err);
-  				});
+			delete segments[key]
+
+  			// if (vue.segment.segment_id[0] == "n") {
+  			// 	vue.$notification.success(`Bloque eliminado correctamente.`, {
+  			// 		timer: 10,
+  			// 		showLeftIcn: false,
+  			// 		showCloseIcn: true,
+  			// 	});
+  			// 	vue.$emit("borrar_segment");
+  			// 	return;
+  			// }
+  			// vue.dialog_eliminar = false;
+  			// vue.segment.loading = true;
+  			// vue.loading_guardar = true;
+
+  			// axios
+  			// 	.delete(`/segment/eliminar/${vue.segment.segment_id}`)
+  			// 	.then((res) => {
+  			// 		vue.$notification.success(`${res.data.msg}`, {
+  			// 			timer: 10,
+  			// 			showLeftIcn: false,
+  			// 			showCloseIcn: true,
+  			// 		});
+  			// 		vue.segment.loading = false;
+  			// 		vue.loading_guardar = false;
+
+  			// 		vue.$emit("borrar_segment");
+  			// 	})
+  			// 	.catch((err) => {
+  			// 		console.log(err);
+  			// 	});
   		},
   	},
   };

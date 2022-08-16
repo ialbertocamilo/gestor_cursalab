@@ -131,9 +131,6 @@ export default {
         },
         getNewSegment() {
             return {
-                // name: 'XXX',
-                // model_type: this.model_type,
-                // model_id: this.model_id,
                 criteria_selected: [],
             }
         },
