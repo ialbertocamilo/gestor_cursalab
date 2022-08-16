@@ -16,6 +16,7 @@ class CursoSearchResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'name' => $this->name,
             'nombre' => $this->name,
             'image' => space_url($this->imagen),
             'temas_count' => $this->topics_count,

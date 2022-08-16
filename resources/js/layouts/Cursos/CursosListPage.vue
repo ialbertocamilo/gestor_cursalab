@@ -56,7 +56,7 @@
                 @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
                 @delete="deleteCurso($event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', 'Segmentación')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
 
             />
             <CursosEncuestaModal
@@ -239,6 +239,7 @@ export default {
             modalFormSegmentationOptions: {
                 ref: 'SegmentFormModal',
                 open: false,
+                persistent: true,
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
                 resource: 'segmentación',

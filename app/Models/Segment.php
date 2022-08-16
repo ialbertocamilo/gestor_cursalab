@@ -54,11 +54,8 @@ class Segment extends BaseModel
             $segments = Segment::with(['values' => ['type:id,name,code', 'criterion:id,name,code,position', 'criterion_value:id,value_text']])
                 ->where('model_type', $model_type)
                 ->where('model_id', $model_id)
-                // ->where('model_id', 188)
                 ->get();
 
-            // info('segments');
-            // info($segments);
 
             foreach ($segments as $key => $segment)
             {
@@ -69,23 +66,10 @@ class Segment extends BaseModel
                 // $grouped = [];
                 // $grouped = $segment->values->where('criterion_id', $criterion->id)->pluck('criterion_value_id')->toArray();
 
-                // foreach ($values as $key => $value) {
-                //     $grouped[$value->criterion_id] = $value['criterion_value_id'];
-                //     // code...
-                // }
-                // $grouped = $values->groupBy('criterion_id');
-
-                // info('grouped');
-                // info($grouped);
-                // $grouped = [];
-
                 foreach($criteria_selected AS $key => $criterion)
                 {
                     // $grouped = $segment->values->where('criterion_id', $criterion['id'])->pluck('criterion_value_id')->toArray();
                     $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
-
-                    info('grouped');
-                    info($grouped);
 
                     $segment_values_selected = [];
 
@@ -95,12 +79,6 @@ class Segment extends BaseModel
 
                         $segment_values_selected[] = $new;
                     }
-
-
-                    // info('segment');
-                    // info($segment->id);
-                    info('segment_values_selected');
-                    info($segment_values_selected);
 
                     $criteria_selected[$key]['values'] = $criteria->where('id', $criterion['id'])->first()->values ?? [];
                     $criteria_selected[$key]['values_selected'] = $segment_values_selected ?? [];

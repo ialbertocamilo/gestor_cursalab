@@ -3,10 +3,10 @@
                    :width="width"
                    @onCancel="closeModal"
                    @onConfirm="confirmModal"
-                   persistent
+                   :persistent="true"
     >
         <template v-slot:content>
-            <v-form ref="accountForm" class="--mb-15">
+            <v-form ref="segmentForm" class="--mb-15">
 
                 <DefaultErrors :errors="errors" />
 
@@ -16,86 +16,55 @@
                             class="-"
                             @click="addSegmentation()"
                         >
-                            <!-- :disabled="
-                                escuela.curso_seleccionado == null ||
-                                escuela.curso_seleccionado == '' 
-                            " -->
-                            Agregar segmentación
+                            Agregar bloque
                         </v-btn>
                     </v-col>
                 </v-row>
 
                 <v-row justify="space-around">
-                    <!-- <v-col cols="6" class="d-flex justify-content-center"> -->
-                        <!-- <DefaultInput v-model="resource.name" label="Nombre" :rules="rules.name" /> -->
-                    <!-- </v-col> -->
+
                     <v-col cols="12" class="d-flex justify-content-center">
-                        <!-- <DefaultInput v-model="resource.email" label="Correo" :rules="rules.email" /> -->
 
-                            <!-- hide-delimiter-background -->
-                <v-carousel
-                    height="450"
-                    show-arrows-on-hover
-                    light
-                    v-model="steps"
-                  >
-                    <v-carousel-item
-                      v-for="(row, i) in segments"
-                      :key="i"
-                    >
-
-                        <!-- :color="colors[0]" -->
-                        <v-sheet
+                        <!-- hide-delimiter-background -->
+                        <v-carousel
                             height="100%"
-                        >
-                            <segment :segment="row" :criteria="criteria" class="mx-5" :options="options" />
-                       <!--  <v-row
-                          class="fill-height"
-                          align="center"
-                          justify="center"
-                        >
-                          <div class="text-h2">
-                            {{ slide }} Slide
-                          </div>
-                        </v-row> -->
-                      </v-sheet>
-                    </v-carousel-item>
-                  </v-carousel>
+                            show-arrows-on-hover
+                            light
+                            v-model="steps"
+                            hide-delimiters
+                          >
+                            <v-carousel-item
+                              v-for="(row, i) in segments"
+                              :key="i"
+                            >
+                                <v-sheet
+                                    height="100%"
+                                >
+                                    <div class="text-h6 text-center">
+                                        Bloque {{ i + 1 }} / {{ segments.length }} 
+                                    </div>
+
+                                    <v-divider class="mx-12" /> 
+
+                                    <segment :segment="row" :criteria="criteria" class="mx-5" :options="options" />
+                               <!--  <v-row
+                                  class="fill-height"
+                                  align="center"
+                                  justify="center"
+                                >
+                                  <div class="text-h2">
+                                    {{ slide }} Slide
+                                  </div>
+                                </v-row> -->
+                              </v-sheet>
+
+                            </v-carousel-item>
+                        </v-carousel>
                     </v-col>
                 </v-row>
 
-                
-
-               
-
-             <!--    <v-subheader class="mt-5 px-0"><strong>Configuración de tokens</strong></v-subheader>
-
-                <v-divider class="mt-0" />
-
-                <v-row justify="space-around">
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.key" label="API Key" :rules="rules.key" />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.secret" label="API Secret" :rules="rules.secret" />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.token" label="Token" :rules="rules.token" />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.refresh_token" label="Refresh token" :rules="rules.refresh_token" />
-                    </v-col>
-                </v-row> -->
-
                 <!-- <v-subheader class="mt-5"><strong>Datos adicionales</strong></v-subheader> -->
 
-  <!--               <v-divider class="mx-3" />
-
-                <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultTextArea v-model="resource.description" label="Descripción" :rows="4" />
-                    </v-col>
-                </v-row> -->
 
 <!--                 <v-row align="center" align-content="center">
                     <v-col cols="6" class="--d-flex --justify-content-start">
@@ -133,15 +102,6 @@ export default {
         return {
             steps: 0,
 
-            colors: [
-              'indigo',
-              'warning',
-              'pink darken-2',
-              'red lighten-1',
-              'deep-purple accent-4',
-            ],
-
-
             errors: [],
             showConfigTokens: false,
             resourceDefault: {
@@ -153,12 +113,7 @@ export default {
             criteria: [],
 
             rules: {
-                // text: this.getRules(['required', 'max:255']),
-                name: this.getRules(['required', 'max:255']),
                 // name: this.getRules(['required', 'max:255']),
-                service: this.getRules(['required']),
-                plan: this.getRules(['required']),
-                type: this.getRules(['required']),
             },
         }
     },
@@ -172,7 +127,7 @@ export default {
         },
         resetValidation() {
             let vue = this
-            vue.$refs.accountForm.resetValidation()
+            vue.$refs.segmentForm.resetValidation()
         },
         getNewSegment() {
             return {
@@ -184,38 +139,9 @@ export default {
         },
         async addSegmentation() {
             let vue = this;
-            // let curso_seleccionado = vue.modulos[index1].categorias[index2].curso_seleccionado;
-            // // 
-            // let modulo_id = vue.modulos[index1].id;
-            // let tipos_criterios = [];
-            // await axios
-            //     .get(`/curricula/tc_s/${vue.modulos[index1].id}`)
-            //     .then((res) => {
-            //         tipos_criterios = res.data.data;
-            //     })
-            //     .catch((err) => {
-            //         console.log(err);
-            //     });
-
-            // let id = vue.modulos[index1].categorias[index2].curricula.length + 1;
-
-            // vue.nuevaCurricula = Object.assign({}, this.nuevaCurricula, {
-            //     curricula_id: `n-${id}`,
-            //     curso_id: curso_seleccionado,
-            //     tipos_criterio_seleccionado: [],
-            //     tipos_criterios: tipos_criterios,
-            //     modulo_id: modulo_id,
-            //     loading: false,
-            // });
-
-            // console.log('vue.segment')
-            // console.log(vue.segment)
-
             vue.segments.push(this.getNewSegment());
 
-            vue.steps = vue.segments.length -1
-
-            // vue.nuevaCurricula = {};
+            vue.steps = vue.segments.length - 1
         },
         confirmModal() {
             let vue = this
@@ -224,7 +150,7 @@ export default {
 
             this.showLoader()
 
-            const validateForm = vue.validateForm('accountForm')
+            const validateForm = vue.validateForm('segmentForm')
             const edit = vue.options.action === 'edit'
 
             let base = `${vue.options.base_endpoint}`
@@ -234,10 +160,6 @@ export default {
             // let method = edit ? 'PUT' : 'POST';
             let method = 'POST';
 
-            // console.log('vue.segments STORE')
-            console.log('vue.resource.id')
-            console.log(vue.resource)
-            console.log(vue.resource.id)
             // if (validateForm && validateSelectedModules) {
             if (validateForm ) {
 
@@ -264,9 +186,6 @@ export default {
         resetSelects() {
             let vue = this
             // Selects independientes
-            vue.selects.types = []
-            vue.selects.selects = []
-            vue.selects.plans = []
         },
         async loadData(resource) {
             let vue = this
@@ -278,16 +197,8 @@ export default {
 
             vue.resource = resource
 
-            // console.log('vue.resource.id')
-            // console.log(vue.resource)
-            // console.log(vue.resource.id)
-
             let base = `${vue.options.base_endpoint}`
             let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
-
-            console.log('resource.id')
-            console.log(resource)
-            console.log(resource.id)
 
             url = url + '?model_type=' + vue.model_type + '&model_id=' + resource.id
 

@@ -49,11 +49,6 @@ class SegmentController extends Controller
 
     public function store(Request $request)
     {
-        info($request->all());
-
-        // return true;
-
-
         foreach ($request->segments as $key => $segment_row) {
 
             $data = [
@@ -78,12 +73,9 @@ class SegmentController extends Controller
                         'type_id' => NULL,
                     ];
                 }
-                // $segment->values()->createMany($values);
             }
 
-            info('values');
-            info($values);
-
+            // $segment->values()->createMany($values);
             $segment->values()->sync($values);
         }
     }
