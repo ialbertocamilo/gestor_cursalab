@@ -15,7 +15,8 @@ return new class extends Migration
     {
         Schema::create('user_relationships', function (Blueprint $table) {
             $table->foreignId('user_id')->nullable()->constrained('users');
-            $table->foreignId('user_associated_id')->nullable()->constrained('users');
+//            $table->foreignId('user_associated_id')->nullable()->constrained('users');
+            $table->morphs('model');
 
             $table->foreignId('relation_type_id')->nullable()->constrained('taxonomies');
         });

@@ -12,7 +12,6 @@ class RestAnnouncementController extends Controller
     public function announcements()
     {
         $user = Auth::user();
-
         $anuncios = Announcement::getPublisheds($user->workspace?->id);
 
         return $this->successApp(['data' => $anuncios]);

@@ -38,10 +38,10 @@ return new class extends Migration
 
             $table->string('v_android')->nullable();
             $table->string('v_ios')->nullable();
-            $table->string('android')->nullable();
-            $table->string('ios')->nullable();
-            $table->string('huawei')->nullable();
-            $table->string('windows')->nullable();
+            $table->string('android')->default(0);
+            $table->string('ios')->default(0);
+            $table->string('huawei')->default(0);
+            $table->string('windows')->default(0);
 
             $table->rememberToken();
 

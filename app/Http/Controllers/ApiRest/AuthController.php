@@ -18,8 +18,8 @@ class AuthController extends Controller
 
             $username = strip_tags($data['user']);
             $password = strip_tags($data['password']);
-            $os = strip_tags($data['os'] ?? '');
-            $version = strip_tags($data['version'] ?? '');
+            $data['os'] = strip_tags($data['os'] ?? '');
+            $data['version'] = strip_tags($data['version'] ?? '');
             $credentials = ['password' => $password];
             $key_search = str_contains($username, '@') ? 'email' : 'document';
             $credentials[$key_search] = $username;
@@ -27,7 +27,7 @@ class AuthController extends Controller
             if (!Auth::attempt($credentials))
                 return $this->error('No autorizado.', 401);
 
-            return $this->respondWithDataAndToken();
+            return $this->respondWithDataAndToken($data);
 
         } catch (Exception $e) {
             info($e);
@@ -36,7 +36,7 @@ class AuthController extends Controller
         }
     }
 
-    private function respondWithDataAndToken()
+    private function respondWithDataAndToken($data)
     {
         $user = Auth::user();
         $user->tokens()->delete();
@@ -45,13 +45,8 @@ class AuthController extends Controller
         if (!$user->active)
             return $this->error("Usuario inactivo.", http_code: 401);
 
-        $user->updateUserDeviceVersion();
-        try {
-            // Actualizar tabla usuario_versiones
-            UsuarioVersiones::actualizar_version_y_visita($user->id, $os, $version);
-        } catch (\Throwable $th) {
-            info($th);
-        }
+        $user->load('criterion_values:id,value_text');
+        $user->updateUserDeviceVersion($data);
 
 //        $config_data = Abconfig::with('main_menu', 'side_menu')->select('id', 'color', 'duracion_dias', 'logo', 'isotipo', 'mod_agrupacion', 'mod_cronometro', 'mod_encuestas', 'mod_evaluaciones', 'mod_mainmenu', 'mod_sidemenu', 'mod_tipovalidacion', 'plantilla_diploma', 'mod_push', 'push_code')
 //            ->where('id', $user->config_id)
@@ -59,18 +54,19 @@ class AuthController extends Controller
 //        $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
 //        $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
 //        $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
+
         $supervisor = $user->isSupervisor();
 
         $user_data = [
             "id" => $user->id,
             "dni" => $user->document,
             "nombre" => $user->name,
-            'criteria' => $user->load('criterion_values:id,value_text'),
+            'criteria' => $user->criterion_values,
 //            "cargo" => $user->cargo,
 //            "sexo" => $user->sexo,
 //            "botica" => $user->botica,
 //            "grupo" => $user->grupo,
-//            'rol_entrenamiento' => $user->rol_entrenamiento,
+            'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
 //            'carrera' => $carrera,
 //            'ciclo' => $ciclo
