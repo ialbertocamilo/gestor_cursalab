@@ -22,13 +22,15 @@ class CheckRol
     {
         $user = auth()->user();
         $access = false;
-        foreach ($checkrol as $rol) {
-            if ($user->isAn($rol)) {
-                $access = true;
+        if (!$user->isAn('super-user')) {
+            foreach ($checkrol as $rol) {
+                if ($user->isAn($rol)) {
+                    $access = true;
+                }
             }
-        }
-        if (!$access) {
-            Redirect::to('home')->send();
+            if (!$access) {
+                Redirect::to('home')->send();
+            }
         }
         return $next($request);
     }

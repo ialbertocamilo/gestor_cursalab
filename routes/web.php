@@ -52,59 +52,59 @@ Route::get('informacion_app', function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::prefix('/')->middleware('checkrol:super-user,admin,content-manager,trainer,reports')->group(base_path('routes/cms/temp.php'));
+    Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
 
-    Route::prefix('general')->middleware('checkrol:super-user,admin,content-manager,trainer,reports')->group(base_path('routes/cms/general.php'));
-    Route::prefix('common')->middleware('checkrol:super-user,admin,content-manager,trainer,reports')->group(base_path('routes/cms/common.php'));
-
-
-
-    Route::prefix('anuncios')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/anuncios.php'));
-    Route::prefix('encuestas')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/encuestas.php'));
-    Route::prefix('multimedia')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/multimedia.php'));
-    Route::prefix('glosario')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/glosario.php'));
-    Route::prefix('vademecum')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/vademecum.php'));
-    Route::prefix('videoteca')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/videoteca.php'));
-    Route::prefix('tags')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/tags.php'));
+    Route::prefix('general')->middleware('checkrol:admin')->group(base_path('routes/cms/general.php'));
+    Route::prefix('common')->middleware('checkrol:admin')->group(base_path('routes/cms/common.php'));
 
 
-    Route::prefix('ayudas')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/ayudas.php'));
-    Route::prefix('preguntas-frecuentes')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/preguntas_frecuentes.php'));
-    Route::prefix('notificaciones_push')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/notificaciones_push.php'));
-    Route::prefix('soporte')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/soporte.php'));
+
+    Route::prefix('anuncios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/anuncios.php'));
+    Route::prefix('encuestas')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/encuestas.php'));
+    Route::prefix('multimedia')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/multimedia.php'));
+    Route::prefix('glosario')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/glosario.php'));
+    Route::prefix('vademecum')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/vademecum.php'));
+    Route::prefix('videoteca')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/videoteca.php'));
+    Route::prefix('tags')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/tags.php'));
 
 
-    Route::prefix('users')->middleware('checkrol:trainer,super-user,admin')->group(base_path('routes/cms/users.php'));
-    Route::prefix('permisos')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/permisos.php'));
-    Route::prefix('roles')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/roles.php'));
+    Route::prefix('ayudas')->middleware('checkrol:admin')->group(base_path('routes/cms/ayudas.php'));
+    Route::prefix('preguntas-frecuentes')->middleware('checkrol:admin')->group(base_path('routes/cms/preguntas_frecuentes.php'));
+    Route::prefix('notificaciones_push')->middleware('checkrol:admin')->group(base_path('routes/cms/notificaciones_push.php'));
+    Route::prefix('soporte')->middleware('checkrol:admin')->group(base_path('routes/cms/soporte.php'));
 
 
-    Route::prefix('errores')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/errores.php'));
-    Route::prefix('incidencias')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/incidencias.php'));
-    Route::prefix('auditoria')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/audits.php'));
+    Route::prefix('users')->middleware('checkrol:trainer,admin')->group(base_path('routes/cms/users.php'));
+    Route::prefix('permisos')->middleware('checkrol:admin')->group(base_path('routes/cms/permisos.php'));
+    Route::prefix('roles')->middleware('checkrol:admin')->group(base_path('routes/cms/roles.php'));
 
 
-    Route::prefix('usuarios')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/usuarios.php'));
-    Route::prefix('cargos')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/cargos.php'));
-    Route::prefix('boticas')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/boticas.php'));
-    Route::prefix('criterios')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/criteria.php'));
-    Route::prefix('supervisores')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/supervisores.php'));
+    Route::prefix('errores')->middleware('checkrol:admin')->group(base_path('routes/cms/errores.php'));
+    Route::prefix('incidencias')->middleware('checkrol:admin')->group(base_path('routes/cms/incidencias.php'));
+    Route::prefix('auditoria')->middleware('checkrol:admin')->group(base_path('routes/cms/audits.php'));
 
 
-    Route::prefix('modulos')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/modulos.php'));
-    Route::prefix('segments')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/segments.php'));
-    Route::prefix('entrenadores')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/entrenadores.php'));
-    Route::prefix('escuelas')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/escuelas.php'));
+    Route::prefix('usuarios')->middleware('checkrol:admin')->group(base_path('routes/cms/usuarios.php'));
+    Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
+    Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
+    Route::prefix('criterios')->middleware('checkrol:admin')->group(base_path('routes/cms/criteria.php'));
+    Route::prefix('supervisores')->middleware('checkrol:admin')->group(base_path('routes/cms/supervisores.php'));
 
 
-    Route::prefix('entrenamiento')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/entrenamiento.php'));
+    Route::prefix('modulos')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/modulos.php'));
+    Route::prefix('segments')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/segments.php'));
+    Route::prefix('entrenadores')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenadores.php'));
+    Route::prefix('escuelas')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/escuelas.php'));
 
-    Route::prefix('programas')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/blocks.php'));
-    Route::prefix('media')->middleware('checkrol:super-user,admin,content-manager,trainer')->group(base_path('routes/cms/media.php'));
+
+    Route::prefix('entrenamiento')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenamiento.php'));
+
+    Route::prefix('programas')->middleware('checkrol:admin')->group(base_path('routes/cms/blocks.php'));
+    Route::prefix('media')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/media.php'));
 
 
-    Route::prefix('workspaces')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/workspaces.php'));
-    Route::prefix('/')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/reportes.php'));
+    Route::prefix('workspaces')->middleware('checkrol:admin')->group(base_path('routes/cms/workspaces.php'));
+    Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/reportes.php'));
 
-    Route::prefix('aulas-virtuales')->middleware('checkrol:super-user,admin')->group(base_path('routes/cms/meetings.php'));
+    Route::prefix('aulas-virtuales')->middleware('checkrol:admin')->group(base_path('routes/cms/meetings.php'));
 });

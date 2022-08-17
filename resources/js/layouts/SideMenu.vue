@@ -70,15 +70,6 @@ export default {
                         permission:"learning_analytics",
                         role:["super-user","admin","content-manager","trainer","reports"]
                     },
-                    {
-                        title:"Resultados de encuestas",
-                        icon:"fas fa-poll",
-                        path:"/resumen_encuesta/index",
-                        subpaths:["resumen_encuesta"],
-                        selected:false,
-                        permission:"resumen_encuesta",
-                        role:["super-user","admin","content-manager","trainer","reports"]
-                    }
                 ]
             },
             {
@@ -114,39 +105,21 @@ export default {
                 active:false,
                 items:[
                     {
+                        title:"Módulos",
+                        icon:"fas fa-th-large",
+                        path:"/modulos",
+                        subpaths:['modulos', 'abconfigs', 'categorias', 'cursos'],
+                        selected:false,
+                        permission:"modulos",
+                        role:["super-user","admin","content-manager","trainer"]
+                    },
+                    {
                         title:"Usuarios",
                         icon:"fas fa-users",
                         path:"/usuarios",
                         subpaths:['usuarios'],
                         selected:false,
                         permission:"usuarios",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Código de matrícula",
-                        icon:"fas fa-grip-horizontal",
-                        path:"/grupos/index",
-                        subpaths:["grupos"],
-                        selected:false,
-                        permission:"grupos",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Cargos",
-                        icon:"fas fa-user-tie",
-                        path:"/cargos",
-                        subpaths:["cargos"],
-                        selected:false,
-                        permission:"cargos",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Sedes",
-                        icon:"fas fa-building",
-                        path:"/boticas",
-                        subpaths:["boticas"],
-                        selected:false,
-                        permission:"sedes",
                         role:["super-user","admin"]
                     },
                     {
@@ -158,16 +131,16 @@ export default {
                         permission:"criterios",
                         role:["super-user","admin"]
                     },
-                    {
-                        title:"Supervisores",
-                        icon:"fas fa-sitemap",
-                        // path:"/reportes-supervisores/index",
-                        path:"/supervisores",
-                        subpaths:["reportes-supervisores"],
-                        selected:false,
-                        permission:"supervisores",
-                        role:["super-user","admin"]
-                    },
+                    // {
+                    //     title:"Supervisores",
+                    //     icon:"fas fa-sitemap",
+                    //     // path:"/reportes-supervisores/index",
+                    //     path:"/supervisores",
+                    //     subpaths:["reportes-supervisores"],
+                    //     selected:false,
+                    //     permission:"supervisores",
+                    //     role:["super-user","admin"]
+                    // },
                 ]
             },
             {
@@ -176,30 +149,21 @@ export default {
                 active:false,
                 items:[
                     {
-                        title:"Módulos",
+                        title:"Escuelas",
                         icon:"fas fa-th-large",
-                        path:"/modulos",
-                        subpaths:['modulos', 'abconfigs', 'categorias', 'cursos'],
+                        path:"/escuelas",
+                        subpaths:['escuelas'],
                         selected:false,
-                        permission:"modulos",
+                        permission:"escuelas",
                         role:["super-user","admin","content-manager","trainer"]
                     },
                     {
-                        title:"Segmentación",
+                        title:"Cursos",
                         icon:"fas fa-map-signs",
-                        path:"/curriculas_grupos",
-                        subpaths:["curriculas_grupos"],
+                        path:"/cursos",
+                        subpaths:["cursos"],
                         selected:false,
-                        permission:"segmentacion",
-                        role:["super-user","admin","content-manager","trainer"]
-                    },
-                    {
-                        title:"Carreras",
-                        icon:"fas fa-th-large",
-                        subpaths:["carreras"],
-                        selected:false,
-                        path:"/carreras/index",
-                        permission:"carreras",
+                        permission:"cursos",
                         role:["super-user","admin","content-manager","trainer"]
                     },
                 ]
@@ -237,42 +201,33 @@ export default {
                         permission:"multimedia",
                         role:["super-user","admin","content-manager","trainer"]
                     },
-                    {
-                        title:"Glosario",
-                        icon:"fas fa-book",
-                        path:"/glosario",
-                        subpaths:["glosario"],
-                        selected:false,
-                        permission:"glosario",
-                        role:["super-user","admin","content-manager","trainer"]
-                    },
-                    {
-                        title:"Vademécum",
-                        icon:"fas fa-file-invoice",
-                        path:"/vademecum",
-                        subpaths:["vademecum"],
-                        selected:false,
-                        permission:"vademecum",
-                        role:["super-user","admin","content-manager","trainer"]
-                    },
-                    {
-                        title:"Videoteca",
-                        icon:"fas fa-caret-square-right",
-                        path:"/videoteca/list",
-                        subpaths:["videoteca"],
-                        selected:false,
-                        permission:"videoteca",
-                        role:["super-user","admin","content-manager","trainer"]
-                    },
-                    {
-                        title:"Tags",
-                        icon:"fas fa-tags",
-                        path:"/tags",
-                        subpaths:["tags"],
-                        selected:false,
-                        permission:"tags",
-                        role:["super-user","admin","content-manager","trainer"]
-                    },
+                    // {
+                    //     title:"Glosario",
+                    //     icon:"fas fa-book",
+                    //     path:"/glosario",
+                    //     subpaths:["glosario"],
+                    //     selected:false,
+                    //     permission:"glosario",
+                    //     role:["super-user","admin","content-manager","trainer"]
+                    // },
+                    // {
+                    //     title:"Vademécum",
+                    //     icon:"fas fa-file-invoice",
+                    //     path:"/vademecum",
+                    //     subpaths:["vademecum"],
+                    //     selected:false,
+                    //     permission:"vademecum",
+                    //     role:["super-user","admin","content-manager","trainer"]
+                    // },
+                    // {
+                    //     title:"Videoteca",
+                    //     icon:"fas fa-caret-square-right",
+                    //     path:"/videoteca/list",
+                    //     subpaths:["videoteca"],
+                    //     selected:false,
+                    //     permission:"videoteca",
+                    //     role:["super-user","admin","content-manager","trainer"]
+                    // },
                 ]
             },
             {
@@ -301,12 +256,12 @@ export default {
                 ]
             },
             {
-                title:"EXPORTAR",
+                title:"REPORTES",
                 icon:"fas fa-download",
                 active:false,
                 items:[
                     {
-                        title:"Reportes",
+                        title:"General",
                         icon:"fas fa-download",
                         path:"/exportar/node",
                         subpaths:["exportar/node"],
@@ -314,17 +269,8 @@ export default {
                         permission:"reportes",
                         role:["super-user","admin","trainer","reports"]
                     },
-                    // {
-                    //     title:"Reportes (NEW)",
-                    //     icon:"fas fa-download",
-                    //     path:"/reportes/general",
-                    //     subpaths:["reportes"],
-                    //     selected:false,
-                        // permission:"exportar.index"
-                    // },
-
                     {
-                        title:"Conferencias",
+                        title:"Aulas Virtuales",
                         icon:"fas fa-download",
                         path:"/exportar/conferencias",
                         subpaths:["exportar/conferencias"],
@@ -332,19 +278,20 @@ export default {
                         permission:"conferencias",
                         role:["super-user","admin","trainer","reports"]
                     },
-                    // {
-                    //     title:"Otros",
-                    //     icon:"fas fa-download",
-                    //     path:"/reportes/usuarios",
-                    //     subpaths:["reportes/usuarios"],
-                    //     selected:false,
-                        // permission:"exportar.index"
-                    // },
+                    {
+                        title:"Encuestas",
+                        icon:"fas fa-poll",
+                        path:"/resumen_encuesta/index",
+                        subpaths:["resumen_encuesta"],
+                        selected:false,
+                        permission:"resumen_encuesta",
+                        role:["super-user","admin","content-manager","trainer","reports"]
+                    },
                 ]
             },
             {
-                title:"ATENCIÓN AL CLIENTE",
-                icon:"fas fa-headset",
+                title:"HERRAMIENTAS",
+                icon:"fas fa-tools",
                 active:false,
                 items:[
                     {
@@ -357,40 +304,6 @@ export default {
                         role:["super-user","admin"]
                     },
                     {
-                        title:"Preguntas frecuentes",
-                        icon:"far fa-question-circle",
-                        path:"/preguntas-frecuentes",
-                         subpaths:["preguntas-frecuentes"],
-                        selected:false,
-                        permission:"faq",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Ayuda",
-                        icon:"fas fa-hands-helping",
-                        path:"/ayudas",
-                        subpaths:["ayudas"],
-                        selected:false,
-                        permission:"ayuda",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Soporte",
-                        icon:"fas fa-headset",
-                        path:"/soporte",
-                        subpaths:["soporte"],
-                        selected:false,
-                        permission:"soporte",
-                        role:["super-user","admin"]
-                    },
-                ]
-            },
-            {
-                title:"HERRAMIENTAS",
-                icon:"fas fa-tools",
-                active:false,
-                items:[
-                    {
                         title:"Reinicio de usuarios",
                         icon:"fas fa-redo-alt",
                         path:"/masivo/usuarios/index_reinicios",
@@ -400,7 +313,7 @@ export default {
                         role:["super-user","admin"]
                     },
                     {
-                        title:"Procesos masivos",
+                        title:"Subida masivos",
                         icon:"fas fa-share-square",
                         path:"/masivo/index",
                         subpaths:["masivo/index"],
@@ -408,93 +321,8 @@ export default {
                         permission:"proceso_masivo",
                         role:["super-user","admin"]
                     },
-                    {
-                        title:"Migrar Avance",
-                        icon:"fas fa-exchange-alt",
-                        path:"/migrar_avance",
-                        subpaths:["migrar_avance"],
-                        selected:false,
-                        permission:"migrar_avance",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Compatibles",
-                        icon:"fas fa-equals",
-                        path:"/compatibles",
-                        subpaths:["compatibles"],
-                        selected:false,
-                        permission:"compatibles",
-                        role:["super-user","admin"]
-                    }
                 ]
             },
-            {
-                title:"AUDITORÍA",
-                icon:"fas fa-check-double",
-                active:false,
-                items:[
-                    {
-                        title:"Incidencias",
-                        icon:"fas fa-exclamation-triangle",
-                        path:"/incidencias",
-                        subpaths:["incidencias"],
-                        selected:false,
-                        permission:"incidencias",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Errores",
-                        icon:"fas fa-bug",
-                        path:"/errores",
-                        subpaths:["errores"],
-                        selected:false,
-                        permission:"errores",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Auditoría",
-                        icon:"fas fa-receipt",
-                        path:"/auditoria",
-                        subpaths:["auditoria"],
-                        selected:false,
-                        permission:"auditoria",
-                        role:["super-user","admin"]
-                    }
-                ]
-            },
-            {
-                title:"ROLES Y PERMISOS",
-                icon:"fas fa-users-cog",
-                active:false,
-                items:[
-                    {
-                        title:"Administradores",
-                        icon:"fas fa-users-cog",
-                        path:"/users",
-                        subpaths:["users"],
-                        selected:false,
-                        permission:"users",
-                        role:["super-user","admin"]
-                    },
-                    {
-                        title:"Roles",
-                        icon:"fas fa-user-tie",
-                        path:"/roles",
-                        subpaths:["roles"],
-                        selected:false,
-                        permission:"roles",
-                        role:["super-user"]
-                    },
-                    // {
-                    //     title:"Permisos",
-                    //     icon:"fas fa-shield-alt",
-                    //     path:"/permisos",
-                    //     subpaths:["permisos"],
-                    //     selected:false,
-                    //     // permission:"permisos.index"
-                    // }
-                ]
-            }
         ]
     }),
     props: {
