@@ -2,24 +2,23 @@
 
 use App\Http\Controllers\UserController;
 
-Route::controller(UserController::class)->group(function() {
+Route::controller(UserController::class)->group(function () {
 
-	Route::get('/search', 'search');
-	Route::get('/get-form-data', 'getFormData');
+    Route::get('/', 'index')->name('users.index');
+    Route::get('/search', 'search')->name('users.search');
+    Route::get('/get-form-data', 'getFormData');
 
-	Route::put('/update-profile', 'updateProfile');
-	Route::put('/update-phones', 'updatePhones');
-	Route::put('/update-password', 'updatePassword');
-	
-	Route::get('/create', 'create');
-	Route::post('/store', 'store');
+    Route::put('/update-profile', 'updateProfile');
+    Route::put('/update-phones', 'updatePhones');
+    Route::put('/update-password', 'updatePassword');
 
-	Route::get('/{user}/edit', 'edit');
-	Route::put('/{user}/update', 'update');
-	Route::get('/{user}/show', 'show');
+    Route::get('/create', 'create')->name('users.create');
+    Route::post('/store', 'store')->name('users.store');
 
-	Route::put('/{user}/status', 'status');
-	Route::delete('/{user}/destroy', 'destroy');
+    Route::get('/{user}/edit', 'edit')->name('users.edit');
+    Route::put('/{user}/update', 'update')->name('users.update');
+    Route::get('/{user}/show', 'show')->name('users.show');
 
+    Route::put('/{user}/status', 'status')->name('users.status');
+    Route::delete('/{user}/destroy', 'destroy')->name('users.destroy');
 });
-

@@ -17,6 +17,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Middleware\CheckRol;
 
 Route::redirect('/', 'login', 301);
 
@@ -51,42 +52,102 @@ Route::get('informacion_app', function () {
 
 Route::middleware(['auth'])->group(function () {
 
+
+    // Route::prefix('users')->middleware('checkrol:qqqq,admin,dasdas,dasda')->group(base_path('routes/cms/users.php'));
     Route::prefix('/')->group(base_path('routes/cms/temp.php'));
 
     Route::prefix('general')->group(base_path('routes/cms/general.php'));
     Route::prefix('common')->group(base_path('routes/cms/common.php'));
-    Route::prefix('usuarios')->group(base_path('routes/cms/usuarios.php'));
-    Route::prefix('modulos')->group(base_path('routes/cms/modulos.php'));
-    Route::prefix('escuelas')->group(base_path('routes/cms/escuelas.php'));
+
+    // Route::middleware(['checkrol:config'])->group(function () {
+    //     groupRoles();
+    // });
+    // Route::middleware(['checkrol:admin'])->group(function () {
+    //     groupCursos();
+    //     groupContenido();
+    //     groupEntrenamiento();
+    // });
+    // Route::middleware(['checkrol:content-manager'])->group(function () {
+    //     groupContenido();
+    // });
+    // Route::middleware(['checkrol:trainer'])->group(function () {
+    //     groupCursos();
+    //     groupEntrenamiento();
+    // });
+    // Route::middleware(['checkrol:reports'])->group(function () {
+    //     groupRoles();
+    // });
+    // Route::middleware(['checkrol:super-admin'])->group(function () {
+    groupCursos();
+    groupEntrenamiento();
+    groupUsuarios();
+    groupAuditoria();
+    groupContenido();
+    groupRoles();
+    groupSoporte();
+
     Route::prefix('programas')->group(base_path('routes/cms/blocks.php'));
-    Route::prefix('segments')->group(base_path('routes/cms/segments.php'));
     Route::prefix('media')->group(base_path('routes/cms/media.php'));
-    Route::prefix('anuncios')->group(base_path('routes/cms/anuncios.php'));
-    Route::prefix('ayudas')->group(base_path('routes/cms/ayudas.php'));
+
+
+    Route::prefix('workspaces')->group(base_path('routes/cms/workspaces.php'));
+    Route::prefix('/')->group(base_path('routes/cms/reportes.php'));
+
+    Route::prefix('aulas-virtuales')->group(base_path('routes/cms/meetings.php'));
+    // });
+});
+
+function groupCursos()
+{
+    Route::prefix('modulos')->group(base_path('routes/cms/modulos.php'));
+    Route::prefix('segments')->group(base_path('routes/cms/segments.php'));
+    Route::prefix('entrenadores')->group(base_path('routes/cms/entrenadores.php'));
+    Route::prefix('escuelas')->group(base_path('routes/cms/escuelas.php'));
+}
+
+function groupEntrenamiento()
+{
+    Route::prefix('entrenamiento')->group(base_path('routes/cms/entrenamiento.php'));
+}
+
+function groupUsuarios()
+{
+    Route::prefix('usuarios')->group(base_path('routes/cms/usuarios.php'));
     Route::prefix('cargos')->group(base_path('routes/cms/cargos.php'));
     Route::prefix('boticas')->group(base_path('routes/cms/boticas.php'));
     Route::prefix('criterios')->group(base_path('routes/cms/criteria.php'));
-    Route::prefix('encuestas')->group(base_path('routes/cms/encuestas.php'));
-    Route::prefix('glosario')->group(base_path('routes/cms/glosario.php'));
-    Route::prefix('vademecum')->group(base_path('routes/cms/vademecum.php'));
-    Route::prefix('preguntas-frecuentes')->group(base_path('routes/cms/preguntas_frecuentes.php'));
-    Route::prefix('auditoria')->group(base_path('routes/cms/audits.php'));
-    Route::prefix('entrenadores')->group(base_path('routes/cms/entrenadores.php'));
-    Route::prefix('notificaciones_push')->group(base_path('routes/cms/notificaciones_push.php'));
-    Route::prefix('multimedia')->group(base_path('routes/cms/multimedia.php'));
     Route::prefix('supervisores')->group(base_path('routes/cms/supervisores.php'));
-    Route::prefix('soporte')->group(base_path('routes/cms/soporte.php'));
-    Route::prefix('tags')->group(base_path('routes/cms/tags.php'));
-    Route::prefix('videoteca')->group(base_path('routes/cms/videoteca.php'));
-    Route::prefix('roles')->group(base_path('routes/cms/roles.php'));
-    Route::prefix('entrenamiento')->group(base_path('routes/cms/entrenamiento.php'));
-    Route::prefix('workspaces')->group(base_path('routes/cms/workspaces.php'));
-    Route::prefix('/')->group(base_path('routes/cms/reportes.php'));
-    // Route::prefix('reportes')->group(base_path('routes/cms/reportes.php'));
-    // Route::prefix('exportar')->group(base_path('routes/cms/reportes-exportar.php'));
-    // Route::prefix('cuentas-zoom')->group(base_path('routes/cms/cuentas_zoom.php'));
+}
+
+function groupAuditoria()
+{
     Route::prefix('errores')->group(base_path('routes/cms/errores.php'));
     Route::prefix('incidencias')->group(base_path('routes/cms/incidencias.php'));
+    Route::prefix('auditoria')->group(base_path('routes/cms/audits.php'));
+}
 
-    Route::prefix('aulas-virtuales')->group(base_path('routes/cms/meetings.php'));
-});
+function groupContenido()
+{
+    Route::prefix('anuncios')->group(base_path('routes/cms/anuncios.php'));
+    Route::prefix('encuestas')->group(base_path('routes/cms/encuestas.php'));
+    Route::prefix('multimedia')->group(base_path('routes/cms/multimedia.php'));
+    Route::prefix('glosario')->group(base_path('routes/cms/glosario.php'));
+    Route::prefix('vademecum')->group(base_path('routes/cms/vademecum.php'));
+    Route::prefix('videoteca')->group(base_path('routes/cms/videoteca.php'));
+    Route::prefix('tags')->group(base_path('routes/cms/tags.php'));
+}
+
+function groupRoles()
+{
+    Route::prefix('users')->group(base_path('routes/cms/users.php'));
+    Route::prefix('permisos')->group(base_path('routes/cms/permisos.php'));
+    Route::prefix('roles')->group(base_path('routes/cms/roles.php'));
+}
+
+function groupSoporte()
+{
+    Route::prefix('ayudas')->group(base_path('routes/cms/ayudas.php'));
+    Route::prefix('preguntas-frecuentes')->group(base_path('routes/cms/preguntas_frecuentes.php'));
+    Route::prefix('notificaciones_push')->group(base_path('routes/cms/notificaciones_push.php'));
+    Route::prefix('soporte')->group(base_path('routes/cms/soporte.php'));
+}

@@ -40,46 +40,42 @@ class Ability extends Model
 
     public function model()
     {
-       return $this->belongsTo(Taxonomy::class, 'entity_type', 'name')
-                    ->where('group', 'system')->where('type', 'model');
+        return $this->belongsTo(Taxonomy::class, 'entity_type', 'name')
+            ->where('group', 'system')->where('type', 'model');
     }
 
-    // protected function getAbilititesForTree()
-    // {
-    //     $groups = Ability::with('model')->where('entity_type', '<>', '*')->get()->groupBy('entity_type');
+    protected function getAbilititesForTree()
+    {
+        $groups = Ability::with('model')->where('entity_type', '<>', '*')->get()->groupBy('entity_type');
 
-    //     $permissions = [];
+        // $permissions = [];
 
-    //     foreach ($groups as $entity_type => $abilities)
-    //     {
+        // foreach ($groups as $entity_type => $abilities) {
 
-    //         $children = [];
+        //     $children = [];
 
-    //         foreach ($abilities as $key => $ability)
-    //         {
-    //             $children[] = [
-    //                 // 'id' => $ability->name,
-    //                 'id' => $ability->id,
-    //                 'label' => $ability->title,
-    //                 'icon' => $ability->icon ?? 'folder_open'
-    //             ];
-    //         }
+        //     foreach ($abilities as $key => $ability) {
+        //         $children[] = [
+        //             // 'id' => $ability->name,
+        //             'id' => $ability->id,
+        //             'label' => $ability->title,
+        //             'icon' => $ability->icon ?? 'folder_open'
+        //         ];
+        //     }
 
-    //         $parent = [
-    //             'id' => $entity_type,
-    //             'label' => 'Módulo ' . ($ability->model->short_name ?? 'X'),
-    //             'avatar' => '',
-    //             'children' => $children,
-    //         ];
+        //     $parent = [
+        //         'id' => $entity_type,
+        //         'label' => 'Módulo ' . ($ability->model->short_name ?? 'X'),
+        //         'avatar' => '',
+        //         'children' => $children,
+        //     ];
 
-    //         $permissions[] = $parent;
-            
-    //     }
+        //     $permissions[] = $parent;
+        // }
 
-    //     // $data[] = ['id' => 'All', 'label' => 'Seleccionar módulos', 'children' => $permissions];
-    //     $data = $permissions;
+        // // $data[] = ['id' => 'All', 'label' => 'Seleccionar módulos', 'children' => $permissions];
+        // $data = $permissions;
 
-    //     return $data;
-    // }
-
+        return $groups;
+    }
 }

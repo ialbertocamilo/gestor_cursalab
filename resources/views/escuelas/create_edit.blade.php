@@ -5,8 +5,8 @@
         @include('layouts.user-header')
 
         @php
-            $worskpace = session('workspace');
-            $workspace_id = is_array($worskpace) ? $worskpace['id'] : null;
+            $workspace = session('workspace');
+            $workspace_id = is_array($workspace) ? $workspace['id'] : null;
 
             $escuela = request()->segment(3) ?? null;
         @endphp
