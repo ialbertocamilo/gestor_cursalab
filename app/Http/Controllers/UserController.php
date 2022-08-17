@@ -23,15 +23,14 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // $ddd = auth()->user();
-        // dd($ddd->workspace);
         if ($request->has('q')) {
             $question = $request->input('q');
-            $users = User::whereIsNot('user')->where('name', 'like', '%' . $question . '%')->paginate();
+            $users = User::whereIsNot('user', 'super-user')->where('name', 'like', '%' . $question . '%')->paginate();
         } else {
-            $users = User::whereIsNot('user')->paginate();
+            $users = User::whereIsNot('user', 'super-user')->paginate();
         }
-        return view('users.index', compact('users'));
+        $super_user = auth()->user()->isAn('super-user');
+        return view('users.index', compact('users', 'super_user'));
     }
 
     /**

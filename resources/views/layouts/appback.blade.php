@@ -2,34 +2,7 @@
 use Illuminate\Support\Facades\DB;
 
 $user = auth()->user();
-$permisos = [];
-
-$group_cursos = ['modulos', 'segmentacion', 'carreras'];
-$group_contenido = ['anuncios', 'encuestas', 'multimedia', 'glosario', 'vademecum', 'videoteca', 'tags'];
-$group_aulas = ['meetings', 'accounts'];
-$group_resumen = ['home', 'learning_analytics', 'resumen_encuesta'];
-$group_entrenadores = ['entrenadores', 'checklist'];
-$group_exportar = ['reportes', 'conferencias'];
-$group_soporte = ['notificaciones', 'faq', 'ayuda', 'soporte'];
-$group_herramienta = ['reinicio_usuarios', 'proceso_masivo', 'migrar_avance', 'compatibles'];
-$group_auditoria = ['incidencias', 'errores', 'auditoria'];
-$group_roles = ['users'];
-
-if ($user->isAn('super-user')) {
-    $permisos = ['all'];
-} elseif ($user->isAn('config')) {
-    $permisos = array_merge($group_cursos, $group_contenido);
-} elseif ($user->isAn('admin')) {
-    $permisos = array_merge($group_cursos, $group_contenido, $group_entrenadores, $group_exportar);
-} elseif ($user->isAn('content-manager')) {
-    $permisos = array_merge($group_contenido);
-} elseif ($user->isAn('trainer')) {
-    $permisos = array_merge($group_cursos, $group_entrenadores, $group_exportar);
-} elseif ($user->isAn('reports')) {
-    $permisos = array_merge($group_exportar);
-} else {
-    $permisos = ['all'];
-}
+$roles = $user->getRoles();
 @endphp
 @include('layouts.header')
 
@@ -70,7 +43,7 @@ if (isset($fullScreen)) {
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
                 {{-- <v-app> --}}
-                <side-menu :options="{{ json_encode($permisos) }}" />
+                <side-menu :roles="{{ json_encode($roles) }}" />
                 {{-- </v-app> --}}
             </div>
         </div>

@@ -58,7 +58,8 @@ export default {
                         path:"/home",
                         subpaths:["home"],
                         selected:false,
-                        permission:"home"
+                        permission:"home",
+                        role:["super-user","admin","content-manager","trainer","reports"]
                     },
                     {
                         title:"Learning Analytics",
@@ -66,7 +67,8 @@ export default {
                         path:"/dashboard_pbi",
                         subpaths:["dashboard_pbi"],
                         selected:false,
-                        permission:"learning_analytics"
+                        permission:"learning_analytics",
+                        role:["super-user","admin","content-manager","trainer","reports"]
                     },
                     {
                         title:"Resultados de encuestas",
@@ -74,7 +76,8 @@ export default {
                         path:"/resumen_encuesta/index",
                         subpaths:["resumen_encuesta"],
                         selected:false,
-                        permission:"resumen_encuesta"
+                        permission:"resumen_encuesta",
+                        role:["super-user","admin","content-manager","trainer","reports"]
                     }
                 ]
             },
@@ -89,7 +92,8 @@ export default {
                         path:"/aulas-virtuales",
                         subpaths:["aulas-virtuales"],
                         selected:false,
-                        permission:"meetings"
+                        permission:"meetings",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Cuentas Zoom",
@@ -98,6 +102,7 @@ export default {
                         subpaths:["cuentas-zoom"],
                         selected:false,
                         permission:"accounts",
+                        role:["super-user","admin"]
                         //Fix -2
                         // permission:"accounts.list"
                     },
@@ -114,7 +119,8 @@ export default {
                         path:"/usuarios",
                         subpaths:['usuarios'],
                         selected:false,
-                        permission:"usuarios"
+                        permission:"usuarios",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Código de matrícula",
@@ -122,7 +128,8 @@ export default {
                         path:"/grupos/index",
                         subpaths:["grupos"],
                         selected:false,
-                        permission:"grupos"
+                        permission:"grupos",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Cargos",
@@ -130,7 +137,8 @@ export default {
                         path:"/cargos",
                         subpaths:["cargos"],
                         selected:false,
-                        permission:"cargos"
+                        permission:"cargos",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Sedes",
@@ -138,7 +146,8 @@ export default {
                         path:"/boticas",
                         subpaths:["boticas"],
                         selected:false,
-                        permission:"sedes"
+                        permission:"sedes",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Criterios",
@@ -146,7 +155,8 @@ export default {
                         path:"/criterios",
                         subpaths:["criterios", "valores"],
                         selected:false,
-                        permission:"criterios"
+                        permission:"criterios",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Supervisores",
@@ -155,7 +165,8 @@ export default {
                         path:"/supervisores",
                         subpaths:["reportes-supervisores"],
                         selected:false,
-                        permission:"supervisores"
+                        permission:"supervisores",
+                        role:["super-user","admin"]
                     },
                 ]
             },
@@ -170,7 +181,8 @@ export default {
                         path:"/modulos",
                         subpaths:['modulos', 'abconfigs', 'categorias', 'cursos'],
                         selected:false,
-                        permission:"modulos"
+                        permission:"modulos",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Segmentación",
@@ -178,7 +190,8 @@ export default {
                         path:"/curriculas_grupos",
                         subpaths:["curriculas_grupos"],
                         selected:false,
-                        permission:"segmentacion"
+                        permission:"segmentacion",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Carreras",
@@ -186,7 +199,8 @@ export default {
                         subpaths:["carreras"],
                         selected:false,
                         path:"/carreras/index",
-                        permission:"carreras"
+                        permission:"carreras",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                 ]
             },
@@ -202,7 +216,8 @@ export default {
                         path:"/anuncios",
                         subpaths:["anuncios"],
                         selected:false,
-                        permission:"anuncios"
+                        permission:"anuncios",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Encuestas",
@@ -210,7 +225,8 @@ export default {
                         path:"/encuestas",
                         subpaths:["encuestas"],
                         selected:false,
-                        permission:"encuestas"
+                        permission:"encuestas",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Multimedia",
@@ -218,7 +234,8 @@ export default {
                         path:"/multimedia",
                         subpaths:["multimedia"],
                         selected:false,
-                        permission:"multimedia"
+                        permission:"multimedia",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Glosario",
@@ -226,7 +243,8 @@ export default {
                         path:"/glosario",
                         subpaths:["glosario"],
                         selected:false,
-                        permission:"glosario"
+                        permission:"glosario",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Vademécum",
@@ -234,7 +252,8 @@ export default {
                         path:"/vademecum",
                         subpaths:["vademecum"],
                         selected:false,
-                        permission:"vademecum"
+                        permission:"vademecum",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Videoteca",
@@ -242,7 +261,8 @@ export default {
                         path:"/videoteca/list",
                         subpaths:["videoteca"],
                         selected:false,
-                        permission:"videoteca"
+                        permission:"videoteca",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Tags",
@@ -250,7 +270,8 @@ export default {
                         path:"/tags",
                         subpaths:["tags"],
                         selected:false,
-                        permission:"tags"
+                        permission:"tags",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                 ]
             },
@@ -265,7 +286,8 @@ export default {
                         path:"/entrenamiento/entrenadores",
                         subpaths:["entrenamiento/entrenador"],
                         selected:false,
-                        permission:"entrenadores"
+                        permission:"entrenadores",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                     {
                         title:"Checklists",
@@ -273,7 +295,8 @@ export default {
                         path:"/entrenamiento/checklists",
                         subpaths:["entrenamiento/checklist"],
                         selected:false,
-                        permission:"checklist"
+                        permission:"checklist",
+                        role:["super-user","admin","content-manager","trainer"]
                     },
                 ]
             },
@@ -288,7 +311,8 @@ export default {
                         path:"/exportar/node",
                         subpaths:["exportar/node"],
                         selected:false,
-                        permission:"reportes"
+                        permission:"reportes",
+                        role:["super-user","admin","trainer","reports"]
                     },
                     // {
                     //     title:"Reportes (NEW)",
@@ -305,7 +329,8 @@ export default {
                         path:"/exportar/conferencias",
                         subpaths:["exportar/conferencias"],
                         selected:false,
-                        permission:"conferencias"
+                        permission:"conferencias",
+                        role:["super-user","admin","trainer","reports"]
                     },
                     // {
                     //     title:"Otros",
@@ -328,7 +353,8 @@ export default {
                         path:"/notificaciones_push",
                         subpaths:["notificaciones_push"],
                         selected:false,
-                        permission:"notificaciones"
+                        permission:"notificaciones",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Preguntas frecuentes",
@@ -336,7 +362,8 @@ export default {
                         path:"/preguntas-frecuentes",
                          subpaths:["preguntas-frecuentes"],
                         selected:false,
-                        permission:"faq"
+                        permission:"faq",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Ayuda",
@@ -344,7 +371,8 @@ export default {
                         path:"/ayudas",
                         subpaths:["ayudas"],
                         selected:false,
-                        permission:"ayuda"
+                        permission:"ayuda",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Soporte",
@@ -352,7 +380,8 @@ export default {
                         path:"/soporte",
                         subpaths:["soporte"],
                         selected:false,
-                        permission:"soporte"
+                        permission:"soporte",
+                        role:["super-user","admin"]
                     },
                 ]
             },
@@ -367,7 +396,8 @@ export default {
                         path:"/masivo/usuarios/index_reinicios",
                         subpaths:["masivo/usuarios"],
                         selected:false,
-                        permission:"reinicio_usuarios"
+                        permission:"reinicio_usuarios",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Procesos masivos",
@@ -375,7 +405,8 @@ export default {
                         path:"/masivo/index",
                         subpaths:["masivo/index"],
                         selected:false,
-                        permission:"proceso_masivo"
+                        permission:"proceso_masivo",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Migrar Avance",
@@ -383,7 +414,8 @@ export default {
                         path:"/migrar_avance",
                         subpaths:["migrar_avance"],
                         selected:false,
-                        permission:"migrar_avance"
+                        permission:"migrar_avance",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Compatibles",
@@ -391,7 +423,8 @@ export default {
                         path:"/compatibles",
                         subpaths:["compatibles"],
                         selected:false,
-                        permission:"compatibles"
+                        permission:"compatibles",
+                        role:["super-user","admin"]
                     }
                 ]
             },
@@ -406,7 +439,8 @@ export default {
                         path:"/incidencias",
                         subpaths:["incidencias"],
                         selected:false,
-                        permission:"incidencias"
+                        permission:"incidencias",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Errores",
@@ -414,7 +448,8 @@ export default {
                         path:"/errores",
                         subpaths:["errores"],
                         selected:false,
-                        permission:"errores"
+                        permission:"errores",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Auditoría",
@@ -422,7 +457,8 @@ export default {
                         path:"/auditoria",
                         subpaths:["auditoria"],
                         selected:false,
-                        permission:"auditoria"
+                        permission:"auditoria",
+                        role:["super-user","admin"]
                     }
                 ]
             },
@@ -437,7 +473,8 @@ export default {
                         path:"/users",
                         subpaths:["users"],
                         selected:false,
-                        permission:"users"
+                        permission:"users",
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Roles",
@@ -445,7 +482,8 @@ export default {
                         path:"/roles",
                         subpaths:["roles"],
                         selected:false,
-                        permission:"roles"
+                        permission:"roles",
+                        role:["super-user"]
                     },
                     // {
                     //     title:"Permisos",
@@ -460,7 +498,7 @@ export default {
         ]
     }),
     props: {
-        options: {
+        roles: {
             type: Array,
             required: true
         },
@@ -473,20 +511,12 @@ export default {
             this.grupos.forEach((grupo) => {
                 let new_items = []
                 grupo.items.forEach((i) => {
-                    vue.options.forEach((item)=>{
-                        if(item == 'all'){
+                    vue.roles.forEach((item)=>{
+                        if(i.role.includes(item)){
                             new_items.push(i)
                             if(this.verify_path(location,i.subpaths)){
                                 grupo.active = true;
                                 i.selected=true;
-                            }
-                        }else{
-                            if(i.permission == item){
-                                new_items.push(i)
-                                if(this.verify_path(location,i.subpaths)){
-                                    grupo.active = true;
-                                    i.selected=true;
-                                }
                             }
                         }
                     })
