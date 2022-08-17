@@ -31,7 +31,7 @@ $meses_ES = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio"
 		setlocale(LC_TIME, 'es_PE.UTF-8');
 	 ?>
 	<div class="container" id="certi" download="canvasexport.png">
-		{{-- <img src="{{ Storage::disk('do_spaces')->url($data['plantilla']) }}"> --}}
+		{{-- <img src="{{ Storage::url($data['plantilla']) }}"> --}}
 		<img src="{{ $data['image'] }}">
 		<span class="nombre">{{ $data['usuario'] }}</span>
 		<span class="curso">{{ $data['video'] }}</span>

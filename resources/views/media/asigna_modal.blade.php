@@ -160,7 +160,7 @@
 					if(result){
 						console.log(result);
 						var medias = result.data;
-						var space_url = "{{ Storage::disk('do_spaces')->url('') }}";
+						var space_url = "{{ Storage::url('') }}";
 						var base_url = "{{ asset('') }}";
 						$("#asg_med_list .row").removeClass('loading');
 						//extensiones y previews

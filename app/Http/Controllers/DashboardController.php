@@ -34,6 +34,7 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
+        // dd(config('filesystems.disks.s3'));
 
         if ($request->refresh == 'true')
             cache()->flush();

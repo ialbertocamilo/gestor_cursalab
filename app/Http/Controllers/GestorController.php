@@ -90,7 +90,7 @@ class GestorController extends Controller
     }
     private function parse_image($plantilla){
         $type = pathinfo($plantilla, PATHINFO_EXTENSION);
-        $image = file_get_contents(Storage::disk('do_spaces')->url($plantilla)); 
+        $image = file_get_contents(Storage::url($plantilla)); 
         return 'data:image/' . $type . ';base64,' . base64_encode($image);
     }
     public function descargaArchivo($id){
@@ -110,7 +110,7 @@ class GestorController extends Controller
         }
         // return response()->download($_SERVER['DOCUMENT_ROOT']."/uploads/".$ruta[0]['download_link'], $ruta[0]['original_name']);
         // return response()->download($_SERVER['DOCUMENT_ROOT']."/".$posteo->archivo, $nombre_archivo);
-        return Storage::disk('do_spaces')->download($posteo->archivo);
+        return Storage::download($posteo->archivo);
     }
 
     public function descargaVideo($id){
@@ -130,7 +130,7 @@ class GestorController extends Controller
         }
         // return response()->download($_SERVER['DOCUMENT_ROOT']."/uploads/".$ruta[0]['download_link'], $ruta[0]['original_name']);
         // return response()->download($_SERVER['DOCUMENT_ROOT']."/".$posteo->video, $nombre_video);
-        return Storage::disk('do_spaces')->download($posteo->video);
+        return Storage::download($posteo->video);
     }
 
 	

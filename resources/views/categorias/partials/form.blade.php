@@ -76,7 +76,7 @@
 	</div>
 
 	<div class="col-sm-3 mb-4  d-flex flex-column align-items-center">
-		<?php $imagen = (isset($categoria)) ? Storage::disk('do_spaces')->url('images/'.$categoria->imagen) : "";?>
+		<?php $imagen = (isset($categoria)) ? Storage::url('images/'.$categoria->imagen) : "";?>
 		<?php $imagen_text = (isset($categoria)) ? 'images/'.$categoria->imagen : "";?>
 		<div class="imagen_actual m_imagen text-center">
 			<img src="{{ $imagen }}" alt="">

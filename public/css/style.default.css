@@ -1832,7 +1832,6 @@ input.input-material ~ label {
 input.input-material ~ label.active {
 	font-size: 0.8rem;
 	top: -10px;
-	color: #de534e;
 }
 
 input.input-material.is-invalid ~ label {

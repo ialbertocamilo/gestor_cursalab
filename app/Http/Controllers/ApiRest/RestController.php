@@ -3839,7 +3839,7 @@ class RestController extends Controller
 
             $path = 'usuario_archivos/' . $fileName;
 
-            if (Storage::disk('do_spaces')->put($path, file_get_contents($file), 'public')) {
+            if (Storage::put($path, file_get_contents($file), 'public')) {
                 $array = array(
                     'usuario_id' => $usuario_id,
                     'file' => $path,

@@ -20,7 +20,7 @@
             <li class="nav-item">
               <a class="nav-link {{ (request()->modulo_id == $modulo->id) ? 'active' : '' }}" href="{{ route('home', ['modulo_id' => $modulo->id]) }}">
                 <div class="">
-                  <img src="{{ Storage::disk('do_spaces')->url($modulo->logo) }}" height="20" alt="{{ $modulo->etapa }}" title="{{ $modulo->etapa }}" class="">
+                  <img src="{{ Storage::url($modulo->logo) }}" height="20" alt="{{ $modulo->etapa }}" title="{{ $modulo->etapa }}" class="">
                   {{ $modulo->etapa }}
                 </div>
               </a>
