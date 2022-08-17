@@ -36,7 +36,7 @@
                     ?>
                     <div class="item d-flex align-items-center justify-content-between">
                         <div class="d-flex" style="width: 40%">
-                            <div class="image"><img src="{{ Storage::disk('do_spaces')->url($carrera->imagen ?? '') }}" alt="..." class=""></div>
+                            <div class="image"><img src="{{ Storage::url($carrera->imagen ?? '') }}" alt="..." class=""></div>
                             <div class="text" >
                                 <h3 class="h5">{{ $carrera->nombre }}</h3>
                                 <small>{{ ($carrera->estado == 1) ? "Activo" : "Inactivo" }}</small>

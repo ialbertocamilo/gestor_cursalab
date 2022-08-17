@@ -33,7 +33,7 @@ function fechaCastellano ($fecha) {
 	<input type="text" id="curso_nombre" style="display:none;" value="{{$data['video']}}">
 
 	<div class="container" id="certi">
-		{{-- <img id="bg" src="{{ Storage::disk('do_spaces')->url($data['plantilla']) }}"> --}}
+		{{-- <img id="bg" src="{{ Storage::url($data['plantilla']) }}"> --}}
 		<img id="bg" src="{{ $data['image'] }}">
 		<span class="nombre">{{ $data['usuario'] }}</span>
 		<span class="curso">{{ $data['video'] }}</span>

@@ -72,7 +72,7 @@ use App\Http\Controllers\CursosController;
               </div>
 
               <div class="card-img">
-                <img src="{{ Storage::disk('do_spaces')->url($curso->imagen) }}" alt="..." class="img-fluid">
+                <img src="{{ Storage::url($curso->imagen) }}" alt="..." class="img-fluid">
               </div>
 
               <div class="client-title">
