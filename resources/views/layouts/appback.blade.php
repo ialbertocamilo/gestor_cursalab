@@ -27,6 +27,8 @@ if ($user->isAn('super-user')) {
     $permisos = array_merge($group_cursos, $group_entrenadores, $group_exportar);
 } elseif ($user->isAn('reports')) {
     $permisos = array_merge($group_exportar);
+} else {
+    $permisos = ['all'];
 }
 @endphp
 @include('layouts.header')
