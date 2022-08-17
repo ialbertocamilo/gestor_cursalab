@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use DB;
+
 class Segment extends BaseModel
 {
     protected $fillable = [
@@ -56,19 +58,12 @@ class Segment extends BaseModel
                 ->where('model_id', $model_id)
                 ->get();
 
-
             foreach ($segments as $key => $segment)
             {
-                // $grouped = $segment->values->groupBy('criterion_id');
-                // $values = $segment->values;
                 $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
-
-                // $grouped = [];
-                // $grouped = $segment->values->where('criterion_id', $criterion->id)->pluck('criterion_value_id')->toArray();
 
                 foreach($criteria_selected AS $key => $criterion)
                 {
-                    // $grouped = $segment->values->where('criterion_id', $criterion['id'])->pluck('criterion_value_id')->toArray();
                     $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
 
                     $segment_values_selected = [];
@@ -82,7 +77,6 @@ class Segment extends BaseModel
 
                     $criteria_selected[$key]['values'] = $criteria->where('id', $criterion['id'])->first()->values ?? [];
                     $criteria_selected[$key]['values_selected'] = $segment_values_selected ?? [];
-                    // $criterion->values_selected = $grouped[$criterion->id]['values_selected'] ?? [];
                 }
 
                 $segment->criteria_selected = $criteria_selected;
@@ -94,5 +88,61 @@ class Segment extends BaseModel
         }
 
         return $segments;
+    }
+
+    protected function storeRequestData($request)
+    {
+        try {
+
+            $segments_id = array_column($request->segments, 'id');
+
+            DB::beginTransaction();
+
+            Segment::where('model_type', $request->model_type)->where('model_id', $request->model_id)
+                    ->whereNotIn('id', $segments_id)->delete();
+
+            foreach ($request->segments as $key => $segment_row) {
+
+                $data = [
+                    'model_type' => $request->model_type,
+                    'model_id' => $request->model_id,
+                    'name' => 'Nuevo segmento',
+                    'active' => ACTIVE,
+                ];
+
+                $segment = !empty($segment_row['id']) ? Segment::find($segment_row['id']) : Segment::create($data);
+
+                $values = [];
+
+                foreach ($segment_row['criteria_selected'] ?? [] as $criterion) {
+
+                    foreach ($criterion['values_selected'] ?? [] as $value) {
+
+                        $values[] = [
+                            'id' => $value['segment_value_id'] ?? null,
+                            'criterion_value_id' => $value['id'],
+                            'criterion_id' => $criterion['id'],
+                            'type_id' => NULL,
+                        ];
+                    }
+                }
+
+                $segment->values()->sync($values);
+            }
+
+            DB::commit();
+
+        }catch (\Exception $e){
+
+            info($e);
+
+            DB::rollBack();
+
+            return $this->error($e->getMessage());
+        }
+
+        $message = 'Segmentación actualizada correctamente.';
+
+        return $this->success(['msg' => $message], $message);
     }
 }

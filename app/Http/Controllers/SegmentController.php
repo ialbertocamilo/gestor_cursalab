@@ -49,35 +49,7 @@ class SegmentController extends Controller
 
     public function store(Request $request)
     {
-        foreach ($request->segments as $key => $segment_row) {
-
-            $data = [
-                'model_type' => $request->model_type,
-                'model_id' => $request->model_id,
-                'name' => 'Nuevo segmento',
-                'active' => ACTIVE,
-            ];
-
-            $segment = !empty($segment_row['id']) ? Segment::find($segment_row['id']) : Segment::create($data);
-
-            $values = [];
-
-            foreach ($segment_row['criteria_selected'] ?? [] as $criterion) {
-
-                foreach ($criterion['values_selected'] ?? [] as $value) {
-
-                    $values[] = [
-                        'id' => $value['segment_value_id'] ?? null,
-                        'criterion_value_id' => $value['id'],
-                        'criterion_id' => $criterion['id'],
-                        'type_id' => NULL,
-                    ];
-                }
-            }
-
-            // $segment->values()->createMany($values);
-            $segment->values()->sync($values);
-        }
+        return Segment::storeRequestData($request);
     }
 
 }
