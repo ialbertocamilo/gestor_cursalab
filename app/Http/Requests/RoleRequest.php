@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Requests;
 
@@ -24,10 +24,10 @@ class RoleRequest extends FormRequest
     public function rules()
     {
         $rules = [
+            'name' => 'required|max:255',
             'title' => 'required|max:255',
-            'permissions' => 'required',
-            'description' => 'nullable|max:10000',
-            'active' => 'nullable',
+            // 'permissions' => 'required',
+            'description' => 'nullable|max:10000'
         ];
 
         return $rules;

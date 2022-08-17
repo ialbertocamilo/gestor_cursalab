@@ -21,9 +21,35 @@ use App\Http\Resources\RoleResource;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->has('q')) {
+            $question = $request->input('q');
+            $roles = Role::where('title', 'like', '%' . $question . '%')->paginate();
+        } else {
+            $roles = Role::paginate();
+        }
+        return view('roles.index', compact('roles'));
+    }
 
+    public function create()
+    {
+        // $permissions = Ability::where('entity_type', '<>', '*')->get();
+        $roles = Role::get();
+        return view('roles.create', compact('roles'));
+    }
+
+    public function destroy(Role $role)
+    {
+        Bouncer::role()->where('id', $role->id)->delete();
+        return redirect()->route('roles.index')
+            ->with('info', 'Rol eliminado Correctamente.');
+    }
+
+    public function edit(Role $role)
+    {
+        // $permissions = Ability::where('entity_type', '<>', '*')->get();
+        return view('roles.edit', compact('role'));
     }
 
     public function search(Request $request)
@@ -47,9 +73,11 @@ class RoleController extends Controller
         $data = $request->validated();
         $row = Role::create($data);
 
-        Bouncer::allow($row->name)->to($data['permissions']);
+        // Bouncer::allow($row->name)->to($data['permissions']);
 
-        return $this->success([], 'Rol registrado correctamente.');
+        return redirect()->route('roles.index')
+            ->with('info', 'Rol registrado correctamente.');
+        // return $this->success([], 'Rol registrado correctamente.');
     }
 
     public function update(Role $role, RoleRequest $request)
@@ -58,9 +86,11 @@ class RoleController extends Controller
 
         $role->update($data);
 
-        $role->abilities()->sync($data['permissions']);
+        // $role->abilities()->sync($data['permissions']);
 
-        return $this->success([], 'Rol actualizado correctamente.');
+        return redirect()->route('roles.index')
+            ->with('info', 'Rol actualizado correctamente.');
+        // return $this->success([], 'Rol actualizado correctamente.');
     }
 
     public function show(Role $role)

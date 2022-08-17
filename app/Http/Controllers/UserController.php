@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Caffeinated\Shinobi\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserStoreRequest;
+use App\Models\Role;
+use App\Models\Taxonomy;
 use Illuminate\Support\Facades\Hash;
+use Bouncer;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
+use Silber\Bouncer\Database\Role as DatabaseRole;
 
 class UserController extends Controller
 {
@@ -17,12 +23,13 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        // $ddd = auth()->user();
+        // dd($ddd->workspace);
         if ($request->has('q')) {
             $question = $request->input('q');
-            // return $question;
-            $users = User::where('name', 'like', '%'.$question.'%')->paginate();
-        }else{
-            $users = User::paginate();
+            $users = User::whereIsNot('user')->where('name', 'like', '%' . $question . '%')->paginate();
+        } else {
+            $users = User::whereIsNot('user')->paginate();
         }
         return view('users.index', compact('users'));
     }
@@ -35,7 +42,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::get();
-        return view('users.create',compact('roles'));
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -50,18 +57,24 @@ class UserController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
+        $workspace = session('workspace');
+        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
+
+        $employee = Taxonomy::getFirstData('user', 'type', 'employee');
+        $data['type_id'] = $employee->id;
+        $data['workspace_id'] = $workspace_id;
         $user = User::create($data);
 
         $user->roles()->sync($request->get('roles'));
 
         return redirect()->route('users.index')
-                ->with('info', 'usero guardado con éxito');
+            ->with('info', 'usero guardado con éxito');
     }
 
     public function edit(user $user)
     {
         $roles = Role::get();
-        return view('users.edit', compact('user','roles'));
+        return view('users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -75,10 +88,12 @@ class UserController extends Controller
     {
         // 1. Actualizar el usuario
         $data = $request->all();
-        
+
+        // dd($request->password, $user->password);
+
         if (!is_null($request->password)) {
             $data['password'] = Hash::make($request->password);
-        }else{
+        } else {
             $data['password'] = $user->password;
         }
 
@@ -89,7 +104,7 @@ class UserController extends Controller
         $user->roles()->sync($request->get('roles'));
 
         return redirect()->route('users.index')
-                ->with('info', 'Actualizado con éxito');
+            ->with('info', 'Actualizado con éxito');
     }
 
     /**

@@ -328,11 +328,11 @@ class Media extends Model
     public function streamDownloadFile()
     {
         $filename = Str::after($this->file, '/');
-        // $stream = Storage::disk('do_spaces')->readStream($this->file);
+        // $stream = Storage::readStream($this->file);
 
         $response = response()->streamDownload(function () {
 
-            $path = Storage::disk('do_spaces')->url($this->file);
+            $path = Storage::url($this->file);
 
             if ($stream = fopen($path, 'r')) {
 

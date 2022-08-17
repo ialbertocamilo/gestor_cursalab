@@ -62,7 +62,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $fillable = [
         'name', 'lastname', 'surname', 'username', 'slug', 'alias',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
-        'type_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
+        'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token',
@@ -160,7 +160,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setPasswordAttribute($value)
     {
-        if (!empty ($value))
+        if (!empty($value))
             $this->attributes['password'] = bcrypt($value);
     }
 
@@ -242,7 +242,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
 
-//        $training_role =
+        //        $training_role =
 
         return null;
     }
@@ -259,7 +259,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                 $user->update($data);
 
-            else:
+            else :
 
                 $user = self::create($data);
 
@@ -268,7 +268,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->criterion_values()->sync(array_values($data['criterion_list']) ?? []);
 
             DB::commit();
-
         } catch (\Exception $e) {
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
@@ -286,7 +285,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                 $user->update($data);
 
-            else:
+            else :
 
                 $user = $this->create($data);
 
@@ -300,7 +299,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->setMediaCollection($data, 'avatar');
 
             DB::commit();
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -373,7 +371,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // TODO: No considerar criterion_values que se excluyan (ciclo 0)
 
         $user_criterion_values_id = $user->criterion_values->pluck('id');
-        $all_programs = Block::with('segments.values.criterion_value',
+        $all_programs = Block::with(
+            'segments.values.criterion_value',
             'block_children.child.segments.values.criterion_value',
             'block_children.child.courses.segments.values.criterion_value'
         )
@@ -392,7 +391,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                 $program_segment_valid = true;
 
-            else:
+            else :
 
                 foreach ($program->segments as $segment) {
 
@@ -404,7 +403,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             endif;
 
-            if ($program_segment_valid):
+            if ($program_segment_valid) :
 
                 $blocks = collect();
 
@@ -416,7 +415,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                         $block_segment_valid = true;
 
-                    else:
+                    else :
 
                         foreach ($block_child->child->segments as $segment) {
 
@@ -444,7 +443,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                                 $courses_id[] = $course->id;
 
-                            else:
+                            else :
 
                                 foreach ($course->segments as $segment) {
 
@@ -475,7 +474,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                             'courses' => $courses->sortBy('position')->values()->all()
                         ]);
                     endif;
-
                 }
                 $programs->push([
                     'id' => $program->id,
@@ -502,12 +500,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         ($request['os'] == "android" || $request['os'] == "ios") ? $user->$request['os']++ : $user->windows++;
-        if($request['os'] && $request['version']){
+        if ($request['os'] && $request['version']) {
             $field = "v-{$request['os']}";
             $user->$field = $request['version'];
         }
 
         $user->save();
     }
-
 }

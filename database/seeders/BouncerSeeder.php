@@ -36,35 +36,63 @@ class BouncerSeeder extends Seeder
      */
     public function run()
     {
-        Bouncer::allow('superadmin')->everything();
-        Bouncer::allow('coder')->everything();
+        Bouncer::role()->firstOrCreate([
+            'name' => 'super-user',
+            'title' => 'Super Administrador',
+        ]);
+        Bouncer::role()->firstOrCreate([
+            'name' => 'config',
+            'title' => 'Configurador',
+        ]);
+        Bouncer::role()->firstOrCreate([
+            'name' => 'admin',
+            'title' => 'Administrator',
+        ]);
+        Bouncer::role()->firstOrCreate([
+            'name' => 'content-manager',
+            'title' => 'Gestor de Contenidos',
+        ]);
+        Bouncer::role()->firstOrCreate([
+            'name' => 'trainer',
+            'title' => 'Entrenador',
+        ]);
+        Bouncer::role()->firstOrCreate([
+            'name' => 'reports',
+            'title' => 'Reportero',
+        ]);
+        Bouncer::role()->firstOrCreate([
+            'name' => 'user',
+            'title' => 'Usuario',
+        ]);
+        // Bouncer::allow('superadmin')->everything();
+        // Bouncer::allow('coder')->everything();
 
-        $default_actions = ['index', 'create', 'edit', 'show', 'delete', 'status', 'audit'];
+        // $default_actions = ['index', 'create', 'edit', 'show', 'delete', 'status', 'audit'];
 
-        // Bouncer::scope()->to($platform_master->id);
-        
-        // Bouncer::allow($role)->to(['list', 'show', 'create'], Taxonomy::class);
-        
-        $roles = ['support', 'commercial', 'designer', 'developer'];
+        // // Bouncer::scope()->to($platform_master->id);
 
-        foreach ($roles as $key => $role)
-        {
-            Bouncer::allow($role)->to(['index', 'show',], Audit::class);
-        }
+        // // Bouncer::allow($role)->to(['list', 'show', 'create'], Taxonomy::class);
 
-        // Editor
+        // $roles = ['support', 'commercial', 'designer', 'developer'];
 
-        $roles = ['visitor'];
+        // foreach ($roles as $key => $role)
+        // {
+        //     Bouncer::allow($role)->to(['index', 'show',], Audit::class);
+        // }
 
-        $default_actions = ['index', 'show'];
+        // // Editor
 
-        foreach ($roles as $key => $role)
-        {
-            Bouncer::allow($role)->to(['index', 'show',], Audit::class);
-        }
+        // $roles = ['visitor'];
+
+        // $default_actions = ['index', 'show'];
+
+        // foreach ($roles as $key => $role)
+        // {
+        //     Bouncer::allow($role)->to(['index', 'show',], Audit::class);
+        // }
 
         // Bouncer::allow('technical-support')->to(['index', 'show',], Error::class);
-        
+
 
 
         // // Administrativo
@@ -98,7 +126,7 @@ class BouncerSeeder extends Seeder
         // Bouncer::scope()->to($platform_client->id);
 
         // Bouncer::allow('owner')->everything();
-        
+
         // Bouncer::allow('admin')->to(['index', 'show',], Post::class);
         // Bouncer::allow('admin-content')->to(['index', 'show',], Post::class);
         // Bouncer::allow('admin-course')->to(['index', 'show',], Post::class);
@@ -117,7 +145,7 @@ class BouncerSeeder extends Seeder
 
         // $user = User::find(1);
         // $user->assign('superadmin');
-        
+
         // $user = User::find(2);
         // $user->assign('superadmin');
     }

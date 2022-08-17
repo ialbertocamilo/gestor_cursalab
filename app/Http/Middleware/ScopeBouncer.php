@@ -1,4 +1,4 @@
- <?php
+<?php
 
 namespace App\Http\Middleware;
 
@@ -37,10 +37,11 @@ class ScopeBouncer
         // Here you may use whatever mechanism you use in your app
         // to determine the current tenant. To demonstrate, the
         // $tenantId is set here from the user's account_id.
-        
-        // $tenantId = $request->user()->account_id;
 
-        // $this->bouncer->scope()->to($tenantId);
+        $workspace = session('workspace');
+        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
+
+        $this->bouncer->scope()->to($workspace_id);
 
         return $next($request);
     }

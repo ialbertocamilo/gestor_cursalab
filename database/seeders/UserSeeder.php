@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
             'type_id' => $cursalab->id,
         ]);
 
-        $user_1->assign(['coder']);
+        $user_1->assign(['super-user']);
 
         $user_2 = User::create([
             'name' => 'Rodrigo',
@@ -58,11 +58,11 @@ class UserSeeder extends Seeder
             'type_id' => $cursalab->id,
         ]);
 
-        $user_2->assign(['coder']);
+        $user_2->assign(['super-user']);
 
-         User::factory(35)
+        User::factory(35)
             ->state(new Sequence(
-                fn() => ['type_id' => $employee]
+                fn () => ['type_id' => $employee]
             ))
             // ->state(new Sequence(
             //     fn() => ['gender_id' => $genders->random()]
@@ -77,6 +77,5 @@ class UserSeeder extends Seeder
             //     fn() => ['area_id' => $areas->random()]
             // ))
             ->create();
-
     }
 }

@@ -225,7 +225,7 @@ class MediaController extends Controller
 //    public function fill_media_from_space()
 //    {
 //
-//        $files = Storage::disk('do_spaces')->allFiles('');
+//        $files = Storage::allFiles('');
 //
 //        foreach ($files as $file) {
 //            $fileName = basename($file);

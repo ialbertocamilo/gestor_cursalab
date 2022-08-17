@@ -111,7 +111,7 @@ class HomeController extends Controller
 
         // $location = asset('storage/' . $path);
 
-        $location = Storage::disk('do_spaces')->url($path);
+        $location = Storage::url($path);
 
         return compact('location');
     }

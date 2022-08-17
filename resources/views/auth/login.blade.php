@@ -2,7 +2,9 @@
 
 @section('morecss')
 <style>
-
+.label-material.active{
+  color:#007aff;
+}
 </style>
 @endsection
 
@@ -10,8 +12,8 @@
 <div class="page login-page d-flex justify-content-end align-items-center">
   <div class="content_login_form">
     <div class="form-holder has-shadow">
-      <div class="logo mt-5">
-        <img src="img/logo_color.png" alt="..." class="img-fluid">
+      <div class="logo mt-5 mx-auto text-center">
+        <img src="img/logo_color.png" alt="..." class="img-fluid" width="230">
       </div>
 
       <div class="titulo text-center mt-5 mb-5">
@@ -62,7 +64,7 @@
     </div>
     <div class="mt-4 text-right copy">
       <a href="https://cursalab.io/" target="_blank" class="external">
-        <img src="img/poweredByCursalab.png" alt="..." class="img-fluid">
+        <img src="img/poweredByCursalab.png" alt="..." class="img-fluid" width="160">
       </a>
     </div>
   </div>

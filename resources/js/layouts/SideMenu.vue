@@ -58,7 +58,7 @@ export default {
                         path:"/home",
                         subpaths:["home"],
                         selected:false,
-                        // permission:"general.index"
+                        permission:"home"
                     },
                     {
                         title:"Learning Analytics",
@@ -66,7 +66,7 @@ export default {
                         path:"/dashboard_pbi",
                         subpaths:["dashboard_pbi"],
                         selected:false,
-                        // permission:"learning_analytics.index"
+                        permission:"learning_analytics"
                     },
                     {
                         title:"Resultados de encuestas",
@@ -74,7 +74,7 @@ export default {
                         path:"/resumen_encuesta/index",
                         subpaths:["resumen_encuesta"],
                         selected:false,
-                        // permission:"resumen_encuesta.index"
+                        permission:"resumen_encuesta"
                     }
                 ]
             },
@@ -89,7 +89,7 @@ export default {
                         path:"/aulas-virtuales",
                         subpaths:["aulas-virtuales"],
                         selected:false,
-                        // permission:"meetings.list"
+                        permission:"meetings"
                     },
                     {
                         title:"Cuentas Zoom",
@@ -97,7 +97,7 @@ export default {
                         path:"/aulas-virtuales/cuentas",
                         subpaths:["cuentas-zoom"],
                         selected:false,
-                        permission:"cuentas_zoom.index"
+                        permission:"accounts",
                         //Fix -2
                         // permission:"accounts.list"
                     },
@@ -114,7 +114,7 @@ export default {
                         path:"/usuarios",
                         subpaths:['usuarios'],
                         selected:false,
-                        // permission:"usuarios.index"
+                        permission:"usuarios"
                     },
                     {
                         title:"Código de matrícula",
@@ -122,7 +122,7 @@ export default {
                         path:"/grupos/index",
                         subpaths:["grupos"],
                         selected:false,
-                        // permission:"grupos.index"
+                        permission:"grupos"
                     },
                     {
                         title:"Cargos",
@@ -130,7 +130,7 @@ export default {
                         path:"/cargos",
                         subpaths:["cargos"],
                         selected:false,
-                        // permission:"cargos.index"
+                        permission:"cargos"
                     },
                     {
                         title:"Sedes",
@@ -138,7 +138,7 @@ export default {
                         path:"/boticas",
                         subpaths:["boticas"],
                         selected:false,
-                        // permission:"sedes.index"
+                        permission:"sedes"
                     },
                     {
                         title:"Criterios",
@@ -146,7 +146,7 @@ export default {
                         path:"/criterios",
                         subpaths:["criterios", "valores"],
                         selected:false,
-                        // permission:"criterios.index"
+                        permission:"criterios"
                     },
                     {
                         title:"Supervisores",
@@ -155,7 +155,7 @@ export default {
                         path:"/supervisores",
                         subpaths:["reportes-supervisores"],
                         selected:false,
-                        // permission:"supervisores.index"
+                        permission:"supervisores"
                     },
                 ]
             },
@@ -170,7 +170,7 @@ export default {
                         path:"/modulos",
                         subpaths:['modulos', 'abconfigs', 'categorias', 'cursos'],
                         selected:false,
-                        // permission:"modulos.index"
+                        permission:"modulos"
                     },
                     {
                         title:"Segmentación",
@@ -178,7 +178,7 @@ export default {
                         path:"/curriculas_grupos",
                         subpaths:["curriculas_grupos"],
                         selected:false,
-                        // permission:"segmentacion.index"
+                        permission:"segmentacion"
                     },
                     {
                         title:"Carreras",
@@ -186,7 +186,7 @@ export default {
                         subpaths:["carreras"],
                         selected:false,
                         path:"/carreras/index",
-                        // permission:"carreras.index"
+                        permission:"carreras"
                     },
                 ]
             },
@@ -202,7 +202,7 @@ export default {
                         path:"/anuncios",
                         subpaths:["anuncios"],
                         selected:false,
-                        // permission:"anuncios.index"
+                        permission:"anuncios"
                     },
                     {
                         title:"Encuestas",
@@ -210,7 +210,7 @@ export default {
                         path:"/encuestas",
                         subpaths:["encuestas"],
                         selected:false,
-                        // permission:"encuestas.index"
+                        permission:"encuestas"
                     },
                     {
                         title:"Multimedia",
@@ -218,7 +218,7 @@ export default {
                         path:"/multimedia",
                         subpaths:["multimedia"],
                         selected:false,
-                        // permission:"multimedia.index"
+                        permission:"multimedia"
                     },
                     {
                         title:"Glosario",
@@ -226,7 +226,7 @@ export default {
                         path:"/glosario",
                         subpaths:["glosario"],
                         selected:false,
-                        // permission:"glosarios.index"
+                        permission:"glosario"
                     },
                     {
                         title:"Vademécum",
@@ -234,7 +234,7 @@ export default {
                         path:"/vademecum",
                         subpaths:["vademecum"],
                         selected:false,
-                        // permission:"vademecum.index"
+                        permission:"vademecum"
                     },
                     {
                         title:"Videoteca",
@@ -242,7 +242,7 @@ export default {
                         path:"/videoteca/list",
                         subpaths:["videoteca"],
                         selected:false,
-                        // permission:"videoteca.index"
+                        permission:"videoteca"
                     },
                     {
                         title:"Tags",
@@ -250,7 +250,7 @@ export default {
                         path:"/tags",
                         subpaths:["tags"],
                         selected:false,
-                        // permission:"tags.index"
+                        permission:"tags"
                     },
                 ]
             },
@@ -265,7 +265,7 @@ export default {
                         path:"/entrenamiento/entrenadores",
                         subpaths:["entrenamiento/entrenador"],
                         selected:false,
-                        // permission:"entrenadores.index"
+                        permission:"entrenadores"
                     },
                     {
                         title:"Checklists",
@@ -273,7 +273,7 @@ export default {
                         path:"/entrenamiento/checklists",
                         subpaths:["entrenamiento/checklist"],
                         selected:false,
-                        // permission:"checklist.index"
+                        permission:"checklist"
                     },
                 ]
             },
@@ -288,7 +288,7 @@ export default {
                         path:"/exportar/node",
                         subpaths:["exportar/node"],
                         selected:false,
-                        // permission:"exportar.index"
+                        permission:"reportes"
                     },
                     // {
                     //     title:"Reportes (NEW)",
@@ -305,7 +305,7 @@ export default {
                         path:"/exportar/conferencias",
                         subpaths:["exportar/conferencias"],
                         selected:false,
-                        // permission:"exportar_eventos.index"
+                        permission:"conferencias"
                     },
                     // {
                     //     title:"Otros",
@@ -328,7 +328,7 @@ export default {
                         path:"/notificaciones_push",
                         subpaths:["notificaciones_push"],
                         selected:false,
-                        // permission:"notificaciones_push.index"
+                        permission:"notificaciones"
                     },
                     {
                         title:"Preguntas frecuentes",
@@ -336,7 +336,7 @@ export default {
                         path:"/preguntas-frecuentes",
                          subpaths:["preguntas-frecuentes"],
                         selected:false,
-                        // permission:"pregunta_frecuentes.index"
+                        permission:"faq"
                     },
                     {
                         title:"Ayuda",
@@ -344,7 +344,7 @@ export default {
                         path:"/ayudas",
                         subpaths:["ayudas"],
                         selected:false,
-                        // permission:"ayuda.index"
+                        permission:"ayuda"
                     },
                     {
                         title:"Soporte",
@@ -352,7 +352,7 @@ export default {
                         path:"/soporte",
                         subpaths:["soporte"],
                         selected:false,
-                        // permission:"usuarios_ayuda.show"
+                        permission:"soporte"
                     },
                 ]
             },
@@ -367,7 +367,7 @@ export default {
                         path:"/masivo/usuarios/index_reinicios",
                         subpaths:["masivo/usuarios"],
                         selected:false,
-                        // permission:"usuarios.index_reinicios"
+                        permission:"reinicio_usuarios"
                     },
                     {
                         title:"Procesos masivos",
@@ -375,7 +375,7 @@ export default {
                         path:"/masivo/index",
                         subpaths:["masivo/index"],
                         selected:false,
-                        // permission:"tools.masivo"
+                        permission:"proceso_masivo"
                     },
                     {
                         title:"Migrar Avance",
@@ -383,7 +383,7 @@ export default {
                         path:"/migrar_avance",
                         subpaths:["migrar_avance"],
                         selected:false,
-                        // permission:"migrar_avance.index"
+                        permission:"migrar_avance"
                     },
                     {
                         title:"Compatibles",
@@ -391,7 +391,7 @@ export default {
                         path:"/compatibles",
                         subpaths:["compatibles"],
                         selected:false,
-                        // permission:"compatibles.index"
+                        permission:"compatibles"
                     }
                 ]
             },
@@ -406,7 +406,7 @@ export default {
                         path:"/incidencias",
                         subpaths:["incidencias"],
                         selected:false,
-                        // permission:"incidencias.index"
+                        permission:"incidencias"
                     },
                     {
                         title:"Errores",
@@ -414,7 +414,7 @@ export default {
                         path:"/errores",
                         subpaths:["errores"],
                         selected:false,
-                        // permission:"incidencias.index"
+                        permission:"errores"
                     },
                     {
                         title:"Auditoría",
@@ -422,7 +422,7 @@ export default {
                         path:"/auditoria",
                         subpaths:["auditoria"],
                         selected:false,
-                        // permission:"auditoria.index"
+                        permission:"auditoria"
                     }
                 ]
             },
@@ -434,45 +434,62 @@ export default {
                     {
                         title:"Administradores",
                         icon:"fas fa-users-cog",
-                        path:"/users/index",
+                        path:"/users",
                         subpaths:["users"],
                         selected:false,
-                        // permission:"users.index"
+                        permission:"users"
                     },
                     {
                         title:"Roles",
                         icon:"fas fa-user-tie",
-                        path:"/roles/index",
+                        path:"/roles",
                         subpaths:["roles"],
                         selected:false,
-                        // permission:"roles.index"
+                        permission:"roles"
                     },
-                    {
-                        title:"Permisos",
-                        icon:"fas fa-shield-alt",
-                        path:"/permisos/index",
-                        subpaths:["permisos"],
-                        selected:false,
-                        // permission:"permisos.index"
-                    }
+                    // {
+                    //     title:"Permisos",
+                    //     icon:"fas fa-shield-alt",
+                    //     path:"/permisos",
+                    //     subpaths:["permisos"],
+                    //     selected:false,
+                    //     // permission:"permisos.index"
+                    // }
                 ]
             }
         ]
     }),
+    props: {
+        options: {
+            type: Array,
+            required: true
+        },
+    },
     computed: {
         gruposFiltrado: function () {
+            let vue = this
             let new_grupos = []
             let location = window.location.pathname.split('/');
             this.grupos.forEach((grupo) => {
                 let new_items = []
                 grupo.items.forEach((i) => {
-                    // if(this.$can(i.permission)){
-                        new_items.push(i)
-                        if(this.verify_path(location,i.subpaths)){
-                            grupo.active = true;
-                            i.selected=true;
+                    vue.options.forEach((item)=>{
+                        if(item == 'all'){
+                            new_items.push(i)
+                            if(this.verify_path(location,i.subpaths)){
+                                grupo.active = true;
+                                i.selected=true;
+                            }
+                        }else{
+                            if(i.permission == item){
+                                new_items.push(i)
+                                if(this.verify_path(location,i.subpaths)){
+                                    grupo.active = true;
+                                    i.selected=true;
+                                }
+                            }
                         }
-                    // }
+                    })
                 })
                 if(new_items.length > 0){
                     grupo.items = new_items;
