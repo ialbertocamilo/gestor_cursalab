@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiRest\AuthController;
+use App\Http\Controllers\Test\TestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,6 +51,16 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
 
 
     Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
-    Route::prefix('topics')->group(base_path('routes/app/topics.php'));
+    Route::prefix('temas')->group(base_path('routes/app/topics.php'));
     Route::prefix('quizzes')->group(base_path('routes/app/quizzes.php'));
+});
+
+Route::controller(TestController::class)->group(function() {
+
+    Route::get('/test/users', 'users');
+    Route::get('/test/workspaces', 'workspaces');
+    Route::get('/test/schools', 'schools');
+    Route::get('/test/courses', 'courses');
+
+    Route::get('/test/blocks', 'blocks');
 });

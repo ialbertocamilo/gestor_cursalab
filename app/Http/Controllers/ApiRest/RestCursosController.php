@@ -59,9 +59,6 @@ class RestCursosController extends Controller
             ->groupBy('c.id')
             ->get();
         $modulo = Abconfig::where('id', $appUser->config_id)->first();
-        $mod_eval = json_decode($modulo->mod_evaluaciones, true);
-        $max_intentos = (int) $mod_eval['nro_intentos'];
-        $nota_aprobatoria_arr = $mod_eval['nota_aprobatoria'];
         // 'cursos.temas'
         $categorias = Categoria::with(['cursos', 'temas' => function ($q) {
             $q->select('id', 'estado', 'orden','tipo_ev')->orderBy('orden','ASC');
@@ -114,11 +111,11 @@ class RestCursosController extends Controller
             $data_cursos = [];
             foreach ($cursos as $key => $curso) {
                 $escuela_asignados++;
+                $last_tema = null;
                 $estado_curso = $this->estadoCurso($appUser->id, $curso->id, $curso->requisito_id);
                 if ($estado_curso['status'] == 'completado') {
                     $escuela_completados++;
                 }
-                $last_tema = null;
                 $temas = $curso->temas->where('estado', 1);
                 $visita_temas = $visitas->whereIn('post_id', $temas->pluck('id'));
                 if($visita_temas->count()>0){
@@ -138,10 +135,7 @@ class RestCursosController extends Controller
                         }
                     }
                 }
-//                info("TEMAS", [$curso->temas]);
-//                info("LAST TEMA ::", [$last_tema]);
 
-//                $ultimo_tema_visto = ($last_tema) ? $last_tema : $temas->first()->id;
                 $ultimo_tema_visto = $last_tema ?? $temas->first()->id ?? null;
 
                 if(is_null($data_ultimo_curso) && $estado_curso['status'] != 'completado'){
@@ -160,10 +154,8 @@ class RestCursosController extends Controller
                     'nombre' => $curso->nombre,
                     'descripcion' => $curso->descripcion,
                     'imagen' => $curso->imagen,
-                    // 'requisito_id' => $curso->requisito_id,
                     'requisito' => $requisito_curso,
                     'c_evaluable' => $curso->c_evaluable,
-                    'porcentaje' => $estado_curso['porcentaje'],
                     'disponible' => $estado_curso['disponible'],
                     'status' => $arr_estados[$estado_curso['status']],
                     'encuesta' => $estado_curso['enc_disponible'],
@@ -407,6 +399,7 @@ class RestCursosController extends Controller
                 }
             }
         }
+
         return [
             'porcentaje' => $porcentaje,
             'disponible' => $disponible,
@@ -417,7 +410,7 @@ class RestCursosController extends Controller
             'enc_resuelta' => $enc_resuelta,
             'temas_asignados' => $temas_asignados,
             'temas_completados' => $temas_completados,
-            'existe_rxc' => ($disponible && $res_x_curso2) ? true : false
+            'existe_rxc' => ($disponible && $res_x_curso2)
         ];
     }
 

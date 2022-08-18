@@ -21,6 +21,7 @@ return new class extends Migration
 
             // $table->tinyInteger('libre')->nullable()->default(false);
 
+            $table->unsignedInteger('completed')->nullable();
             $table->unsignedInteger('assigned')->nullable();
             $table->unsignedInteger('passed')->nullable();
             $table->unsignedInteger('taken')->nullable();
