@@ -43,6 +43,9 @@ return new class extends Migration
             $table->string('huawei')->default(0);
             $table->string('windows')->default(0);
 
+            $table->dateTime('last_login')->nullable();
+
+
             $table->rememberToken();
 
             $table->softDeletes();

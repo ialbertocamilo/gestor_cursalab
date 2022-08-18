@@ -328,10 +328,11 @@ class Course extends Model
         return $temp;
     }
 
-    protected function getCourseStatusByUser(User $user, Course $course) : array
+    protected function getCourseStatusByUser(User $user, Course $course): array
     {
         return [
             'percentage' => 0,
+            'status' => null,
             'available' => true,
             'survey_id' => null,
             'survey_available' => true,
@@ -343,7 +344,7 @@ class Course extends Model
         ];
     }
 
-    protected function sortBySchoolAppByUser($user, $courses_id): array
+    protected function getDataToCoursesViewAppByUser($user, $courses_id): array
     {
         $schools = School::withWhereHas('courses', function ($q) use ($courses_id) {
             $q->whereIn('id', $courses_id)
@@ -352,19 +353,27 @@ class Course extends Model
         })
             ->select('id', 'name')
             ->get();
+        $workspace = $user->workspace;
+        $mod_eval = json_decode($workspace->mod_evaluaciones, true);
+        $summary_topics = SummaryTopic::whereHas('courses', function ($q) use ($courses_id) {
+            $q->whereIn('id', $courses_id)->where('active', ACTIVE)->sortBy('position');
+        })
+            ->where('user_id', $user->id)
+            ->get();
+
         $data = [];
 
         foreach ($schools as $school) {
             $courses = [];
-            $completed = 0;
-            $assigned = 0;
+            $school_completed = 0;
+            $school_assigned = 0;
             $school_percentage = 0;
-            $status = '';
+            $school_status = '';
             $last_course = null;
 
             foreach ($school->courses as $course) {
                 $topics = [];
-                $assigned++;
+                $school_assigned++;
 
                 $course_status = self::getCourseStatusByUser($user, $course);
 
@@ -394,10 +403,10 @@ class Course extends Model
             $data[] = [
                 'categoria_id' => $school->id,
                 'categoria' => $school->name,
-                'completados' => $completed,
-                'asignados' => $assigned,
+                'completados' => $school_completed,
+                'asignados' => $school_assigned,
                 'porcentaje' => $school_percentage,
-                'estado' => $status,
+                'estado' => $school_status,
                 'ultimo_curso' => $last_course,
                 "cursos" => $courses
             ];

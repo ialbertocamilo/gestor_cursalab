@@ -249,4 +249,9 @@ class Topic extends Model
         $temp['list'] = $list1;
         return $temp;
     }
+
+    protected function getDataToTopicsViewAppByUser($user, $courses_id)
+    {
+
+    }
 }

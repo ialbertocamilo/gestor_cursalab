@@ -47,6 +47,7 @@ class AuthController extends Controller
 
         $user->load('criterion_values:id,value_text');
         $user->updateUserDeviceVersion($data);
+        $user->updateLastUserLogin($data);
 
 //        $config_data = Abconfig::with('main_menu', 'side_menu')->select('id', 'color', 'duracion_dias', 'logo', 'isotipo', 'mod_agrupacion', 'mod_cronometro', 'mod_encuestas', 'mod_evaluaciones', 'mod_mainmenu', 'mod_sidemenu', 'mod_tipovalidacion', 'plantilla_diploma', 'mod_push', 'push_code')
 //            ->where('id', $user->config_id)
@@ -62,19 +63,15 @@ class AuthController extends Controller
             "dni" => $user->document,
             "nombre" => $user->name,
             'criteria' => $user->criterion_values,
-//            "cargo" => $user->cargo,
-//            "sexo" => $user->sexo,
-//            "botica" => $user->botica,
-//            "grupo" => $user->grupo,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
 //            'carrera' => $carrera,
 //            'ciclo' => $ciclo
+//            "grupo" => $user->grupo,
+//            "botica" => $user->botica,
+//            "sexo" => $user->sexo,
+//            "cargo" => $user->cargo,
         ];
-        // Actualiza ultima_sesion
-//        date_default_timezone_set('America/Lima');
-//        $user->ultima_sesion = date('Y-m-d H:i:s');
-//        $user->save();
 
 //        $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
 //        $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
@@ -82,15 +79,6 @@ class AuthController extends Controller
 //        $config_data->full_app_main_menu = Abconfig::getFullAppMenu('main_menu', $config_data->app_main_menu);
 //        $config_data->full_app_side_menu = Abconfig::getFullAppMenu('side_menu', $config_data->app_side_menu);
 
-//        return response()->json([
-//            'access_token' => $token,
-//            'token_type' => 'bearer',
-//            'expires_in' => 560,
-//            'error' => 0,
-//            "token_firebase" => $user->token_firebase,
-//            'config_data' => $config_data,
-//            'usuario' => $user_data
-//        ]);
         return response()->json([
             'access_token' => $token,
 //            'expires_in' => auth('api')->factory()->getTTL() * 60,
@@ -98,16 +86,6 @@ class AuthController extends Controller
             'usuario' => $user_data
         ]);
     }
-
-    // public function me()
-    // {
-    //     return response()->json(auth()->user());
-    // }
-
-    // public function payload()
-    // {
-    //     return response()->json(auth()->payload());
-    // }
 
     /**
      * Log the user out (Invalidate the token).

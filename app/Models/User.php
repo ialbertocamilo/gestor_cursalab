@@ -496,6 +496,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $intersection->count() === $segment_values->count();
     }
 
+    public function updateLastUserLogin()
+    {
+        $user = $this;
+        $user->last_login = date('Y-m-d H:i:s');
+        $user->save();
+    }
+
     public function updateUserDeviceVersion($request): void
     {
         $user = $this;
@@ -504,7 +511,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $field = "v-{$request['os']}";
             $user->$field = $request['version'];
         }
-
         $user->save();
     }
 }
