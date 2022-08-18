@@ -43,10 +43,10 @@ class Course extends Model
         return $this->belongsToMany(Poll::class);
     }
 
-    public function requirement()
-    {
-        return $this->belongsToMany(Course::class);
-    }
+    // public function requirement()
+    // {
+    //     return $this->belongsToMany(Course::class);
+    // }
 
     public function checklists()
     {

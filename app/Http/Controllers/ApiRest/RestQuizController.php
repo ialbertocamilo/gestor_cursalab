@@ -21,7 +21,7 @@ class RestQuizController extends Controller
         $rpta_fail   = 0;
         $resultado   = 0;
 
-        $config_id   = $appUser->config_id;
+        $subworkspace_id   = $appUser->subworkspace_id;
         $usuario_id  = $appUser->id;
         $post_id     = $request->tema;
         $rptas       = $request->respuestas;
@@ -54,7 +54,7 @@ class RestQuizController extends Controller
         }
 
         $helper             = new HelperController();
-        $config_evaluacion  = $helper->configEvaluacionxModulo($config_id);
+        $config_evaluacion  = $helper->configEvaluacionxModulo($subworkspace_id);
         $nota_aprobatoria   = $config_evaluacion['nota_aprobatoria'];
         $nota_calculada     = ($rpta_ok == 0) ? 0 : ((20 / ($rpta_ok + $rpta_fail)) * $rpta_ok);
         $resultado          = ($nota_calculada >= $nota_aprobatoria) ? 1 : 0;
@@ -85,9 +85,9 @@ class RestQuizController extends Controller
                 $data_ev['resultado'] = ($actividad->estado_tema=='aprobado') ? 1 : 0 ;
             }
             if($resultado){
-                $tema = Posteo::where('id',$ev->posteo_id)->select('orden')->first();
-                $tema_siguiente = Posteo::where('curso_id',$ev->curso_id)->whereNotIn('id',[$ev->posteo_id])->where('orden','>=',$tema->orden)->select('id')->first();
-                $data_tema_siguiente = ($tema_siguiente) ? $tema_siguiente->id : false;
+                $topic = Posteo::where('id',$ev->posteo_id)->select('orden')->first();
+                $topic_siguiente = Posteo::where('curso_id',$ev->curso_id)->whereNotIn('id',[$ev->posteo_id])->where('orden','>=',$topic->orden)->select('id')->first();
+                $data_tema_siguiente = ($topic_siguiente) ? $topic_siguiente->id : false;
             }
             $data_ev['ev_updated']      = 1;
             $data_ev['ev_updated_msg']  = "(1) EV actualizada";
@@ -136,6 +136,71 @@ class RestQuizController extends Controller
     public function usuarioRespuestasEval(Request $request)
     {
 
+    }
+
+    public function cargar_preguntas($topic_id)
+    {
+        $apiResponse = ['data' => [], 'error' => true];
+        
+        $appUser = auth()->user();
+
+        $topic = Topic::find('id', $topic_id)->first();
+
+
+        if (!$topic) return response()->json($apiResponse, 200);
+
+        $data = [];
+        $subworkspace_id = $appUser->subworkspace_id;
+        $helper = new HelperController();
+        $config_eva = $helper->configEvaluacionxModulo($subworkspace_id);
+
+        if ($topic->tipo_ev  == 'calificada') {
+            $preguntas = Pregunta::where('post_id', $topic->id)
+                            ->where('estado', 1)
+                            ->where('tipo_pregunta','selecciona')
+                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
+                            ->inRandomOrder()
+                            ->limit($config_eva['preg_x_ev'])
+                            ->get();
+            // APLICAR SHUFFLE A ALTERNATIVAS DE CADA PREGUNTA
+            foreach ($preguntas as $value) {
+                $val_rpta = json_decode($value->rptas_json, true);
+                $tempRptas = collect();
+                foreach ($val_rpta as $key => $value2) {
+                    $tempRpta = ['id'=> $key , 'opc' =>$value2];
+                    $tempRptas->push($tempRpta);
+                }
+                // shuffle($val_rpta);
+                $shu = $tempRptas->shuffle()->all();
+
+                // info($value);
+                $value->rptas_json = $shu;
+                // $value->rptas_json = $val_rpta;
+            }
+        } else {
+            $preguntas = Pregunta::where('post_id', $topic->id)
+                            ->where('estado', 1)
+                            ->where('tipo_pregunta','texto')
+                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
+                            ->get();
+        }
+
+
+        $data = ["tipo_evaluacion"=>$topic->tipo_ev,"curso_id"=>$topic->curso_id,"posteo_id" => $topic->id, "nombre" => $topic->nombre, "preguntas" => $preguntas];
+        $ultima_evaluacion = Carbon::now();
+
+        DB::table('resumen_general')->where('usuario_id',$appUser->id)->update([
+            'last_ev' =>$ultima_evaluacion,
+        ]);
+
+        DB::table('resumen_x_curso')->where('usuario_id',$appUser->id)->where('curso_id',$topic->curso_id)->update([
+            'last_ev' =>$ultima_evaluacion,
+        ]);
+        
+        if (count($preguntas) > 0) $apiResponse = ['error' => false, 'data' => $data];
+        else $apiResponse = ['error' => true, 'data' => null];
+
+        return response()->json($apiResponse, 200);
     }
 
 }
