@@ -87,9 +87,13 @@ class Course extends Model
     {
         $q = Course::whereHas('workspace', function ($t) use ($request) {
             $t->where('workspace_id', $request->workspace_id);
-        })->whereHas('schools', function ($t) use ($request) {
-            $t->where('school_id', $request->school_id);
-        })->withCount(['topics', 'polls', 'segments']);
+        });
+        if (!is_null($request->school_id)) {
+            $q->whereHas('schools', function ($t) use ($request) {
+                $t->where('school_id', $request->school_id);
+            });
+        }
+        $q->withCount(['topics', 'polls', 'segments']);
 
         if ($request->q)
             $q->where('courses.name', 'like', "%$request->q%");
@@ -383,11 +387,11 @@ class Course extends Model
                     'nombre' => $course->name,
                     'descripcion' => $course->description,
                     'imagen' => $course->imagen,
-//                    'requisito_id' => $course->requisito_id,
+                    //                    'requisito_id' => $course->requisito_id,
                     'c_evaluable' => $course->assessable,
                     'porcentaje' => $course_status['percentage'],
                     'disponible' => $course_status['available'],
-//                    'status' => $arr_estados_cursos[$course_status['status']],
+                    //                    'status' => $arr_estados_cursos[$course_status['status']],
                     'encuesta' => $course_status['survey_available'],
                     'encuesta_habilitada' => $course_status['survey_enabled'],
                     'encuesta_resuelta' => $course_status['solved_survey'],

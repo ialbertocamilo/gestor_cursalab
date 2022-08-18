@@ -41,7 +41,7 @@ class CursosController extends Controller
         $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         $request->workspace_id = $workspace_id;
-        $request->school_id = $escuela->id;
+        $request->school_id = ($escuela->exists) ? $escuela->id : null;
 
         $cursos = Course::search($request);
         CursoSearchResource::collection($cursos);

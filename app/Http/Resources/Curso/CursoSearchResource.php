@@ -14,6 +14,8 @@ class CursoSearchResource extends JsonResource
      */
     public function toArray($request)
     {
+        $route_edit = route('cursos.editCurso', [$this->schools()->first()->id, $this->id]);
+        $route_topics = route('temas.list', [$this->schools()->first()->id, $this->id]);
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -29,8 +31,8 @@ class CursoSearchResource extends JsonResource
 
             'actualizaciones' => '',
 
-            'edit_route' => route('cursos.editCurso', [$request->school_id, $this->id]),
-            'temas_route' => route('temas.list', [$request->school_id, $this->id]),
+            'edit_route' => $route_edit,
+            'temas_route' => $route_topics,
         ];
     }
 }

@@ -127,14 +127,14 @@ export default {
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name'],
     data() {
         let vue = this
-
+        let route_school = (vue.escuela_id !== '') ? `/escuelas/${vue.escuela_id}` : ``;
         return {
             breadcrumbs: [
                 {title: 'Escuelas', text: `${this.escuela_name}`, disabled: false, href: `/escuelas`},
                 {title: 'Cursos', text: null, disabled: true, href: ''},
             ],
             dataTable: {
-                endpoint: `/escuelas/${vue.escuela_id}/cursos/search`,
+                endpoint: `${route_school}/cursos/search`,
                 ref: 'cursosTable',
                 headers: [
                     {text: "Portada", value: "image", align: 'center', sortable: false},
