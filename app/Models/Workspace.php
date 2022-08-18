@@ -104,12 +104,39 @@ class Workspace extends BaseModel
     }
 
     /**
-     * Load default workspace for logged user
+     * Load user assigned workspaces, according roles
      */
-    public static function getDefaultUserWorkspace() {
+    public static function loadUserWorkspaces(int $userId) {
 
-        return ['id' => 1, 'name' => 'Workspace', 'code' => 'X'];
-        //return Workspace::find(1);
+        $userEntity = 'App\\Model\\User';
+        $allowedRoles = [
+            1, // super-user
+            2, // config
+            3  // admin
+        ];
+        $workspaces = Workspace::query()
+                        ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
+                        ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+                        ->where('assigned_roles.entity_type', $userEntity)
+                        ->whereIn('assigned_roles.role_id', $allowedRoles)
+                        ->where('users.id', $userId)
+                        ->where('workspaces.active', ACTIVE)
+                        ->select('workspaces.*')
+                        ->get();
+
+        if (count($workspaces) > 0) {
+
+            return $workspaces;
+
+        } else {
+
+            // Since user does not have any workspace assigned by role,
+            // get its subworkspace with it subworkspace_id field
+
+            $user = User::find($userId);
+            $workspace = Workspace::find($user->subworkspace_id);
+            return [$workspace];
+        }
     }
 
     /**

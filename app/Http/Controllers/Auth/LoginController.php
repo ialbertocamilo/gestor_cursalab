@@ -27,7 +27,9 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    //protected $redirectTo = '/home';
+
+    protected $workspacesList = [];
 
     /**
      * Create a new controller instance.
@@ -75,8 +77,6 @@ class LoginController extends Controller
 
         $this->clearLoginAttempts($request);
 
-        session(['workspace' => Workspace::getDefaultUserWorkspace()]);
-
         if ($response = $this->authenticated($request, $this->guard()->user())) {
 
             return $response;
@@ -85,5 +85,32 @@ class LoginController extends Controller
         return $request->wantsJson()
                     ? new JsonResponse([], 204)
                     : redirect()->intended($this->redirectPath());
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+
+        // Load user's workspaces
+
+        $workspaces =  Workspace::loadUserWorkspaces($user->id);
+
+        // Save first workspace in session, to be used
+        // as the default workspace, since user has not
+        // selected a workspace yet
+
+        session(['workspace' => $workspaces[0]]);
+
+        // When there is more than 1 workspace show
+        // workspaces selector, or show welcome page
+        // otherwise
+
+        if (count($workspaces) > 1) {
+
+            return redirect('/workspaces/list');
+
+        } else {
+
+            return redirect('/welcome');
+        }
     }
 }
