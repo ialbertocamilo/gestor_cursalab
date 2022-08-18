@@ -51,28 +51,26 @@ class  DashboardService {
      * Counts workspace users
      *
      * @param int|null $workspaceId
-     * @return string
+     * @return int
      */
-    public static function countUsers(?int $workspaceId) {
-        return 'falta roles';
-//                                Usuario::where('rol', 'default')->when($modulo_id, function ($q) use ($modulo_id) {
-//                                    $q->where('config_id', $modulo_id);
-//                                })->count(),
+    public static function countUsers(?int $workspaceId): int
+    {
+
+        return Usuario::where('subworkspace_id', $workspaceId)
+                      ->count();
     }
 
     /**
      * Counts workspace active users
      *
      * @param int|null $workspaceId
-     * @return string
+     * @return int
      */
-    public static function countActiveUsers(?int $workspaceId) {
-        return 'falta roles';
-//                                Usuario::where('active', 1)
-//                                ->where('rol', 'default')
-//                                ->when($modulo_id, function ($q) use ($modulo_id) {
-//                                    $q->where('config_id', $modulo_id);
-//                                })->count(),
+    public static function countActiveUsers(?int $workspaceId): int
+    {
+        return Usuario::where('subworkspace_id', $workspaceId)
+                      ->where('active', ACTIVE)
+                      ->count();
     }
 
     /**
