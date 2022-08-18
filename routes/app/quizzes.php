@@ -4,14 +4,13 @@ use App\Http\Controllers\ApiRest\RestQuizController;
 
 Route::controller(RestQuizController::class)->group(function() {
 
-    // Route::post('/rest/evaluar_preguntas', 'ApiRest\RestController@evaluar_preguntas');
     // Route::get('/rest/evaluarpreguntas_v2/{id_video}/{id_user}/{rpta_ok}/{rpta_fail}/{usu_rptas}', 'ApiRest\RestAvanceController@evaluarpreguntas_v2');
+    // Route::get('evaluarpreguntas_v2/{topic_id}/{user_id}/{rpta_ok}/{rpta_fail}/{usu_rptas}', 'evaluarpreguntas_v2');
 
-    // Route::post('/rest/evaluar_abiertas', 'ApiRest\RestAvanceController@guardaEvaluacionAbierta');
-    // Route::get('/rest/eval_pendientes2/{user_id}/{cate_id}', 'ApiRest\RestController@evalPendientes2');
+    Route::post('evaluar_preguntas', 'evaluar_preguntas');
+    Route::post('evaluar_abiertas', 'guardaEvaluacionAbierta');
+    Route::get('eval_pendientes2/{user_id}/{cate_id}', 'evalPendientes2');
 
-    // Route::get('/rest/usuario_respuestas_eval/{user_id}/{post_id}', 'ApiRest\RestController@usuarioRespuestasEval');
-
-    
+    Route::get('usuario_respuestas_eval/{user_id}/{post_id}', 'usuarioRespuestasEval');
 
 });
