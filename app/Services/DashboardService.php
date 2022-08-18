@@ -25,7 +25,7 @@ class  DashboardService {
         if (!$workspaceId) return 0;
 
         return Posteo::join('courses', 'courses.id', '=', 'topics.course_id')
-                    ->join('course_workspace as cw', 'cw.courses_id', '=', 'courses.id')
+                    ->join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
                     ->where('cw.workspaces_id', $workspaceId)
                     ->count();
     }
@@ -42,7 +42,7 @@ class  DashboardService {
 
         if (!$workspaceId) return 0;
 
-        return Curso::join('course_workspace as cw', 'cw.courses_id', '=', 'courses.id')
+        return Curso::join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
                     ->where('cw.workspaces_id', $workspaceId)
                     ->count();
     }
@@ -88,7 +88,7 @@ class  DashboardService {
         if (!$workspaceId) return 0;
 
         return Posteo::join('courses', 'courses.id', '=', 'topics.course_id')
-                ->join('course_workspace as cw', 'cw.courses_id', '=', 'courses.id')
+                ->join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
                 ->where('cw.workspaces_id', $workspaceId)
                 ->where('topics.assessable', 1)
                 ->count();
@@ -118,8 +118,8 @@ class  DashboardService {
                 $data['data'] = SummaryTopic::query()
                      ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
                      ->join('courses', 'courses.id', '=', 'topics.course_id')
-                     ->join('course_workspace', 'course_workspace.courses_id', '=', 'courses.id')
-                     ->where('course_workspace.workspaces_id', $workspaceId)
+                     ->join('course_workspace', 'course_workspace.course_id', '=', 'courses.id')
+                     ->where('course_workspace.workspace_id', $workspaceId)
                      ->where(DB::raw('date(summary_topics.created_at)'), '>=', 'curdate() - INTERVAL 20 DAY')
                      ->select([
                          DB::raw('date(summary_topics.created_at) as fechita'),
@@ -159,8 +159,8 @@ class  DashboardService {
             $data['data'] = SummaryTopic::query()
                 ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
                 ->join('courses', 'courses.id', '=', 'topics.course_id')
-                ->join('course_workspace', 'course_workspace.courses_id', '=', 'courses.id')
-                ->where('course_workspace.workspaces_id', $workspaceId)
+                ->join('course_workspace', 'course_workspace.course_id', '=', 'courses.id')
+                ->where('course_workspace.workspace_id', $workspaceId)
                 ->where(DB::raw('date(summary_topics.created_at)'), '>=', 'curdate() - INTERVAL 20 DAY')
                 ->select([
                     DB::raw('date(summary_topics.created_at) as fechita'),
@@ -211,7 +211,7 @@ class  DashboardService {
                 ->whereNotIn('users.id', $excludedUsersIds)
                 ->whereIn('criterion_value_user.criterion_value_id', $boticasIds)
                 ->where('summary_topics.passed', 1)
-                ->where('users.workspace_id', $workspaceId)
+                ->where('users.subworkspace_id', $workspaceId)
                 ->where('users.active', 1)
                 // group by botica
                 ->groupBy('criterion_value_user.criterion_value_id')

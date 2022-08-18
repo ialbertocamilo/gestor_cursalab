@@ -263,7 +263,7 @@ class RestCursosController extends Controller
                 $media_temas = $tema->medias->sortBy('orden')->values()->all();
                 foreach ($media_temas as $md) {
                     if($md->tipo == 'audio' && !str_contains('https',$md->valor)){
-                        $md->valor=env('DO_URL').'/'.$md->valor;
+                        $md->valor=env('BUCKET_BASE_URL').'/'.$md->valor;
                     }
                 }
                 $data_temas[] = [

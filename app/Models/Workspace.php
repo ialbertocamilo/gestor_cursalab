@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
+
 class Workspace extends BaseModel
 {
     protected $fillable = [
@@ -51,7 +55,16 @@ class Workspace extends BaseModel
 
     protected static function search($request)
     {
-        $query = self::query()->where('active', true);
+        // Get authenticated user's id
+
+        $userId = null;
+        if (Auth::check()) {
+            $userId = Auth::user()->id;
+        }
+
+        // Generate query to get workspaces according to role
+
+        $query = self::generateUserWorkspacesQuery($userId);
 
         if ($request->id) {
             $query::where('id', $request->id)
@@ -62,7 +75,7 @@ class Workspace extends BaseModel
             $query->where('name', 'like', "%$request->q%");
         }
 
-        $field = $request->sortBy ?? 'id';
+        $field = $request->sortBy ?? 'workspaces.id';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort);
@@ -76,7 +89,8 @@ class Workspace extends BaseModel
      * @param int $workspaceId
      * @return int
      */
-    public static function countModules(int $workspaceId) {
+    public static function countModules(int $workspaceId): int
+    {
 
         $count = Workspace::query()
                  ->join('criterion_value_workspace', 'criterion_value_workspace.workspace_id', '=', 'workspaces.id')
@@ -93,10 +107,11 @@ class Workspace extends BaseModel
      * @param int $workspaceId
      * @return int
      */
-    public static function countUsers(int $workspaceId) {
+    public static function countUsers(int $workspaceId): int
+    {
 
         $count = Workspace::query()
-                 ->join('users', 'users.workspace_id', '=', 'workspaces.id')
+                 ->join('users', 'users.subworkspace_id', '=', 'workspaces.id')
                  ->where('workspaces.id', $workspaceId)
                  ->count();
 
@@ -104,9 +119,10 @@ class Workspace extends BaseModel
     }
 
     /**
-     * Load user assigned workspaces, according roles
+     * Generate a query to get user's workspaces
      */
-    public static function loadUserWorkspaces(int $userId) {
+    public static function generateUserWorkspacesQuery(int $userId): Builder
+    {
 
         $userEntity = 'App\\Model\\User';
         $allowedRoles = [
@@ -114,15 +130,26 @@ class Workspace extends BaseModel
             2, // config
             3  // admin
         ];
-        $workspaces = Workspace::query()
-                        ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
-                        ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-                        ->where('assigned_roles.entity_type', $userEntity)
-                        ->whereIn('assigned_roles.role_id', $allowedRoles)
-                        ->where('users.id', $userId)
-                        ->where('workspaces.active', ACTIVE)
-                        ->select('workspaces.*')
-                        ->get();
+
+        return Workspace::query()
+                ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
+                ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+                ->where('assigned_roles.entity_type', $userEntity)
+                ->whereIn('assigned_roles.role_id', $allowedRoles)
+                ->where('users.id', $userId)
+                ->where('workspaces.active', ACTIVE)
+                ->select('workspaces.*');
+    }
+
+    /**
+     * Load user assigned workspaces, according roles
+     */
+    public static function loadUserWorkspaces(int $userId): Collection|array
+    {
+
+        // Load user's workspaces according its roles
+
+        $workspaces = Workspace::generateUserWorkspacesQuery($userId)->get();
 
         if (count($workspaces) > 0) {
 
