@@ -5,13 +5,13 @@
             class="title-logo-wrapper bg-white d-flex justify-content-center rounded-0">
             <img v-if="userSession.session"
                  :src="userSession.session.workspace.logo"
-                 alt="Farmacias peruanas"
+                 :alt="userSession.session.workspace.name"
                  width="140">
             <v-icon v-if="workspaces.length > 1"
                     class="caret">
                 {{ workspacesListIsVisible
-                ? 'mdi-chevron-up'
-                : 'mdi-chevron-down'
+                    ? 'mdi-chevron-up'
+                    : 'mdi-chevron-down'
                 }}
             </v-icon>
 
@@ -47,7 +47,7 @@
         tile>
             <v-list-group
             :value="false"
-            v-for="(grupo, i) in gruposFiltrado"
+            v-for="(grupo, i) in grupos"
             :key="i"
             color="white"
             v-model="grupo.active"
@@ -82,7 +82,7 @@ export default {
     data: () => ({
         workspacesListIsVisible: true,
         workspaces: [ ],
-        userSession: {},
+        userSession: { },
         collapseOnScroll: true,
         grupos: [
             {
@@ -455,7 +455,8 @@ export default {
 
             let vue = this;
 
-            // Load workspaces
+            // Submit request to update workspace in session
+
             let formData = vue.getMultipartFormData('PUT');
             let url = `/usuarios/session/workspace/${workspaceId}`;
             this.$http

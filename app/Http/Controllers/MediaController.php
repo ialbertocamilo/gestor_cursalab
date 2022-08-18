@@ -43,9 +43,13 @@ class MediaController extends Controller
      */
     public function show(Media $multimedia)
     {
+
+
         $size = $multimedia->size === 0.0 ? '-' : $multimedia->size;
-        $multimedia->file = $multimedia->ext === 'scorm' ? $multimedia->file : env('DO_URL') . '/' . $multimedia->file;
-        $multimedia->preview = env('DO_URL') . '/' . $multimedia->getPreview();
+        $multimedia->file = $multimedia->ext === 'scorm'
+                             ? $multimedia->file
+                             : env('BUCKET_BASE_URL') . '/' . $multimedia->file;
+        $multimedia->preview = $multimedia->getPreview();
         $multimedia->type = $multimedia->getMediaType($multimedia->ext);
         $multimedia->created = $multimedia->created_at->format('d/m/Y');
         $multimedia->size = $size;
