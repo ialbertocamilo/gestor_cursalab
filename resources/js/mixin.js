@@ -127,6 +127,29 @@ export default {
             // console.info(logTitle);
             // console.table(tempObj);
         },
+        /**
+         * Get bucket URL
+         *
+         * @returns {string}
+         */
+        getBucketBaseUrl() {
+
+            let bucketBaseUrl = '';
+            let meta = document.querySelector('meta[name=BUCKET_BASE_URL]');
+            if (meta) {
+                // Get value from HTML meta element
+
+                bucketBaseUrl = meta.getAttribute('content');
+
+                // Remove trailing slash
+
+                bucketBaseUrl =  bucketBaseUrl.replace(/\/+$/, '');
+
+            }
+
+            return bucketBaseUrl;
+        }
+        ,
         infoMedia(item) {
 
             if (!item.ext) return false;
@@ -139,7 +162,7 @@ export default {
             };
             if (item)
                 if (extensiones.image.includes(item.ext.toLowerCase())) {
-                    data.preview = `https://static.universidadcorporativafp.com.pe/${item.file}`;
+                    data.preview = this.getBucketBaseUrl() +  `/${item.file}`;
                     data.tipo = "Imagen";
                     data.color = "#f6685e";
                 } else if (extensiones.video.includes(item.ext)) {

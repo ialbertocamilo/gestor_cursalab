@@ -5,6 +5,9 @@ use App\Http\Controllers\UsuarioController;
 
 Route::controller(UsuarioController::class)->group(function () {
 
+    Route::get('/session', 'session');
+    Route::put('/session/workspace/{workspace}', 'updateWorkspaceInSession');
+
 	Route::view('/', 'usuarios.list')->name('usuarios.list');
 	// ->middleware('permission:usuarios.index');
 

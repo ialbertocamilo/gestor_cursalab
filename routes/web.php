@@ -32,6 +32,7 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 Route::get('home', [DashboardController::class, 'index'])->name('home');
+Route::view('welcome', 'welcome');
 
 // DESCARGAS
 Route::get('dnx/{id}', 'GestorController@descargaArchivo');

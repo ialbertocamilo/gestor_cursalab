@@ -2,46 +2,79 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserStoreRequest;
-use App\Http\Resources\Usuario\UsuarioSearchResource;
-use App\Models\Criterion;
-use App\Models\CriterionValue;
-use App\Models\User;
-use Auth;
-
-use App\Models\Cargo;
-use App\Models\Ciclo;
-use App\Models\Curso;
-
-// use App\Perfil;
-use App\Models\Grupo;
-use App\Models\Botica;
-use App\Models\Posteo;
-use App\Models\Prueba;
-use App\Models\Carrera;
-use App\Models\Ingreso;
-use App\Models\Usuario;
-use App\Models\Abconfig;
-use App\Models\Criterio;
-use App\Models\Reinicio;
-use App\Models\Categoria;
-use App\Models\Curricula;
-use App\Models\Matricula;
-use App\Models\Resumen_general;
-use App\Models\Resumen_x_curso;
-use App\Models\Usuario_vigencia;
-
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use App\Http\Requests\UsuarioStoreRequest;
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Controllers\ApiRest\RestAvanceController;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Resources\Usuario\UsuarioSearchResource;
+use App\Models\Abconfig;
+use App\Models\Botica;
+use App\Models\Cargo;
+use App\Models\Carrera;
+use App\Models\Categoria;
+use App\Models\Ciclo;
+use App\Models\Criterio;
+use App\Models\Criterion;
+use App\Models\CriterionValue;
+use App\Models\Curso;
+use App\Models\Grupo;
+use App\Models\Ingreso;
+use App\Models\Matricula;
+use App\Models\Posteo;
+use App\Models\Prueba;
+use App\Models\Reinicio;
+use App\Models\Resumen_general;
+use App\Models\Resumen_x_curso;
+use App\Models\User;
+use App\Models\Usuario;
+use App\Models\Workspace;
+use App\Services\FileService;
+use Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
+
+// use App\Perfil;
 
 class UsuarioController extends Controller
 {
+
+    /**
+     * Process request to load authenticated user and its workspace
+     */
+    public function session(Request $request) {
+
+        if (Auth::check()) {
+
+            $user = Auth::user();
+            $session = $request->session()->all();
+            $workspace = $session['workspace'];
+            $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
+
+            return [
+                'user' => [
+                    'username' => $user->username,
+                    'fullname' =>  $user->fullname
+                ],
+                'session' => [
+                    'workspace' => $workspace
+                ]
+            ];
+        }
+    }
+
+    /**
+     * Process request to update workspace in session
+     *
+     * @param Request $request
+     * @param Workspace $workspace
+     */
+    public function updateWorkspaceInSession(Request $request, Workspace $workspace) {
+
+        // update workspace value in Session
+
+        Session::put('workspace', $workspace);
+    }
 
     public function search(Request $request)
     {

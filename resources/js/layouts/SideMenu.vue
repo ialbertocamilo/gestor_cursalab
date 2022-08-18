@@ -1,9 +1,44 @@
 <template>
     <v-card flat tile :collapse="!collapseOnScroll">
-        <v-card-title class="bg-default-primary d-flex justify-content-center rounded-0">
-            <img :src="`/img/ucfp_logo_blanco.png`" alt="Farmacias peruanas" width="140">
+        <v-card-title
+            @click="workspacesListIsVisible = !workspacesListIsVisible"
+            class="title-logo-wrapper bg-white d-flex justify-content-center rounded-0">
+            <img v-if="userSession.session"
+                 :src="userSession.session.workspace.logo"
+                 alt="Farmacias peruanas"
+                 width="140">
+            <v-icon v-if="workspaces.length > 1"
+                    class="caret">
+                {{ workspacesListIsVisible
+                ? 'mdi-chevron-up'
+                : 'mdi-chevron-down'
+                }}
+            </v-icon>
+
             <!-- <v-app-bar-nav-icon color="white"></v-app-bar-nav-icon> -->
         </v-card-title>
+        <div :class="{visible: workspacesListIsVisible}"
+             v-if="workspaces.length > 1"
+             class="workspaces-list-wrapper">
+
+            <v-list shaped class="bg-white workspaces-list">
+                <v-list-item-group
+                    color="primary"
+                    active-class="bg-white"
+                    class="bg-white"
+                >
+                    <v-list-item
+                        v-for="(workspace, i) in workspaces"
+                        @click="setActiveWorkspace(workspace.id)"
+                        :key="i"
+                    >
+                        <v-list-item-content>
+                            <v-list-item-title v-text="workspace.name"></v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-list-item-group>
+            </v-list>
+        </div>
         <v-list class="mx-auto"
         dark
         nav
@@ -45,6 +80,9 @@
 
 export default {
     data: () => ({
+        workspacesListIsVisible: true,
+        workspaces: [ ],
+        userSession: {},
         collapseOnScroll: true,
         grupos: [
             {
@@ -356,7 +394,14 @@ export default {
             });
             return new_grupos;
         }
-    },
+    }
+    ,
+    mounted() {
+
+        this.loadData();
+        this.loadSession();
+    }
+    ,
     methods:{
         verify_path(location,subpaths){
             return subpaths.find((e)=>{
@@ -365,11 +410,99 @@ export default {
                 return lt.includes(e)
             })
         }
+        ,
+        /**
+         * Load data from server
+         */
+        loadData() {
+
+            let vue = this;
+
+            // Load workspaces
+
+            let url = `/workspaces/search`
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.workspaces = data.data.data;
+                });
+
+        }
+        ,
+        /**
+         * Load session data from server
+         */
+        loadSession() {
+
+            let vue = this;
+
+            // Load session data
+
+            let url = `/usuarios/session`
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.userSession = data;
+                });
+        }
+        ,
+        /**
+         * Update workspace in User's session
+         *
+         * @param workspaceId
+         */
+        setActiveWorkspace(workspaceId) {
+
+            let vue = this;
+
+            // Load workspaces
+            let formData = vue.getMultipartFormData('PUT');
+            let url = `/usuarios/session/workspace/${workspaceId}`;
+            this.$http
+                .post(url, formData)
+                .then(() => {
+                    vue.workspacesListIsVisible = false;
+                    vue.loadSession();
+                });
+        }
     }
 }
 </script>
 
 <style scoped>
+
+.title-logo-wrapper {
+    height: 130px;
+    box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25);
+    cursor: pointer;
+}
+
+.title-logo-wrapper .caret {
+    color: #5458ea;
+    margin-left: 5px;
+}
+
+.workspaces-list-wrapper {
+    background: white;
+    box-shadow: inset 8px 8px 5px rgba(165, 166, 246, 0.15);
+    opacity: 0;
+    transition: all 1000ms;
+    overflow: hidden;
+}
+
+.workspaces-list-wrapper .v-list {
+    display: none;
+}
+
+.workspaces-list-wrapper.visible {
+    padding-top: 10px;
+    opacity: 1;
+}
+
+.workspaces-list-wrapper.visible .v-list {
+    display: block;
+}
+
 .v-list{
     background: #5458ea;
 }

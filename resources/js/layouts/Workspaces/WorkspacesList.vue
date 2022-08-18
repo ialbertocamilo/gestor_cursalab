@@ -31,10 +31,11 @@
                 </h3>
             </div>
             <div class="col-2">
-                <div class="user-button-wrapper">
+                <div v-if="userSession.user"
+                    class="user-button-wrapper">
                     <button class="mr-3">
                         <v-icon class="icon">mdi-account</v-icon>
-                        Juan Perez
+                        {{ userSession.user.fullname }}
                     </button>
 <!--                    <v-icon class="stats-icon">mdi-logout</v-icon>-->
                 </div>
@@ -71,14 +72,16 @@
         <v-row class="justify-content-center">
             <v-col cols="10" class="workspaces-wrapper">
                 <v-row class="mb-5">
-                    <v-col cols="3" class="workspace">
+                    <v-col v-for="workspace in workspaces"
+                           :key="workspace.id"
+                           cols="3" class="workspace">
+
                         <div class="row">
                             <div class="logo-wrapper col-12 pt-3 pb-3">
-                                <img src="/img/workspace1.png"
+                                <img v-bind:src="workspace.logo"
                                      class="logo"
                                      alt="">
-
-                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
+                                <div @click="openFormModal(workspaceFormModalOptions, {workspaceId: workspace.id}, action = null, title = 'Editar workspace')"
                                      class="edit-button">
                                     <v-icon color="white" size="16px">
                                         mdi-square-edit-outline
@@ -88,113 +91,18 @@
                             <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
                                 <v-icon class="icon" size="30px">mdi-sitemap</v-icon>
                                 <div class="text-left ml-2">
-                                    <span class="number">3</span><br>
+                                    <span class="number">
+                                        {{ workspace.modules_count }}
+                                    </span><br>
                                     <span class="label">módulos</span>
                                 </div>
                             </div>
                             <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
                                 <v-icon class="icon" size="30px">mdi-account-group</v-icon>
                                 <div class="text-left ml-2">
-                                    <span class="number">1350</span><br>
-                                    <span class="label">usuarios</span>
-                                </div>
-                            </div>
-                            <div class="col-12 pt-3 pb-3 button-wrapper d-flex justify-content-center">
-                                <button class="btn">Ingresar</button>
-                            </div>
-                        </div>
-                    </v-col>
-                    <v-col cols="3" class="workspace">
-                        <div class="row">
-                            <div class="logo-wrapper col-12 pt-3 pb-3">
-                                <img src="/img/workspace2.png"
-                                     class="logo"
-                                     alt="">
-
-                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
-                                     class="edit-button">
-                                    <v-icon color="white" size="16px">
-                                        mdi-square-edit-outline
-                                    </v-icon>
-                                </div>
-                            </div>
-                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
-                                <v-icon class="icon" size="30px">mdi-sitemap</v-icon>
-                                <div class="text-left ml-2">
-                                    <span class="number">3</span><br>
-                                    <span class="label">módulos</span>
-                                </div>
-                            </div>
-                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
-                                <v-icon class="icon" size="30px">mdi-account-group</v-icon>
-                                <div class="text-left ml-2">
-                                    <span class="number">1350</span><br>
-                                    <span class="label">usuarios</span>
-                                </div>
-                            </div>
-                            <div class="col-12 pt-3 pb-3 button-wrapper d-flex justify-content-center">
-                                <button class="btn">Ingresar</button>
-                            </div>
-                        </div>
-                    </v-col>
-                    <v-col cols="3" class="workspace">
-                        <div class="row">
-                            <div class="logo-wrapper col-12 pt-3 pb-3">
-                                <img src="/img/workspace3.png"
-                                     class="logo"
-                                     alt="">
-
-                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
-                                     class="edit-button">
-                                    <v-icon color="white" size="16px">
-                                        mdi-square-edit-outline
-                                    </v-icon>
-                                </div>
-                            </div>
-                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
-                                <v-icon class="icon" size="30px">mdi-sitemap</v-icon>
-                                <div class="text-left ml-2">
-                                    <span class="number">3</span><br>
-                                    <span class="label">módulos</span>
-                                </div>
-                            </div>
-                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
-                                <v-icon class="icon" size="30px">mdi-account-group</v-icon>
-                                <div class="text-left ml-2">
-                                    <span class="number">1350</span><br>
-                                    <span class="label">usuarios</span>
-                                </div>
-                            </div>
-                            <div class="col-12 pt-3 pb-3 button-wrapper d-flex justify-content-center">
-                                <button class="btn">Ingresar</button>
-                            </div>
-                        </div>
-                    </v-col>
-                    <v-col cols="3" class="workspace">
-                        <div class="row">
-                            <div class="logo-wrapper col-12 pt-3 pb-3">
-                                <img src="/img/workspace4.png"
-                                     class="logo"
-                                     alt="">
-
-                                <div @click="openFormModal(workspaceFormModalOptions, rowData = null, action = null, title = 'Editar workspace')"
-                                     class="edit-button">
-                                    <v-icon color="white" size="16px">
-                                        mdi-square-edit-outline
-                                    </v-icon>
-                                </div>
-                            </div>
-                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
-                                <v-icon class="icon" size="30px">mdi-sitemap</v-icon>
-                                <div class="text-left ml-2">
-                                    <span class="number">3</span><br>
-                                    <span class="label">módulos</span>
-                                </div>
-                            </div>
-                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
-                                <v-icon class="icon" size="30px">mdi-account-group</v-icon>
-                                <div class="text-left ml-2">
-                                    <span class="number">1350</span><br>
+                                    <span class="number">
+                                        {{ workspace.users_count }}
+                                    </span><br>
                                     <span class="label">usuarios</span>
                                 </div>
                             </div>
@@ -239,9 +147,11 @@
                                 <v-icon>mdi-account-cog</v-icon>
                                 Criterios
 
-                                <div class="go-icon">
-                                    <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
-                                </div>
+                                <a href="/criterios">
+                                    <div class="go-icon">
+                                        <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
+                                    </div>
+                                </a>
                             </h5>
                             <p>
                                 Configura datos generales del ambiente y de branding como el
@@ -254,9 +164,11 @@
                                 <v-icon>mdi-account-group</v-icon>
                                 Usuarios
 
-                                <div class="go-icon">
-                                    <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
-                                </div>
+                                <a href="/usuarios">
+                                    <div class="go-icon">
+                                        <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
+                                    </div>
+                                </a>
                             </h5>
                             <p>
                                 Configura datos generales del ambiente y de branding como el
@@ -269,11 +181,16 @@
                         <div class="card p-3">
                             <h5>
                                 <v-icon>mdi-notebook</v-icon>
+
                                 Roles
 
-                                <div class="go-icon">
-                                    <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
-                                </div>
+                                <a href="/roles/index">
+                                    <div class="go-icon">
+                                        <v-icon color="#5D5FEF">
+                                            mdi-arrow-top-right-thin
+                                        </v-icon>
+                                    </div>
+                                </a>
                             </h5>
                             <p>
                                 Configura datos generales del ambiente y de branding como el
@@ -286,9 +203,13 @@
                                 <v-icon>mdi-key-variant</v-icon>
                                 Permisos
 
-                                <div class="go-icon">
-                                    <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
-                                </div>
+                                <a href="/permisos/index">
+                                    <div class="go-icon">
+                                        <v-icon color="#5D5FEF">
+                                            mdi-arrow-top-right-thin
+                                        </v-icon>
+                                    </div>
+                                </a>
                             </h5>
                             <p>
                                 Configura datos generales del ambiente y de branding como el
@@ -301,9 +222,13 @@
                                 <v-icon>mdi-account-tie</v-icon>
                                 Administradores
 
-                                <div class="go-icon">
-                                    <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
-                                </div>
+                                <a href="/users/index">
+                                    <div class="go-icon">
+                                        <v-icon color="#5D5FEF">
+                                            mdi-arrow-top-right-thin
+                                        </v-icon>
+                                    </div>
+                                </a>
                             </h5>
                             <p>
                                 Configura datos generales del ambiente y de branding como el
@@ -324,7 +249,7 @@
             width="60vw"
             :ref="workspaceFormModalOptions.ref"
             @onCancel="closeSimpleModal(workspaceFormModalOptions)"
-            @onConfirm=""
+            @onConfirm="loadData()"
         />
 
     </div>
@@ -339,20 +264,60 @@ export default {
         WorkspacesForm
     },
     data: () => ({
+        workspaces: []
+        ,
+        userSession: {}
+        ,
         configurationIsVisible: false
         ,
         workspaceFormModalOptions: {
             ref: 'WorkspacesForm',
             open: false,
+            action: 'edit',
+            base_endpoint: 'workspaces',
             confirmLabel: 'Guardar'
         }
     })
     ,
     mounted() {
 
+        this.loadData();
+        this.loadSession();
     }
     ,
     methods: {
+        /**
+         * Load workspaces list from server
+         */
+        loadData() {
+
+            let vue = this;
+
+            let url = `/workspaces/search`
+
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.workspaces = data.data.data;
+                })
+        }
+        ,/**
+         * Load session data from server
+         */
+        loadSession() {
+
+            let vue = this;
+
+            // Load session data
+
+            let url = `/usuarios/session`
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.userSession = data;
+                });
+        }
+        ,
         /**
          * Show/hide configuration, also when configuration
          * is shown scroll to its position
@@ -424,7 +389,7 @@ export default {
     display: flex;
     align-items: center;
     width: 90%;
-    padding: 5px 0 5px 15px;
+    padding: 5px 10px 5px 15px;
     border-radius: 6px;
     color: white;
     background: #A5A6F6;

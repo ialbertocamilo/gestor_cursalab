@@ -52,7 +52,7 @@
 							<v-list-item class="pt-2" two-line>
 								<v-list-item-avatar tile size="90">
 									<v-img
-										:src="'https://static.universidadcorporativafp.com.pe/' + escuela.imagen"
+										:src="bucketBaseUrl + '/' + escuela.imagen"
 									></v-img>
 								</v-list-item-avatar>
 								<v-list-item-content>
@@ -127,7 +127,7 @@
 												:icon="modulos_componente[index1].categorias[index2].alert.icon"
 												v-html="modulos_componente[index1].categorias[index2].alert.text "
 											>
-                         
+
 											</v-alert>
 										</v-col>
 									</v-expand-transition>
@@ -222,7 +222,7 @@
 														</td>
 														<td  style="width: 55% !important;vertical-align:bottom" >
 															<div class="d-flex align-items-center" :style="(curricula.all_criterios) ? 'justify-content: start;' : 'justify-content: center;' ">
-																<label for="input-1455" 
+																<label for="input-1455"
 																class="v-label theme--light"
 																 style="left: 0px; right: auto; position: relative;">¿Segmentar por áreas?</label>
 																<v-switch
@@ -308,6 +308,7 @@
   export default {
   	data() {
   		return {
+            bucketBaseUrl : '',
   			overlay: true,
   			loader_text: "Cargando",
   			tab: null,
@@ -329,7 +330,6 @@
   		};
   	},
   	computed: {},
-
   	methods: {
   		async getCurriculaGrupos() {
   			let vue = this;
@@ -627,6 +627,12 @@
   		vue.getCarreras();
   		vue.getGrupos();
   	}
+    ,
+    mounted() {
+        // Initialize bucket URL
+
+        this.bucketBaseUrl = this.getBucketBaseUrl();
+    }
   };
 </script>
 

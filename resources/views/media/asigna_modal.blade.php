@@ -17,13 +17,13 @@
 		</div>
 		<div class="modal-body">
 		  <div class="container-fluid">
-			  
+
 			  <!-- Media init -->
 			  <div class="lista_media asg_lista loading" id="asg_med_list">
 				  <div class="row loading"></div>
 			  </div>
 			  <!-- Media fin -->
-			  
+
 			  <!-- Media selected  -->
 			  <div class="row mt-2">
 				  <!-- paginacion -->
@@ -34,7 +34,7 @@
 				  <!-- pagination fin -->
 			  </div>
 			  <!-- Media selected fin -->
-  
+
 			  	<input class="form-control" type="hidden" id="asg_field">
 			  	<input class="form-control" type="hidden" id="asg_img">
 				<input class="form-control" type="hidden" id="asg_filename" >
@@ -63,10 +63,10 @@
                 var element = $(event.relatedTarget);
                 var field = element.data('field')
                 var tipo = element.data('tipo')
-                
+
 				var modal = $(this)
 				modal.find('#asg_field').val(field);
-				
+
 				if($('.asg_lista .med_item').length == 0){
 					var url = "{{ route('media.modal_list_media_asigna') }}" + "?tipo=" + tipo;
 					asg_load_ajax_multimedia(url);
@@ -102,7 +102,7 @@
 				var img = modal.find('#asg_img').val();
 				var filename = modal.find('#asg_filename').val();
 				var id = modal.find('#asg_id').val();
-				
+
 				if(img.length == 0 || filename.length == 0){
 					$(".asg_msg_valida").fadeIn().text("Ingresa los datos solicitados");
 					return false;
@@ -112,7 +112,7 @@
 					$('.modal-backdrop').hide();
 					$('#'+field).val(filename);
 					$('.'+field).find('img').attr('src',img);
-					
+
 					// if Dropify
 						// console.log(id)
 						// console.log(filename)
@@ -160,7 +160,7 @@
 					if(result){
 						console.log(result);
 						var medias = result.data;
-						var space_url = "{{ Storage::url('') }}";
+						var space_url = "{{ Storage::url('http://') }}";
 						var base_url = "{{ asset('') }}";
 						$("#asg_med_list .row").removeClass('loading');
 						//extensiones y previews
@@ -169,10 +169,10 @@
 						valid_ext3 = ["mp3"];
 						valid_ext4 = ["pdf"];
 						valid_ext5 = ["zip","scorm"];
-						// 
+						//
 						preview = base_url + 'img/icon-file.svg';
 						tipo = 'archivo'; color = '#455A64';
-						
+
 						medias.forEach(media => {
 							ext = (media.ext).toLowerCase();
 							if(valid_ext1.indexOf(ext) !== -1){
@@ -191,7 +191,7 @@
 								preview = base_url + 'img/icon-zip.svg';
 								tipo = 'scorm'; color = '#ffac33';
 							}
-							
+
 							item = '<div class="col-sm-6 col-md-3 col-lg-2 mt-2 med_item" data-id="'+media.id+'" data-filename="'+media.file+'">'+
 										'<div class="med_box" >'+
 											'<div class="img_box">'+
@@ -211,5 +211,5 @@
 				});
 			}
 
-        });    
+        });
     </script>
