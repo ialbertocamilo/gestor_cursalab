@@ -2,7 +2,7 @@
     <v-img
         :max-height="maxHeight"
         :max-width="maxWidth"
-        :src="'https://static.universidadcorporativafp.com.pe/'+image"
+        :src="bucketBaseUrl + '/' + image"
     >
         <template v-slot:placeholder>
             <v-row
@@ -30,5 +30,18 @@ export default {
         maxWidth: {type: String|Number, default: 50},
         maxHeight: {type: String|Number, default: 50},
     }
+    ,
+    data() {
+        return {
+            bucketBaseUrl : ''
+        }
+    }
+    ,
+    mounted() {
+
+        // Initialize bucket URL
+
+        this.bucketBaseUrl = this.getBucketBaseUrl();
+    },
 }
 </script>

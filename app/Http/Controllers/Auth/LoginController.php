@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -74,13 +75,13 @@ class LoginController extends Controller
 
         $this->clearLoginAttempts($request);
 
-        session(['workspace' => ['id' => 1, 'name' => 'Workspace', 'code' => 'X']]);
-        
+        session(['workspace' => Workspace::getDefaultUserWorkspace()]);
+
         if ($response = $this->authenticated($request, $this->guard()->user())) {
-            
+
             return $response;
         }
-        
+
         return $request->wantsJson()
                     ? new JsonResponse([], 204)
                     : redirect()->intended($this->redirectPath());

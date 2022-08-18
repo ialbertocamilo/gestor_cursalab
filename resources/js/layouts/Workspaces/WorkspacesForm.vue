@@ -22,35 +22,28 @@
                     <v-col cols="6">
                         <DefaultInput
                             clearable
-                            v-model="resource.name"
+                            v-model="resource.url_powerbi"
                             label="Link de learning analytics (PowerBI)"
-                            :rules="rules.name"
+                            :rules="rules.url_powerbi"
                         />
                     </v-col>
                 </v-row>
                 <v-row class="justify-content-center">
                     <v-col cols="6">
-                        <v-img :src="resource.logo" contain aspect-ratio="2"
-                               :lazy-src="`/img/loader.gif`"
-                        />
-                        <div class="d-flex justify-content-center">
-                            <DefaultButton
-                                label="Seleccionar logotipo"
-                                @click="openFormModal(workspaceDropzoneModalOptions, rowData = null, action = null, title = 'Seleccionar logotipo')"
-                                />
-                        </div>
+                        <DefaultSelectOrUploadMultimedia
+                            ref="inputLogo"
+                            v-model="resource.logo"
+                            label="Logotipo"
+                            :file-types="['image']"
+                            @onSelect="setFile($event, resource,'logo')"/>
                     </v-col>
                     <v-col cols="6" >
-                        <v-img :src="resource.logo_negativo"
-                               contain aspect-ratio="2"
-                               :lazy-src="`/img/loader.gif`"
-                        />
-                        <div class="d-flex justify-content-center">
-                            <DefaultButton
-                                label="Seleccionar logotipo negativo"
-
-                                />
-                        </div>
+                        <DefaultSelectOrUploadMultimedia
+                            ref="inputLogoNegativo"
+                            v-model="resource.logo_negativo"
+                            label="Logotipo negativo"
+                            :file-types="['image']"
+                            @onSelect="setFile($event, resource,'logo_negativo')"/>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -59,16 +52,16 @@
                             <strong>Criterios</strong>
                         </v-subheader>
 
+                        <v-divider class="mt-0"/>
+
                         <v-alert
                             border="top"
                             colored-border
                             type="info"
                             elevation="2"
                         >
-                           Aquí van las indicaciones sobre los criterios.
+                            Aquí van las indicaciones sobre los criterios.
                         </v-alert>
-
-                        <v-divider class="mt-0"/>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -77,37 +70,11 @@
                             <strong>Obligatorios</strong>
                         </v-subheader>
                         <v-checkbox
-
-                            :label="'ÁREA (requerido)'"
-                        ></v-checkbox>
-                        <v-checkbox
-
-                            :label="'SEDE (requerido)'"
-                        ></v-checkbox>
-                        <v-checkbox
-
-                            :label="'PUESTO (requerido)'"
-                        ></v-checkbox>
-                        <v-checkbox
-
-                            :label="'GÉNERO (requerido)'"
-                        ></v-checkbox>
-                        <v-checkbox
-
-                            :label="'GRUPO (requerido)'"
-                        ></v-checkbox>
-                        <v-checkbox
-
-                            :label="'ORGANIZACIÓN (requerido)'"
-                        ></v-checkbox>
-                        <v-checkbox
-
-                            :label="'UNIDAD DE NEGOCIO (requerido)'"
-                        ></v-checkbox>
-                        <v-checkbox
-
-                            :label="'TIPO DE BONO (requerido)'"
-                        ></v-checkbox>
+                            v-for="criterion in requiredCriteria"
+                            :key="criterion.id"
+                            v-model="resource.selected_criteria[criterion.id]"
+                            :label="`${criterion.name} (requerido)`">
+                        </v-checkbox>
                     </v-col>
                     <v-col cols="6">
 
@@ -116,55 +83,27 @@
                         </v-subheader>
 
                         <v-checkbox
-                            :label="'CARRERA (opcional)'"
-                        ></v-checkbox>
-                        <v-checkbox
-                            :label="'CICLO (opcional)'"
-                        ></v-checkbox>
-                        <v-checkbox
-                            :label="'BOTICA (opcional)'"
-                        ></v-checkbox>
-                        <v-checkbox
-                            :label="'GRUPO (opcional)'"
-                        ></v-checkbox>
-                        <v-checkbox
-                            :label="'CLASIFICACIÓN EDV (opcional)'"
-                        ></v-checkbox>
-                        <v-checkbox
-                            :label="'DEPARTAMENTO NIVEL 5 (opcional)'"
-                        ></v-checkbox>
-                        <v-checkbox
-                            :label="'DEPARTAMENTO NIVEL 6 (opcional)'"
-                        ></v-checkbox>
+                            v-for="criterion in optionalCriteria"
+                            :key="criterion.id"
+                            v-model="resource.selected_criteria[criterion.id]"
+                            :label="`${criterion.name} (opcional)`">
+                        </v-checkbox>
                     </v-col>
                 </v-row>
             </v-form>
-
-
-        <!--
-            Modals
-        ======================================== -->
-
-        <WorkspaceDropzone
-            :options="workspaceDropzoneModalOptions"
-            width="50vw"
-            :ref="workspaceDropzoneModalOptions.ref"
-            @onCancel="closeSimpleModal(workspaceDropzoneModalOptions)"
-            @onConfirm=""
-        />
         </template>
     </DefaultDialog>
 </template>
 
 <script>
 
-import WorkspaceDropzone from "./WorkspaceDropzone";
+
+const fields = [
+    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria'
+];
+const file_fields = ['logo', 'logo_negativo'];
 
 export default {
-    components: {
-        WorkspaceDropzone
-    }
-    ,
     props: {
         options: {
             type: Object,
@@ -173,23 +112,25 @@ export default {
         width: String
     },
     data: () => ({
-        errors: [],
+
+        errors: []
+        ,
         resourceDefault: {
             name: '',
+            url_powerbi: '',
             logo: '',
-            logo_negativo: ''
+            logo_negativo: '',
+            selected_criteria: {}
         }
         ,
         resource: {}
         ,
+        requiredCriteria: []
+        ,
+        optionalCriteria: []
+        ,
         rules: {
             //name: this.getRules(['required', 'max:255']),
-        }
-        ,
-        workspaceDropzoneModalOptions: {
-            ref: 'WorkspaceDropzone',
-            open: false,
-            confirmLabel: 'Guardar'
         }
     })
     ,
@@ -204,56 +145,117 @@ export default {
             //vue.resetFormValidation('workspaceForm')
         }
         ,
+        resetForm() {
+            let vue = this
+            vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
+            vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
+        }
+        ,
         closeModal() {
             let vue = this;
-            vue.$emit('onCancel')
+            vue.resetForm();
+            vue.$emit('onCancel');
         }
         ,
         confirmModal() {
 
+            let vue = this
+            vue.errors = []
+            this.showLoader()
+
+            const isValid = vue.validateForm('workspaceForm');
+            const edit = vue.options.action === 'edit';
+
+            let base = `${vue.options.base_endpoint}`;
+            let url = vue.resource.id
+                        ? `/${base}/${vue.resource.id}/update`
+                        : `/${base}/store`;
+
+            let method = edit ? 'PUT' : 'POST';
+
+            if (isValid) {
+
+                // Prepare data
+
+                let formData = vue.getMultipartFormData(
+                    method, vue.resource, fields, file_fields
+                );
+                formData.set(
+                    'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
+                );
+
+                // Submit data to be saved
+
+                vue.$http
+                    .post(url, formData)
+                    .then(({data}) => {
+
+                        vue.resetForm();
+                        vue.closeModal();
+                        vue.showAlert(data.data.msg);
+                        this.hideLoader();
+                        vue.$emit('onConfirm');
+
+                    }).catch((error) => {
+                        this.hideLoader();
+                        if (error && error.errors)
+                            vue.errors = error.errors
+                    })
+            }
         }
         ,
         /**
          * Load data from server
          */
-        loadData () {
+        loadData (workspace) {
+
+            if (!workspace) return;
 
             let vue = this;
+            vue.$nextTick(() => {
+                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+            })
 
-            /*
+            let url = `/workspaces/${workspace.workspaceId}/edit`;
 
-            let url = `/multimedia/search?` +
-                `page=${page || vue.pagination.actual_page}` +
-                `&paginate=${vue.pagination.rows_per_page}`
-
-            if (vue.sortParams.sortBy) // Add param to sort result
-                url += `&sortBy=${vue.sortParams.sortBy}`
-
-            if (vue.sortParams.sortDesc) // Add param to sort orientation
-                url += `&sortDesc=${vue.sortParams.sortDesc}`
-
-            const filters = vue.addParamsToURL("", vue.filters)
-            // console.log('FILTROS :: ', filters)
-
-            url = url + filters
-            this.$http.get(url)
+            this.$http
+                .get(url)
                 .then(({data}) => {
-                    console.log(data.medias)
-                    vue.data = data.medias.data
-                    // console.log(vue.data)
-                    if (vue.pagination.actual_page > data.medias.total_pages)
-                        vue.pagination.actual_page = data.medias.total_pages
 
-                    vue.pagination.total_pages = data.medias.last_page;
-                    vue.pagination.fromRow = data.medias.from || 0;
-                    vue.pagination.toRow = data.medias.to || 0;
-                    vue.pagination.total_rows = data.medias.total;
-                    vue.loading = false
+                    vue.resource = Object.assign({}, data.data);
+
+                    // Filter criteria in two collections,
+                    // according its "required" properties
+
+                    vue.requiredCriteria = data.data.criteria.filter(c => c.required === 1);
+                    vue.optionalCriteria = data.data.criteria.filter(c => c.required === 0);
+
+                    // Update content of selected criteria
+
+                    vue.resource.selected_criteria = {};
+                    data.data.criteria.forEach(c => {
+                        let checked = vue.criterionExistsInCriteriaValue(
+                            c.id, data.data.criteria_value
+                        );
+                        vue.resource.selected_criteria[c.id] = checked;
+                    });
                 })
-        */
-        },
+        }
+        ,
         loadSelects() {
-        },
+        }
+        ,
+        criterionExistsInCriteriaValue(criterionId, criteriaValue) {
+
+            let exists = false;
+
+            criteriaValue.forEach(v => {
+                if (v.criterion_id === criterionId)
+                    exists = true;
+            });
+
+            return exists;
+        }
     }
 }
 </script>

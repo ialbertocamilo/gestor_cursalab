@@ -29,7 +29,7 @@
                                :src="infoMedia(fileSelected).preview"
                     />
                     <v-img v-else contain width="276" height="200"
-                           :src="'https://static.universidadcorporativafp.com.pe/'+fileSelected" -->
+                           :src="bucketBaseUrl + '/' + fileSelected" -->
                 <span class="media-tag"
                       @click="removeMediaPreview"
                 >&nbsp;<v-icon small color="red" title="Quitar" v-text="'mdi-close-circle-outline'"
@@ -98,6 +98,7 @@ export default {
     },
     data() {
         return {
+            bucketBaseUrl: '',
             fileSelected: null,
             dropzoneDefault: 'dropzoneDefault',
             modalPreviewMultimedia: {
@@ -112,12 +113,12 @@ export default {
     computed: {
         getMediaPreview() {
             let vue = this
-            let preview = "https://static.universidadcorporativafp.com.pe/images/default-scorm-img_116.png"
+            let preview = this.bucketBaseUrl + '/' + "images/default-scorm-img_116.png"
 
             if (vue.TypeOf(this.fileSelected) === 'string') {
                 const extension = this.fileSelected.split('.').at(-1).toLowerCase()
                 if (vue.mixin_extensiones.image.includes(extension)) {
-                    return 'https://static.universidadcorporativafp.com.pe/' + vue.fileSelected
+                    return this.bucketBaseUrl + '/' + vue.fileSelected
                 } else {
                     for (const mixinExtensionesKey in vue.mixin_extensiones) {
                         if (vue.mixin_extensiones[mixinExtensionesKey].includes(extension)) {
@@ -128,7 +129,7 @@ export default {
             } else if (vue.TypeOf(this.fileSelected) === 'object' && this.fileSelected.ext) {
                 const extension = this.fileSelected.ext
                 if (vue.mixin_extensiones.image.includes(extension)) {
-                    return 'https://static.universidadcorporativafp.com.pe/' + vue.fileSelected.file
+                    return this.bucketBaseUrl + '/' + vue.fileSelected.file
                 } else {
                     for (const mixinExtensionesKey in vue.mixin_extensiones) {
                         if (vue.mixin_extensiones[mixinExtensionesKey].includes(extension)) {
@@ -137,12 +138,21 @@ export default {
                     }
                 }
             }
-            return vue.fileSelected ? 'https://static.universidadcorporativafp.com.pe/' + preview : null
+            return vue.fileSelected
+                    ? this.bucketBaseUrl + '/' + preview
+                    : null
         }
     },
     created() {
         if (this.path)
             this.fileSelected = this.path
+    },
+    mounted() {
+
+        // Initialize bucket URL
+
+        this.bucketBaseUrl = this.getBucketBaseUrl();
+
     },
     watch: {
         value(val) {

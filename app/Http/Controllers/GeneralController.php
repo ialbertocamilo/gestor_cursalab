@@ -30,9 +30,10 @@ class GeneralController extends Controller
         if ($request->refresh === 'true')
             cache()->flush();
 
-        $workspaceId = Workspace::getCurrentWorkspaceId();
+        $module_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
         $cache_name = 'dashboard_cards-v2';
-        $cache_name.= $workspaceId ? "-modulo-{$workspaceId}" : '';
+        $cache_name.= $module_id ? "-modulo-{$module_id}" : '';
 
 
         // Generates totals array
@@ -97,7 +98,8 @@ class GeneralController extends Controller
         if ($request->refresh === 'true')
             cache()->flush();
 
-        $workspaceId = Workspace::getCurrentWorkspaceId();
+        $module_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
 
         $response = DashboardService::loadEvaluacionesByDate($workspaceId);
 
@@ -125,7 +127,8 @@ class GeneralController extends Controller
         if ($request->refresh === 'true')
             cache()->flush();
 
-        $workspaceId = Workspace::getCurrentWorkspaceId();
+        $module_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
         $response = DashboardService::loadVisitsByUser($workspaceId);
 
         foreach ($response['data'] as $row) {
@@ -150,7 +153,8 @@ class GeneralController extends Controller
         if ($request->refresh === 'true')
             cache()->flush();
 
-        $workspaceId = Workspace::getCurrentWorkspaceId();
+        $module_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
 
         $response = DashboardService::loadTopBoticas($workspaceId);
 

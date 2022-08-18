@@ -52,20 +52,22 @@
                                     <th scope="row">{{ $user->id }}</th>
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->email }}</td>
-                                    <td width="10px">
-                                        @can('users.edit')
-                                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm bg-orange"><i
-                                                    class="fas fa-edit"></i></a>
-                                        @endcan
-                                    </td>
-                                    <td width="10px">
-                                        @can('users.destroy')
-                                            {!! Form::open(['route' => ['users.destroy', $user->id], 'method' => 'DELETE']) !!}
-                                            <button class="btn btn-sm bg-red btndelete"><i
-                                                    class="far fa-trash-alt"></i></button>
-                                            {!! Form::close() !!}
-                                        @endcan
-                                    </td>
+                                    @if ($super_user)
+                                        <td width="10px">
+                                            @can('users.edit')
+                                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm bg-orange"><i
+                                                        class="fas fa-edit"></i></a>
+                                            @endcan
+                                        </td>
+                                        <td width="10px">
+                                            @can('users.destroy')
+                                                {!! Form::open(['route' => ['users.destroy', $user->id], 'method' => 'DELETE']) !!}
+                                                <button class="btn btn-sm bg-red btndelete"><i
+                                                        class="far fa-trash-alt"></i></button>
+                                                {!! Form::close() !!}
+                                            @endcan
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>

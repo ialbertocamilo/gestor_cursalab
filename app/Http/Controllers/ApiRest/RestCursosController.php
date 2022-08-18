@@ -89,7 +89,10 @@ class RestCursosController extends Controller
                             ->select('curso_id', 'post_id','estado_tema','usuario_id')
                             ->whereIn('curso_id',$cursos_id)
                             ->where(function($v){
-                                $v->orWhereNull('estado_tema')->orWhere('estado_tema','desaprobado')->orWhere('estado_tema','')->orWhere('estado_tema','por-iniciar');
+                                $v->orWhereNull('estado_tema')
+                                    ->orWhere('estado_tema','desaprobado')
+                                    ->orWhere('estado_tema','')
+                                    ->orWhere('estado_tema','por-iniciar');
                             })->get();
         $pruebas_aprobadas = Prueba::where('usuario_id', $appUser->id)
                                 ->where('historico',1)

@@ -12,7 +12,7 @@ class CriterionValue extends BaseModel
         'position', 'active', 'description',
     ];
 
-    // protected $visible = ['id', 'criterion_id', 'parent_id', 
+    // protected $visible = ['id', 'criterion_id', 'parent_id',
     //     'value_text', 'value_date', 'value_datetime', 'value_boolean', 'value_decimal', 'value_integer',
     //     'position', ];
 
@@ -123,5 +123,21 @@ class CriterionValue extends BaseModel
         return self::getColumnName($this->criterion->field_type->code ?? 'xx');
     }
 
+    /**
+     * Bulk insert record and get ids of all inserted records
+     *
+     * @param $data
+     * @return array
+     */
+    public function bulkInsertAndGetIds($data): array
+    {
+        $ids = [];
+        DB::transaction(function() use ($data, &$ids) {
+            CriterionValue::insert($data);
+            $lastId = CriterionValue::orderByDesc('id')->first()->id;
+            $ids = range($lastId - count($data) + 1, $lastId);
+        });
 
+        return $ids;
+    }
 }

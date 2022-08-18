@@ -34,41 +34,41 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // dd(config('filesystems.disks.s3'));
 
         if ($request->refresh == 'true')
             cache()->flush();
 
-        $workspaceId = Workspace::getCurrentWorkspaceId();
+        $module_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
 
         $cache_name = 'dashboard_cards';
-        $cache_name .= $workspaceId ? "-modulo-{$workspaceId}" : '';
+        $cache_name .= $module_id ? "-modulo-{$module_id}" : '';
 
         $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
             function () use ($workspaceId) {
 
-            $data['time'] = now();
+                $data['time'] = now();
 
-            $data['totales'] = [
+                $data['totales'] = [
 
-                'temas' => DashboardService::countTopics($workspaceId),
+                    'temas' => DashboardService::countTopics($workspaceId),
 
-                'cursos' => DashboardService::countCourses($workspaceId),
+                    'cursos' => DashboardService::countCourses($workspaceId),
 
-                'usuarios' => DashboardService::countUsers($workspaceId),
+                    'usuarios' => DashboardService::countUsers($workspaceId),
 
-                'usuarios_activos' => DashboardService::countActiveUsers($workspaceId),
+                    'usuarios_activos' => DashboardService::countActiveUsers($workspaceId),
 
-                'temas_evaluables' => DashboardService::countAssessableTopics($workspaceId)
-            ];
+                    'temas_evaluables' => DashboardService::countAssessableTopics($workspaceId)
+                ];
 
-            $data['data'] = [
-                'modulos' => Criterion::getValuesForSelect('module'),
-                'categorias' => []//Categoria::select('id', 'nombre')->pluck('nombre', 'id'),
-            ];
+                $data['data'] = [
+                    'modulos' => Criterion::getValuesForSelect('module'),
+                    'categorias' => []//Categoria::select('id', 'nombre')->pluck('nombre', 'id'),
+                ];
 
-            return $data;
-        });
+                return $data;
+            });
 
         $data['last_update']['time'] = $data['time']->format('d/m/Y g:i:s a');
         $data['last_update']['text'] = $data['time']->diffForHumans();

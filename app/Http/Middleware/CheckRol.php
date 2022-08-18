@@ -20,11 +20,18 @@ class CheckRol
      */
     public function handle(Request $request, Closure $next, ...$checkrol)
     {
-        // dd($checkrol);
         $user = auth()->user();
-        // if (!$user->isAn($checkrol)) {
-        //     Redirect::to('home')->send();
-        // }
+        $access = false;
+        if (!$user->isAn('super-user')) {
+            foreach ($checkrol as $rol) {
+                if ($user->isAn($rol)) {
+                    $access = true;
+                }
+            }
+            if (!$access) {
+                Redirect::to('home')->send();
+            }
+        }
         return $next($request);
     }
 }

@@ -13,7 +13,7 @@ class RestCourseController extends Controller
         $user = Auth::user();
         $courses_id = $user->setCurrentCourses(return_courses_id: true);
 
-        $data = Course::sortBySchoolAppByUser($user, $courses_id);
+        $data = Course::getDataToCoursesViewAppByUser($user, $courses_id);
 
         return $this->successApp(['data' => $data]);
     }
