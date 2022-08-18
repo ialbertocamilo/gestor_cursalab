@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Middleware\CheckRol;
+use App\Http\Controllers\CursosController;
 
 Route::redirect('/', 'login', 301);
 
@@ -32,7 +33,6 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 Route::get('home', [DashboardController::class, 'index'])->name('home');
-Route::view('welcome', 'welcome');
 
 // DESCARGAS
 Route::get('dnx/{id}', 'GestorController@descargaArchivo');
@@ -52,6 +52,8 @@ Route::get('informacion_app', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::view('welcome', 'welcome');
 
     Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
 
@@ -96,6 +98,9 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('segments')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/segments.php'));
     Route::prefix('entrenadores')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenadores.php'));
     Route::prefix('escuelas')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/escuelas.php'));
+
+    Route::view('cursos', [CursosController::class, 'cursos.list'])->middleware('checkrol:admin,content-manager')->name('curso.list');
+    Route::get('cursos/search', [CursosController::class, 'search'])->middleware('checkrol:admin,content-manager')->name('curso.search');
 
 
     Route::prefix('entrenamiento')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenamiento.php'));

@@ -9,7 +9,7 @@
             <div class="col-6">
                 <img src="/img/we-connect-logo.png"
                      class="logo"
-                     alt="">
+                     alt="We connect">
             </div>
             <div class="col-4">
 
@@ -107,7 +107,10 @@
                                 </div>
                             </div>
                             <div class="col-12 pt-3 pb-3 button-wrapper d-flex justify-content-center">
-                                <button class="btn">Ingresar</button>
+                                <button @click="setActiveWorkspace(workspace.id)"
+                                        class="btn">
+                                    Ingresar
+                                </button>
                             </div>
                         </div>
                     </v-col>
@@ -374,6 +377,30 @@ export default {
                     window.scrollTo(0, pos);
                 }
             });
+        }
+        ,
+        /**
+         * Update workspace in User's session and
+         * redirect to welcome page
+         *
+         * @param workspaceId
+         */
+        setActiveWorkspace(workspaceId) {
+
+            let vue = this;
+
+            // Submit request to update workspace in session
+
+            let formData = vue.getMultipartFormData('PUT');
+            let url = `/usuarios/session/workspace/${workspaceId}`;
+            this.$http
+                .post(url, formData)
+                .then(() => {
+
+                    // Redirect to welcome page
+
+                    window.location.href = '/welcome';
+                });
         }
     }
 }

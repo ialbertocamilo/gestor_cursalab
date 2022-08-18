@@ -17,9 +17,9 @@
                     </v-col>
                     <v-col cols="4" class="d-flex flex-column align-center" style="justify-content: space-evenly">
                         <div class="d-flex justify-content-center flex-column align-center">
-                        <span class="multimedia-label mb-1">
-                            Abrir en otra pestaña
-                        </span>
+                            <span class="multimedia-label mb-1">
+                                Abrir en otra pestaña
+                            </span>
                             <DefaultButton
                                 append-icon="mdi-open-in-new"
                                 label="Abrir"

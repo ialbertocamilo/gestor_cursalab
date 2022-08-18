@@ -177,8 +177,9 @@ export default {
     components: {CursoValidacionesModal},
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
+        let route_school = (this.categoria_id !== '') ? `/escuelas/${this.categoria_id}` : ``;
         return {
-            base_endpoint: `/escuelas/${this.categoria_id}/cursos`,
+            base_endpoint: `${route_school}/cursos`,
             resourceDefault: {
                 name: null,
                 description: null,

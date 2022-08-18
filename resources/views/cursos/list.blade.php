@@ -4,9 +4,13 @@
     <v-app>
         @include('layouts.user-header')
         @php
-            // $modulo = \App\Models\Workspace::find(request()->segment(2));
-            $escuela = \App\Models\School::find(request()->segment(2));
+            $id_school = request()->segment(2);
+            $escuela_name = null;
+            if (!is_null($id_school)) {
+                $escuela = \App\Models\School::find($id_school);
+                $escuela_name = $escuela->name ?? '';
+            }
         @endphp
-        <curso-layout escuela_id="{{ request()->segment(2) }}" escuela_name="{{ $escuela->name ?? '' }}" />
+        <curso-layout escuela_id="{{ $id_school }}" escuela_name="{{ $escuela_name }}" />
     </v-app>
 @endsection
