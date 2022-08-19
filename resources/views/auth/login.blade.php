@@ -13,12 +13,12 @@
   <div class="content_login_form">
     <div class="form-holder has-shadow">
       <div class="logo mt-5 mx-auto text-center">
-        <img src="img/logo_color.png" alt="..." class="img-fluid" width="230">
+        <img src="img/logo_cursalab.png" alt="..." class="img-fluid" width="230">
       </div>
 
       <div class="titulo text-center mt-5 mb-5">
-        <h2>Bienvenido a</h2>
-        <h1>Cursalab Gestiona</h1>
+        <h3>Bienvenido a</h3>
+        <h2><strong>Cursalab Gestiona</strong></h2>
       </div>
 
       <div class="form mt-5">
@@ -64,7 +64,7 @@
     </div>
     <div class="mt-4 text-right copy">
       <a href="https://cursalab.io/" target="_blank" class="external">
-        <img src="img/poweredByCursalab.png" alt="..." class="img-fluid" width="160">
+        <img src="img/poweredByCursalab.png" alt="..." class="img-fluid" width="120">
       </a>
     </div>
   </div>

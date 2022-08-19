@@ -73,6 +73,11 @@ class Course extends Model
         return $this->morphMany(Requirement::class, 'requirement');
     }
 
+    public function summaries()
+    {
+        return $this->hasMany(SummaryCourse::class);
+    }
+
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
@@ -81,6 +86,15 @@ class Course extends Model
     public function scopeActive($q, $active)
     {
         return $q->where('active', $active);
+    }
+
+    public function summaryByUser($user_id, array $withRelations = null)
+    {
+        return $this->summaries()
+            ->when($withRelations ?? null, function ($q) use ($withRelations) {
+                $q->with($withRelations);
+            })
+            ->where('user_id', $user_id)->first();
     }
 
     protected static function search($request, $paginate = 15)
@@ -334,75 +348,164 @@ class Course extends Model
 
     protected function getCourseStatusByUser(User $user, Course $course): array
     {
+        $course_progress_percentage = 0;
+        $status = 'por-iniciar';
+        $available_course = true;
+        $poll_id = null;
+        $available_poll = false;
+        $enabled_poll = false;
+        $solved_poll = false;
+        $assigned_topics = 0;
+        $completed_topics = 0;
+
+        $requirement_course = $course->requirements->first();
+        if ($requirement_course) {
+            $summary_requirement_course = SummaryCourse::with('course')
+                ->where('user_id', $user->id)
+                ->where('course_id', $requirement_course->id)
+                ->whereRelation('status', 'code', '=', 'aprobado')
+                ->first();
+
+            if (!$summary_requirement_course) {
+                $available_course = false;
+                $status = 'bloqueado';
+            }
+        }
+
+        if ($available_course) {
+            $poll = $course->polls->first();
+            if ($poll) {
+                $poll_id = $poll->id;
+                $available_poll = true;
+
+                $poll_questions_answers = PollQuestionAnswer::whereIn('question_id', $poll->questions->pluck('id'))
+                    ->where('user_id', $user->id)->first();
+
+                if ($poll_questions_answers) $solved_poll = true;
+            }
+
+            $summary_course = $course->summaryByUser($user->id);
+
+            if ($summary_course) {
+                $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
+                $course_progress_percentage = $summary_course->advanced_percentage;
+                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado'):
+                    $status = 'completado';
+                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend'):
+                    $status = 'enc_pend';
+                elseif ($summary_course->status->code == 'desaprobado'):
+                    $status = 'desaprobado';
+                    $enabled_poll = true;
+                else:
+                    $status = 'continuar';
+                    $resolved_topics = $completed_topics + $summary_course->failed;
+                    if ($summary_course->assigned <= $resolved_topics)
+                        $available_poll = true;
+                endif;
+            }
+        }
+
         return [
-            'percentage' => 0,
-            'status' => null,
-            'available' => true,
-            'survey_id' => null,
-            'survey_available' => true,
-            'survey_enabled' => true,
-            'solved_survey' => true,
-            'exists_summary_course' => true,
-            'assigned_topics' => 0,
-            'completed_topics' => 0,
+            'status' => $status,
+            'progress_percentage' => $course_progress_percentage,
+            'available' => $available_course,
+            'poll_id' => $poll_id,
+            'available_poll' => $available_poll,
+            'enabled_poll' => $enabled_poll,
+            'solved_poll' => $solved_poll,
+            'exists_summary_course' => $available_course && $summary_course,
+            'assigned_topics' => $assigned_topics,
+            'completed_topics' => $completed_topics,
         ];
     }
 
-    protected function getDataToCoursesViewAppByUser($user, $courses_id): array
+    protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
-        $schools = School::withWhereHas('courses', function ($q) use ($courses_id) {
-            $q->whereIn('id', $courses_id)
-                ->where('active', ACTIVE)
-                ->select('id', 'name', 'description', 'assessable');
-        })
-            ->select('id', 'name')
-            ->get();
-        $workspace = $user->workspace;
-        $mod_eval = json_decode($workspace->mod_evaluaciones, true);
-        $summary_topics = SummaryTopic::whereHas('courses', function ($q) use ($courses_id) {
-            $q->whereIn('id', $courses_id)->where('active', ACTIVE)->sortBy('position');
+        $schools = $user_courses->groupBy('schools.*.id');
+        $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
+            $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
         })
             ->where('user_id', $user->id)
             ->get();
 
         $data = [];
 
-        foreach ($schools as $school) {
-            $courses = [];
+        foreach ($schools as $school_id => $courses) {
+            $school = $courses->first()->schools->where('id', $school_id)->first();
+            $school_courses = [];
             $school_completed = 0;
             $school_assigned = 0;
             $school_percentage = 0;
-            $school_status = '';
-            $last_course = null;
+            $last_course_reviewed = null;
 
-            foreach ($school->courses as $course) {
-                $topics = [];
+            foreach ($courses as $course) {
                 $school_assigned++;
-
+                $last_topic = null;
                 $course_status = self::getCourseStatusByUser($user, $course);
+                if ($course_status['status'] == 'completado') $school_completed++;
+
+                $topics = $course->topics->where('active', ACTIVE);
+                $summary_topics = $summary_topics_user->whereIn('topic_id', $topics->pluck('id'));
+
+                if ($summary_topics->count() > 0) {
+                    foreach ($topics as $topic) {
+                        $topics_view = $summary_topics->where('topic_id', $topic->id)->first();
+                        $last_item = ($topic->id == $topics->last()->id);
+                        if ($topics_view?->views) {
+                            // validar columna passed
+                            $passed_tests = $summary_topics->where('posteo_id', $topic->id)->where('passed', 1)->first();
+                            if ($topic->evaluation_type->code == 'calificada' && $passed_tests && !$last_item) continue;
+                            $last_topic = ($topic->id);
+                            break;
+                        }
+                        if (is_null($last_topic) && $last_item) {
+                            $last_topic = $topic->id;
+                            break;
+                        }
+                    }
+                }
+
+                $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
+
+                if (is_null($last_course_reviewed) && $course_status['status'] != 'completado') {
+                    $last_course_reviewed = [
+                        'id' => $course->id,
+                        'nombre' => $course->name,
+                        'imagen' => $course->imagen,
+                        'porcentaje' => $course_status['progress_percentage'],
+                        'ultimo_tema_visto' => $last_topic_reviewed,
+                    ];
+                }
 
 
-                $courses[] = [
+                $school_courses[] = [
                     'id' => $course->id,
                     'nombre' => $course->name,
                     'descripcion' => $course->description,
                     'imagen' => $course->imagen,
-                    //                    'requisito_id' => $course->requisito_id,
                     'c_evaluable' => $course->assessable,
-                    'porcentaje' => $course_status['percentage'],
                     'disponible' => $course_status['available'],
-                    //                    'status' => $arr_estados_cursos[$course_status['status']],
-                    'encuesta' => $course_status['survey_available'],
-                    'encuesta_habilitada' => $course_status['survey_enabled'],
-                    'encuesta_resuelta' => $course_status['solved_survey'],
-                    'encuesta_id' => $course_status['survey_id'],
+                    'status' => $course_status['status'],
+                    'encuesta' => $course_status['available_poll'],
+                    'encuesta_habilitada' => $course_status['enabled_poll'],
+                    'encuesta_resuelta' => $course_status['solved_poll'],
+                    'encuesta_id' => $course_status['poll_id'],
                     'temas_asignados' => $course_status['exists_summary_course'] ?
                         $course_status['assigned_topics'] :
-                        $course->topics->where('active', ACTIVE)->count(),
+                        $topics->count(),
                     'temas_completados' => $course_status['completed_topics'],
-                    'temas' => $topics
+                    'porcentaje' => $course_status['progress_percentage'],
+                    'ultimo_tema_visto' => $last_topic_reviewed
                 ];
             }
+
+            if ($school_completed > 0):
+                $school_status = $school_completed >= $school_assigned ? 'Aprobado' : 'Desarrollo';
+                $school_percentage = ($school_completed / $school_assigned) * 100;
+            else:
+                $school_status = 'Pendiente';
+            endif;
+            $school_percentage = round($school_percentage);
 
             $data[] = [
                 'categoria_id' => $school->id,
@@ -411,8 +514,8 @@ class Course extends Model
                 'asignados' => $school_assigned,
                 'porcentaje' => $school_percentage,
                 'estado' => $school_status,
-                'ultimo_curso' => $last_course,
-                "cursos" => $courses
+                'ultimo_curso' => $last_course_reviewed,
+                "cursos" => $school_courses
             ];
         }
 
