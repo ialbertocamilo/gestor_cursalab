@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UserStoreRequest;
 use App\Models\Role;
 use App\Models\Taxonomy;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\Hash;
 use Bouncer;
 use Illuminate\Support\Facades\Auth;
@@ -40,8 +41,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::get();
-        return view('users.create', compact('roles'));
+        $roles = Role::all()->pluck('title', 'id');
+        $workspaces = Workspace::all()->pluck('name', 'id');
+        return view('users.create', compact('roles', 'workspaces'));
     }
 
     /**
@@ -64,7 +66,8 @@ class UserController extends Controller
         $data['workspace_id'] = $workspace_id;
         $user = User::create($data);
 
-        $user->roles()->sync($request->get('roles'));
+        Bouncer::scope()->to($data['workspace']);
+        Bouncer::sync($user)->roles($request->get('roles'));
 
         return redirect()->route('users.index')
             ->with('info', 'usero guardado con éxito');
@@ -72,8 +75,9 @@ class UserController extends Controller
 
     public function edit(user $user)
     {
-        $roles = Role::get();
-        return view('users.edit', compact('user', 'roles'));
+        $roles = Role::all()->pluck('title', 'id');
+        $workspaces = Workspace::all()->pluck('name', 'id');
+        return view('users.edit', compact('user', 'workspaces', 'roles'));
     }
 
     /**
@@ -88,19 +92,19 @@ class UserController extends Controller
         // 1. Actualizar el usuario
         $data = $request->all();
 
-        // dd($request->password, $user->password);
-
         if (!is_null($request->password)) {
-            $data['password'] = Hash::make($request->password);
+            $data['password'] = $request->password;
         } else {
-            $data['password'] = $user->password;
+            unset($data['password']);
         }
-
-
         $user->update($data);
 
         // 2. Actualizar roles
-        $user->roles()->sync($request->get('roles'));
+        $roles = $data['roles'];
+        foreach ($roles as $k => $v) {
+            Bouncer::scope()->to($data['workspaces'][$k]);
+            Bouncer::sync($user)->roles($data['roles'][$k]);
+        }
 
         return redirect()->route('users.index')
             ->with('info', 'Actualizado con éxito');

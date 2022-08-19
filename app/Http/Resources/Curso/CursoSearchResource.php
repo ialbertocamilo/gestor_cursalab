@@ -14,8 +14,13 @@ class CursoSearchResource extends JsonResource
      */
     public function toArray($request)
     {
-        $route_edit = route('cursos.editCurso', [$this->schools()->first()->id, $this->id]);
-        $route_topics = route('temas.list', [$this->schools()->first()->id, $this->id]);
+        if (is_null($request->school_id)) {
+            $route_edit = route('curso.editCurso', [$this->id]);
+            $route_topics = route('tema.list', [$this->id]);
+        } else {
+            $route_edit = route('cursos.editCurso', [$request->school_id, $this->id]);
+            $route_topics = route('temas.list', [$request->school_id, $this->id]);
+        }
         return [
             'id' => $this->id,
             'name' => $this->name,

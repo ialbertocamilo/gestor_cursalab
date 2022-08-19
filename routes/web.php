@@ -99,9 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('entrenadores')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenadores.php'));
     Route::prefix('escuelas')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/escuelas.php'));
 
-    Route::view('cursos', [CursosController::class, 'cursos.list'])->middleware('checkrol:admin,content-manager')->name('curso.list');
-    Route::get('cursos/search', [CursosController::class, 'search'])->middleware('checkrol:admin,content-manager')->name('curso.search');
-
+    Route::prefix('cursos')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/curso.php'));
 
     Route::prefix('entrenamiento')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenamiento.php'));
 

@@ -56,16 +56,27 @@ class CursosController extends Controller
         $curso->scheduled_restarts_dias = $scheduled_restarts->reinicio_dias ?? 0;
         $curso->scheduled_restarts_horas = $scheduled_restarts->reinicio_horas ?? 0;
         $curso->scheduled_restarts_minutos = $scheduled_restarts->reinicio_minutos ?? 0;
-        $requisitos =  $this->getFormSelects($escuela, $curso, true);
+        $form_selects =  $this->getFormSelects($escuela, $curso, true);
         $curso->makeHidden('reinicios_programado');
 
         $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($curso) {
             $query->where('id', $curso->id);
         })->first();
         $curso->requisito_id = (!is_null($req_curso)) ? $req_curso->requirement_id : '';
+
+        $escuelas = collect();
+        foreach ($curso->schools as $req) {
+            $escuelas->push((object)[
+                'id' => $req->id,
+                'nombre' => $req->name,
+            ]);
+        }
+
+        $curso->lista_escuelas = $escuelas;
         return $this->success([
             'curso' => $curso,
-            'requisitos' => $requisitos
+            'requisitos' => $form_selects['requisitos'],
+            'escuelas' => $form_selects['escuelas'],
         ]);
     }
 
@@ -77,7 +88,8 @@ class CursosController extends Controller
         $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         $data['workspace_id'] = $workspace_id;
-        $data['school_id'] = $escuela->id;
+        $data['school_id'] = ($escuela->exists) ? $escuela->id : null;
+        $data['escuelas'] = $request->lista_escuelas;
 
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
@@ -99,7 +111,8 @@ class CursosController extends Controller
         $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         $data['workspace_id'] = $workspace_id;
-        $data['school_id'] = $escuela->id;
+        $data['school_id'] = ($escuela->exists) ? $escuela->id : null;
+        $data['escuelas'] = $request->lista_escuelas;
         $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
 
         if (!$validate['validate'])
@@ -118,13 +131,19 @@ class CursosController extends Controller
 
     public function getFormSelects(School $escuela, Course $curso = null, $compactResponse = false)
     {
+        $req_cursos = Course::join('course_school', 'course_school.course_id', '=', 'courses.id');
+        if (!is_null($escuela) && $escuela->exists) {
+            $req_cursos->where('school_id', $escuela->id);
+        }
+        if (!is_null($curso) && $curso->exists) {
+            $req_cursos->where('course_id', '!=', $curso->id);
+        }
+        $req_cursos->get();
 
-        $req_cursos = Course::join('course_school', 'course_school.course_id', '=', 'courses.id')
-            ->where('school_id', $escuela->id)
-            ->where('course_id', '!=', $curso->id)
-            ->get();
+        $lista_escuelas = School::all()->where('active', 1);
 
         $requisitos = collect();
+        $escuelas = collect();
         foreach ($req_cursos as $req) {
             $requisitos->push((object)[
                 'id' => $req->id,
@@ -132,9 +151,15 @@ class CursosController extends Controller
                 'carreras' => ''
             ]);
         }
+        foreach ($lista_escuelas as $req) {
+            $escuelas->push((object)[
+                'id' => $req->id,
+                'nombre' => $req->name,
+            ]);
+        }
 
-
-        return $compactResponse ? $requisitos : $this->success(compact('requisitos'));
+        $response = compact('escuelas', 'requisitos');
+        return $compactResponse ? $response : $this->success($response);
     }
 
     public function temas(Categoria $categoria, Curso $curso, Request $request)

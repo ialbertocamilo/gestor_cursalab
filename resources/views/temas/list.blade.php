@@ -4,11 +4,30 @@
     <v-app>
         @include('layouts.user-header')
         @php
-            // $modulo = \App\Models\Abconfig::find(request()->segment(2));
-            $school = \App\Models\School::find(request()->segment(2));
-            $curso = \App\Models\Course::find(request()->segment(4));
+
+            $param2 = request()->segment(2);
+            $param4 = request()->segment(4);
+
+            $escuela_name = null;
+            $curso_name = null;
+            $id_escuela = null;
+            $id_curso = $param2;
+            $ruta = '';
+            if (!is_null($param2) && !is_null($param4)) {
+                $escuela = \App\Models\School::find($param2);
+                $curso = \App\Models\Course::find($param4);
+
+                $id_escuela = $param2;
+                $id_curso = $curso->id;
+                $escuela_name = $escuela->name ?? '';
+                $curso_name = $curso->name ?? '';
+                $ruta = 'escuelas/' . $id_escuela . '/';
+            } else {
+                $curso = \App\Models\Course::find($param2);
+                $curso_name = $curso->name ?? '';
+            }
         @endphp
-        <tema-layout school_id="{{ request()->segment(2) }}" school_name="{{ $school->name ?? '' }}"
-            course_id="{{ request()->segment(4) }}" course_name="{{ $curso->name ?? '' }}" />
+        <tema-layout school_id="{{ $id_escuela }}" school_name="{{ $escuela_name }}" course_id="{{ $id_curso }}"
+            course_name="{{ $curso_name }}" ruta="{{ $ruta }}" />
     </v-app>
 @endsection
