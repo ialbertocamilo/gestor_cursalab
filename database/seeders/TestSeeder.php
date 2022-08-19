@@ -5,11 +5,9 @@ namespace Database\Seeders;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\User;
-use App\Models\Usuario;
 use App\Models\Workspace;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class TestSeeder extends Seeder
 {
@@ -23,10 +21,6 @@ class TestSeeder extends Seeder
     public function run()
     {
 
-        //DB::beginTransaction();
-
-        //try {
-
             $this->insertCriteria();
             $this->insertWorkspaces();
 
@@ -37,11 +31,6 @@ class TestSeeder extends Seeder
                 $this->insertUsers();
                 $this->insertAdmins();
             }
-
-            DB::commit();
-        //} catch (\Exception $e) {
-            DB::rollback();
-        //}
 
 
     }
@@ -229,6 +218,13 @@ class TestSeeder extends Seeder
         // ----------------------------------------
 
         Workspace::create([
+            'id' => 1,
+            'name' => 'Universidad corporativa',
+            'slug' => 'universidad-corporativa',
+            'active' => 1
+        ]);
+
+        Workspace::create([
             'id' => 25,
             'name' => 'Inkafarma',
             'slug' => 'inkafarma',
@@ -254,9 +250,9 @@ class TestSeeder extends Seeder
         // Mifarma subworkspace
         // ----------------------------------------
 
-        $mifarma = Workspace::find(3);
-        $mifarma->logo = 'images/mifarma.png';
-        $mifarma->save();
+//        $mifarma = Workspace::find(3);
+//        $mifarma->logo = 'images/mifarma.png';
+//        $mifarma->save();
     }
 
     /**
@@ -264,77 +260,80 @@ class TestSeeder extends Seeder
      */
     public function insertUsers() {
 
+        $idWorkspaceInRetail = Workspace::where('slug', 'inretail')->first()->id;
+        $idWorkspaceUni = Workspace::where('slug', 'universidad-corporativa')->first()->id;
+
         $users = [
             [
                 'name' => 'Elvis Usuario Universidad',
                 'email' => 'usuario_universidad_elvis@cursalab.io',
-                'subworkspace_id' => 3,
+                'subworkspace_id' => $idWorkspaceUni,
             ]
             ,
             [
                 'name' => 'Elvis Usuario Inretail',
                 'email' => 'usuario_inretail_elvis@cursalab.io',
-                'subworkspace_id' => 21,
+                'subworkspace_id' => $idWorkspaceInRetail,
             ]
             ,
             [
                 'name' => 'Daniel Usuario Universidad',
                 'email' => 'usuario_universidad_daniel@cursalab.io',
-                'subworkspace_id' => 3,
+                'subworkspace_id' => $idWorkspaceUni,
             ]
             ,
             [
                 'name' => 'Daniel Usuario Inretail',
                 'email' => 'usuario_inretail_daniel@cursalab.io',
-                'subworkspace_id' => 21,
+                'subworkspace_id' => $idWorkspaceInRetail,
             ]
             ,
             [
                 'name' => 'JeanCarlo Usuario Universidad',
                 'email' => 'usuario_universidad_jeancarlo@lamediadl.com',
-                'subworkspace_id' => 3,
+                'subworkspace_id' => $idWorkspaceUni,
             ]
             ,
             [
                 'name' => 'JeanCarlo Usuario Inretail',
                 'email' => 'usuario_inretail_jeancarlo@lamediadl.com',
-                'subworkspace_id' => 21,
+                'subworkspace_id' => $idWorkspaceInRetail,
             ]
             ,
             [
                 'name' => 'Kevin Usuario Universidad',
                 'email' => 'usuario_universidad_kevin@lamediadl.com',
-                'subworkspace_id' => 3,
+                'subworkspace_id' => $idWorkspaceUni,
             ]
             ,
             [
                 'name' => 'Kevin Usuario Inretail',
                 'email' => 'usuario_inretail_kevin@lamediadl.com',
-                'subworkspace_id' => 21,
+                'subworkspace_id' => $idWorkspaceInRetail,
             ]
             ,
             [
                 'name' => 'Deivy Usuario Universidad',
                 'email' => 'usuario_universidad_deyvi@lamediadl.com',
-                'subworkspace_id' => 3,
+                'subworkspace_id' => $idWorkspaceUni,
             ]
             ,
             [
                 'name' => 'Deivy Usuario Inretail',
                 'email' => 'usuario_inretail_deyvi@lamediadl.com',
-                'subworkspace_id' => 21,
+                'subworkspace_id' => $idWorkspaceInRetail,
             ]
             ,
             [
                 'name' => 'Rodrigo Usuario Universidad',
                 'email' => 'usuario_universidad_rodrigo@lamediadl.com',
-                'subworkspace_id' => 3,
+                'subworkspace_id' => $idWorkspaceUni,
             ]
             ,
             [
                 'name' => 'Rodrigo Usuario Inretail',
                 'email' => 'usuario_inretail_rodrigo@lamediadl.com',
-                'subworkspace_id' => 21,
+                'subworkspace_id' => $idWorkspaceInRetail,
             ]
         ];
 
