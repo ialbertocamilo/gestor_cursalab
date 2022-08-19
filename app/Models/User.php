@@ -517,7 +517,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         ($request['os'] == "android" || $request['os'] == "ios") ? $user->$request['os']++ : $user->windows++;
-        if ($request['os'] && $request['version']) {
+        if (($request['os'] == "android" || $request['os'] == "ios") && !is_null($request['version'])) {
             $field = "v-{$request['os']}";
             $user->$field = $request['version'];
         }
