@@ -43,6 +43,7 @@ class TestSeeder extends Seeder
         if ($criterion) return;
 
         $criteria = [
+            ['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1],
             ['code' => 'business_unit_id', 'name' => 'Business_Unit_Id','required' =>1,'show_in_segmentation' =>0],
             ['code' => 'business_unit_name', 'name' => 'Business_Unit_Name','required' =>1,'show_in_segmentation' =>0],
             ['code' => 'gender', 'name' => 'Genero','required' =>1,'show_in_segmentation' =>1],
@@ -81,7 +82,6 @@ class TestSeeder extends Seeder
             ['code' => 'correo_jefe', 'name' => 'correo jefe','required' =>0,'show_in_segmentation' =>1],
             ['code' => 'grupos_de_supervision_supply', 'name' => 'Grupos de supervisión (Supply)','required' =>0,'show_in_segmentation' =>1],
             ['code' => 'gerente_de_area_o_mall', 'name' => 'Gerente de área o Mall','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1],
             ['code' => 'cycle', 'name' => 'Ciclo','required' =>0,'show_in_segmentation' =>1],
         ];
 
@@ -107,6 +107,7 @@ class TestSeeder extends Seeder
         Workspace::create([
             'name' => 'InRetail',
             'slug' => 'inretail',
+            'logo' => 'images/workspace4-20220816165310-9825.png',
             'active' => 1
         ]);
         $idWorkspaceInRetail = Workspace::where('slug', 'inretail')->first()->id;
@@ -200,7 +201,7 @@ class TestSeeder extends Seeder
 
         CriterionValue::create([
             'criterion_id' => 1,
-            'value_text' => 'Financiera Oh',
+            'value_text' => 'Promart',
             'active' => 1
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
@@ -216,6 +217,7 @@ class TestSeeder extends Seeder
         Workspace::create([
             'name' => 'Universidad corporativa',
             'slug' => 'universidad-corporativa',
+            'logo' => 'images/universidad.png',
             'active' => 1
         ]);
         $idWorkspaceUni = Workspace::where('slug', 'universidad-corporativa')->first()->id;

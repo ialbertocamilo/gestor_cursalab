@@ -149,43 +149,40 @@ class Workspace extends BaseModel
     public static function generateUserWorkspacesQuery(int $userId): Builder
     {
 
-        $userEntity = 'App\\Model\\User';
+
+        $userEntity = 'App\Models\User';
+
+        $assignedRole = DB::table('assigned_roles')
+            ->where('entity_type', $userEntity)
+            ->where('entity_id', $userId)
+            ->first();
+
+        if ($assignedRole->role_id == 1) {
+
+            // Return all workspaces, excluding subworkspaces
+
+            return Workspace::query()
+                ->where('parent_id', null)
+                ->where('workspaces.active', ACTIVE)
+                ->select('workspaces.*');
+        }
+
+
         $allowedRoles = [
-            1, // super-user
             2, // config
             3  // admin
         ];
 
-        $disallowedRoles = [
-            7
-        ];
-
-//        return Workspace::query()
-//                ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
-//                ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-//                ->where('assigned_roles.entity_type', $userEntity)
-//                ->whereIn('assigned_roles.role_id', $allowedRoles)
-//                ->where('users.id', $userId)
-//                ->where('workspaces.active', ACTIVE)
-//                ->select('workspaces.*');
-
-//        dd(DB::table('assigned_roles')
-//            ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-//            ->where('assigned_roles.entity_type', $userEntity)
-//            ->whereIn('assigned_roles.role_id', $allowedRoles)
-//            ->where('users.id', $userId)
-//            ->select('assigned_roles.*')->toSql());
-
         $role = DB::table('assigned_roles')
             ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-            //->where('assigned_roles.entity_type', $userEntity)
-            ->whereNotIn('assigned_roles.role_id', $disallowedRoles)
+            ->where('assigned_roles.entity_type', $userEntity)
+            ->whereIn('assigned_roles.role_id', $allowedRoles)
             ->where('users.id', $userId)
             ->select('assigned_roles.*')
             ->first();
 
         return Workspace::query()
-            ->where('parent_id', $role->scope)
+            ->where('id', $role->scope)
             ->where('workspaces.active', ACTIVE)
             ->select('workspaces.*');
     }
@@ -260,9 +257,9 @@ class Workspace extends BaseModel
             DB::beginTransaction();
 
             if ($subworkspace) :
-            
+
                 $subworkspace->update($data);
-            
+
             else:
 
                 $data['parent_id'] = session('workspace')->id ?? NULL;

@@ -31,7 +31,7 @@ class AuthController extends Controller
             return $this->respondWithDataAndToken($data);
 
         } catch (Exception $e) {
-            info($e);
+           info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }
@@ -84,7 +84,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
 //            'expires_in' => auth('api')->factory()->getTTL() * 60,
-//            'config_data' => $config_data,
+            'config_data' => $config_data,
             'usuario' => $user_data
         ]);
     }
