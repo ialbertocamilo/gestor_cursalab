@@ -27,17 +27,17 @@ class ExternalLMSMigration6 extends Model
     {
         $db = self::connect();
         $client_LMS_data = [
-            'media' => [],
+            // 'media' => [],
             'taxonomies' => [],
             'taxonomies_es' => [],
-            'videoteca' => [],
-            'vademecum' => [],
+            // 'videoteca' => [],
+            // 'vademecum' => [],
         ];
-        $this->setMediaData($client_LMS_data, $db);
+        // $this->setMediaData($client_LMS_data, $db);
         $this->setTaxonomiesData($client_LMS_data, $db);
         $this->setTaxonomiesEsData($client_LMS_data, $db);
-        $this->setVideotecaData($client_LMS_data, $db);
-        $this->setVademecumData($client_LMS_data, $db);
+        // $this->setVideotecaData($client_LMS_data, $db);
+        // $this->setVademecumData($client_LMS_data, $db);
 
         return $client_LMS_data;
     }

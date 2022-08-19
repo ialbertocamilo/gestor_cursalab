@@ -121,7 +121,7 @@ class Migration_1 extends Model
                 'type_id' => $type_client->id,
                 'config_id' => $user->config_id,
 
-                'password' => Hash::make($user->dni),
+                'password' => bcrypt($user->dni),
 
                 'active' => $user->estado,
 
