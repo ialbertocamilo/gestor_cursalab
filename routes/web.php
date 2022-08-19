@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
     Route::view('welcome', 'welcome');
 
     Route::get('/workspaces/search', [WorkspaceController::class, 'search']);
+    Route::put('/usuarios/session/workspace/{workspace}', [WorkspaceController::class, 'updateWorkspaceInSession']);
     Route::get('/usuarios/session', [UsuarioController::class, 'session']);
 
     Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
