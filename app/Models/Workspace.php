@@ -34,7 +34,7 @@ class Workspace extends BaseModel
 
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'subworkspace_id');
     }
 
     // public function schools()
@@ -233,6 +233,13 @@ class Workspace extends BaseModel
         $query = self::withCount(['users']);
 
         $query->whereNotNull('parent_id');
+
+        info('workspace');
+
+        info(session('workspace'));
+        
+        if (session('workspace') || $request->workspace_id)
+            $query->where('parent_id', $request->workspace_id ?? session('workspace')->id);
 
         if ($request->q)
             $query->where('name', 'like', "%$request->q%");
