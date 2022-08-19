@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         // When taxonomy is not empty, stop method execution
         //dd(bcrypt('12345')); return;
-        if (Taxonomy::count() == 0) {
+        // if (Taxonomy::count() == 0) {
             // $this->call(WorldTablesSeeder::class);
 
             $this->call(TaxonomySeederSystem::class);
@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
             // $this->call(AccountSeeder::class);
             // $this->call(PostSeeder::class);
             // $this->call(NotificationTypeSeeder::class);
-        }
+        // }
 
         // Seeds for testing purposes
 
