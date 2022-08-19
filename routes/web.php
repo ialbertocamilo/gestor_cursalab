@@ -19,6 +19,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Middleware\CheckRol;
 use App\Http\Controllers\CursosController;
+use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\UsuarioController;
 
 Route::redirect('/', 'login', 301);
 
@@ -54,6 +56,9 @@ Route::get('informacion_app', function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::view('welcome', 'welcome');
+
+    Route::get('/workspaces/search', [WorkspaceController::class, 'search']);
+    Route::get('/usuarios/session', [UsuarioController::class, 'session']);
 
     Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
 
