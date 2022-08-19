@@ -72,26 +72,26 @@ class Abconfig extends Model
         return $this->hasMany(Criterio::class, 'config_id');
     }
 
-    public function app_menu()
-    {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'main_menu')
-            ->select('id', 'nombre');
-    }
+    // public function app_menu()
+    // {
+    //     return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+    //         ->where('tipo', 'main_menu')
+    //         ->select('id', 'nombre');
+    // }
 
-    public function main_menu()
-    {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'main_menu')
-            ->select('id', 'nombre', 'code');
-    }
+    // public function main_menu()
+    // {
+    //     return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+    //         ->where('tipo', 'main_menu')
+    //         ->select('id', 'nombre', 'code');
+    // }
 
-    public function side_menu()
-    {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'side_menu')
-            ->select('id', 'nombre', 'code');
-    }
+    // public function side_menu()
+    // {
+    //     return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+    //         ->where('tipo', 'side_menu')
+    //         ->select('id', 'nombre', 'code');
+    // }
 
     public function areas()
     {

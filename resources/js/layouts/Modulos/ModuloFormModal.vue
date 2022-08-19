@@ -11,8 +11,8 @@
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
-                            v-model="resource.etapa"
-                            :rules="rules.etapa"
+                            v-model="resource.name"
+                            :rules="rules.name"
                             label="Nombre"
                             dense
                             show-required
@@ -70,7 +70,7 @@
                                     <div>
                                         <input type="checkbox" class="mx-2"
                                                v-model="element.active">
-                                        {{ element.nombre }}
+                                        {{ element.name }}
                                     </div>
 <!--                                    <v-icon color="grey" v-text="'mdi-drag'"/>-->
                                 </div>
@@ -96,7 +96,7 @@
                                     <div>
                                         <input type="checkbox" class="mx-2"
                                                v-model="element.active">
-                                        {{ element.nombre }}
+                                        {{ element.name }}
                                     </div>
 <!--                                    <v-icon color="grey" v-text="'mdi-drag'"/>-->
                                 </div>
@@ -243,7 +243,7 @@
                         <!--                        <DefaultFormLabel-->
                         <!--                            label="Estado"-->
                         <!--                        />-->
-                        <DefaultToggle v-model="resource.estado"/>
+                        <DefaultToggle v-model="resource.active"/>
                     </v-col>
                 </v-row>
             </v-form>
@@ -255,7 +255,7 @@
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import draggable from 'vuedraggable'
 
-const fields = ['etapa', 'codigo_matricula', 'estado', 'reinicios_programado',
+const fields = ['name', 'codigo_matricula', 'estado', 'reinicios_programado',
     'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo'];
 const file_fields = ['logo', 'plantilla_diploma'];
 export default {
@@ -278,7 +278,7 @@ export default {
             },
             resourceDefault: {
                 id: null,
-                etapa: null,
+                name: null,
                 logo: null,
                 file_logo: null,
                 plantilla_diploma: null,
@@ -295,7 +295,7 @@ export default {
                 nro_intentos: null,
             },
             rules: {
-                etapa: this.getRules(['required']),
+                name: this.getRules(['required']),
                 plantilla_diploma: this.getRules(['required']),
                 codigo_matricula: this.getRules(['required']),
                 preg_x_ev: this.getRules(['required', 'number', 'min_value:1']),
@@ -430,7 +430,7 @@ export default {
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
-            let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/search` : `form-selects`}`
+            let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/edit` : `form-selects`}`
             await vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.main_menu = data.data.main_menu
