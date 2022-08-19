@@ -111,14 +111,17 @@
         <!--
             Configurations title
         ======================================== -->
-                <div class="configurations-button-wrapper"
-                     >
-                    <span @click="toggleConfiguration()"
-                          style="cursor: pointer">
-                        Configuraciones
-                    </span>
-                    <v-icon class="stats-icon">mdi-cog</v-icon>
-                </div>
+        <v-row>
+            <div class="configurations-button-wrapper"
+                    >
+                <span @click="toggleConfiguration()"
+                        style="cursor: pointer">
+                    Configuraciones
+                </span>
+                <v-icon class="stats-icon">mdi-cog</v-icon>
+            </div>
+        </v-row>
+
         <v-row
             ref="configurationTitle"
             class="justify-content-center mt-3 pt-3 pb-3">
