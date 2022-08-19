@@ -5,11 +5,12 @@
         @include('layouts.user-header')
 
         @php
-            $id_curso = request()->segment(5) ?? null;
-            $id_escuela = request()->segment(2);
-            if (is_null($id_curso)) {
-                $id_escuela = null;
+            if (request()->segment(1) == 'escuelas') {
+                $id_curso = request()->segment(5) ?? null;
+                $id_escuela = request()->segment(2);
+            } else {
                 $id_curso = request()->segment(3) ?? null;
+                $id_escuela = null;
             }
         @endphp
         <curso-form-page modulo_id="{{ $id_escuela }}" categoria_id="{{ $id_escuela }}"
