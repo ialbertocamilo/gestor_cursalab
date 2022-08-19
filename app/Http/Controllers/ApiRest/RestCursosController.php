@@ -246,7 +246,7 @@ class RestCursosController extends Controller
             $temas = $curso->temas->where('estado', 1)
                 ->where('curso_id', $curso->id)
                 ->sortBy('orden');
-            foreach ($temas as $key => $tema) {
+            foreach ($temas as $tema) {
                 $estado_tema = $this->estadoTemas($appUser->id, $tema, $max_intentos);
                 $ultimo_tema_visto = $estado_tema['ultimo_tema_visto'];
                 $tema_estado = "por-iniciar";

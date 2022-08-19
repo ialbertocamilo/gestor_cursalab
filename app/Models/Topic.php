@@ -284,27 +284,68 @@ class Topic extends Model
 
         $max_attempts = (int)$mod_eval['nro_intentos'];
 
-        $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
-            $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
-        })
-            ->where('user_id', $user->id)
-            ->get();
+//        $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
+//            $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
+//        })
+//            ->where('user_id', $user->id)
+//            ->get();
 
         $schools_courses = [];
 
         foreach ($courses as $course) {
             $course_status = Course::getCourseStatusByUser($user, $course);
-            $courses_topics = [];
-            $last_topic_reviewed = null;
+            $topics_data = [];
 
             $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
 
             foreach ($topics as $topic) {
                 $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
-                $schools_courses[] = $topic_status;
+                $media_topics = $topic->medias->sortBy('position')->values()->all();
+                foreach ($media_topics as $media) {
+                    if ($media->type->code == 'audio' && !str_contains('https', $media->value))
+                        $media->value = env('BUCKET_BASE_URL') . '/' . $media->valor;
+                }
 
+                $topics_data[] = [
+                    'id' => $topic->id,
+                    'nombre' => $topic->name,
+                    'requisito_id' => $topic_status['topic_requirement'],
+                    'imagen' => $topic->imagen,
+                    'contenido' => $topic->contenido,
+                    'media' => $media_topics,
+                    'evaluable' => $topic->evaluable,
+                    'tipo_ev' => $topic->tipo_ev,
+                    'tipo_cal' => $topic->tipo_cal,
+                    'nota' => $topic_status['grade'],
+                    'disponible' => $topic_status['available'],
+                    'intentos_restantes' => $topic_status['remaining_attempts'],
+                    't_evaluacion' => $topic_status['t_evaluacion'],
+                    'estado_tema' => $topic_status['activity']?->status->code,
+                    'estado_tema_str' => $topic_status['activity']?->status->code,
+                ];
             }
+
+            $schools_courses[] = [
+                'id' => $course->id,
+                'nombre' => $course->name,
+                'descripcion' => $course->description,
+                'imagen' => $course->imagen,
+                'requisito_id' => $course->require,
+                'c_evaluable' => $course->c_evaluable,
+                'disponible' => $course_status['available'],
+                'status' => $course_status['status'],
+                'encuesta' => $course_status['available_poll'],
+                'encuesta_habilitada' => $course_status['enabled_poll'],
+                'encuesta_resuelta' => $course_status['solved_poll'],
+                'encuesta_id' => $course_status['poll_id'],
+                'temas_asignados' => $course_status['exists_summary_course'] ?
+                    $course_status['assigned_topics'] :
+                    $topics->count(),
+                'temas_completados' => $course_status['completed_topics'],
+                'porcentaje' => $course_status['progress_percentage'],
+                'temas' => $topics_data
+            ];
         }
 
         return [
@@ -351,6 +392,7 @@ class Topic extends Model
 
         return [
 //            'topic_name' => $topic->name,
+            'topic_requirement' => $topic_requirement,
             'grade' => $grade,
             'available' => $available_topic,
             'remaining_attempts' => $remaining_attempts,

@@ -379,10 +379,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     'segments.values.criterion_value',
                     'requirements',
                     'schools',
-//                    'topics.evaluation_type',
                     'topics' => [
                         'evaluation_type',
-                        'requirements'
+                        'requirements',
+                        'medias.type'
                     ],
                     'polls.questions',
                     'topics.evaluation_type'
