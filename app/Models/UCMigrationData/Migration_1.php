@@ -119,7 +119,7 @@ class Migration_1 extends Model
                 'document' => $user->dni,
 
                 'type_id' => $type_client->id,
-                'workspace_id' => $uc_workspace->id,
+                'subworkspace_id' => $uc_workspace->id,
 
                 'password' => Hash::make($user->dni),
 
