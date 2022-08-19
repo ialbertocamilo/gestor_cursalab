@@ -45,6 +45,6 @@ class DatabaseSeeder extends Seeder
 
         // Seeds for testing purposes
 
-        $this->call(TestSeeder::class);
+        // $this->call(TestSeeder::class);
     }
 }
