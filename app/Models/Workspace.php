@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-use DB;
+
+use Illuminate\Support\Facades\DB;
+
 
 class Workspace extends BaseModel
 {
@@ -91,7 +93,7 @@ class Workspace extends BaseModel
 
         if ($request->id) {
             $query::where('id', $request->id)
-                  ->withCount(['schools', 'courses']);
+                ->withCount(['schools', 'courses']);
         }
 
         if ($request->q) {
@@ -116,10 +118,10 @@ class Workspace extends BaseModel
     {
 
         $count = Workspace::query()
-                 ->join('criterion_value_workspace', 'criterion_value_workspace.workspace_id', '=', 'workspaces.id')
-                 ->join('criterion_values', 'criterion_values.id', '=', 'criterion_value_workspace.criterion_value_id')
-                 ->where('workspaces.id', $workspaceId)
-                 ->count();
+            ->join('criterion_value_workspace', 'criterion_value_workspace.workspace_id', '=', 'workspaces.id')
+            ->join('criterion_values', 'criterion_values.id', '=', 'criterion_value_workspace.criterion_value_id')
+            ->where('workspaces.id', $workspaceId)
+            ->count();
 
         return $count ?? 0;
     }
@@ -134,9 +136,9 @@ class Workspace extends BaseModel
     {
 
         $count = Workspace::query()
-                 ->join('users', 'users.subworkspace_id', '=', 'workspaces.id')
-                 ->where('workspaces.id', $workspaceId)
-                 ->count();
+            ->join('users', 'users.subworkspace_id', '=', 'workspaces.id')
+            ->where('workspaces.id', $workspaceId)
+            ->count();
 
         return $count ?? 0;
     }
@@ -154,14 +156,34 @@ class Workspace extends BaseModel
             3  // admin
         ];
 
+//        return Workspace::query()
+//                ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
+//                ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+//                ->where('assigned_roles.entity_type', $userEntity)
+//                ->whereIn('assigned_roles.role_id', $allowedRoles)
+//                ->where('users.id', $userId)
+//                ->where('workspaces.active', ACTIVE)
+//                ->select('workspaces.*');
+
+//        dd(DB::table('assigned_roles')
+//            ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+//            ->where('assigned_roles.entity_type', $userEntity)
+//            ->whereIn('assigned_roles.role_id', $allowedRoles)
+//            ->where('users.id', $userId)
+//            ->select('assigned_roles.*')->toSql());
+
+        $role = DB::table('assigned_roles')
+            ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+            //->where('assigned_roles.entity_type', $userEntity)
+            ->whereIn('assigned_roles.role_id', $allowedRoles)
+            ->where('users.id', $userId)
+            ->select('assigned_roles.*')
+            ->first();
+
         return Workspace::query()
-                ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
-                ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-                ->where('assigned_roles.entity_type', $userEntity)
-                ->whereIn('assigned_roles.role_id', $allowedRoles)
-                ->where('users.id', $userId)
-                ->where('workspaces.active', ACTIVE)
-                ->select('workspaces.*');
+            ->where('parent_id', $role->scope)
+            ->where('workspaces.active', ACTIVE)
+            ->select('workspaces.*');
     }
 
     /**
@@ -198,10 +220,10 @@ class Workspace extends BaseModel
     public static function getWorkspaceIdFromModule(?int $moduleId): mixed
     {
         $workspace = Workspace::query()
-                    ->join('criterion_value_workspace', 'criterion_value_workspace.workspace_id', '=', 'workspaces.id')
-                    ->join('criterion_values', 'criterion_values.id', '=', 'criterion_value_workspace.criterion_value_id')
-                    ->where('criterion_values.id', $moduleId)
-                    ->first();
+            ->join('criterion_value_workspace', 'criterion_value_workspace.workspace_id', '=', 'workspaces.id')
+            ->join('criterion_values', 'criterion_values.id', '=', 'criterion_value_workspace.criterion_value_id')
+            ->where('criterion_values.id', $moduleId)
+            ->first();
 
         return $workspace?->id;
     }
@@ -211,7 +233,7 @@ class Workspace extends BaseModel
         $query = self::withCount(['users']);
 
         $query->whereNotNull('parent_id');
-        
+
         if ($request->q)
             $query->where('name', 'like', "%$request->q%");
 
@@ -254,10 +276,10 @@ class Workspace extends BaseModel
             DB::rollBack();
 
             info($e);
-        
+            
             return $e;
         }
-        
+
         return $subworkspace;
 
     }
