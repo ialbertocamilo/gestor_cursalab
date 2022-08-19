@@ -23,6 +23,7 @@ class Topic extends Model
     {
         $this->attributes['assessable'] = ($value === 'true' or $value === 'si' or $value === true or $value === 1 or $value === '1');
     }
+
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -42,10 +43,12 @@ class Topic extends Model
     {
         return $this->hasMany(MediaTema::class, 'topic_id');
     }
+
     public function models()
     {
         return $this->morphMany(Requirement::class, 'model');
     }
+
     public function requirements()
     {
         return $this->morphMany(Requirement::class, 'requirement');
@@ -54,6 +57,20 @@ class Topic extends Model
     public function evaluation_type()
     {
         return $this->belongsTo(Taxonomy::class, 'type_evaluation_id');
+    }
+
+    public function summaries()
+    {
+        return $this->hasMany(SummaryTopic::class);
+    }
+
+    public function summaryByUser($user_id, array $withRelations = null)
+    {
+        return $this->summaries()
+            ->when($withRelations ?? null, function ($q) use ($withRelations) {
+                $q->with($withRelations);
+            })
+            ->where('user_id', $user_id)->first();
     }
 
     protected static function search($request, $paginate = 15)
@@ -73,6 +90,7 @@ class Topic extends Model
 
         return $q->paginate($request->paginate);
     }
+
     protected static function search_preguntas($request, $tema)
     {
         $q = Question::whereHas('type', function ($t) use ($tema) {
@@ -183,8 +201,8 @@ class Topic extends Model
         })->get();
 
         if ((($temas_activos->count() === 1 && $tema->estado == 1)
-            || $req_cursos->count() > 0
-            || $req_temas->count() > 0) && !$estado) :
+                || $req_cursos->count() > 0
+                || $req_temas->count() > 0) && !$estado) :
 
             $validate = collect();
 
@@ -212,14 +230,14 @@ class Topic extends Model
                 'title' => 'Alerta',
                 'show_confirm' => !($count > 0)
             ];
-        //            endif;
+            //            endif;
 
         endif;
 
         return ['validate' => true];
     }
 
-    public function validateReqTemas($req_temas, $escuela, $curso,  $tema, $verb = 'desactivar')
+    public function validateReqTemas($req_temas, $escuela, $curso, $tema, $verb = 'desactivar')
     {
         $temp = [
             'title' => "No se puede {$verb} este tema.",
@@ -255,18 +273,90 @@ class Topic extends Model
         return $temp;
     }
 
-    protected function getDataToTopicsViewAppByUser($user, $user_courses): array
+    protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         $schools = $user_courses->groupBy('schools.*.id');
+        $courses = $schools[$school_id] ?? [];
+        $school = $courses->first()->schools->where('id', $school_id)->first();
+
+        $sub_workspace = $user->subworkspace;
+        $mod_eval = json_decode($sub_workspace->mod_evaluaciones, true);
+
+        $max_attempts = (int)$mod_eval['nro_intentos'];
+
         $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
             $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
         })
             ->where('user_id', $user->id)
             ->get();
 
-        $data = [];
+        $schools_courses = [];
 
+        foreach ($courses as $course) {
+            $course_status = Course::getCourseStatusByUser($user, $course);
+            $courses_topics = [];
+            $last_topic_reviewed = null;
 
-        return [];
+            $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
+
+            foreach ($topics as $topic) {
+                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
+
+                $schools_courses[] = $topic_status;
+
+            }
+        }
+
+        return [
+            'id' => $school->id,
+            'nombre' => $school->name,
+            'cursos' => $schools_courses
+        ];
+    }
+
+    public function getTopicStatusByUser(Topic $topic, User $user, $max_attempts)
+    {
+        $grade = 0;
+        $available_topic = false;
+        $remaining_attempts = $max_attempts;
+        $t_evaluacion = true;
+        $summary_topic = $topic->summaryByUser($user->id);
+        $last_topic_reviewed = null;
+
+        if ($topic->assesable && $topic->evaluation_type->code === 'qualified') {
+            if ($summary_topic) {
+                $actividad['estado_tema'] = $summary_topic->passed ? 'aprobado' : 'desaprobado';
+                $grade = $summary_topic->grade;
+                $sub = $max_attempts - $summary_topic->attempts;
+                $remaining_attempts = max($sub, 0);
+            }
+        }
+
+        $topic_requirement = $topic->requirements->first();
+
+        if (!$topic_requirement) {
+            $available_topic = true;
+        } else {
+            $summary_requirement_topic = SummaryTopic::with('status')
+                ->where('user_id', $user->id)
+                ->where('topic_id', $topic_requirement->id)
+                ->first();
+
+            $activity_requirement = in_array($summary_requirement_topic?->status->code, ['aprobado', 'realizado', 'revisado']);
+            $test_requirement = $summary_requirement_topic?->result == 1;
+
+            if ($activity_requirement || $test_requirement)
+                $available_topic = true;
+        }
+
+        return [
+//            'topic_name' => $topic->name,
+            'grade' => $grade,
+            'available' => $available_topic,
+            'remaining_attempts' => $remaining_attempts,
+            't_evaluacion' => $t_evaluacion,
+            'activity' => $summary_topic ?? null,
+            'last_topic_reviewed' => $last_topic_reviewed
+        ];
     }
 }

@@ -19,7 +19,7 @@ class ExternalDatabase6 extends Model
     protected function insertMigrationData5($data)
     {
         // Media
-        $this->insertMediaData($data);
+        // $this->insertMediaData($data);
 
         // Taxonomies
         $this->insertTaxonomiesData($data);
@@ -30,10 +30,10 @@ class ExternalDatabase6 extends Model
         $this->updateTaxonomiesEsData();
 
         // Videoteca
-        $this->insertVideotecaData($data);
+        // $this->insertVideotecaData($data);
 
         // Vademecum
-        $this->insertVademecumData($data);
+        // $this->insertVademecumData($data);
     }
 
     protected function insertMigrationData6($data)

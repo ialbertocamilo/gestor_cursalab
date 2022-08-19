@@ -222,101 +222,101 @@ class RestAvanceController extends Controller
     /**
      * GUARDAR CALIFICACION Y RESPUESTAS DE EVALUACION
      */
-    public function evaluarpreguntas_v2($post_id = null, $id_user = null, $rpta_ok = null, $rpta_fail = null, $usu_rptas = null)
-    {
-        $data_ev = null;
-        $response = array('error' => 3, 'msg' => 'Error. Algo ha ocurrido.');
-        if (is_null($post_id) && is_null($id_user) && is_null($rpta_ok) && is_null($rpta_fail)) {
-            $response = array('error' => 2, 'data' => $data_ev, 'msg' => 'No values');
-        } else {
-            $user = DB::table('usuarios')->select('config_id')->where('id', $id_user)->first();
-            $config = DB::table('ab_config')->select('mod_evaluaciones')->where('id', $user->config_id)->first();
-            $mod_eval = json_decode($config->mod_evaluaciones, true);
-            $nota_aprobatoria = $mod_eval['nota_aprobatoria'];
-            $nota_calculada = ($rpta_ok == 0) ? 0 : ((20 / ($rpta_ok + $rpta_fail)) * $rpta_ok);
-            $resultado = ($nota_calculada >= $nota_aprobatoria) ? 1 : 0;
+    // public function evaluarpreguntas_v2($post_id = null, $id_user = null, $rpta_ok = null, $rpta_fail = null, $usu_rptas = null)
+    // {
+    //     $data_ev = null;
+    //     $response = array('error' => 3, 'msg' => 'Error. Algo ha ocurrido.');
+    //     if (is_null($post_id) && is_null($id_user) && is_null($rpta_ok) && is_null($rpta_fail)) {
+    //         $response = array('error' => 2, 'data' => $data_ev, 'msg' => 'No values');
+    //     } else {
+    //         $user = DB::table('usuarios')->select('config_id')->where('id', $id_user)->first();
+    //         $config = DB::table('ab_config')->select('mod_evaluaciones')->where('id', $user->config_id)->first();
+    //         $mod_eval = json_decode($config->mod_evaluaciones, true);
+    //         $nota_aprobatoria = $mod_eval['nota_aprobatoria'];
+    //         $nota_calculada = ($rpta_ok == 0) ? 0 : ((20 / ($rpta_ok + $rpta_fail)) * $rpta_ok);
+    //         $resultado = ($nota_calculada >= $nota_aprobatoria) ? 1 : 0;
 
-            $ev = Prueba::select('id', 'nota', 'rptas_ok', 'rptas_fail', 'resultado', 'categoria_id', 'curso_id')
-                ->where('posteo_id', $post_id)
-                ->where('usuario_id', $id_user)
-                ->first();
+    //         $ev = Prueba::select('id', 'nota', 'rptas_ok', 'rptas_fail', 'resultado', 'categoria_id', 'curso_id')
+    //             ->where('posteo_id', $post_id)
+    //             ->where('usuario_id', $id_user)
+    //             ->first();
 
-            $ultima_evaluacion = Carbon::now();
-            $data_ev = array(
-                'rptas_ok' => $rpta_ok,
-                'rptas_fail' => $rpta_fail,
-                'resultado' => $resultado,
-                'usu_rptas' => $usu_rptas,
-                'nota' => round($nota_calculada),
-                'last_ev' => $ultima_evaluacion
-            );
+    //         $ultima_evaluacion = Carbon::now();
+    //         $data_ev = array(
+    //             'rptas_ok' => $rpta_ok,
+    //             'rptas_fail' => $rpta_fail,
+    //             'resultado' => $resultado,
+    //             'usu_rptas' => $usu_rptas,
+    //             'nota' => round($nota_calculada),
+    //             'last_ev' => $ultima_evaluacion
+    //         );
 
-            if ($ev) {
-                $nota_bd = $ev->nota;
-                $actividad = Visita::select('id')
-                        ->where('post_id', $post_id)
-                        ->where('usuario_id', $id_user)
-                        ->first();
-                if ($nota_calculada >= $nota_bd) {
-                    Prueba::where('id', $ev->id)->update($data_ev);
-                    $data_ev['intentos_realizados'] = $ev->intentos;
-                    if ($actividad) {
-                        $actividad->tipo_tema = 'calificada';
-                        $actividad->estado_tema = ($resultado == 1) ? 'aprobado' : 'desaprobado';
-                        $actividad->save();
-                    }else{
-                        Visita::insert(array(
-                                'sumatoria' => 1,
-                                'curso_id' => $ev->curso_id,
-                                'post_id' => $post_id,
-                                'usuario_id' => $id_user,
-                                'descargas' => 0,
-                                'tipo_tema' => 'calificada',
-                                'estado_tema'=> ($resultado == 1) ? 'aprobado' : 'desaprobado' ,
-                            )
-                        );
-                    }
-                    $data_ev['ev_updated'] = 1;
-                    $data_ev['ev_updated_msg'] = "(1) EV actualizada";
-                    $response = array('error' => false, 'data' => $data_ev);
-                } else {
-                    DB::table('pruebas')->where('id',$ev->id)->update([
-                        'last_ev' =>$ultima_evaluacion,
-                    ]);
-                    if (is_null($actividad)) {
-                        Visita::insert(array(
-                            'sumatoria' => 1,
-                            'curso_id' => $ev->curso_id,
-                            'post_id' => $post_id,
-                            'usuario_id' => $id_user,
-                            'descargas' => 0,
-                            'tipo_tema' => 'calificada',
-                            'estado_tema'=> ($ev->resultado == 1) ? 'aprobado' : 'desaprobado' ,
-                        )
-                        );
-                    }
-                    $data_ev['intentos_realizados'] = $ev->intentos;
-                    $data_ev['ev_updated'] = 0;
-                    $data_ev['ev_updated_msg'] = "(0) EV no actualizada (nota obtenida menor que nota existente)";
-                    $response = array('error' => false, 'data' => $data_ev);
-                }
-                // ACTUALIZAR RESUMENES
-                $this->actualizar_resumen_x_curso($id_user, $ev->curso_id, $mod_eval['nro_intentos']);
-                $this->actualizar_resumen_general($id_user);
-                DB::table('resumen_general')->where('usuario_id',$id_user)->update([
-                    'last_ev' =>$ultima_evaluacion,
-                ]);
-                DB::table('resumen_x_curso')->where('usuario_id',$id_user)->where('curso_id',$ev->curso_id)->update([
-                    'last_ev' =>$ultima_evaluacion,
-                ]);
-            } else {
-                $response = array('error' => true, 'error_msg' => 'EV no existe');
-            }
-        }
-        // $this->actualizaResumenTotal($id_user);
-        // $this->actualizaResumenCategorias( $id_user, $post_id );
-        return $response;
-    }
+    //         if ($ev) {
+    //             $nota_bd = $ev->nota;
+    //             $actividad = Visita::select('id')
+    //                     ->where('post_id', $post_id)
+    //                     ->where('usuario_id', $id_user)
+    //                     ->first();
+    //             if ($nota_calculada >= $nota_bd) {
+    //                 Prueba::where('id', $ev->id)->update($data_ev);
+    //                 $data_ev['intentos_realizados'] = $ev->intentos;
+    //                 if ($actividad) {
+    //                     $actividad->tipo_tema = 'calificada';
+    //                     $actividad->estado_tema = ($resultado == 1) ? 'aprobado' : 'desaprobado';
+    //                     $actividad->save();
+    //                 }else{
+    //                     Visita::insert(array(
+    //                             'sumatoria' => 1,
+    //                             'curso_id' => $ev->curso_id,
+    //                             'post_id' => $post_id,
+    //                             'usuario_id' => $id_user,
+    //                             'descargas' => 0,
+    //                             'tipo_tema' => 'calificada',
+    //                             'estado_tema'=> ($resultado == 1) ? 'aprobado' : 'desaprobado' ,
+    //                         )
+    //                     );
+    //                 }
+    //                 $data_ev['ev_updated'] = 1;
+    //                 $data_ev['ev_updated_msg'] = "(1) EV actualizada";
+    //                 $response = array('error' => false, 'data' => $data_ev);
+    //             } else {
+    //                 DB::table('pruebas')->where('id',$ev->id)->update([
+    //                     'last_ev' =>$ultima_evaluacion,
+    //                 ]);
+    //                 if (is_null($actividad)) {
+    //                     Visita::insert(array(
+    //                         'sumatoria' => 1,
+    //                         'curso_id' => $ev->curso_id,
+    //                         'post_id' => $post_id,
+    //                         'usuario_id' => $id_user,
+    //                         'descargas' => 0,
+    //                         'tipo_tema' => 'calificada',
+    //                         'estado_tema'=> ($ev->resultado == 1) ? 'aprobado' : 'desaprobado' ,
+    //                     )
+    //                     );
+    //                 }
+    //                 $data_ev['intentos_realizados'] = $ev->intentos;
+    //                 $data_ev['ev_updated'] = 0;
+    //                 $data_ev['ev_updated_msg'] = "(0) EV no actualizada (nota obtenida menor que nota existente)";
+    //                 $response = array('error' => false, 'data' => $data_ev);
+    //             }
+    //             // ACTUALIZAR RESUMENES
+    //             $this->actualizar_resumen_x_curso($id_user, $ev->curso_id, $mod_eval['nro_intentos']);
+    //             $this->actualizar_resumen_general($id_user);
+    //             DB::table('resumen_general')->where('usuario_id',$id_user)->update([
+    //                 'last_ev' =>$ultima_evaluacion,
+    //             ]);
+    //             DB::table('resumen_x_curso')->where('usuario_id',$id_user)->where('curso_id',$ev->curso_id)->update([
+    //                 'last_ev' =>$ultima_evaluacion,
+    //             ]);
+    //         } else {
+    //             $response = array('error' => true, 'error_msg' => 'EV no existe');
+    //         }
+    //     }
+    //     // $this->actualizaResumenTotal($id_user);
+    //     // $this->actualizaResumenCategorias( $id_user, $post_id );
+    //     return $response;
+    // }
 
     /**
      * GUARDAR EVALUACION ABIERTA

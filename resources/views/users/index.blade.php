@@ -9,10 +9,11 @@
                     <div class="d-flex align-items-center">
                         <h5 class="no-margin-bottom">Administrador</h5>
                         <div class="ml-2">
-                            @can('users.create')
-                                <a href="{{ route('users.create') }}" class="btn bg-green float-right"><i class="fa fa-plus"></i>
+                            @if ($super_user)
+                                <a href="{{ route('users.create') }}" class="btn bg-green float-right"><i
+                                        class="fa fa-plus"></i>
                                     Crear</a>
-                            @endcan
+                            @endif
                         </div>
                     </div>
                     <div class="d-flex align-items-center">
@@ -54,18 +55,14 @@
                                     <td>{{ $user->email }}</td>
                                     @if ($super_user)
                                         <td width="10px">
-                                            @can('users.edit')
-                                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm bg-orange"><i
-                                                        class="fas fa-edit"></i></a>
-                                            @endcan
+                                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm bg-orange"><i
+                                                    class="fas fa-edit"></i></a>
                                         </td>
                                         <td width="10px">
-                                            @can('users.destroy')
-                                                {!! Form::open(['route' => ['users.destroy', $user->id], 'method' => 'DELETE']) !!}
-                                                <button class="btn btn-sm bg-red btndelete"><i
-                                                        class="far fa-trash-alt"></i></button>
-                                                {!! Form::close() !!}
-                                            @endcan
+                                            {!! Form::open(['route' => ['users.destroy', $user->id], 'method' => 'DELETE']) !!}
+                                            <button class="btn btn-sm bg-red btndelete"><i
+                                                    class="far fa-trash-alt"></i></button>
+                                            {!! Form::close() !!}
                                         </td>
                                     @endif
                                 </tr>

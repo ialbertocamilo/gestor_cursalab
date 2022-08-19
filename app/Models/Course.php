@@ -43,10 +43,10 @@ class Course extends Model
         return $this->belongsToMany(Poll::class);
     }
 
-    public function requirement()
-    {
-        return $this->belongsToMany(Course::class);
-    }
+    // public function requirement()
+    // {
+    //     return $this->belongsToMany(Course::class);
+    // }
 
     public function checklists()
     {
@@ -145,7 +145,7 @@ class Course extends Model
             Requirement::storeRequest($course_requirements, $req_curso);
 
             $curso->workspace()->sync($data['workspace_id']);
-            $curso->schools()->sync($data['school_id']);
+            $curso->schools()->sync($data['escuelas']);
 
             $curso->save();
             DB::commit();
@@ -389,14 +389,14 @@ class Course extends Model
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
                 $course_progress_percentage = $summary_course->advanced_percentage;
-                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado'):
+                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
-                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend'):
+                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
                     $status = 'enc_pend';
-                elseif ($summary_course->status->code == 'desaprobado'):
+                elseif ($summary_course->status->code == 'desaprobado') :
                     $status = 'desaprobado';
                     $enabled_poll = true;
-                else:
+                else :
                     $status = 'continuar';
                     $resolved_topics = $completed_topics + $summary_course->failed;
                     if ($summary_course->assigned <= $resolved_topics)
@@ -499,10 +499,10 @@ class Course extends Model
                 ];
             }
 
-            if ($school_completed > 0):
+            if ($school_completed > 0) :
                 $school_status = $school_completed >= $school_assigned ? 'Aprobado' : 'Desarrollo';
                 $school_percentage = ($school_completed / $school_assigned) * 100;
-            else:
+            else :
                 $school_status = 'Pendiente';
             endif;
             $school_percentage = round($school_percentage);

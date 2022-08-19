@@ -4780,60 +4780,60 @@ class RestController extends Controller
             echo file_get_contents($url);
         }, $nombre);
     }
-    public function cargar_preguntas($tema_id)
-    {
-        $apiResponse = ['data' => [], 'error' => true];
-        $appUser = auth()->user();
-        $tema = Posteo::where('id', $tema_id)->first();
-        if (!$tema) return response()->json($apiResponse, 200);
+    // public function cargar_preguntas($tema_id)
+    // {
+    //     $apiResponse = ['data' => [], 'error' => true];
+    //     $appUser = auth()->user();
+    //     $tema = Posteo::where('id', $tema_id)->first();
+    //     if (!$tema) return response()->json($apiResponse, 200);
 
-        $data = [];
-        $config_id = $appUser->config_id;
-        $helper = new HelperController();
-        $config_eva = $helper->configEvaluacionxModulo($config_id);
-        if ($tema->tipo_ev  == 'calificada') {
-            $preguntas = Pregunta::where('post_id', $tema->id)
-                            ->where('estado', 1)
-                            ->where('tipo_pregunta','selecciona')
-                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
-                            ->inRandomOrder()
-                            ->limit($config_eva['preg_x_ev'])
-                            ->get();
-            // APLICAR SHUFFLE A ALTERNATIVAS DE CADA PREGUNTA
-            foreach ($preguntas as $value) {
-                $val_rpta = json_decode($value->rptas_json, true);
-                $tempRptas = collect();
-                foreach ($val_rpta as $key => $value2) {
-                    $tempRpta = ['id'=> $key , 'opc' =>$value2];
-                    $tempRptas->push($tempRpta);
-                }
-                // shuffle($val_rpta);
-                $shu = $tempRptas->shuffle()->all();
+    //     $data = [];
+    //     $config_id = $appUser->config_id;
+    //     $helper = new HelperController();
+    //     $config_eva = $helper->configEvaluacionxModulo($config_id);
+    //     if ($tema->tipo_ev  == 'calificada') {
+    //         $preguntas = Pregunta::where('post_id', $tema->id)
+    //                         ->where('estado', 1)
+    //                         ->where('tipo_pregunta','selecciona')
+    //                         ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
+    //                         ->inRandomOrder()
+    //                         ->limit($config_eva['preg_x_ev'])
+    //                         ->get();
+    //         // APLICAR SHUFFLE A ALTERNATIVAS DE CADA PREGUNTA
+    //         foreach ($preguntas as $value) {
+    //             $val_rpta = json_decode($value->rptas_json, true);
+    //             $tempRptas = collect();
+    //             foreach ($val_rpta as $key => $value2) {
+    //                 $tempRpta = ['id'=> $key , 'opc' =>$value2];
+    //                 $tempRptas->push($tempRpta);
+    //             }
+    //             // shuffle($val_rpta);
+    //             $shu = $tempRptas->shuffle()->all();
 
-                // info($value);
-                $value->rptas_json = $shu;
-                // $value->rptas_json = $val_rpta;
-            }
-        } else {
-            $preguntas = Pregunta::where('post_id', $tema->id)
-                            ->where('estado', 1)
-                            ->where('tipo_pregunta','texto')
-                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
-                            ->get();
-        }
-        $data = ["tipo_evaluacion"=>$tema->tipo_ev,"curso_id"=>$tema->curso_id,"posteo_id" => $tema->id, "nombre" => $tema->nombre, "preguntas" => $preguntas];
-        $ultima_evaluacion = Carbon::now();
-        DB::table('resumen_general')->where('usuario_id',$appUser->id)->update([
-            'last_ev' =>$ultima_evaluacion,
-        ]);
-        DB::table('resumen_x_curso')->where('usuario_id',$appUser->id)->where('curso_id',$tema->curso_id)->update([
-            'last_ev' =>$ultima_evaluacion,
-        ]);
-        if (count($preguntas) > 0) $apiResponse = ['error' => false, 'data' => $data];
-        else $apiResponse = ['error' => true, 'data' => null];
+    //             // info($value);
+    //             $value->rptas_json = $shu;
+    //             // $value->rptas_json = $val_rpta;
+    //         }
+    //     } else {
+    //         $preguntas = Pregunta::where('post_id', $tema->id)
+    //                         ->where('estado', 1)
+    //                         ->where('tipo_pregunta','texto')
+    //                         ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
+    //                         ->get();
+    //     }
+    //     $data = ["tipo_evaluacion"=>$tema->tipo_ev,"curso_id"=>$tema->curso_id,"posteo_id" => $tema->id, "nombre" => $tema->nombre, "preguntas" => $preguntas];
+    //     $ultima_evaluacion = Carbon::now();
+    //     DB::table('resumen_general')->where('usuario_id',$appUser->id)->update([
+    //         'last_ev' =>$ultima_evaluacion,
+    //     ]);
+    //     DB::table('resumen_x_curso')->where('usuario_id',$appUser->id)->where('curso_id',$tema->curso_id)->update([
+    //         'last_ev' =>$ultima_evaluacion,
+    //     ]);
+    //     if (count($preguntas) > 0) $apiResponse = ['error' => false, 'data' => $data];
+    //     else $apiResponse = ['error' => true, 'data' => null];
 
-        return response()->json($apiResponse, 200);
-    }
+    //     return response()->json($apiResponse, 200);
+    // }
 
     public function evaluar_preguntas(Request $request)
     {

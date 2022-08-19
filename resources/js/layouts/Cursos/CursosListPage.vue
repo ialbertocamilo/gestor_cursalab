@@ -27,7 +27,7 @@
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/escuelas/${escuela_id}/cursos/create`)"/>
+                    @click="openCRUDPage(`/${ruta}cursos/create`)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -124,7 +124,7 @@ import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
     components: {CursosEncuestaModal, MoverCursoModal, DialogConfirm, CursoValidacionesModal, DefaultStatusModal, SegmentFormModal},
-    props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name'],
+    props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name','ruta'],
     data() {
         let vue = this
         let route_school = (vue.escuela_id !== '') ? `/escuelas/${vue.escuela_id}` : ``;

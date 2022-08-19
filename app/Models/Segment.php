@@ -39,12 +39,12 @@ class Segment extends BaseModel
     protected function getCriteriaByWorkspace($workspace)
     {
         return Criterion::select('id', 'name', 'position', 'code')->with(['values' => function($q) use ($workspace){
-                $values = CriterionValue::whereRelation('workspaces', 'id', $workspace['id'])->get();
+                $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
                 // $q->select('id', 'value_text', 'position');
                 $q->whereIn('id', $values->pluck('id')->toArray());
             }])
             ->whereHas('workspaces', function($q) use ($workspace){
-                $q->where('workspace_id', $workspace['id']);
+                $q->where('workspace_id', $workspace->id);
             })
             ->get();
     }

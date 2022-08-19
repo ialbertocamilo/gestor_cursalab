@@ -35,6 +35,7 @@ return new class extends Migration
             $table->boolean('show_in_profile')->nullable()->default(false);
             $table->boolean('show_in_segmentation')->nullable()->default(false);
             $table->boolean('show_in_form')->nullable()->default(false);
+            $table->boolean('is_default')->nullable()->default(false);
 
             $table->boolean('required')->nullable()->default(false);
 

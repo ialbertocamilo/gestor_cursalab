@@ -72,26 +72,26 @@ class Abconfig extends Model
         return $this->hasMany(Criterio::class, 'config_id');
     }
 
-    public function app_menu()
-    {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'main_menu')
-            ->select('id', 'nombre');
-    }
+    // public function app_menu()
+    // {
+    //     return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+    //         ->where('tipo', 'main_menu')
+    //         ->select('id', 'nombre');
+    // }
 
-    public function main_menu()
-    {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'main_menu')
-            ->select('id', 'nombre', 'code');
-    }
+    // public function main_menu()
+    // {
+    //     return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+    //         ->where('tipo', 'main_menu')
+    //         ->select('id', 'nombre', 'code');
+    // }
 
-    public function side_menu()
-    {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'side_menu')
-            ->select('id', 'nombre', 'code');
-    }
+    // public function side_menu()
+    // {
+    //     return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+    //         ->where('tipo', 'side_menu')
+    //         ->select('id', 'nombre', 'code');
+    // }
 
     public function areas()
     {
@@ -161,17 +161,17 @@ class Abconfig extends Model
         // return Abconfig::select('id','etapa')->where('estado', 1)->pluck('etapa', 'id' )->toArray();
     }
 
-    protected function getFullAppMenu($tipo, $codes)
-    {
-        $values = Taxonomy::getDataByGroupAndType('system', $tipo);
+    // protected function getFullAppMenu($tipo, $codes)
+    // {
+    //     $values = Taxonomy::getDataByGroupAndType('system', $tipo);
 
-        $data = [];
+    //     $data = [];
 
-        foreach($values AS $value)
-        {
-            $data[$value->code] = in_array($value->code, $codes);
-        }
+    //     foreach($values AS $value)
+    //     {
+    //         $data[$value->code] = in_array($value->code, $codes);
+    //     }
 
-        return $data;
-    }
+    //     return $data;
+    // }
 }

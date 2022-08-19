@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginAppRequest;
 use App\Models\Error;
+use App\Models\Workspace;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,7 @@ class AuthController extends Controller
             return $this->respondWithDataAndToken($data);
 
         } catch (Exception $e) {
-            info($e);
+//            info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }
@@ -40,7 +41,7 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $user->tokens()->delete();
-        $token =  $user->createToken('accessToken')->accessToken;
+        $token = $user->createToken('accessToken')->accessToken;
 
         if (!$user->active)
             return $this->error("Usuario inactivo.", http_code: 401);
@@ -49,12 +50,13 @@ class AuthController extends Controller
         $user->updateUserDeviceVersion($data);
         $user->updateLastUserLogin($data);
 
-//        $config_data = Abconfig::with('main_menu', 'side_menu')->select('id', 'color', 'duracion_dias', 'logo', 'isotipo', 'mod_agrupacion', 'mod_cronometro', 'mod_encuestas', 'mod_evaluaciones', 'mod_mainmenu', 'mod_sidemenu', 'mod_tipovalidacion', 'plantilla_diploma', 'mod_push', 'push_code')
-//            ->where('id', $user->config_id)
-//            ->first();
-//        $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
-//        $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
-//        $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
+       $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma')
+           ->where('id', $user->subworkspace_id)
+           ->first();
+           
+       // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
+       // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
+       // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
         $supervisor = $user->isSupervisor();
 
@@ -73,11 +75,11 @@ class AuthController extends Controller
 //            "cargo" => $user->cargo,
         ];
 
-//        $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
-//        $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
-//
-//        $config_data->full_app_main_menu = Abconfig::getFullAppMenu('main_menu', $config_data->app_main_menu);
-//        $config_data->full_app_side_menu = Abconfig::getFullAppMenu('side_menu', $config_data->app_side_menu);
+       $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
+       $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
+
+       $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
+       $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
 
         return response()->json([
             'access_token' => $token,

@@ -70,10 +70,10 @@
                             <strong>Obligatorios</strong>
                         </v-subheader>
                         <v-checkbox
-                            v-for="criterion in requiredCriteria"
+                            v-for="criterion in defaultCriteria"
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
-                            :label="`${criterion.name} (requerido)`">
+                            :label="`${criterion.name} ` + criterion.required ? '(requerido)' : '(opcional)' ">
                         </v-checkbox>
                     </v-col>
                     <v-col cols="6">
@@ -83,10 +83,10 @@
                         </v-subheader>
 
                         <v-checkbox
-                            v-for="criterion in optionalCriteria"
+                            v-for="criterion in customCriteria"
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
-                            :label="`${criterion.name} (opcional)`">
+                            :label="`${criterion.name} ` + criterion.required ? '(requerido)' : '(opcional)' ">
                         </v-checkbox>
                     </v-col>
                 </v-row>
@@ -125,9 +125,9 @@ export default {
         ,
         resource: {}
         ,
-        requiredCriteria: []
+        defaultCriteria: []
         ,
-        optionalCriteria: []
+        customCriteria: []
         ,
         rules: {
             //name: this.getRules(['required', 'max:255']),
@@ -234,10 +234,9 @@ export default {
 
                     vue.resource.selected_criteria = {};
                     data.data.criteria.forEach(c => {
-                        let checked = vue.criterionExistsInCriteriaValue(
+                        vue.resource.selected_criteria[c.id] = vue.criterionExistsInCriteriaValue(
                             c.id, data.data.criteria_value
                         );
-                        vue.resource.selected_criteria[c.id] = checked;
                     });
                 })
         }

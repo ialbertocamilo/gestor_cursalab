@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\Auth;
 
 class RestTopicController extends Controller
 {
-    public function topics(Course $course)
+    public function topics(Course $course, Request $request)
     {
-        $user = Auth::user();
-        $courses_id = $user->setCurrentCourses(return_courses: true);
+//        return $this->successApp(['data' => $course, 'request' => $request->school_id]);
 
-        $data = Topic::getDataToTopicsViewAppByUser($user, $courses_id);
+        $user = Auth::user();
+        $courses = $user->setCurrentCourses(return_courses: true);
+
+        $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
 
         return $this->successApp(['data' => $data]);
     }
