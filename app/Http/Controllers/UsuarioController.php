@@ -78,6 +78,10 @@ class UsuarioController extends Controller
 
     public function search(Request $request)
     {
+        $workspace = get_current_workspace();
+        $sub_workspaces = $workspace?->subworkspaces;
+        $request->merge(['sub_workspaces_id' => $sub_workspaces?->pluck('id')]);
+
         $users = User::search($request);
 
         UsuarioSearchResource::collection($users);
@@ -87,6 +91,9 @@ class UsuarioController extends Controller
 
     public function getListSelects()
     {
+//        $workspace = get_current_workspace();
+//        $sub_workspaces = $workspace?->subworkspaces;
+
         $modules = CriterionValue::getListForSelect(criterion_code: 'module');
 
         return $this->success([

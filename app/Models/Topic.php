@@ -321,8 +321,8 @@ class Topic extends Model
                     'disponible' => $topic_status['available'],
                     'intentos_restantes' => $topic_status['remaining_attempts'],
                     't_evaluacion' => $topic_status['t_evaluacion'],
-                    'estado_tema' => $topic_status['activity']?->status->code,
-                    'estado_tema_str' => $topic_status['activity']?->status->code,
+                    'estado_tema' => $topic_status['status'],
+                    'estado_tema_str' => $topic_status['status'],
                 ];
             }
 
@@ -363,10 +363,11 @@ class Topic extends Model
         $t_evaluacion = true;
         $summary_topic = $topic->summaryByUser($user->id);
         $last_topic_reviewed = null;
+        $topic_status = 'por-iniciar';
 
         if ($topic->assesable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
-                $actividad['estado_tema'] = $summary_topic->passed ? 'aprobado' : 'desaprobado';
+                $topic_status = $summary_topic->passed ? 'aprobado' : 'desaprobado';
                 $grade = $summary_topic->grade;
                 $sub = $max_attempts - $summary_topic->attempts;
                 $remaining_attempts = max($sub, 0);
@@ -392,6 +393,7 @@ class Topic extends Model
 
         return [
 //            'topic_name' => $topic->name,
+            'status' => $topic_status,
             'topic_requirement' => $topic_requirement,
             'grade' => $grade,
             'available' => $available_topic,

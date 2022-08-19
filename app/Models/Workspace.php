@@ -57,6 +57,11 @@ class Workspace extends BaseModel
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_workspace');
     }
 
+    public function subworkspaces()
+    {
+        return $this->hasMany(Workspace::class, 'parent_id');
+    }
+
     public function app_menu()
     {
         return $this->belongsToMany(Taxonomy::class, 'workspace_app_menu', 'workspace_id', 'menu_id')

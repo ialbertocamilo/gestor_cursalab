@@ -321,39 +321,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             });
         }
 
-        if ($request->filters) {
-            foreach ($request->filters as $key => $filter) {
-                if ($key == 'q') {
-                    $query->where(function ($q) use ($filter) {
-                        $q->where('name', 'like', "%$filter%");
-                        $q->orWhere('lastname', 'like', "%$filter%");
-                        $q->orWhere('surname', 'like', "%$filter%");
-                        $q->orWhere('email', 'like', "%$filter%");
-                    });
-                }
+        if ($request->sub_workspaces_id)
+            $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
 
-                if ($key == 'type')
-                    $query->where('type_id', $filter);
-
-                if ($key == 'country')
-                    $query->where('country_id', $filter);
-
-                if ($key == 'job_position')
-                    $query->where('job_position_id', $filter);
-
-                if ($key == 'gender')
-                    $query->where('gender_id', $filter);
-
-                if ($key == 'area')
-                    $query->where('area_id', $filter);
-
-                if ($key == 'starts_at')
-                    $query->whereDate('created_at', '>=', $filter);
-
-                if ($key == 'ends_at')
-                    $query->whereDate('created_at', '<=', $filter);
-            }
-        }
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->descending == 'true' ? 'DESC' : 'ASC';

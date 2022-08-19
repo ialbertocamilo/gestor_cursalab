@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Workspace;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -130,7 +131,8 @@ function is_date($str): bool
     return is_numeric(strtotime($str));
 }
 
-function delete_col(&$array, $key) {
+function delete_col(&$array, $key)
+{
     return array_walk($array, function (&$v) use ($key) {
         unset($v[$key]);
     });
@@ -214,4 +216,11 @@ function get_title_date($date)
     $numero = $date->format('d');
 
     return "{$dia}, {$numero} de {$mes}";
+}
+
+function get_current_workspace()
+{
+    if (request()->workspace_id) return Workspace::find(request()->workspace_id);
+    if (session('workspace')) return session('workspace');
+    return null;
 }
