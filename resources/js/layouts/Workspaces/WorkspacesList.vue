@@ -6,29 +6,10 @@
         ======================================== -->
 
         <v-row class="justify-content-center pt-3 pb-3">
-            <div class="col-6">
+            <div class="col-8">
                 <img src="/img/we-connect-logo.png"
                      class="logo"
                      alt="We connect">
-            </div>
-            <div class="col-4">
-
-            </div>
-        </v-row>
-
-        <!--
-            Main title
-        ======================================== -->
-
-        <v-row class="justify-content-center">
-            <div class="col-8">
-
-                <h1>
-                    Bienvenido(a) a WeConnect 2.0
-                </h1>
-                <h3>
-                    Ingresa a un workspace para administrar  su contenido
-                </h3>
             </div>
             <div class="col-2">
                 <div v-if="userSession.user"
@@ -39,15 +20,24 @@
                     </button>
 <!--                    <v-icon class="stats-icon">mdi-logout</v-icon>-->
                 </div>
+            </div>
+        </v-row>
 
-                <div class="configurations-button-wrapper"
-                     >
-                    <span @click="toggleConfiguration()"
-                          style="cursor: pointer">
-                        Configuraciones
-                    </span>
-                    <v-icon class="stats-icon">mdi-cog</v-icon>
-                </div>
+        <!--
+            Main title
+        ======================================== -->
+
+        <v-row class="justify-content-center">
+            <div class="col-8">
+                <h1>
+                    Bienvenido(a) a WeConnect 2.0
+                </h1>
+                <h3>
+                    Ingresa a un workspace para administrar  su contenido
+                </h3>
+            </div>
+            <div class="col-2">
+                
             </div>
         </v-row>
 
@@ -121,17 +111,25 @@
         <!--
             Configurations title
         ======================================== -->
-
+                <div class="configurations-button-wrapper"
+                     >
+                    <span @click="toggleConfiguration()"
+                          style="cursor: pointer">
+                        Configuraciones
+                    </span>
+                    <v-icon class="stats-icon">mdi-cog</v-icon>
+                </div>
         <v-row
             ref="configurationTitle"
             class="justify-content-center mt-3 pt-3 pb-3">
             <div class="col-10"
                  :class="{ 'd-none': !configurationIsVisible }">
-                <h2>
+                <!-- <h2>
                     <b>
                         Configuración
                     </b>
-                </h2>
+                </h2> -->
+                
             </div>
         </v-row>
 
