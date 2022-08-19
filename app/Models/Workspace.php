@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Workspace extends BaseModel
 {
@@ -131,12 +132,32 @@ class Workspace extends BaseModel
             3  // admin
         ];
 
+//        return Workspace::query()
+//                ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
+//                ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+//                ->where('assigned_roles.entity_type', $userEntity)
+//                ->whereIn('assigned_roles.role_id', $allowedRoles)
+//                ->where('users.id', $userId)
+//                ->where('workspaces.active', ACTIVE)
+//                ->select('workspaces.*');
+
+//        dd(DB::table('assigned_roles')
+//            ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+//            ->where('assigned_roles.entity_type', $userEntity)
+//            ->whereIn('assigned_roles.role_id', $allowedRoles)
+//            ->where('users.id', $userId)
+//            ->select('assigned_roles.*')->toSql());
+
+        $role = DB::table('assigned_roles')
+                    ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+                    //->where('assigned_roles.entity_type', $userEntity)
+                    ->whereIn('assigned_roles.role_id', $allowedRoles)
+                    ->where('users.id', $userId)
+                    ->select('assigned_roles.*')
+                    ->first();
+
         return Workspace::query()
-                ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
-                ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-                ->where('assigned_roles.entity_type', $userEntity)
-                ->whereIn('assigned_roles.role_id', $allowedRoles)
-                ->where('users.id', $userId)
+                ->where('parent_id', $role->scope)
                 ->where('workspaces.active', ACTIVE)
                 ->select('workspaces.*');
     }
