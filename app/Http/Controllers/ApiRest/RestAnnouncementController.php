@@ -12,7 +12,7 @@ class RestAnnouncementController extends Controller
     public function announcements()
     {
         $user = Auth::user();
-        $anuncios = Announcement::getPublisheds($user->workspace?->id);
+        $anuncios = Announcement::getPublisheds($user->subworkspace?->id);
 
         return $this->successApp(['data' => $anuncios]);
     }

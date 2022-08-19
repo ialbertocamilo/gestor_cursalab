@@ -51,6 +51,11 @@ class Topic extends Model
         return $this->morphMany(Requirement::class, 'requirement');
     }
 
+    public function evaluation_type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_evaluation_id');
+    }
+
     protected static function search($request, $paginate = 15)
     {
         $q = self::withCount(['questions'])->where('course_id', $request->course_id);
@@ -250,8 +255,18 @@ class Topic extends Model
         return $temp;
     }
 
-    protected function getDataToTopicsViewAppByUser($user, $courses_id)
+    protected function getDataToTopicsViewAppByUser($user, $user_courses): array
     {
+        $schools = $user_courses->groupBy('schools.*.id');
+        $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
+            $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
+        })
+            ->where('user_id', $user->id)
+            ->get();
 
+        $data = [];
+
+
+        return [];
     }
 }

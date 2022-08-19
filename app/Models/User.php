@@ -125,9 +125,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(CriterionValue::class);
     }
 
-    public function workspace()
+    public function subworkspace()
     {
-        return $this->belongsTo(Workspace::class);
+        return $this->belongsTo(Workspace::class, 'subworkspace_id');
     }
 
     public function getFullnameAttribute()
@@ -248,7 +248,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     }
 
 
-
     protected function storeRequest($data, $user = null)
     {
         try {
@@ -364,23 +363,32 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function setCurrentCourses($return_courses_id = false)
+    public function setCurrentCourses($return_courses = false)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text');
         // TODO: No considerar criterion_values que se excluyan (ciclo 0)
+        // TODO: Agregar segmentacion directa
 
         $user_criterion_values_id = $user->criterion_values->pluck('id');
-        $all_programs = Block::with(
+        $all_programs = Block::with([
             'segments.values.criterion_value',
-            'block_children.child.segments.values.criterion_value',
-            'block_children.child.courses.segments.values.criterion_value'
-        )
+            'block_children.child' => [
+                'segments.values.criterion_value',
+                'courses' => [
+                    'segments.values.criterion_value',
+                    'requirements',
+                    'schools',
+                    'topics.evaluation_type',
+                    'polls.questions',
+                ],
+            ]
+        ])
             ->where('parent', 1)
             ->where('active', ACTIVE)
             ->get();
 
-        $courses_id = [];
+        $all_courses = [];
 
         $programs = collect();
         foreach ($all_programs as $program) {
@@ -438,10 +446,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                                 $courses->push([
                                     'id' => $course->id,
                                     'name' => $course->name,
-                                    'position' => $course->position
+                                    'position' => $course->position,
+                                    'schools' => $course->schools->toArray()
                                 ]);
 
-                                $courses_id[] = $course->id;
+                                $all_courses[] = $course;
 
                             else :
 
@@ -455,10 +464,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                                         $courses->push([
                                             'id' => $course->id,
                                             'name' => $course->name,
-                                            'position' => $course->position
+                                            'position' => $course->position,
+                                            'schools' => $course->schools->toArray()
                                         ]);
 
-                                        $courses_id[] = $course->id;
+                                        $all_courses[] = $course;
                                         break;
 
                                     endif;
@@ -484,7 +494,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             endif;
         }
 
-        if ($return_courses_id) return $courses_id;
+        if ($return_courses) return collect($all_courses);
 
         $user->courses = $programs;
     }

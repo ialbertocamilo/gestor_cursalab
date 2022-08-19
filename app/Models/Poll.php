@@ -21,10 +21,7 @@ class Poll extends BaseModel
 
     public function questions()
     {
-        return $this->hasMany(
-            PollQuestion::class,
-            'poll_id'
-        );
+        return $this->hasMany(PollQuestion::class, 'poll_id');
     }
 
     public function type()
