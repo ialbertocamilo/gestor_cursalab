@@ -29,7 +29,12 @@ class CheckRol
                 }
             }
             if (!$access) {
-                Redirect::to('home')->send();
+                if ($request->wantsJson())
+                {
+                    return abort(403);
+                }
+
+                Redirect::to('welcome')->send();
             }
         }
         return $next($request);

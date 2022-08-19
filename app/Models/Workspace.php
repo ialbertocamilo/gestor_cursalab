@@ -156,6 +156,10 @@ class Workspace extends BaseModel
             3  // admin
         ];
 
+        $disallowedRoles = [
+            7
+        ];
+
 //        return Workspace::query()
 //                ->join('assigned_roles', 'assigned_roles.scope', '=', 'workspaces.id')
 //                ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
@@ -175,7 +179,7 @@ class Workspace extends BaseModel
         $role = DB::table('assigned_roles')
             ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
             //->where('assigned_roles.entity_type', $userEntity)
-            ->whereIn('assigned_roles.role_id', $allowedRoles)
+            ->whereNotIn('assigned_roles.role_id', $disallowedRoles)
             ->where('users.id', $userId)
             ->select('assigned_roles.*')
             ->first();
@@ -237,7 +241,7 @@ class Workspace extends BaseModel
         info('workspace');
 
         info(session('workspace'));
-        
+
         if (session('workspace') || $request->workspace_id)
             $query->where('parent_id', $request->workspace_id ?? session('workspace')->id);
 
