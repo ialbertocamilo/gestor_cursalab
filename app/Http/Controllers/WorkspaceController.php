@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\WorkspaceRequest;
-use App\Http\Resources\WorkspaceResource;
 use App\Http\Requests\SubWorkspaceRequest;
+use App\Http\Resources\WorkspaceResource;
+use App\Http\Resources\SubWorkspaceResource;
 
 use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\Workspace;
+use App\Models\Taxonomy;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -115,6 +117,14 @@ class WorkspaceController extends Controller
 
     // Sub Workspaces
 
+    public function searchSubWorkspace (Request $request)
+    {
+        $subworkspaces = Workspace::searchSubWorkspace($request);
+        SubWorkspaceResource::collection($subworkspaces);
+
+        return $this->success($subworkspaces);
+    }
+
     public function destroy(Workspace $subworkspace)
     {
         // \File::delete(public_path().'/'.$subworkspace->plantilla_diploma);
@@ -123,13 +133,72 @@ class WorkspaceController extends Controller
         return back()->with('info', 'Eliminado Correctamente');
     }
 
+    public function editSubWorkspace(Workspace $subworkspace)
+    {
+        // $workspace = Workspace::where('criterion_value_id', $subworkspace->id)->first();
+
+        $reinicio_automatico = json_decode($subworkspace->reinicios_programado);
+        $subworkspace->reinicio_automatico = $reinicio_automatico->activado ?? false;
+        $subworkspace->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
+        $subworkspace->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
+        $subworkspace->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
+
+
+        $subworkspace->load('main_menu');
+        $subworkspace->load('side_menu');
+
+        $formSelects = $this->getFormSelects(true);
+
+        $formSelects['main_menu']->each(function ($item) use ($subworkspace) {
+            $item->active = $subworkspace->main_menu->where('id', $item->id)->first() !== NULL;
+        });
+
+        $formSelects['side_menu']->each(function ($item) use ($subworkspace) {
+            $item->active = $subworkspace->side_menu->where('id', $item->id)->first() !== NULL;
+        });
+
+        $evaluacion = json_decode($subworkspace->mod_evaluaciones);
+        $subworkspace->preg_x_ev = $evaluacion->preg_x_ev ?? NULL;
+        $subworkspace->nota_aprobatoria = $evaluacion->nota_aprobatoria ?? NULL;
+        $subworkspace->nro_intentos = $evaluacion->nro_intentos ?? NULL;
+
+        return $this->success([
+            'modulo' => $subworkspace,
+            'main_menu' => $formSelects['main_menu'],
+            'side_menu' => $formSelects['side_menu'],
+        ]);
+    }
+
+    public function getFormSelects($compactResponse = false)
+    {
+        $main_menu = Taxonomy::where('group', 'system')->where('type', 'main_menu')
+                            ->select('id', 'name')
+                            ->get();
+        
+        $main_menu->each(function ($item) {
+            $item->active = false;
+        });
+
+        $side_menu = Taxonomy::where('group', 'system')->where('type', 'side_menu')
+                            ->select('id', 'name')
+                            ->get();
+
+        $side_menu->each(function ($item) {
+            $item->active = false;
+        });
+
+        $response = compact('main_menu', 'side_menu');
+
+        return $compactResponse ? $response : $this->success($response);
+    }
+
     public function storeSubWorkspace(SubWorkspaceRequest $request)
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
         
-        $subworkspace = Workspace::storeRequest($data);
+        $subworkspace = Workspace::storeSubWorkspaceRequest($data);
 
         return $this->success(['msg' => 'Módulo registrado correctamente.']);
     }
@@ -140,7 +209,7 @@ class WorkspaceController extends Controller
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        $subworkspace = Workspace::storeRequest($data, $subworkspace);
+        $subworkspace = Workspace::storeSubWorkspaceRequest($data, $subworkspace);
 
         return $this->success(['msg' => 'Módulo actualizado correctamente.']);
     }

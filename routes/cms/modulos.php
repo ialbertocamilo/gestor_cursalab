@@ -7,6 +7,7 @@ Route::controller(WorkspaceController::class)->group(function() {
 	Route::view('/', 'abconfigs.list')->name('abconfigs.list');
 	Route::post('store', 'storeSubWorkspace');
 	Route::get('/search', 'searchSubWorkspace');
+	Route::get('{subworkspace}/edit', 'editSubWorkspace');
 	Route::put('{subworkspace}/update', 'updateSubWorkspace');
 	Route::get('{subworkspace}/usuarios', 'usuarios');
 });

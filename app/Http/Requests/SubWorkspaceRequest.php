@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Modulo;
+namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -27,7 +27,7 @@ class SubWorkspaceRequest extends FormRequest
             'name' => 'required',
 
             'codigo_matricula' => 'required',
-            'estado' => 'required',
+            'active' => 'nullable',
             'mod_evaluaciones' => 'required',
             'reinicios_programado' => 'nullable',
             // 'reinicios_programado' => 'required',

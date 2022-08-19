@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use DB;
 
 class Workspace extends BaseModel
 {
@@ -56,23 +57,23 @@ class Workspace extends BaseModel
 
     public function app_menu()
     {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'main_menu')
-            ->select('id', 'nombre');
+        return $this->belongsToMany(Taxonomy::class, 'workspace_app_menu', 'workspace_id', 'menu_id')
+            ->where('type', 'main_menu')
+            ->select('id', 'name');
     }
 
     public function main_menu()
     {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'main_menu')
-            ->select('id', 'nombre', 'code');
+        return $this->belongsToMany(Taxonomy::class, 'workspace_app_menu', 'workspace_id', 'menu_id')
+            ->where('type', 'main_menu')
+            ->select('id', 'name', 'code');
     }
 
     public function side_menu()
     {
-        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
-            ->where('tipo', 'side_menu')
-            ->select('id', 'nombre', 'code');
+        return $this->belongsToMany(Taxonomy::class, 'workspace_app_menu', 'workspace_id', 'menu_id')
+            ->where('type', 'side_menu')
+            ->select('id', 'name', 'code');
     }
 
     protected static function search($request)
@@ -205,7 +206,7 @@ class Workspace extends BaseModel
         return $workspace?->id;
     }
 
-    protected function searchSubWorkspaces($request)
+    protected function searchSubWorkspace($request)
     {
         $query = self::withCount(['users']);
 
@@ -215,5 +216,36 @@ class Workspace extends BaseModel
             $query->where('name', 'like', "%$request->q%");
 
         return $query->paginate($request->paginate);
+    }
+
+    protected static function storeSubWorkspaceRequest($data, $subworkspace = null)
+    {
+        try {
+
+            DB::beginTransaction();
+
+            if ($subworkspace) :
+                $subworkspace->update($data);
+            else:
+                $data['parent_id'] = session('workspace')->id;
+                $subworkspace = self::create($data);
+            endif;
+
+            if (!empty($data['app_menu'])):
+                $subworkspace->app_menu()->sync($data['app_menu']);
+            endif;
+
+            // $subworkspace->save();
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+        
+            return $e;
+        }
+        
+        return $subworkspace;
+
     }
 }

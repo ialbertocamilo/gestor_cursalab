@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ModuloResource extends JsonResource
+class SubWorkspaceResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,17 +17,17 @@ class ModuloResource extends JsonResource
         return [
             'id' => $this->id,
 //            'name' => $this->etapa,
-            'name' => $this->value_text,
+            'name' => $this->name,
             'image' => space_url($this->logo),
             'active' => $this->estado,
 
-            'escuelas_count' => (string)$this->categorias_count,
-            'usuarios_count' => (string)thousandsFormat($this->usuarios_count),
-            'carreras_count' => (string)thousandsFormat($this->carreras_count),
+            // 'escuelas_count' => (string)$this->categorias_count,
+            'users_count' => (string)thousandsFormat($this->users_count),
+            // 'carreras_count' => (string)thousandsFormat($this->carreras_count),
 
-            'escuelas_route' => route('escuelas.list', $this->id),
+            // 'escuelas_route' => route('escuelas.list', $this->id),
             'usuarios_route' => route('usuarios.list', ['modulo' => $this->id]),
-            'carreras_route' => route('carreras.index'),
+            // 'carreras_route' => route('carreras.index'),
         ];
     }
 }

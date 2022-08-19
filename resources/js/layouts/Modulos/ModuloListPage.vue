@@ -80,14 +80,14 @@ export default {
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
-                    {
-                        text: "Escuelas",
-                        icon: 'fas fa-school',
-                        type: 'route',
-                        // method_name: 'reset',
-                        count: 'escuelas_count',
-                        route: 'escuelas_route'
-                    },
+                    // {
+                    //     text: "Escuelas",
+                    //     icon: 'fas fa-school',
+                    //     type: 'route',
+                    //     // method_name: 'reset',
+                    //     count: 'escuelas_count',
+                    //     route: 'escuelas_route'
+                    // },
                     {
                         text: "Usuarios",
                         icon: 'fas fa-user',
@@ -135,9 +135,9 @@ export default {
                 action: null,
                 selects: {
                     modules: [],
-                    boticas: [],
-                    groups: [],
-                    cargos: [],
+                    // boticas: [],
+                    // groups: [],
+                    // cargos: [],
                 }
             },
             modalDeleteOptions: {
@@ -158,16 +158,16 @@ export default {
     methods: {
         getSelects() {
             let vue = this
-            const url = `/modulos/get-selects`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.modules = data.data.modules
-                    vue.modalOptions.selects.modules = data.data.modules
-                })
+            // const url = `/modulos/get-selects`
+            // vue.$http.get(url)
+            //     .then(({data}) => {
+            //         vue.selects.modules = data.data.modules
+            //         vue.modalOptions.selects.modules = data.data.modules
+            //     })
         },
         reset(user) {
             let vue = this
-            vue.consoleObjectTable(user, 'User to Reset')
+            // vue.consoleObjectTable(user, 'User to Reset')
         },
         activity() {
             console.log('activity')
