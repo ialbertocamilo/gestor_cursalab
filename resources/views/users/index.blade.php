@@ -9,10 +9,11 @@
                     <div class="d-flex align-items-center">
                         <h5 class="no-margin-bottom">Administrador</h5>
                         <div class="ml-2">
-                            @can('users.create')
-                                <a href="{{ route('users.create') }}" class="btn bg-green float-right"><i class="fa fa-plus"></i>
+                            @if ($super_user)
+                                <a href="{{ route('users.create') }}" class="btn bg-green float-right"><i
+                                        class="fa fa-plus"></i>
                                     Crear</a>
-                            @endcan
+                            @endif
                         </div>
                     </div>
                     <div class="d-flex align-items-center">
