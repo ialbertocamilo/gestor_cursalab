@@ -161,17 +161,17 @@ class Abconfig extends Model
         // return Abconfig::select('id','etapa')->where('estado', 1)->pluck('etapa', 'id' )->toArray();
     }
 
-    protected function getFullAppMenu($tipo, $codes)
-    {
-        $values = Taxonomy::getDataByGroupAndType('system', $tipo);
+    // protected function getFullAppMenu($tipo, $codes)
+    // {
+    //     $values = Taxonomy::getDataByGroupAndType('system', $tipo);
 
-        $data = [];
+    //     $data = [];
 
-        foreach($values AS $value)
-        {
-            $data[$value->code] = in_array($value->code, $codes);
-        }
+    //     foreach($values AS $value)
+    //     {
+    //         $data[$value->code] = in_array($value->code, $codes);
+    //     }
 
-        return $data;
-    }
+    //     return $data;
+    // }
 }

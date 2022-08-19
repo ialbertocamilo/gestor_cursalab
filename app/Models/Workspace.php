@@ -276,11 +276,25 @@ class Workspace extends BaseModel
             DB::rollBack();
 
             info($e);
-            
+
             return $e;
         }
 
         return $subworkspace;
 
+    }
+
+    protected function getFullAppMenu($type, $codes)
+    {
+        $values = Taxonomy::getDataByGroupAndType('system', $type);
+
+        $data = [];
+
+        foreach($values AS $value)
+        {
+            $data[$value->code] = in_array($value->code, $codes);
+        }
+
+        return $data;
     }
 }
