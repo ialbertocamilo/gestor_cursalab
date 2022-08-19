@@ -220,27 +220,40 @@ class Workspace extends BaseModel
 
     protected static function storeSubWorkspaceRequest($data, $subworkspace = null)
     {
+        info(session('workspace'));
+
         try {
 
             DB::beginTransaction();
 
             if ($subworkspace) :
+            
                 $subworkspace->update($data);
+            
             else:
-                $data['parent_id'] = session('workspace')->id;
+
+                $data['parent_id'] = session('workspace')->id ?? NULL;
+
+                $module = Criterion::where('code', 'module')->first();
+
+                $criterion_value = $module->values()->create(['value_text' => $data['name'], 'active' => ACTIVE]);
+
+                $data['criterion_value_id'] = $criterion_value->id;
+
                 $subworkspace = self::create($data);
+
             endif;
 
             if (!empty($data['app_menu'])):
                 $subworkspace->app_menu()->sync($data['app_menu']);
             endif;
 
-            // $subworkspace->save();
-
             DB::commit();
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            info($e);
         
             return $e;
         }
