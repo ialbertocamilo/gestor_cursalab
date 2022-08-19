@@ -30,7 +30,7 @@ class AuthController extends Controller
             return $this->respondWithDataAndToken($data);
 
         } catch (Exception $e) {
-            info($e);
+//            info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }

@@ -363,7 +363,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function setCurrentCourses($return_courses = false)
+    public function setCurrentCourses($return_courses = false, $school_id = null)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text');
@@ -379,8 +379,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     'segments.values.criterion_value',
                     'requirements',
                     'schools',
-                    'topics.evaluation_type',
+//                    'topics.evaluation_type',
+                    'topics' => [
+                        'evaluation_type',
+                        'requirements'
+                    ],
                     'polls.questions',
+                    'topics.evaluation_type'
                 ],
             ]
         ])
