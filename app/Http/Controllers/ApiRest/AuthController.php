@@ -31,7 +31,7 @@ class AuthController extends Controller
             return $this->respondWithDataAndToken($data);
 
         } catch (Exception $e) {
-//            info($e);
+           info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }
@@ -53,7 +53,7 @@ class AuthController extends Controller
        $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma')
            ->where('id', $user->subworkspace_id)
            ->first();
-           
+
        // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
        // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
        // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
@@ -84,7 +84,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
 //            'expires_in' => auth('api')->factory()->getTTL() * 60,
-//            'config_data' => $config_data,
+            'config_data' => $config_data,
             'usuario' => $user_data
         ]);
     }

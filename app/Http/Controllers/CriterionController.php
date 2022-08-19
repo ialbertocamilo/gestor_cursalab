@@ -14,7 +14,7 @@ class CriterionController extends Controller
     public function search(Request $request)
     {
 //        $current_workspace = session('workspace');
-        $current_workspace_id = $request->workspace_id ?? session('workspace')['id'] ?? null;;
+        $current_workspace_id = $request->workspace_id ?? session('workspace')['id'] ?? null;
         $request->merge(['workspace_id'=> $current_workspace_id]);
 
         $criteria = Criterion::search($request);
