@@ -473,7 +473,7 @@ export default {
 <style scoped>
 
 .title-logo-wrapper {
-    height: 130px;
+    /* height: 130px; */
     box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25);
     cursor: pointer;
 }
