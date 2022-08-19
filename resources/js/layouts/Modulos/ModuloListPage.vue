@@ -92,8 +92,8 @@ export default {
                         text: "Usuarios",
                         icon: 'fas fa-user',
                         type: 'route',
-                        route: 'usuarios_route',
-                        count: 'usuarios_count'
+                        route: 'users_route',
+                        count: 'users_count'
                     },
                     // {
                     //     text: "Carreras",
