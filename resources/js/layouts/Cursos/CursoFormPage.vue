@@ -35,6 +35,19 @@
                             </DefaultAutocomplete>
                         </v-col>
                     </v-row> -->
+                    <v-row>
+                        <v-col cols="6">
+                            <DefaultAutocomplete
+                                dense
+                                label="Escuelas"
+                                v-model="resource.lista_escuelas"
+                                :items="selects.lista_escuelas"
+                                item-text="nombre"
+                                item-value="id"
+                                multiple
+                            />
+                        </v-col>
+                    </v-row>
                     <v-row >
                         <v-col cols="6">
                             <DefaultInput
@@ -169,7 +182,7 @@
 </template>
 <script>
 const fields = ['name', 'reinicios_programado', 'active', 'position', 'imagen', 'plantilla_diploma', 'config_id', 'categoria_id',
-    'description', 'requisito_id'];
+    'description', 'requisito_id','lista_escuelas'];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 
@@ -196,6 +209,7 @@ export default {
                 scheduled_restarts_dias: null,
                 scheduled_restarts_horas: null,
                 scheduled_restarts_minutos: 1,
+                lista_escuelas: [],
             },
             resource: {},
             rules: {
@@ -203,7 +217,8 @@ export default {
                 position: this.getRules(['required', 'number']),
             },
             selects: {
-                requisito_id: []
+                requisito_id: [],
+                lista_escuelas: [],
             },
             loadingActionBtn: false,
             modalCursoValidaciones: {
@@ -342,6 +357,7 @@ export default {
             await vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.requisito_id = data.data.requisitos
+                    vue.selects.lista_escuelas = data.data.escuelas
                     if (vue.curso_id !== '') {
                         vue.resource = Object.assign({}, data.data.curso)
                     }

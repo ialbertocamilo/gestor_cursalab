@@ -58,9 +58,9 @@ class Migration_1 extends Model
 
     public function insertMigrationData_1($data)
     {
-        $this->insertUsersData($data);
-
         $this->insertModulosData($data);
+
+        $this->insertUsersData($data);
 
         $this->insertCarrerasData($data);
         $this->insertCiclosData($data);
@@ -119,7 +119,7 @@ class Migration_1 extends Model
                 'document' => $user->dni,
 
                 'type_id' => $type_client->id,
-                'subworkspace_id' => $uc_workspace->id,
+                'config_id' => $user->config_id,
 
                 'password' => Hash::make($user->dni),
 
@@ -130,7 +130,7 @@ class Migration_1 extends Model
             ];
         }
 
-        $result['users'] = array_chunk($result['users'], self::CHUNK_LENGTH, true);
+//        $result['users'] = array_chunk($result['users'], self::CHUNK_LENGTH, true);
     }
 
     public function setModulosData(&$result, $db)
@@ -414,7 +414,19 @@ class Migration_1 extends Model
 
     public function insertUsersData($data)
     {
-        $this->insertChunkedData('users', $data['users']);
+//        $this->insertChunkedData('users', $data['users']);
+        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
+
+        $user_temp = [];
+        foreach ($data['users'] as $user) {
+            $module_value = $modules_values->where('external_id', $user['config_id'])->first();
+            unset($user['config_id']);
+
+            if ($module_value)
+                $user_temp[] = array_merge($user, ['subworkspace_id' => $module_value->id,]);
+        }
+
+        $this->makeChunkAndInsert($user_temp, 'users');
     }
 
     public function insertModulosData($data)
@@ -549,7 +561,7 @@ class Migration_1 extends Model
             $group = $grupos_values->where('external_id', $relation['grupo_id'])->first();
             $botica = $boticas_values->where('external_id', $relation['botica_id'])->first();
 
-            if ($group and $botica){
+            if ($group and $botica) {
                 $temp[] = ['criterion_value_parent_id' => $group->id, 'criterion_value_id' => $botica->id];
                 $criterion_values_workspace[] = ['criterion_value_id' => $botica->id, 'workspace_id' => $uc_workspace->id];
             }

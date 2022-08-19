@@ -26,7 +26,7 @@
                 <!--                    :label="'Actividad'"-->
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
-                    @click="openCRUDPage(`/escuelas/${school_id}/cursos/${course_id}/temas/create`)"
+                    @click="openCRUDPage(`/${ruta}cursos/${course_id}/temas/create`)"
                     :label="'Tema'"/>
             </v-card-title>
         </v-card>
@@ -91,7 +91,7 @@ import TemaValidacionesModal from "./TemaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 export default {
     components: {DialogConfirm, TemaValidacionesModal, DefaultStatusModal},
-    props: ['school_id', 'school_name', 'course_id', 'course_name'],
+    props: ['school_id', 'school_name', 'course_id', 'course_name','ruta'],
     data() {
         let vue = this
         return {
@@ -101,7 +101,7 @@ export default {
                 {title: 'Temas', text: null, disabled: true, href: ''},
             ],
             dataTable: {
-                endpoint: `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/search`,
+                endpoint: `/${vue.ruta}cursos/${vue.course_id}/temas/search`,
                 ref: 'cursosTable',
                 headers: [
                     {text: "Orden", value: "orden", align: 'center', model: 'Topic'},

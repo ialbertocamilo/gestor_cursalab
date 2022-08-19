@@ -238,6 +238,7 @@ class RestCursosController extends Controller
             "bloqueado" => "Bloqueado",
             "por-iniciar" => "Por iniciar",
         ];
+
         foreach ($cursos_x_usuario as $key => $curso) {
             $estado_curso = $this->estadoCurso($appUser->id, $curso->id, $curso->requisito_id);
             $data_temas = [];
@@ -249,15 +250,19 @@ class RestCursosController extends Controller
                 $estado_tema = $this->estadoTemas($appUser->id, $tema, $max_intentos);
                 $ultimo_tema_visto = $estado_tema['ultimo_tema_visto'];
                 $tema_estado = "por-iniciar";
+
                 if ($estado_tema['actividad'] && $estado_tema['actividad']['estado_tema']) {
                     $tema_estado = $estado_tema['actividad']['estado_tema'];
                 }
+
                 $media_temas = $tema->medias->sortBy('orden')->values()->all();
+
                 foreach ($media_temas as $md) {
                     if($md->tipo == 'audio' && !str_contains('https',$md->valor)){
                         $md->valor=env('BUCKET_BASE_URL').'/'.$md->valor;
                     }
                 }
+
                 $data_temas[] = [
                     'id' => $tema->id,
                     'nombre' => $tema->nombre,
@@ -285,7 +290,6 @@ class RestCursosController extends Controller
                 'imagen' => $curso->imagen,
                 'requisito_id' => $curso->requisito_id,
                 'c_evaluable' => $curso->c_evaluable,
-                'porcentaje' => $estado_curso['porcentaje'],
                 'disponible' => $estado_curso['disponible'],
                 'status' => $arr_estados_cursos[$estado_curso['status']],
                 'encuesta' => $estado_curso['enc_disponible'],
@@ -300,6 +304,7 @@ class RestCursosController extends Controller
                 'temas' => $data_temas
             ];
         }
+
         $apiResponse = [
             'id' => $categoria->id,
             'nombre' => $categoria->nombre,

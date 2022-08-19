@@ -52,23 +52,47 @@
 </div>
 
 <hr>
-<h3>Lista de roles</h3>
-<div class="form-group row">
-    <div class="col-sm-9">
-        <ul class="list-unstyled" style="height: auto;">
-            @foreach ($roles as $role)
-                @if ($role->name != 'super-user')
-                    <li>
-                        <label class="form-control-label">
-                            {{ Form::checkbox('roles[]', $role->id, null) }}
-                            {{ $role->title }}
-                            <em>({{ $role->description ?: 'N/A' }})</em>
-                        </label>
-                    </li>
-                @endif
-            @endforeach
-        </ul>
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h3>Workspaces</h3>
     </div>
+    <div class="col-md-6">
+        <h3>Roles</h3>
+    </div>
+</div>
+<div class="box_workspaces" id="box_workspaces">
+    @isset($user)
+        @if (count($user->roles) > 0)
+            @foreach ($user->roles as $rol)
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {!! Form::select('workspaces[]', $workspaces, $rol->scope, ['class' => 'form-control']) !!}
+                    </div>
+                    <div class="col-md-6">
+                        {!! Form::select('roles[]', $roles, $rol->id, ['class' => 'form-control']) !!}
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    {!! Form::select('workspaces[]', $workspaces, null, ['class' => 'form-control']) !!}
+                </div>
+                <div class="col-md-6">
+                    {!! Form::select('roles[]', $roles, null, ['class' => 'form-control']) !!}
+                </div>
+            </div>
+        @endif
+    @else
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {!! Form::select('workspaces[]', $workspaces, null, ['class' => 'form-control']) !!}
+            </div>
+            <div class="col-md-6">
+                {!! Form::select('roles[]', $roles, null, ['class' => 'form-control']) !!}
+            </div>
+        </div>
+    @endisset
 </div>
 <div class="line"></div>
 <div class="form-group row">
