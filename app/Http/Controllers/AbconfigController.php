@@ -104,51 +104,51 @@ class AbconfigController extends Controller
         return view('abconfigs.usuarios', compact('abconfig','usuarios'));
     }
 
-    public function categorias(Abconfig $abconfig, Request $request)
-    {
+//     public function categorias(Abconfig $abconfig, Request $request)
+//     {
 
-        $query = $abconfig->categorias()->withCount('cursos');
+//         $query = $abconfig->categorias()->withCount('cursos');
 
-        if ($request->has('pid')) {
-            $catespp = Categoria_perfil::select('categoria_id')->where('perfil_id', $request->input('pid'))->pluck('categoria_id');
+//         if ($request->has('pid')) {
+//             $catespp = Categoria_perfil::select('categoria_id')->where('perfil_id', $request->input('pid'))->pluck('categoria_id');
 
-            $query->whereIn('id', $catespp);
-        }
+//             $query->whereIn('id', $catespp);
+//         }
 
-        if ($request->q)
-            $query->where('nombre', 'like', "%$request->q%");
+//         if ($request->q)
+//             $query->where('nombre', 'like', "%$request->q%");
 
-        $escuelas = $query->orderBy('orden')->paginate($request->paginate);
+//         $escuelas = $query->orderBy('orden')->paginate($request->paginate);
 
-        EscuelaResource::collection($escuelas);
+//         EscuelaResource::collection($escuelas);
 
-//        if ($request->isJson()) {
-        if ($request->has('page')) {
-            return $this->success($escuelas);
-        } else {
-            $categorias = $escuelas;
-            return view('abconfigs.categorias', compact('abconfig', 'categorias'));
-        }
+// //        if ($request->isJson()) {
+//         if ($request->has('page')) {
+//             return $this->success($escuelas);
+//         } else {
+//             $categorias = $escuelas;
+//             return view('abconfigs.categorias', compact('abconfig', 'categorias'));
+//         }
 
-    }
+//     }
 
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        if ($request->has('q')) {
-            $question = $request->input('q');
-            // return $question;
-            $abconfigs = Categoria::where('etapa', 'like', '%'.$question.'%')->get();
-        }else{
-            $abconfigs = Abconfig::paginate();
-        }
+    // public function index(Request $request)
+    // {
+    //     if ($request->has('q')) {
+    //         $question = $request->input('q');
+    //         // return $question;
+    //         $abconfigs = Categoria::where('etapa', 'like', '%'.$question.'%')->get();
+    //     }else{
+    //         $abconfigs = Abconfig::paginate();
+    //     }
 
-        return view('abconfigs.index', compact('abconfigs'));
-    }
+    //     return view('abconfigs.index', compact('abconfigs'));
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -168,41 +168,41 @@ class AbconfigController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(AbconfigStoreRequest $request)
-//    public function store(ModuloStoreUpdateRequest $request)
-    {
-        $data = $request->all();
-        // if ($request->has('logo')) {
-        // // Mover imagen a carpea public/images
-        //     $logo= $request->file('logo');
-        //     $new_name = rand() . '.' . $logo->getClientOriginalExtension();
-        //     $logo->move(public_path('images'), $new_name);
+//     public function store(AbconfigStoreRequest $request)
+// //    public function store(ModuloStoreUpdateRequest $request)
+//     {
+//         $data = $request->all();
+//         // if ($request->has('logo')) {
+//         // // Mover imagen a carpea public/images
+//         //     $logo= $request->file('logo');
+//         //     $new_name = rand() . '.' . $logo->getClientOriginalExtension();
+//         //     $logo->move(public_path('images'), $new_name);
 
-        //      //cambiar valor de name en el request
-        //     $data['logo'] = 'images/'.$new_name;
-        // }
-        //  if ($request->has('plantilla_diploma')) {
-        // // Mover imagen a carpea public/images
-        //     $plantilla_diploma= $request->file('plantilla_diploma');
-        //     $new_name = rand() . '.' . $plantilla_diploma->getClientOriginalExtension();
-        //     $plantilla_diploma->move(public_path('images'), $new_name);
+//         //      //cambiar valor de name en el request
+//         //     $data['logo'] = 'images/'.$new_name;
+//         // }
+//         //  if ($request->has('plantilla_diploma')) {
+//         // // Mover imagen a carpea public/images
+//         //     $plantilla_diploma= $request->file('plantilla_diploma');
+//         //     $new_name = rand() . '.' . $plantilla_diploma->getClientOriginalExtension();
+//         //     $plantilla_diploma->move(public_path('images'), $new_name);
 
-        //      //cambiar valor de name en el request
-        //     $data['plantilla_diploma'] = 'images/'.$new_name;
-        // }
-        if ($request->filled('logo')) {
-            $data['logo'] = 'images/'.$request->logo;
-        }
-        if ($request->filled('plantilla_diploma')) {
-            $data['plantilla_diploma'] = 'images/'.$request->plantilla_diploma;
-        }
-        $abconfig = Abconfig::create($data);
+//         //      //cambiar valor de name en el request
+//         //     $data['plantilla_diploma'] = 'images/'.$new_name;
+//         // }
+//         if ($request->filled('logo')) {
+//             $data['logo'] = 'images/'.$request->logo;
+//         }
+//         if ($request->filled('plantilla_diploma')) {
+//             $data['plantilla_diploma'] = 'images/'.$request->plantilla_diploma;
+//         }
+//         $abconfig = Abconfig::create($data);
 
-        // return redirect()->route('abconfigs.edit', $abconfig->id)
-        //         ->with('info', 'Abconfig guardado con éxito');
-        return redirect()->route('abconfigs.index')
-            ->with('info', 'Configuracion guardada con éxito');
-    }
+//         // return redirect()->route('abconfigs.edit', $abconfig->id)
+//         //         ->with('info', 'Abconfig guardado con éxito');
+//         return redirect()->route('abconfigs.index')
+//             ->with('info', 'Configuracion guardada con éxito');
+//     }
 
     public function edit(Abconfig $abconfig)
     {
@@ -228,50 +228,50 @@ class AbconfigController extends Controller
      * @param  \App\Abconfig  $abconfig
      * @return \Illuminate\Http\Response
      */
-    public function update(AbconfigStoreRequest $request, Abconfig $abconfig)
-//    public function update(ModuloStoreUpdateRequest $request, Abconfig $abconfig)
-    {
-        $data = $request->all();
+//     public function update(AbconfigStoreRequest $request, Abconfig $abconfig)
+// //    public function update(ModuloStoreUpdateRequest $request, Abconfig $abconfig)
+//     {
+//         $data = $request->all();
 
-        // if ($request->has('logo')) {
-        //     // Mover imagen a carpea public/images
-        //     $logo= $request->file('logo');
-        //     $new_name = rand() . '.' . $logo->getClientOriginalExtension();
-        //     $logo->move(public_path('images'), $new_name);
+//         // if ($request->has('logo')) {
+//         //     // Mover imagen a carpea public/images
+//         //     $logo= $request->file('logo');
+//         //     $new_name = rand() . '.' . $logo->getClientOriginalExtension();
+//         //     $logo->move(public_path('images'), $new_name);
 
-        //      //cambiar valor de name en el request
-        //     $data['logo'] = 'images/'.$new_name;
+//         //      //cambiar valor de name en el request
+//         //     $data['logo'] = 'images/'.$new_name;
 
-        //             //eliminar imagen anterior
-        //     \File::delete(public_path().'/'.$abconfig->logo);
-        // }
-        // if ($request->has('plantilla_diploma')) {
-        //     // Mover imagen a carpea public/images
-        //     $plantilla_diploma= $request->file('plantilla_diploma');
-        //     $new_name = rand() . '.' . $plantilla_diploma->getClientOriginalExtension();
-        //     $plantilla_diploma->move(public_path('images'), $new_name);
+//         //             //eliminar imagen anterior
+//         //     \File::delete(public_path().'/'.$abconfig->logo);
+//         // }
+//         // if ($request->has('plantilla_diploma')) {
+//         //     // Mover imagen a carpea public/images
+//         //     $plantilla_diploma= $request->file('plantilla_diploma');
+//         //     $new_name = rand() . '.' . $plantilla_diploma->getClientOriginalExtension();
+//         //     $plantilla_diploma->move(public_path('images'), $new_name);
 
-        //      //cambiar valor de name en el request
-        //     $data['plantilla_diploma'] = 'images/'.$new_name;
+//         //      //cambiar valor de name en el request
+//         //     $data['plantilla_diploma'] = 'images/'.$new_name;
 
-        //             //eliminar imagen anterior
-        //     \File::delete(public_path().'/'.$abconfig->plantilla_diploma);
-        // }
+//         //             //eliminar imagen anterior
+//         //     \File::delete(public_path().'/'.$abconfig->plantilla_diploma);
+//         // }
 
-        if ($request->filled('logo')) {
-            $data['logo'] = 'images/'.$request->logo;
-        }
-        if ($request->filled('plantilla_diploma')) {
-            $data['plantilla_diploma'] = 'images/'.$request->plantilla_diploma;
-        }
-        $data['reinicios_programado']= HelperController::getDataReinicioAutomatico($data);
-        $abconfig->update($data);
+//         if ($request->filled('logo')) {
+//             $data['logo'] = 'images/'.$request->logo;
+//         }
+//         if ($request->filled('plantilla_diploma')) {
+//             $data['plantilla_diploma'] = 'images/'.$request->plantilla_diploma;
+//         }
+//         $data['reinicios_programado']= HelperController::getDataReinicioAutomatico($data);
+//         $abconfig->update($data);
 
-        // return redirect()->route('abconfigs.edit', $abconfig->id)
-        //         ->with('info', 'Abconfigo actualizado con éxito');
-        return redirect()->route('abconfigs.index')
-            ->with('info', 'Configuracion guardada con éxito');
-    }
+//         // return redirect()->route('abconfigs.edit', $abconfig->id)
+//         //         ->with('info', 'Abconfigo actualizado con éxito');
+//         return redirect()->route('abconfigs.index')
+//             ->with('info', 'Configuracion guardada con éxito');
+//     }
 
     /**
      * Remove the specified resource from storage.
@@ -279,34 +279,34 @@ class AbconfigController extends Controller
      * @param  \App\Abconfig  $abconfig
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Abconfig $abconfig)
-    {
-        // \File::delete(public_path().'/'.$abconfig->plantilla_diploma);
-        $abconfig->delete();
+//     public function destroy(Abconfig $abconfig)
+//     {
+//         // \File::delete(public_path().'/'.$abconfig->plantilla_diploma);
+//         $abconfig->delete();
 
-        return back()->with('info', 'Eliminado Correctamente');
-    }
+//         return back()->with('info', 'Eliminado Correctamente');
+//     }
 
-    public function storeModulo(ModuloStoreUpdateRequest $request)
-    {
-        $data = $request->validated();
-        $data = Media::requestUploadFile($data, 'logo');
-        $data = Media::requestUploadFile($data, 'plantilla_diploma');
-//        dd($data);
-        $modulo = Abconfig::storeRequest($data);
-        $msg = 'Módulo registrado correctamente.';
-        return $this->success(compact('modulo', 'msg'));
-    }
+//     public function storeModulo(ModuloStoreUpdateRequest $request)
+//     {
+//         $data = $request->validated();
+//         $data = Media::requestUploadFile($data, 'logo');
+//         $data = Media::requestUploadFile($data, 'plantilla_diploma');
+// //        dd($data);
+//         $modulo = Abconfig::storeRequest($data);
+//         $msg = 'Módulo registrado correctamente.';
+//         return $this->success(compact('modulo', 'msg'));
+//     }
 
-    public function updateModulo(ModuloStoreUpdateRequest $request, Abconfig $modulo)
-    {
-        $data = $request->validated();
-        $data = Media::requestUploadFile($data, 'logo');
-        $data = Media::requestUploadFile($data, 'plantilla_diploma');
-//        dd($data);
-//        return $data;
-        $modulo = Abconfig::storeRequest($data, $modulo);
-        $msg = 'Módulo actualizado correctamente.';
-        return $this->success(compact('modulo', 'msg'));
-    }
+//     public function updateModulo(ModuloStoreUpdateRequest $request, Abconfig $modulo)
+//     {
+//         $data = $request->validated();
+//         $data = Media::requestUploadFile($data, 'logo');
+//         $data = Media::requestUploadFile($data, 'plantilla_diploma');
+// //        dd($data);
+// //        return $data;
+//         $modulo = Abconfig::storeRequest($data, $modulo);
+//         $msg = 'Módulo actualizado correctamente.';
+//         return $this->success(compact('modulo', 'msg'));
+//     }
 }

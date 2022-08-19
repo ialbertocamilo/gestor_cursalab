@@ -34,10 +34,11 @@ class Workspace extends BaseModel
         return $this->hasMany(User::class);
     }
 
-    public function schools()
-    {
-        return $this->belongsToMany(School::class);
-    }
+    // public function schools()
+    // {
+    //     return $this->belongsToMany(School::class);
+    // }
+
     public function courses()
     {
         return $this->belongsToMany(Course::class);
@@ -51,6 +52,27 @@ class Workspace extends BaseModel
     public function criteriaValue()
     {
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_workspace');
+    }
+
+    public function app_menu()
+    {
+        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+            ->where('tipo', 'main_menu')
+            ->select('id', 'nombre');
+    }
+
+    public function main_menu()
+    {
+        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+            ->where('tipo', 'main_menu')
+            ->select('id', 'nombre', 'code');
+    }
+
+    public function side_menu()
+    {
+        return $this->belongsToMany(Taxonomy::class, 'modulos_app_menu', 'modulo_id', 'menu_id')
+            ->where('tipo', 'side_menu')
+            ->select('id', 'nombre', 'code');
     }
 
     protected static function search($request)
@@ -181,5 +203,17 @@ class Workspace extends BaseModel
                     ->first();
 
         return $workspace?->id;
+    }
+
+    protected function searchSubWorkspaces($request)
+    {
+        $query = self::withCount(['users']);
+
+        $query->whereNotNull('parent_id');
+        
+        if ($request->q)
+            $query->where('name', 'like', "%$request->q%");
+
+        return $query->paginate($request->paginate);
     }
 }

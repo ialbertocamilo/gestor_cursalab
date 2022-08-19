@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\WorkspaceRequest;
 use App\Http\Resources\WorkspaceResource;
+use App\Http\Requests\SubWorkspaceRequest;
+
 use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\Workspace;
+
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -108,5 +111,37 @@ class WorkspaceController extends Controller
         // Response
 
         return $this->success(['msg' => 'Workspace actualizado correctamente.']);
+    }
+
+    // Sub Workspaces
+
+    public function destroy(Workspace $subworkspace)
+    {
+        // \File::delete(public_path().'/'.$subworkspace->plantilla_diploma);
+        $subworkspace->delete();
+
+        return back()->with('info', 'Eliminado Correctamente');
+    }
+
+    public function storeSubWorkspace(SubWorkspaceRequest $request)
+    {
+        $data = $request->validated();
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'plantilla_diploma');
+        
+        $subworkspace = Workspace::storeRequest($data);
+
+        return $this->success(['msg' => 'Módulo registrado correctamente.']);
+    }
+
+    public function updateSubWorkspace(SubWorkspaceRequest $request, Workspace $subworkspace)
+    {
+        $data = $request->validated();
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'plantilla_diploma');
+
+        $subworkspace = Workspace::storeRequest($data, $subworkspace);
+
+        return $this->success(['msg' => 'Módulo actualizado correctamente.']);
     }
 }
