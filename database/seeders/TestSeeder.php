@@ -81,7 +81,7 @@ class TestSeeder extends Seeder
             ['code' => 'correo_jefe', 'name' => 'correo jefe','required' =>0,'show_in_segmentation' =>1],
             ['code' => 'grupos_de_supervision_supply', 'name' => 'Grupos de supervisión (Supply)','required' =>0,'show_in_segmentation' =>1],
             ['code' => 'gerente_de_area_o_mall', 'name' => 'Gerente de área o Mall','required' =>0,'show_in_segmentation' =>1],
-            //['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1],
+            ['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1],
             ['code' => 'cycle', 'name' => 'Ciclo','required' =>0,'show_in_segmentation' =>1],
         ];
 
@@ -97,7 +97,7 @@ class TestSeeder extends Seeder
 
         // When workspace already exists, stop method
 
-        if (Workspace::find(20)) {
+        if (Workspace::count() > 0) {
             return;
         }
 
@@ -105,21 +105,20 @@ class TestSeeder extends Seeder
         // ----------------------------------------
 
         Workspace::create([
-            'id' => 20,
             'name' => 'InRetail',
             'slug' => 'inretail',
             'active' => 1
         ]);
+        $idWorkspaceInRetail = Workspace::where('slug', 'inretail')->first()->id;
 
         // Intercorp Retail subworkspace
         // ----------------------------------------
 
         Workspace::create([
-            'id' => 21,
             'name' => 'Intercorp Retail',
             'slug' => 'intercorp-retail',
             'logo' => 'images/workspace4-20220816165310-9825.png',
-            'parent_id' => 20,
+            'parent_id' => $idWorkspaceInRetail,
             'active' => 1
         ]);
         $workspaceId = DB::getPdo()->lastInsertId();
@@ -140,11 +139,10 @@ class TestSeeder extends Seeder
         // ----------------------------------------
 
         Workspace::create([
-            'id' => 22,
             'name' => 'Quimica Suiza',
             'slug' => 'quimica-suiza',
             'logo' => 'images/workspace1-20220816165243-3521.png',
-            'parent_id' => 20,
+            'parent_id' => $idWorkspaceInRetail,
             'active' => 1
         ]);
 
@@ -166,11 +164,10 @@ class TestSeeder extends Seeder
         // ----------------------------------------
 
         Workspace::create([
-            'id' => 23,
             'name' => 'Financiera Oh',
             'slug' => 'financiera-oh',
             'logo' => 'images/workspace2-20220816165253-1851.png',
-            'parent_id' => 20,
+            'parent_id' => $idWorkspaceInRetail,
             'active' => 1
         ]);
 
@@ -192,11 +189,10 @@ class TestSeeder extends Seeder
         // ----------------------------------------
 
         Workspace::create([
-            'id' => 24,
             'name' => 'Promart',
             'slug' => 'promart',
             'logo' => 'images/workspace3-20220816165303-6210.png',
-            'parent_id' => 20,
+            'parent_id' => $idWorkspaceInRetail,
             'active' => 1
         ]);
 
@@ -214,22 +210,24 @@ class TestSeeder extends Seeder
             'criterion_value_id' => $criterionValueId
         ]);
 
-        // Inkafarma subworkspace
+        // UNIVERSIDAD CORPORATIVA subworkspace
         // ----------------------------------------
 
         Workspace::create([
-            'id' => 1,
             'name' => 'Universidad corporativa',
             'slug' => 'universidad-corporativa',
             'active' => 1
         ]);
+        $idWorkspaceUni = Workspace::where('slug', 'universidad-corporativa')->first()->id;
+
+        // Inkafarma subworkspace
+        // ----------------------------------------
 
         Workspace::create([
-            'id' => 25,
             'name' => 'Inkafarma',
             'slug' => 'inkafarma',
             'logo' => 'images/inkafarma.png',
-            'parent_id' => 1,
+            'parent_id' => $idWorkspaceUni,
             'active' => 1
         ]);
 
@@ -247,12 +245,28 @@ class TestSeeder extends Seeder
             'criterion_value_id' => $criterionValueId
         ]);
 
-        // Mifarma subworkspace
-        // ----------------------------------------
 
-//        $mifarma = Workspace::find(3);
-//        $mifarma->logo = 'images/mifarma.png';
-//        $mifarma->save();
+        Workspace::create([
+            'name' => 'MiFarma',
+            'slug' => 'mifarma',
+            'logo' => 'images/mifarma.png',
+            'parent_id' => $idWorkspaceUni,
+            'active' => 1
+        ]);
+
+        $workspaceId = DB::getPdo()->lastInsertId();
+
+        CriterionValue::create([
+            'criterion_id' => 1,
+            'value_text' => 'MiFarma',
+            'active' => 1
+        ]);
+        $criterionValueId = DB::getPdo()->lastInsertId();
+
+        DB::table('criterion_value_workspace')->insert([
+            'workspace_id' => $workspaceId,
+            'criterion_value_id' => $criterionValueId
+        ]);
     }
 
     /**
