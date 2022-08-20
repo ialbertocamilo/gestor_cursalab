@@ -52,9 +52,9 @@ class Criterion extends BaseModel
                             ->join('criterion_value_workspace', 'criterion_value_workspace.criterion_value_id', '=', 'criterion_values.id')
                             ->join('workspaces', 'workspaces.id', '=', 'criterion_value_workspace.workspace_id')
                             ->join('criteria', 'criteria.id', '=', 'criterion_values.criterion_id')
-                            ->where('workspaces.active', 1)
-                            ->whereIn('workspaces.id', $subworkspacesIds)
+                            ->where('workspaces.id', $workspace->id)
                             ->select('criterion_values.id', 'criterion_values.value_text as nombre')
+                            ->where('workspaces.active', 1)
                             ->get();
 
     }

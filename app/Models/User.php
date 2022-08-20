@@ -264,10 +264,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             endif;
 
-            $user->criterion_values()->sync(array_values($data['criterion_list']) ?? []);
+            $user->criterion_values()->sync(array_values($data['criterion_list_final']) ?? []);
 
             DB::commit();
         } catch (\Exception $e) {
+            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());

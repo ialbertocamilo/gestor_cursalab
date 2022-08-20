@@ -1,25 +1,25 @@
 <template>
     <section class="section-list ">
-        <DefaultFilter
-            v-model="open_advanced_filter"
-            @filter="advanced_filter(dataTable, filters, 1)"
-            @cleanFilters="clearObject(filters)"
-            :disabled-confirm-btn="isValuesObjectEmpty(filters)"
-        >
-            <template v-slot:content>
-                <v-row>
-                    <v-col cols="12">
-                        <DefaultSelect
-                            clearable
-                            :items="selects.sub_workspaces"
-                            v-model="filters.subworkspace_id"
-                            label="Módulos"
-                            item-text="name"
-                        />
-                    </v-col>
-                </v-row>
-            </template>
-        </DefaultFilter>
+<!--        <DefaultFilter-->
+<!--            v-model="open_advanced_filter"-->
+<!--            @filter="advanced_filter(dataTable, filters, 1)"-->
+<!--            @cleanFilters="clearObject(filters)"-->
+<!--            :disabled-confirm-btn="isValuesObjectEmpty(filters)"-->
+<!--        >-->
+<!--            <template v-slot:content>-->
+<!--                <v-row>-->
+<!--                    <v-col cols="12">-->
+<!--                        <DefaultSelect-->
+<!--                            clearable-->
+<!--                            :items="selects.sub_workspaces"-->
+<!--                            v-model="filters.subworkspace_id"-->
+<!--                            label="Módulos"-->
+<!--                            item-text="name"-->
+<!--                        />-->
+<!--                    </v-col>-->
+<!--                </v-row>-->
+<!--            </template>-->
+<!--        </DefaultFilter>-->
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Usuarios
@@ -36,6 +36,16 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
+<!--                    <v-col cols="3">-->
+<!--                        <DefaultSelect-->
+<!--                            clearable dense-->
+<!--                            :items="selects.workspaces"-->
+<!--                            v-model="filters.workspace_id"-->
+<!--                            label="Workspace"-->
+<!--                            @onChange="refreshDefaultTable(dataTable, filters, 1)"-->
+<!--                            item-text="name"-->
+<!--                        />-->
+<!--                    </v-col>-->
                     <v-col cols="3">
                         <DefaultSelect
                             clearable dense
@@ -56,12 +66,12 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-end">
-                        <DefaultButton
-                            label="Ver Filtros"
-                            icon="mdi-filter"
-                            @click="open_advanced_filter = !open_advanced_filter"/>
-                    </v-col>
+<!--                    <v-col cols="3" class="d-flex justify-content-end">-->
+<!--                        <DefaultButton-->
+<!--                            label="Ver Filtros"-->
+<!--                            icon="mdi-filter"-->
+<!--                            @click="open_advanced_filter = !open_advanced_filter"/>-->
+<!--                    </v-col>-->
                 </v-row>
             </v-card-text>
 
@@ -157,12 +167,14 @@ export default {
             },
             selects: {
                 sub_workspaces: [],
+                workspaces: [],
                 carreras: [],
-                ciclos: []
+                ciclos: [],
             },
             filters: {
                 q: '',
                 subworkspace_id: null,
+                workspace_id: null,
                 carrera: null,
                 ciclos: []
             },
@@ -213,7 +225,8 @@ export default {
 
             let uri = window.location.search.substring(1);
             let params = new URLSearchParams(uri);
-            let param_subworkspace = params.get("subworkspace");
+            let param_subworkspace = params.get("subworkspace_id");
+            console.log("PARAM:: ", param_subworkspace)
 
             const url = `/usuarios/get-list-selects`
             vue.$http.get(url)
@@ -221,6 +234,9 @@ export default {
                     vue.selects.sub_workspaces = data.data.sub_workspaces
 
                     vue.filters.subworkspace_id = parseInt(param_subworkspace)
+
+                    // if (param_subworkspace)
+                    //     vue.filters.subworkspace_id = param_subworkspace
 
                     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })

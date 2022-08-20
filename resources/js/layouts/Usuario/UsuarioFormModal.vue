@@ -130,6 +130,7 @@ export default {
                 document: '',
 
                 criterion_list: {},
+                criterion_list_final: {},
             },
             resource: {},
             selects: {},
@@ -173,12 +174,14 @@ export default {
 
                 vue.$http[method](url, data)
                     .then(({data}) => {
+                        vue.errors = []
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         vue.hideLoader()
                     })
                     .catch((error) => {
+                        vue.resource.criterion_list_final = {}
                         vue.hideLoader()
 
                         if (error && error.errors)
@@ -193,16 +196,13 @@ export default {
             let temp = []
 
             vue.criterion_list.forEach(criterion => {
-                if (criterion.multiple) {
-                    vue.resource.criterion_list[criterion.code].forEach(value => {
-                        temp.push(value)
-                    })
-                } else {
-                    temp.push(vue.resource.criterion_list[criterion.code])
-                }
+                const user_criterion_value = vue.resource.criterion_list[criterion.code]
+
+                if (criterion.multiple) user_criterion_value.forEach(val => temp.push(val))
+                else if (user_criterion_value) temp.push(user_criterion_value)
             })
 
-            vue.resource.criterion_list = temp;
+            vue.resource.criterion_list_final = temp;
         },
         resetSelects() {
             let vue = this
@@ -221,14 +221,14 @@ export default {
                 .then(({data}) => {
                     vue.criterion_list = data.data.criteria
                     vue.criterion_list.forEach(criterion => {
+                        // console.log(criterion)
                         // vue.resource.criterion_list[`${criterion.code}`] = null
                         let criterion_default_value = criterion.multiple ? [] : null
                         Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
                     })
-                    if (resource) {
-                        vue.resource = data.data.usuario
-                    }
 
+                    if (resource)
+                        vue.resource = data.data.usuario
                 })
             return 0;
         },
