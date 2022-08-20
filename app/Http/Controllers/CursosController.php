@@ -35,15 +35,12 @@ use App\Models\School;
 class CursosController extends Controller
 {
 
-    public function search(School $escuela, Request $request)
+    public function search(School $school, Request $request)
     {
-        $workspace = session('workspace');
-        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
-
-        $request->workspace_id = $workspace_id;
-        $request->school_id = ($escuela->exists) ? $escuela->id : null;
+        $request->merge(['school_id' => $school->id ?? null]);
 
         $cursos = Course::search($request);
+
         CursoSearchResource::collection($cursos);
 
         return $this->success($cursos);
@@ -74,7 +71,7 @@ class CursosController extends Controller
         }
 
         $curso->lista_escuelas = $escuelas;
-        
+
         return $this->success([
             'curso' => $curso,
             'requisitos' => $form_selects['requisitos'],
@@ -146,6 +143,7 @@ class CursosController extends Controller
 
         $requisitos = collect();
         $escuelas = collect();
+
         foreach ($req_cursos as $req) {
             $requisitos->push((object)[
                 'id' => $req->id,
@@ -161,6 +159,7 @@ class CursosController extends Controller
         }
 
         $response = compact('escuelas', 'requisitos');
+
         return $compactResponse ? $response : $this->success($response);
     }
 

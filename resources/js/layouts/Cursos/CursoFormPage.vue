@@ -354,8 +354,10 @@ export default {
             let url = `${vue.base_endpoint}/${vue.curso_id === '' ? 'form-selects' : `search/${vue.curso_id}`}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.requisito_id = data.data.requisitos
-                    vue.selects.lista_escuelas = data.data.escuelas
+                    console.log('data')
+                    console.log(data)
+                    vue.selects.requisito_id = data.requisitos
+                    vue.selects.lista_escuelas = data.escuelas
                     if (vue.curso_id !== '') {
                         vue.resource = Object.assign({}, data.data.curso)
                     }
