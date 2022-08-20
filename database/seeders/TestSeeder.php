@@ -91,6 +91,7 @@ class TestSeeder extends Seeder
             'logo' => 'images/workspace4-20220816165310-9825.png',
             'active' => 1
         ]);
+
         $idWorkspaceInRetail = Workspace::where('slug', 'inretail')->first()->id;
 
         // Intercorp Retail subworkspace
@@ -135,6 +136,7 @@ class TestSeeder extends Seeder
             'value_text' => 'Quimica Suiza',
             'active' => 1
         ]);
+        
         $criterionValueId = DB::getPdo()->lastInsertId();
 
         DB::table('criterion_value_workspace')->insert([
