@@ -56,6 +56,23 @@
                             :disabled="options.action === 'edit'"
                         />
                     </v-col>
+                    <v-col cols="6">
+                        <DefaultToggle
+                            v-model="resource.show_in_segmentation"
+                            type="show_in_segmentation"
+                            label="¿Mostrar en segmentación?"
+                            :disabled="options.action === 'edit'"
+                        />
+                    </v-col>
+
+                    <v-col cols="6" v-if="false">
+                        <DefaultToggle
+                            v-model="resource.is_default"
+                            type="is_default"
+                            label="¿Es obligatorio?"
+                            :disabled="options.action === 'edit'"
+                        />
+                    </v-col>
 
                 </v-row>
 
@@ -81,7 +98,7 @@
 
 import CriterionValidationsModal from "./CriterionValidationsModal";
 
-const fields = ['name', 'multiple', 'field_id', 'position'];
+const fields = ['name', 'multiple', 'show_in_segmentation', 'field_id', 'position'];
 const file_fields = [];
 
 export default {
@@ -102,6 +119,8 @@ export default {
                 tipo: null,
                 field_id: null,
                 multiple: false,
+                show_in_segmentation: false,
+                is_default: false,
                 position: 1,
                 default_position: 1,
             },

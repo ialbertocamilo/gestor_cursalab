@@ -65,7 +65,7 @@ class WorkspaceController extends Controller
                                           ->where('show_in_segmentation', 1)
                                           ->get();
 
-        $workspace['criteria_value'] = CriterionValue::getCriterionValuesFromWorkspace($workspace->id);
+        $workspace['criteria_value'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
 
         return $this->success($workspace);
     }

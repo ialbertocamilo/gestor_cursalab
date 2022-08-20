@@ -11,9 +11,8 @@
                     <v-col cols="12">
                         <DefaultSelect
                             clearable
-                            :items="selects.modules"
-                            @onChange="setCarreras"
-                            v-model="filters.module"
+                            :items="selects.sub_workspaces"
+                            v-model="filters.subworkspace_id"
                             label="Módulos"
                             item-text="name"
                         />
@@ -40,10 +39,10 @@
                     <v-col cols="3">
                         <DefaultSelect
                             clearable dense
-                            :items="selects.modules"
-                            v-model="filters.module"
+                            :items="selects.sub_workspaces"
+                            v-model="filters.subworkspace_id"
                             label="Módulos"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1); setCarreras()"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
                     </v-col>
@@ -157,14 +156,13 @@ export default {
                 ]
             },
             selects: {
-                modules: [],
+                sub_workspaces: [],
                 carreras: [],
                 ciclos: []
             },
             filters: {
                 q: '',
-                // module: param_modulo || null,
-                module: null,
+                subworkspace_id: null,
                 carrera: null,
                 ciclos: []
             },
@@ -215,17 +213,15 @@ export default {
 
             let uri = window.location.search.substring(1);
             let params = new URLSearchParams(uri);
-            let param_modulo = params.get("modulo");
+            let param_subworkspace = params.get("subworkspace");
 
             const url = `/usuarios/get-list-selects`
             vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.modules = data.data.modules
+                    vue.selects.sub_workspaces = data.data.sub_workspaces
 
-                    vue.filters.module = parseInt(param_modulo)
+                    vue.filters.subworkspace_id = parseInt(param_subworkspace)
 
-                    if (param_modulo)
-                        this.setCarreras()
                     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
 
@@ -239,37 +235,6 @@ export default {
         },
         activity() {
             console.log('activity')
-        },
-        setCarreras() {
-            let vue = this
-            vue.selects.ciclos = []
-            vue.filters.ciclos = []
-            vue.filters.carrera = null
-
-            if (!vue.filters.module) {
-                vue.selects.carreras = []
-                return
-            }
-
-            vue.getCarrerasByModulo(vue.filters.module)
-                .then(data => {
-                    vue.selects.carreras = data
-                })
-
-        },
-        setCiclos() {
-            let vue = this
-            vue.filters.ciclos = []
-
-            if (!vue.filters.carrera) {
-                vue.selects.ciclos = []
-                return
-            }
-
-            vue.getCiclosByCarrera(vue.filters.carrera)
-                .then(data => {
-                    vue.selects.ciclos = data
-                })
         },
     }
 

@@ -62,6 +62,11 @@ class Workspace extends BaseModel
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_workspace');
     }
 
+    public function subworkspaces()
+    {
+        return $this->hasMany(Workspace::class, 'parent_id');
+    }
+
     public function app_menu()
     {
         return $this->belongsToMany(Taxonomy::class, 'workspace_app_menu', 'workspace_id', 'menu_id')
@@ -123,8 +128,8 @@ class Workspace extends BaseModel
     {
 
         $count = Workspace::query()
-                ->where('parent_id', $workspaceId)
-                ->count();
+            ->where('parent_id', $workspaceId)
+            ->count();
 
         return $count ?? 0;
     }
@@ -141,8 +146,8 @@ class Workspace extends BaseModel
         $ids = self::loadSubWorkspacesIds($workspaceId);
 
         $count = User::query()
-                    ->whereIn('subworkspace_id', $ids)
-                    ->count();
+            ->whereIn('subworkspace_id', $ids)
+            ->count();
 
         return $count ?? 0;
     }
@@ -234,7 +239,9 @@ class Workspace extends BaseModel
         $workspace = Workspace::query()
             ->join('criterion_workspace', 'criterion_workspace.workspace_id', '=', 'workspaces.id')
             ->join('criterion_values', 'criterion_values.id', '=', 'criterion_workspace.criterion_id')
-            ->where('criterion_workspace.criterion_id', $moduleId)
+            ->when($moduleId ?? null, function ($q) use ($moduleId) {
+                $q->where('criterion_workspace.criterion_id', $moduleId);
+            })
             ->select('workspaces.*')
             ->first();
 
@@ -310,8 +317,7 @@ class Workspace extends BaseModel
 
         $data = [];
 
-        foreach($values AS $value)
-        {
+        foreach ($values as $value) {
             $data[$value->code] = in_array($value->code, $codes);
         }
 
