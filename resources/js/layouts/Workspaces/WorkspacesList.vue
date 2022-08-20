@@ -37,7 +37,7 @@
                 </h3>
             </div>
             <div class="col-2">
-                
+
             </div>
         </v-row>
 
@@ -71,7 +71,7 @@
                                 <img v-bind:src="workspace.logo"
                                      class="logo"
                                      alt="">
-                                <div @click="openFormModal(workspaceFormModalOptions, {workspaceId: workspace.id}, action = null, title = 'Editar workspace')"
+                                <div @click="editWorkspace(workspace.id)"
                                      class="edit-button">
                                     <v-icon color="white" size="16px">
                                         mdi-square-edit-outline
@@ -97,7 +97,7 @@
                                 </div>
                             </div>
                             <div class="col-12 pt-3 pb-3 button-wrapper d-flex justify-content-center">
-                                <button @click="setActiveWorkspace(workspace.id)"
+                                <button @click="setActiveWorkspace(workspace.id, true)"
                                         class="btn">
                                     Ingresar
                                 </button>
@@ -132,7 +132,7 @@
                         Configuración
                     </b>
                 </h2> -->
-                
+
             </div>
         </v-row>
 
@@ -291,6 +291,22 @@ export default {
     ,
     methods: {
         /**
+         * Open form to edit workspace, and update the session workspace
+         *
+         * @param workspaceId
+         */
+        editWorkspace(workspaceId) {
+
+            this.openFormModal(
+                this.workspaceFormModalOptions,
+                {workspaceId: workspaceId},
+                null,
+                'Editar workspace'
+            );
+            this.setActiveWorkspace(workspaceId, false);
+        }
+        ,
+        /**
          * Load workspaces list from server
          */
         loadData() {
@@ -385,8 +401,9 @@ export default {
          * redirect to welcome page
          *
          * @param workspaceId
+         * @param redirect
          */
-        setActiveWorkspace(workspaceId) {
+        setActiveWorkspace(workspaceId, redirect) {
 
             let vue = this;
 
@@ -400,7 +417,9 @@ export default {
 
                     // Redirect to welcome page
 
-                    window.location.href = '/welcome';
+                    if (redirect) {
+                        window.location.href = '/welcome';
+                    }
                 });
         }
     }

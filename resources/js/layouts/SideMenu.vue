@@ -80,7 +80,7 @@
 
 export default {
     data: () => ({
-        workspacesListIsVisible: true,
+        workspacesListIsVisible: false,
         workspaces: [ ],
         userSession: { },
         collapseOnScroll: true,

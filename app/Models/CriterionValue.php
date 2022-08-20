@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CriterionValue extends BaseModel
@@ -133,11 +135,27 @@ class CriterionValue extends BaseModel
     {
         $ids = [];
         DB::transaction(function() use ($data, &$ids) {
+
             CriterionValue::insert($data);
             $lastId = CriterionValue::orderByDesc('id')->first()->id;
             $ids = range($lastId - count($data) + 1, $lastId);
         });
 
         return $ids;
+    }
+
+    /**
+     * Get all workspace's criterion values
+     *
+     * @param $workspaceId
+     * @return Builder[]|Collection
+     */
+    public static function getCriterionValuesFromWorkspace($workspaceId) {
+
+        return CriterionValue::query()
+                ->join('criterion_value_workspace', 'criterion_value_workspace.criterion_value_id', '=', 'criterion_values.id')
+                ->where('criterion_values.active', ACTIVE)
+                ->where('criterion_value_workspace.workspace_id', $workspaceId)
+                ->get();
     }
 }

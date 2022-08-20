@@ -141,6 +141,4 @@ class Criterion extends BaseModel
 
         return $temp;
     }
-
-
 }

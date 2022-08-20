@@ -19,59 +19,57 @@ class TestSeeder extends Seeder
      */
     public function run()
     {
+        $this->insertCriteria();
+        $this->insertWorkspaces();
 
-            $this->insertCriteria();
-            $this->insertWorkspaces();
-
-            $this->insertUsers();
-            $this->insertAdmins();
-
-
+        $this->insertUsers();
+        $this->insertAdmins();
     }
 
     public function insertCriteria() {
 
         $criteria = [
-            ['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'business_unit_id', 'name' => 'Business_Unit_Id','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'business_unit_name', 'name' => 'Business_Unit_Name','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'gender', 'name' => 'Genero','required' =>1,'show_in_segmentation' =>1],
-            ['code' => 'position_name', 'name' => 'Position_Name','required' =>1,'show_in_segmentation' =>1],
-            ['code' => 'position_code', 'name' => 'Position_Code','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'date_start', 'name' => 'Date_Start','required' =>1,'show_in_segmentation' =>1],
-            ['code' => 'seniority_date', 'name' => 'Seniority_date','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'birthday_date', 'name' => 'Birthday_date','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'tipo_de_bono', 'name' => 'Tipo de bono','required' =>1,'show_in_segmentation' =>1],
-            ['code' => 'grupo_ocupacional', 'name' => 'Grupo ocupacional','required' =>1,'show_in_segmentation' =>1],
-            ['code' => 'location_code', 'name' => 'location_code','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'location_name', 'name' => 'location_name','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'department_name', 'name' => 'department_name','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'department_code', 'name' => 'department_code','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'modalidad_de_trabajo', 'name' => 'modalidad de trabajo','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'department_name_nivel_1', 'name' => 'department_name_nivel_1','required' =>1,'show_in_segmentation' =>0],
-            ['code' => 'department_name_nivel_2', 'name' => 'department_name_nivel_2','required' =>1,'show_in_segmentation' =>1],
-            ['code' => 'department_name_nivel_3', 'name' => 'department_name_nivel_3','required' =>1,'show_in_segmentation' =>1],
-            ['code' => 'department_name_nivel_4', 'name' => 'department_name_nivel_4','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'department_name_nivel_5', 'name' => 'department_name_nivel_5','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'department_name_nivel_6', 'name' => 'department_name_nivel_6','required' =>0,'show_in_segmentation' =>0],
-            ['code' => 'national_identifier_number_manager', 'name' => 'National_Identifier_Number_Manager','required' =>0,'show_in_segmentation' =>0],
-            ['code' => 'nombre_de_jefe', 'name' => 'nombre de jefe','required' =>0,'show_in_segmentation' =>0],
-            ['code' => 'posicion_jefe', 'name' => 'posicion jefe','required' =>0,'show_in_segmentation' =>0],
-            ['code' => 'clasificacion_de_evd', 'name' => 'Clasificación de EVD','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'gor_gerente_de_área', 'name' => 'Gor/Gerente de área','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'botica', 'name' => 'Boticas','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'grupo', 'name' => 'Grupos','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'zonal', 'name' => 'Zonal','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'correo_zonal', 'name' => 'Correo zonal','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'tipo_de_publico', 'name' => 'Tipo de Publico','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'division', 'name' => 'División','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'area', 'name' => 'Área','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'region', 'name' => 'Región','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'region_de_tienda', 'name' => 'Región de tienda','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'correo_jefe', 'name' => 'correo jefe','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'grupos_de_supervision_supply', 'name' => 'Grupos de supervisión (Supply)','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'gerente_de_area_o_mall', 'name' => 'Gerente de área o Mall','required' =>0,'show_in_segmentation' =>1],
-            ['code' => 'cycle', 'name' => 'Ciclo','required' =>0,'show_in_segmentation' =>1],
+            ['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'business_unit_id', 'name' => 'Business_Unit_Id','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'business_unit_name', 'name' => 'Business_Unit_Name','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'gender', 'name' => 'Genero','required' =>1,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'position_name', 'name' => 'Position_Name','required' =>1,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'position_code', 'name' => 'Position_Code','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'date_start', 'name' => 'Date_Start','required' =>1,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'seniority_date', 'name' => 'Seniority_date','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'birthday_date', 'name' => 'Birthday_date','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'tipo_de_bono', 'name' => 'Tipo de bono','required' =>1,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'grupo_ocupacional', 'name' => 'Grupo ocupacional','required' =>1,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'location_code', 'name' => 'location_code','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'location_name', 'name' => 'location_name','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'department_name', 'name' => 'department_name','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'department_code', 'name' => 'department_code','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'modalidad_de_trabajo', 'name' => 'modalidad de trabajo','required' =>0,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'department_name_nivel_1', 'name' => 'department_name_nivel_1','required' =>1,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'department_name_nivel_2', 'name' => 'department_name_nivel_2','required' =>1,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'department_name_nivel_3', 'name' => 'department_name_nivel_3','required' =>1,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'department_name_nivel_4', 'name' => 'department_name_nivel_4','required' =>0,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'department_name_nivel_5', 'name' => 'department_name_nivel_5','required' =>0,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'department_name_nivel_6', 'name' => 'department_name_nivel_6','required' =>0,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'national_identifier_number_manager', 'name' => 'National_Identifier_Number_Manager','required' =>0,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'nombre_de_jefe', 'name' => 'nombre de jefe','required' =>0,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'posicion_jefe', 'name' => 'posicion jefe','required' =>0,'show_in_segmentation' =>0,'is_default' => 1],
+            ['code' => 'clasificacion_de_evd', 'name' => 'Clasificación de EVD','required' =>0,'show_in_segmentation' =>1,'is_default' => 1],
+            ['code' => 'gor_gerente_de_área', 'name' => 'Gor/Gerente de área','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'botica', 'name' => 'Boticas','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'grupo', 'name' => 'Grupos','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'zonal', 'name' => 'Zonal','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'correo_zonal', 'name' => 'Correo zonal','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'tipo_de_publico', 'name' => 'Tipo de Publico','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'division', 'name' => 'División','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'area', 'name' => 'Área','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'region', 'name' => 'Región','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'region_de_tienda', 'name' => 'Región de tienda','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'correo_jefe', 'name' => 'correo jefe','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'grupos_de_supervision_supply', 'name' => 'Grupos de supervisión (Supply)','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'gerente_de_area_o_mall', 'name' => 'Gerente de área o Mall','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'cycle', 'name' => 'Ciclo','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
+            ['code' => 'career', 'name' => 'Carrera','required' =>0,'show_in_segmentation' =>1,'is_default' => 0],
         ];
 
         foreach ($criteria as $criterion) {

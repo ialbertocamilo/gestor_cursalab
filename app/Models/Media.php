@@ -225,7 +225,11 @@ class Media extends Model
 
     protected function queryGrid($request)
     {
-        $query = Media::query();
+        $session = session()->all();
+        $workspace = $session['workspace'];
+
+        $query = Media::query()
+                      ->where('workspace_id', $workspace->id);
 
         if ($request->q) {
             $title = Str::slug(trim($request->q));

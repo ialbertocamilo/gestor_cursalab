@@ -7,6 +7,7 @@ use App\Http\Requests\SubWorkspaceRequest;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Resources\SubWorkspaceResource;
 
+use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\Workspace;
@@ -58,7 +59,14 @@ class WorkspaceController extends Controller
      */
     public function edit(Workspace $workspace): JsonResponse
     {
-        $workspace->load(['criteria', 'criteriaValue']);
+        // Load criteria
+
+        $workspace['criteria'] = Criterion::where('active', ACTIVE)
+                                          ->where('show_in_segmentation', 1)
+                                          ->get();
+
+        $workspace['criteria_value'] = CriterionValue::getCriterionValuesFromWorkspace($workspace->id);
+
         return $this->success($workspace);
     }
 
@@ -84,31 +92,36 @@ class WorkspaceController extends Controller
 
         // Insert criterion values
 
-        $criteria = json_decode($data['selected_criteria'], true);
-        $criteriaIds = array_keys($criteria);
+        $criteriaSelected = json_decode($data['selected_criteria'], true);
+        $criteriaIds = array_keys($criteriaSelected);
+        $criteria = Criterion::whereIn('id', $criteriaIds)->get();
+
         $criterionValues = [];
         foreach ($criteriaIds as $criterionId) {
-            if ($criteria[$criterionId]) {
+            if ($criteriaSelected[$criterionId]) {
                 $criterionValues[] = [
                     'criterion_id' => $criterionId,
+                    'value_text' => $criteria->find($criterionId)->name,
                     'active' => 1
                 ];
             }
         }
 
-//        $criterionValuesIds = CriterionValue::bulkInsertAndGetIds($criterionValues);
-//
-//        // Save workspace criteria values
-//
-//        $workspaceCriteriaValue = [];
-//        foreach ($criterionValuesIds as $criterionValueId) {
-//            $workspaceCriteriaValue[] = [
-//              'workspace_id' => $workspace->id,
-//              'criterion_value_id' => $criterionValueId
-//            ];
-//        }
-//
-//        $workspace->criteriaValue()->sync($workspaceCriteriaValue);
+        $criterionValuesIds = CriterionValue::bulkInsertAndGetIds(
+            $criterionValues
+        );
+
+        // Save workspace's criteria values
+
+        $workspaceCriteriaValue = [];
+        foreach ($criterionValuesIds as $criterionValueId) {
+            $workspaceCriteriaValue[] = [
+              'workspace_id' => $workspace->id,
+              'criterion_value_id' => $criterionValueId
+            ];
+        }
+
+        $workspace->criteriaValue()->sync($workspaceCriteriaValue);
 
         // Response
 

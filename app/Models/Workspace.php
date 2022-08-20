@@ -118,10 +118,8 @@ class Workspace extends BaseModel
     {
 
         $count = Workspace::query()
-            ->join('criterion_value_workspace', 'criterion_value_workspace.workspace_id', '=', 'workspaces.id')
-            ->join('criterion_values', 'criterion_values.id', '=', 'criterion_value_workspace.criterion_value_id')
-            ->where('workspaces.id', $workspaceId)
-            ->count();
+                ->where('parent_id', $workspaceId)
+                ->count();
 
         return $count ?? 0;
     }
@@ -135,10 +133,11 @@ class Workspace extends BaseModel
     public static function countUsers(int $workspaceId): int
     {
 
-        $count = Workspace::query()
-            ->join('users', 'users.subworkspace_id', '=', 'workspaces.id')
-            ->where('workspaces.id', $workspaceId)
-            ->count();
+        $ids = self::loadSubWorkspacesIds($workspaceId);
+
+        $count = User::query()
+                    ->whereIn('subworkspace_id', $ids)
+                    ->count();
 
         return $count ?? 0;
     }

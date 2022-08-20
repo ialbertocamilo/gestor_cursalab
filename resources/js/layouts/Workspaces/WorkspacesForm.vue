@@ -73,7 +73,7 @@
                             v-for="criterion in defaultCriteria"
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
-                            :label="`${criterion.name} ` + criterion.required ? '(requerido)' : '(opcional)' ">
+                            :label="generateCriterionTitle(criterion)">
                         </v-checkbox>
                     </v-col>
                     <v-col cols="6">
@@ -86,7 +86,7 @@
                             v-for="criterion in customCriteria"
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
-                            :label="`${criterion.name} ` + criterion.required ? '(requerido)' : '(opcional)' ">
+                            :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') ">
                         </v-checkbox>
                     </v-col>
                 </v-row>
@@ -114,6 +114,15 @@ export default {
     data: () => ({
 
         errors: []
+        ,
+        generateCriterionTitle(criterion) {
+
+            let requiredLabel = criterion.required
+                                ? '(requerido)'
+                                : '(opcional)';
+
+            return `${criterion.name} ${requiredLabel}`;
+        }
         ,
         resourceDefault: {
             name: '',
@@ -227,8 +236,8 @@ export default {
                     // Filter criteria in two collections,
                     // according its "required" properties
 
-                    vue.requiredCriteria = data.data.criteria.filter(c => c.required === 1);
-                    vue.optionalCriteria = data.data.criteria.filter(c => c.required === 0);
+                    vue.defaultCriteria = data.data.criteria.filter(c => c.is_default === 1);
+                    vue.customCriteria = data.data.criteria.filter(c => c.is_default === 0);
 
                     // Update content of selected criteria
 
