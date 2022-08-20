@@ -45,7 +45,6 @@ class WorkspaceController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-
         $workspaces = Workspace::search($request);
         WorkspaceResource::collection($workspaces);
 
@@ -66,7 +65,8 @@ class WorkspaceController extends Controller
                                           ->where('show_in_segmentation', 1)
                                           ->get();
 
-        $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
+        // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
+        $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
 
         return $this->success($workspace);
     }
@@ -91,27 +91,20 @@ class WorkspaceController extends Controller
 
         $workspace->update($data);
 
-
         // Save workspace's criteria
 
         $criteriaSelected = json_decode($data['selected_criteria'], true);
-        $criteriaIds = array_keys($criteriaSelected);
 
-        $workspaceCriteria = [];
-        foreach ($criteriaIds as $criterionId) {
-            if ($criteriaSelected[$criterionId]) {
+        $criteria = [];
 
-                $workspaceCriteria[] = [
-                    'workspace_id' => $workspace->id,
-                    'criterion_id' => $criterionId
-                ];
-            }
+        foreach ($criteriaSelected as $criterion_id => $is_selected)
+        {
+            if ( $is_selected ) $criteria[] = $criterion_id;
         }
 
-        DB::table('criterion_workspace')->where('workspace_id', $workspace->id)->delete();
-        DB::table('criterion_workspace')->insert($workspaceCriteria);
+        $workspace->criterionWorkspace()->sync($criteria);
 
-        // Response
+        \Artisan::call('modelCache:clear', array('--model' => "App\Models\Criterion"));
 
         return $this->success(['msg' => 'Workspace actualizado correctamente.']);
     }

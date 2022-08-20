@@ -51,9 +51,9 @@ class Workspace extends BaseModel
     {
         return $this->belongsToMany(
             Criterion::class,
-            'criterion_workspace',
-            'workspace_id',
-            'criterion_id'
+            // 'criterion_workspace',
+            // 'workspace_id',
+            // 'criterion_id'
         );
     }
 
