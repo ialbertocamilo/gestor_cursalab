@@ -91,14 +91,11 @@ class UsuarioController extends Controller
 
     public function getListSelects()
     {
-//        $workspace = get_current_workspace();
-//        $sub_workspaces = $workspace?->subworkspaces;
+        $workspace = get_current_workspace();
 
-        $modules = CriterionValue::getListForSelect(criterion_code: 'module');
+        $sub_workspaces = Workspace::where('parent_id', $workspace?->id)->get();
 
-        return $this->success([
-            'modules' => $modules,
-        ]);
+        return $this->success(['sub_workspaces' => $sub_workspaces,]);
     }
 
     public function edit(User $user)
@@ -158,272 +155,14 @@ class UsuarioController extends Controller
         return $this->success(['msg' => 'Usuario creado correctamente.']);
     }
 
-    public function getInitialData($usuario_id)
-    {
-        $usuario = Usuario::where('id', $usuario_id)->first();
-        $matriculas_pasadas = [];
-        $carrera_usuario = 0;
-        $grupo_usuario = 0;
-        $grupos_x_carrera = [];
-        $query_boticas = Botica::with([
-            'criterio' => function ($query) {
-                $query->select('id', 'valor', 'tipo_criterio', 'tipo_criterio_id');
-            }
-        ]);
-        $query_cargos = Cargo::select('id as cargo_id', 'nombre as cargo_nombre');
-        if ($usuario_id != 0) {
-            $matriculas_pasadas = Matricula::join('carreras', 'carreras.id', 'matricula.carrera_id')
-                ->join('ciclos', 'ciclos.id', 'matricula.ciclo_id')
-                ->join('matricula_criterio', 'matricula_criterio.matricula_id', 'matricula.id')
-                ->join('criterios', 'criterios.id', 'matricula_criterio.criterio_id')
-                ->where('matricula.usuario_id', $usuario_id)
-                ->select('criterios.valor as grupo', 'carreras.nombre as carrera', 'ciclos.nombre as ciclo',
-                    'matricula.estado as estado', 'matricula.secuencia_ciclo as secuencia', 'matricula.id as matricula_id', 'ciclos.id as id', 'carreras.id as carrera_id')
-                ->orderBy('matricula.secuencia_ciclo')
-                ->get();
-            $grupo = Usuario::join('criterios', 'criterios.id', 'usuarios.grupo')->where('usuarios.id', $usuario_id)->first(['criterios.valor']);
-            $grupo_usuario = $grupo->valor;
-            $carrera_usuario = $matriculas_pasadas[0]->carrera ?? NULL;
-            $grupos_x_carrera = DB::table('curricula_criterio')
-                ->join('criterios', 'criterios.id', 'curricula_criterio.criterio_id')
-                ->join('curricula', 'curricula.id', 'curricula_criterio.curricula_id')
-                ->where('curricula.carrera_id', $matriculas_pasadas[0]->carrera_id ?? NULL)
-                ->select('criterios.valor', 'criterios.id')
-                ->groupBy('criterios.valor')
-                ->get();
-            $query_boticas->where('config_id', $usuario->config_id);
-        }
-
-        $modulos = Abconfig::all(['id', 'etapa']);
-        $grupos = Criterio::where('tipo_criterio_id', 1)->get(['id', 'valor']);
-        $grupo_sistema = Grupo::select('id', 'nombre')->get('nombre', 'id');
-        $boticas = $query_boticas->select('id as botica_id', 'criterio_id', DB::raw(" CONCAT('[', codigo_local, ']', ' - ',nombre) as botica_nombre"), 'config_id')->get();
-        $cargos = $query_cargos->get();
-        $grupos_x_carr = 0;
-
-        return response()->json(compact('grupos', 'modulos', 'grupo_sistema', 'matriculas_pasadas', 'carrera_usuario', 'grupo_usuario', 'grupos_x_carrera', 'boticas', 'cargos'), 200);
-    }
-
-    public function getCarrerasxGrupo($grupo_id, $config_id)
-    {
-        // $grupo = Criterio::where('id', $grupo_id)->first();
-        // $carreras = DB::table('curricula_criterio')
-        //             ->join('criterios', 'criterios.id', 'curricula_criterio.criterio_id')
-        //             ->join('curricula', 'curricula.id', 'curricula_criterio.curricula_id')
-        //             ->join('carreras', 'carreras.id', 'curricula.carrera_id')
-        //             ->where('criterios.valor', $grupo->valor)
-        //             ->where('carreras.config_id', $config_id)
-        //             ->select('carreras.nombre', 'carreras.id')
-        //             ->groupBy('carreras.nombre')
-        //             ->get();
-        $carreras = Carrera::where('config_id', $config_id)->select('nombre', 'id')->get();
-        return response()->json(compact('carreras'), 200);
-    }
-
-    public function getCarrerasxModulo($config_id)
-    {
-        $carreras = Carrera::where('config_id', $config_id)->get(['nombre', 'id']);
-        return response()->json(compact('carreras'), 200);
-    }
-
-    public function getCarrerasxModuloxBotica($config_id, $grupo_id)
-    {
-        $carreras = Carrera::where('config_id', $config_id)->get(['nombre', 'id']);
-        return response()->json(compact('carreras'), 200);
-    }
-
-    public function getCiclosxCarreraFilter($carrera_id)
-    {
-        $ciclos = Ciclo::where('carrera_id', $carrera_id)->get(['nombre', 'id']);
-        return response()->json(compact('ciclos'), 200);
-    }
-
-    public function getCiclosxCarrera($carrera_id, $botica)
-    {
-        // $ciclosxCarrera = Ciclo::where('carrera_id', $carrera_id)->get(['id']);
-        $ciclos = Ciclo::where('carrera_id', $carrera_id)->get();
-        $botica = Botica::find($botica);
-//         dd($botica);
-        $carrera = Carrera::find($carrera_id, ['nombre']);
-        // $_ciclos = collect();
-        // foreach ($ciclosxCarrera as $ciclo) {
-        //     $_ciclos->push($ciclo->id);
-        // }
-        // $ciclos = Curricula::join('curricula_criterio', 'curricula_criterio.curricula_id', 'curricula.id')
-        //                     ->join('ciclos', 'ciclos.id', 'curricula.ciclo_id')
-        //                     ->where('curricula.carrera_id', $carrera_id)
-        //                     ->where('curricula_criterio.criterio_id', $botica_id)
-        //                     ->whereIn('curricula.ciclo_id', $_ciclos)
-        //                     ->orderBy('ciclos.nombre')
-        //                     ->groupBy('curricula.ciclo_id')
-        //                     ->get(['ciclos.id', 'ciclos.nombre as ciclo', 'ciclos.secuencia', 'ciclos.estado']);
-        $ciclo_final = collect();
-        $only_one_ciclo = count($ciclos) === 1;
-        foreach ($ciclos as $ciclo) {
-            $ciclo_final->push([
-                'matricula_id' => 0,
-                'id' => $ciclo->id,
-                'ciclo' => $ciclo->nombre,
-                'secuencia' => $ciclo->secuencia,
-                'grupo' => $botica->criterio->valor ?? 'Seleccione una botica',
-                'carrera' => $carrera->nombre,
-                'estado' => !$only_one_ciclo && ($ciclo->estado == 0 || strtoupper($ciclo->nombre) == 'CICLO 0') ? false : true
-            ]);
-        }
-        return $this->success(compact('ciclo_final'));
-//        return response()->json(compact('ciclo_final'), 200);
-    }
-
-    public function getDataCiclo($ciclo_id, $carrera_id, $grupo_id)
-    {
-        $error = 0;
-        if ($ciclo_id == "0" || $carrera_id == "0" || $grupo_id == "0") {
-            $msg = 'Debe seleccionar los campos : GRUPO, CARRERA y CICLO.';
-            $error++;
-            return response()->json(['msg' => $msg, 'error' => $error], 200);
-        }
-        $ciclo_seleccionado = Ciclo::find($ciclo_id, ['secuencia']);
-        if ($ciclo_seleccionado->secuencia == 0) {
-            $ciclos = Ciclo::where('carrera_id', $carrera_id)
-                ->where('secuencia', '<=', $ciclo_seleccionado->secuencia)
-                ->orderBy('secuencia')
-                ->get(['id', 'nombre', 'secuencia']);
-        } else {
-            $ciclos = Ciclo::where('carrera_id', $carrera_id)
-                ->where('secuencia', '>', 0)
-                ->where('secuencia', '<=', $ciclo_seleccionado->secuencia)
-                ->orderBy('secuencia')
-                ->get(['id', 'nombre', 'secuencia']);
-        }
-        $carrera = Carrera::find($carrera_id, ['nombre']);
-        $grupo = Criterio::find($grupo_id, ['valor']);
-
-        return response()->json(compact('ciclos', 'carrera', 'grupo'), 200);
-    }
-
-    public function getCiclo($ciclo_id, $carrera_id, $grupo_id)
-    {
-        $ciclo = Ciclo::find($ciclo_id, ['id', 'nombre', 'secuencia']);
-        $carrera = Carrera::find($carrera_id, ['id', 'nombre']);
-        $grupo = Criterio::find($grupo_id, ['valor']);
-        $ciclo_agregar = [
-            'secuencia' => $ciclo->secuencia,
-            'ciclo_nombre' => $ciclo->nombre,
-            'grupo' => $grupo->valor,
-            'carrera' => $carrera->nombre,
-            'estado' => "ACTIVO"
-        ];
-        return response()->json(compact('ciclo_agregar'), 200);
-    }
-
     public function update(UserStoreRequest $request, User $user)
     {
         $data = $request->validated();
-
-//        dd($data);
 
         User::storeRequest($data, $user);
 
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);
     }
-//    public function update(UsuarioStoreRequest $request, Usuario $usuario)
-//    {
-//        if ($request->errores > 0) {
-//            $request->curr_grupo_id = 0;
-//            return redirect()->back()->withInput($request->all())->withErrors(['msg' => 'Debe asignar una matricula para registrar al usuario.']);
-//        }
-//
-//        $data = $request->all();
-//        // GUARDAR DATOS PREVIOS
-//        $dni_previo = $usuario->dni;
-//        $email_previo = $usuario->email;
-//
-//        if (!is_null($request->password)) {
-//            $data['password'] = Hash::make($request->password);
-//        } else {
-//            $data['password'] = $usuario->password;
-//        }
-//        $data['grupo'] = $request->curr_grupo_id;
-//
-//        $usuario->update($data);
-//
-//        //Consultar dias de configuracion
-//        $dias = $usuario->config->duracion_dias;
-//        date_default_timezone_set('America/Lima');
-//        //insertar vigencia
-//        $vigencia = $usuario->vigencia;
-//        $vigencia->usuario_id = $usuario->id;
-//        $vigencia->fecha_inicio = date('Y-m-d');
-//        $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio . ' + ' . $dias . ' days'));
-//        $vigencia->save();
-//
-//
-//        if (isset($request->curr_carrera) && isset($request->curr_ciclos) && $request->curr_carrera != "0" && $request->curr_ciclos != "0") {
-//            // SABER EL NUMERO DE MATRICULAS DEL USUARIO
-//            $matricula = Matricula::select('id')->where('usuario_id', $usuario->id)->get();
-//            $ciclo = Ciclo::select('id', 'carrera_id', 'nombre', 'secuencia')->where('id', $request->curr_ciclos)->first();
-//            // dd($ciclo);
-//            /**
-//             * 1 O MAS MATRICULAS
-//             * CAMBIO LA PRESENTE A 0
-//             * SI LA SECUENCIA DE CICLO DE LA PRESENTE ES 0, LA MATRICULA CAMBIA A ESTADO 0
-//             */
-//            if (count($matricula) > 0) {
-//                $matricula_presente = Matricula::select('id', 'ciclo_id')->where('usuario_id', $usuario->id)->where('presente', 1)->first();
-//                // dd($matricula_presente);
-//                $matricula_presente->presente = 0;
-//                $ciclo_presente = Ciclo::select('id', 'carrera_id', 'secuencia')->where('id', $matricula_presente->ciclo_id)->first();
-//                if ($ciclo_presente->secuencia == 0) {
-//                    $matricula_presente->estado = 0;
-//                }
-//                $matricula_presente->save();
-//            }
-//
-//            // SELECCIONAR TODOS LOS CICLOS DE LA CARRERA
-//            $ciclosxCarrera = Ciclo::where('carrera_id', $request->curr_carrera)
-//                ->where('secuencia', '>', 0)
-//                ->where('secuencia', '<=', $ciclo->secuencia)
-//                ->get(['secuencia', 'id']);
-//            $_ciclosxCarrera = collect();
-//            foreach ($ciclosxCarrera as $c) {
-//                $_ciclosxCarrera->push($c->id);
-//            }
-//            // RESTAR A TODOS EN LOS QUE YA SE ENCUENTRA MATRICULADOS Y QUE SEAN MAYOR QUE 0
-//            $ciclos_matriculados = Matricula::where('usuario_id', $usuario->id)->get(['secuencia_ciclo', 'ciclo_id']);
-//            $_ciclos_matriculados = collect();
-//            foreach ($ciclos_matriculados as $cm) {
-//                $cm->presente = 0;
-//                $cm->save();
-//                $_ciclos_matriculados->push($cm->ciclo_id);
-//            }
-//            $resta = $_ciclosxCarrera->diff($_ciclos_matriculados);
-//            $ciclos_restantes = $resta->all();
-//            $ciclos_restantes2 = Ciclo::whereIn('id', $ciclos_restantes)->get(['id', 'nombre', 'secuencia']);
-//
-//            $i = 0;
-//            $len = count($ciclos_restantes2);
-//            // CREAR MATRICULA Y MATRICULA CRITERIO DE LOS RESTANTES
-//            foreach ($ciclos_restantes2 as $ciclo_restante) {
-//                $matricula = new Matricula;
-//                $matricula->usuario_id = $usuario->id;
-//                $matricula->carrera_id = $request->curr_carrera;
-//                $matricula->ciclo_id = $ciclo_restante->id;
-//                $matricula->secuencia_ciclo = $ciclo_restante->secuencia;
-//                $matricula->presente = ($i == $len - 1) ? 1 : 0;;
-//                $matricula->estado = 1;
-//                $matricula->save();
-//                // GUARDAR EN TABLA MATRICULA CRITERIO LA NUEVA MATRICULA
-//                DB::table('matricula_criterio')->insert([
-//                    'matricula_id' => $matricula->id,
-//                    'criterio_id' => $request->curr_grupo_id
-//                ]);
-//                $i++;
-//            }
-//        }
-//
-//        return redirect()->route('usuarios.index')
-//            ->with('info', 'Usuario actualizado con éxito');
-//    }
 
     public function destroy(Usuario $usuario)
     {
@@ -447,6 +186,8 @@ class UsuarioController extends Controller
 
         return back()->with('info', 'Eliminado Correctamente');
     }
+
+    // ==========================================================================================
 
 
     // RESETEO DE USUARIOS
@@ -477,7 +218,6 @@ class UsuarioController extends Controller
 
         // return view('usuarios.reset', compact('usuario', 'temas', 'cursos'));
     }
-
 
     // Reiniciar
     public function reset_x_tema(Usuario $usuario, Request $request)
@@ -831,7 +571,6 @@ class UsuarioController extends Controller
             'mod_eval' => $mod_eval
         ], 200);
     }
-
 
     public function validarDetallesReinicioIntentosMasivo($curso_id, $posteo_id, $modulo_id, $tipo, $mod_eval, $admin_id)
     {

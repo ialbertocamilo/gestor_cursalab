@@ -321,6 +321,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             });
         }
 
+        if ($request->subworkspace_id)
+            $query->where('subworkspace_id', $request->subworkspace_id);
+
         if ($request->sub_workspaces_id)
             $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
 
@@ -333,7 +336,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function setCurrentCourses($return_courses = false, $school_id = null)
+    public function setCurrentCourses($return_courses = false)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text');

@@ -40,7 +40,7 @@ class CriterionValue extends BaseModel
         $value_param = 'value_text';
 
         return self::query()
-            ->select('id', "$value_param as name")
+            ->select('id', "$value_param as name", 'parent_id')
             ->when($criterion_code ?? null,
                 function ($q) use ($criterion_code) {
                     $q->whereHas('criterion',
@@ -145,16 +145,18 @@ class CriterionValue extends BaseModel
     }
 
     /**
-     * Get all workspace's criterion values
+     * Get all workspace's criteria
      *
      * @param $workspaceId
      * @return Builder[]|Collection
      */
-    public static function getCriterionValuesFromWorkspace($workspaceId) {
+    public static function getCriteriaFromWorkspace($workspaceId) {
 
-        return CriterionValue::query()
-                ->join('criterion_workspace', 'criterion_workspace.criterion_id', '=', 'criterion_values.id')
-                ->where('criterion_values.active', ACTIVE)
+//        return CriterionValue::query()
+        return Criterion::query()
+                ->join('criterion_workspace', 'criterion_workspace.criterion_id', '=', 'criteria.id')
+                ->where('criteria.active', ACTIVE)
+//                ->where('criterion_values.active', ACTIVE)
                 ->where('criterion_workspace.workspace_id', $workspaceId)
                 ->get();
     }

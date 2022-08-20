@@ -18,7 +18,7 @@ class UsuarioSearchResource extends JsonResource
             'id' => $this->id,
             'nombre' => $this->fullname,
             'image' => space_url($this->config?->logo) ?? 'No logo',
-            'document' => $this->document,
+            'document' => $this->document ?? 'Sin documento',
             'module' => $this->config->etapa ?? 'No module',
             'active' => !!$this->active,
 //            'pruebas_desaprobadas' => $this->rpta_pruebas_dessaprob($this->config) ? true : false,
