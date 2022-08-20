@@ -35,7 +35,7 @@ class AnnouncementStoreRequest extends FormRequest
             'active' => 'nullable',
             'destino' => 'nullable',
             'link' => 'nullable',
-            'module_id' => 'nullable',
+            'module_ids' => 'nullable',
             'publish_date' => 'nullable'
         ];
     }

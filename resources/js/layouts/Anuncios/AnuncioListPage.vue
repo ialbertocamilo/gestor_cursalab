@@ -91,9 +91,9 @@ export default {
                 endpoint: '/anuncios/search',
                 ref: 'AnuncioTable',
                 headers: [
-                    {text: "Banner", value: "image", align: 'center', sortable: false},
+                    //{text: "Banner", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre"},
-                    {text: "Fecha de publicación", value: "publication_date", align: 'center', sortable: false},
+                    {text: "Fecha de publicación", value: "publish_date", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
