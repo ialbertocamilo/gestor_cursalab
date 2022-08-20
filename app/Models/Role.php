@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\Database\Concerns\IsRole;
 
 class Role extends BaseModel
@@ -75,10 +78,9 @@ class Role extends BaseModel
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
-        
+
         $query->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->rowsPerPage);
     }
-
 }

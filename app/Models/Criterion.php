@@ -43,13 +43,20 @@ class Criterion extends BaseModel
 
     protected function getValuesForSelect($criterion_code)
     {
-        return CriterionValue::whereRelation('criterion', 'code', $criterion_code)
-            ->select('id', 'value_text as nombre')
-            // ->where('criterion_id', $criterion->id)
-            // ->when($config_id, function($q) use ($config_id){
-            //     $q->where('config_id', $config_id);
-            // })
-            ->get();
+        $session = session()->all();
+        $workspace = $session['workspace'];
+
+        $subworkspacesIds = Workspace::loadSubWorkspacesIds($workspace->id);
+
+        return  CriterionValue::query()
+                            ->join('criterion_workspace', 'criterion_workspace.criterion_id', '=', 'criterion_values.id')
+                            ->join('workspaces', 'workspaces.id', '=', 'criterion_workspace.workspace_id')
+                            ->join('criteria', 'criteria.id', '=', 'criterion_values.criterion_id')
+                            ->where('workspaces.active', 1)
+                            ->whereIn('workspaces.id', $subworkspacesIds)
+                            ->select('criterion_values.id', 'criterion_values.value_text as nombre')
+                            ->get();
+
     }
 
     protected function search($request)

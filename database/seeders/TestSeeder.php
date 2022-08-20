@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AssignedRole;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\User;
@@ -11,8 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class TestSeeder extends Seeder
 {
-    const ENTITY_TYPE = 'App\Models\User';
-
     /**
      * Run the database seeds.
      *
@@ -24,23 +23,13 @@ class TestSeeder extends Seeder
             $this->insertCriteria();
             $this->insertWorkspaces();
 
-            $user = User::where('email', 'usuario_inretail_elvis@cursalab.io')
-                ->first();
-
-            if (!$user) {
-                $this->insertUsers();
-                $this->insertAdmins();
-            }
+            $this->insertUsers();
+            $this->insertAdmins();
 
 
     }
 
     public function insertCriteria() {
-
-        $criterion = Criterion::where('code', 'business_unit_id')
-                    ->first();
-
-        if ($criterion) return;
 
         $criteria = [
             ['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1],
@@ -95,12 +84,6 @@ class TestSeeder extends Seeder
      */
     public function insertWorkspaces() {
 
-        // When workspace already exists, stop method
-
-        if (Workspace::count() > 0) {
-            return;
-        }
-
         // InRetail workspace
         // ----------------------------------------
 
@@ -131,9 +114,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_value_workspace')->insert([
+        DB::table('criterion_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'criterion_id' => $criterionValueId
         ]);
 
         // Quimica Suiza subworkspace
@@ -156,9 +139,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_value_workspace')->insert([
+        DB::table('criterion_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'criterion_id' => $criterionValueId
         ]);
 
         // Financiera Oh subworkspace
@@ -181,9 +164,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_value_workspace')->insert([
+        DB::table('criterion_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'criterion_id' => $criterionValueId
         ]);
 
         // Promart subworkspace
@@ -206,9 +189,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_value_workspace')->insert([
+        DB::table('criterion_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'criterion_id' => $criterionValueId
         ]);
 
         // UNIVERSIDAD CORPORATIVA subworkspace
@@ -242,9 +225,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_value_workspace')->insert([
+        DB::table('criterion_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'criterion_id' => $criterionValueId
         ]);
 
 
@@ -265,9 +248,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_value_workspace')->insert([
+        DB::table('criterion_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'criterion_id' => $criterionValueId
         ]);
     }
 
@@ -276,8 +259,8 @@ class TestSeeder extends Seeder
      */
     public function insertUsers() {
 
-        $idWorkspaceInRetail = Workspace::where('slug', 'inretail')->first()->id;
-        $idWorkspaceUni = Workspace::where('slug', 'universidad-corporativa')->first()->id;
+        $idWorkspaceInRetail = Workspace::where('slug', 'intercorp-retail')->first()->id;
+        $idWorkspaceUni = Workspace::where('slug', 'inkafarma')->first()->id;
 
         $users = [
             [
@@ -374,7 +357,7 @@ class TestSeeder extends Seeder
             DB::table('assigned_roles')
                 ->insert([
                     'role_id' => 7, // USER role
-                    'entity_type' => self::ENTITY_TYPE,
+                    'entity_type' => AssignedRole::USER_ENTITY,
                     'entity_id' => DB::getPdo()->lastInsertId(),
                     'scope' => $workspaceId
                 ]);
@@ -478,7 +461,7 @@ class TestSeeder extends Seeder
                 ->insert([
 
                     'role_id' => $roleId,
-                    'entity_type' => self::ENTITY_TYPE,
+                    'entity_type' => AssignedRole::USER_ENTITY,
                     'entity_id' => DB::getPdo()->lastInsertId(),
                     'scope' => $workspaceId
                 ]);

@@ -129,7 +129,7 @@ class CriterionValue extends BaseModel
      * @param $data
      * @return array
      */
-    public function bulkInsertAndGetIds($data): array
+    public static function bulkInsertAndGetIds($data): array
     {
         $ids = [];
         DB::transaction(function() use ($data, &$ids) {

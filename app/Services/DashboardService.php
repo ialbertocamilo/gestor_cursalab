@@ -26,7 +26,7 @@ class  DashboardService {
 
         return Posteo::join('courses', 'courses.id', '=', 'topics.course_id')
                     ->join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
-                    ->where('cw.workspaces_id', $workspaceId)
+                    ->where('cw.workspace_id', $workspaceId)
                     ->count();
     }
 
@@ -43,7 +43,7 @@ class  DashboardService {
         if (!$workspaceId) return 0;
 
         return Curso::join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
-                    ->where('cw.workspaces_id', $workspaceId)
+                    ->where('cw.workspace_id', $workspaceId)
                     ->count();
     }
 
@@ -55,6 +55,8 @@ class  DashboardService {
      */
     public static function countUsers(?int $workspaceId): int
     {
+
+        if (!$workspaceId) return 0;
 
         return Usuario::where('subworkspace_id', $workspaceId)
                       ->count();
@@ -68,6 +70,8 @@ class  DashboardService {
      */
     public static function countActiveUsers(?int $workspaceId): int
     {
+        if (!$workspaceId) return 0;
+
         return Usuario::where('subworkspace_id', $workspaceId)
                       ->where('active', ACTIVE)
                       ->count();
@@ -87,7 +91,7 @@ class  DashboardService {
 
         return Posteo::join('courses', 'courses.id', '=', 'topics.course_id')
                 ->join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
-                ->where('cw.workspaces_id', $workspaceId)
+                ->where('cw.workspace_id', $workspaceId)
                 ->where('topics.assessable', 1)
                 ->count();
     }
@@ -100,6 +104,8 @@ class  DashboardService {
      */
     public static function loadVisitsByUser($workspaceId)
     {
+
+
         $cache_name = 'visitas_usuarios_por_fecha-v2';
 
         // List of ids from users to be excluded in query.
@@ -140,6 +146,8 @@ class  DashboardService {
      */
     public static function loadEvaluacionesByDate($workspaceId)
     {
+
+
         $cache_name = 'evaluaciones_por_fecha-v2';
 
         // List of ids from users to be excluded in query.
@@ -182,6 +190,9 @@ class  DashboardService {
      */
     public static function loadTopBoticas($workspaceId): mixed
     {
+
+
+
         $cache_name = 'pruebas_top_boticas-v2';
         $cache_name .= $workspaceId ? "-modulo-{$workspaceId}" : '';
 

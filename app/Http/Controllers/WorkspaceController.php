@@ -96,19 +96,19 @@ class WorkspaceController extends Controller
             }
         }
 
-        $criterionValuesIds = CriterionValue::bulkInsertAndGetIds($criterionValues);
-
-        // Save workspace criteria values
-
-        $workspaceCriteriaValue = [];
-        foreach ($criterionValuesIds as $criterionValueId) {
-            $workspaceCriteriaValue[] = [
-              'workspace_id' => $workspace->id,
-              'criterion_value_id' => $criterionValueId
-            ];
-        }
-
-        $workspace->criteriaValue()->sync($workspaceCriteriaValue);
+//        $criterionValuesIds = CriterionValue::bulkInsertAndGetIds($criterionValues);
+//
+//        // Save workspace criteria values
+//
+//        $workspaceCriteriaValue = [];
+//        foreach ($criterionValuesIds as $criterionValueId) {
+//            $workspaceCriteriaValue[] = [
+//              'workspace_id' => $workspace->id,
+//              'criterion_value_id' => $criterionValueId
+//            ];
+//        }
+//
+//        $workspace->criteriaValue()->sync($workspaceCriteriaValue);
 
         // Response
 
@@ -174,7 +174,7 @@ class WorkspaceController extends Controller
         $main_menu = Taxonomy::where('group', 'system')->where('type', 'main_menu')
                             ->select('id', 'name')
                             ->get();
-        
+
         $main_menu->each(function ($item) {
             $item->active = false;
         });
@@ -197,7 +197,7 @@ class WorkspaceController extends Controller
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-        
+
         $subworkspace = Workspace::storeSubWorkspaceRequest($data);
 
         return $this->success(['msg' => 'Módulo registrado correctamente.']);

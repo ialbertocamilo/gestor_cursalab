@@ -464,6 +464,10 @@ export default {
                 .then(() => {
                     vue.workspacesListIsVisible = false;
                     vue.loadSession();
+
+                    // Redirect to welcome page
+
+                    window.location.href = '/welcome';
                 });
         }
     }

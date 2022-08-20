@@ -39,7 +39,7 @@ class GeneralController extends Controller
         // Generates totals array
 
         $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
-            function () use ($workspaceId) {
+            function () use ($workspaceId, $module_id) {
 
             $data['time'] = now();
 

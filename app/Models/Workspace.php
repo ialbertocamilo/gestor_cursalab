@@ -57,11 +57,6 @@ class Workspace extends BaseModel
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_workspace');
     }
 
-    public function subworkspaces()
-    {
-        return $this->hasMany(Workspace::class, 'parent_id');
-    }
-
     public function app_menu()
     {
         return $this->belongsToMany(Taxonomy::class, 'workspace_app_menu', 'workspace_id', 'menu_id')
@@ -153,14 +148,7 @@ class Workspace extends BaseModel
      */
     public static function generateUserWorkspacesQuery(int $userId): Builder
     {
-
-
-        $userEntity = 'App\Models\User';
-
-        $assignedRole = DB::table('assigned_roles')
-            ->where('entity_type', $userEntity)
-            ->where('entity_id', $userId)
-            ->first();
+        $assignedRole = AssignedRole::getUserAssignedRole($userId);
 
         if ($assignedRole->role_id == 1) {
 
@@ -169,9 +157,9 @@ class Workspace extends BaseModel
             return Workspace::query()
                 ->where('parent_id', null)
                 ->where('workspaces.active', ACTIVE)
+                ->where('workspaces.deleted_at', null)
                 ->select('workspaces.*');
         }
-
 
         $allowedRoles = [
             2, // config
@@ -180,7 +168,7 @@ class Workspace extends BaseModel
 
         $role = DB::table('assigned_roles')
             ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-            ->where('assigned_roles.entity_type', $userEntity)
+            ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
             ->whereIn('assigned_roles.role_id', $allowedRoles)
             ->where('users.id', $userId)
             ->select('assigned_roles.*')
@@ -218,6 +206,20 @@ class Workspace extends BaseModel
     }
 
     /**
+     * Load ids of workspace's workspaces
+     *
+     * @param $workspaceId
+     * @return mixed
+     */
+    public static function loadSubWorkspacesIds($workspaceId): mixed
+    {
+
+        return Workspace::where('active', ACTIVE)
+            ->where('parent_id', $workspaceId)
+            ->pluck('id');
+    }
+
+    /**
      * Get workspace's id, from its module id
      *
      * @param int|null $moduleId
@@ -226,9 +228,10 @@ class Workspace extends BaseModel
     public static function getWorkspaceIdFromModule(?int $moduleId): mixed
     {
         $workspace = Workspace::query()
-            ->join('criterion_value_workspace', 'criterion_value_workspace.workspace_id', '=', 'workspaces.id')
-            ->join('criterion_values', 'criterion_values.id', '=', 'criterion_value_workspace.criterion_value_id')
-            ->where('criterion_values.id', $moduleId)
+            ->join('criterion_workspace', 'criterion_workspace.workspace_id', '=', 'workspaces.id')
+            ->join('criterion_values', 'criterion_values.id', '=', 'criterion_workspace.criterion_id')
+            ->where('criterion_workspace.criterion_id', $moduleId)
+            ->select('workspaces.*')
             ->first();
 
         return $workspace?->id;

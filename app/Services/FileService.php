@@ -13,6 +13,7 @@ class FileService {
      */
     public static function generateUrl(?string $path): string
     {
+        if (str_starts_with($path, 'https://')) return $path;
 
         // Initiliaze path value if it is not set
 
