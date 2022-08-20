@@ -143,6 +143,8 @@ class Segment extends BaseModel
 
         $message = 'Segmentación actualizada correctamente.';
 
+        cache_clear_model(Course::class);
+
         return $this->success(['msg' => $message], $message);
     }
 }

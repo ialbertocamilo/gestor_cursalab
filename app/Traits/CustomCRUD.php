@@ -12,7 +12,8 @@ trait CustomCRUD
 {
     use ApiResponse;
 
-    protected function storeRequest($data, $model = null, $files = [])
+    protected function storeRequest($data, $model = null)
+    // protected function storeRequest($data, $model = null, $files = [])
     {
         try {
 
@@ -20,10 +21,10 @@ trait CustomCRUD
 
             extract( self::storeOrUpdate($data, $model) );
 
-            foreach ($files as $key => $name)
-            {
-                $model->setMediaCollection($data, $name);
-            }
+            // foreach ($files as $key => $name)
+            // {
+            //     $model->setMediaCollection($data, $name);
+            // }
 
             DB::commit();
 
@@ -45,17 +46,17 @@ trait CustomCRUD
             return $this->error($e->getMessage());
         }
 
-        if ($files)
-        {
-            foreach ($files as $key => $name)
-            {
-                $model->getFirstMediaToForm($name);
-            }
-        }
+        // if ($files)
+        // {
+        //     foreach ($files as $key => $name)
+        //     {
+        //         $model->getFirstMediaToForm($name);
+        //     }
+        // }
 
         // info('storeRequest CRUD');
 
-        PublicEvent::dispatch($message);
+        // PublicEvent::dispatch($message);
 
         return $this->success($model, $message);
     }

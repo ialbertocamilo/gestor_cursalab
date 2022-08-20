@@ -85,172 +85,167 @@ class TestSeeder extends Seeder
         // InRetail workspace
         // ----------------------------------------
 
-        Workspace::create([
+        $workspace = Workspace::create([
             'name' => 'InRetail',
             'slug' => 'inretail',
             'logo' => 'images/workspace4-20220816165310-9825.png',
             'active' => 1
         ]);
 
-        $idWorkspaceInRetail = Workspace::where('slug', 'inretail')->first()->id;
-
         // Intercorp Retail subworkspace
         // ----------------------------------------
 
-        Workspace::create([
-            'name' => 'Intercorp Retail',
-            'slug' => 'intercorp-retail',
-            'logo' => 'images/workspace4-20220816165310-9825.png',
-            'parent_id' => $idWorkspaceInRetail,
-            'active' => 1
-        ]);
-        $workspaceId = DB::getPdo()->lastInsertId();
-
-        CriterionValue::create([
+        $criterion_value = CriterionValue::create([
             'criterion_id' => 1,
             'value_text' => 'Intercorp Retail',
             'active' => 1
         ]);
-        $criterionValueId = DB::getPdo()->lastInsertId();
+
+        $subworkspace = Workspace::create([
+            'criterion_value_id' => $criterion_value->id,
+            'name' => 'Intercorp Retail',
+            'slug' => 'intercorp-retail',
+            'logo' => 'images/workspace4-20220816165310-9825.png',
+            'parent_id' => $workspace->id,
+            'active' => 1
+        ]);
+
+
 
         DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
         ]);
 
         // Quimica Suiza subworkspace
         // ----------------------------------------
 
-        Workspace::create([
-            'name' => 'Quimica Suiza',
-            'slug' => 'quimica-suiza',
-            'logo' => 'images/workspace1-20220816165243-3521.png',
-            'parent_id' => $idWorkspaceInRetail,
-            'active' => 1
-        ]);
-
-        $workspaceId = DB::getPdo()->lastInsertId();
-
-        CriterionValue::create([
+        $criterion_value = CriterionValue::create([
             'criterion_id' => 1,
             'value_text' => 'Quimica Suiza',
             'active' => 1
         ]);
-        
-        $criterionValueId = DB::getPdo()->lastInsertId();
+
+        $subworkspace = Workspace::create([
+            'criterion_value_id' => $criterion_value->id,
+            'name' => 'Quimica Suiza',
+            'slug' => 'quimica-suiza',
+            'logo' => 'images/workspace1-20220816165243-3521.png',
+            'parent_id' => $workspace->id,
+            'active' => 1
+        ]);
+
 
         DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
         ]);
 
         // Financiera Oh subworkspace
         // ----------------------------------------
 
-        Workspace::create([
-            'name' => 'Financiera Oh',
-            'slug' => 'financiera-oh',
-            'logo' => 'images/workspace2-20220816165253-1851.png',
-            'parent_id' => $idWorkspaceInRetail,
-            'active' => 1
-        ]);
-
-        $workspaceId = DB::getPdo()->lastInsertId();
-
-        CriterionValue::create([
+        $criterion_value = CriterionValue::create([
             'criterion_id' => 1,
             'value_text' => 'Financiera Oh',
             'active' => 1
         ]);
-        $criterionValueId = DB::getPdo()->lastInsertId();
+
+        $subworkspace = Workspace::create([
+            'criterion_value_id' => $criterion_value->id,
+            'name' => 'Financiera Oh',
+            'slug' => 'financiera-oh',
+            'logo' => 'images/workspace2-20220816165253-1851.png',
+            'parent_id' => $workspace->id,
+            'active' => 1
+        ]);
+
 
         DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
         ]);
 
         // Promart subworkspace
         // ----------------------------------------
 
-        Workspace::create([
-            'name' => 'Promart',
-            'slug' => 'promart',
-            'logo' => 'images/workspace3-20220816165303-6210.png',
-            'parent_id' => $idWorkspaceInRetail,
-            'active' => 1
-        ]);
-
-        $workspaceId = DB::getPdo()->lastInsertId();
-
-        CriterionValue::create([
+        $criterion_value = CriterionValue::create([
             'criterion_id' => 1,
             'value_text' => 'Promart',
             'active' => 1
         ]);
-        $criterionValueId = DB::getPdo()->lastInsertId();
+
+        $subworkspace = Workspace::create([
+            'criterion_value_id' => $criterion_value->id,
+            'name' => 'Promart',
+            'slug' => 'promart',
+            'logo' => 'images/workspace3-20220816165303-6210.png',
+            'parent_id' => $workspace->id,
+            'active' => 1
+        ]);
+
 
         DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
         ]);
 
         // UNIVERSIDAD CORPORATIVA subworkspace
         // ----------------------------------------
 
-        Workspace::create([
+        $workspace = Workspace::create([
             'name' => 'Universidad corporativa',
             'slug' => 'universidad-corporativa',
             'logo' => 'images/universidad.png',
             'active' => 1
         ]);
-        $idWorkspaceUni = Workspace::where('slug', 'universidad-corporativa')->first()->id;
+
+        // $idWorkspaceUni = Workspace::where('slug', 'universidad-corporativa')->first()->id;
 
         // Inkafarma subworkspace
         // ----------------------------------------
 
-        Workspace::create([
-            'name' => 'Inkafarma',
-            'slug' => 'inkafarma',
-            'logo' => 'images/inkafarma.png',
-            'parent_id' => $idWorkspaceUni,
-            'active' => 1
-        ]);
-
-        $workspaceId = DB::getPdo()->lastInsertId();
-
-        CriterionValue::create([
+        $criterion_value = CriterionValue::create([
             'criterion_id' => 1,
             'value_text' => 'Inkafarma',
             'active' => 1
         ]);
-        $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
-        ]);
-
-
-        Workspace::create([
-            'name' => 'MiFarma',
-            'slug' => 'mifarma',
-            'logo' => 'images/mifarma.png',
-            'parent_id' => $idWorkspaceUni,
+        $subworkspace = Workspace::create([
+            'criterion_value_id' => $criterion_value->id,
+            'name' => 'Inkafarma',
+            'slug' => 'inkafarma',
+            'logo' => 'images/inkafarma.png',
+            'parent_id' => $workspace->id,
             'active' => 1
         ]);
 
-        $workspaceId = DB::getPdo()->lastInsertId();
 
-        CriterionValue::create([
+        DB::table('criterion_value_workspace')->insert([
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
+        ]);
+
+        // -----------------
+
+        $criterion_value = CriterionValue::create([
             'criterion_id' => 1,
             'value_text' => 'MiFarma',
             'active' => 1
         ]);
-        $criterionValueId = DB::getPdo()->lastInsertId();
+
+        $subworkspace = Workspace::create([
+            'criterion_value_id' => $criterion_value->id,
+            'name' => 'MiFarma',
+            'slug' => 'mifarma',
+            'logo' => 'images/mifarma.png',
+            'parent_id' => $workspace->id,
+            'active' => 1
+        ]);
+
 
         DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspaceId,
-            'criterion_value_id' => $criterionValueId
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
         ]);
     }
 

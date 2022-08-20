@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class School extends Model
+class School extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma',
@@ -80,6 +80,8 @@ class School extends Model
             
             return $e;
         }
+
+        cache_clear_model(Course::class);
         
         return $school;
     }

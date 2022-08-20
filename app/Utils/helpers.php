@@ -224,3 +224,9 @@ function get_current_workspace()
     if (session('workspace')) return session('workspace');
     return null;
 }
+
+
+function cache_clear_model($model)
+{
+    \Artisan::call('modelCache:clear', array('--model' => $model));
+}

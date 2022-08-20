@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Course extends Model
+class Course extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
@@ -126,7 +126,7 @@ class Course extends Model
         return $q->paginate($request->paginate);
     }
 
-    protected static function storeRequest($data, $course = null)
+    protected function storeRequest($data, $course = null)
     {
         try {
             $workspace = get_current_workspace();
