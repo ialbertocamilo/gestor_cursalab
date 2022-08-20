@@ -105,7 +105,9 @@ class Course extends Model
             $t->where('workspace_id', $workspace->id);
         });
 
-        if (!is_null($request->school_id)) {
+        info($request->all());
+
+        if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->where('school_id', $request->school_id);
             });
@@ -114,9 +116,9 @@ class Course extends Model
         $q->withCount(['topics', 'polls', 'segments']);
 
         if ($request->q)
-            $q->where('courses.name', 'like', "%$request->q%");
+            $q->where('name', 'like', "%$request->q%");
 
-        $field = $request->sortBy ?? 'courses.position';
+        $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $q->orderBy($field, $sort);
