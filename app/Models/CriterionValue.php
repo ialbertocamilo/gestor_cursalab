@@ -150,14 +150,11 @@ class CriterionValue extends BaseModel
      * @param $workspaceId
      * @return Builder[]|Collection
      */
-    public static function getCriteriaFromWorkspace($workspaceId) {
+    public static function getCriteriaFromWorkspace($workspaceId)
+    {
+        $criteria = Criterion::whereRelation('workspaces', 'workspace_id', $workspaceId)
+                ->get()->toArray();
 
-//        return CriterionValue::query()
-        return Criterion::query()
-                ->join('criterion_workspace', 'criterion_workspace.criterion_id', '=', 'criteria.id')
-                ->where('criteria.active', ACTIVE)
-//                ->where('criterion_values.active', ACTIVE)
-                ->where('criterion_workspace.workspace_id', $workspaceId)
-                ->get();
+        return $criteria;
     }
 }
