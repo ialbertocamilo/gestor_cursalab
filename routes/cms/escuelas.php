@@ -11,14 +11,14 @@ Route::controller(EscuelaController::class)->group(function () {
 
     Route::view('/create', 'escuelas.create_edit')->name('escuelas.create');
     // ->middleware('permission:escuelas.create');
-    Route::view('/edit/{escuela}', 'escuelas.create_edit')->name('escuelas.edit');
+    Route::view('/edit/{school}', 'escuelas.create_edit')->name('escuelas.edit');
     // ->middleware('permission:escuelas.edit');
 
     Route::post('/store', 'store')->name('escuelas.store');
-    Route::put('/update/{escuela}', 'update')->name('escuelas.update');
+    Route::put('/update/{school}', 'update')->name('escuelas.update');
 
 
-    Route::get('/search/{escuela}', 'searchCategoria')->name('escuelas.searchEscuela');
+    Route::get('/search/{school}', 'searchCategoria')->name('escuelas.searchEscuela');
     Route::get('/form-selects', 'getFormSelects')->name('escuelas.formSelects');
 
     Route::delete('/{categoria}', 'destroyEscuela')->name('escuelas.destroyEscuela');
@@ -27,4 +27,4 @@ Route::controller(EscuelaController::class)->group(function () {
 });
 
 // CURSOS
-Route::prefix('{escuela}/cursos')->group(base_path('routes/cms/cursos.php'));
+Route::prefix('{school}/cursos')->group(base_path('routes/cms/cursos.php'));

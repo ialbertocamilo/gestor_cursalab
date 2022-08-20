@@ -37,10 +37,10 @@ class Workspace extends BaseModel
         return $this->hasMany(User::class, 'subworkspace_id');
     }
 
-    // public function schools()
-    // {
-    //     return $this->belongsToMany(School::class);
-    // }
+    public function schools()
+    {
+        return $this->belongsToMany(School::class);
+    }
 
     public function courses()
     {

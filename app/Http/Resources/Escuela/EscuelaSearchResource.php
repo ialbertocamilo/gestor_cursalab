@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Escuela;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Services\FileService;
 
 class EscuelaSearchResource extends JsonResource
 {
@@ -19,7 +20,7 @@ class EscuelaSearchResource extends JsonResource
         return [
             'id' => $this->id,
             'nombre' => $this->name,
-            'image' => space_url($this->imagen),
+            'image' => FileService::generateUrl($this->imagen),
             'active' => $this->active,
             'orden' => $this->position,
 

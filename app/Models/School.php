@@ -11,12 +11,13 @@ class School extends Model
         'name', 'description', 'imagen', 'plantilla_diploma',
         'position', 'scheduled_restarts', 'active'
     ];
+    
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
     }
 
-    public function workspace()
+    public function workspaces()
     {
         return $this->belongsToMany(Workspace::class);
     }
@@ -28,22 +29,26 @@ class School extends Model
 
     protected static function search($request)
     {
-        $courses = Course::whereHas('workspace', function ($t) use ($request) {
-            $t->where('workspace_id', $request->workspace_id);
-        })->get('id');
+        // $courses = Course::whereHas('workspace', function ($t) use ($request) {
+        //     $t->where('workspace_id', $request->workspace_id);
+        // })->get('id');
 
-        $escuelas = School::whereHas('courses', function ($j) use ($courses) {
-            $j->whereIn('course_id', $courses->pluck('id'));
-        })->withCount(['courses' => function ($c) use ($request) {
-            $c->whereHas('workspace', function ($r) use ($request) {
-                $r->where('workspace_id', $request->workspace_id);
+        $workspace = get_current_workspace();
+
+        $escuelas = School::whereRelation('workspaces', 'workspace_id', $workspace->id)
+        // whereHas('courses', function ($j) use ($courses) {
+        //     $j->whereIn('course_id', $courses->pluck('id'));
+        // })->
+        ->withCount(['courses' => function ($c) use ($workspace) {
+            $c->whereHas('workspace', function ($r) use ($workspace) {
+                $r->where('workspace_id', $workspace->id);
             });
         }]);
 
         if ($request->q)
-            $escuelas->where('schools.name', 'like', "%$request->q%");
+            $escuelas->where('name', 'like', "%$request->q%");
 
-        $field = $request->sortBy ?? 'schools.position';
+        $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $escuelas->orderBy($field, $sort);
@@ -51,38 +56,48 @@ class School extends Model
         return $escuelas->paginate($request->paginate);
     }
 
-    protected static function storeRequest($data, $escuela = null)
+    protected function storeRequest($data, $school = null)
     {
         try {
 
+            $workspace = get_current_workspace();
+
             DB::beginTransaction();
 
-            if ($escuela) :
-                $escuela->update($data);
+            if ($school) :
+                $school->update($data);
             else :
-                $escuela = self::create($data);
+                $school = self::create($data);
+
+                $workspace->schools()->attach($school);
             endif;
 
-            if (!empty($data['file_imagen'])) :
-                $path = Media::uploadFile($data['file_imagen']);
-                $escuela->imagen = $path;
-            endif;
+            // if (!empty($data['file_imagen'])) :
+            //     $path = Media::uploadFile($data['file_imagen']);
+            //     $school->imagen = $path;
+            // endif;
 
-            if (!empty($data['file_plantilla_diploma'])) :
-                $path = Media::uploadFile($data['file_plantilla_diploma']);
-                $escuela->plantilla_diploma = $path;
-            endif;
+            // if (!empty($data['file_plantilla_diploma'])) :
+            //     $path = Media::uploadFile($data['file_plantilla_diploma']);
+            //     $school->plantilla_diploma = $path;
+            // endif;
 
-            // if (!empty($data['nombre_ciclo_0'])) : (new Categoria())->guardarNombreCiclo0($escuela->id, $data['nombre_ciclo_0']);
+            // if (!empty($data['nombre_ciclo_0'])) : (new Categoria())->guardarNombreCiclo0($school->id, $data['nombre_ciclo_0']);
             // endif;
 
 
-            $escuela->save();
+            // $school->save();
             DB::commit();
-            return $escuela;
+
         } catch (\Exception $e) {
+            
             DB::rollBack();
+
+            info($e);
+            
             return $e;
         }
+        
+        return $school;
     }
 }

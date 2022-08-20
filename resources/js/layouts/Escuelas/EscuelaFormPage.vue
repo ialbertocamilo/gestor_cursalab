@@ -118,7 +118,7 @@
 </template>
 <script>
 const fields = ['name', 'nombre_ciclo_0', 'active', 'position', 'config_id',
-    'imagen', 'reinicios_programado', 'modalidad'];
+    'imagen', 'scheduled_restarts', 'modalidad'];
 const file_fields = ['imagen','plantilla_diploma'];
 export default {
     props: ["modulo_id", 'categoria_id'],
@@ -224,7 +224,7 @@ export default {
                 reinicio_minutos: vue.resource.reinicio_automatico_minutos,
             }
             let json = JSON.stringify(data)
-            formData.append('reinicios_programado', json)
+            formData.append('scheduled_restarts', json)
         },
         resetValidation() {
             let vue = this

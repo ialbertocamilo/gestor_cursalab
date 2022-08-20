@@ -4,6 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
+use App\Services\FileService;
+
 class SubWorkspaceResource extends JsonResource
 {
     /**
