@@ -35,7 +35,7 @@ class UserStoreRequest extends FormRequest
             'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
             'document' => 'required|min:8',
 
-            'criterion_list' => 'nullable',
+            'criterion_list_final' => 'nullable',
         ];
 
         return $rules;

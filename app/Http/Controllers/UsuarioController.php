@@ -42,7 +42,8 @@ class UsuarioController extends Controller
     /**
      * Process request to load authenticated user and its workspace
      */
-    public function session(Request $request) {
+    public function session(Request $request)
+    {
 
         if (Auth::check()) {
 
@@ -54,7 +55,7 @@ class UsuarioController extends Controller
             return [
                 'user' => [
                     'username' => $user->username,
-                    'fullname' =>  $user->fullname
+                    'fullname' => $user->fullname
                 ],
                 'session' => [
                     'workspace' => $workspace
@@ -69,7 +70,8 @@ class UsuarioController extends Controller
      * @param Request $request
      * @param Workspace $workspace
      */
-    public function updateWorkspaceInSession(Request $request, Workspace $workspace) {
+    public function updateWorkspaceInSession(Request $request, Workspace $workspace)
+    {
 
         // update workspace value in Session
 
@@ -95,28 +97,40 @@ class UsuarioController extends Controller
 
         $sub_workspaces = Workspace::where('parent_id', $workspace?->id)->get();
 
-        return $this->success(['sub_workspaces' => $sub_workspaces,]);
+        return $this->success(['sub_workspaces' => $sub_workspaces]);
     }
 
     public function edit(User $user)
     {
-        $criterion_grouped = $user->criterion_values()->with('criterion')->get()
-            ->groupBy('criterion.code')->toArray();
+        $current_workspace_criterion_list = $this->getFormSelects(true);
+        $user_criteria = [];
 
-        $criterion_list = [];
-        foreach ($criterion_grouped as $code => $criterion_values) {
-            if (count($criterion_values) === 1) {
-                $criterion_list[$code] = $criterion_values[0]['id'];
-            } else if(count($criterion_values) > 1){
-                foreach ($criterion_values as $criterion_value) {
-                    $criterion_list[$code][] = [
-                        'id' => $criterion_value['id'],
-                        'value_text' => $criterion_value['value_text']
-                    ];
-                }
-            }
+        foreach ($current_workspace_criterion_list as $criterion) {
+            $value = $user->criterion_values->where('criterion_id', $criterion->id);
+            $user_criterion_value = $criterion->multiple ?
+                $value->pluck('id') : $value?->first()?->id;
+
+            $user_criteria[$criterion->code] = $user_criterion_value;
         }
-        $user->criterion_list = $criterion_list;
+
+
+//        $criterion_grouped = $user->criterion_values()->with('criterion')->get()
+//            ->groupBy('criterion.code')->toArray();
+//
+//        $criterion_list = [];
+//        foreach ($criterion_grouped as $code => $criterion_values) {
+//            if (count($criterion_values) == 1 || count($criterion_values) == 0) {
+//                $criterion_list[$code] = $criterion_values[0]['id'];
+//            } else if(count($criterion_values) > 1){
+//                foreach ($criterion_values as $criterion_value) {
+//                    $criterion_list[$code][] = [
+//                        'id' => $criterion_value['id'],
+//                        'value_text' => $criterion_value['value_text']
+//                    ];
+//                }
+//            }
+//        }
+        $user->criterion_list = $user_criteria;
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
@@ -126,7 +140,7 @@ class UsuarioController extends Controller
 
     public function getFormSelects($compactResponse = false)
     {
-        $current_workspace = session('workspace');
+        $current_workspace = get_current_workspace();
         $criteria = Criterion::query()
             ->with([
                 'values' => function ($q) {
@@ -134,9 +148,10 @@ class UsuarioController extends Controller
                         ->select('id', 'criterion_id', 'exclusive_criterion_id', 'value_text', 'parent_id');
                 }
             ])
-            ->whereHas('workspaces', function ($q) use ($current_workspace) {
-                $q->whereIn('id', [$current_workspace['id']]);
-            })
+            ->whereRelation('workspaces', 'id', $current_workspace?->id)
+//            ->whereHas('workspaces', function ($q) use ($current_workspace) {
+//                $q->whereIn('id', [$current_workspace?->id]);
+//            })
             ->select('id', 'name', 'code', 'parent_id', 'multiple')
             ->orderBy('position')
             ->get();
