@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Services\FileService;
 
 class MediaController extends Controller
 {
@@ -48,7 +49,7 @@ class MediaController extends Controller
         $size = $multimedia->size === 0.0 ? '-' : $multimedia->size;
         $multimedia->file = $multimedia->ext === 'scorm'
                              ? $multimedia->file
-                             : env('BUCKET_BASE_URL') . '/' . $multimedia->file;
+                             : FileService::generateUrl($multimedia->file);
         $multimedia->preview = $multimedia->getPreview();
         $multimedia->type = $multimedia->getMediaType($multimedia->ext);
         $multimedia->created = $multimedia->created_at->format('d/m/Y');

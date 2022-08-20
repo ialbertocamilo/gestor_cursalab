@@ -20,7 +20,12 @@ class FileService {
 
         if (!$path) $path = '';
 
-        return Storage::url($path);
+        $full_url = Storage::url($path);
+        // $full_path = Storage::path($path);
+
+        $full_url = str_replace("%5C", '/', $full_url);
+
+        return $full_url;
 
         // $base = env('BUCKET_BASE_URL', '');
         // $base = rtrim($base, '/');

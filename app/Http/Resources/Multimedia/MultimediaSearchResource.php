@@ -24,7 +24,7 @@ class MultimediaSearchResource extends JsonResource
             'tipo' => $this->getMediaType($this->ext),
             'created_at' => $this->created_at->format('d/m/Y'),
 //            'image' => env('DO_URL')."/".$this->file,
-            'image' => FileService::generateUrl($this->getPreview()) ,
+            'image' => FileService::generateUrl($this->getPreview()),
         ];
     }
 }
