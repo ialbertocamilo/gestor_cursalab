@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="robots" content="all,follow">
-    <meta name="BUCKET_BASE_URL" content="{{ env('BUCKET_BASE_URL', '')  }}">
+    <meta name="BUCKET_BASE_URL" content="{{ App\Services\FileService::generateUrl('/') }}">
 
     <!-- Bootstrap CSS-->
     <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}">
