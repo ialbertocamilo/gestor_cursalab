@@ -84,5 +84,14 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 3,
         ]);
+
+        Taxonomy::create([
+            'group' => 'criterion',
+            'type' => 'type',
+            'code' => 'boolean',
+            'name' => 'Booleano',
+            'active' => ACTIVE,
+            'position' => 4,
+        ]);
     }
 }
