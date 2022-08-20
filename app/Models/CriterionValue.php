@@ -153,9 +153,9 @@ class CriterionValue extends BaseModel
     public static function getCriterionValuesFromWorkspace($workspaceId) {
 
         return CriterionValue::query()
-                ->join('criterion_value_workspace', 'criterion_value_workspace.criterion_value_id', '=', 'criterion_values.id')
+                ->join('criterion_workspace', 'criterion_workspace.criterion_id', '=', 'criterion_values.id')
                 ->where('criterion_values.active', ACTIVE)
-                ->where('criterion_value_workspace.workspace_id', $workspaceId)
+                ->where('criterion_workspace.workspace_id', $workspaceId)
                 ->get();
     }
 }

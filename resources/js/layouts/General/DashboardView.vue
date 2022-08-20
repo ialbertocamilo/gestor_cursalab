@@ -51,12 +51,12 @@
                         @refreshCache="getVisitas(true)"
                     />
                 </v-col>
-                <v-col cols="12" class="d-flex flex-column">
-                    <GeneralGraphic
-                        :graphic_data="apiData.graficos.topBoticas"
-                        @refreshCache="getTopBoticas(true)"
-                    />
-                </v-col>
+<!--                <v-col cols="12" class="d-flex flex-column">-->
+<!--                    <GeneralGraphic-->
+<!--                        :graphic_data="apiData.graficos.topBoticas"-->
+<!--                        @refreshCache="getTopBoticas(true)"-->
+<!--                    />-->
+<!--                </v-col>-->
             </v-row>
         </v-card>
         <!-- <Fab/> -->
