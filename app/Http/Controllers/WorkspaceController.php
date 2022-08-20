@@ -18,6 +18,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WorkspaceController extends Controller
 {
@@ -65,7 +66,7 @@ class WorkspaceController extends Controller
                                           ->where('show_in_segmentation', 1)
                                           ->get();
 
-        $workspace['criteria_value'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
+        $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
 
         return $this->success($workspace);
     }
@@ -90,24 +91,25 @@ class WorkspaceController extends Controller
 
         $workspace->update($data);
 
-        // Insert criterion values
+
+        // Save workspace's criteria
 
         $criteriaSelected = json_decode($data['selected_criteria'], true);
         $criteriaIds = array_keys($criteriaSelected);
 
-        // Save workspace's criteria values
-
-        $workspaceCriteriaValue = [];
+        $workspaceCriteria = [];
         foreach ($criteriaIds as $criterionId) {
             if ($criteriaSelected[$criterionId]) {
-                $workspaceCriteriaValue[] = [
+
+                $workspaceCriteria[] = [
                     'workspace_id' => $workspace->id,
                     'criterion_id' => $criterionId
                 ];
             }
         }
 
-        $workspace->criterionWorkspace()->sync($workspaceCriteriaValue);
+        DB::table('criterion_workspace')->where('workspace_id', $workspace->id)->delete();
+        DB::table('criterion_workspace')->insert($workspaceCriteria);
 
         // Response
 
