@@ -40,9 +40,7 @@ class School extends Model
         //     $j->whereIn('course_id', $courses->pluck('id'));
         // })->
         ->withCount(['courses' => function ($c) use ($workspace) {
-            $c->whereHas('workspace', function ($r) use ($workspace) {
-                $r->where('workspace_id', $workspace->id);
-            });
+            $c->whereRelation('workspaces', 'workspace_id', $workspace->id);
         }]);
 
         if ($request->q)
@@ -72,21 +70,6 @@ class School extends Model
                 $workspace->schools()->attach($school);
             endif;
 
-            // if (!empty($data['file_imagen'])) :
-            //     $path = Media::uploadFile($data['file_imagen']);
-            //     $school->imagen = $path;
-            // endif;
-
-            // if (!empty($data['file_plantilla_diploma'])) :
-            //     $path = Media::uploadFile($data['file_plantilla_diploma']);
-            //     $school->plantilla_diploma = $path;
-            // endif;
-
-            // if (!empty($data['nombre_ciclo_0'])) : (new Categoria())->guardarNombreCiclo0($school->id, $data['nombre_ciclo_0']);
-            // endif;
-
-
-            // $school->save();
             DB::commit();
 
         } catch (\Exception $e) {

@@ -28,7 +28,7 @@ class Course extends Model
         );
     }
 
-    public function workspace()
+    public function workspaces()
     {
         return $this->belongsToMany(Workspace::class);
     }
@@ -99,14 +99,18 @@ class Course extends Model
 
     protected static function search($request, $paginate = 15)
     {
-        $q = Course::whereHas('workspace', function ($t) use ($request) {
-            $t->where('workspace_id', $request->workspace_id);
+        $workspace = get_current_workspace();
+
+        $q = Course::whereHas('workspaces', function ($t) use ($workspace) {
+            $t->where('workspace_id', $workspace->id);
         });
+
         if (!is_null($request->school_id)) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->where('school_id', $request->school_id);
             });
         }
+
         $q->withCount(['topics', 'polls', 'segments']);
 
         if ($request->q)
