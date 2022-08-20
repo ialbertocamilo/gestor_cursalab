@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Storage;
 
 class FileService {
 
@@ -19,13 +20,15 @@ class FileService {
 
         if (!$path) $path = '';
 
-        $base = env('BUCKET_BASE_URL', '');
-        $base = rtrim($base, '/');
-        $base = rtrim($base, '\\');
+        return Storage::url($path);
 
-        $path = trim($path, '/');
-        $path = trim($path, '\\');
+        // $base = env('BUCKET_BASE_URL', '');
+        // $base = rtrim($base, '/');
+        // $base = rtrim($base, '\\');
 
-        return "$base/$path";
+        // $path = trim($path, '/');
+        // $path = trim($path, '\\');
+
+        // return "$base/$path";
     }
 }
