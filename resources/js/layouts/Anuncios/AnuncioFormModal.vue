@@ -15,10 +15,11 @@
                         <DefaultSelect
                             clearable
                             :items="selects.modules"
-                            v-model="resource.module_id"
-                            label="Módulo"
+                            multiple
                             return-object
-                            :rules="rules.module_id"
+                            v-model="resource.module_ids"
+                            label="Módulo"
+                            :rules="rules.module_ids"
                         />
                     </v-col>
                 </v-row>
@@ -114,7 +115,7 @@ import DefaultRichText from "../../components/globals/DefaultRichText";
 import moment from "moment";
 
 const fields = [
-    'nombre', 'active', 'destino', 'link', 'module_id',
+    'nombre', 'active', 'destino', 'link', 'module_ids',
     'contenido', 'publish_date'
 ];
 const file_fields = ['imagen', 'archivo'];
@@ -133,7 +134,6 @@ export default {
             errors: [],
             resourceDefault: {
                 id: null,
-                config_id: null,
                 nombre: '',
                 imagen: null,
                 file_imagen: null,
@@ -141,7 +141,7 @@ export default {
                 file_archivo: null,
                 destino: null,
                 link: null,
-                module_id: null,
+                module_ids: [],
                 destinos: null,
                 active: true,
                 publish_date: null,
@@ -154,7 +154,7 @@ export default {
             },
 
             rules: {
-                module_id: this.getRules(['required']),
+                module_ids: this.getRules(['required']),
                 nombre: this.getRules(['required', 'max:100']),
                 imagen: this.getRules(['required']),
                 contenido: this.getRules(['required'])

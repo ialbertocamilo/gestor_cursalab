@@ -79,8 +79,17 @@ class AnnouncementController extends Controller
 
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'archivo');
+        $modulesIds = $data['module_ids'];
+        unset($data['module_ids']);
 
-        Announcement::create($data);
+        // Create announcement
+
+        $announcement = Announcement::create($data);
+
+        // Save relationships
+
+        $announcement->criterionValues()->sync($modulesIds);
+
 
         return $this->success(['msg' => 'Anuncio creado correctamente.']);
     }
@@ -93,9 +102,7 @@ class AnnouncementController extends Controller
      */
     public function edit(Announcement $announcement)
     {
-        $config_ids = json_decode($announcement->config_id, true);
-        $announcement->modules = Abconfig::getModulesForSelect($config_ids);
-
+        $announcement['module_ids'] = $announcement->criterionValues()->pluck('criterion_value_id');
         $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
 
@@ -116,9 +123,16 @@ class AnnouncementController extends Controller
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'archivo');
 
-        $data['config_id'] = json_encode($request->modules);
+        $modulesIds = $data['module_ids'];
+        unset($data['module_ids']);
+
+        // Update announcement
 
         $announcement->update($data);
+
+        // Save relationships
+
+        $announcement->criterionValues()->sync($modulesIds);
 
         return $this->success(['msg' => 'Anuncio actualizado correctamente.']);
     }

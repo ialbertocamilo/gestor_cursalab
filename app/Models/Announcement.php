@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
 class Announcement extends BaseModel
@@ -10,7 +11,6 @@ class Announcement extends BaseModel
     protected $table = 'announcements';
 
     protected $fillable = [
-        'module_id',
         'nombre',
         'contenido',
         'imagen',
@@ -28,6 +28,23 @@ class Announcement extends BaseModel
     protected $dates = [
         'publish_date'
     ];
+
+    /*
+
+        Relationships
+
+    --------------------------------------------------------------------------*/
+
+    public function criterionValues (): BelongsToMany
+    {
+
+        return $this->belongsToMany(
+            CriterionValue::class,
+            'criterion_value_announcements',
+            'announcement_id',
+            'criterion_value_id'
+        );
+    }
 
     /*
 
@@ -49,30 +66,30 @@ class Announcement extends BaseModel
     /**
      * Load and filter records
      *
-     * @param $request
+     * @param $data
      * @return LengthAwarePaginator
      */
-    protected function search($request)
+    protected function search($data)
     {
         $query = self::query();
 
-        if ($request->q)
-            $query->where('nombre', 'like', "%$request->q%");
+        if ($data->q)
+            $query->where('nombre', 'like', "%$data->q%");
 
-        if ($request->module) {
-            $query->where(
-                'module_id', 'like', "%$request->module%"
-            );
+        if ($data->module) {
+            $query->whereHas('criterionValues', function ($q) use ($data) {
+                return $q->where('criterion_value_id', $data->module);
+            });
         }
 
         // Set sorting values
 
-        $field = $request->sortBy ?? 'publish_date';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+        $field = $data->sortBy ?? 'publish_date';
+        $sort = $data->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort);
 
-        return $query->paginate($request->paginate);
+        return $query->paginate($data->paginate);
     }
 
     /**
@@ -106,5 +123,13 @@ class Announcement extends BaseModel
             ->orderBy('publish_date', 'DESC')
             ->orderBy('created_at', 'DESC')
             ->get();
+    }
+
+    // Save list of modules
+
+    public static function saveModules($announcementId, $modulesId) {
+
+
+
     }
 }
