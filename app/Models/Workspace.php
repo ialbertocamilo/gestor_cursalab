@@ -291,6 +291,9 @@ class Workspace extends BaseModel
 
                 $subworkspace = self::create($data);
 
+                $workspace = get_current_workspace();
+                $workspace->criteriaValue()->attach($criterion_value);
+
             endif;
 
             if (!empty($data['app_menu'])):
