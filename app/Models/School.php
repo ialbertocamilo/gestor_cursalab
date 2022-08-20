@@ -11,7 +11,7 @@ class School extends Model
         'name', 'description', 'imagen', 'plantilla_diploma',
         'position', 'scheduled_restarts', 'active'
     ];
-    
+
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
@@ -40,7 +40,7 @@ class School extends Model
         //     $j->whereIn('course_id', $courses->pluck('id'));
         // })->
         ->withCount(['courses' => function ($c) use ($workspace) {
-            $c->whereRelation('workspaces', 'workspace_id', $workspace->id);
+            $c->whereRelation('workspaces', 'id', $workspace->id);
         }]);
 
         if ($request->q)

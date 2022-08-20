@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Curso;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Services\FileService;
 
 class CursoSearchResource extends JsonResource
 {
@@ -25,7 +26,7 @@ class CursoSearchResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'nombre' => $this->name,
-            'image' => space_url($this->imagen),
+            'image' => FileService::generateUrl($this->imagen),
             'temas_count' => $this->topics_count,
             'encuesta_count' => $this->polls_count,
             'segments_count' => $this->segments_count,

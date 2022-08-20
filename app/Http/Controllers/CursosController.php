@@ -57,11 +57,12 @@ class CursosController extends Controller
         $curso->scheduled_restarts_horas = $scheduled_restarts->reinicio_horas ?? 0;
         $curso->scheduled_restarts_minutos = $scheduled_restarts->reinicio_minutos ?? 0;
         $form_selects =  $this->getFormSelects($escuela, $curso, true);
-        $curso->makeHidden('reinicios_programado');
+        $curso->makeHidden('scheduled_restarts');
 
         $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($curso) {
             $query->where('id', $curso->id);
         })->first();
+
         $curso->requisito_id = (!is_null($req_curso)) ? $req_curso->requirement_id : '';
 
         $escuelas = collect();
@@ -73,6 +74,7 @@ class CursosController extends Controller
         }
 
         $curso->lista_escuelas = $escuelas;
+        
         return $this->success([
             'curso' => $curso,
             'requisitos' => $form_selects['requisitos'],
@@ -84,10 +86,10 @@ class CursosController extends Controller
     {
         $data = $request->validated();
 
-        $workspace = session('workspace');
-        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
+        // $workspace = session('workspace');
+        // $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
-        $data['workspace_id'] = $workspace_id;
+        // $data['workspace_id'] = $workspace_id;
         $data['school_id'] = ($escuela->exists) ? $escuela->id : null;
         $data['escuelas'] = $request->lista_escuelas;
 
@@ -107,10 +109,10 @@ class CursosController extends Controller
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        $workspace = session('workspace');
-        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
+        // $workspace = session('workspace');
+        // $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
-        $data['workspace_id'] = $workspace_id;
+        // $data['workspace_id'] = $workspace_id;
         $data['school_id'] = ($escuela->exists) ? $escuela->id : null;
         $data['escuelas'] = $request->lista_escuelas;
         $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;

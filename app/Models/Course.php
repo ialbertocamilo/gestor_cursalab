@@ -124,37 +124,45 @@ class Course extends Model
         return $q->paginate($request->paginate);
     }
 
-    protected static function storeRequest($data, $curso = null)
+    protected static function storeRequest($data, $course = null)
     {
         try {
+            $workspace = get_current_workspace();
+
             DB::beginTransaction();
 
             $data['scheduled_restarts'] = $data['reinicios_programado'];
 
-            if ($curso) :
-                $curso->update($data);
+            if ($course) :
+                $course->update($data);
             else :
-                $curso = self::create($data);
+                $course = self::create($data);
+                $course->workspaces()->sync([$workspace->id]);
             endif;
 
-            $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($curso) {
-                $query->where('id', $curso->id);
+            $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($course) {
+                $query->where('id', $course->id);
             })->first();
+
             $course_requirements = [
                 'model_type' => Course::class,
-                'model_id' => $curso->id,
+                'model_id' => $course->id,
                 'requirement_type' => Course::class,
                 'requirement_id' => $data['requisito_id']
             ];
+
             Requirement::storeRequest($course_requirements, $req_curso);
 
-            $curso->workspace()->sync($data['workspace_id']);
-            $curso->schools()->sync($data['escuelas']);
 
-            $curso->save();
+            $course->schools()->sync($data['escuelas']);
+
+            // $course->save();
+
             DB::commit();
-            return $curso;
+            
+            return $course;
         } catch (\Exception $e) {
+            
             DB::rollBack();
             return $e;
         }

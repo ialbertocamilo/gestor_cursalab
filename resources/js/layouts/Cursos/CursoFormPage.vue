@@ -35,19 +35,6 @@
                             </DefaultAutocomplete>
                         </v-col>
                     </v-row> -->
-                    <v-row>
-                        <v-col cols="6">
-                            <DefaultAutocomplete
-                                dense
-                                label="Escuelas"
-                                v-model="resource.lista_escuelas"
-                                :items="selects.lista_escuelas"
-                                item-text="nombre"
-                                item-value="id"
-                                multiple
-                            />
-                        </v-col>
-                    </v-row>
                     <v-row >
                         <v-col cols="6">
                             <DefaultInput
@@ -57,6 +44,17 @@
                                 v-model="resource.name"
                                 :rules="rules.name"
                                 show-required
+                            />
+                        </v-col>
+                        <v-col cols="6">
+                            <DefaultAutocomplete
+                                dense
+                                label="Escuelas"
+                                v-model="resource.lista_escuelas"
+                                :items="selects.lista_escuelas"
+                                item-text="nombre"
+                                item-value="id"
+                                multiple
                             />
                         </v-col>
                     </v-row>
