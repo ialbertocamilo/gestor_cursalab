@@ -244,21 +244,22 @@ export default {
                     vue.resource.selected_criteria = {};
                     data.data.criteria.forEach(c => {
                         vue.resource.selected_criteria[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, data.data.criteria_value
+                            c.id, data.data.criteria_workspace
                         );
                     });
+
                 })
         }
         ,
         loadSelects() {
         }
         ,
-        criterionExistsInCriteriaValue(criterionId, criteriaValue) {
+        criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
 
             let exists = false;
 
-            criteriaValue.forEach(v => {
-                if (v.criterion_id === criterionId)
+            criteria_workspace.forEach(v => {
+                if (v.id === criterionId)
                     exists = true;
             });
 
