@@ -94,34 +94,20 @@ class WorkspaceController extends Controller
 
         $criteriaSelected = json_decode($data['selected_criteria'], true);
         $criteriaIds = array_keys($criteriaSelected);
-        $criteria = Criterion::whereIn('id', $criteriaIds)->get();
-
-        $criterionValues = [];
-        foreach ($criteriaIds as $criterionId) {
-            if ($criteriaSelected[$criterionId]) {
-                $criterionValues[] = [
-                    'criterion_id' => $criterionId,
-                    'value_text' => $criteria->find($criterionId)->name,
-                    'active' => 1
-                ];
-            }
-        }
-
-        $criterionValuesIds = CriterionValue::bulkInsertAndGetIds(
-            $criterionValues
-        );
 
         // Save workspace's criteria values
 
         $workspaceCriteriaValue = [];
-        foreach ($criterionValuesIds as $criterionValueId) {
-            $workspaceCriteriaValue[] = [
-              'workspace_id' => $workspace->id,
-              'criterion_value_id' => $criterionValueId
-            ];
+        foreach ($criteriaIds as $criterionId) {
+            if ($criteriaSelected[$criterionId]) {
+                $workspaceCriteriaValue[] = [
+                    'workspace_id' => $workspace->id,
+                    'criterion_id' => $criterionId
+                ];
+            }
         }
 
-        $workspace->criteriaValue()->sync($workspaceCriteriaValue);
+        $workspace->criterionWorkspace()->sync($workspaceCriteriaValue);
 
         // Response
 

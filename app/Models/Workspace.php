@@ -47,9 +47,14 @@ class Workspace extends BaseModel
         return $this->belongsToMany(Course::class);
     }
 
-    public function criteria()
+    public function criterionWorkspace()
     {
-        return $this->belongsToMany(Criterion::class, 'criterion_workspace');
+        return $this->belongsToMany(
+            CriterionValue::class,
+            'criterion_workspace',
+            'workspace_id',
+            'criterion_id'
+        );
     }
 
     public function criteriaValue()

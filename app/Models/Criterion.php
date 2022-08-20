@@ -49,8 +49,8 @@ class Criterion extends BaseModel
         $subworkspacesIds = Workspace::loadSubWorkspacesIds($workspace->id);
 
         return  CriterionValue::query()
-                            ->join('criterion_workspace', 'criterion_workspace.criterion_id', '=', 'criterion_values.id')
-                            ->join('workspaces', 'workspaces.id', '=', 'criterion_workspace.workspace_id')
+                            ->join('criterion_value_workspace', 'criterion_value_workspace.criterion_value_id', '=', 'criterion_values.id')
+                            ->join('workspaces', 'workspaces.id', '=', 'criterion_value_workspace.workspace_id')
                             ->join('criteria', 'criteria.id', '=', 'criterion_values.criterion_id')
                             ->where('workspaces.active', 1)
                             ->whereIn('workspaces.id', $subworkspacesIds)

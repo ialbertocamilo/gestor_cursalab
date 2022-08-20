@@ -112,9 +112,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_workspace')->insert([
+        DB::table('criterion_value_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_id' => $criterionValueId
+            'criterion_value_id' => $criterionValueId
         ]);
 
         // Quimica Suiza subworkspace
@@ -137,9 +137,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_workspace')->insert([
+        DB::table('criterion_value_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_id' => $criterionValueId
+            'criterion_value_id' => $criterionValueId
         ]);
 
         // Financiera Oh subworkspace
@@ -162,9 +162,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_workspace')->insert([
+        DB::table('criterion_value_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_id' => $criterionValueId
+            'criterion_value_id' => $criterionValueId
         ]);
 
         // Promart subworkspace
@@ -187,9 +187,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_workspace')->insert([
+        DB::table('criterion_value_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_id' => $criterionValueId
+            'criterion_value_id' => $criterionValueId
         ]);
 
         // UNIVERSIDAD CORPORATIVA subworkspace
@@ -223,9 +223,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_workspace')->insert([
+        DB::table('criterion_value_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_id' => $criterionValueId
+            'criterion_value_id' => $criterionValueId
         ]);
 
 
@@ -246,9 +246,9 @@ class TestSeeder extends Seeder
         ]);
         $criterionValueId = DB::getPdo()->lastInsertId();
 
-        DB::table('criterion_workspace')->insert([
+        DB::table('criterion_value_workspace')->insert([
             'workspace_id' => $workspaceId,
-            'criterion_id' => $criterionValueId
+            'criterion_value_id' => $criterionValueId
         ]);
     }
 
