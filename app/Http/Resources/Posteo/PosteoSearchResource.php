@@ -14,18 +14,20 @@ class PosteoSearchResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->id,
-            'nombre' => $this->name,
-            'tipo_evaluacion' => '', //$this->getTipoEvaluacion(),
-            'image' => space_url($this->imagen),
-            'active' => (bool)$this->active,
-            'orden' => $this->position,
-            'es_evaluable' => $this->assessable === 1,
-            'preguntas_count' => $this->questions_count,
+        $topic = $this;
 
-            'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $this->id]),
-            'evaluacion_route' => route('temas.preguntas_list', [$request->school_id, $request->course_id, $this->id]),
+        return [
+            'id' => $topic->id,
+            'nombre' => $topic->name,
+            'tipo_evaluacion' => $topic->evaluation_type->name, //$topic->getTipoEvaluacion(),
+            'image' => space_url($topic->imagen),
+            'active' => (bool)$topic->active,
+            'orden' => $topic->position,
+            'es_evaluable' => $topic->assessable === 1,
+            'preguntas_count' => $topic->questions_count,
+
+            'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $topic->id]),
+            'evaluacion_route' => route('temas.preguntas_list', [$request->school_id, $request->course_id, $topic->id]),
         ];
     }
 }

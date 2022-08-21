@@ -388,7 +388,7 @@ class Curso extends Model
 
         $messages = [];
 //        dd($curso->wasChanged('estado'), $curso->estado, $curso->temas->count());
-        if (($curso->wasChanged('estado') || $curso->estado === 1) && $curso->temas->count() > 0):
+        if (($curso->wasChanged('active') || $curso->active) && $curso->topics->count() > 0):
             $messages[] = [
                 'title' => $title,
                 'subtitle' => "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.

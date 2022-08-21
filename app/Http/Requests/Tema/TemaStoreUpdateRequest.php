@@ -32,29 +32,26 @@ class TemaStoreUpdateRequest extends FormRequest
             'categoria_id' => 'nullable',
             'course_id' => 'required',
 
-            //            'media' => 'nullable',
+            'assessable' => 'required',
+            'type_evaluation_id' => 'nullable',
+            'topic_requirement_id' => 'nullable',
+            'check_tipo_ev' => 'nullable',
 
             'new_medias' => 'nullable',
             'medias' => 'nullable',
 
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
-
-            'assessable' => 'required',
-            'type_evaluation_id ' => 'nullable',
-            'topic_requirement_id ' => 'nullable',
-            'tags' => 'nullable',
-            'check_tipo_ev' => 'nullable'
-
         ];
     }
 
-    public function validationData()
-    {
-        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
+//    public function validationData()
+//    {
+//        info($this);
+//        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
+//
+//        $data['active'] = $active;
 
-        $data['active'] = $active;
-
-        return $this->merge($data)->all();
-    }
+//        return $this->merge($data)->all();
+//    }
 }

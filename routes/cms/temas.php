@@ -10,22 +10,22 @@ Route::controller(TemaController::class)->group(function() {
 
 	Route::view('/create', 'temas.create_edit')->name('temas.create');
 	// ->middleware('permission:temas.create');
-	Route::view('/edit/{tema}', 'temas.create_edit')->name('temas.editTema');
+	Route::view('/edit/{topic}', 'temas.create_edit')->name('temas.editTema');
 	// ->middleware('permission:temas.editTema');
 
 	Route::get('/form-selects', 'getFormSelects')->name('temas.form-selects');
 
 	Route::post('/store', 'store')->name('temas.store');
 
-	Route::put('/update/{tema}', 'update')->name('temas.update');
+	Route::put('/update/{topic}', 'update')->name('temas.update');
 
-	Route::get('/search/{tema}', 'searchTema')->name('temas.search');
+	Route::get('/search/{topic}', 'searchTema')->name('temas.search');
 
-	Route::post('/{tema}', 'destroy')->name('temas.destroy');
+	Route::post('/{topic}', 'destroy')->name('temas.destroy');
 
-	Route::put('/{tema}/status', 'updateStatus');
+	Route::put('/{topic}/status', 'updateStatus');
 
 });
 
 // PREGUNTAS
-Route::prefix('{tema}/preguntas')->group(base_path('routes/cms/temas_preguntas.php'));
+Route::prefix('{topic}/preguntas')->group(base_path('routes/cms/temas_preguntas.php'));

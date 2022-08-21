@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Topic extends Model
+class Topic extends BaseModel
 {
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen',
@@ -104,7 +102,7 @@ class Topic extends Model
         return $q->paginate($request->paginate ?? 10);
     }
 
-    protected static function storeRequest($data, $tema = null)
+    protected function storeRequest($data, $tema = null)
     {
         try {
             DB::beginTransaction();
@@ -275,20 +273,16 @@ class Topic extends Model
 
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
+        if ($user_courses->count() === 0) return [];
+
         $schools = $user_courses->groupBy('schools.*.id');
-        $courses = $schools[$school_id] ?? [];
-        $school = $courses->first()->schools->where('id', $school_id)->first();
+        $courses = $schools[$school_id] ?? collect();
+        $school = $courses->first()?->schools?->where('id', $school_id)->first();
 
         $sub_workspace = $user->subworkspace;
         $mod_eval = json_decode($sub_workspace->mod_evaluaciones, true);
 
         $max_attempts = (int)$mod_eval['nro_intentos'];
-
-//        $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
-//            $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
-//        })
-//            ->where('user_id', $user->id)
-//            ->get();
 
         $schools_courses = [];
 
@@ -304,7 +298,7 @@ class Topic extends Model
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
                 foreach ($media_topics as $media) {
                     if ($media->type->code == 'audio' && !str_contains('https', $media->value))
-                        $media->value = env('BUCKET_BASE_URL') . '/' . $media->valor;
+                        $media->value = get_media_url($media->valor);
                 }
 
                 $topics_data[] = [
@@ -320,7 +314,7 @@ class Topic extends Model
                     'nota' => $topic_status['grade'],
                     'disponible' => $topic_status['available'],
                     'intentos_restantes' => $topic_status['remaining_attempts'],
-                    't_evaluacion' => $topic_status['t_evaluacion'],
+                    't_evaluacion' => $topic->evaluation_type->code,
                     'estado_tema' => $topic_status['status'],
                     'estado_tema_str' => $topic_status['status'],
                 ];
@@ -349,8 +343,8 @@ class Topic extends Model
         }
 
         return [
-            'id' => $school->id,
-            'nombre' => $school->name,
+            'id' => $school?->id,
+            'nombre' => $school?->name,
             'cursos' => $schools_courses
         ];
     }
@@ -360,7 +354,6 @@ class Topic extends Model
         $grade = 0;
         $available_topic = false;
         $remaining_attempts = $max_attempts;
-        $t_evaluacion = true;
         $summary_topic = $topic->summaryByUser($user->id);
         $last_topic_reviewed = null;
         $topic_status = 'por-iniciar';
@@ -398,7 +391,6 @@ class Topic extends Model
             'grade' => $grade,
             'available' => $available_topic,
             'remaining_attempts' => $remaining_attempts,
-            't_evaluacion' => $t_evaluacion,
             'activity' => $summary_topic ?? null,
             'last_topic_reviewed' => $last_topic_reviewed
         ];

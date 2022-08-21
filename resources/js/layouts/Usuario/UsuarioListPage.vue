@@ -144,13 +144,13 @@ export default {
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
-                    {
-                        text: "Reporte",
-                        type: 'route',
-                        icon: 'mdi mdi-file-document-multiple',
-                        route: 'reporte_route',
-                        route_type: 'external'
-                    },
+                    // {
+                    //     text: "Reporte",
+                    //     type: 'route',
+                    //     icon: 'mdi mdi-file-document-multiple',
+                    //     route: 'reporte_route',
+                    //     route_type: 'external'
+                    // },
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
                     {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
                 ],

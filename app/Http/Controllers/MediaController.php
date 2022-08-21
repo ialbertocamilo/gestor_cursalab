@@ -208,6 +208,9 @@ class MediaController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
+        $workspace = get_current_workspace();
+        $request->merge(['workspace_id' => $workspace?->id]);
+
         $medias = Media::queryGrid($request, 12);
 
         MultimediaSearchResource::collection($medias);

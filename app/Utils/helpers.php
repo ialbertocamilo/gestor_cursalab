@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Workspace;
+use App\Services\FileService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -229,4 +230,8 @@ function get_current_workspace()
 function cache_clear_model($model)
 {
     \Artisan::call('modelCache:clear', array('--model' => $model));
+}
+
+function get_media_url($path){
+    return FileService::generateUrl($path);
 }

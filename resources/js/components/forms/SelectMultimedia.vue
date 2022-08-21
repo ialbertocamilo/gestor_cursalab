@@ -120,7 +120,7 @@ export default {
         getData() {
             let vue = this;
             vue.loading = true;
-            let url = `/media/search?paginate=12&page=${vue.paginate.page}`
+            let url = `/multimedia/search?paginate=12&page=${vue.paginate.page}`
             url = vue.prepareUrl(url)
 
             axios.get(url)
@@ -153,9 +153,7 @@ export default {
         },
         selectItem(item) {
             let vue = this;
-            vue.multimedias.forEach((el) => {
-                el.selected = el.id === item.id
-            })
+            vue.multimedias.forEach((el) => el.selected = el.id === item.id)
             vue.selected = item
         },
         onClose() {

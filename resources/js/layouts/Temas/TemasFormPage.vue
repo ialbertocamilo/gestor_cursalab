@@ -17,7 +17,7 @@
                                 dense
                                 label="Requisito"
                                 placeholder="Seleccione un requisito"
-                                v-model="resource.requisito_id"
+                                v-model="resource.topic_requirement_id"
                                 :items="selects.requisitos"
                                 clearable
                                 item-text="name"
@@ -36,15 +36,10 @@
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="8">
-                            <!-- <DefaultRichText
-                                v-model="resource.content"
-                                label="Contenido"
-                                :height="225"
-                            /> -->
                             <editor
-                            api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
-                            v-model="resource.content"
-                            :init="{
+                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                v-model="resource.content"
+                                :init="{
                                 content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
                                 height: 175,
                                 menubar: false,
@@ -86,8 +81,8 @@
                                 dense
                                 :show-required="resource.assessable === 1"
                                 label="Tipo Evaluación"
-                                v-model="resource.tipo_ev"
-                                :items="selects.tipo_ev"
+                                v-model="resource.type_evaluation_id"
+                                :items="selects.evaluation_types"
                                 :rules="resource.assessable === 0 ? [] : rules.tipo_ev"
                                 :disabled="resource.assessable === 0 || !resource.assessable"
                                 @onChange="showAlertEvaluacion"
@@ -181,22 +176,6 @@
                         </v-col>
 
                     </v-row>
-                    <!-- <v-row>
-                        <v-col cols="7">
-                            <DefaultAutocomplete
-                                multiple
-                                show-required
-                                placeholder="Tags"
-                                dense
-                                v-model="resource.tags"
-                                :items="selects.tags"
-                                label="Tags"
-                                :count-show-values="4"
-                                open-up
-                                :max-values-selected="3"
-                            />
-                        </v-col>
-                    </v-row> -->
                     <v-row>
                         <v-col cols="5">
                             <DefaultToggle
@@ -237,32 +216,29 @@ import draggable from 'vuedraggable'
 import TemaValidacionesModal from "./TemaValidacionesModal";
 import Editor from "@tinymce/tinymce-vue";
 
+const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'course_id'];
 
-const fields = ['name', 'active', 'position', 'imagen', 'course_id', 'config_id', 'school_id',
-    'topic_id', 'content', 'assessable', 'tipo_ev', 'tags', 'requisito_id'];
 const file_fields = ['imagen'];
+
 export default {
-    components: {editor: Editor,TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal},
+    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal},
     props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
     data() {
         return {
             drag: false,
             base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
             resourceDefault: {
-                course_id: this.course_id,
-                config_id: this.modulo_id,
-                school_id: this.school_id,
                 name: null,
-                requisito_id: null,
-                resumen: null,
+                course_id: this.course_id,
+                topic_requirement_id: null,
                 content: null,
                 imagen: null,
                 file_imagen: null,
                 assessable: null,
-                tipo_ev: null,
+                type_evaluation_id: null,
                 position: null,
                 media: [],
-                tags: [],
                 active: false,
                 hide_evaluable: null,
                 hide_tipo_ev: null,
@@ -274,11 +250,7 @@ export default {
                     {id: 1, nombre: 'Si'},
                     {id: 0, nombre: 'No'},
                 ],
-                tipo_ev: [
-                    {id: 'qualified', nombre: 'Calificada'},
-                    {id: 'open', nombre: 'Abierta'},
-                ],
-                tags: [],
+                evaluation_types: [],
                 requisitos: []
             },
             resource: {},
@@ -391,7 +363,7 @@ export default {
             let vue = this
 
             // console.log("SEND FORM DATA :: ", data)
-            if (data.confirmMethod === 'messagesActions'){
+            if (data.confirmMethod === 'messagesActions') {
                 vue.leavePage()
                 return
             }
@@ -424,7 +396,6 @@ export default {
                     const messages = data.data.messages
                     this.hideLoader()
                     if (messages.data.length > 0) {
-                        console.log("MODAL DE AVISO")
                         await vue.cleanModalTemasValidaciones()
                         vue.modalTemasValidaciones.hideCancelBtn = true
                         vue.modalTemasValidaciones.confirmLabel = 'Entendido'
@@ -503,12 +474,11 @@ export default {
             let url = `${vue.base_endpoint}/${vue.topic_id === '' ? 'form-selects' : `search/${vue.topic_id}`}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.tags = data.data.tags
                     vue.selects.requisitos = data.data.requisitos
+                    vue.selects.evaluation_types = data.data.evaluation_types
                     if (vue.topic_id !== '') {
                         vue.resource = Object.assign({}, data.data.tema)
-                        console.log(vue.resource);
-                        vue.resource.assessable = (vue.resource.assessable == 1) ? 1:0;
+                        vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
                     }
                 })
             return 0;

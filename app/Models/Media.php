@@ -271,6 +271,9 @@ class Media extends Model
             $query->orderBy('created_at', 'DESC');
         }
 
+        if ($request->workspace_id)
+            $query->where('workspace_id', $request->workspace_id);
+
         return $query->paginate($request->paginate);
     }
 

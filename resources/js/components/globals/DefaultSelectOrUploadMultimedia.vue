@@ -156,7 +156,7 @@ export default {
     },
     watch: {
         value(val) {
-            console.log('NEW VAL :: ', val)
+            // console.log('NEW VAL :: ', val)
             this.fileSelected = val // watch change from parent component
         }
     },
