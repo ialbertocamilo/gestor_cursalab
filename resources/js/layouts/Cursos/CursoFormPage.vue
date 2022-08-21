@@ -74,6 +74,8 @@
                                 v-model="resource.requisito_id"
                                 :items="selects.requisito_id"
                                 custom-items
+                                item-text="name"
+                                item-value="id"
                                 clearable
                             >
                                 <template v-slot:customItems="{item}">

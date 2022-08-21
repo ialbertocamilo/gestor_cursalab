@@ -253,6 +253,14 @@ class TestSeeder extends Seeder
             'workspace_id' => $workspace->id,
             'criterion_value_id' => $criterion_value->id
         ]);
+        
+
+        // $workspace = Workspace::create([
+        //     'name' => 'InRetail',
+        //     'slug' => 'inretail',
+        //     'logo' => 'images/workspace4-20220816165310-9825.png',
+        //     'active' => 1
+        // ]);
     }
 
     /**

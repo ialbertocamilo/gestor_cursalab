@@ -134,8 +134,8 @@ class CursosController extends Controller
         
         $query = Course::whereRelation('workspaces', 'id', $workspace->id)->where('active', ACTIVE);
         
-        if ($school)
-            $query->whereRelation('schools', 'id', $school->id);            
+        // if ($school)
+        //     $query->whereRelation('schools', 'id', $school->id);            
             // $req_cursos->where('school_id', $school->id);
 
         if ($course)
