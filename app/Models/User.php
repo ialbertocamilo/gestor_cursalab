@@ -268,7 +268,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             DB::commit();
         } catch (\Exception $e) {
-            info($e);
+//            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());

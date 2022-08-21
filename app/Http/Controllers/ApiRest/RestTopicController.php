@@ -12,8 +12,6 @@ class RestTopicController extends Controller
 {
     public function topics(Course $course, Request $request)
     {
-//        return $this->successApp(['data' => $course, 'request' => $request->school_id]);
-
         $user = Auth::user();
         $courses = $user->setCurrentCourses(return_courses: true);
 
