@@ -88,179 +88,93 @@ class TestSeeder extends Seeder
      */
     public function insertWorkspaces() {
 
-        // InRetail workspace
-        // ----------------------------------------
+        $workspaces = [
+            [   'name' => 'InRetail',
+                'children' => [
+                    ['name' => 'Agora'],
+                    ['name' => 'InDigital XP'],
+                    ['name' => 'Intercorp Retail'],
+                ],
+            ],
 
-        $workspace = Workspace::create([
-            'name' => 'InRetail',
-            'slug' => 'inretail',
-            'logo' => 'images/workspace4-20220816165310-9825.png',
-            'active' => 1
-        ]);
+            [   'name' => 'Química Suiza',
+                'children' => [
+                    ['name' => 'Química Suiza'],
+                    ['name' => 'Vanttive'],
+                ],
+            ],
 
-        // Intercorp Retail subworkspace
-        // ----------------------------------------
+            [   'name' => 'Financiera Oh',
+                'children' => [
+                    ['name' => 'Financiera Oh - Masivo'],
+                    ['name' => 'Financiera Oh - Central'],
+                ],
+            ],
 
-        $criterion_value = CriterionValue::create([
-            'criterion_id' => 1,
-            'value_text' => 'Intercorp Retail',
-            'active' => 1
-        ]);
+            [   'name' => 'Homecenters Peruanos',
+                'children' => [
+                    ['name' => 'Promart - Masivo'],
+                    ['name' => 'Promart - Central'],
+                ],
+            ],
 
-        $subworkspace = Workspace::create([
-            'criterion_value_id' => $criterion_value->id,
-            'name' => 'Intercorp Retail',
-            'slug' => 'intercorp-retail',
-            'logo' => 'images/workspace4-20220816165310-9825.png',
-            'parent_id' => $workspace->id,
-            'active' => 1
-        ]);
+            [   'name' => 'Tiendas Peruanas',
+                'children' => [
+                    ['name' => 'Oechsle'],
+                ],
+            ],
 
+            [   'name' => 'Real Plaza',
+                'children' => [
+                    ['name' => 'Real Plaza'],
+                ],
+            ],
 
+            [   'name' => 'Supermercados Peruanos',
+                'children' => [
+                    ['name' => 'Plaza Vea Oriente'],
+                    ['name' => 'Compañia Hard Discount'],
+                    ['name' => 'Operadora de Servicios Logisticos'],
+                    ['name' => 'Compañia Food Retail'],
+                    ['name' => 'Administración Food Regional'],
+                    ['name' => 'Makro Supermayorista'],
+                ],
+            ],
 
-        DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspace->id,
-            'criterion_value_id' => $criterion_value->id
-        ]);
+            [   'name' => 'Farmacias Peruanas',
+                'children' => [
+                    ['name' => 'Mi Farma'],
+                    ['name' => 'Inkafarma'],
+                    ['name' => 'FAPE Masivos'],
+                    ['name' => 'Administrativos FAPE'],
+                ],
+            ],
 
-        // Quimica Suiza subworkspace
-        // ----------------------------------------
+        ];
 
-        $criterion_value = CriterionValue::create([
-            'criterion_id' => 1,
-            'value_text' => 'Quimica Suiza',
-            'active' => 1
-        ]);
+        foreach($workspaces AS $row)
+        {
+            $workspace = Workspace::create([
+                'name' => $row['name'],
+                'active' => ACTIVE
+            ]);
 
-        $subworkspace = Workspace::create([
-            'criterion_value_id' => $criterion_value->id,
-            'name' => 'Quimica Suiza',
-            'slug' => 'quimica-suiza',
-            'logo' => 'images/workspace1-20220816165243-3521.png',
-            'parent_id' => $workspace->id,
-            'active' => 1
-        ]);
+            foreach ($row['children'] as $key => $child)
+            {
+                $criterion_value = CriterionValue::create([
+                    'criterion_id' => 1,
+                    'value_text' => $child['name'],
+                    'active' => 1
+                ]);
 
-
-        DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspace->id,
-            'criterion_value_id' => $criterion_value->id
-        ]);
-
-        // Financiera Oh subworkspace
-        // ----------------------------------------
-
-        $criterion_value = CriterionValue::create([
-            'criterion_id' => 1,
-            'value_text' => 'Financiera Oh',
-            'active' => 1
-        ]);
-
-        $subworkspace = Workspace::create([
-            'criterion_value_id' => $criterion_value->id,
-            'name' => 'Financiera Oh',
-            'slug' => 'financiera-oh',
-            'logo' => 'images/workspace2-20220816165253-1851.png',
-            'parent_id' => $workspace->id,
-            'active' => 1
-        ]);
-
-
-        DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspace->id,
-            'criterion_value_id' => $criterion_value->id
-        ]);
-
-        // Promart subworkspace
-        // ----------------------------------------
-
-        $criterion_value = CriterionValue::create([
-            'criterion_id' => 1,
-            'value_text' => 'Promart',
-            'active' => 1
-        ]);
-
-        $subworkspace = Workspace::create([
-            'criterion_value_id' => $criterion_value->id,
-            'name' => 'Promart',
-            'slug' => 'promart',
-            'logo' => 'images/workspace3-20220816165303-6210.png',
-            'parent_id' => $workspace->id,
-            'active' => 1
-        ]);
-
-
-        DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspace->id,
-            'criterion_value_id' => $criterion_value->id
-        ]);
-
-        // UNIVERSIDAD CORPORATIVA subworkspace
-        // ----------------------------------------
-
-        $workspace = Workspace::create([
-            'name' => 'Universidad corporativa',
-            'slug' => 'universidad-corporativa',
-            'logo' => 'images/universidad.png',
-            'active' => 1
-        ]);
-
-        // $idWorkspaceUni = Workspace::where('slug', 'universidad-corporativa')->first()->id;
-
-        // Inkafarma subworkspace
-        // ----------------------------------------
-
-        $criterion_value = CriterionValue::create([
-            'criterion_id' => 1,
-            'value_text' => 'Inkafarma',
-            'active' => 1
-        ]);
-
-        $subworkspace = Workspace::create([
-            'criterion_value_id' => $criterion_value->id,
-            'name' => 'Inkafarma',
-            'slug' => 'inkafarma',
-            'logo' => 'images/inkafarma.png',
-            'parent_id' => $workspace->id,
-            'active' => 1
-        ]);
-
-
-        DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspace->id,
-            'criterion_value_id' => $criterion_value->id
-        ]);
-
-        // -----------------
-
-        $criterion_value = CriterionValue::create([
-            'criterion_id' => 1,
-            'value_text' => 'MiFarma',
-            'active' => 1
-        ]);
-
-        $subworkspace = Workspace::create([
-            'criterion_value_id' => $criterion_value->id,
-            'name' => 'MiFarma',
-            'slug' => 'mifarma',
-            'logo' => 'images/mifarma.png',
-            'parent_id' => $workspace->id,
-            'active' => 1
-        ]);
-
-
-        DB::table('criterion_value_workspace')->insert([
-            'workspace_id' => $workspace->id,
-            'criterion_value_id' => $criterion_value->id
-        ]);
-        
-
-        // $workspace = Workspace::create([
-        //     'name' => 'InRetail',
-        //     'slug' => 'inretail',
-        //     'logo' => 'images/workspace4-20220816165310-9825.png',
-        //     'active' => 1
-        // ]);
+                $subworkspace = Workspace::create([
+                    'criterion_value_id' => $criterion_value->id,
+                    'name' => $child['name'],
+                    'parent_id' => $workspace->id,
+                    'active' => 1
+                ]);
+            }
+        }         
     }
 
     /**
@@ -353,7 +267,7 @@ class TestSeeder extends Seeder
             $userData['active'] = 1;
 
             if (str_contains($userData['email'], 'universidad')) {
-                $workspace = Workspace::where('slug', 'universidad-corporativa')->first();
+                $workspace = Workspace::where('slug', 'farmacias-peruanas')->first();
                 $workspaceId = $workspace->id;
             }
 
@@ -453,7 +367,7 @@ class TestSeeder extends Seeder
             if (str_contains($userData['email'], 'reports')) $roleId = 6;
 
             if (str_contains($userData['email'], 'universidad')) {
-                $workspace = Workspace::where('slug', 'universidad-corporativa')->first();
+                $workspace = Workspace::where('slug', 'farmacias-peruanas')->first();
                 $workspaceId = $workspace->id;
             }
 
