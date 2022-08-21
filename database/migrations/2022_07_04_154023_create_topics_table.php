@@ -34,7 +34,7 @@ return new class extends Migration
             $table->foreignId('type_evaluation_id')->nullable()->constrained('taxonomies');
             $table->foreignId('duplicate_id')->nullable()->constrained('topics');
 
-            $table->boolean('active')->nullable()->default(true);
+            $table->boolean('active')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

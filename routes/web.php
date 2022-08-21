@@ -110,7 +110,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('entrenamiento')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenamiento.php'));
 
     Route::prefix('programas')->middleware('checkrol:admin')->group(base_path('routes/cms/blocks.php'));
-    Route::prefix('media')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/media.php'));
+//    Route::prefix('media')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/media.php'));
 
 
     Route::prefix('workspaces')->middleware('checkrol:admin')->group(base_path('routes/cms/workspaces.php'));
