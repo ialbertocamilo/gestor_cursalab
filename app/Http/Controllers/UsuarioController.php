@@ -149,10 +149,7 @@ class UsuarioController extends Controller
                 }
             ])
             ->whereRelation('workspaces', 'id', $current_workspace?->id)
-//            ->whereHas('workspaces', function ($q) use ($current_workspace) {
-//                $q->whereIn('id', [$current_workspace?->id]);
-//            })
-            ->select('id', 'name', 'code', 'parent_id', 'multiple')
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required')
             ->orderBy('position')
             ->get();
 
