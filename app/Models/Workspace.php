@@ -210,6 +210,7 @@ class Workspace extends BaseModel
 
             $user = User::find($userId);
             $workspace = Workspace::find($user->subworkspace_id);
+            
             return [$workspace];
         }
     }

@@ -13,19 +13,9 @@ class Course extends BaseModel
         'position', 'scheduled_restarts', 'active'
     ];
 
-    /*
-
-        Relationships
-
-    --------------------------------------------------------------------------*/
-
-
     public function schools()
     {
-        return $this->belongsToMany(
-            School::class,
-            'course_school'
-        );
+        return $this->belongsToMany(School::class);
     }
 
     public function workspaces()
@@ -162,12 +152,15 @@ class Course extends BaseModel
 
             DB::commit();
             
-            return $course;
         } catch (\Exception $e) {
             
             DB::rollBack();
             return $e;
         }
+        
+        cache_clear_model(School::class);
+
+        return $course;
     }
 
     protected function validateCursoRequisito($data, $escuela, $curso)

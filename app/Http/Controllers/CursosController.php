@@ -46,34 +46,34 @@ class CursosController extends Controller
         return $this->success($cursos);
     }
 
-    public function searchCurso(School $escuela, Course $curso)
+    public function searchCurso(School $school, Course $course)
     {
-        $scheduled_restarts = json_decode($curso->scheduled_restarts);
-        $curso->scheduled_restarts = $scheduled_restarts->activado ?? false;
-        $curso->scheduled_restarts_dias = $scheduled_restarts->reinicio_dias ?? 0;
-        $curso->scheduled_restarts_horas = $scheduled_restarts->reinicio_horas ?? 0;
-        $curso->scheduled_restarts_minutos = $scheduled_restarts->reinicio_minutos ?? 0;
-        $form_selects =  $this->getFormSelects($escuela, $curso, true);
-        $curso->makeHidden('scheduled_restarts');
+        $scheduled_restarts = json_decode($course->scheduled_restarts);
+        $course->scheduled_restarts = $scheduled_restarts->activado ?? false;
+        $course->scheduled_restarts_dias = $scheduled_restarts->reinicio_dias ?? 0;
+        $course->scheduled_restarts_horas = $scheduled_restarts->reinicio_horas ?? 0;
+        $course->scheduled_restarts_minutos = $scheduled_restarts->reinicio_minutos ?? 0;
+        $form_selects =  $this->getFormSelects($school, $course, true);
+        $course->makeHidden('scheduled_restarts');
 
-        $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($curso) {
-            $query->where('id', $curso->id);
+        $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($course) {
+            $query->where('id', $course->id);
         })->first();
 
-        $curso->requisito_id = (!is_null($req_curso)) ? $req_curso->requirement_id : '';
+        $course->requisito_id = (!is_null($req_curso)) ? $req_curso->requirement_id : '';
 
-        $escuelas = collect();
-        foreach ($curso->schools as $req) {
-            $escuelas->push((object)[
+        $schools = collect();
+        foreach ($course->schools as $req) {
+            $schools->push((object)[
                 'id' => $req->id,
                 'nombre' => $req->name,
             ]);
         }
 
-        $curso->lista_escuelas = $escuelas;
+        $course->lista_escuelas = $schools;
 
         return $this->success([
-            'curso' => $curso,
+            'curso' => $course,
             'requisitos' => $form_selects['requisitos'],
             'escuelas' => $form_selects['escuelas'],
         ]);
@@ -99,10 +99,10 @@ class CursosController extends Controller
         return $this->success(compact('curso', 'msg'));
     }
 
-    public function updateCurso(School $escuela, Course $curso, CursosStoreUpdateRequest $request)
+    public function updateCurso(School $escuela, Course $course, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $validate = Course::validateCursoRequisito($data, $escuela, $curso);
+        $validate = Course::validateCursoRequisito($data, $escuela, $course);
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
@@ -117,44 +117,45 @@ class CursosController extends Controller
         if (!$validate['validate'])
             return $this->success(compact('validate'), 422);
 
-        $response_curso = Course::storeRequest($data, $curso);
+        $response_curso = Course::storeRequest($data, $course);
         $response = [
             'curso' => $response_curso,
             'msg' => 'Curso actualizado correctamente.',
         ];
 
-        $response['messages'] = Course::getMessagesActions($curso);
+        $response['messages'] = Course::getMessagesActions($course);
 
         return $this->success($response);
     }
 
-    public function getFormSelects(School $escuela, Course $curso = null, $compactResponse = false)
+    public function getFormSelects(School $school, Course $course = null, $compactResponse = false)
     {
-        $req_cursos = Course::join('course_school', 'course_school.course_id', '=', 'courses.id');
-        if (!is_null($escuela) && $escuela->exists) {
-            $req_cursos->where('school_id', $escuela->id);
-        }
-        if (!is_null($curso) && $curso->exists) {
-            $req_cursos->where('course_id', '!=', $curso->id);
-        }
-        $req_cursos->get();
+        $workspace = get_current_workspace();
+        
+        $query = Course::whereRelation('workspaces', 'id', $workspace->id)->where('active', ACTIVE);
+        
+        if ($school)
+            $query->whereRelation('schools', 'id', $school->id);            
+            // $req_cursos->where('school_id', $school->id);
 
-        $lista_escuelas = School::all()->where('active', 1);
+        if ($course)
+            $query->where('id', '!=', $course->id);
+
+        $req_cursos = $query->get();
+
+        // info('req_cursos');
+        // info($req_cursos);
+
+        $escuelas = School::where('active', ACTIVE)->get();
 
         $requisitos = collect();
-        $escuelas = collect();
+        // $escuelas = collect();
 
         foreach ($req_cursos as $req) {
             $requisitos->push((object)[
                 'id' => $req->id,
-                'nombre' => $req->name,
-                'carreras' => ''
-            ]);
-        }
-        foreach ($lista_escuelas as $req) {
-            $escuelas->push((object)[
-                'id' => $req->id,
-                'nombre' => $req->name,
+                'name' => $req->name,
+                'escuelas' => '---'
             ]);
         }
 
@@ -163,9 +164,9 @@ class CursosController extends Controller
         return $compactResponse ? $response : $this->success($response);
     }
 
-    public function temas(Categoria $categoria, Curso $curso, Request $request)
+    public function temas(Categoria $categoria, Curso $course, Request $request)
     {
-        $posteos = $curso->temas()->orderBy('orden')->paginate();
+        $posteos = $course->temas()->orderBy('orden')->paginate();
         foreach ($posteos as $posteo) {
             if ($posteo->tipo_ev) {
                 $tipo = ($posteo->tipo_ev == 'calificada') ? 'selecciona' : 'texto';
@@ -177,7 +178,7 @@ class CursosController extends Controller
 
         // if ($request->has('pid')) {
         //     // $temaspp = Posteo_perfil::select('posteo_id')->where('perfile_id', $request->input('pid'))->pluck('posteo_id');
-        //     // $posteos = $curso->temas()->whereIn('id', $temaspp)->orderBy('orden')->paginate();
+        //     // $posteos = $course->temas()->whereIn('id', $temaspp)->orderBy('orden')->paginate();
 
         // } else {
         //     // $posteos = $curso->temas()->withCount(['preguntas'])->orderBy('orden')->paginate();
@@ -210,31 +211,31 @@ class CursosController extends Controller
     // }
 
 
-    public function create(Categoria $categoria)
-    {
-        $config_id = $categoria->config->id;
+    // public function create(Categoria $categoria)
+    // {
+    //     $config_id = $categoria->config->id;
 
-        $config_array = Abconfig::select('id', 'etapa')->pluck('etapa', 'id');
-        $cates_array = Categoria::select('id', 'nombre')->where('config_id', $config_id)->orderBaay('orden')->pluck('nombre', 'id');
-        $carrera_array = Carrera::select('id', 'nombre')->pluck('nombre', 'id');
-        $cursos_array = Curso::select('id', 'nombre')->where('categoria_id', $categoria->id)->where('estado', 1)->orderBy('orden')->pluck('nombre', 'id');
+    //     $config_array = Abconfig::select('id', 'etapa')->pluck('etapa', 'id');
+    //     $cates_array = Categoria::select('id', 'nombre')->where('config_id', $config_id)->orderBaay('orden')->pluck('nombre', 'id');
+    //     $carrera_array = Carrera::select('id', 'nombre')->pluck('nombre', 'id');
+    //     $cursos_array = Curso::select('id', 'nombre')->where('categoria_id', $categoria->id)->where('estado', 1)->orderBy('orden')->pluck('nombre', 'id');
 
-        $requisitos = DB::table('cursos AS c')
-            ->select(DB::raw('c.id, c.nombre, c.orden, u.carrera_id'))
-            ->join('curricula AS u', 'c.id', '=', 'u.curso_id')
-            ->where('c.categoria_id', $categoria->id)
-            ->where('c.estado', 1)
-            ->orderBy('c.orden')
-            ->get();
-        // $requisitos->prepend('NINGUNO', '');
-        // return $requisitos;
+    //     $requisitos = DB::table('cursos AS c')
+    //         ->select(DB::raw('c.id, c.nombre, c.orden, u.carrera_id'))
+    //         ->join('curricula AS u', 'c.id', '=', 'u.curso_id')
+    //         ->where('c.categoria_id', $categoria->id)
+    //         ->where('c.estado', 1)
+    //         ->orderBy('c.orden')
+    //         ->get();
+    //     // $requisitos->prepend('NINGUNO', '');
+    //     // return $requisitos;
 
-        $carreras = Carrera::where('config_id', $config_id)->where('estado', 1)->orderBy('nombre')->get();
-        $curricula = [];
-        // return $carreras;
+    //     $carreras = Carrera::where('config_id', $config_id)->where('estado', 1)->orderBy('nombre')->get();
+    //     $curricula = [];
+    //     // return $carreras;
 
-        return view('cursos.create', compact('config_id', 'config_array', 'cates_array', 'carrera_array', 'cursos_array', 'requisitos', 'categoria', 'carreras', 'curricula'));
-    }
+    //     return view('cursos.create', compact('config_id', 'config_array', 'cates_array', 'carrera_array', 'cursos_array', 'requisitos', 'categoria', 'carreras', 'curricula'));
+    // }
 
     public function store(Categoria $categoria, CursoStoreRequest $request)
     {
@@ -294,34 +295,34 @@ class CursosController extends Controller
             ->with('info', 'Registro guardado con éxito');
     }
 
-    public function edit(Categoria $categoria, Curso $curso)
-    {
-        $config_id = $categoria->config->id;
+    // public function edit(Categoria $categoria, Curso $curso)
+    // {
+    //     $config_id = $categoria->config->id;
 
-        $config_array = Abconfig::select('id', 'etapa')->pluck('etapa', 'id');
-        $cates_array = Categoria::select('id', 'nombre')->where('config_id', $config_id)->orderBy('orden')->pluck('nombre', 'id');
-        $carrera_array = Carrera::select('id', 'nombre')->where('config_id', $config_id)->pluck('nombre', 'id');
-        // $ciclos_array = Ciclo::select('id','nombre')->pluck('nombre','id' );
-        $cursos_array = Curso::select('id', 'nombre')->where('categoria_id', $categoria->id)->where('estado', 1)->orderBy('orden')->pluck('nombre', 'id');
-        $requisitos = DB::table('cursos AS c')
-            ->select(DB::raw('c.id, c.nombre, c.orden, u.carrera_id'))
-            ->join('curricula AS u', 'c.id', '=', 'u.curso_id')
-            ->where('c.id', "!=", $curso->id)
-            ->where('c.categoria_id', $categoria->id)
-            ->where('c.estado', 1)
-            ->where('c.libre', $curso->libre)
-            ->orderBy('c.orden')
-            ->get();
-        $carreras = Carrera::where('config_id', $config_id)->where('estado', 1)->orderBy('nombre')->get();
+    //     $config_array = Abconfig::select('id', 'etapa')->pluck('etapa', 'id');
+    //     $cates_array = Categoria::select('id', 'nombre')->where('config_id', $config_id)->orderBy('orden')->pluck('nombre', 'id');
+    //     $carrera_array = Carrera::select('id', 'nombre')->where('config_id', $config_id)->pluck('nombre', 'id');
+    //     // $ciclos_array = Ciclo::select('id','nombre')->pluck('nombre','id' );
+    //     $cursos_array = Curso::select('id', 'nombre')->where('categoria_id', $categoria->id)->where('estado', 1)->orderBy('orden')->pluck('nombre', 'id');
+    //     $requisitos = DB::table('cursos AS c')
+    //         ->select(DB::raw('c.id, c.nombre, c.orden, u.carrera_id'))
+    //         ->join('curricula AS u', 'c.id', '=', 'u.curso_id')
+    //         ->where('c.id', "!=", $curso->id)
+    //         ->where('c.categoria_id', $categoria->id)
+    //         ->where('c.estado', 1)
+    //         ->where('c.libre', $curso->libre)
+    //         ->orderBy('c.orden')
+    //         ->get();
+    //     $carreras = Carrera::where('config_id', $config_id)->where('estado', 1)->orderBy('nombre')->get();
 
-        // $curricula = $this->get_curricula_agrupada($curso->id);
+    //     // $curricula = $this->get_curricula_agrupada($curso->id);
 
-        if ($curso->imagen != "") {
-            $curso->imagen = str_replace("images/", "", $curso->imagen);
-        }
+    //     if ($curso->imagen != "") {
+    //         $curso->imagen = str_replace("images/", "", $curso->imagen);
+    //     }
 
-        return view('cursos.edit', compact('config_id', 'curso', 'config_array', 'cates_array', 'carrera_array', 'cursos_array', 'requisitos', 'categoria', 'carreras'));
-    }
+    //     return view('cursos.edit', compact('config_id', 'curso', 'config_array', 'cates_array', 'carrera_array', 'cursos_array', 'requisitos', 'categoria', 'carreras'));
+    // }
 
     public function get_requisitos(Request $request)
     {
@@ -337,24 +338,24 @@ class CursosController extends Controller
         return response()->json(compact('requisitos'));
     }
 
-    public static function get_curricula_agrupada($curso_id)
-    {
-        $curricula_res = Curricula::select('carrera_id')->where('curso_id', $curso_id)->groupBy('carrera_id')->get();
-        $curricula = [];
-        foreach ($curricula_res as $curri) {
-            $curricula_res2 = Curricula::select('ciclo_id')->where('curso_id', $curso_id)->where('carrera_id', $curri->carrera_id)->get();
-            $ciclos = [];
-            foreach ($curricula_res2 as $curri2) {
-                $ciclos[] = $curri2->ciclo_id;
-            }
-            $curricula[] = [
-                "carrera_id" => $curri->carrera_id,
-                "ciclos" => $ciclos
-            ];
-        }
-        // dd($curricula);
-        return $curricula;
-    }
+    // public static function get_curricula_agrupada($curso_id)
+    // {
+    //     $curricula_res = Curricula::select('carrera_id')->where('curso_id', $curso_id)->groupBy('carrera_id')->get();
+    //     $curricula = [];
+    //     foreach ($curricula_res as $curri) {
+    //         $curricula_res2 = Curricula::select('ciclo_id')->where('curso_id', $curso_id)->where('carrera_id', $curri->carrera_id)->get();
+    //         $ciclos = [];
+    //         foreach ($curricula_res2 as $curri2) {
+    //             $ciclos[] = $curri2->ciclo_id;
+    //         }
+    //         $curricula[] = [
+    //             "carrera_id" => $curri->carrera_id,
+    //             "ciclos" => $ciclos
+    //         ];
+    //     }
+    //     // dd($curricula);
+    //     return $curricula;
+    // }
 
     public function update(Categoria $categoria, CursoStoreRequest $request, Curso $curso)
     {
@@ -654,38 +655,40 @@ class CursosController extends Controller
         return $this->success($response);
     }
 
-    public function moverCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso, MoverCursoRequest $request)
+    // public function moverCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso, MoverCursoRequest $request)
+    // {
+    //     $data = $request->validated();
+    //     $validate = Curso::validateMoverCurso($curso);
+    //     //        dd($validate);
+    //     if (!$validate['validate'])
+    //         return $this->success(compact('validate'), 422);
+
+    //     $curso = Curso::moverCurso($curso, $data['escuela_id']);
+
+    //     return $this->success(['msg' => 'El curso se movió correctamente.']);
+    // }
+
+    public function updateStatus(School $school, Course $course, Request $request)
     {
-        $data = $request->validated();
-        $validate = Curso::validateMoverCurso($curso);
-        //        dd($validate);
-        if (!$validate['validate'])
-            return $this->success(compact('validate'), 422);
-
-        $curso = Curso::moverCurso($curso, $data['escuela_id']);
-
-        return $this->success(['msg' => 'El curso se movió correctamente.']);
-    }
-
-    public function updateStatus(School $escuela, Course $curso, Request $request)
-    {
-        $active = ($curso->active == 1) ? 0 : 1;
+        $active = ($course->active == 1) ? 0 : 1;
+        
         if ($request->withValidations == 0) {
 
-            $validate = Course::validateUpdateStatus($escuela, $curso, $active);
+            $validate = Course::validateUpdateStatus($school, $course, $active);
 
             if (!$validate['validate'])
                 return $this->success(compact('validate'), 422);
         }
-        $curso->active = $active;
-        $curso->save();
+
+        $course->active = $active;
+        $course->save();
 
         $response = [
-            'curso' => $curso,
+            'curso' => $course,
             'msg' => 'Estado actualizado con éxito.',
         ];
 
-        $response['messages'] = Course::getMessagesActions($curso);
+        $response['messages'] = Course::getMessagesActions($course);
 
         return $this->success($response);
     }

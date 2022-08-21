@@ -52,7 +52,7 @@
                                 label="Escuelas"
                                 v-model="resource.lista_escuelas"
                                 :items="selects.lista_escuelas"
-                                item-text="nombre"
+                                item-text="name"
                                 item-value="id"
                                 multiple
                             />
@@ -78,8 +78,8 @@
                             >
                                 <template v-slot:customItems="{item}">
                                     <v-list-item-content>
-                                        <v-list-item-title v-html="item.nombre"/>
-                                        <v-list-item-subtitle class="list-cursos-carreras" v-html="item.carreras"/>
+                                        <v-list-item-title v-html="item.name"/>
+                                        <v-list-item-subtitle class="list-cursos-carreras" v-html="item.escuelas"/>
                                     </v-list-item-content>
                                 </template>
                             </DefaultAutocomplete>
@@ -356,10 +356,12 @@ export default {
                 .then(({data}) => {
                     console.log('data')
                     console.log(data)
-                    vue.selects.requisito_id = data.requisitos
-                    vue.selects.lista_escuelas = data.escuelas
+                    let response = data.data ? data.data : data;
+
+                    vue.selects.requisito_id = response.requisitos
+                    vue.selects.lista_escuelas = response.escuelas
                     if (vue.curso_id !== '') {
-                        vue.resource = Object.assign({}, data.data.curso)
+                        vue.resource = Object.assign({}, response.curso)
                     }
                 })
             return 0;
