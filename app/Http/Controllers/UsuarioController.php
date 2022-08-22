@@ -81,8 +81,9 @@ class UsuarioController extends Controller
     public function search(Request $request)
     {
         $workspace = get_current_workspace();
-        $sub_workspaces = $workspace?->subworkspaces;
-        $request->merge(['sub_workspaces_id' => $sub_workspaces?->pluck('id')]);
+        $sub_workspaces_id = $workspace?->subworkspaces?->pluck('id');
+        info($sub_workspaces_id);
+        $request->merge(['sub_workspaces_id' => $sub_workspaces_id]);
 
         $users = User::search($request);
 
@@ -143,8 +144,11 @@ class UsuarioController extends Controller
         $current_workspace = get_current_workspace();
         $criteria = Criterion::query()
             ->with([
-                'values' => function ($q) {
+                'values' => function ($q) use($current_workspace) {
                     $q->with('parents:id,criterion_id,value_text')
+                        ->whereHas('workspaces', function ($q2) use($current_workspace){
+                            $q2->where('id', $current_workspace->id);
+                        })
                         ->select('id', 'criterion_id', 'exclusive_criterion_id', 'value_text', 'parent_id');
                 }
             ])

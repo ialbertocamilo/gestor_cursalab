@@ -18,13 +18,16 @@ class Criterion extends BaseModel
         'editable_segmentation', 'multiple', 'active', 'description',
     ];
 
+    protected $casts = [
+        'required' => 'boolean',
+    ];
+
     public function sluggable(): array
     {
         return [
 //            'code' => ['source' => 'name', 'onUpdate' => true, 'unique' => true]
         ];
     }
-
 
     public function values()
     {
