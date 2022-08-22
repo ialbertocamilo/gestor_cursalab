@@ -119,7 +119,8 @@
             <div class="col-10">
                 <div class="configurations-button-wrapper"
                 >
-                    <v-col cols="5">
+                    <v-col cols="5"
+                            @click="toggleConfiguration()">
                         <span style="cursor: pointer">
                             Configuraciones
                         </span>
@@ -420,8 +421,8 @@ export default {
                 // one workspace, update flag to show
                 // configuration area
 
-                if (vue.workspacesAdmin.length > 0)
-                    vue.canAccessConfiguration = true;
+                // if (vue.workspacesAdmin.length > 0)
+                //     vue.canAccessConfiguration = true;
 
             }
         }
