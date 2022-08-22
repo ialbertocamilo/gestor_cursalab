@@ -47,7 +47,7 @@
         tile>
             <v-list-group
             :value="false"
-            v-for="(grupo, i) in grupos"
+            v-for="(grupo, i) in gruposFiltrado"
             :key="i"
             color="white"
             v-model="grupo.active"
@@ -122,7 +122,7 @@ export default {
                         subpaths:["aulas-virtuales"],
                         selected:false,
                         permission:"meetings",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Cuentas Zoom",
@@ -131,7 +131,7 @@ export default {
                         subpaths:["cuentas-zoom"],
                         selected:false,
                         permission:"accounts",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                         //Fix -2
                         // permission:"accounts.list"
                     },
