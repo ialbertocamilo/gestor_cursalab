@@ -336,6 +336,84 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Jaime K',
+            'email'=> 'jaime@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>5,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>8,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'name'=> 'Janella V',
+            'email'=> 'janella@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>5,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>8,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
             'name'=> 'Kevin Alcántara',
             'email'=> 'Kevin.Alcantara@intercorpretail.pe',
             'workspaces'=>

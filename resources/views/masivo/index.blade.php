@@ -82,8 +82,8 @@
 
                       <div class="col-sm-12 client-title">
                         <h2>Subida masiva de usuarios</h2>
-                        <p>Se crea o actualiza los datos de usuarios según el valor de la columna de acción.</p>
-                        <span>Columnas del excel: Módulo, DNI, nombres y apellidos, botica, grupo, cargo, genero, carrera, ciclo, acción</span>
+                        <p>Permite crear o actualizar usuarios según la plantilla.</p>
+                        <span>Tomar en cuenta</span>
                         <br />
                         <span>Accion: Nuevo, datos</span>
                         <hr>
