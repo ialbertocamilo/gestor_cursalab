@@ -98,10 +98,11 @@ class TemaController extends Controller
 
         $response = [
             'tema' => $tema,
-            'msg' => ' Tema creado correctamente.'
+            'msg' => ' Tema creado correctamente.',
+            'messages' => [],
         ];
 
-        $response['messages'] = Topic::getMessagesActions($tema, $data, 'Tema creado con éxito');
+//        $response['messages'] = Topic::getMessagesActions($tema, $data, 'Tema creado con éxito');
 
         return $this->success($response);
     }
@@ -121,7 +122,8 @@ class TemaController extends Controller
 
         $response = [
             'tema' => $topic,
-            'msg' => ' Tema actualizado correctamente.'
+            'msg' => ' Tema actualizado correctamente.',
+            'messages' => [],
         ];
 
 //        $response['messages'] = Topic::getMessagesActions($topic, $data, 'Tema actualizado con éxito');

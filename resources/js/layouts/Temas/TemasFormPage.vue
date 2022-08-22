@@ -394,19 +394,19 @@ export default {
 
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
-                    const messages = data.data.messages
-                    this.hideLoader()
-                    if (messages.data.length > 0) {
-                        await vue.cleanModalTemasValidaciones()
-                        vue.modalTemasValidaciones.hideCancelBtn = true
-                        vue.modalTemasValidaciones.confirmLabel = 'Entendido'
-                        vue.modalTemasValidaciones.persistent = true
-                        vue.modalTemasValidaciones.showCloseIcon = false
-                        await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
-                    } else {
+                    // const messages = data.data.messages
+                        this.hideLoader()
+                    //     if (messages.data.length > 0) {
+                    //         await vue.cleanModalTemasValidaciones()
+                    //         vue.modalTemasValidaciones.hideCancelBtn = true
+                    //         vue.modalTemasValidaciones.confirmLabel = 'Entendido'
+                    //         vue.modalTemasValidaciones.persistent = true
+                    //         vue.modalTemasValidaciones.showCloseIcon = false
+                    //         await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
+                    //     } else {
                         vue.showAlert(data.data.msg)
                         setTimeout(() => vue.leavePage(), 2000)
-                    }
+                    // }
                 })
                 .catch(async ({data}) => {
                     // console.log('PAGE ERROR DATA ::', data)
