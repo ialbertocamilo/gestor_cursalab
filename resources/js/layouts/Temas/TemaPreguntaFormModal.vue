@@ -8,6 +8,7 @@
     >
         <template v-slot:content>
             <v-form ref="TemaPreguntaForm">
+                <DefaultErrors :errors="errors"/>
 
                 <v-row justify="space-around" class="mt-3">
                     <v-col cols="12">
@@ -151,6 +152,7 @@ export default {
     },
     data() {
         return {
+            errors: [],
             resourceDefault: {
                 id: null,
                 pregunta: "",
@@ -179,6 +181,8 @@ export default {
         },
         confirmModal() {
             let vue = this
+            vue.errors = []
+
             vue.showLoader()
             const validateForm = vue.validateFieldsForm();
             // console.log(validateForm)
@@ -191,6 +195,12 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         vue.hideLoader()
+                    })
+                    .catch((error) => {
+                        vue.hideLoader()
+
+                        if (error && error.errors)
+                            vue.errors = error.errors
                     })
             } else {
                 vue.hideLoader()
@@ -247,6 +257,7 @@ export default {
         },
         resetSelects() {
             let vue = this
+            vue.tempAnswer = ''
             vue.rules.pregunta = false
         },
         resetValidation() {
@@ -256,7 +267,8 @@ export default {
         async loadData(resource) {
             let vue = this
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                vue.resource = JSON.parse(JSON.stringify(vue.resourceDefault))
+                // vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
             if (resource) {
                 let url = `${vue.options.base_endpoint}/${resource.id}`
