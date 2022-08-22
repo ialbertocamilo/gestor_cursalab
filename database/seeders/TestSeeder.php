@@ -796,7 +796,7 @@ class TestSeeder extends Seeder
             // Assign admins
             foreach ($child['workspaces'] as $key => $wk_arr)
             {
-                AssignedRole::create([
+                AssignedRole::insert([
                     'entity_type' => AssignedRole::USER_ENTITY,
                     'entity_id' => $user->id,
                     'scope' => $wk_arr['id'],
