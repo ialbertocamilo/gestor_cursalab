@@ -26,7 +26,7 @@ class TestSeeder extends Seeder
             ],
         ],
         [   
-            'id'=>2,
+            'id'=>5,
             'code' => 'QUSU',
             'name' => 'Química Suiza',
             'children' => [
@@ -35,7 +35,7 @@ class TestSeeder extends Seeder
             ],
         ],
         [   
-            'id'=>3,
+            'id'=>8,
             'code' => 'FIOH',
             'name' => 'Financiera Oh',
             'children' => [
@@ -44,7 +44,7 @@ class TestSeeder extends Seeder
             ],
         ],
         [   
-            'id'=>4,
+            'id'=>11,
             'code' => 'HOPE',
             'name' => 'Homecenters Peruanos',
             'children' => [
@@ -53,7 +53,7 @@ class TestSeeder extends Seeder
             ],
         ],
         [   
-            'id'=>5,
+            'id'=>14,
             'code' => 'TIPE',
             'name' => 'Tiendas Peruanas',
             'children' => [
@@ -62,7 +62,7 @@ class TestSeeder extends Seeder
             
         ],
         [   
-            'id'=>6,
+            'id'=>16,
             'code' => 'REPL',
             'name' => 'Real Plaza',
             'children' => [
@@ -70,7 +70,7 @@ class TestSeeder extends Seeder
             ],
         ],
         [   
-            'id'=>7,
+            'id'=>18,
             'code' => 'SUPE',
             'name' => 'Supermercados Peruanos',
             'children' => [
@@ -83,7 +83,7 @@ class TestSeeder extends Seeder
             ],
         ],
         [   
-            'id'=>8,
+            'id'=>25,
             'code' => 'FAPE',
             'name' => 'Farmacias Peruanas',
             'children' => [
@@ -111,7 +111,7 @@ class TestSeeder extends Seeder
             'workspaces'=>
             [
                 [
-                    'id'=>2,
+                    'id'=>5,
                     'role_id'=>4,
                 ]
             ]
@@ -121,7 +121,7 @@ class TestSeeder extends Seeder
             'workspaces'=>
             [
                 [
-                    'id'=>3,
+                    'id'=>8,
                     'role_id'=>5,
                 ]
             ]
@@ -131,7 +131,7 @@ class TestSeeder extends Seeder
             'workspaces'=>
             [
                 [
-                    'id'=>4,
+                    'id'=>11,
                     'role_id'=>6,
                 ]
             ]
@@ -145,31 +145,31 @@ class TestSeeder extends Seeder
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>2,
-                    'role_id'=>3,
-                ],
-                [
-                    'id'=>3,
-                    'role_id'=>3,
-                ],
-                [
-                    'id'=>4,
-                    'role_id'=>3,
-                ],
-                [
                     'id'=>5,
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>6,
-                    'role_id'=>3,
-                ],
-                [
-                    'id'=>7,
-                    'role_id'=>3,
-                ],
-                [
                     'id'=>8,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
                     'role_id'=>3,
                 ],
             ]
@@ -183,15 +183,41 @@ class TestSeeder extends Seeder
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>2,
+                    'id'=>5,
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>3,
+                    'id'=>8,
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>4,
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'email'=> 'alyona@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
                     'role_id'=>3,
                 ],
                 [
@@ -199,15 +225,27 @@ class TestSeeder extends Seeder
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>6,
-                    'role_id'=>3,
-                ],
-                [
-                    'id'=>7,
-                    'role_id'=>3,
-                ],
-                [
                     'id'=>8,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
                     'role_id'=>3,
                 ],
             ]
@@ -221,15 +259,41 @@ class TestSeeder extends Seeder
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>2,
+                    'id'=>5,
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>3,
+                    'id'=>8,
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>4,
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'email'=> 'gianlucca@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
                     'role_id'=>3,
                 ],
                 [
@@ -237,15 +301,103 @@ class TestSeeder extends Seeder
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>6,
+                    'id'=>8,
                     'role_id'=>3,
                 ],
                 [
-                    'id'=>7,
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'email'=> 'Kevin.Alcantara@intercorpretail.pe',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>5,
                     'role_id'=>3,
                 ],
                 [
                     'id'=>8,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'email'=> 'Vanessa.Chavez@intercorpretail.pe',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>5,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>8,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>11,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>25,
                     'role_id'=>3,
                 ],
             ]
@@ -259,35 +411,36 @@ class TestSeeder extends Seeder
                     'role_id'=>1,
                 ],
                 [
-                    'id'=>2,
-                    'role_id'=>1,
-                ],
-                [
-                    'id'=>3,
-                    'role_id'=>1,
-                ],
-                [
-                    'id'=>4,
-                    'role_id'=>1,
-                ],
-                [
                     'id'=>5,
-                    'role_id'=>1,
-                ],
-                [
-                    'id'=>6,
-                    'role_id'=>1,
-                ],
-                [
-                    'id'=>7,
                     'role_id'=>1,
                 ],
                 [
                     'id'=>8,
                     'role_id'=>1,
                 ],
+                [
+                    'id'=>11,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>14,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>16,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>18,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>25,
+                    'role_id'=>1,
+                ],
             ]
         ]
+
     ];
 
 
@@ -301,9 +454,9 @@ class TestSeeder extends Seeder
         $this->insertCriteria();
         $this->insertWorkspaces();
 
-        $this->insertUsers();
         // $this->insertAdmins();
         $this->insertDefaultAdmins();
+        //$this->insertUsers();
     }
 
     public function insertCriteria() {
@@ -622,14 +775,14 @@ class TestSeeder extends Seeder
         {
             // Create admins
             $user = User::create([
-                'email'=>$user_arr['email'],
-                'name' => $user_arr['name'],
+                'email'=>$child['email'],
+                'name' => $child['name'],
                 'password'=>bcrypt('12345'),
                 'active' => 1
             ]);
 
             // Assign admins
-            foreach ($user_arr['workspaces'] as $key => $wk_arr)
+            foreach ($child['workspaces'] as $key => $wk_arr)
             {
                 AssignedRole::create([
                     'entity_type' => AssignedRole::USER_ENTITY,
