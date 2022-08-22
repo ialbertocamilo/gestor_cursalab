@@ -237,35 +237,35 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters)
                     vue.delete_model = null
                     vue.modalDeleteOptions.open = false
-                    const messages = data.data.messages
-
-                    if (messages.data.length > 0) {
-                        // console.log(messages.data)
-                        await vue.cleanModalTemasValidaciones()
-                        vue.modalTemasValidaciones.hideCancelBtn = true
-                        vue.modalTemasValidaciones.confirmLabel = 'Entendido'
-                        vue.modalTemasValidaciones.persistent = true
-                        await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
-                    } else {
+                    // const messages = data.data.messages
+                    //
+                    // if (messages.data.length > 0) {
+                    //     // console.log(messages.data)
+                    //     await vue.cleanModalTemasValidaciones()
+                    //     vue.modalTemasValidaciones.hideCancelBtn = true
+                    //     vue.modalTemasValidaciones.confirmLabel = 'Entendido'
+                    //     vue.modalTemasValidaciones.persistent = true
+                    //     await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
+                    // } else {
                         vue.showAlert(data.data.msg)
                         vue.hideLoader()
-                    }
+                    // }
                 })
                 .catch(async ({data}) => {
-                    await vue.cleanModalTemasValidaciones()
-                    vue.loadingActionBtn = false
-                    // vue.modalTemasValidaciones.hideConfirmBtn = true
-                    // vue.modalTemasValidaciones.cancelLabel = 'Entendido'
-                    if (data.validate.show_confirm) {
-                        vue.modalTemasValidaciones.hideConfirmBtn = false
-                        vue.modalTemasValidaciones.hideCancelBtn = false
-                        vue.modalTemasValidaciones.cancelLabel = 'Cancelar'
-                        vue.modalTemasValidaciones.confirmLabel = 'Confirmar'
-                    } else {
-                        vue.modalTemasValidaciones.hideConfirmBtn = true
-                        vue.modalTemasValidaciones.cancelLabel = 'Entendido'
-                    }
-                    await vue.openFormModal(vue.modalTemasValidaciones, data.validate, 'validateDeleteTema', data.validate.title)
+                    // await vue.cleanModalTemasValidaciones()
+                    // vue.loadingActionBtn = false
+                    // // vue.modalTemasValidaciones.hideConfirmBtn = true
+                    // // vue.modalTemasValidaciones.cancelLabel = 'Entendido'
+                    // if (data.validate.show_confirm) {
+                    //     vue.modalTemasValidaciones.hideConfirmBtn = false
+                    //     vue.modalTemasValidaciones.hideCancelBtn = false
+                    //     vue.modalTemasValidaciones.cancelLabel = 'Cancelar'
+                    //     vue.modalTemasValidaciones.confirmLabel = 'Confirmar'
+                    // } else {
+                    //     vue.modalTemasValidaciones.hideConfirmBtn = true
+                    //     vue.modalTemasValidaciones.cancelLabel = 'Entendido'
+                    // }
+                    // await vue.openFormModal(vue.modalTemasValidaciones, data.validate, 'validateDeleteTema', data.validate.title)
                     vue.hideLoader()
                 })
         },
