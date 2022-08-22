@@ -50,10 +50,11 @@
                         <!--                            v-model="tempAnswer"-->
                         <!--                            title="Respuesta"-->
                         <!--                        />-->
-                        <div class="d-flex justify-content-center mb-2">
-                            <label class="default-rich-text-title">Respuesta</label>
-                        </div>
+<!--                        <div class="d-flex justify-content-center mb-2">-->
+<!--                            <label class="default-rich-text-title">Respuesta</label>-->
+<!--                        </div>-->
                         <fieldset class="editor">
+                            <legend>Respuesta</legend>
                             <editor
                                 api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
                                 v-model="tempAnswer"
@@ -158,7 +159,7 @@ export default {
                 pregunta: "",
                 respuestas: [],
                 rpta_ok: null,
-                active: false,
+                active: true,
                 nuevasRptas: "",
             },
             resource: {},
