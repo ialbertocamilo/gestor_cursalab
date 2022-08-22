@@ -124,7 +124,7 @@ class TemaController extends Controller
             'msg' => ' Tema actualizado correctamente.'
         ];
 
-        $response['messages'] = Topic::getMessagesActions($topic, $data, 'Tema actualizado con éxito');
+//        $response['messages'] = Topic::getMessagesActions($topic, $data, 'Tema actualizado con éxito');
 
         return $this->success($response);
     }
@@ -142,31 +142,32 @@ class TemaController extends Controller
 
         $topic->delete();
 
-        $tema_evaluable = Topic::where('course_id', $course->id)->where('assessable', ACTIVE)->first();
-        $course->assessable = $tema_evaluable ? 1 : 0;
-        $course->save();
+//        $tema_evaluable = Topic::where('course_id', $course->id)->where('assessable', ACTIVE)->first();
+//        $course->assessable = $tema_evaluable ? 1 : 0;
+//        $course->save();
 
         $response = [
             'tema' => $topic,
             'msg' => ' Tema eliminado correctamente.'
         ];
 
-        $response['messages'] = Topic::getMessagesActions($topic, [], 'Tema eliminado con éxito');
+//        $response['messages'] = Topic::getMessagesActions($topic, [], 'Tema eliminado con éxito');
 
         return $this->success($response);
     }
 
     public function updateStatus(School $school, Course $course, Topic $topic, Request $request)
     {
-        $active = !(($topic->active === 1));
+//        $active = !(($topic->active === 1));
+        $active = !$topic->active;
 
-        if ($request->withValidations == 0) {
-            $validate = Topic::validateTemaUpdateStatus($school, $course, $topic, $active);
-            //        dd($validate);
-
-            if (!$validate['validate'])
-                return $this->success(compact('validate'), 422);
-        }
+//        if ($request->withValidations == 0) {
+//            $validate = Topic::validateTemaUpdateStatus($school, $course, $topic, $active);
+//            //        dd($validate);
+//
+//            if (!$validate['validate'])
+//                return $this->success(compact('validate'), 422);
+//        }
 
         $topic->active = $active;
         $topic->save();
@@ -176,7 +177,7 @@ class TemaController extends Controller
             'msg' => ' Estado actualizado con éxito.'
         ];
 
-        $response['messages'] = Topic::getMessagesActions($topic, [], 'Tema actualizado con éxito');
+//        $response['messages'] = Topic::getMessagesActions($topic, [], 'Tema actualizado con éxito');
 
         return $this->success($response);
     }
@@ -203,7 +204,7 @@ class TemaController extends Controller
                 $temp->push([
                     'id' => (int)$key,
                     'opc' => $rpta,
-                    'correcta' => $pregunta->rpta_ok === (int)$key
+                    'correcta' => $pregunta->rpta_ok == $key
                 ]);
             }
         }

@@ -47,11 +47,10 @@ class TemaStoreUpdateRequest extends FormRequest
 
 //    public function validationData()
 //    {
-//        info($this);
 //        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
 //
 //        $data['active'] = $active;
-
+//
 //        return $this->merge($data)->all();
 //    }
 }

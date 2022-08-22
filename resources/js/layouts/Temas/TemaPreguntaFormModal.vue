@@ -181,7 +181,7 @@ export default {
             let vue = this
             vue.showLoader()
             const validateForm = vue.validateFieldsForm();
-            console.log(validateForm)
+            // console.log(validateForm)
             vue.generarJson();
             if (validateForm) {
                 const url = `${vue.options.base_endpoint}/store`

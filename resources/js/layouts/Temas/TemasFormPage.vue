@@ -178,12 +178,13 @@
                     </v-row>
                     <v-row>
                         <v-col cols="5">
-                            <DefaultToggle
-                                v-model="resource.active"
-                                :disabled="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"/>
-                            <small
-                                v-if="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"
-                                v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
+<!--                            <DefaultToggle-->
+<!--                                v-model="resource.active"-->
+<!--                                :disabled="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"/>-->
+                            <DefaultToggle v-model="resource.active"/>
+<!--                            <small-->
+<!--                                v-if="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"-->
+<!--                                v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>-->
                         </v-col>
                     </v-row>
                 </v-form>
@@ -316,46 +317,46 @@ export default {
         },
         async validate() {
             let vue = this
-            if (vue.topic_id !== '') {
-
-                if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.tipo_ev) {
-                    let data = {
-                        tema: vue.resource.id,
-                        curso: vue.resource.course_id,
-                        modulo: vue.modulo_id,
-                        escuela: vue.resource.school_id, //falta
-                        grupo: [],
-                        cursos_libres: false,
-                        UsuariosActivos: true,
-                        UsuariosInactivos: false,
-                        url: 'temas_noevaluables'
-                    }
-                    if (vue.resource.hide_evaluable === 'no' || vue.resource.hide_tipo_ev === 'qualified') {
-                        data.carrera = []
-                        data.ciclo = []
-                        data.temasActivos = true
-                        data.temasInactivos = true
-                        if (vue.resource.hide_tipo_ev === 'qualified') {
-                            // Mostrar modal con check y opcion de descarga (endpoint notas por temas)
-                            data.aprobados = true;
-                            data.desaprobados = true;
-                            data.validacion = false;
-                            data.variantes = false;
-                            data.url = 'notas_tema';
-                        }
-                    } else if (vue.resource.hide_tipo_ev === 'open') {
-                        // endpoint evaluaciones abiertas)
-                        data.variantes = false;
-                        data.url = 'evaluaciones_abiertas';
-                    }
-                    await vue.cleanModalTemasValidaciones()
-                    vue.modalTemasValidaciones.hideConfirmBtn = false
-                    // const cancelLabel = (vue.resource && vue.resource.hide_tipo_ev === 'qualified' && vue.resource.assessable === 'no') ? 'Cerrar' : 'Entendido'
-                    vue.modalTemasValidaciones.cancelLabel = 'Cerrar'
-                    await vue.openFormModal(vue.modalTemasValidaciones, data, 'validacionFormPage', 'Atención')
-                    return
-                }
-            }
+            // if (vue.topic_id !== '') {
+            //
+            //     if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.tipo_ev) {
+            //         let data = {
+            //             tema: vue.resource.id,
+            //             curso: vue.resource.course_id,
+            //             modulo: vue.modulo_id,
+            //             escuela: vue.resource.school_id, //falta
+            //             grupo: [],
+            //             cursos_libres: false,
+            //             UsuariosActivos: true,
+            //             UsuariosInactivos: false,
+            //             url: 'temas_noevaluables'
+            //         }
+            //         if (vue.resource.hide_evaluable === 'no' || vue.resource.hide_tipo_ev === 'qualified') {
+            //             data.carrera = []
+            //             data.ciclo = []
+            //             data.temasActivos = true
+            //             data.temasInactivos = true
+            //             if (vue.resource.hide_tipo_ev === 'qualified') {
+            //                 // Mostrar modal con check y opcion de descarga (endpoint notas por temas)
+            //                 data.aprobados = true;
+            //                 data.desaprobados = true;
+            //                 data.validacion = false;
+            //                 data.variantes = false;
+            //                 data.url = 'notas_tema';
+            //             }
+            //         } else if (vue.resource.hide_tipo_ev === 'open') {
+            //             // endpoint evaluaciones abiertas)
+            //             data.variantes = false;
+            //             data.url = 'evaluaciones_abiertas';
+            //         }
+            //         await vue.cleanModalTemasValidaciones()
+            //         vue.modalTemasValidaciones.hideConfirmBtn = false
+            //         // const cancelLabel = (vue.resource && vue.resource.hide_tipo_ev === 'qualified' && vue.resource.assessable === 'no') ? 'Cerrar' : 'Entendido'
+            //         vue.modalTemasValidaciones.cancelLabel = 'Cerrar'
+            //         await vue.openFormModal(vue.modalTemasValidaciones, data, 'validacionFormPage', 'Atención')
+            //         return
+            //     }
+            // }
             // return
             return vue.sendForm({checkbox: false})
         },
@@ -497,6 +498,7 @@ export default {
             vue.verifyDisabledMediaEmbed();
         },
         validateTipoEv() {
+            return;
             let vue = this
             vue.resource.tipo_ev = null
             vue.resetFormValidation('TemaForm')
@@ -521,6 +523,7 @@ export default {
             }
         },
         async showAlertEvaluacion() {
+            return;
             let vue = this
             vue.modalTemasValidaciones.hideConfirmBtn = true
             const tipo_ev = vue.resource.tipo_ev === 'qualified' ? 'Calificada' : 'Abierta'
