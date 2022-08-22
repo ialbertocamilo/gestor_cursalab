@@ -63,7 +63,7 @@
 
 <script>
 
-const fields = ['type_id', 'anonima', 'titulo', 'active'];
+const fields = ['type_id', 'anonima', 'titulo', 'active', 'imagen'];
 const file_fields = ['imagen'];
 
 
@@ -80,6 +80,7 @@ export default {
             resourceDefault: {
                 id: null,
                 titulo: '',
+                imagen: '',
                 anonima: 0,
                 type_id: [],
                 // secciones: [],
