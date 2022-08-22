@@ -67,6 +67,8 @@
                             clearable
                             v-model="resource.password"
                             label="Contraseña"
+                            type="password"
+                            :rules="options.action === 'edit' ? rules.password_not_required : rules.password"
                         />
                     </v-col>
                 </v-row>
@@ -139,6 +141,8 @@ export default {
                 lastname: this.getRules(['required', 'max:100', 'text']),
                 surname: this.getRules(['required', 'max:100', 'text']),
                 document: this.getRules(['required', 'number', 'min:8']),
+                password: this.getRules(['required', 'min:8']),
+                password_not_required: this.getRules([]),
             }
         }
     },
