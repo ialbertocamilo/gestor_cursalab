@@ -81,6 +81,10 @@ class PollController extends Controller
 
         $data = Media::requestUploadFile($data, 'imagen');
 
+        $session = $request->session()->all();
+        $workspace = $session['workspace'];
+        $data['workspace_id'] = $workspace->id;
+
         Poll::create($data);
 
         $msg = 'Encuesta creada correctamente.';
