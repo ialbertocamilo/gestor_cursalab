@@ -64,8 +64,15 @@ export default {
                     valor: vue.url,
                     type:vue.type
                 }
+                vue.cleanValues()
                 vue.$emit('onConfirm', data)
             }
+        },
+        cleanValues(){
+            let vue = this
+            vue.titulo = null
+            vue.url = null
+            vue.$refs['TemaMultimediaTextForm'].reset()
         },
     }
 }

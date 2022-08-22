@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 use ZipArchive;
 
-class Media extends Model
+class Media extends BaseModel
 {
 
     use SoftDeletes;
