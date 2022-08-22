@@ -789,7 +789,7 @@ class TestSeeder extends Seeder
             $user = User::create([
                 'email'=>$child['email'],
                 'name' => $child['name'],
-                'password'=>bcrypt('12345'),
+                'password' => 'CursalabV2-$2022',
                 'active' => 1
             ]);
 
