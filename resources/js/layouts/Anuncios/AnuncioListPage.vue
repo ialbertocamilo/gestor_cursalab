@@ -75,6 +75,7 @@
 
 
 <script>
+
 import AnuncioFormModal from "./AnuncioFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
@@ -91,7 +92,7 @@ export default {
                 endpoint: '/anuncios/search',
                 ref: 'AnuncioTable',
                 headers: [
-                    //{text: "Banner", value: "image", align: 'center', sortable: false},
+                    {text: "Banner", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre"},
                     {text: "Fecha de publicación", value: "publish_date", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},

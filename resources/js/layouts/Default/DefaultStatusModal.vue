@@ -9,10 +9,9 @@
             <b>{{ options.contentText || contentText }}</b>
             <br>
             <br>
-            El registro pasará de estado
-            "{{ resource.active ? 'Activo' : 'Inactivo' }}"
-            a
+            El registro pasará a estar
             "{{ !resource.active ? 'Activo' : 'Inactivo' }}"
+            {{ !resource.active ? '' : 'y los usuarios asignados no podrán verlo' }}
         </template>
     </DefaultAlertDialog>
 </template>

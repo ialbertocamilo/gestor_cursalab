@@ -8,6 +8,7 @@
     >
         <template v-slot:content>
             <v-form ref="TemaPreguntaForm">
+                <DefaultErrors :errors="errors"/>
 
                 <v-row justify="space-around" class="mt-3">
                     <v-col cols="12">
@@ -49,10 +50,11 @@
                         <!--                            v-model="tempAnswer"-->
                         <!--                            title="Respuesta"-->
                         <!--                        />-->
-                        <div class="d-flex justify-content-center mb-2">
-                            <label class="default-rich-text-title">Respuesta</label>
-                        </div>
+<!--                        <div class="d-flex justify-content-center mb-2">-->
+<!--                            <label class="default-rich-text-title">Respuesta</label>-->
+<!--                        </div>-->
                         <fieldset class="editor">
+                            <legend>Respuesta</legend>
                             <editor
                                 api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
                                 v-model="tempAnswer"
@@ -151,12 +153,13 @@ export default {
     },
     data() {
         return {
+            errors: [],
             resourceDefault: {
                 id: null,
                 pregunta: "",
                 respuestas: [],
                 rpta_ok: null,
-                active: false,
+                active: true,
                 nuevasRptas: "",
             },
             resource: {},
@@ -179,6 +182,8 @@ export default {
         },
         confirmModal() {
             let vue = this
+            vue.errors = []
+
             vue.showLoader()
             const validateForm = vue.validateFieldsForm();
             // console.log(validateForm)
@@ -191,6 +196,12 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         vue.hideLoader()
+                    })
+                    .catch((error) => {
+                        vue.hideLoader()
+
+                        if (error && error.errors)
+                            vue.errors = error.errors
                     })
             } else {
                 vue.hideLoader()
@@ -247,6 +258,7 @@ export default {
         },
         resetSelects() {
             let vue = this
+            vue.tempAnswer = ''
             vue.rules.pregunta = false
         },
         resetValidation() {
@@ -256,7 +268,8 @@ export default {
         async loadData(resource) {
             let vue = this
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                vue.resource = JSON.parse(JSON.stringify(vue.resourceDefault))
+                // vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
             if (resource) {
                 let url = `${vue.options.base_endpoint}/${resource.id}`

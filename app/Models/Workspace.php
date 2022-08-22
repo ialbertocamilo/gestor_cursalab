@@ -162,9 +162,9 @@ class Workspace extends BaseModel
      */
     public static function generateUserWorkspacesQuery(int $userId): Builder
     {
-        $assignedRole = AssignedRole::getUserAssignedRole($userId);
+        $assignedRoles = AssignedRole::getUserAssignedRoles($userId);
 
-        if ($assignedRole->role_id == 1) {
+        if ($assignedRoles->first()->role_id == 1) {
 
             // Return all workspaces, excluding subworkspaces
 

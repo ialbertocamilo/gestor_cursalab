@@ -32,7 +32,7 @@ class TemaStoreUpdateRequest extends FormRequest
             'categoria_id' => 'nullable',
             'course_id' => 'required',
 
-            'assessable' => 'required',
+            'assessable' => 'nullable',
             'type_evaluation_id' => 'nullable',
             'topic_requirement_id' => 'nullable',
             'check_tipo_ev' => 'nullable',

@@ -111,6 +111,7 @@ class CriterionValue extends BaseModel
         return match ($match) {
             'date' => 'value_date',
             'number' => 'value_integer',
+            'boolean' => 'value_boolean',
             default => 'value_text',
         };
     }

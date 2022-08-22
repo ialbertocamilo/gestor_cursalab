@@ -124,7 +124,7 @@
                     </v-col>
                     <v-col cols="2">
                         <DefaultSelect
-                            label="Ordernar por"
+                            label="Ordenar por"
                             dense
                             v-model="filters.order_by"
                             :items="selects.order_by"

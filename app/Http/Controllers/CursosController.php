@@ -131,11 +131,11 @@ class CursosController extends Controller
     public function getFormSelects(School $school, Course $course = null, $compactResponse = false)
     {
         $workspace = get_current_workspace();
-        
+
         $query = Course::whereRelation('workspaces', 'id', $workspace->id)->where('active', ACTIVE);
-        
+
         // if ($school)
-        //     $query->whereRelation('schools', 'id', $school->id);            
+        //     $query->whereRelation('schools', 'id', $school->id);
             // $req_cursos->where('school_id', $school->id);
 
         if ($course)
@@ -633,24 +633,25 @@ class CursosController extends Controller
         return redirect()->route('categorias.cursos', [$curso->categoria->config->id, $curso->categoria->id])->with('info', 'Eliminado Correctamente');
     }
 
-    public function destroyCurso(School $escuela, Course $curso, Request $request)
+    public function destroyCurso(School $school, Course $course, Request $request)
     {
-        if ($request->withValidations == 0) {
+//        if ($request->withValidations == 0) {
+//
+//            $validate = Course::validateCursoEliminar($escuela, $course);
+//
+//            if (!$validate['validate'])
+//                return $this->success(compact('validate'), 422);
+//        }
 
-            $validate = Course::validateCursoEliminar($escuela, $curso);
-
-            if (!$validate['validate'])
-                return $this->success(compact('validate'), 422);
-        }
-
-        $curso->delete();
+        $course->delete();
 
         $response = [
-            'curso' => $curso,
-            'msg' => 'Estado eliminado correctamente.',
+            'curso' => $course,
+            'msg' => 'Curso eliminado correctamente.',
+            'messages' => []
         ];
 
-        $response['messages'] = Curso::getMessagesActions($curso, 'Curso eliminado correctamente');
+//        $response['messages'] = Curso::getMessagesActions($curso, 'Curso eliminado correctamente');
 
         return $this->success($response);
     }
@@ -671,7 +672,7 @@ class CursosController extends Controller
     public function updateStatus(School $school, Course $course, Request $request)
     {
         $active = ($course->active == 1) ? 0 : 1;
-        
+
         if ($request->withValidations == 0) {
 
             $validate = Course::validateUpdateStatus($school, $course, $active);

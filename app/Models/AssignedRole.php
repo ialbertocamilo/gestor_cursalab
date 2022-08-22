@@ -18,12 +18,12 @@ class AssignedRole extends Model
      * @param $userId
      * @return object
      */
-    public static function getUserAssignedRole($userId): object
+    public static function getUserAssignedRoles($userId): object
     {
 
         return DB::table('assigned_roles')
-            ->where('entity_type', self::USER_ENTITY)
-            ->where('entity_id', $userId)
-            ->first();
+                ->where('entity_type', self::USER_ENTITY)
+                ->where('entity_id', $userId)
+                ->get();
     }
 }

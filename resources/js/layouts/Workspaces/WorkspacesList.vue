@@ -72,6 +72,7 @@
                                      class="logo"
                                      alt="">
                                 <div @click="editWorkspace(workspace.id)"
+                                     v-if="isAdminInWorkspace(workspace.id)"
                                      class="edit-button">
                                     <v-icon color="white" size="16px">
                                         mdi-square-edit-outline
@@ -112,18 +113,31 @@
             Configurations title
         ======================================== -->
 
-        <v-row class="justify-content-center mt-3 pt-3" v-if="false">
+        <v-row v-if="canAccessConfiguration"
+               class="justify-content-center mt-3 pt-3">
+
             <div class="col-10">
                 <div class="configurations-button-wrapper"
                 >
-                    <v-col cols="10">
-                    <span @click="toggleConfiguration()"
-                          style="cursor: pointer">
-                        Configuraciones
-                    </span>
+                    <v-col cols="5"
+                            @click="toggleConfiguration()">
+                        <span style="cursor: pointer">
+                            Configuraciones
+                        </span>
                         <v-icon class="stats-icon">mdi-cog</v-icon>
-                    </v-col>
 
+                    </v-col>
+                    <v-col cols="7">
+                        <DefaultSelect
+                            v-model="selectedWorkspaceId"
+                            :items="workspacesAdmin"
+                            label="Workspace"
+                            item-text="name"
+                            item-value="id"
+                            dense
+                            @onChange="toggleConfiguration()"
+                        />
+                    </v-col>
                 </div>
             </div>
         </v-row>
@@ -147,7 +161,8 @@
         ======================================== -->
 
         <v-row :class="{ 'd-none': !configurationIsVisible }"
-               class="justify-content-center mb-5" v-if="false">
+               class="justify-content-center mb-5"
+               v-if="canAccessConfiguration">
             <v-col cols="10" class="configurations-wrapper">
                 <v-row class="justify-content-center pt-5">
                     <div class="col-3">
@@ -274,11 +289,21 @@ export default {
         WorkspacesForm
     },
     data: () => ({
+        superUserRoleId : 1
+        ,
+        adminRoleId : 3
+        ,
+        selectedWorkspaceId: null
+        ,
         workspaces: []
+        ,
+        workspacesAdmin: []
         ,
         userSession: {}
         ,
         configurationIsVisible: false
+        ,
+        canAccessConfiguration: false
         ,
         workspaceFormModalOptions: {
             ref: 'WorkspacesForm',
@@ -292,7 +317,17 @@ export default {
     mounted() {
 
         this.loadData();
-        this.loadSession();
+
+    }
+    ,
+    watch: {
+        selectedWorkspaceId () {
+            if (this.selectedWorkspaceId > 0) {
+                this.setActiveWorkspace(
+                    this.selectedWorkspaceId, false
+                );
+            }
+        }
     }
     ,
     methods: {
@@ -325,6 +360,7 @@ export default {
                 .get(url)
                 .then(({data}) => {
                     vue.workspaces = data.data.data;
+                    this.loadSession();
                 })
         }
         ,/**
@@ -335,13 +371,87 @@ export default {
             let vue = this;
 
             // Load session data
-
+            vue.workspacesAdmin = [];
             let url = `/usuarios/session`
             this.$http
                 .get(url)
                 .then(({data}) => {
+
                     vue.userSession = data;
+                    vue.findAdminWorkspaces();
+
+
                 });
+        }
+        ,
+        /**
+         * Find those workspaces the user has admin access to
+         */
+        findAdminWorkspaces() {
+
+            let vue = this;
+
+            // When user roles include admin (3)
+            // allow configuration access
+
+            if (vue.userSession.user.roles) {
+
+                vue.userSession
+                    .user
+                    .roles.forEach(r => {
+
+                    // Super users has access to all workspaces
+
+                    if (r.role_id === vue.superUserRoleId) {
+                        vue.workspacesAdmin = vue.workspaces;
+                    }
+
+                    // Admin users
+
+                    if (r.role_id === vue.adminRoleId) {
+                        let workspace = vue.workspaces
+                                           .find(w => w.id === r.scope)
+
+                        if (workspace)
+                            vue.workspacesAdmin.push(workspace)
+                    }
+                })
+
+                // If user has admin access to at least
+                // one workspace, update flag to show
+                // configuration area
+
+                // if (vue.workspacesAdmin.length > 0)
+                //     vue.canAccessConfiguration = true;
+
+            }
+        }
+        ,
+        /**
+         * Check whether user has admin role for specific
+         * @param workspaceId
+         * @returns {boolean}
+         */
+        isAdminInWorkspace (workspaceId) {
+
+            let isAdmin = false;
+            let vue = this;
+            vue.userSession
+                .user
+                .roles.forEach(r => {
+
+                let workspaceMatch = workspaceId === r.scope;
+                let isAdminOrSuper = (
+                    r.role_id === vue.adminRoleId ||
+                    r.role_id === vue.superUserRoleId
+                );
+
+                if (workspaceMatch && isAdminOrSuper) {
+                    isAdmin = true;
+                }
+            })
+
+            return isAdmin;
         }
         ,
         /**
@@ -365,9 +475,9 @@ export default {
                 this.scrollToSmoothly(position,500);
             }
 
-            // Toggle flag to hide configuration
+            // Show configuration
 
-            this.configurationIsVisible = !this.configurationIsVisible;
+            this.configurationIsVisible = true;
         }
         ,
         /**

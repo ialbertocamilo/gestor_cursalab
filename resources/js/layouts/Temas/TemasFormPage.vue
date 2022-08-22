@@ -13,6 +13,16 @@
                     <DefaultSectionLabel label="Contenido General"/>
                     <v-row justify="center">
                         <v-col cols="6">
+                            <DefaultInput
+                                dense
+                                label="Nombre"
+                                show-required
+                                placeholder="Ingrese un nombre"
+                                v-model="resource.name"
+                                :rules="rules.name"
+                            />
+                        </v-col>
+                        <v-col cols="6">
                             <DefaultAutocomplete
                                 dense
                                 label="Requisito"
@@ -21,16 +31,6 @@
                                 :items="selects.requisitos"
                                 clearable
                                 item-text="name"
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultInput
-                                dense
-                                label="Nombre"
-                                show-required
-                                placeholder="Ingrese un nombre"
-                                v-model="resource.name"
-                                :rules="rules.name"
                             />
                         </v-col>
                     </v-row>
@@ -72,9 +72,9 @@
                                 label="Evaluable"
                                 v-model="resource.assessable"
                                 :items="selects.assessable"
-                                :rules="rules.assessable"
                                 @onChange="validateTipoEv"
                             />
+                                <!-- :rules="rules.assessable" -->
                         </v-col>
                         <v-col cols="4">
                             <DefaultSelect
@@ -83,7 +83,7 @@
                                 label="Tipo Evaluación"
                                 v-model="resource.type_evaluation_id"
                                 :items="selects.evaluation_types"
-                                :rules="resource.assessable === 0 ? [] : rules.tipo_ev"
+                                :rules="resource.assessable === 1 ? rules.tipo_ev : []"
                                 :disabled="resource.assessable === 0 || !resource.assessable"
                                 @onChange="showAlertEvaluacion"
                             />
@@ -257,7 +257,7 @@ export default {
             resource: {},
             rules: {
                 name: this.getRules(['required']),
-                assessable: this.getRules(['required']),
+                // assessable: this.getRules(['required']),
                 tipo_ev: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
             },

@@ -223,7 +223,7 @@ return [
         'app_id' => 'aplicación',
         'section_id' => 'sección',
         'category_id' => 'categoría',
-        'position' => 'posición',
+        // 'position' => 'posición',
         'email_verified_at' => 'fecha de verificación de correo',
         'display_name' => 'nombre a mostrar',
         'parent_id' => 'padre',
@@ -301,8 +301,8 @@ return [
         'average_rating' => 'calificación promedio',
         'external_id' => 'ID externo',
         'file_logo' => 'logo',
-
-
+        'position' => 'orden',
+        'rpta_ok' => 'respuesta correcta',
     ],
 
 ];

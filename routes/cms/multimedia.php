@@ -9,7 +9,7 @@ Route::controller(MediaController::class)->group(function() {
     Route::get('/search', 'search');
     Route::get('/get-list-selects', 'getListSelects');
     Route::get('/show/{multimedia}', 'show');
-    Route::get('/eliminar/{id}', 'delete')->name('media.eliminar');
+    Route::get('/eliminar/{media}', 'delete')->name('media.eliminar');
 
     Route::post('/upload', 'upload');
     Route::get('/{media}/download', 'downloadExternalFile');

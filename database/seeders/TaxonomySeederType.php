@@ -25,8 +25,8 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
-        
-        
+
+
         Taxonomy::create([
             'group' => 'post',
             'type' => 'section',
@@ -46,7 +46,7 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
-        
+
         Taxonomy::create([
             'group' => 'user',
             'type' => 'action',
@@ -66,32 +66,32 @@ class TaxonomySeederType extends Seeder
             'active' => ACTIVE,
             'position' => 1,
         ]);
-        
-        Taxonomy::create([
-            'group' => 'criterion',
-            'type' => 'type',
-            'code' => 'date',
-            'name' => 'Fecha',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
 
-        Taxonomy::create([
-            'group' => 'criterion',
-            'type' => 'type',
-            'code' => 'number',
-            'name' => 'Numérico',
-            'active' => ACTIVE,
-            'position' => 3,
-        ]);
-
-        Taxonomy::create([
-            'group' => 'criterion',
-            'type' => 'type',
-            'code' => 'boolean',
-            'name' => 'Booleano',
-            'active' => ACTIVE,
-            'position' => 4,
-        ]);
+//        Taxonomy::create([
+//            'group' => 'criterion',
+//            'type' => 'type',
+//            'code' => 'date',
+//            'name' => 'Fecha',
+//            'active' => ACTIVE,
+//            'position' => 2,
+//        ]);
+//
+//        Taxonomy::create([
+//            'group' => 'criterion',
+//            'type' => 'type',
+//            'code' => 'number',
+//            'name' => 'Numérico',
+//            'active' => ACTIVE,
+//            'position' => 3,
+//        ]);
+//
+//        Taxonomy::create([
+//            'group' => 'criterion',
+//            'type' => 'type',
+//            'code' => 'boolean',
+//            'name' => 'Booleano',
+//            'active' => ACTIVE,
+//            'position' => 4,
+//        ]);
     }
 }
