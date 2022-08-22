@@ -24,7 +24,6 @@
                             clearable
                             v-model="resource.url_powerbi"
                             label="Link de learning analytics (PowerBI)"
-                            :rules="rules.url_powerbi"
                         />
                     </v-col>
                 </v-row>
@@ -35,6 +34,7 @@
                             v-model="resource.logo"
                             label="Logotipo"
                             :file-types="['image']"
+                            :rules="rules.logo"
                             @onSelect="setFile($event, resource,'logo')"/>
                     </v-col>
                     <v-col cols="6" >
@@ -111,7 +111,9 @@ export default {
         },
         width: String
     },
-    data: () => ({
+    // data: () => ({
+    data(){ 
+        return {
 
         errors: []
         ,
@@ -139,9 +141,11 @@ export default {
         customCriteria: []
         ,
         rules: {
-            //name: this.getRules(['required', 'max:255']),
+            name: this.getRules(['required', 'max:255']),
+            logo: this.getRules(['required']),
         }
-    })
+    }}
+    // })
     ,
     mounted() {
 
@@ -210,6 +214,8 @@ export default {
                         if (error && error.errors)
                             vue.errors = error.errors
                     })
+            }else{
+                this.hideLoader();
             }
         }
         ,

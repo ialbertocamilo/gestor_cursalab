@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('polls', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('external_id')->nullable();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
 
             $table->boolean('anonima')->nullable()->default(false);
