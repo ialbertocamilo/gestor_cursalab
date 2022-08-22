@@ -97,6 +97,7 @@ class TestSeeder extends Seeder
 
     public static $default_admins = [
         [
+            'name'=> 'Rodrigo C',
             'email'=> 'rodrigo@cursalab.io',
             'workspaces'=>
             [
@@ -107,6 +108,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Elvis F',
             'email'=> 'elvis@cursalab.io',
             'workspaces'=>
             [
@@ -117,6 +119,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Jean Carlo P',
             'email'=> 'jeancarlo@cursalab.io',
             'workspaces'=>
             [
@@ -127,6 +130,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Crusbel D',
             'email'=> 'crusbel@cursalab.io',
             'workspaces'=>
             [
@@ -137,6 +141,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Luis A',
             'email'=> 'luis@cursalab.io',
             'workspaces'=>
             [
@@ -175,6 +180,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Fiorella L',
             'email'=> 'friorella@cursalab.io',
             'workspaces'=>
             [
@@ -213,6 +219,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Alyona V',
             'email'=> 'alyona@cursalab.io',
             'workspaces'=>
             [
@@ -251,6 +258,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Gabriel R',
             'email'=> 'gabriel@cursalab.io',
             'workspaces'=>
             [
@@ -289,6 +297,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Gian Lucca M',
             'email'=> 'gianlucca@cursalab.io',
             'workspaces'=>
             [
@@ -327,6 +336,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Kevin Alcántara',
             'email'=> 'Kevin.Alcantara@intercorpretail.pe',
             'workspaces'=>
             [
@@ -365,6 +375,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Vanessa Chavez',
             'email'=> 'Vanessa.Chavez@intercorpretail.pe',
             'workspaces'=>
             [
@@ -403,6 +414,7 @@ class TestSeeder extends Seeder
             ]
         ],
         [
+            'name'=> 'Kevin G',
             'email'=> 'kevin@cursalab.io',
             'workspaces'=>
             [
