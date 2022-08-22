@@ -20,7 +20,7 @@ class PosteoSearchResource extends JsonResource
             'id' => $topic->id,
             'nombre' => $topic->name,
             'tipo_evaluacion' => $topic->evaluation_type->name, //$topic->getTipoEvaluacion(),
-            'image' => space_url($topic->imagen),
+            'image' => get_media_url($topic->imagen),
             'active' => (bool)$topic->active,
             'orden' => $topic->position,
             'es_evaluable' => $topic->assessable === 1,
