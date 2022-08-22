@@ -181,7 +181,7 @@ class TestSeeder extends Seeder
         ],
         [
             'name'=> 'Fiorella L',
-            'email'=> 'friorella@cursalab.io',
+            'email'=> 'fiorella@cursalab.io',
             'workspaces'=>
             [
                 [
