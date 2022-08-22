@@ -374,15 +374,10 @@ export default {
             let vue = this
             let new_grupos = []
             let location = window.location.pathname.split('/');
-            console.log('location')
-            console.log(location)
             this.grupos.forEach((grupo) => {
                 let new_items = []
                 grupo.items.forEach((i) => {
                     vue.roles.forEach((item)=>{
-                        console.log('i.role')
-                        console.log(i.role)
-                        console.log(item)
                         if(i.role.includes(item)){
                             new_items.push(i)
                             if(this.verify_path(location,i.subpaths)){

@@ -42,7 +42,8 @@ class DashboardController extends Controller
         $modulos = $current_workspace->subworkspaces->toArray();
 
         $subworkspace_id = request('modulo_id', NULL);
-        $workspaceId = Workspace::getWorkspaceIdFromModule($subworkspace_id);
+        // $workspaceId = Workspace::getWorkspaceIdFromModule($subworkspace_id);
+        $workspaceId = $current_workspace->id;
 
         $cache_name = "dashboard_cards-{$current_workspace->id}-";
         $cache_name .= $subworkspace_id ? "-modulo-{$subworkspace_id}" : '';
