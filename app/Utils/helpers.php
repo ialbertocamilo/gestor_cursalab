@@ -160,10 +160,7 @@ function bytesToMB($bytes)
 
 function space_url($path)
 {
-    if ($path)
-        return Storage::url($path);
-
-    return '';
+    return FileService::generateUrl($path);
 }
 
 function thousandsFormat($num)
