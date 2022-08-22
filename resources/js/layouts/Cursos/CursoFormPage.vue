@@ -48,6 +48,8 @@
                         </v-col>
                         <v-col cols="6">
                             <DefaultAutocomplete
+                                show-required
+                                :rules="rules.lista_escuelas"
                                 dense
                                 label="Escuelas"
                                 v-model="resource.lista_escuelas"
@@ -214,6 +216,7 @@ export default {
             resource: {},
             rules: {
                 name: this.getRules(['required']),
+                lista_escuelas: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
             },
             selects: {

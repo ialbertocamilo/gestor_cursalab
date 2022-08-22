@@ -99,10 +99,10 @@ class CursosController extends Controller
         return $this->success(compact('curso', 'msg'));
     }
 
-    public function updateCurso(School $escuela, Course $course, CursosStoreUpdateRequest $request)
+    public function updateCurso(School $school, Course $course, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $validate = Course::validateCursoRequisito($data, $escuela, $course);
+        $validate = Course::validateCursoRequisito($data, $school, $course);
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
@@ -110,7 +110,7 @@ class CursosController extends Controller
         // $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         // $data['workspace_id'] = $workspace_id;
-        $data['school_id'] = ($escuela->exists) ? $escuela->id : null;
+        $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
         $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
 
