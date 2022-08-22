@@ -18,6 +18,8 @@
                             label="Módulo"
                             :items="selects.modulo"
                             v-model="filters.modulo"
+                            item-text="name"
+                            item-value="id"
                             @onChange="getEstadisticas"
                         />
                     </v-col>
@@ -226,7 +228,7 @@ export default {
             },
             selects: {
                 modulo: [
-                    {nombre: 'Todos', id: null}
+                    {name: 'Todos', id: null}
                 ],
             },
         }

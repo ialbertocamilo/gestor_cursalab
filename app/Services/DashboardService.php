@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Models\Criterion;
 use App\Models\CriterionValue;
-use App\Models\Curso;
+use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\SummaryTopic;
 use App\Models\Usuario;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class  DashboardService {
@@ -42,8 +43,7 @@ class  DashboardService {
 
         if (!$workspaceId) return 0;
 
-        return Curso::join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
-                    ->where('cw.workspace_id', $workspaceId)
+        return Course::whereRelation('workspaces', 'id', $workspaceId)
                     ->count();
     }
 
@@ -53,13 +53,20 @@ class  DashboardService {
      * @param int|null $workspaceId
      * @return int
      */
-    public static function countUsers(?int $workspaceId): int
+    public static function countUsers(?int $subworkspaceId): int
     {
+        if (!$subworkspaceId)
+        {
+            $workspace = get_current_workspace();
+            $subworkspaceIds = $workspace->subworkspaces->pluck('id')->toArray();
 
-        if (!$workspaceId) return 0;
+            return User::whereIn('subworkspace_id', $subworkspaceIds)
+                    ->count();
+        }
 
-        return Usuario::where('subworkspace_id', $workspaceId)
-                      ->count();
+
+        return User::where('subworkspace_id', $subworkspaceId)
+                    ->count();
     }
 
     /**
@@ -68,13 +75,22 @@ class  DashboardService {
      * @param int|null $workspaceId
      * @return int
      */
-    public static function countActiveUsers(?int $workspaceId): int
+    public static function countActiveUsers(?int $subworkspaceId): int
     {
-        if (!$workspaceId) return 0;
+        if (!$subworkspaceId)
+        {
+            $workspace = get_current_workspace();
+            $subworkspaceIds = $workspace->subworkspaces->pluck('id')->toArray();
 
-        return Usuario::where('subworkspace_id', $workspaceId)
-                      ->where('active', ACTIVE)
-                      ->count();
+            return User::whereIn('subworkspace_id', $subworkspaceIds)
+                    ->where('active', ACTIVE)
+                    ->count();
+        }
+
+
+        return User::where('subworkspace_id', $subworkspaceId)
+                    ->where('active', ACTIVE)
+                    ->count();
     }
 
     /**

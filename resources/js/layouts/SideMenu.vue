@@ -47,7 +47,7 @@
         tile>
             <v-list-group
             :value="false"
-            v-for="(grupo, i) in grupos"
+            v-for="(grupo, i) in gruposFiltrado"
             :key="i"
             color="white"
             v-model="grupo.active"
@@ -122,7 +122,7 @@ export default {
                         subpaths:["aulas-virtuales"],
                         selected:false,
                         permission:"meetings",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Cuentas Zoom",
@@ -131,7 +131,7 @@ export default {
                         subpaths:["cuentas-zoom"],
                         selected:false,
                         permission:"accounts",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                         //Fix -2
                         // permission:"accounts.list"
                     },
@@ -195,15 +195,15 @@ export default {
                         permission:"escuelas",
                         role:["super-user","admin","content-manager","trainer"]
                     },
-                    {
-                        title:"Cursos",
-                        icon:"fas fa-map-signs",
-                        path:"/cursos",
-                        subpaths:["cursos"],
-                        selected:false,
-                        permission:"cursos",
-                        role:["super-user","admin","content-manager","trainer"]
-                    },
+                    // {
+                    //     title:"Cursos",
+                    //     icon:"fas fa-map-signs",
+                    //     path:"/cursos",
+                    //     subpaths:["cursos"],
+                    //     selected:false,
+                    //     permission:"cursos",
+                    //     role:["super-user","admin","content-manager","trainer"]
+                    // },
                 ]
             },
 
@@ -280,7 +280,7 @@ export default {
                         subpaths:["entrenamiento/entrenador"],
                         selected:false,
                         permission:"entrenadores",
-                        role:["super-user","admin","content-manager","trainer"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","content-manager-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Checklists",
@@ -289,7 +289,7 @@ export default {
                         subpaths:["entrenamiento/checklist"],
                         selected:false,
                         permission:"checklist",
-                        role:["super-user","admin","content-manager","trainer"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","content-manager-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO"]
                     },
                 ]
             },
@@ -305,7 +305,7 @@ export default {
                         subpaths:["exportar/node"],
                         selected:false,
                         permission:"reportes",
-                        role:["super-user","admin","trainer","reports"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO","reports-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Aulas Virtuales",
@@ -314,7 +314,7 @@ export default {
                         subpaths:["exportar/conferencias"],
                         selected:false,
                         permission:"conferencias",
-                        role:["super-user","admin","trainer","reports"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO","reports-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Encuestas",
@@ -323,7 +323,7 @@ export default {
                         subpaths:["resumen_encuesta"],
                         selected:false,
                         permission:"resumen_encuesta",
-                        role:["super-user","admin","content-manager","trainer","reports"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","content-manager-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO","reports-TEMPORAL_INACTIVO"]
                     },
                 ]
             },
@@ -339,7 +339,7 @@ export default {
                         subpaths:["notificaciones_push"],
                         selected:false,
                         permission:"notificaciones",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Reinicio de usuarios",
@@ -348,7 +348,7 @@ export default {
                         subpaths:["masivo/usuarios"],
                         selected:false,
                         permission:"reinicio_usuarios",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Subida masivos",
@@ -357,7 +357,7 @@ export default {
                         subpaths:["masivo/index"],
                         selected:false,
                         permission:"proceso_masivo",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                 ]
             },

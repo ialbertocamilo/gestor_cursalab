@@ -14,7 +14,9 @@ class GeneralController extends Controller
 {
     public function getModulos()
     {
-        $modulos = Criterion::getValuesForSelect('module');
+        $current_workspace = get_current_workspace();
+        $modulos = $current_workspace->subworkspaces->toArray();
+        // $modulos = Criterion::getValuesForSelect('module');
 
         return $this->success(compact('modulos'));
     }
@@ -30,16 +32,21 @@ class GeneralController extends Controller
         if ($request->refresh === 'true')
             cache()->flush();
 
-        $module_id = request('modulo_id', NULL);
-        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
-        $cache_name = 'dashboard_cards-v2';
-        $cache_name.= $module_id ? "-modulo-{$module_id}" : '';
+        $current_workspace = get_current_workspace();
+        $modulos = $current_workspace->subworkspaces->toArray();
+
+        $subworkspace_id = request('modulo_id', NULL);
+        // $workspaceId = Workspace::getWorkspaceIdFromModule($subworkspace_id);
+        $workspaceId = $current_workspace->id;
+
+        $cache_name = "dashboard_cards-{$current_workspace->id}-";
+        $cache_name .= $subworkspace_id ? "-modulo-{$subworkspace_id}" : '';
 
 
         // Generates totals array
 
         $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
-            function () use ($workspaceId, $module_id) {
+            function () use ($workspaceId, $subworkspace_id) {
 
             $data['time'] = now();
 
@@ -63,14 +70,14 @@ class GeneralController extends Controller
                     'title' => 'Usuarios totales',
                     'icon' => 'mdi-account-group',
                     'color' => '#5458ea',
-                    'value' => DashboardService::countUsers($workspaceId)
+                    'value' => DashboardService::countUsers($subworkspace_id)
                 ],
 
                 'usuarios_activos' => [
                     'title' => 'Usuarios activos',
                     'icon' => 'mdi-account-group',
                     'color' => '#22B573',
-                    'value' => DashboardService::countActiveUsers($workspaceId)
+                    'value' => DashboardService::countActiveUsers($subworkspace_id)
                 ],
 
                 'temas_evaluables' => [
