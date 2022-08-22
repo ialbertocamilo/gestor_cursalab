@@ -479,7 +479,7 @@ class TestSeeder extends Seeder
         $boolean_type = Taxonomy::getFirstData('criterion', 'type', 'boolean');
 
         $criteria = [
-            ['code' => 'module', 'name' => 'Módulo','required' =>0,'show_in_segmentation' =>1,'is_default' => 1, 'field_id' => $default_type->id],
+            ['code' => 'module', 'name' => 'Módulo','required' =>1,'show_in_segmentation' =>1,'is_default' => 1, 'field_id' => $default_type->id],
             ['code' => 'business_unit_id', 'name' => 'Business_Unit_Id','required' =>1,'show_in_segmentation' =>0,'is_default' => 1, 'field_id' => $default_type->id],
             ['code' => 'business_unit_name', 'name' => 'Business_Unit_Name','required' =>1,'show_in_segmentation' =>0,'is_default' => 1, 'field_id' => $default_type->id],
             ['code' => 'gender', 'name' => 'Genero','required' =>1,'show_in_segmentation' =>1,'is_default' => 1, 'field_id' => $default_type->id],
