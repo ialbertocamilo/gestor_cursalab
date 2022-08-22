@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,7 +19,7 @@ class EncuestaResource extends JsonResource
         return [
             'id' => $this->id,
             'titulo' => $this->titulo,
-            'image' => space_url($this->imagen),
+            'image' => FileService::generateUrl($this->imagen),
             'active' => $this->active,
             'anonima' => $this->anonima ? 'Anónima' : 'No anónima',
             // 'tipo' => $sections[$this->tipo] ?? '',

@@ -25,7 +25,8 @@ class PollStoreRequest extends FormRequest
     {
         return [
             'titulo' => 'required|min:3',
-            'imagen' => 'required',
+            'imagen' => 'nullable',
+            'file_imagen' => 'nullable',
             'active' => 'nullable',
             'type_id' => 'nullable',
             'anonima' => 'nullable',

@@ -177,7 +177,10 @@ class Workspace extends BaseModel
 
         $allowedRoles = [
             2, // config
-            3  // admin
+            3, // admin
+            4, // content-manager
+            5, // trainer
+            6  // reports
         ];
 
         $role = DB::table('assigned_roles')
@@ -215,7 +218,7 @@ class Workspace extends BaseModel
 
             $user = User::find($userId);
             $workspace = Workspace::find($user->subworkspace_id);
-            
+
             return [$workspace];
         }
     }
