@@ -92,3 +92,12 @@ body::-webkit-scrollbar-thumb {
 	flex: auto !important;
 	margin-top: 15px !important;
 }
+
+.login-page .form-control:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #a1cbef;
+    outline: 0;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
