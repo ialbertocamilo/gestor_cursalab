@@ -195,15 +195,15 @@ export default {
                         permission:"escuelas",
                         role:["super-user","admin","content-manager","trainer"]
                     },
-                    {
-                        title:"Cursos",
-                        icon:"fas fa-map-signs",
-                        path:"/cursos",
-                        subpaths:["cursos"],
-                        selected:false,
-                        permission:"cursos",
-                        role:["super-user","admin","content-manager","trainer"]
-                    },
+                    // {
+                    //     title:"Cursos",
+                    //     icon:"fas fa-map-signs",
+                    //     path:"/cursos",
+                    //     subpaths:["cursos"],
+                    //     selected:false,
+                    //     permission:"cursos",
+                    //     role:["super-user","admin","content-manager","trainer"]
+                    // },
                 ]
             },
 
