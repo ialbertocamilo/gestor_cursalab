@@ -13,6 +13,16 @@
                     <DefaultSectionLabel label="Contenido General"/>
                     <v-row justify="center">
                         <v-col cols="6">
+                            <DefaultInput
+                                dense
+                                label="Nombre"
+                                show-required
+                                placeholder="Ingrese un nombre"
+                                v-model="resource.name"
+                                :rules="rules.name"
+                            />
+                        </v-col>
+                        <v-col cols="6">
                             <DefaultAutocomplete
                                 dense
                                 label="Requisito"
@@ -21,16 +31,6 @@
                                 :items="selects.requisitos"
                                 clearable
                                 item-text="name"
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultInput
-                                dense
-                                label="Nombre"
-                                show-required
-                                placeholder="Ingrese un nombre"
-                                v-model="resource.name"
-                                :rules="rules.name"
                             />
                         </v-col>
                     </v-row>

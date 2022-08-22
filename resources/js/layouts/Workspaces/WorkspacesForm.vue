@@ -60,7 +60,7 @@
                             type="info"
                             elevation="2"
                         >
-                            Aquí van las indicaciones sobre los criterios.
+                            Selecciona los criterios que usa la empresa para segmentar el contenido
                         </v-alert>
                     </v-col>
                 </v-row>
