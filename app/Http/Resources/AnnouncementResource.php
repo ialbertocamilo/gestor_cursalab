@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,7 +19,7 @@ class AnnouncementResource extends JsonResource
         return [
             'id' => $this->id,
             'nombre' => $this->nombre,
-            'image' => space_url($this->imagen),
+            'image' =>  FileService::generateUrl($this->imagen),
             'active' => $this->active ? true : false,
             'orden' => $this->orden,
             'publish_date' => $this->getPublicationDate(),

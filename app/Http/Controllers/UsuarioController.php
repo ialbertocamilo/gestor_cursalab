@@ -7,6 +7,7 @@ use App\Http\Controllers\ApiRest\RestAvanceController;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Models\Abconfig;
+use App\Models\AssignedRole;
 use App\Models\Botica;
 use App\Models\Cargo;
 use App\Models\Carrera;
@@ -51,11 +52,13 @@ class UsuarioController extends Controller
             $session = $request->session()->all();
             $workspace = $session['workspace'];
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
+            $roles = AssignedRole::getUserAssignedRoles($user->id);
 
             return [
                 'user' => [
                     'username' => $user->username,
-                    'fullname' => $user->fullname
+                    'fullname' => $user->fullname,
+                    'roles' => $roles
                 ],
                 'session' => [
                     'workspace' => $workspace
