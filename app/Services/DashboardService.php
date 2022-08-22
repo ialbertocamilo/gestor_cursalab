@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Criterion;
 use App\Models\CriterionValue;
-use App\Models\Curso;
+use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\SummaryTopic;
 use App\Models\Usuario;
@@ -43,8 +43,7 @@ class  DashboardService {
 
         if (!$workspaceId) return 0;
 
-        return Curso::join('course_workspace as cw', 'cw.course_id', '=', 'courses.id')
-                    ->where('cw.workspace_id', $workspaceId)
+        return Course::whereRelation('workspaces', 'id', $workspaceId)
                     ->count();
     }
 
@@ -54,7 +53,7 @@ class  DashboardService {
      * @param int|null $workspaceId
      * @return int
      */
-    public static function countUsers(?int $workspaceId): int
+    public static function countUsers(?int $subworkspaceId): int
     {
         if (!$subworkspaceId)
         {

@@ -112,7 +112,7 @@
             Configurations title
         ======================================== -->
 
-        <v-row class="justify-content-center mt-3 pt-3">
+        <v-row class="justify-content-center mt-3 pt-3" v-if="false">
             <div class="col-10">
                 <div class="configurations-button-wrapper"
                 >
@@ -147,7 +147,7 @@
         ======================================== -->
 
         <v-row :class="{ 'd-none': !configurationIsVisible }"
-               class="justify-content-center mb-5">
+               class="justify-content-center mb-5" v-if="false">
             <v-col cols="10" class="configurations-wrapper">
                 <v-row class="justify-content-center pt-5">
                     <div class="col-3">
