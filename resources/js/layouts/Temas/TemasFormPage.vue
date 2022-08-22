@@ -13,6 +13,16 @@
                     <DefaultSectionLabel label="Contenido General"/>
                     <v-row justify="center">
                         <v-col cols="6">
+                            <DefaultInput
+                                dense
+                                label="Nombre"
+                                show-required
+                                placeholder="Ingrese un nombre"
+                                v-model="resource.name"
+                                :rules="rules.name"
+                            />
+                        </v-col>
+                        <v-col cols="6">
                             <DefaultAutocomplete
                                 dense
                                 label="Requisito"
@@ -21,16 +31,6 @@
                                 :items="selects.requisitos"
                                 clearable
                                 item-text="name"
-                            />
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultInput
-                                dense
-                                label="Nombre"
-                                show-required
-                                placeholder="Ingrese un nombre"
-                                v-model="resource.name"
-                                :rules="rules.name"
                             />
                         </v-col>
                     </v-row>
@@ -72,9 +72,9 @@
                                 label="Evaluable"
                                 v-model="resource.assessable"
                                 :items="selects.assessable"
-                                :rules="rules.assessable"
                                 @onChange="validateTipoEv"
                             />
+                                <!-- :rules="rules.assessable" -->
                         </v-col>
                         <v-col cols="4">
                             <DefaultSelect
@@ -83,7 +83,7 @@
                                 label="Tipo Evaluación"
                                 v-model="resource.type_evaluation_id"
                                 :items="selects.evaluation_types"
-                                :rules="resource.assessable === 0 ? [] : rules.tipo_ev"
+                                :rules="resource.assessable === 1 ? rules.tipo_ev : []"
                                 :disabled="resource.assessable === 0 || !resource.assessable"
                                 @onChange="showAlertEvaluacion"
                             />
@@ -257,7 +257,7 @@ export default {
             resource: {},
             rules: {
                 name: this.getRules(['required']),
-                assessable: this.getRules(['required']),
+                // assessable: this.getRules(['required']),
                 tipo_ev: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
             },
@@ -394,19 +394,19 @@ export default {
 
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
-                    const messages = data.data.messages
-                    this.hideLoader()
-                    if (messages.data.length > 0) {
-                        await vue.cleanModalTemasValidaciones()
-                        vue.modalTemasValidaciones.hideCancelBtn = true
-                        vue.modalTemasValidaciones.confirmLabel = 'Entendido'
-                        vue.modalTemasValidaciones.persistent = true
-                        vue.modalTemasValidaciones.showCloseIcon = false
-                        await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
-                    } else {
+                    // const messages = data.data.messages
+                        this.hideLoader()
+                    //     if (messages.data.length > 0) {
+                    //         await vue.cleanModalTemasValidaciones()
+                    //         vue.modalTemasValidaciones.hideCancelBtn = true
+                    //         vue.modalTemasValidaciones.confirmLabel = 'Entendido'
+                    //         vue.modalTemasValidaciones.persistent = true
+                    //         vue.modalTemasValidaciones.showCloseIcon = false
+                    //         await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
+                    //     } else {
                         vue.showAlert(data.data.msg)
                         setTimeout(() => vue.leavePage(), 2000)
-                    }
+                    // }
                 })
                 .catch(async ({data}) => {
                     // console.log('PAGE ERROR DATA ::', data)

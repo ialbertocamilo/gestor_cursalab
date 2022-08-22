@@ -28,14 +28,15 @@ class UserStoreRequest extends FormRequest
 
         $rules = [
             'name' => 'required|min:3|max:255',
-            'lastname' => 'required|min:5|max:255',
-            'surname' => 'required|min:5|max:255',
+            'lastname' => 'required|min:2|max:255',
+            'surname' => 'required|min:2|max:255',
             'password' => "{$pass}|max:255",
 
             'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
             'document' => 'required|min:8',
 
             'criterion_list_final' => 'nullable',
+            'criterion_list' => 'nullable',
         ];
 
         return $rules;

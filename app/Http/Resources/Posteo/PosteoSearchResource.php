@@ -19,8 +19,8 @@ class PosteoSearchResource extends JsonResource
         return [
             'id' => $topic->id,
             'nombre' => $topic->name,
-            'tipo_evaluacion' => $topic->evaluation_type->name, //$topic->getTipoEvaluacion(),
-            'image' => space_url($topic->imagen),
+            'tipo_evaluacion' => $topic->evaluation_type->name ?? '---', //$topic->getTipoEvaluacion(),
+            'image' => get_media_url($topic->imagen),
             'active' => (bool)$topic->active,
             'orden' => $topic->position,
             'es_evaluable' => $topic->assessable === 1,

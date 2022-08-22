@@ -17,8 +17,8 @@
       </div>
 
       <div class="titulo text-center mt-5 mb-5">
-        <h3>Bienvenido a</h3>
-        <h2><strong>Cursalab Gestiona</strong></h2>
+        <h3>¡Bienvenido!</h3>
+        {{-- <h2><strong>Cursalab Gestiona</strong></h2> --}}
       </div>
 
       <div class="form mt-5">

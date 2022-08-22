@@ -293,33 +293,33 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters)
                     vue.delete_model = null
                     vue.modalDeleteOptions.open = false
-                    const messages = data.data.messages
+                    // const messages = data.data.messages
 
-                    if (messages.data.length > 0) {
-                        // console.log(messages.data)
-                        await vue.cleanModalCursosValidaciones()
-                        vue.modalCursosValidaciones.hideCancelBtn = true
-                        vue.modalCursosValidaciones.confirmLabel = 'Entendido'
-                        vue.modalCursosValidaciones.persistent = true
-                        await vue.openFormModal(vue.modalCursosValidaciones, messages, 'messagesActions', 'Aviso')
-                    } else {
+                    // if (messages.data.length > 0) {
+                    //     // console.log(messages.data)
+                    //     await vue.cleanModalCursosValidaciones()
+                    //     vue.modalCursosValidaciones.hideCancelBtn = true
+                    //     vue.modalCursosValidaciones.confirmLabel = 'Entendido'
+                    //     vue.modalCursosValidaciones.persistent = true
+                    //     await vue.openFormModal(vue.modalCursosValidaciones, messages, 'messagesActions', 'Aviso')
+                    // } else {
                         vue.showAlert(data.data.msg)
                         vue.hideLoader()
-                    }
+                    // }
                 })
                 .catch(async ({data}) => {
-                    await vue.cleanModalCursosValidaciones()
-                    vue.loadingActionBtn = false
-                    if (data.validate.show_confirm) {
-                        vue.modalCursosValidaciones.hideConfirmBtn = false
-                        vue.modalCursosValidaciones.hideCancelBtn = false
-                        vue.modalCursosValidaciones.cancelLabel = 'Cancelar'
-                        vue.modalCursosValidaciones.confirmLabel = 'Confirmar'
-                    } else {
-                        vue.modalCursosValidaciones.hideConfirmBtn = true
-                        vue.modalCursosValidaciones.cancelLabel = 'Entendido'
-                    }
-                    await vue.openFormModal(vue.modalCursosValidaciones, data.validate, 'validateDeleteCurso', data.validate.title)
+                    // await vue.cleanModalCursosValidaciones()
+                    // vue.loadingActionBtn = false
+                    // if (data.validate.show_confirm) {
+                    //     vue.modalCursosValidaciones.hideConfirmBtn = false
+                    //     vue.modalCursosValidaciones.hideCancelBtn = false
+                    //     vue.modalCursosValidaciones.cancelLabel = 'Cancelar'
+                    //     vue.modalCursosValidaciones.confirmLabel = 'Confirmar'
+                    // } else {
+                    //     vue.modalCursosValidaciones.hideConfirmBtn = true
+                    //     vue.modalCursosValidaciones.cancelLabel = 'Entendido'
+                    // }
+                    // await vue.openFormModal(vue.modalCursosValidaciones, data.validate, 'validateDeleteCurso', data.validate.title)
                     vue.hideLoader()
                 })
         },

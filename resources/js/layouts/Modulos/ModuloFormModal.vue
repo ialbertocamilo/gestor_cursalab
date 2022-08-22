@@ -54,7 +54,6 @@
                     <v-col cols="6" class="d-flex justify-content-start flex-column">
                         <DefaultFormLabel
                             label="Menú principal"
-                            tooltip="Tooltip"
                         />
                         <draggable v-model="selects.main_menu"
                                    group="main_menu"

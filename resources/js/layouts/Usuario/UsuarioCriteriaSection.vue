@@ -3,15 +3,18 @@
         <v-row justify="start">
             <v-col cols="4" v-for="criterion in criterion_list" :key="criterion.id">
                 <div v-if="TypeOf(user.criterion_list[criterion.code]) !== 'undefined'">
+
                     <DefaultAutocomplete
-                        :required="!!criterion.required"
+                        :rules="criterion.required ? rules.required : []"
                         :multiple="!!criterion.multiple"
                         placeholder="Elige una opción"
                         :label="criterion.name"
                         :items="criterion.values"
                         item-text="value_text"
+                        clearable
                         v-model="user.criterion_list[criterion.code]"
                     />
+
                 </div>
             </v-col>
         </v-row>
@@ -38,8 +41,8 @@ export default {
     data() {
         return {
             rules: {
-                carrera: this.getRules(['required'])
-            }
+                required: this.getRules(['required'])
+            },
         }
     },
     methods: {
