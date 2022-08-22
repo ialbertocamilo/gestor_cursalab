@@ -3,6 +3,7 @@
         <v-row justify="start">
             <v-col cols="4" v-for="criterion in criterion_list" :key="criterion.id">
                 <div v-if="TypeOf(user.criterion_list[criterion.code]) !== 'undefined'">
+
                     <DefaultAutocomplete
                         :rules="criterion.required ? rules.required : []"
                         :multiple="!!criterion.multiple"
@@ -13,6 +14,7 @@
                         clearable
                         v-model="user.criterion_list[criterion.code]"
                     />
+
                 </div>
             </v-col>
         </v-row>

@@ -144,13 +144,15 @@ class UsuarioController extends Controller
         $current_workspace = get_current_workspace();
         $criteria = Criterion::query()
             ->with([
-                'values' => function ($q) use($current_workspace) {
+                'values' => function ($q) use ($current_workspace) {
                     $q->with('parents:id,criterion_id,value_text')
-                        ->whereHas('workspaces', function ($q2) use($current_workspace){
+                        ->whereHas('workspaces', function ($q2) use ($current_workspace) {
                             $q2->where('id', $current_workspace->id);
                         })
-                        ->select('id', 'criterion_id', 'exclusive_criterion_id', 'value_text', 'parent_id');
-                }
+                        ->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
+                            'value_text');
+                },
+                'field_type:id,code'
             ])
             ->whereRelation('workspaces', 'id', $current_workspace?->id)
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required')
