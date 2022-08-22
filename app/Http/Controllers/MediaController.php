@@ -166,33 +166,33 @@ class MediaController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function delete(Request $request): JsonResponse
+    public function delete(Media $media, Request $request): JsonResponse
     {
-        $id = $request->id;
-        $media = Media::find($id);
-
-        $ext = $media->ext;
-        $isScorm = in_array(strtolower($ext), ['zip', 'scorm']);
-
-        // Deletes scrom directory
-
-        if ($isScorm) {
-
-            File::deleteDirectory(
-                public_path('uploads/scorm/' . $media->title)
-            );
-
-        } else {
-
-            // Deletes file from remote storage
-
-            Storage::disk('do_spaces')
-                   ->delete($media->file);
-        }
+//        $id = $request->id;
+//        $media = Media::find($id);
+//
+//        $ext = $media->ext;
+//        $isScorm = in_array(strtolower($ext), ['zip', 'scorm']);
+//
+//        // Deletes scrom directory
+//
+//        if ($isScorm) {
+//
+//            File::deleteDirectory(
+//                public_path('uploads/scorm/' . $media->title)
+//            );
+//
+//        } else {
+//
+//            // Deletes file from remote storage
+//
+//            Storage::disk('do_spaces')
+//                   ->delete($media->file);
+//        }
 
         // Deletes file from database
 
-        // $media->delete();
+         $media->delete();
 
 
         return $this->success([
