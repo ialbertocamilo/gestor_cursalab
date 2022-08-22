@@ -9,7 +9,7 @@ class Poll extends BaseModel
     protected $table = 'polls';
 
     protected $fillable = [
-        'type_id', 'anonima', 'titulo', 'imagen', 'active'
+        'type_id', 'anonima', 'titulo', 'imagen', 'active', 'workspace_id'
     ];
 
     /*
@@ -48,7 +48,11 @@ class Poll extends BaseModel
      */
     protected function search($request)
     {
-        $query = self::withCount('questions');
+        $session = $request->session()->all();
+        $workspace = $session['workspace'];
+
+        $query = self::withCount('questions')
+                     ->where('workspace_id', $workspace->id);
 
         if ($request->q)
             $query->where('titulo', 'like', "%$request->q%");
