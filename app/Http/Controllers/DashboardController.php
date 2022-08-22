@@ -47,9 +47,6 @@ class DashboardController extends Controller
         $cache_name = "dashboard_cards-{$current_workspace->id}-";
         $cache_name .= $subworkspace_id ? "-modulo-{$subworkspace_id}" : '';
 
-        // info($cache_name);
-        // info($subworkspace_id);
-
         $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
             function () use ($workspaceId, $subworkspace_id, $modulos) {
 

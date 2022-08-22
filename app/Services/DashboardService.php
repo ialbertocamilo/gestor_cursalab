@@ -54,7 +54,7 @@ class  DashboardService {
      * @param int|null $workspaceId
      * @return int
      */
-    public static function countUsers(?int $workspaceId): int
+    public static function countUsers(?int $subworkspaceId): int
     {
         if (!$subworkspaceId)
         {

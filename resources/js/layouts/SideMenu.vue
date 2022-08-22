@@ -280,7 +280,7 @@ export default {
                         subpaths:["entrenamiento/entrenador"],
                         selected:false,
                         permission:"entrenadores",
-                        role:["super-user","admin","content-manager","trainer"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","content-manager-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Checklists",
@@ -289,7 +289,7 @@ export default {
                         subpaths:["entrenamiento/checklist"],
                         selected:false,
                         permission:"checklist",
-                        role:["super-user","admin","content-manager","trainer"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","content-manager-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO"]
                     },
                 ]
             },
@@ -305,7 +305,7 @@ export default {
                         subpaths:["exportar/node"],
                         selected:false,
                         permission:"reportes",
-                        role:["super-user","admin","trainer","reports"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO","reports-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Aulas Virtuales",
@@ -314,7 +314,7 @@ export default {
                         subpaths:["exportar/conferencias"],
                         selected:false,
                         permission:"conferencias",
-                        role:["super-user","admin","trainer","reports"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO","reports-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Encuestas",
@@ -323,7 +323,7 @@ export default {
                         subpaths:["resumen_encuesta"],
                         selected:false,
                         permission:"resumen_encuesta",
-                        role:["super-user","admin","content-manager","trainer","reports"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO","content-manager-TEMPORAL_INACTIVO","trainer-TEMPORAL_INACTIVO","reports-TEMPORAL_INACTIVO"]
                     },
                 ]
             },
@@ -339,7 +339,7 @@ export default {
                         subpaths:["notificaciones_push"],
                         selected:false,
                         permission:"notificaciones",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Reinicio de usuarios",
@@ -348,7 +348,7 @@ export default {
                         subpaths:["masivo/usuarios"],
                         selected:false,
                         permission:"reinicio_usuarios",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                     {
                         title:"Subida masivos",
@@ -357,7 +357,7 @@ export default {
                         subpaths:["masivo/index"],
                         selected:false,
                         permission:"proceso_masivo",
-                        role:["super-user","admin"]
+                        role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
                 ]
             },
@@ -374,10 +374,15 @@ export default {
             let vue = this
             let new_grupos = []
             let location = window.location.pathname.split('/');
+            console.log('location')
+            console.log(location)
             this.grupos.forEach((grupo) => {
                 let new_items = []
                 grupo.items.forEach((i) => {
                     vue.roles.forEach((item)=>{
+                        console.log('i.role')
+                        console.log(i.role)
+                        console.log(item)
                         if(i.role.includes(item)){
                             new_items.push(i)
                             if(this.verify_path(location,i.subpaths)){
