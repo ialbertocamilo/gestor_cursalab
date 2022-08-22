@@ -302,9 +302,7 @@ return [
         'external_id' => 'ID externo',
         'file_logo' => 'logo',
         'position' => 'orden',
-
-
-
+        'rpta_ok' => 'respuesta correcta',
     ],
 
 ];
