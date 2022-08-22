@@ -183,18 +183,20 @@ class Workspace extends BaseModel
             6  // reports
         ];
 
-        $role = DB::table('assigned_roles')
-            ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-            ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
-            ->whereIn('assigned_roles.role_id', $allowedRoles)
-            ->where('users.id', $userId)
-            ->select('assigned_roles.*')
-            ->first();
+        // Get list of workspaces the user is allowed to access to
+
+        $workspacesIds = DB::table('assigned_roles')
+                        ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+                        ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
+                        ->whereIn('assigned_roles.role_id', $allowedRoles)
+                        ->where('users.id', $userId)
+                        ->select('assigned_roles.*')
+                        ->pluck('scope');
 
         return Workspace::query()
-            ->where('id', $role->scope)
-            ->where('workspaces.active', ACTIVE)
-            ->select('workspaces.*');
+                        ->whereIn('id', $workspacesIds)
+                        ->where('workspaces.active', ACTIVE)
+                        ->select('workspaces.*');
     }
 
     /**
