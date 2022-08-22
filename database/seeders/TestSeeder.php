@@ -13,6 +13,284 @@ use Illuminate\Support\Facades\DB;
 
 class TestSeeder extends Seeder
 {
+    // Workspaces list
+    public static $workspaces = [
+        [   
+            'id'=>1,
+            'code' => 'INRE',
+            'name' => 'InRetail',
+            'children' => [
+                ['name' => 'Agora'],
+                ['name' => 'InDigital XP'],
+                ['name' => 'Intercorp Retail'],
+            ],
+        ],
+        [   
+            'id'=>2,
+            'code' => 'QUSU',
+            'name' => 'Química Suiza',
+            'children' => [
+                ['name' => 'Química Suiza'],
+                ['name' => 'Vanttive'],
+            ],
+        ],
+        [   
+            'id'=>3,
+            'code' => 'FIOH',
+            'name' => 'Financiera Oh',
+            'children' => [
+                ['name' => 'Financiera Oh - Masivo'],
+                ['name' => 'Financiera Oh - Central'],
+            ],
+        ],
+        [   
+            'id'=>4,
+            'code' => 'HOPE',
+            'name' => 'Homecenters Peruanos',
+            'children' => [
+                ['name' => 'Promart - Masivo'],
+                ['name' => 'Promart - Central'],
+            ],
+        ],
+        [   
+            'id'=>5,
+            'code' => 'TIPE',
+            'name' => 'Tiendas Peruanas',
+            'children' => [
+                ['name' => 'Oechsle'],
+            ],
+            
+        ],
+        [   
+            'id'=>6,
+            'code' => 'REPL',
+            'name' => 'Real Plaza',
+            'children' => [
+                ['name' => 'Real Plaza'],
+            ],
+        ],
+        [   
+            'id'=>7,
+            'code' => 'SUPE',
+            'name' => 'Supermercados Peruanos',
+            'children' => [
+                ['name' => 'Plaza Vea Oriente'],
+                ['name' => 'Compañia Hard Discount'],
+                ['name' => 'Operadora de Servicios Logisticos'],
+                ['name' => 'Compañia Food Retail'],
+                ['name' => 'Administración Food Regional'],
+                ['name' => 'Makro Supermayorista'],
+            ],
+        ],
+        [   
+            'id'=>8,
+            'code' => 'FAPE',
+            'name' => 'Farmacias Peruanas',
+            'children' => [
+                ['name' => 'Mi Farma'],
+                ['name' => 'Inkafarma'],
+                ['name' => 'FAPE Masivos'],
+                ['name' => 'Administrativos FAPE'],
+            ],
+        ],
+    ];
+
+    public static $default_admins = [
+        [
+            'email'=> 'rodrigo@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ]
+            ]
+        ],
+        [
+            'email'=> 'elvis@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>2,
+                    'role_id'=>4,
+                ]
+            ]
+        ],
+        [
+            'email'=> 'jeancarlo@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>3,
+                    'role_id'=>5,
+                ]
+            ]
+        ],
+        [
+            'email'=> 'crusbel@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>4,
+                    'role_id'=>6,
+                ]
+            ]
+        ],
+        [
+            'email'=> 'luis@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>2,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>3,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>4,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>5,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>6,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>7,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>8,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'email'=> 'friorella@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>2,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>3,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>4,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>5,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>6,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>7,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>8,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'email'=> 'gabriel@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>2,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>3,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>4,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>5,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>6,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>7,
+                    'role_id'=>3,
+                ],
+                [
+                    'id'=>8,
+                    'role_id'=>3,
+                ],
+            ]
+        ],
+        [
+            'email'=> 'kevin@cursalab.io',
+            'workspaces'=>
+            [
+                [
+                    'id'=>1,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>2,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>3,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>4,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>5,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>6,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>7,
+                    'role_id'=>1,
+                ],
+                [
+                    'id'=>8,
+                    'role_id'=>1,
+                ],
+            ]
+        ]
+    ];
+
+
     /**
      * Run the database seeds.
      *
@@ -24,7 +302,8 @@ class TestSeeder extends Seeder
         $this->insertWorkspaces();
 
         $this->insertUsers();
-        $this->insertAdmins();
+        // $this->insertAdmins();
+        $this->insertDefaultAdmins();
     }
 
     public function insertCriteria() {
@@ -88,71 +367,7 @@ class TestSeeder extends Seeder
      */
     public function insertWorkspaces() {
 
-        $workspaces = [
-            [   'name' => 'InRetail',
-                'children' => [
-                    ['name' => 'Agora'],
-                    ['name' => 'InDigital XP'],
-                    ['name' => 'Intercorp Retail'],
-                ],
-            ],
-
-            [   'name' => 'Química Suiza',
-                'children' => [
-                    ['name' => 'Química Suiza'],
-                    ['name' => 'Vanttive'],
-                ],
-            ],
-
-            [   'name' => 'Financiera Oh',
-                'children' => [
-                    ['name' => 'Financiera Oh - Masivo'],
-                    ['name' => 'Financiera Oh - Central'],
-                ],
-            ],
-
-            [   'name' => 'Homecenters Peruanos',
-                'children' => [
-                    ['name' => 'Promart - Masivo'],
-                    ['name' => 'Promart - Central'],
-                ],
-            ],
-
-            [   'name' => 'Tiendas Peruanas',
-                'children' => [
-                    ['name' => 'Oechsle'],
-                ],
-            ],
-
-            [   'name' => 'Real Plaza',
-                'children' => [
-                    ['name' => 'Real Plaza'],
-                ],
-            ],
-
-            [   'name' => 'Supermercados Peruanos',
-                'children' => [
-                    ['name' => 'Plaza Vea Oriente'],
-                    ['name' => 'Compañia Hard Discount'],
-                    ['name' => 'Operadora de Servicios Logisticos'],
-                    ['name' => 'Compañia Food Retail'],
-                    ['name' => 'Administración Food Regional'],
-                    ['name' => 'Makro Supermayorista'],
-                ],
-            ],
-
-            [   'name' => 'Farmacias Peruanas',
-                'children' => [
-                    ['name' => 'Mi Farma'],
-                    ['name' => 'Inkafarma'],
-                    ['name' => 'FAPE Masivos'],
-                    ['name' => 'Administrativos FAPE'],
-                ],
-            ],
-
-        ];
-
-        foreach($workspaces AS $row)
+        foreach(static::$workspaces AS $row)
         {
             $workspace = Workspace::create([
                 'name' => $row['name'],
@@ -390,5 +605,34 @@ class TestSeeder extends Seeder
                 ]);
         }
 
+    }
+
+    /**
+     * Insert workspaces and subworkspaces
+     */
+    public function insertDefaultAdmins() {
+
+        foreach(static::$default_admins AS $child)
+        {
+            // Create admins
+            $user = User::create([
+                'email'=>$user_arr['email'],
+                'name' => $user_arr['name'],
+                'password'=>bcrypt('12345'),
+                'active' => 1
+            ]);
+
+            // Assign admins
+            foreach ($user_arr['workspaces'] as $key => $wk_arr)
+            {
+                AssignedRole::create([
+                    'entity_type' => AssignedRole::USER_ENTITY,
+                    'entity_id' => $user->id,
+                    'scope' => $wk_arr['id'],
+                    'role_id' => $wk_arr['role_id']
+                ]);
+            }
+
+        }         
     }
 }
