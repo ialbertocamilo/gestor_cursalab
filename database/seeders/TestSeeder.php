@@ -173,6 +173,12 @@ class TestSeeder extends Seeder
                     'parent_id' => $workspace->id,
                     'active' => 1
                 ]);
+
+                DB::table('criterion_value_workspace')->insert([
+                    'workspace_id' => $workspace->id,
+                    'criterion_value_id' => $criterion_value->id
+                ]);
+
             }
         }         
     }

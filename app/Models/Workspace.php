@@ -47,6 +47,11 @@ class Workspace extends BaseModel
         return $this->belongsToMany(Course::class);
     }
 
+    public function parent()
+    {
+        return $this->belongsTo(Workspace::class, 'parent_id');
+    }
+
     public function criterionWorkspace()
     {
         return $this->belongsToMany(
@@ -237,16 +242,19 @@ class Workspace extends BaseModel
      */
     public static function getWorkspaceIdFromModule(?int $moduleId): mixed
     {
-        $workspace = Workspace::query()
-            ->join('criterion_workspace', 'criterion_workspace.workspace_id', '=', 'workspaces.id')
-            ->join('criterion_values', 'criterion_values.id', '=', 'criterion_workspace.criterion_id')
-            ->when($moduleId ?? null, function ($q) use ($moduleId) {
-                $q->where('criterion_workspace.criterion_id', $moduleId);
-            })
-            ->select('workspaces.*')
-            ->first();
+        $subworkspace = Workspace::find($moduleId);
 
-        return $workspace?->id;
+
+        // $workspace = Workspace::query()
+        //     ->join('criterion_workspace', 'criterion_workspace.workspace_id', '=', 'workspaces.id')
+        //     ->join('criterion_values', 'criterion_values.id', '=', 'criterion_workspace.criterion_id')
+        //     ->when($moduleId ?? null, function ($q) use ($moduleId) {
+        //         $q->where('criterion_workspace.criterion_id', $moduleId);
+        //     })
+        //     ->select('workspaces.*')
+        //     ->first();
+
+        return $workspace->parent_id ?? NULL;
     }
 
     protected function searchSubWorkspace($request)

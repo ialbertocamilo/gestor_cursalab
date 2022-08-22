@@ -38,32 +38,64 @@ class DashboardController extends Controller
         if ($request->refresh == 'true')
             cache()->flush();
 
-        $module_id = request('modulo_id', NULL);
-        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
+        $current_workspace = get_current_workspace();
+        $modulos = $current_workspace->subworkspaces->toArray();
 
-        $cache_name = 'dashboard_cards';
-        $cache_name .= $module_id ? "-modulo-{$module_id}" : '';
+        $subworkspace_id = request('modulo_id', NULL);
+        $workspaceId = Workspace::getWorkspaceIdFromModule($subworkspace_id);
+
+        $cache_name = "dashboard_cards-{$current_workspace->id}-";
+        $cache_name .= $subworkspace_id ? "-modulo-{$subworkspace_id}" : '';
+
+        // info($cache_name);
+        // info($subworkspace_id);
 
         $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
-            function () use ($workspaceId) {
+            function () use ($workspaceId, $subworkspace_id, $modulos) {
 
                 $data['time'] = now();
 
                 $data['totales'] = [
 
-                    'temas' => DashboardService::countTopics($workspaceId),
+                    'temas' => [
+                    'title' => 'Temas',
+                    'icon' => 'mdi-book-open',
+                    'color' => '#FFB300',
+                    'value' => DashboardService::countTopics($workspaceId)
+                ],
 
-                    'cursos' => DashboardService::countCourses($workspaceId),
+                'cursos' => [
+                    'title' => 'Cursos',
+                    'icon' => 'mdi-book',
+                    'color' => '#E01717',
+                    'value' => DashboardService::countCourses($workspaceId)
+                ],
 
-                    'usuarios' => DashboardService::countUsers($workspaceId),
+                'usuarios' => [
+                    'title' => 'Usuarios totales',
+                    'icon' => 'mdi-account-group',
+                    'color' => '#5458ea',
+                    'value' => DashboardService::countUsers($subworkspace_id)
+                ],
 
-                    'usuarios_activos' => DashboardService::countActiveUsers($workspaceId),
+                'usuarios_activos' => [
+                    'title' => 'Usuarios activos',
+                    'icon' => 'mdi-account-group',
+                    'color' => '#22B573',
+                    'value' => DashboardService::countActiveUsers($subworkspace_id)
+                ],
 
-                    'temas_evaluables' => DashboardService::countAssessableTopics($workspaceId)
+                'temas_evaluables' => [
+                    'title' => 'Temas evaluables',
+                    'icon' => 'mdi-text-box-check',
+                    'color' => '#4E5D8C',
+                    'value' => DashboardService::countAssessableTopics($workspaceId)
+                ],
                 ];
 
                 $data['data'] = [
-                    'modulos' => Criterion::getValuesForSelect('module'),
+                    // 'modulos' => Criterion::getValuesForSelect('module'),
+                    'modulos' => $modulos,
                     'categorias' => []//Categoria::select('id', 'nombre')->pluck('nombre', 'id'),
                 ];
 
