@@ -16,6 +16,9 @@
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="CursoForm">
+
+                    <DefaultErrors :errors="errors"/>
+
                     <!-- <v-row>
                         <v-col cols="6">
                             <DefaultAutocomplete
@@ -48,6 +51,8 @@
                         </v-col>
                         <v-col cols="6">
                             <DefaultAutocomplete
+                                show-required
+                                :rules="rules.lista_escuelas"
                                 dense
                                 label="Escuelas"
                                 v-model="resource.lista_escuelas"
@@ -191,7 +196,9 @@ export default {
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         let route_school = (this.categoria_id !== '') ? `/escuelas/${this.categoria_id}` : ``;
+        
         return {
+            errors: [],
             base_endpoint: `${route_school}/cursos`,
             resourceDefault: {
                 name: null,
@@ -214,6 +221,7 @@ export default {
             resource: {},
             rules: {
                 name: this.getRules(['required']),
+                lista_escuelas: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
             },
             selects: {
@@ -277,6 +285,7 @@ export default {
         },
         confirmModal() {
             let vue = this
+            vue.errors = []
             vue.loadingActionBtn = true
             this.showLoader()
             const validateForm = vue.validateForm('CursoForm')
@@ -319,6 +328,12 @@ export default {
                             setTimeout(() => vue.closeModal(), 2000)
                         }
                     }
+                })
+                .catch((error) => {
+                    if (error && error.errors)
+                        vue.errors = error.errors
+
+                    vue.loadingActionBtn = false
                 })
                 .catch(async ({data}) => {
                     await vue.cleanModalCursoValidaciones()

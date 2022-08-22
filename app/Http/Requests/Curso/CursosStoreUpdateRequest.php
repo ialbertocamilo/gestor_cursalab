@@ -31,6 +31,7 @@ class CursosStoreUpdateRequest extends FormRequest
             'requisito_id' => 'nullable',
 
             'reinicios_programado' => 'nullable',
+            'lista_escuelas' =>  'required',
 
             'imagen' => 'nullable',
             'plantilla_diploma' => 'nullable',

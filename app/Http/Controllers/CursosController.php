@@ -79,7 +79,7 @@ class CursosController extends Controller
         ]);
     }
 
-    public function storeCurso(School $escuela, CursosStoreUpdateRequest $request)
+    public function storeCurso(School $school, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
 
@@ -87,7 +87,7 @@ class CursosController extends Controller
         // $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         // $data['workspace_id'] = $workspace_id;
-        $data['school_id'] = ($escuela->exists) ? $escuela->id : null;
+        $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
 
         $data = Media::requestUploadFile($data, 'imagen');
@@ -99,10 +99,10 @@ class CursosController extends Controller
         return $this->success(compact('curso', 'msg'));
     }
 
-    public function updateCurso(School $escuela, Course $course, CursosStoreUpdateRequest $request)
+    public function updateCurso(School $school, Course $course, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $validate = Course::validateCursoRequisito($data, $escuela, $course);
+        $validate = Course::validateCursoRequisito($data, $school, $course);
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
@@ -110,7 +110,7 @@ class CursosController extends Controller
         // $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         // $data['workspace_id'] = $workspace_id;
-        $data['school_id'] = ($escuela->exists) ? $escuela->id : null;
+        $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
         $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
 
@@ -506,7 +506,7 @@ class CursosController extends Controller
     }
 
 
-    public function destroy(School $escuela, Course $curso)
+    public function destroy(School $school, Course $curso)
     {
         // \File::delete(public_path().'/'.$curso->imagen);
         $q_requisito = Course::select('id', 'name')->where('requisito_id', $curso->id)->get();
@@ -516,7 +516,7 @@ class CursosController extends Controller
                 $li = $li . "<li class='ml-4 mt-2'>" . $req->nombre . "</li>";
             }
             $li = $li . "</ul>";
-            return redirect()->route('categorias.cursos', [$escuela->id, $escuela->id])
+            return redirect()->route('categorias.cursos', [$school->id, $school->id])
                 ->with('modal-info', '<strong>No se puede eliminar este Curso.</strong> <br>
                 Para poder eliminar este curso es necesario quitar el requisito en los siguientes cursos' . $li);
         }
@@ -558,7 +558,7 @@ class CursosController extends Controller
 
 
     ////////////////////// CURSO ENCUESTA ////////////////////////////
-    public function getEncuesta(School $escuela, Course $curso)
+    public function getEncuesta(School $school, Course $curso)
     {
         $encuestas = Poll::select('id', 'titulo')->select('titulo as nombre', 'id')->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
@@ -566,15 +566,15 @@ class CursosController extends Controller
         return $this->success(compact('encuestas', 'curso'));
     }
 
-    public function storeUpdateEncuesta(School $escuela, Course $curso, CursoEncuestaStoreUpdate $request)
+    public function storeUpdateEncuesta(School $school, Course $course, CursoEncuestaStoreUpdate $request)
     {
         $data = $request->validated();
         if ($data['encuesta_id'] === "ninguno") {
-            $curso->encuesta->delete();
+            $course->encuesta->delete();
             return $this->success(['msg' => 'Encuesta removida.']);
         }
 
-        $curso->polls()->sync($data['encuesta_id']);
+        $course->polls()->sync($data['encuesta_id']);
 
         return $this->success(['msg' => 'Encuesta actualizada.']);
     }

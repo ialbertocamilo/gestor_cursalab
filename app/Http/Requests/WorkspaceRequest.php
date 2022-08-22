@@ -20,7 +20,7 @@ class WorkspaceRequest extends FormRequest
             'active' => 'nullable',
             'logo' => 'nullable',
             'logo_negativo' => 'nullable',
-            'file_logo' => 'nullable',
+            'file_logo' => 'required_without:logo',
             'file_logo_negativo' => 'nullable',
             'selected_criteria' => 'nullable'
         ];
@@ -35,5 +35,12 @@ class WorkspaceRequest extends FormRequest
             $data['active'] = true;
 
         return $this->merge($data)->all();
+    }
+
+    public function messages(): array
+    {
+        return [
+            'file_logo.required_without' => 'El campo logo es requerido.',
+        ];
     }
 }

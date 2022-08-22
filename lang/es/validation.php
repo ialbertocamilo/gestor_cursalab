@@ -300,6 +300,7 @@ return [
         'scheduled_at' => 'programado a',
         'average_rating' => 'calificación promedio',
         'external_id' => 'ID externo',
+        'file_logo' => 'logo',
 
 
     ],
