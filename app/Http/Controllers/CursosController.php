@@ -558,12 +558,13 @@ class CursosController extends Controller
 
 
     ////////////////////// CURSO ENCUESTA ////////////////////////////
-    public function getEncuesta(School $school, Course $curso)
+    public function getEncuesta(School $school, Course $course)
     {
         $encuestas = Poll::select('id', 'titulo')->select('titulo as nombre', 'id')->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
-        $curso->encuesta_id = $curso->encuesta->encuesta_id ?? "ninguno";
-        return $this->success(compact('encuestas', 'curso'));
+        $course->encuesta_id = $course->polls->first()->id ?? "ninguno";
+
+        return $this->success(compact('encuestas', 'course'));
     }
 
     public function storeUpdateEncuesta(School $school, Course $course, CursoEncuestaStoreUpdate $request)

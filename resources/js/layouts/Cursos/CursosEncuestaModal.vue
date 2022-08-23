@@ -83,8 +83,8 @@ export default {
             let vue = this
             let url = `${vue.options.base_endpoint}/${resource.id}/encuesta`
             vue.$http.get(url).then(({data}) => {
-                vue.resource.id = data.data.curso.id
-                vue.resource.encuesta_id = data.data.curso.encuesta_id
+                vue.resource.id = data.data.course.id
+                vue.resource.encuesta_id = data.data.course.encuesta_id
                 vue.selects.encuestas = data.data.encuestas
             });
         },
