@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
-use App\Models\Announcement;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
+use App\Models\Announcement;
+use App\Models\Question;
+use App\Models\Topic;
+
 
 class RestQuizController extends Controller
 {
@@ -140,53 +144,21 @@ class RestQuizController extends Controller
 
     public function cargar_preguntas($topic_id)
     {
-        $apiResponse = ['data' => [], 'error' => true];
+        $topic = Topic::find('id', $topic_id);
+
+        if (!$topic) return response()->json(['data' => [], 'error' => true], 200);
         
-        $appUser = auth()->user();
+        $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
 
-        $topic = Topic::find('id', $topic_id)->first();
+        $limit = $config_quiz['preg_x_ev'] ?? 5;
+        $is_random = $topic->tipo_ev  == 'calificada';
+        $type_code = $topic->tipo_ev  == 'calificada' ? 'selecciona' : 'texto';
 
-
-        if (!$topic) return response()->json($apiResponse, 200);
-
-        $data = [];
-        $subworkspace_id = $appUser->subworkspace_id;
-        $helper = new HelperController();
-        $config_eva = $helper->configEvaluacionxModulo($subworkspace_id);
-
-        if ($topic->tipo_ev  == 'calificada') {
-            $preguntas = Pregunta::where('post_id', $topic->id)
-                            ->where('estado', 1)
-                            ->where('tipo_pregunta','selecciona')
-                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
-                            ->inRandomOrder()
-                            ->limit($config_eva['preg_x_ev'])
-                            ->get();
-            // APLICAR SHUFFLE A ALTERNATIVAS DE CADA PREGUNTA
-            foreach ($preguntas as $value) {
-                $val_rpta = json_decode($value->rptas_json, true);
-                $tempRptas = collect();
-                foreach ($val_rpta as $key => $value2) {
-                    $tempRpta = ['id'=> $key , 'opc' =>$value2];
-                    $tempRptas->push($tempRpta);
-                }
-                // shuffle($val_rpta);
-                $shu = $tempRptas->shuffle()->all();
-
-                // info($value);
-                $value->rptas_json = $shu;
-                // $value->rptas_json = $val_rpta;
-            }
-        } else {
-            $preguntas = Pregunta::where('post_id', $topic->id)
-                            ->where('estado', 1)
-                            ->where('tipo_pregunta','texto')
-                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
-                            ->get();
-        }
+        $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
 
 
-        $data = ["tipo_evaluacion"=>$topic->tipo_ev,"curso_id"=>$topic->curso_id,"posteo_id" => $topic->id, "nombre" => $topic->nombre, "preguntas" => $preguntas];
+        $data = ["tipo_evaluacion"=>$topic->tipo_ev,"curso_id"=>$topic->curso_id,"posteo_id" => $topic->id, "nombre" => $topic->nombre, "preguntas" => $questions];
+
         $ultima_evaluacion = Carbon::now();
 
         DB::table('resumen_general')->where('usuario_id',$appUser->id)->update([
@@ -197,7 +169,8 @@ class RestQuizController extends Controller
             'last_ev' =>$ultima_evaluacion,
         ]);
         
-        if (count($preguntas) > 0) $apiResponse = ['error' => false, 'data' => $data];
+        if (count($questions) > 0) $apiResponse = ['error' => false, 'data' => $data];
+
         else $apiResponse = ['error' => true, 'data' => null];
 
         return response()->json($apiResponse, 200);

@@ -32,6 +32,10 @@ class Workspace extends BaseModel
         ];
     }
 
+    protected $casts = [
+        'mod_evaluaciones' => 'array',
+    ];
+
     public function users()
     {
         return $this->hasMany(User::class, 'subworkspace_id');
