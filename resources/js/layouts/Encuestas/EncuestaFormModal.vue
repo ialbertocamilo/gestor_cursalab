@@ -47,7 +47,6 @@
                         <DefaultSelectOrUploadMultimedia
                             ref="inputImagen"
                             v-model="resource.imagen"
-                            :rules="rules.imagen"
                             label="Imagen"
                             :file-types="['image']"
                             @onSelect="setFile($event, resource, 'imagen')"/>
@@ -99,7 +98,6 @@ export default {
 
             rules: {
                 titulo: this.getRules(['required', 'max:100']),
-                imagen: this.getRules(['required']),
             }
         }
     },
@@ -144,6 +142,10 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
+                    }).catch((error) => {
+
+                        if (error && error.errors)
+                            vue.errors = error.errors
                     })
             }
 
@@ -185,8 +187,11 @@ export default {
 
             let valid = true;
             let errors = [];
+            let formData = this.getMultipartFormData(
+                '', this.resource, fields, file_fields
+            );
 
-            if (!this.resource.imagen) {
+            if (!formData.get('file_imagen')) {
                 errors.push({
                     message: 'No ha seleccionado ninguna imágen'
                 })
