@@ -562,7 +562,7 @@ class CursosController extends Controller
     {
         $workspace = get_current_workspace();
 
-        $encuestas = Poll::select('id', 'titulo')->select('titulo as nombre', 'id')->where('workspace_id', $workspace->id)->get();
+        $encuestas = Poll::select('titulo as nombre', 'id')->where('workspace_id', $workspace->id)->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
         $course->encuesta_id = $course->polls->first()->id ?? "ninguno";
 
@@ -572,14 +572,14 @@ class CursosController extends Controller
     public function storeUpdateEncuesta(School $school, Course $course, CursoEncuestaStoreUpdate $request)
     {
         $data = $request->validated();
-        if ($data['encuesta_id'] === "ninguno") {
-            $course->encuesta->delete();
-            return $this->success(['msg' => 'Encuesta removida.']);
-        }
 
-        $course->polls()->sync($data['encuesta_id']);
+        $polls = $data['encuesta_id'] === "ninguno" ? [] : $data['encuesta_id'];
 
-        return $this->success(['msg' => 'Encuesta actualizada.']);
+        $course->polls()->sync($polls);
+
+        cache_clear_model(Course::class);
+
+        return $this->success(['msg' => 'Encuesta de curso actualizada.']);
     }
 
     public function create_CE(Curso $curso)
