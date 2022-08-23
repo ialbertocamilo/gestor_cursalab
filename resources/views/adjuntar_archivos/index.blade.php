@@ -8,7 +8,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    <title>Universidad Corporativa</title>
+    <title>Cursalab</title>
   </head>
   <style>
     .contacts {
@@ -57,11 +57,9 @@
   <body>
         <header class="masthead mb-auto mt-3 ml-3 ">
           <div class="container-fluid">
-              <!--Mods logo-->
               <div id="logo">
                 <a href="#">
-                  <!-- <img class="img-fluid" src="https://gestor.universidadcorporativafp.com.pe/images/1867057438.png" data-retina="true"> -->
-                  <img class="img-fluid" src="img/logo_color.png" data-retina="true" width="150"> 
+                  <img class="img-fluid" src="img/we-connect-logo.png" data-retina="true" width="150"> 
                 </a>
               </div>
           </div>
@@ -147,7 +145,7 @@
             </div>
             <div class="credits col-lg-5 col-md-12 text-center">
               <p class=" credits_content">
-                <img src="img/logo_color.png" class="img-fluid" data-retina="true" alt="" style="filter: brightness(0) invert(1);" width="150">
+                <img src="img/we-connect-logo.png" class="img-fluid" data-retina="true" alt="" style="filter: brightness(0) invert(1);" width="150">
               </p>
             </div>
           </div>
