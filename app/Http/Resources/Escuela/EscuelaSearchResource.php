@@ -20,6 +20,7 @@ class EscuelaSearchResource extends JsonResource
         return [
             'id' => $this->id,
             'nombre' => $this->name,
+            'name' => $this->name,
             'image' => FileService::generateUrl($this->imagen),
             'active' => $this->active,
             'orden' => $this->position,

@@ -94,7 +94,7 @@ export default {
                 ref: 'escuelasTable',
                 headers: [
                     {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombres", value: "nombre"},
+                    {text: "Nombres", value: "name"},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
