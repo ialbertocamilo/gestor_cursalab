@@ -560,7 +560,9 @@ class CursosController extends Controller
     ////////////////////// CURSO ENCUESTA ////////////////////////////
     public function getEncuesta(School $school, Course $course)
     {
-        $encuestas = Poll::select('id', 'titulo')->select('titulo as nombre', 'id')->get();
+        $workspace = get_current_workspace();
+
+        $encuestas = Poll::select('id', 'titulo')->select('titulo as nombre', 'id')->where('workspace_id', $workspace->id)->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
         $course->encuesta_id = $course->polls->first()->id ?? "ninguno";
 
