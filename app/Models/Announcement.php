@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
@@ -20,14 +21,17 @@ class Announcement extends BaseModel
         'position',
         'active',
         'publish_date',
+        'end_date',
         'created_at',
         'updated_at',
         'deleted_at'
     ];
 
     protected $dates = [
-        'publish_date'
+        'publish_date',
+        'end_date'
     ];
+
 
     /*
 
@@ -97,14 +101,24 @@ class Announcement extends BaseModel
      *
      * @return string
      */
-    public function getPublicationDate()
+    public function getPublicationDate(): string
     {
 
-        if (is_null($this->publish_date)) {
-            return 'Indefinido';
+        $publishDate = 'Indefinido';
+        if (!is_null($this->publish_date)) {
+
+            $publishDate = $this->publish_date->format('d/m/Y');
         }
 
-        return $this->publish_date->format('d/m/Y');
+        $endDate = 'Indefinido';
+        if (!is_null($this->end_date)) {
+
+            $endDate = $this->end_date->format('d/m/Y');
+        }
+
+        return ($publishDate === 'Indefinido' && $endDate === 'Indefinido')
+                ? 'Indefinido'
+                : "$publishDate - $endDate";
     }
 
     protected function getPublisheds($module_id = NULL)

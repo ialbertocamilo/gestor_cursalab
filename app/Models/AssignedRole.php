@@ -21,9 +21,28 @@ class AssignedRole extends Model
     public static function getUserAssignedRoles($userId): object
     {
 
-        return DB::table('assigned_roles')
-                ->where('entity_type', self::USER_ENTITY)
-                ->where('entity_id', $userId)
-                ->get();
+        return AssignedRole::query()
+                           ->where('entity_type', self::USER_ENTITY)
+                           ->where('entity_id', $userId)
+                           ->get();
+    }
+
+    /**
+     * Check whether user has specific role
+     *
+     * @param $userId
+     * @param $roleId
+     * @return bool
+     */
+    public static function hasRole($userId, $roleId): bool
+    {
+
+        $role = DB::table('assigned_roles')
+                    ->where('entity_type', self::USER_ENTITY)
+                    ->where('entity_id', $userId)
+                    ->where('role_id', $roleId)
+                    ->first();
+
+        return (bool)$role;
     }
 }

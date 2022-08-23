@@ -82,7 +82,16 @@
                             :referenceComponent="'modalDateFilter1'"
                             :options="modalDateFilter1"
                             v-model="resource.publish_date"
-                            label="Fecha publicación"
+                            label="Fecha de inicio"
+                        />
+                    </v-col>
+                    <v-col cols="6">
+                        <DefaultInputDate
+                            clearable
+                            :referenceComponent="'modalDateFilter2'"
+                            :options="modalDateFilter2"
+                            v-model="resource.end_date"
+                            label="Fecha de finalización"
                         />
                     </v-col>
                 </v-row>
@@ -116,7 +125,7 @@ import moment from "moment";
 
 const fields = [
     'nombre', 'active', 'destino', 'link', 'module_ids',
-    'contenido', 'publish_date'
+    'contenido', 'publish_date', 'end_date'
 ];
 const file_fields = ['imagen', 'archivo'];
 
@@ -145,7 +154,8 @@ export default {
                 destinos: null,
                 active: true,
                 publish_date: null,
-                contenido: null
+                end_date: null,
+                contenido: ''
             },
             resource: { },
             selects: {
@@ -207,7 +217,7 @@ export default {
 
             let method = edit ? 'PUT' : 'POST';
 
-            if (validateForm) {
+            if (validateForm && vue.isValid()) {
 
                 let formData = vue.getMultipartFormData(
                     method, vue.resource, fields, file_fields
@@ -223,9 +233,11 @@ export default {
 
                    }).catch((error) => {
 
-                   if (error && error.errors)
-                        vue.errors = error.errors
-                })
+                       if (error && error.errors)
+                            vue.errors = error.errors
+
+
+                    })
             }
 
             this.hideLoader()
@@ -259,10 +271,35 @@ export default {
 
                 if (resource) {
                     vue.resource = Object.assign({}, data.data.announcement);
+
+                    if (vue.resource.publish_date)
+                        vue.resource.publish_date = vue.resource.publish_date.substring(0, 10)
+
+                    if (vue.resource.end_date)
+                        vue.resource.end_date = vue.resource.end_date.substring(0, 10)
                 }
             })
 
             return 0;
+        }
+        ,
+        isValid() {
+
+            let valid = true;
+            let errors = [];
+
+            if (this.resource.module_ids.length === 0) {
+                errors.push({
+                    message: 'No hay ningún módulo seleccionado'
+                })
+                valid = false;
+            }
+
+            if (!valid) {
+                this.errors = errors;
+            }
+
+            return valid;
         }
         ,
         loadSelects() {

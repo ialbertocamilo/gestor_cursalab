@@ -31,6 +31,7 @@ return new class extends Migration
             $table->boolean('active')->nullable()->default(true);
 
             $table->dateTime('publish_date')->nullable();
+            $table->dateTime('end_date')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

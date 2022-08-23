@@ -127,10 +127,10 @@
                         <v-icon class="stats-icon">mdi-cog</v-icon>
 
                     </v-col>
-                    <v-col cols="7">
+                    <v-col v-if="false" cols="7">
                         <DefaultSelect
                             v-model="selectedWorkspaceId"
-                            :items="workspacesAdmin"
+                            :items="workspacesConfig"
                             label="Workspace"
                             item-text="name"
                             item-value="id"
@@ -291,13 +291,15 @@ export default {
     data: () => ({
         superUserRoleId : 1
         ,
+        configRoleId: 2
+        ,
         adminRoleId : 3
         ,
         selectedWorkspaceId: null
         ,
         workspaces: []
         ,
-        workspacesAdmin: []
+        workspacesConfig: []
         ,
         userSession: {}
         ,
@@ -406,14 +408,14 @@ export default {
                         vue.workspacesAdmin = vue.workspaces;
                     }
 
-                    // Admin users
+                    // Config users
 
-                    if (r.role_id === vue.adminRoleId) {
+                    if (r.role_id === vue.configRoleId) {
                         let workspace = vue.workspaces
                                            .find(w => w.id === r.scope)
 
                         if (workspace)
-                            vue.workspacesAdmin.push(workspace)
+                            vue.workspacesConfig.push(workspace)
                     }
                 })
 
@@ -421,8 +423,8 @@ export default {
                 // one workspace, update flag to show
                 // configuration area
 
-                // if (vue.workspacesAdmin.length > 0)
-                //     vue.canAccessConfiguration = true;
+                if (vue.workspacesConfig.length > 0)
+                    vue.canAccessConfiguration = true;
 
             }
         }
@@ -462,7 +464,7 @@ export default {
 
             // Scroll to configuration's element position,
             // only if it is hidden, since it value is
-            // gonna change  to visible
+            // going to change to visible
 
             if (!this.configurationIsVisible) {
 
