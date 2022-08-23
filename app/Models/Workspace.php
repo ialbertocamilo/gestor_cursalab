@@ -155,8 +155,8 @@ class Workspace extends BaseModel
         $ids = self::loadSubWorkspacesIds($workspaceId);
 
         $count = User::query()
-            ->whereIn('subworkspace_id', $ids)
-            ->count();
+                    ->whereIn('subworkspace_id', $ids)
+                    ->count();
 
         return $count ?? 0;
     }
@@ -166,36 +166,42 @@ class Workspace extends BaseModel
      */
     public static function generateUserWorkspacesQuery(int $userId): Builder
     {
-        $assignedRoles = AssignedRole::getUserAssignedRoles($userId);
+        // When user has SuperUser role, return al workspaces
 
-        if ($assignedRoles->first()->role_id == 1) {
+        $isSuperUser = AssignedRole::hasRole($userId, Role::SUPER_USER);
+        if ($isSuperUser) {
 
             // Return all workspaces, excluding subworkspaces
 
             return Workspace::query()
-                ->where('parent_id', null)
-                ->where('workspaces.active', ACTIVE)
-                ->where('workspaces.deleted_at', null)
-                ->select('workspaces.*');
+                            ->where('parent_id', null)
+                            ->where('workspaces.active', ACTIVE)
+                            ->where('workspaces.deleted_at', null)
+                            ->select('workspaces.*');
         }
 
+
+        // Get user's assigned roles
+
+        $assignedRoles = AssignedRole::getUserAssignedRoles($userId);
         $allowedRoles = [
-            2, // config
-            3, // admin
-            4, // content-manager
-            5, // trainer
-            6  // reports
+            Role::CONFIG,
+            Role::ADMIN,
+            Role::CONTENT_MANAGER,
+            Role::TRAINER,
+            Role::REPORTS
         ];
 
-        // Get list of workspaces the user is allowed to access to
+        // Get list of workspaces the user is allowed to
+        // access to, according to its role
 
-        $workspacesIds = DB::table('assigned_roles')
-                        ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-                        ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
-                        ->whereIn('assigned_roles.role_id', $allowedRoles)
-                        ->where('users.id', $userId)
-                        ->select('assigned_roles.*')
-                        ->pluck('scope');
+        $workspacesIds = AssignedRole::query()
+                           ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+                           ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
+                           ->whereIn('assigned_roles.role_id', $allowedRoles)
+                           ->where('users.id', $userId)
+                           ->select('assigned_roles.*')
+                           ->pluck('scope');
 
         return Workspace::query()
                         ->whereIn('id', $workspacesIds)
@@ -239,8 +245,8 @@ class Workspace extends BaseModel
     {
 
         return Workspace::where('active', ACTIVE)
-            ->where('parent_id', $workspaceId)
-            ->pluck('id');
+                        ->where('parent_id', $workspaceId)
+                        ->pluck('id');
     }
 
     /**

@@ -7,6 +7,9 @@
     >
         <template v-slot:content>
             <v-form ref="encuestaForm">
+
+                <DefaultErrors :errors="errors" />
+
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput
@@ -77,10 +80,11 @@ export default {
     },
     data() {
         return {
+            errors: [],
             resourceDefault: {
                 id: null,
                 titulo: '',
-                imagen: '',
+                imagen: null,
                 anonima: 0,
                 type_id: [],
                 // secciones: [],
@@ -113,7 +117,9 @@ export default {
             vue.$refs.encuestaForm.resetValidation()
         },
         confirmModal() {
+
             let vue = this
+            vue.errors = []
             const validateForm = vue.validateForm('encuestaForm')
             const edit = vue.options.action === 'edit'
 
@@ -124,8 +130,7 @@ export default {
 
             let method = edit ? 'PUT' : 'POST';
 
-            // if (validateForm && validateSelectedModules) {
-            if (validateForm) {
+            if (validateForm && vue.isValid()) {
 
                 let formData = vue.getMultipartFormData(
                     method, vue.resource, fields, file_fields
@@ -137,6 +142,10 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
+                    }).catch((error) => {
+
+                        if (error && error.errors)
+                            vue.errors = error.errors
                     })
             }
 
@@ -145,13 +154,14 @@ export default {
         resetSelects() {
             let vue = this
             // Selects independientes
+
             vue.selects.tipos = []
             vue.selects.secciones = []
             vue.removeFileFromDropzone(vue.resource.imagen, 'inputImagen')
         },
         async loadData(resource) {
             let vue = this
-
+            vue.errors = []
             vue.$nextTick(() => {
                 vue.resource = Object.assign(
                     {}, vue.resource, vue.resourceDefault
@@ -173,6 +183,28 @@ export default {
                 })
             return 0;
         },
+        isValid() {
+
+            let valid = true;
+            let errors = [];
+            let formData = this.getMultipartFormData(
+                '', this.resource, fields, file_fields
+            );
+
+            if (!formData.get('file_imagen')) {
+                errors.push({
+                    message: 'No ha seleccionado ninguna imágen'
+                })
+                valid = false;
+            }
+
+            if (!valid) {
+                this.errors = errors;
+            }
+
+            return valid;
+        }
+        ,
         loadSelects() {
             let vue = this
             // if (vue.resource.modulo && vue.resource.modulo.id)

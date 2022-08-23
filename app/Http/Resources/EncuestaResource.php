@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\PollQuestion;
 use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -25,7 +26,8 @@ class EncuestaResource extends JsonResource
             // 'tipo' => $sections[$this->tipo] ?? '',
             'tipo' => $this->type->name ?? '',
 
-            'preguntas_count' => $this->preguntas_count,
+            //'preguntas_count' => PollQuestion::where('poll_id', $this->id)->count(),
+            'preguntas_count' => $this->questions_count,
             'encuestas_preguntas_route' => route('encuestas_preguntas.list', $this->id),
 
             'created_at' => $this->created_at->format('d/m/Y g:i a'),

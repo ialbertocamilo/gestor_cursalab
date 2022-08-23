@@ -11,6 +11,17 @@ class Role extends BaseModel
 {
     use IsRole;
 
+    // Role ids
+
+    public const SUPER_USER = 1;
+    public const CONFIG = 2;
+    public const ADMIN = 3;
+    public const CONTENT_MANAGER = 4;
+    public const TRAINER = 5;
+    public const REPORTS = 6;
+    public const USER = 7;
+
+
     public $defaultRelationships = [];
     protected $ledgerThreshold = 100;
     protected $morphClass = 'MorphOrder';
