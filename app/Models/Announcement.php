@@ -117,7 +117,7 @@ class Announcement extends BaseModel
     {
         return Announcement::whereRelation('criterionValues', 'id', $subworkspace_value_id)
             // select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date"))
-            ->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date, publish_date AS inicio, end_date AS fin"))
+            ->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date_formatted, publish_date AS inicio, end_date AS fin"))
             // ->where('config_id', 'like', "%$subworkspace_id%")
             ->where('active', ACTIVE)
             ->where(function ($query) {
