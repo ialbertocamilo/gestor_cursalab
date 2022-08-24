@@ -151,17 +151,60 @@ class Course extends BaseModel
             // $course->save();
 
             DB::commit();
-            
+
         } catch (\Exception $e) {
-            
+
             DB::rollBack();
             return $e;
         }
-        
+
         cache_clear_model(School::class);
 
         return $course;
     }
+
+    protected function validationsOnUpdate(array $data, School $school, Course $course)
+    {
+        $validations = collect();
+
+        $is_required_course = $this->checkIfIsRequiredCourse($data, $school, $course);
+
+        if ($is_required_course['ok']) $validations->push($is_required_course);
+
+        $show_confirm = !($validations->where('show_confirm', false)->count() > 0);
+
+        return [
+            'list' => $validations->toArray(),
+            'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
+            'show_confirm' => $show_confirm
+        ];
+    }
+
+    protected function checkIfIsRequiredCourse(array $data, School $school, Course $course)
+    {
+        $requirements_of =  Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($course) {
+            $query->where('id', $course->id);
+        })->get();
+        $is_required_course =$requirements_of->count() > 0;
+        $temp['ok'] = $data['active'] === false && $is_required_course;
+
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = "No se puede inactivar el curso.";
+        $temp['subtitle'] = "Para poder inactivar el curso es necesario quitarlo como requisito de los siguientes cursos:";
+        $temp['show_confirm'] = false;
+        $temp['type'] = 'field_id_was_changed';
+        $temp['list'] = [];
+
+        foreach ($requirements_of as $requirement) {
+            $requisito = Course::where('id', $requirement->model_id)->first();
+            $route = route('cursos.editCurso', [$school->id, $requirement->model_id]);
+            $temp['list'][] =  "<a href='{$route}'>" . $requisito->name . "</a>";
+        }
+
+        return $temp;
+    }
+
 
     protected function validateCursoRequisito($data, $escuela, $curso)
     {
