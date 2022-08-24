@@ -5,7 +5,7 @@
                 Token
             </v-card-title>
             <v-card-text class="ml-2">
-                <p>Es una cadena de texto codificado que nos ayuda a controlar el acceso al uso de nuestras API'S. 
+                <p>Es una cadena de texto codificado que nos ayuda a controlar el acceso al uso de nuestras API's. 
                     Esta clave será entregada junto con los permisos de administrador del gestor y la fecha de duración es de 1 mes. 
                 </p>
                 <descriptionApi :options="api_description_options" />
