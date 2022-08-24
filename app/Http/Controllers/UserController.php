@@ -41,8 +41,27 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::all()->pluck('title', 'id');
-        $workspaces = Workspace::all()->pluck('name', 'id');
+        $get_workspaces = Workspace::all()->where('parent_id', null);
+        $get_roles = Role::all()->where('name', '!=', 'super-user');
+
+        $workspaces = collect();
+        $roles = collect();
+
+        foreach ($get_workspaces as $wk) {
+            $workspaces->push((object)[
+                'id' => $wk->id,
+                'name' => $wk->name,
+                'slug' => $wk->slug,
+            ]);
+        }
+        foreach ($get_roles as $rol) {
+            $roles->push((object)[
+                'id' => $rol->id,
+                'name' => $rol->title,
+                'slug' => $rol->name,
+            ]);
+        }
+
         return view('users.create', compact('roles', 'workspaces'));
     }
 
@@ -58,16 +77,20 @@ class UserController extends Controller
         $data = $request->all();
         $data['password'] = Hash::make($request->password);
 
-        $workspace = session('workspace');
-        $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
-
         $employee = Taxonomy::getFirstData('user', 'type', 'employee');
         $data['type_id'] = $employee->id;
-        $data['workspace_id'] = $workspace_id;
+
         $user = User::create($data);
 
-        Bouncer::scope()->to($data['workspace']);
-        Bouncer::sync($user)->roles($request->get('roles'));
+        if (isset($data['workspacessel']) && is_array($data['workspacessel']) && count($data['workspacessel']) > 0) {
+            foreach ($data['workspacessel'] as $wk => $val) {
+                if (isset($data['rolestowk'][$wk]) && is_array($data['rolestowk'][$wk]) && count($data['rolestowk'][$wk]) > 0 && !is_null($data['rolestowk'][$wk][0])) {
+                    $roles = explode(',', $data['rolestowk'][$wk][0]);
+                    Bouncer::scope()->to($data['workspacessel'][$wk][0]);
+                    Bouncer::sync($user)->roles($roles);
+                }
+            }
+        }
 
         return redirect()->route('users.index')
             ->with('info', 'usero guardado con éxito');
@@ -75,9 +98,51 @@ class UserController extends Controller
 
     public function edit(user $user)
     {
-        $roles = Role::all()->pluck('title', 'id');
-        $workspaces = Workspace::all()->pluck('name', 'id');
-        return view('users.edit', compact('user', 'workspaces', 'roles'));
+        $get_workspaces = Workspace::all()->where('parent_id', null);
+        $get_roles = Role::all()->where('name', '!=', 'super-user');
+
+        $workspaces = collect();
+        $roles = collect();
+
+        foreach ($get_workspaces as $wk) {
+            $workspaces->push((object)[
+                'id' => $wk->id,
+                'name' => $wk->name,
+                'slug' => $wk->slug,
+            ]);
+        }
+        foreach ($get_roles as $rol) {
+            $roles->push((object)[
+                'id' => $rol->id,
+                'name' => $rol->title,
+                'slug' => $rol->name,
+            ]);
+        }
+        $workspaces_roles = [];
+
+        foreach ($workspaces as $wkk => $wkv) {
+            foreach ($user->roles as $rol) {
+
+                $ids = [];
+                if ($rol->name != 'super-user' && !is_null($rol->pivot->scope) && $rol->pivot->scope == $wkv->id) {
+                    if (isset($workspaces_roles[$wkv->slug])) {
+                        $workspaces_roles[$wkv->slug][] = [
+                            'id' => $rol->pivot->role_id,
+                            'name' => $rol->title,
+                            'slug' => $rol->name,
+                        ];
+                    } else {
+                        $workspaces_roles[$wkv->slug][] = [
+                            'id' => $rol->pivot->role_id,
+                            'name' => $rol->title,
+                            'slug' => $rol->name,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return view('users.edit', compact('user', 'workspaces', 'roles', 'workspaces_roles'));
     }
 
     /**
@@ -100,10 +165,15 @@ class UserController extends Controller
         $user->update($data);
 
         // 2. Actualizar roles
-        $roles = $data['roles'];
-        foreach ($roles as $k => $v) {
-            Bouncer::scope()->to($data['workspaces'][$k]);
-            Bouncer::sync($user)->roles($data['roles'][$k]);
+
+        if (isset($data['workspacessel']) && is_array($data['workspacessel']) && count($data['workspacessel']) > 0) {
+            foreach ($data['workspacessel'] as $wk => $val) {
+                if (isset($data['rolestowk'][$wk]) && is_array($data['rolestowk'][$wk]) && count($data['rolestowk'][$wk]) > 0 && !is_null($data['rolestowk'][$wk][0])) {
+                    $roles = explode(',', $data['rolestowk'][$wk][0]);
+                    Bouncer::scope()->to($data['workspacessel'][$wk][0]);
+                    Bouncer::sync($user)->roles($roles);
+                }
+            }
         }
 
         return redirect()->route('users.index')

@@ -28,11 +28,11 @@ Vue.mixin(common_http_request);
 Vue.mixin(commons);
 
 Vue.use(VueNotification, {
-	timer: 20,
-	success: {
-		background: "#d4edda",
-		color: "#0f5132"
-	}
+    timer: 20,
+    success: {
+        background: "#d4edda",
+        color: "#0f5132"
+    }
 });
 // Vue.use(axiosDefault)
 Vue.prototype.$http = axiosDefault;
@@ -102,10 +102,10 @@ Vue.component("modulo-layout", require("./layouts/Modulos/ModuloListPage"));
 Vue.component("escuela-layout", require("./layouts/Escuelas/EscuelaListPage"));
 Vue.component("escuela-form-page", require("./layouts/Escuelas/EscuelaFormPage"));
 Vue.component("curso-layout", require("./layouts/Cursos/CursosListPage"));
-Vue.component("curso-form-page",require("./layouts/Cursos/CursoFormPage"));
+Vue.component("curso-form-page", require("./layouts/Cursos/CursoFormPage"));
 Vue.component("tema-layout", require("./layouts/Temas/TemaListPage"));
 Vue.component("tema-preguntas-layout", require("./layouts/Temas/TemaPreguntasListPage"));
-Vue.component("tema-form-page",require("./layouts/Temas/TemasFormPage"));
+Vue.component("tema-form-page", require("./layouts/Temas/TemasFormPage"));
 Vue.component("anuncio-layout", require("./layouts/Anuncios/AnuncioListPage"));
 Vue.component("cargo-layout", require("./layouts/Cargos/CargoListPage"));
 Vue.component("criterion-layout", require("./layouts/Criteria/CriterionListPage"));
@@ -113,32 +113,32 @@ Vue.component("criterion-value-layout", require("./layouts/Criteria/CriterionVal
 Vue.component("encuesta-layout", require("./layouts/Encuestas/EncuestaListPage"));
 Vue.component("incidencia-layout", require("./layouts/Incidencias/IncidenciaListPage"));
 Vue.component(
-	"encuesta-pregunta-layout",
-	require("./layouts/Encuestas/Preguntas/PreguntaListPage")
+    "encuesta-pregunta-layout",
+    require("./layouts/Encuestas/Preguntas/PreguntaListPage")
 );
 Vue.component("glosario-layout", require("./layouts/Glosario/GlosarioListPage"));
 Vue.component("vademecum-layout", require("./layouts/Vademecum/VademecumListPage"));
 Vue.component(
-	"vademecum-categoria-layout",
-	require("./layouts/Vademecum/Categorias/CategoriaListPage")
+    "vademecum-categoria-layout",
+    require("./layouts/Vademecum/Categorias/CategoriaListPage")
 );
 Vue.component(
-	"vademecum-subcategoria-layout",
-	require("./layouts/Vademecum/Categorias/Subcategorias/SubcategoriaListPage")
+    "vademecum-subcategoria-layout",
+    require("./layouts/Vademecum/Categorias/Subcategorias/SubcategoriaListPage")
 );
 Vue.component("botica-layout", require("./layouts/Boticas/BoticaListPage"));
 Vue.component("ayuda-layout", require("./layouts/Ayudas/AyudaListPage"));
 Vue.component(
-	"pregunta-frecuente-layout",
-	require("./layouts/PreguntasFrecuentes/PreguntaFrecuenteListPage")
+    "pregunta-frecuente-layout",
+    require("./layouts/PreguntasFrecuentes/PreguntaFrecuenteListPage")
 );
 
 Vue.component("aulas-virtuales-layout", require("./layouts/AulasVirtuales/AulasVirtualesListPage"));
 Vue.component("aulas-virtuales-create", require("./layouts/AulasVirtuales/AulaVirtualFormPage"));
 
 Vue.component(
-	"notificaciones-push-layout",
-	require("./layouts/NotificacionesPush/NotificacionPushListPage")
+    "notificaciones-push-layout",
+    require("./layouts/NotificacionesPush/NotificacionPushListPage")
 );
 Vue.component("multimedia-layout", require("./layouts/Multimedia/MultimediaListPage"));
 Vue.component("supervisores-layout", require("./layouts/Supervisores/SupervisoresListPage"));
@@ -152,8 +152,8 @@ Vue.component('workspaces-list-layout', require('./layouts/Workspaces/Workspaces
 // Side Menu
 Vue.component("side-menu", require("./layouts/SideMenu"));
 Vue.component(
-	"learning-analytics-embed",
-	require("./layouts/LearningAnalytics/LearningAnalyticsEmbed")
+    "learning-analytics-embed",
+    require("./layouts/LearningAnalytics/LearningAnalyticsEmbed")
 );
 
 // ==============================================================================
@@ -165,8 +165,10 @@ Vue.component("reinicios-masivos", require("./layouts/Masivos/ReiniciosMasivos.v
 Vue.component("meetings-layout", require("./layouts/Meetings/MeetingsListPage.vue"));
 Vue.component("accounts-layout", require("./layouts/Accounts/AccountListPage.vue"));
 
+Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
+
 const app = new Vue({
-	vuetify,
-	store,
-	el: "#app"
+    vuetify,
+    store,
+    el: "#app"
 });
