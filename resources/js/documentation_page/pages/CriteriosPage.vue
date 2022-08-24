@@ -5,7 +5,7 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-                Los criterios son atributos que tienen los usuarios de la plataforma los cuales nos ayudan a segmentar los cursos. 
+                Los criterios son atributos que tienen los usuarios de la plataforma, los cuales se pueden usar para segmentar los contenidos. 
             </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
