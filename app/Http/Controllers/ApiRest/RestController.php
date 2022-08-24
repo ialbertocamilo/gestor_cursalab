@@ -349,141 +349,141 @@ class RestController extends Controller
     //     return $response;
     // }
 
-    public function preguntasIntentos($post_id = null, $id_user = null)
-    {
-        if (is_null($post_id) && is_null($id_user)) {
-            $response = array('error' => 2, 'data' => null);
-        } else {
-            $user = DB::table('usuarios')->select('config_id')->where('id', $id_user)->first();
-            $config = DB::table('ab_config')->select('mod_evaluaciones')->where('id', $user->config_id)->first();
-            $mod_eval = json_decode($config->mod_evaluaciones, true);
-            //
-            $ev = Prueba::select('id', 'intentos', 'categoria_id', 'curso_id')->where('posteo_id', $post_id)->where('usuario_id', $id_user)->first();
-            if ($ev) {
-                if (intval($ev->intentos) < intval($mod_eval['nro_intentos'])) {
-                    $intentos = intval($ev->intentos) + 1;
-                    Prueba::where('id', $ev->id)->update(array('intentos' => $intentos));
-                }
-            } else {
-                $posteo = Posteo::find($post_id);
-                $intentos = 1;
-                $new_prueba_id = Prueba::insertGetId(array(
-                    'categoria_id' => $posteo->categoria_id,
-                    'curso_id' => $posteo->curso_id,
-                    'posteo_id' => $post_id,
-                    'usuario_id' => $id_user,
-                    'intentos' => $intentos,
-                    'fuente' => 'old'
-                ));
+    // public function preguntasIntentos($post_id = null, $id_user = null)
+    // {
+    //     if (is_null($post_id) && is_null($id_user)) {
+    //         $response = array('error' => 2, 'data' => null);
+    //     } else {
+    //         $user = DB::table('usuarios')->select('config_id')->where('id', $id_user)->first();
+    //         $config = DB::table('ab_config')->select('mod_evaluaciones')->where('id', $user->config_id)->first();
+    //         $mod_eval = json_decode($config->mod_evaluaciones, true);
+    //         //
+    //         $ev = Prueba::select('id', 'intentos', 'categoria_id', 'curso_id')->where('posteo_id', $post_id)->where('usuario_id', $id_user)->first();
+    //         if ($ev) {
+    //             if (intval($ev->intentos) < intval($mod_eval['nro_intentos'])) {
+    //                 $intentos = intval($ev->intentos) + 1;
+    //                 Prueba::where('id', $ev->id)->update(array('intentos' => $intentos));
+    //             }
+    //         } else {
+    //             $posteo = Posteo::find($post_id);
+    //             $intentos = 1;
+    //             $new_prueba_id = Prueba::insertGetId(array(
+    //                 'categoria_id' => $posteo->categoria_id,
+    //                 'curso_id' => $posteo->curso_id,
+    //                 'posteo_id' => $post_id,
+    //                 'usuario_id' => $id_user,
+    //                 'intentos' => $intentos,
+    //                 'fuente' => 'old'
+    //             ));
 
-                $ev = Prueba::find($new_prueba_id);
-            }
+    //             $ev = Prueba::find($new_prueba_id);
+    //         }
 
-            // INSERTA / ACTUALIZA -> RESUMEN_X_CURSO
-            $res_x_curso = DB::table('resumen_x_curso')->select('id', 'intentos')->where('usuario_id', $id_user)->where('curso_id', $ev->curso_id)->first();
-            if ($res_x_curso) { // Actualiza
-                $suma_intentos = $res_x_curso->intentos + 1;
+    //         // INSERTA / ACTUALIZA -> RESUMEN_X_CURSO
+    //         $res_x_curso = DB::table('resumen_x_curso')->select('id', 'intentos')->where('usuario_id', $id_user)->where('curso_id', $ev->curso_id)->first();
+    //         if ($res_x_curso) { // Actualiza
+    //             $suma_intentos = $res_x_curso->intentos + 1;
 
-                DB::table('resumen_x_curso')->where('id', $res_x_curso->id)->where('curso_id', $ev->curso_id)->update(array('intentos' => $suma_intentos));
-            } else { // Inserta
-                $this->new_res_x_curso($id_user, $ev->curso_id, $ev->categoria_id);
-            }
+    //             DB::table('resumen_x_curso')->where('id', $res_x_curso->id)->where('curso_id', $ev->curso_id)->update(array('intentos' => $suma_intentos));
+    //         } else { // Inserta
+    //             $this->new_res_x_curso($id_user, $ev->curso_id, $ev->categoria_id);
+    //         }
 
-            // INSERTA / ACTUALIZA -> RESUMEN_GENERAL
-            $res_general = DB::table('resumen_general')->select('id', 'intentos')->where('usuario_id', $id_user)->first();
-            if ($res_general) { // Actualiza
-                $suma_intentos = $res_general->intentos + 1;
+    //         // INSERTA / ACTUALIZA -> RESUMEN_GENERAL
+    //         $res_general = DB::table('resumen_general')->select('id', 'intentos')->where('usuario_id', $id_user)->first();
+    //         if ($res_general) { // Actualiza
+    //             $suma_intentos = $res_general->intentos + 1;
 
-                DB::table('resumen_general')->where('id', $res_general->id)->update(array('intentos' => $suma_intentos));
-            } else { // Inserta
-                $this->new_res_general($id_user);
-            }
+    //             DB::table('resumen_general')->where('id', $res_general->id)->update(array('intentos' => $suma_intentos));
+    //         } else { // Inserta
+    //             $this->new_res_general($id_user);
+    //         }
 
-            if ($ev)
-                $response = array('error' => 0, 'data' => $intentos);
-            else
-                $response = array('error' => 1, 'data' => null);
-        }
-        return $response;
-    }
+    //         if ($ev)
+    //             $response = array('error' => 0, 'data' => $intentos);
+    //         else
+    //             $response = array('error' => 1, 'data' => null);
+    //     }
+    //     return $response;
+    // }
 
 
     /**
      *   Crea por primera vez, y actualiza para los siguiente INTENTOS del usuario ante una prueba
      */
-    public function preguntasIntentos_v7($post_id = null, $id_user = null, $fuente)
-    {
-        if (is_null($post_id) && is_null($id_user)) {
-            $response = array('error' => 2, 'data' => null);
-        } else {
-            $user = DB::table('usuarios')->select('config_id')->where('id', $id_user)->first();
-            $config = DB::table('ab_config')->select('mod_evaluaciones')->where('id', $user->config_id)->first();
-            $mod_eval = json_decode($config->mod_evaluaciones, true);
-            //
-            $ev = Prueba::select('id', 'intentos', 'categoria_id', 'curso_id')->where('posteo_id', $post_id)->where('usuario_id', $id_user)->first();
-            if ($ev) {
-                if (intval($ev->intentos) < intval($mod_eval['nro_intentos'])) {
-                    $intentos = intval($ev->intentos) + 1;
-                    Prueba::where('id', $ev->id)->update(array('intentos' => $intentos));
-                }
-            } else {
-                $posteo = Posteo::find($post_id);
-                $intentos = 1;
-                $new_prueba_id = Prueba::insertGetId(array(
-                    'categoria_id' => $posteo->categoria_id,
-                    'curso_id' => $posteo->curso_id,
-                    'posteo_id' => $post_id,
-                    'usuario_id' => $id_user,
-                    'intentos' => $intentos,
-                    'fuente' => $fuente
-                ));
+    // public function preguntasIntentos_v7($post_id = null, $id_user = null, $fuente)
+    // {
+    //     if (is_null($post_id) && is_null($id_user)) {
+    //         $response = array('error' => 2, 'data' => null);
+    //     } else {
+    //         $user = DB::table('usuarios')->select('config_id')->where('id', $id_user)->first();
+    //         $config = DB::table('ab_config')->select('mod_evaluaciones')->where('id', $user->config_id)->first();
+    //         $mod_eval = json_decode($config->mod_evaluaciones, true);
+    //         //
+    //         $ev = Prueba::select('id', 'intentos', 'categoria_id', 'curso_id')->where('posteo_id', $post_id)->where('usuario_id', $id_user)->first();
+    //         if ($ev) {
+    //             if (intval($ev->intentos) < intval($mod_eval['nro_intentos'])) {
+    //                 $intentos = intval($ev->intentos) + 1;
+    //                 Prueba::where('id', $ev->id)->update(array('intentos' => $intentos));
+    //             }
+    //         } else {
+    //             $posteo = Posteo::find($post_id);
+    //             $intentos = 1;
+    //             $new_prueba_id = Prueba::insertGetId(array(
+    //                 'categoria_id' => $posteo->categoria_id,
+    //                 'curso_id' => $posteo->curso_id,
+    //                 'posteo_id' => $post_id,
+    //                 'usuario_id' => $id_user,
+    //                 'intentos' => $intentos,
+    //                 'fuente' => $fuente
+    //             ));
 
-                $ev = Prueba::find($new_prueba_id);
-            }
+    //             $ev = Prueba::find($new_prueba_id);
+    //         }
 
-            // INSERTA / ACTUALIZA -> RESUMEN_X_CURSO
-            $res_x_curso = DB::table('resumen_x_curso')->select('id', 'intentos')->where('usuario_id', $id_user)->where('curso_id', $ev->curso_id)->first();
-            if ($res_x_curso) { // Actualiza
-                $suma_intentos = $res_x_curso->intentos + 1;
+    //         // INSERTA / ACTUALIZA -> RESUMEN_X_CURSO
+    //         $res_x_curso = DB::table('resumen_x_curso')->select('id', 'intentos')->where('usuario_id', $id_user)->where('curso_id', $ev->curso_id)->first();
+    //         if ($res_x_curso) { // Actualiza
+    //             $suma_intentos = $res_x_curso->intentos + 1;
 
-                DB::table('resumen_x_curso')->where('id', $res_x_curso->id)->where('curso_id', $ev->curso_id)->update(array('intentos' => $suma_intentos));
-            } else { // Inserta
-                $this->new_res_x_curso($id_user, $ev->curso_id, $ev->categoria_id);
-            }
+    //             DB::table('resumen_x_curso')->where('id', $res_x_curso->id)->where('curso_id', $ev->curso_id)->update(array('intentos' => $suma_intentos));
+    //         } else { // Inserta
+    //             $this->new_res_x_curso($id_user, $ev->curso_id, $ev->categoria_id);
+    //         }
 
-            // INSERTA / ACTUALIZA -> RESUMEN_GENERAL
-            $res_general = DB::table('resumen_general')->select('id', 'intentos')->where('usuario_id', $id_user)->first();
-            if ($res_general) { // Actualiza
-                $suma_intentos = $res_general->intentos + 1;
+    //         // INSERTA / ACTUALIZA -> RESUMEN_GENERAL
+    //         $res_general = DB::table('resumen_general')->select('id', 'intentos')->where('usuario_id', $id_user)->first();
+    //         if ($res_general) { // Actualiza
+    //             $suma_intentos = $res_general->intentos + 1;
 
-                DB::table('resumen_general')->where('id', $res_general->id)->update(array('intentos' => $suma_intentos));
-            } else { // Inserta
-                $this->new_res_general($id_user);
-            }
+    //             DB::table('resumen_general')->where('id', $res_general->id)->update(array('intentos' => $suma_intentos));
+    //         } else { // Inserta
+    //             $this->new_res_general($id_user);
+    //         }
 
-            if ($ev)
-                $response = array('error' => 0, 'data' => $intentos);
-            else
-                $response = array('error' => 1, 'data' => null);
-        }
-        return $response;
-    }
+    //         if ($ev)
+    //             $response = array('error' => 0, 'data' => $intentos);
+    //         else
+    //             $response = array('error' => 1, 'data' => null);
+    //     }
+    //     return $response;
+    // }
 
-    public function new_res_x_curso($id_user, $curso_id, $categoria_id)
-    {
-        $asignados = Posteo::where('curso_id', $curso_id)->where('estado', 1)->count();
+    // public function new_res_x_curso($id_user, $curso_id, $categoria_id)
+    // {
+    //     $asignados = Posteo::where('curso_id', $curso_id)->where('estado', 1)->count();
 
-        $data = Resumen_x_curso::create([
-            'usuario_id' => $id_user,
-            'curso_id' => $curso_id,
-            'categoria_id' => $categoria_id,
-            'asignados' => $asignados,
-            'intentos' => 1,
-            'estado' => 'desarrollo'
-        ]);
+    //     $data = Resumen_x_curso::create([
+    //         'usuario_id' => $id_user,
+    //         'curso_id' => $curso_id,
+    //         'categoria_id' => $categoria_id,
+    //         'asignados' => $asignados,
+    //         'intentos' => 1,
+    //         'estado' => 'desarrollo'
+    //     ]);
 
-        return $data;
-    }
+    //     return $data;
+    // }
 
     public function new_res_general($id_user)
     {

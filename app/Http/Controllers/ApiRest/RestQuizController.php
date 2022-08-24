@@ -3,9 +3,15 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
-use App\Models\Announcement;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
+use App\Models\SummaryCourse;
+use App\Models\Announcement;
+use App\Models\SummaryUser;
+use App\Models\Question;
+use App\Models\Topic;
+
 
 class RestQuizController extends Controller
 {
@@ -23,7 +29,7 @@ class RestQuizController extends Controller
 
         $subworkspace_id   = $appUser->subworkspace_id;
         $usuario_id  = $appUser->id;
-        $post_id     = $request->tema;
+        $topic_id     = $request->tema;
         $rptas       = $request->respuestas;
         $usu_rptas   = $rptas;
 
@@ -32,7 +38,7 @@ class RestQuizController extends Controller
             return response()->json($apiResponse, 200);
         }
         $ev = Prueba::select('id', 'nota', 'intentos', 'rptas_ok', 'rptas_fail', 'resultado', 'categoria_id', 'curso_id', 'posteo_id')
-                    ->where('posteo_id', $post_id)
+                    ->where('posteo_id', $topic_id)
                     ->where('usuario_id', $usuario_id)
                     ->first();
         if (!$ev) {
@@ -40,7 +46,7 @@ class RestQuizController extends Controller
             return response()->json($apiResponse, 200);
         }
         $preguntas = Pregunta::select('id', 'rpta_ok')
-                    ->where('post_id', $post_id)
+                    ->where('topic_id', $topic_id)
                     ->get();
 
         foreach ($preguntas as $preg) {
@@ -74,7 +80,7 @@ class RestQuizController extends Controller
             Prueba::where('id', $ev->id)->update($data_ev);
 
             $actividad = Visita::select('id')
-                ->where('post_id', $post_id)
+                ->where('topic_id', $topic_id)
                 ->where('usuario_id', $usuario_id)
                 ->first();
             if ($actividad) {
@@ -85,8 +91,8 @@ class RestQuizController extends Controller
                 $data_ev['resultado'] = ($actividad->estado_tema=='aprobado') ? 1 : 0 ;
             }
             if($resultado){
-                $topic = Posteo::where('id',$ev->posteo_id)->select('orden')->first();
-                $topic_siguiente = Posteo::where('curso_id',$ev->curso_id)->whereNotIn('id',[$ev->posteo_id])->where('orden','>=',$topic->orden)->select('id')->first();
+                $topic = Topic::where('id',$ev->posteo_id)->select('orden')->first();
+                $topic_siguiente = Topic::where('curso_id',$ev->curso_id)->whereNotIn('id',[$ev->posteo_id])->where('orden','>=',$topic->orden)->select('id')->first();
                 $data_tema_siguiente = ($topic_siguiente) ? $topic_siguiente->id : false;
             }
             $data_ev['ev_updated']      = 1;
@@ -140,67 +146,60 @@ class RestQuizController extends Controller
 
     public function cargar_preguntas($topic_id)
     {
-        $apiResponse = ['data' => [], 'error' => true];
+        $topic = Topic::with('evaluation_type', 'course')->find('id', $topic_id);
+
+        if (!$topic) return response()->json(['data' => [], 'error' => true], 200);
         
-        $appUser = auth()->user();
+        $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
 
-        $topic = Topic::find('id', $topic_id)->first();
+        $limit = $config_quiz['preg_x_ev'] ?? 5;
+        $is_random = $topic->evaluation_type->code == 'calificada';
+        $type_code = $topic->evaluation_type->code == 'calificada' ? 'selecciona' : 'texto';
 
+        $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
 
-        if (!$topic) return response()->json($apiResponse, 200);
+        if ( count($questions) == 0 )
+            return response()->json(['error' => true, 'data' => null], 200);
 
-        $data = [];
-        $subworkspace_id = $appUser->subworkspace_id;
-        $helper = new HelperController();
-        $config_eva = $helper->configEvaluacionxModulo($subworkspace_id);
+        $data = [   
+            'nombre' => $topic->name,
+            'posteo_id' => $topic->id,
+            'curso_id' => $topic->course_id,
+            'preguntas' => $questions,
+            'tipo_evaluacion' => $topic->evaluation_type->code,
+        ];
 
-        if ($topic->tipo_ev  == 'calificada') {
-            $preguntas = Pregunta::where('post_id', $topic->id)
-                            ->where('estado', 1)
-                            ->where('tipo_pregunta','selecciona')
-                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
-                            ->inRandomOrder()
-                            ->limit($config_eva['preg_x_ev'])
-                            ->get();
-            // APLICAR SHUFFLE A ALTERNATIVAS DE CADA PREGUNTA
-            foreach ($preguntas as $value) {
-                $val_rpta = json_decode($value->rptas_json, true);
-                $tempRptas = collect();
-                foreach ($val_rpta as $key => $value2) {
-                    $tempRpta = ['id'=> $key , 'opc' =>$value2];
-                    $tempRptas->push($tempRpta);
-                }
-                // shuffle($val_rpta);
-                $shu = $tempRptas->shuffle()->all();
+        SummaryUser::setUserLastTimeEvaluation();
+        SummaryCourse::setUserLastTimeEvaluation($topic->course);
+        
+        return response()->json(['error' => false, 'data' => $data], 200);
+    }
 
-                // info($value);
-                $value->rptas_json = $shu;
-                // $value->rptas_json = $val_rpta;
-            }
-        } else {
-            $preguntas = Pregunta::where('post_id', $topic->id)
-                            ->where('estado', 1)
-                            ->where('tipo_pregunta','texto')
-                            ->select('id', 'tipo_pregunta', 'pregunta', 'ubicacion', 'estado', 'rptas_json')
-                            ->get();
+    public function preguntasIntentos_v7($topic_id = null, $user_id = null, $fuente)
+    {
+        if ( !$topic_id && !$user_id ) return ['error' => 2, 'data' => null];
+
+        $topic = Topic::with('course.topics')->find($topic_id);
+
+        $row = SummaryTopic::incrementUserAttempts($topic);
+
+        SummaryCourse::incrementUserAttempts($topic->course);
+
+        $res_general = SummaryUser::select('id', 'attempts')->where('user_id', $user_id)->first();
+        if ($res_general) { // Actualiza
+            $suma_attempts = $res_general->attempts + 1;
+
+            SummaryUser::where('id', $res_general->id)->update(array('attempts' => $suma_attempts));
+        } else { // Inserta
+            $this->new_res_general($user_id);
         }
 
+        if ($row)
+            $response = array('error' => 0, 'data' => $row->attempts);
+        else
+            $response = array('error' => 1, 'data' => null);
 
-        $data = ["tipo_evaluacion"=>$topic->tipo_ev,"curso_id"=>$topic->curso_id,"posteo_id" => $topic->id, "nombre" => $topic->nombre, "preguntas" => $preguntas];
-        $ultima_evaluacion = Carbon::now();
-
-        DB::table('resumen_general')->where('usuario_id',$appUser->id)->update([
-            'last_ev' =>$ultima_evaluacion,
-        ]);
-
-        DB::table('resumen_x_curso')->where('usuario_id',$appUser->id)->where('curso_id',$topic->curso_id)->update([
-            'last_ev' =>$ultima_evaluacion,
-        ]);
-        
-        if (count($preguntas) > 0) $apiResponse = ['error' => false, 'data' => $data];
-        else $apiResponse = ['error' => true, 'data' => null];
-
-        return response()->json($apiResponse, 200);
+        return $response;
     }
 
 }

@@ -6,6 +6,7 @@ use App\Http\Requests\AnnouncementStoreRequest;
 use App\Http\Resources\AnnouncementResource;
 use App\Models\Announcement;
 use App\Models\Criterion;
+use App\Models\CriterionValue;
 use App\Models\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -134,6 +135,8 @@ class AnnouncementController extends Controller
         // Save relationships
 
         $announcement->criterionValues()->sync($modulesIds);
+
+        cache_clear_model(CriterionValue::class);
 
         return $this->success(['msg' => 'Anuncio actualizado correctamente.']);
     }

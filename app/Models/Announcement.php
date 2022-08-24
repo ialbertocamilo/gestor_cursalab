@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class Announcement extends BaseModel
 {
-    protected $table = 'announcements';
-
     protected $fillable = [
         'nombre',
         'contenido',
@@ -32,14 +30,11 @@ class Announcement extends BaseModel
         'end_date'
     ];
 
-
     /*
-
         Relationships
-
     --------------------------------------------------------------------------*/
 
-    public function criterionValues (): BelongsToMany
+    public function criterionValues(): BelongsToMany
     {
 
         return $this->belongsToMany(
@@ -51,11 +46,8 @@ class Announcement extends BaseModel
     }
 
     /*
-
         Methods
-
     --------------------------------------------------------------------------*/
-
 
     /**
      * Delete record
@@ -121,17 +113,22 @@ class Announcement extends BaseModel
                 : "$publishDate - $endDate";
     }
 
-    protected function getPublisheds($module_id = NULL)
+    protected function getPublisheds($subworkspace_value_id = NULL)
     {
-        return DB::table('announcements')
-            ->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date"))
-            ->where('config_id', 'like', "%$module_id%")
+        return Announcement::whereRelation('criterionValues', 'id', $subworkspace_value_id)
+            // select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date"))
+            ->select(DB::raw("nombre, contenido, imagen, destino, link, archivo, DATE_FORMAT(publish_date,'%d/%m/%Y') AS publish_date_formatted, publish_date AS inicio, end_date AS fin"))
+            // ->where('config_id', 'like', "%$subworkspace_id%")
             ->where('active', ACTIVE)
             ->where(function ($query) {
 
-                $query->where(function ($q) {
+                $query->where(function($q){
                     $q->whereNull('publish_date');
                     $q->orWhereDate('publish_date', '<=', date('Y-m-d'));
+                });
+                $query->where(function($q){
+                    $q->whereNull('end_date');
+                    $q->orWhereDate('end_date', '>=', date('Y-m-d'));
                 });
             })
             ->orderBy('publish_date', 'DESC')

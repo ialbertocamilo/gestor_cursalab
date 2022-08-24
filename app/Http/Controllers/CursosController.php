@@ -53,7 +53,7 @@ class CursosController extends Controller
         $course->scheduled_restarts_dias = $scheduled_restarts->reinicio_dias ?? 0;
         $course->scheduled_restarts_horas = $scheduled_restarts->reinicio_horas ?? 0;
         $course->scheduled_restarts_minutos = $scheduled_restarts->reinicio_minutos ?? 0;
-        $form_selects =  $this->getFormSelects($school, $course, true);
+        $form_selects = $this->getFormSelects($school, $course, true);
         $course->makeHidden('scheduled_restarts');
 
         $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($course) {
@@ -93,29 +93,28 @@ class CursosController extends Controller
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        $curso = Course::storeRequest($data);
+        Course::storeRequest($data);
 
         $msg = 'Curso creado correctamente.';
-        return $this->success(compact('curso', 'msg'));
+        return $this->success(compact('msg'));
     }
 
     public function updateCurso(School $school, Course $course, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $validate = Course::validateCursoRequisito($data, $school, $course);
+//        $validations = Course::validateCursoRequisito($data, $school, $course);
+//        $validations = Course::validationsOnUpdate($data, $school, $course);
+//
+//        if (count($validations['list']) > 0)
+//            return $this->success(compact('validations'), 'Ocurrió un error', 422);
+
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        // $workspace = session('workspace');
-        // $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
-
-        // $data['workspace_id'] = $workspace_id;
         $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
         $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
 
-        if (!$validate['validate'])
-            return $this->success(compact('validate'), 422);
 
         $response_curso = Course::storeRequest($data, $course);
         $response = [
@@ -136,7 +135,7 @@ class CursosController extends Controller
 
         // if ($school)
         //     $query->whereRelation('schools', 'id', $school->id);
-            // $req_cursos->where('school_id', $school->id);
+        // $req_cursos->where('school_id', $school->id);
 
         if ($course)
             $query->where('id', '!=', $course->id);

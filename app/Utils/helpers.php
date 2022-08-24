@@ -229,6 +229,6 @@ function cache_clear_model($model)
     \Artisan::call('modelCache:clear', array('--model' => $model));
 }
 
-function get_media_url($path){
+function get_media_url($path = ''){
     return FileService::generateUrl($path);
 }
