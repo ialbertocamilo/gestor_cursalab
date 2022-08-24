@@ -123,15 +123,15 @@ class Announcement extends BaseModel
             ->where(function ($query) {
 
                 $query->where(function($q){
-                    $q->whereNull('publish_date');
-                    $q->orWhereDate('publish_date', '<=', date('Y-m-d'));
+                    $q->whereNull('inicio');
+                    $q->orWhereDate('inicio', '<=', date('Y-m-d'));
                 });
                 $query->where(function($q){
-                    $q->whereNull('end_date');
-                    $q->orWhereDate('end_date', '>=', date('Y-m-d'));
+                    $q->whereNull('fin');
+                    $q->orWhereDate('fin', '>=', date('Y-m-d'));
                 });
             })
-            ->orderBy('publish_date', 'DESC')
+            ->orderBy('inicio', 'DESC')
             ->orderBy('created_at', 'DESC')
             ->get();
     }
