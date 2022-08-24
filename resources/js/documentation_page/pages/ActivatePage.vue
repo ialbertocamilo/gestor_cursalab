@@ -24,14 +24,14 @@ export default {
                         title:'Parametros (body)',
                         parameters:[
                             {
-                                name:'users_dni',
-                                type:'Array (String)',
-                                description:'Listado de DNI de los usuarios.'
+                                name:'identificator',
+                                type:'Texto (String)',
+                                description:'El tipo de identificador que usará para enviar la lista de usuarios (puedes ser "document" (dni, pasaporte), "user_name", "email").'
                             },
                             {
-                                name:'users_email (opcional)',
+                                name:'users',
                                 type:'Array (String)',
-                                description:'Listado de emails de los usuarios.'
+                                description:'Colección de usuarios.'
                             }
                         ],
                     },
@@ -69,10 +69,11 @@ code:
 `   
     const base_url = '${base_url}';
     const axios = require('axios');
-    const data = JSON.stringify({
-        "users_dni":["87364823","2937892384","98723497234","98237492384","98237492834"
-        ],
-        "users_email":["usuario1@gmail.com"]}
+    const data = JSON.stringify(
+        {
+        "identificator":"document",
+        "users":["87364823","2937892384","654987156","156984562","32165498"]
+        }
     );
     const config = {
         method: 'post',

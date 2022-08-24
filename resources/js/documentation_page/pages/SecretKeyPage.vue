@@ -5,14 +5,14 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-               La clave secreta es una cadena conformada por números y letras de 15 caracteres que será necesario para el uso de las API's de CURSALAB. 
-               Esta clave será entregada junto con los permisos de administrador del gestor y no tendrán fecha de caducidad.
+               La clave secreta es una cadena conformada por números y letras de 15 caracteres que será necesario para el uso de las API's. 
+               Esta clave será entregada junto con los permisos de administrador del gestor y no tienen fecha de caducidad.
             </p>
             <alert 
                 background='#F8F8FB'
                 border='#C1C1FF'
                 icon='mdi-information-outline'
-                text='Cada cuenta de administrador tiene una clave secreta asociada.'
+                text="Cada cuenta de administrador puede tener una clave secreta asociada para utilizar las API's."
                 class="mb-6"
             />
             <descriptionApi :options="api_description_options" />
@@ -43,7 +43,7 @@ export default {
                             {
                                 name:'password',
                                 type:'String',
-                                description:'Es la contraseña asociado a la cuenta administrador del gestor.'
+                                description:'Es la contraseña asociada a la cuenta administrador del gestor.'
                             },
                         ]
                     }
