@@ -186,6 +186,7 @@ class RestQuizController extends Controller
         SummaryCourse::incrementUserAttempts($topic->course);
 
         $res_general = SummaryUser::select('id', 'attempts')->where('user_id', $user_id)->first();
+        
         if ($res_general) { // Actualiza
             $suma_attempts = $res_general->attempts + 1;
 
