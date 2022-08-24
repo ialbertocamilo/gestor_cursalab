@@ -5,7 +5,7 @@ namespace App\Models;
 class SummaryCourse extends BaseModel
 {
     protected $fillable = [
-        'last_time_evaluated_at',
+        'last_time_evaluated_at', 'user_id', 'course_id', 'assigneds', 'attempts'
     ];
 
     public function course()
@@ -23,12 +23,12 @@ class SummaryCourse extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'status_id');
     }
 
-    protected function setUserLastTimeEvaluation($course_id, $user = NULL)
+    protected function setUserLastTimeEvaluation($course, $user = NULL)
     {
         $user = $user ?? auth()->user;
 
         return SummaryCourse::where('user_id', $user->id)
-                ->where('course_id', $course_id)
+                ->where('course_id', $course->id)
                 ->update([
                     'last_time_evaluated_at' => now(),
                 ]);

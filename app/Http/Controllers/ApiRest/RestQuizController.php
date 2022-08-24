@@ -146,7 +146,7 @@ class RestQuizController extends Controller
 
     public function cargar_preguntas($topic_id)
     {
-        $topic = Topic::with('evaluation_type')->find('id', $topic_id);
+        $topic = Topic::with('evaluation_type', 'course')->find('id', $topic_id);
 
         if (!$topic) return response()->json(['data' => [], 'error' => true], 200);
         
@@ -170,7 +170,7 @@ class RestQuizController extends Controller
         ];
 
         SummaryUser::setUserLastTimeEvaluation();
-        SummaryCourse::setUserLastTimeEvaluation($topic->course_id);
+        SummaryCourse::setUserLastTimeEvaluation($topic->course);
         
         return response()->json(['error' => false, 'data' => $data], 200);
     }
