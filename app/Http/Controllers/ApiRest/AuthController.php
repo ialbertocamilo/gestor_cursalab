@@ -85,6 +85,7 @@ class AuthController extends Controller
 
         return response()->json([
             'access_token' => $token,
+            'bucket_base_url' => get_media_url(),
 //            'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data

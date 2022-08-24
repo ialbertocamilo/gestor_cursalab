@@ -12,7 +12,7 @@ class FileService {
      * @param string|null $path
      * @return string
      */
-    public static function generateUrl(?string $path): string
+    public static function generateUrl($path = ''): string
     {
         if (str_starts_with($path, 'https://')) return $path;
 

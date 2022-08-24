@@ -17,26 +17,27 @@ export default {
         return{
              api_description_options:{
                 title:'Activar Usuarios',
+                subtitle: 'Este proceso sirve para cambiar el estado de los usuarios en Cursalab. <br>También aplica para la REVERSA DE CESES.<br>Cuando se realiza este proceso se actualiza el dato "termination_date" del usuario a NULO.',
                 type:'POST',
                 route:'/integrations/activate_users',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
-                                name:'users_dni',
-                                type:'Array (String)',
-                                description:'Listado de DNI de los usuarios.'
+                                name:'identificator',
+                                type:'Texto (String)',
+                                description:'El tipo de identificador que usará para enviar la lista de usuarios (puedes ser "document" (dni, pasaporte), "user_name", "email").'
                             },
                             {
-                                name:'users_email (opcional)',
+                                name:'users',
                                 type:'Array (String)',
-                                description:'Listado de emails de los usuarios.'
+                                description:'Colección de usuarios.'
                             }
                         ],
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',
@@ -69,10 +70,11 @@ code:
 `   
     const base_url = '${base_url}';
     const axios = require('axios');
-    const data = JSON.stringify({
-        "users_dni":["87364823","2937892384","98723497234","98237492384","98237492834"
-        ],
-        "users_email":["usuario1@gmail.com"]}
+    const data = JSON.stringify(
+        {
+        "identificator":"document",
+        "users":["87364823","2937892384","654987156","156984562","32165498"]
+        }
     );
     const config = {
         method: 'post',

@@ -202,13 +202,13 @@ class HelperController extends Controller
         return number_format($total) . "MB";
     }
     //REDISEÑO
-    public function configEvaluacionxModulo($modulo_id)
-    {
-        $config = Abconfig::select('mod_evaluaciones')->where('id', $modulo_id)->first();
-        $mod_eval = json_decode($config->mod_evaluaciones, true);
+    // public function configEvaluacionxModulo($modulo_id)
+    // {
+    //     $config = Abconfig::select('mod_evaluaciones')->where('id', $modulo_id)->first();
+    //     $mod_eval = json_decode($config->mod_evaluaciones, true);
 
-        return $mod_eval;
-    }
+    //     return $mod_eval;
+    // }
     public static function getDataReinicioAutomatico($data){
         //reinicios_progrmados
         $isset_rp = isset($data['reinicios_programado']);

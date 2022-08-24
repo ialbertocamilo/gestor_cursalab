@@ -17,26 +17,27 @@ export default {
         return{
              api_description_options:{
                 title:'Inactivar Usuarios',
+                subtitle: '',
                 type:'POST',
                 route:'/integrations/inactivate_users',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
-                                name:'users_dni',
-                                type:'Array (String)',
-                                description:'Listado de DNI de los usuarios.'
+                                name:'identificator',
+                                type:'Texto (String)',
+                                description:'El tipo de identificador que usará para enviar la lista de usuarios (puedes ser "document" (dni, pasaporte), "user_name", "email").'
                             },
                             {
-                                name:'users_email (opcional)',
+                                name:'users',
                                 type:'Array (String)',
-                                description:'Listado de emails de los usuarios.'
+                                description:'Colección de usuarios con la fecha de terminación o cese. Formato de fecha "yyyy-mm-dd"'
                             }
                         ],
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',
@@ -70,9 +71,18 @@ code:
     const base_url = '${base_url}';
     const axios = require('axios');
     const data = JSON.stringify({
-        "users_dni":["87364823","2937892384","98723497234","98237492384","98237492834"
-        ],
-        "users_email":["usuario1@gmail.com"]}
+        {
+        "identificator":"document",
+        "users":[
+                ["12345678", "2022-08-30"],
+                ["12345678", "2022-08-30"],
+                ["12345678", "2022-08-30"],
+                ["12345678", "2022-08-30"],
+                ["12345678", "2022-08-30"],
+                ["12345678", "2022-08-30"],
+                ["12345678", "2022-08-30"],
+            ]
+        }
     );
     const config = {
         method: 'post',

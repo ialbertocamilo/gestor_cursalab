@@ -5,8 +5,8 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-                Cada criterio tiene un conjunto de valores asociados, por ejemplo si existe un criterio "GÉNERO" este puede tener como valores
-                "Masculino","Femenino","Otros". 
+                Cada criterio tiene un conjunto de valores que se pueden asociar a los usuarios, por ejemplo si existe un criterio "GÉNERO" este puede tener como valores
+                "Masculino", "Femenino", "Otros". 
             </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
@@ -25,7 +25,7 @@ export default {
                 route:'/integrations/criterion/{criterion_id}/values',
                 parameters_type:[
                     {
-                        title:'Parametros (url)',
+                        title:'Parámetros (url)',
                         parameters:[
                             {
                                 name:'criterion_id',
@@ -35,7 +35,7 @@ export default {
                         ]
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',

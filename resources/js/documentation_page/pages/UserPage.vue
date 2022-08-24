@@ -25,7 +25,7 @@ export default {
                 route:'/integrations/update_create_users',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
                                 name:'usuarios',
@@ -33,27 +33,69 @@ export default {
                                 description:`
                                     Listado de usuarios a actualizar/crear. Cada usuario contiene atributos estáticos y dinámicos<br>
                                     <ul>
-                                        Estáticos:"mother_lastname","father_lastname."dni","email","module","name"<br>
+                                        Estáticos:"active","document", "fullname","phone_number", etc.<br>
                                         Dinámicos: "criterions"<br>
                                         Ejemplo:<br>
 <pre class='language-js line-numbers'><code>
     "users": [
         {
-            "mother_lastname": "apellido_materno_admin",
-            "father_lastname": "apellido_paterno_admin",
-            "dni": "36472834",
-            "email": "admin@gmail.com",
-            "module": "Alicorp",
-            "name": "admin",
+            "active": boolean,
+            "document": text,
+            "person_number": text,
+            "fullname": text,
+            "name": text,
+            "lastname": text,
+            "user_name": text,
+            "phone_number": number,
+            "email_address": text,
             "criterions": {
-                "gender": "M",
-                "position": "ASISTENTE",
-                "area": "FINANZAS",
-                "libre": "NO",
-                "district": "CERCADO",
-                "process": "UX TEST",
-                "admission_date": "12/12/1997"
+                module
+                "user_action_id":text,
+                "document_type_id":text,
+                "business_unit_id":text,
+                "business_unit_name":text,
+                "gender":text,
+                "position_name":text,
+                "position_code":text,
+                "date_start":text,
+                "termination_date":date,
+                "seniority_date":date,
+                "birthday_date":date,
+                "phone_type_id":text,
+                "aplica_a_bono":text,
+                "tipo_de_bono":text,
+                "grupo_ocupacional":text,
+                "location_code":text,
+                "location_name":text,
+                "department_name":text,
+                "department_code":text,
+                "modalidad_de_trabajo":text,
+                "department_name_nivel_1":text,
+                "department_name_nivel_2":text,
+                "department_name_nivel_3":text,
+                "department_name_nivel_4":text,
+                "department_name_nivel_5":text,
+                "department_name_nivel_6":text,
+                "email_type":text,
+                "national_identifier_number_manager":text,
+                "nombre_de_jefe":text,
+                "posicion_jefe":text,
+                "clasificacion_de_evd":text,
+                "gor_gerente_de_área":text,
+                "botica":text,
+                "grupo":text,
+                "zonal":text,
+                "correo_zonal":text,
+                "tipo_de_publico":text,
+                "division":text,
+                "area":text,
+                "region":text,
+                "region_de_tienda":text,
+                "correo_jefe":text,
+                "grupos_de_supervision_supply":text,
+                "gerente_de_area_o_mall":text,
             }
+            
         }
     ]
 </code></pre>
@@ -62,7 +104,7 @@ export default {
                         ]
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',
@@ -98,23 +140,65 @@ let axios = require('axios');
 let data = JSON.stringify({
     "users":
         [
-            {
-                "father_lastname":"apellido_materno_admin",
-                "mother_lastname":"apellido_paterno_admin",
-                "dni":""374834934"",
-                "email":"admin@gmail.com",
-                "module":"Módulo Prueba",
-                "name":"Admin",
-                "criterions":{
-                     "gender": "M",
-                    "position": "ASISTENTE",
-                    "area": "FINANZAS",
-                    "libre": "NO",
-                    "district": "CERCADO",
-                    "process": "UX TEST",
-                    "admission_date": "12/12/1997"
-                }
+                    {
+            "active": boolean,
+            "document": text,
+            "person_number": text,
+            "fullname": text,
+            "name": text,
+            "lastname": text,
+            "user_name": text,
+            "phone_number": number,
+            "email_address": text,
+            "criterions": {
+                module
+                "user_action_id":text,
+                "document_type_id":text,
+                "business_unit_id":text,
+                "business_unit_name":text,
+                "gender":text,
+                "position_name":text,
+                "position_code":text,
+                "date_start":text,
+                "termination_date":date,
+                "seniority_date":date,
+                "birthday_date":date,
+                "phone_type_id":text,
+                "aplica_a_bono":text,
+                "tipo_de_bono":text,
+                "grupo_ocupacional":text,
+                "location_code":text,
+                "location_name":text,
+                "department_name":text,
+                "department_code":text,
+                "modalidad_de_trabajo":text,
+                "department_name_nivel_1":text,
+                "department_name_nivel_2":text,
+                "department_name_nivel_3":text,
+                "department_name_nivel_4":text,
+                "department_name_nivel_5":text,
+                "department_name_nivel_6":text,
+                "email_type":text,
+                "national_identifier_number_manager":text,
+                "nombre_de_jefe":text,
+                "posicion_jefe":text,
+                "clasificacion_de_evd":text,
+                "gor_gerente_de_área":text,
+                "botica":text,
+                "grupo":text,
+                "zonal":text,
+                "correo_zonal":text,
+                "tipo_de_publico":text,
+                "division":text,
+                "area":text,
+                "region":text,
+                "region_de_tienda":text,
+                "correo_jefe":text,
+                "grupos_de_supervision_supply":text,
+                "gerente_de_area_o_mall":text,
             }
+            
+        }
         ]
     }
 );
