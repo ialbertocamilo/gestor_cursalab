@@ -5,7 +5,7 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-               La clave secreta es una cadena conformada por números y letras de 15 caracteres que será necesario para el uso de las API'S de CURSALAB. 
+               La clave secreta es una cadena conformada por números y letras de 15 caracteres que será necesario para el uso de las API's de CURSALAB. 
                Esta clave será entregada junto con los permisos de administrador del gestor y no tendrán fecha de caducidad.
             </p>
             <alert 
@@ -82,10 +82,9 @@ axios(config).then(function (response) {
 `
 {
     "data": {
-        "secretKey": "Clave Secreta necesaria para el uso de las API'S"
+        "secretKey": "Clave Secreta necesaria para el uso de las API's"
     }
 }
-
 `
                         }
                     ]

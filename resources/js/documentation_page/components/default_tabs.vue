@@ -19,7 +19,7 @@
                 :key="index"
                 eager
             >
-                <v-card flat style="height: 350px;overflow-y: auto;">
+                <v-card flat style="height: 800px;overflow-y: auto;">
                     <v-card-text >
                         <pre class="line-numbers"><code :class="content_tabs[index].type" v-text="content_tabs[index].code"></code></pre>
                     </v-card-text>

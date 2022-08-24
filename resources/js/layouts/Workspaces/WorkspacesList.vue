@@ -18,7 +18,7 @@
                         <v-icon class="icon">mdi-account</v-icon>
                         {{ userSession.user.fullname }}
                     </button>
-<!--                    <v-icon class="stats-icon">mdi-logout</v-icon>-->
+                   <v-icon class="stats-icon">mdi-logout</v-icon>
                 </div>
             </div>
         </v-row>
@@ -35,9 +35,6 @@
                 <h3>
                     Ingresa a un workspace para administrar  su contenido
                 </h3>
-            </div>
-            <div class="col-2">
-
             </div>
         </v-row>
 
@@ -698,19 +695,6 @@ h3 {
     font-style: normal;
     line-height: 13px;
     background-color: rgba(165, 166, 246, 0.2);
-}
-
-.workspace .stats .number,
-.workspace .stats .label
-{
-    opacity: 0;
-    transition: opacity 800ms;
-}
-
-.workspace:hover .stats .number,
-.workspace:hover .stats .label
-{
-    opacity: 1;
 }
 
 .workspace .stats .icon {

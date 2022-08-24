@@ -17,7 +17,10 @@ export default {
         return{
             api_description_options:{
                 title:'Actualizar/Crear usuarios',
-                subtitle:`El API toma como identificador el atributo de acción, este puede tomar el valor de Nuevo (crear un usuario) y datos (actualizar usuario).`,
+                subtitle:`El API toma como identificador de usuario el número de DNI,
+                en caso el DNI se encuentre dentro de nuestra base de datos actualizará la información,
+                caso contrario creará al usuario.<br>Para este API es necesario utilizar las apis de criterio 
+                y listado de valores para poder asignar los atributos de los usuarios`,
                 type:'POST',
                 route:'/integrations/update_create_users',
                 parameters_type:[
@@ -28,23 +31,29 @@ export default {
                                 name:'usuarios',
                                 type:'Array de usuarios(objeto)',
                                 description:`
-                                    Listado de usuarios a actualizar/crear<br>
+                                    Listado de usuarios a actualizar/crear. Cada usuario contiene atributos estáticos y dinámicos<br>
                                     <ul>
-                                        atributos:"Módulo, DNI, Nombres y apellidos, Botica, Grupo, Cargo, Género, Carrera, Ciclo, Acción"<br>
+                                        Estáticos:"mother_lastname","father_lastname."dni","email","module","name"<br>
+                                        Dinámicos: "criterions"<br>
                                         Ejemplo:<br>
 <pre class='language-js line-numbers'><code>
     "users": [
         {
-            "modulo":"Capacitación Mifarma",
-            "dni":""75627382"",
-            "nombre_apellidos":"Rodrigo Perez Ramirez",
-            "genero":"F",
-            "botica":"Paita",
-            "grupo":"Grupo 18",
-            "cargo":"Tecnico de Farmacia",
-            "carrera":"Tecnico de Farmacia",
-            "ciclo":"Ciclo 1",
-            "accion":"Nuevo"
+            "mother_lastname": "apellido_materno_admin",
+            "father_lastname": "apellido_paterno_admin",
+            "dni": "36472834",
+            "email": "admin@gmail.com",
+            "module": "Alicorp",
+            "name": "admin",
+            "criterions": {
+                "gender": "M",
+                "position": "ASISTENTE",
+                "area": "FINANZAS",
+                "libre": "NO",
+                "district": "CERCADO",
+                "process": "UX TEST",
+                "admission_date": "12/12/1997"
+            }
         }
     ]
 </code></pre>
@@ -90,16 +99,21 @@ let data = JSON.stringify({
     "users":
         [
             {
-                "modulo":"Capacitación Mifarma",
-                "dni":""75627382"",
-                "nombre_apellidos":"Rodrigo Perez Ramirez",
-                "genero":"F",
-                "botica":"Paita",
-                "grupo":"Grupo 18",
-                "cargo":"Tecnico de Farmacia",
-                "carrera":"Tecnico de Farmacia",
-                "ciclo":"Ciclo 1",
-                "accion":"Nuevo"
+                "father_lastname":"apellido_materno_admin",
+                "mother_lastname":"apellido_paterno_admin",
+                "dni":""374834934"",
+                "email":"admin@gmail.com",
+                "module":"Módulo Prueba",
+                "name":"Admin",
+                "criterions":{
+                     "gender": "M",
+                    "position": "ASISTENTE",
+                    "area": "FINANZAS",
+                    "libre": "NO",
+                    "district": "CERCADO",
+                    "process": "UX TEST",
+                    "admission_date": "12/12/1997"
+                }
             }
         ]
     }

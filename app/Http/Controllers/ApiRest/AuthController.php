@@ -17,18 +17,20 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
 
-            $username = strip_tags($data['user']);
+            $userinput = strip_tags($data['user']);
             $password = strip_tags($data['password']);
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
-            $credentials = ['password' => $password];
-            $key_search = str_contains($username, '@') ? 'email' : 'document';
-            $credentials[$key_search] = $username;
+            $credentials1 = $credentials2 = ['password' => $password];
+            // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
+            $credentials1['username'] = $userinput;
+            $credentials2['document'] = $userinput;
 
-            if (!Auth::attempt($credentials))
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)){
+                return $this->respondWithDataAndToken($data);
+            }else{
                 return $this->error('No autorizado.', 401);
-
-            return $this->respondWithDataAndToken($data);
+            }
 
         } catch (Exception $e) {
            info($e);

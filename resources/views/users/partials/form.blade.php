@@ -54,45 +54,101 @@
 <hr>
 <div class="row mb-3">
     <div class="col-md-6">
-        <h3>Workspaces</h3>
-    </div>
-    <div class="col-md-6">
         <h3>Roles</h3>
     </div>
 </div>
-<div class="box_workspaces" id="box_workspaces">
-    @isset($user)
-        @if (count($user->roles) > 0)
-            @foreach ($user->roles as $rol)
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        {!! Form::select('workspaces[]', $workspaces, $rol->scope, ['class' => 'form-control']) !!}
+<div class="row mb-3">
+    <div class="col-md-12">
+
+        @isset($user)
+            <div class="box_workspaces">
+                @foreach ($workspaces as $wk)
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-control-label">
+                                        @php
+                                            $existe = false;
+                                            foreach ($workspaces_roles as $wksk => $wksv) {
+                                                if ($wksk == $wk->slug) {
+                                                    $existe = true;
+                                                    break;
+                                                }
+                                            }
+                                        @endphp
+                                        @if ($existe)
+                                            @foreach ($workspaces_roles as $wksk => $wksv)
+                                                @if ($wksk == $wk->slug)
+                                                    {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, $wksk) }}
+                                                @endif
+                                            @endforeach
+                                        @else
+                                            {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null) }}
+                                        @endif
+                                        {{ $wk->name }}
+                                        <input type="hidden" id="roles_{{ $wk->id }}"
+                                            name="rolestowk[{{ $wk->slug }}][]" value=""
+                                            ref="roles_{{ $wk->id }}">
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    @if ($existe)
+                                        @foreach ($workspaces_roles as $wksk => $wksv)
+                                            @if ($wksk == $wk->slug)
+                                                @php
+                                                    $selected = collect();
+                                                    foreach ($wksv as $ww) {
+                                                        $selected->push(
+                                                            (object) [
+                                                                'id' => $ww['id'],
+                                                                'name' => $ww['name'],
+                                                                'slug' => $ww['slug'],
+                                                            ],
+                                                        );
+                                                    }
+                                                @endphp
+                                                <workspace-rol :workspaces="{{ $workspaces }}"
+                                                    :roles="{{ $roles }}" :toworkspace="'{{ $wk->id }}'"
+                                                    :roleselects="{{ $selected }}" />
+                                            @endif
+                                        @endforeach
+                                    @else
+                                        <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
+                                            :toworkspace="'{{ $wk->id }}'" />
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        {!! Form::select('roles[]', $roles, $rol->id, ['class' => 'form-control']) !!}
-                    </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         @else
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    {!! Form::select('workspaces[]', $workspaces, null, ['class' => 'form-control']) !!}
-                </div>
-                <div class="col-md-6">
-                    {!! Form::select('roles[]', $roles, null, ['class' => 'form-control']) !!}
-                </div>
+            <div class="box_workspaces">
+                @foreach ($workspaces as $wk)
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-control-label">
+                                        {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null) }}
+                                        {{ $wk->name }}
+                                        <input type="hidden" id="roles_{{ $wk->id }}"
+                                            name="rolestowk[{{ $wk->slug }}][]" value=""
+                                            ref="roles_{{ $wk->id }}">
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
+                                        :toworkspace="'{{ $wk->id }}'" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-        @endif
-    @else
-        <div class="row mb-3">
-            <div class="col-md-6">
-                {!! Form::select('workspaces[]', $workspaces, null, ['class' => 'form-control']) !!}
-            </div>
-            <div class="col-md-6">
-                {!! Form::select('roles[]', $roles, null, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-    @endisset
+        @endisset
+    </div>
 </div>
 <div class="line"></div>
 <div class="form-group row">

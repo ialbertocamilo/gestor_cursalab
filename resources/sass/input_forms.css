@@ -1,0 +1,12 @@
+.v-text-field .v-input__control,
+.v-text-field .v-input__slot,
+.v-text-field fieldset {
+    border-radius: 0 !important;
+    border-color: #dee2e6;
+}
+
+.label_form{
+    margin-bottom: unset !important;
+    color: #777 !important;
+    font-size: .9rem !important;
+}

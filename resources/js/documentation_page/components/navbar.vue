@@ -6,7 +6,7 @@
         elevate-on-scroll
         scroll-target="#scrolling-techniques-7"
     >
-        <v-toolbar-title>Developer UC</v-toolbar-title>
+        <!-- <v-toolbar-title>Developer Cursalab</v-toolbar-title> -->
         <v-spacer/>
         <v-btn depressed @click="return_gestor()">Regresar al gestor</v-btn>
     </v-app-bar>
@@ -16,7 +16,7 @@
         class="bg-default-primary"
     >
         <v-card-title class="v-card__title bg-default-primary d-flex justify-center rounded-0">
-            <img src="https://gestor.universidadcorporativafp.com.pe/img/ucfp_logo_blanco.png" alt="Cursalab" width="140">
+            <img src="/img/logo_cursalab_white.png" alt="Cursalab" width="130">
         </v-card-title>
         <v-list
             dark
@@ -49,15 +49,9 @@
         </v-list>
     </v-navigation-drawer>
     <v-main style="background-color:#f8f8fb">
-        <v-sheet
-            id="scrolling-techniques-7"
-            class="overflow-y-auto"
-            max-height="600"
-            >
-            <v-container fluid >
-                <router-view></router-view>
-            </v-container>
-        </v-sheet>
+        <v-container fluid >
+            <router-view></router-view>
+        </v-container>
     </v-main>
   </div>
 </template>
@@ -69,41 +63,51 @@ export default {
               {
                   icon:'mdi-security',
                   title:'Authorization',
-                  link:'/documentation-api/secret-key',
+                  link:'/documentacion-api/secret-key',
                   isGroup :true,
                   subItems:[
                         {
                             icon:'mdi-key',
                             title:'Clave secreta',
-                            link:'/documentation-api/secret-key',
+                            link:'/documentacion-api/secret-key',
                         },
                         {
                             icon:'mdi-fingerprint',
                             title:'Token',
-                            link:'/documentation-api/token',
+                            link:'/documentacion-api/token',
                         },
                   ]
               },
               {
                   icon:'mdi-cloud-sync',
-                  title:"Lista de API'S",
-                  link:'/documentation-api/list-apis',
+                  title:"Lista de API's",
+                  link:'/documentacion-api/list-apis',
                   isGroup :true,
                   subItems:[
                         {
+                            icon:'mdi-format-list-bulleted',
+                            title:'Criterios',
+                            link:'/documentacion-api/criterions',
+                        },
+                        {
+                            icon:'mdi-playlist-plus',
+                            title:'Valores por criterio',
+                            link:'/documentacion-api/criterion-values',
+                        },
+                        {
                             icon:'mdi-account-convert',
                             title:'Alta y actualización de usuarios',
-                            link:'/documentation-api/update-create-users',
+                            link:'/documentacion-api/update-create-users',
                         },
                         {
                             icon:'mdi-account-check',
                             title:'Activar usuarios',
-                            link:'/documentation-api/activate-users',
+                            link:'/documentacion-api/activate-users',
                         },
                         {
                             icon:'mdi-account-off',
                             title:'Inactivar usuarios',
-                            link:'/documentation-api/inactivate-users',
+                            link:'/documentacion-api/inactivate-users',
                         }
                   ]
               }
