@@ -16,7 +16,7 @@
         class="bg-default-primary"
     >
         <v-card-title class="v-card__title bg-default-primary d-flex justify-center rounded-0">
-            <img src="/img/logo_cursalab.png" alt="Cursalab" width="140">
+            <img src="/img/logo_cursalab_white.png" alt="Cursalab" width="130">
         </v-card-title>
         <v-list
             dark
