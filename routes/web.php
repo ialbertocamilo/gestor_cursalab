@@ -118,5 +118,5 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('aulas-virtuales')->middleware('checkrol:admin')->group(base_path('routes/cms/meetings.php'));
 
-    Route::view('/documentacion-api/{list_apis?}', 'documentacion-api.index')->name('documentacion-api.index');
+    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 });
