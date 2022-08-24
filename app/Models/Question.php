@@ -31,15 +31,11 @@ class Question extends BaseModel
     {
         $questions = Question::getByTopicAndType($topic, $code);
 
-        if ($random) {
-        
-            $questions = $questions->shuffle()->take($limit);
-            $this->setRandomOptions($questions);
-        
-        } else {
+        if ($random) $questions = $questions->shuffle()->all();
 
-            $questions->take($limit);
-        }
+        $questions = $questions->take($limit);
+        
+        if ($random) $this->setRandomOptions($questions);
 
         return $questions;
     }
@@ -48,7 +44,6 @@ class Question extends BaseModel
     {
         foreach ($questions as $question)
         {
-            // $rptas_json = json_decode($question->rptas_json, true);
             $temp_questions = collect();
 
             foreach ($question->rptas_json as $key => $value)
