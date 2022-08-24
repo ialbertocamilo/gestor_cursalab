@@ -17,11 +17,12 @@ export default {
         return{
              api_description_options:{
                 title:'Inactivar Usuarios',
+                subtitle: '',
                 type:'POST',
                 route:'/integrations/inactivate_users',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
                                 name:'identificator',
@@ -36,7 +37,7 @@ export default {
                         ],
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',

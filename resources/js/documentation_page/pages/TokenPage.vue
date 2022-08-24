@@ -26,7 +26,7 @@ export default {
                 route:'/integrations/auth_user',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
                                 name:'email',
@@ -41,7 +41,7 @@ export default {
                         ]
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',

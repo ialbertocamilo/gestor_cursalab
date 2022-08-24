@@ -33,7 +33,7 @@ export default {
                 route:'/integrations/secret_key',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
                                 name:'email',

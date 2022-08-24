@@ -17,11 +17,12 @@ export default {
         return{
              api_description_options:{
                 title:'Activar Usuarios',
+                subtitle: 'Este proceso sirve para cambiar el estado de los usuarios en Cursalab. <br>También aplica para la REVERSA DE CESES.<br>Cuando se realiza este proceso se actualiza el dato "termination_date" del usuario a NULO.',
                 type:'POST',
                 route:'/integrations/activate_users',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
                                 name:'identificator',
@@ -36,7 +37,7 @@ export default {
                         ],
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',

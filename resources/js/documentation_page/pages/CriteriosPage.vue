@@ -24,7 +24,7 @@ export default {
                 route:'/integrations/criterions',
                 parameters_type:[
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',

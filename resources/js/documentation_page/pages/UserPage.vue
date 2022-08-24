@@ -25,7 +25,7 @@ export default {
                 route:'/integrations/update_create_users',
                 parameters_type:[
                     {
-                        title:'Parametros (body)',
+                        title:'Parámetros (body)',
                         parameters:[
                             {
                                 name:'usuarios',
@@ -104,7 +104,7 @@ export default {
                         ]
                     },
                     {
-                        title:'Parametros (header)',
+                        title:'Parámetros (header)',
                         parameters:[
                             {
                                 name:'secretKey',

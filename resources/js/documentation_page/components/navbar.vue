@@ -96,7 +96,7 @@ export default {
                         },
                         {
                             icon:'mdi-account-convert',
-                            title:'Alta y actualización de usuarios',
+                            title:'Alta de usuarios (creación o actualización)',
                             link:'/documentacion-api/update-create-users',
                         },
                         {
