@@ -18,7 +18,7 @@ class FileService {
 
         // Initiliaze path value if it is not set
 
-        // if (!$path) $path = '';
+        if (!$path) $path = '';
 
         $full_url = Storage::url($path);
         // $full_path = Storage::path($path);
