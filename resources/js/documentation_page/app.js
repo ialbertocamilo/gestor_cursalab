@@ -15,6 +15,7 @@
          color: "#0f5132"
      }
  });
+ import "./../../sass/input_forms.css";
  import Vue from "vue";
 
  Vue.component("documentation-page", require("./pages/HomePage.vue"));
