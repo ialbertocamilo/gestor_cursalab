@@ -42,7 +42,12 @@ Route::group(['prefix' => 'auth'], function () {
 
 });
 
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+});
+
 Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
+
 
     Route::prefix('announcements')->group(base_path('routes/app/announcements.php'));
 

@@ -161,6 +161,14 @@ export default {
                         role:["super-user","admin"]
                     },
                     {
+                        title:"Administradores",
+                        icon:"fas fa-users-cog",
+                        path:"/users",
+                        subpaths:["users"],
+                        selected:false,
+                        role:["super-user"]
+                    },
+                    {
                         title:"Criterios",
                         icon:"fas fa-clipboard-list",
                         path:"/criterios",
@@ -359,6 +367,37 @@ export default {
                         permission:"proceso_masivo",
                         role:["super-user","admin-TEMPORAL_INACTIVO"]
                     },
+                ]
+            },
+            {
+                title:"ATENCIÓN AL CLIENTE",
+                icon:"fas fa-headset",
+                active:false,
+                items:[
+                    {
+                        title:"Preguntas frecuentes",
+                        icon:"far fa-question-circle",
+                        path:"/preguntas-frecuentes",
+                        subpaths:["preguntas-frecuentes"],
+                        selected:false,
+                        role:["super-user"]
+                    },
+                    // {
+                    //     title:"Ayuda",
+                    //     icon:"fas fa-hands-helping",
+                    //     path:"/ayudas",
+                    //     subpaths:["ayudas"],
+                    //     selected:false,
+                    //     permission:"ayuda.index"
+                    // },
+                    // {
+                    //     title:"Soporte",
+                    //     icon:"fas fa-headset",
+                    //     path:"/soporte",
+                    //     subpaths:["soporte"],
+                    //     selected:false,
+                    //     permission:"usuarios_ayuda.show"
+                    // },
                 ]
             },
         ]
