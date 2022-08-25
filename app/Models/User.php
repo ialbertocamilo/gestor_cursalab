@@ -343,7 +343,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true)
     {
         $user = $this;
-        $user->load('criterion_values:id,value_text');
+        $user->load('criterion_values:id,value_text,criterion_id');
         $programs = collect();
         $all_courses = [];
         // TODO: No considerar criterion_values que se excluyan (ciclo 0)
@@ -395,7 +395,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 foreach ($program->segments as $segment) {
 
                     $program_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
-                    $program_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $program_segment_criterion_values_id);
+                    $program_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $program_segment_criterion_values_id);
 
                     if ($program_segment_valid) break;
                 }
@@ -419,7 +419,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                         foreach ($block_child->child->segments as $segment) {
 
                             $block_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
-                            $block_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $block_segment_criterion_values_id);
+                            $block_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $block_segment_criterion_values_id);
 
                             if ($block_segment_valid) break;
                         }
@@ -448,7 +448,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                                 foreach ($course->segments as $segment) {
 
                                     $course_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
-                                    $course_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $course_segment_criterion_values_id);
+                                    $course_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $course_segment_criterion_values_id);
 
                                     if ($course_segment_valid) :
 
@@ -486,7 +486,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses)
     {
-        // Traer todos los cursos con segmentaciones activos
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
@@ -502,16 +501,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
             ->where('active', ACTIVE)->get();
 
-        $user_criterion_values_id = $user->criterion_values->pluck('id');
+        $user_criteria = $user->criterion_values->groupBy('criterion_id');
 
-        // Comparar los criterios del usuario con cada segmentacion de cada curso
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
-                $course_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
-                $course_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $course_segment_criterion_values_id);
+                $course_segment_criteria = $segment->values->groupBy('criterion_id');
+                $valid_segment = $this->validateSegmentByUser($user_criteria, $course_segment_criteria);
 
-                if ($course_segment_valid) :
+                if ($valid_segment) :
                     $all_courses[] = $course;
                     break;
                 endif;
@@ -520,11 +518,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function validateSegmentationForUser(Collection $user_criterion_values, Collection $segment_values): bool
+    public function validateSegmentByUser(Collection $user_criteria, Collection $segment_criteria): bool
     {
-        $intersection = $user_criterion_values->intersect($segment_values);
+        $segment_valid = false;
 
-        return $intersection->count() === $segment_values->count();
+        foreach ($segment_criteria as $criterion_id => $segment_values) {
+            $user_has_criterion_id = $user_criteria[$criterion_id] ?? false;
+
+            if (!$user_has_criterion_id):
+                $segment_valid = false;
+                break;
+            endif;
+
+            $user_criterion_value_id_by_criterion = $user_criteria[$criterion_id]->pluck('id');
+            $segment_valid = $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+
+            if (!$segment_valid):
+                $segment_valid = false;
+                break;
+            endif;
+        }
+
+        return $segment_valid;
     }
 
     public function updateLastUserLogin()
