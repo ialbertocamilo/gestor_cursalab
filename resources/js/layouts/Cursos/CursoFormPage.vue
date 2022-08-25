@@ -5,40 +5,13 @@
                 Cursos: {{ curso_id ? 'Editar' : 'Crear' }}
             </v-card-title>
         </v-card>
-        <!--        <DefaultDivider/>-->
         <br>
-        <!-- <v-card flat elevation="0">
-            <v-card-title>
-                Cursos: {{ curso_id ? 'Editar' : 'Crear' }}
-            </v-card-title>
-        </v-card>
-        <br> -->
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="CursoForm">
-
                     <DefaultErrors :errors="errors"/>
 
-                    <!-- <v-row>
-                        <v-col cols="6">
-                            <DefaultAutocomplete
-                                dense
-                                label="Workspace"
-                                v-model="resource.requisito_id"
-                                :items="selects.requisito_id"
-                                custom-items
-                                clearable
-                            >
-                                <template v-slot:customItems="{item}">
-                                    <v-list-item-content>
-                                        <v-list-item-title v-html="item.nombre"/>
-                                        <v-list-item-subtitle class="list-cursos-carreras" v-html="item.carreras"/>
-                                    </v-list-item-content>
-                                </template>
-                            </DefaultAutocomplete>
-                        </v-col>
-                    </v-row> -->
-                    <v-row >
+                    <v-row>
                         <v-col cols="6">
                             <DefaultInput
                                 dense
@@ -177,17 +150,18 @@
             </v-card-actions>
             <CursoValidacionesModal
                 width="50vw"
-                :ref="modalCursoValidaciones.ref"
-                :options="modalCursoValidaciones"
-                @onCancel="closeFormModal(modalCursoValidaciones)"
-                @onConfirm="confirmModalValidaciones"
+                :ref="courseValidationModal.ref"
+                :options="courseValidationModal"
+                :resource="resource"
+                @onCancel="closeFormModal(courseValidationModal)"
+                @onConfirm="confirmValidationModal(courseValidationModal, base_endpoint, confirmModal(false))"
             />
         </v-card>
     </section>
 </template>
 <script>
 const fields = ['name', 'reinicios_programado', 'active', 'position', 'imagen', 'plantilla_diploma', 'config_id', 'categoria_id',
-    'description', 'requisito_id','lista_escuelas'];
+    'description', 'requisito_id', 'lista_escuelas'];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 
@@ -196,7 +170,7 @@ export default {
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         let route_school = (this.categoria_id !== '') ? `/escuelas/${this.categoria_id}` : ``;
-        
+
         return {
             errors: [],
             base_endpoint: `${route_school}/cursos`,
@@ -229,30 +203,24 @@ export default {
                 lista_escuelas: [],
             },
             loadingActionBtn: false,
-            modalCursoValidaciones: {
+            courseValidationModal: {
                 ref: 'CursoValidacionesModal',
+                refPage: 'CursosFormPage',
                 open: false,
-                base_endpoint: '',
-                hideConfirmBtn: false,
-                hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'TemasValidaciones',
-                persistent: false,
-                showCloseIcon: true
-
             },
-            modalCursoValidacionesDefault: {
+            courseValidationModalDefault: {
                 ref: 'CursoValidacionesModal',
+                refPage: 'CursosFormPage',
                 open: false,
                 base_endpoint: '',
                 hideConfirmBtn: false,
                 hideCancelBtn: false,
                 confirmLabel: 'Confirmar',
                 cancelLabel: 'Cancelar',
-                resource: 'TemasValidaciones',
+                resource: 'CursosValidaciones',
                 persistent: false,
-                showCloseIcon: true
+                showCloseIcon: true,
+                type: null
             },
         }
     },
@@ -280,16 +248,15 @@ export default {
     methods: {
         closeModal() {
             let vue = this
-            // window.history.back()
             window.location.href = vue.base_endpoint;
         },
-        confirmModal() {
+        confirmModal(validateForm = true) {
             let vue = this
             vue.errors = []
             vue.loadingActionBtn = true
             this.showLoader()
-            const validateForm = vue.validateForm('CursoForm')
-            if (!validateForm) {
+            const validForm = vue.validateForm('CursoForm')
+            if (!validForm) {
                 this.hideLoader()
                 vue.loadingActionBtn = false
                 return
@@ -299,56 +266,31 @@ export default {
             let method = edit ? 'PUT' : 'POST';
 
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
-            vue.getJSONReinicioProgramado(formData)
+            formData.append('validateForm', validateForm ? "1": "0");
+            vue.setJSONReinicioProgramado(formData)
 
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
-                    const messages = (data.data.messages) ? data.data.messages : null;
                     this.hideLoader()
-
-                    if(data.message === "422"){
-                        await vue.cleanModalCursoValidaciones()
-                        vue.loadingActionBtn = false
-                        vue.modalCursoValidaciones.hideConfirmBtn = true
-                        vue.modalCursoValidaciones.cancelLabel = 'Entendido'
-                        await vue.openFormModal(vue.modalCursoValidaciones, data.data.validate, data.data.validate.type, data.data.validate.title)
-                    }
-                    else{
-                        if (messages && messages.data.length > 0) {
-                            await vue.cleanModalCursoValidaciones()
-                            vue.modalCursoValidaciones.hideCancelBtn = true
-                            vue.modalCursoValidaciones.confirmLabel = 'Entendido'
-                            vue.modalCursoValidaciones.persistent = true
-                            vue.modalCursoValidaciones.showCloseIcon = false
-
-                            await vue.openFormModal(vue.modalCursoValidaciones, messages, 'messagesActions', 'Aviso')
-
-                        } else {
-                            vue.showAlert(data.data.msg)
-                            setTimeout(() => vue.closeModal(), 2000)
-                        }
+                    const has_info_messages = data.data.messages.list.length > 0
+                    console.log("has_info_messages", has_info_messages)
+                    console.log("confirmModal", data.data, validateForm)
+                    if (has_info_messages)
+                        await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
+                    else {
+                        vue.showAlert(data.data.msg)
+                        setTimeout(() => vue.closeModal(), 2000)
                     }
                 })
-                .catch((error) => {
+                .catch(error => {
                     if (error && error.errors)
                         vue.errors = error.errors
 
+                    vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
-                .catch(async ({data}) => {
-                    await vue.cleanModalCursoValidaciones()
-                    vue.loadingActionBtn = false
-                    vue.modalCursoValidaciones.hideConfirmBtn = true
-                    vue.modalCursoValidaciones.cancelLabel = 'Entendido'
-                    await vue.openFormModal(vue.modalCursoValidaciones, data.validate, data.validate.type, data.validate.title)
-                })
         },
-        confirmModalValidaciones(data){
-            let vue = this
-            if (data.confirmMethod === 'messagesActions')
-                vue.closeModal()
-        },
-        getJSONReinicioProgramado(formData) {
+        setJSONReinicioProgramado(formData) {
             let vue = this
             const minutes = parseInt(vue.resource.scheduled_restarts_minutos) +
                 (parseInt(vue.resource.scheduled_restarts_horas) * 60) +
@@ -371,8 +313,6 @@ export default {
             let url = `${vue.base_endpoint}/${vue.curso_id === '' ? 'form-selects' : `search/${vue.curso_id}`}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    console.log('data')
-                    console.log(data)
                     let response = data.data ? data.data : data;
 
                     vue.selects.requisito_id = response.requisitos
@@ -382,12 +322,6 @@ export default {
                     }
                 })
             return 0;
-        },
-        async cleanModalCursoValidaciones() {
-            let vue = this
-            await vue.$nextTick(() => {
-                vue.modalCursoValidaciones = Object.assign({}, vue.modalCursoValidaciones, vue.modalCursoValidacionesDefault)
-            })
         },
     }
 }

@@ -37,6 +37,17 @@ class CursosStoreUpdateRequest extends FormRequest
             'plantilla_diploma' => 'nullable',
             'file_imagen' => 'nullable',
             'file_plantilla_diploma' => 'nullable',
+            'validateForm' => 'required',
         ];
+    }
+
+    public function validationData()
+    {
+        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
+
+        $data['active'] = $active;
+        $data['validateForm'] = !!$this->validateForm;;
+
+        return $this->merge($data)->all();
     }
 }

@@ -27,6 +27,10 @@ export default {
             type: String,
             required: false,
             default: '¿Desea cambiar de estado a este registro?',
+        },
+        customCallback: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -42,15 +46,16 @@ export default {
         onConfirm(withValidations = true) {
             let vue = this
 
+            if (vue.customCallback){
+                vue.$emit('onConfirm')
+                return;
+            }
+
             vue.showLoader()
 
             let url = `${vue.options.base_endpoint}/${vue.resource.id}/status`
 
-            if (!withValidations) {
-                url += '?withValidations=1'
-            } else {
-                url += '?withValidations=0'
-            }
+            url += !withValidations ? '?withValidations=1' : '?withValidations=0';
 
             vue.$http.post(url, {'_method': 'PUT'})
                 .then(({data}) => {
@@ -60,18 +65,8 @@ export default {
                     }
                     vue.$emit('onConfirm', emitData)
                     vue.showAlert(data.data.msg, data.type)
-                    // this.hideLoader()
                     vue.hideLoader()
                 })
-                // .catch((error) => {
-                // if (error.response) {
-                //     vue.$emit('onCancel')
-                //     let data = error.response.data
-                //     console.log('CATCH :: ' ,data)
-                //     vue.showAlert(data.msg, data.type)
-                //     // this.hideLoader()
-                //     vue.hideLoader()
-                // }
                 .catch(({data}) => {
                     vue.hideLoader()
                     vue.$emit('onError', data)
@@ -80,6 +75,7 @@ export default {
         loadData(resource) {
             let vue = this
             vue.resource = resource
+            console.log(vue.resource)
         }
         ,
         loadSelects() {

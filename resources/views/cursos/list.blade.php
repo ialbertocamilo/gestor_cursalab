@@ -13,6 +13,11 @@
                 $ruta = 'escuelas/' . $id_school . '/';
             }
         @endphp
-        <curso-layout escuela_id="{{ $id_school }}" escuela_name="{{ $escuela_name }}" ruta="{{ $ruta }}" />
+        <curso-layout
+            escuela_id="{{ $id_school }}"
+            escuela_name="{{ $escuela_name }}"
+            ruta="{{ $ruta }}"
+
+        />
     </v-app>
 @endsection

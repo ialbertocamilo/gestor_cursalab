@@ -7,25 +7,12 @@
     >
         <template v-slot:content>
             <div
-                v-if="['validateUpdateStatus', 'validateDeleteCurso', 'validateUpdateCurso', 'validate_mover_curso', 'validateMoverCurso', 'messagesActions'].includes(options.action)">
-                <div
-                    v-for="(validate,i) in validateData.data" :key="i">
-                    <strong v-text="validate.title"/> <br>
-                    {{ validate.subtitle || "" }}
-                    <ul class="mt-1">
-                        <li v-for="(item, i) in validate.list" :key="i" v-html="item"/>
-                    </ul>
-                </div>
-            </div>
-            <div
-                v-if="['validate_curso_requisito'].includes(options.action)">
-                <div>
-                    <strong>No se puede desactivar este curso.</strong><br>
-                        Para poder desactivar este curso es necesario quitar el requisito en los siguientes cursos
-                    <ul class="mt-1">
-                        <li v-for="(item, i) in validateData.data" :key="i" v-html="item"/>
-                    </ul>
-                </div>
+                v-for="(validation,i) in validations.list" :key="i">
+                <strong v-text="validation.title ||'' "/> <br>
+                {{ validation.subtitle || "" }}
+                <ul class="mt-1">
+                    <li v-for="(item, i) in validation.list" :key="i" v-html="item"/>
+                </ul>
             </div>
         </template>
     </DefaultDialog>
@@ -42,22 +29,25 @@ export default {
             type: String,
             required: false
         },
+        resource: {
+            required: true
+        },
     },
     data() {
         return {
-            validateData: null,
+            validations: [],
             checkbox: false
         }
     },
     methods: {
         closeModal() {
             let vue = this
+            // console.log('emit Cancel modal')
             vue.$emit('onCancel')
         },
         resetValidation() {
             let vue = this
             vue.checkbox = false
-            // vue.validateData = null
         },
         resetSelects() {
             let vue = this
@@ -65,15 +55,11 @@ export default {
         },
         confirmModal() {
             let vue = this
-            let data = {
-                checkbox: vue.checkbox,
-                confirmMethod: vue.options.action
-            }
-            vue.$emit('onConfirm', data)
+            vue.$emit('onConfirm')
         },
-        async loadData(validateData) {
+        async loadData(validations) {
             let vue = this
-            vue.validateData = validateData
+            vue.validations = Object.assign({}, validations)
 
             return 0;
         },
