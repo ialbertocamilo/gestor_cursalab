@@ -11,7 +11,7 @@ class RestCourseController extends Controller
     public function courses()
     {
         $user = Auth::user();
-        $courses = $user->setCurrentCourses(return_courses: true);
+        $courses = $user->getCurrentCourses();
 
         $data = Course::getDataToCoursesViewAppByUser($user, $courses);
 

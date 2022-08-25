@@ -164,6 +164,156 @@ class Topic extends BaseModel
         }
     }
 
+    protected function validateBeforeUpdate(School $school, Course $course, Topic $topic, $data)
+    {
+        $validations = collect();
+
+        // Validar que sea el último tema activo y que se va a desactivar,
+        // eso haría que se desactive el curso, validar si ese curso es requisito de otro e impedir que se desactive el tema
+        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic, $data);
+        if ($last_topic_active_and_required_course['ok']) $validations->push($last_topic_active_and_required_course);
+
+
+        // Validar si es tema es requisito de otro tema
+        $is_required_topic = $this->checkIfIsRequiredTopic($school, $topic, $data);
+        if ($is_required_topic['ok']) $validations->push($is_required_topic);
+
+
+        $show_confirm = !($validations->where('show_confirm', false)->count() > 0);
+
+        return [
+            'list' => $validations->toArray(),
+//            'list' => [123,123,123],
+            'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
+            'show_confirm' => $show_confirm,
+//            'show_confirm' => true,
+            'type' => 'validations-before-update'
+        ];
+    }
+
+    public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic, array $data)
+    {
+        $course_requirements_of = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
+            $query->where('id', $topic->course->id);
+        })->get();
+        $is_required_course = $course_requirements_of->count() > 0;
+
+        $last_active_topic = Topic::where('course_id', $topic->course_id)->where('active', 1)->get();
+        $is_last_active_topic = ($last_active_topic->count === 1 && $topic->active);
+
+        $temp['ok'] = ($is_last_active_topic && $is_required_course);
+
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = "No se puede inactivar el tema.";
+        $temp['subtitle'] = "Para poder inactivar el curso es necesario quitarlo como requisito de los siguientes cursos:";
+        $temp['show_confirm'] = false;
+        $temp['type'] = 'last_active_topic_and_required_course';
+        $temp['list'] = [];
+
+        foreach ($course_requirements_of as $requirement) {
+            $requisito = Course::find($requirement->model_id);
+            $route = route('cursos.editCurso', [$school->id, $requirement->model_id]);
+            $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
+        }
+
+        return $temp;
+    }
+
+    public function checkIfIsRequiredTopic(School $school, Topic $topic, $data, $verb = 'inactivar')
+    {
+        $requirements_of = Requirement::whereHasMorph('requirement', [Topic::class], function ($query) use ($topic) {
+            $query->where('id', $topic->id);
+        })->get();
+        $is_required_topic = $requirements_of->count() > 0;
+        $will_be_deleted = $data['to_delete'] ?? false;
+        $will_be_inactivated = $data['active'] === false;
+        $temp['ok'] = (($will_be_inactivated || $will_be_deleted) && $is_required_topic);
+
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = "No se puede {$verb} el tema.";
+        $temp['subtitle'] = "Para poder {$verb} el tema es necesario quitarlo como requisito de los siguientes temas:";
+        $temp['show_confirm'] = false;
+        $temp['type'] = 'check_if_is_required_topic';
+        $temp['list'] = [];
+
+        foreach ($requirements_of as $requirement) {
+            $requisito = Topic::find($requirement->model_id);
+            $route = route('temas.editTema', [$school->id, $topic->course->id, $requirement->model_id]);
+            $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
+        }
+
+        return $temp;
+    }
+
+    protected function getMessagesAfterUpdate(Topic $topic, $data, $title)
+    {
+        $messages = collect();
+
+        $messages_on_delete = $this->getMessagesOnDelete($topic);
+        if ($messages_on_delete['ok']) $messages->push($messages_on_delete);
+
+        $messages_on_create = $this->getMessagesOnCreate($topic);
+        if ($messages_on_create['ok']) $messages->push($messages_on_create);
+
+        $messages_on_update_status = $this->getMessagesOnUpdateStatus($topic);
+        if ($messages_on_update_status['ok']) $messages->push($messages_on_update_status);
+
+        return [
+            'list' => $messages->toArray(),
+            'title' => $title,
+            'type' => 'validations-after-update'
+        ];
+    }
+
+    public function getMessagesOnDelete($topic)
+    {
+        $temp['ok'] = $topic->trashed();
+
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = null;
+        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
+                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['show_confirm'] = true;
+        $temp['type'] = 'update_message_on_update';
+
+        return $temp;
+    }
+
+    public function getMessagesOnCreate($topic)
+    {
+        $temp['ok'] = $topic->wasRecentlyCreated;
+
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = null;
+        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
+                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['show_confirm'] = true;
+        $temp['type'] = 'update_message_on_update';
+
+        return $temp;
+    }
+
+    public function getMessagesOnUpdateStatus($topic, $data)
+    {
+        $temp['ok'] = $topic->active !== $data['active'];
+
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = null;
+        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
+                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['show_confirm'] = true;
+        $temp['type'] = 'update_message_on_update';
+
+        return $temp;
+    }
+
+
+
     protected function getMessagesActions($tema, $data, $title)
     {
         $messages = [];
@@ -173,7 +323,7 @@ class Topic extends BaseModel
             $tema->active === 1 ||
             // Al crear
             (isset($data['active']) && $data['active'] == 1) ||
-            // Al actualizar desde lisitado (active) o desde formulario (active o assessable)
+            // Al actualizar desde listado (active) o desde formulario (active o assessable)
             ($tema->wasChanged('active') || $tema->wasChanged('assessable'))
         ) :
 

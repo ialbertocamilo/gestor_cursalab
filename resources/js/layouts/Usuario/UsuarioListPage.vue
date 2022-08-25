@@ -151,7 +151,7 @@ export default {
                     //     route: 'reporte_route',
                     //     route_type: 'external'
                     // },
-                    {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
+                    // {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
                     {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
                 ],
                 more_actions: [
