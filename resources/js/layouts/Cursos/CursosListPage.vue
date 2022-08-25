@@ -64,6 +64,7 @@
                 :modulo_id="modulo_id"
                 :curso_escuela="escuela_id"
             />
+
             <DialogConfirm
                 :ref="deleteConfirmationDialog.ref"
                 v-model="deleteConfirmationDialog.open"
@@ -99,7 +100,6 @@
                 @onConfirm="confirmValidationModal(courseValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
                 :resource="{}"
             />
-
 
             <SegmentFormModal
                 :options="modalFormSegmentationOptions"
@@ -320,11 +320,22 @@ export default {
             let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
 
+            if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
+                vue.hideLoader()
+                vue.courseValidationModalUpdateStatus.open = false;
+                return
+            };
+
             vue.$http.put(url, bodyData)
                 .then(async ({data}) => {
-                    this.hideLoader()
-                    const has_info_messages = data.data.messages.list.length > 0;
+                    vue.hideLoader()
+                    // if(!validateForm){
+                    //     vue.showAlert(data.data.msg)
+                    //     vue.courseValidationModalUpdateStatus.open = false;
+                    //     return;
+                    // }
 
+                    const has_info_messages = data.data.messages.list.length > 0;
                     if (has_info_messages) {
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     } else {

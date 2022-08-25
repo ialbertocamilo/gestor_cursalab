@@ -139,6 +139,7 @@
                             <DefaultToggle v-model="resource.active"/>
                         </v-col>
                     </v-row>
+
                 </v-form>
             </v-card-text>
             <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
@@ -269,12 +270,18 @@ export default {
             formData.append('validateForm', validateForm ? "1": "0");
             vue.setJSONReinicioProgramado(formData)
 
+            if (vue.courseValidationModal.action === 'validations-after-update') {
+                console.log('jljkljklkjkjlkljkjlkjkjllkjlkj')
+                vue.hideLoader()
+                vue.courseValidationModal.open = false;
+                setTimeout(() => vue.closeModal(), 10000)
+                return
+            };
+
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
                     this.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0
-                    console.log("has_info_messages", has_info_messages)
-                    console.log("confirmModal", data.data, validateForm)
                     if (has_info_messages)
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
                     else {

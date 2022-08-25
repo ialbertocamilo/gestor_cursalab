@@ -39,7 +39,7 @@ export default {
                     modalOptions.cancelLabel = !validations.show_confirm ? 'Entendido' : 'Cancelar';
                     modalOptions.hideConfirmBtn = !validations.show_confirm;
 
-                    await vue.openFormModal(modalOptions, validations, 'messagesActions', validations.title);
+                    await vue.openFormModal(modalOptions, validations, 'validations-before-update', validations.title);
                 }
             }
         },
@@ -55,22 +55,17 @@ export default {
             modalOptions.persistent = true;
             modalOptions.showCloseIcon = false;
 
-            await vue.openFormModal(modalOptions, data.messages, 'messagesActions', data.messages.title);
+            await vue.openFormModal(modalOptions, data.messages, 'validations-after-update', data.messages.title);
         },
         confirmValidationModal(modalOptions, redirectRoute = null, callbackWithoutValidating = () => {}) {
-            console.info("confirmValidationModal", modalOptions);
+            // console.info("confirmValidationModal", modalOptions);
             if (modalOptions.type === 'validations-before-update') {
                 if (!modalOptions.hideConfirmBtn) callbackWithoutValidating()
                 modalOptions.open = false;
             }
 
-            if (modalOptions.type === 'validations-after-update'){
-                console.log("AFTER UPDATE")
+            if (modalOptions.type === 'validations-after-update')
                 if (redirectRoute) window.location.href = redirectRoute;
-            }
-
         }
-
-
     },
 }
