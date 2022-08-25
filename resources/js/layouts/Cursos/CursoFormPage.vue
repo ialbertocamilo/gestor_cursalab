@@ -206,12 +206,10 @@ export default {
             loadingActionBtn: false,
             courseValidationModal: {
                 ref: 'CursoValidacionesModal',
-                refPage: 'CursosFormPage',
                 open: false,
             },
             courseValidationModalDefault: {
                 ref: 'CursoValidacionesModal',
-                refPage: 'CursosFormPage',
                 open: false,
                 base_endpoint: '',
                 hideConfirmBtn: false,
@@ -255,13 +253,21 @@ export default {
             let vue = this
             vue.errors = []
             vue.loadingActionBtn = true
-            this.showLoader()
+            vue.showLoader()
             const validForm = vue.validateForm('CursoForm')
             if (!validForm) {
                 this.hideLoader()
                 vue.loadingActionBtn = false
                 return
             }
+
+            if (vue.courseValidationModal.action === 'validations-after-update') {
+                vue.hideLoader();
+                vue.courseValidationModal.open = false;
+                setTimeout(() => vue.closeModal(), 10000);
+                return;
+            }
+
             const edit = vue.curso_id !== ''
             let url = `${vue.base_endpoint}/${edit ? `update/${vue.curso_id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
@@ -269,14 +275,6 @@ export default {
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validateForm', validateForm ? "1": "0");
             vue.setJSONReinicioProgramado(formData)
-
-            if (vue.courseValidationModal.action === 'validations-after-update') {
-                console.log('jljkljklkjkjlkljkjlkjkjllkjlkj')
-                vue.hideLoader()
-                vue.courseValidationModal.open = false;
-                setTimeout(() => vue.closeModal(), 10000)
-                return
-            };
 
             vue.$http.post(url, formData)
                 .then(async ({data}) => {

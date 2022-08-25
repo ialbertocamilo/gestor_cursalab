@@ -13,7 +13,7 @@ class RestTopicController extends Controller
     public function topics(Course $course, Request $request)
     {
         $user = Auth::user();
-        $courses = $user->setCurrentCourses(return_courses: true);
+        $courses = $user->getCurrentCourses();
 
         $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
 

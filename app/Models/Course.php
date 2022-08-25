@@ -178,20 +178,17 @@ class Course extends BaseModel
 
         return [
             'list' => $validations->toArray(),
-//            'list' => [123,123,123],
             'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
             'show_confirm' => $show_confirm,
-//            'show_confirm' => true,
             'type' => 'validations-before-update'
         ];
     }
 
-    protected function checkIfIsRequiredCourse(array $data, School $school, Course $course)
+    protected function checkIfIsRequiredCourse(array $data, School $school, Course $course, $verb = 'inactivar')
     {
         $requirements_of = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($course) {
             $query->where('id', $course->id);
         })->get();
-        info($requirements_of->toArray());
         $is_required_course = $requirements_of->count() > 0;
         $will_be_deleted = $data['to_delete'] ?? false;
         $will_be_inactivated = $data['active'] === false;
@@ -199,8 +196,8 @@ class Course extends BaseModel
 
         if (!$temp['ok']) return $temp;
 
-        $temp['title'] = "No se puede inactivar el curso.";
-        $temp['subtitle'] = "Para poder inactivar el curso es necesario quitarlo como requisito de los siguientes cursos:";
+        $temp['title'] = "No se puede {$verb} el curso.";
+        $temp['subtitle'] = "Para poder {$verb} el curso es necesario quitarlo como requisito de los siguientes cursos:";
         $temp['show_confirm'] = false;
         $temp['type'] = 'check_if_is_required_course';
         $temp['list'] = [];
@@ -214,8 +211,7 @@ class Course extends BaseModel
         return $temp;
     }
 
-
-    public function hasActiveTopics($data, School $school, Course $course)
+    public function hasActiveTopics($data, School $school, Course $course, $verb = 'inactivar')
     {
         $will_be_inactivated = $data['active'] === false;
         $has_active_topics = $course->topics->where('active', ACTIVE)->count() > 0;
@@ -223,8 +219,8 @@ class Course extends BaseModel
 
         if (!$temp['ok']) return $temp;
 
-        $temp['title'] = "Tener en cuenta que al desactivar el curso.";
-        $temp['subtitle'] = "Los siguientes temas también se inactivarán:";
+        $temp['title'] = "Tener en cuenta que al {$verb} el curso.";
+        $temp['subtitle'] = "Los siguientes temas también se {$verb}án:";
         $temp['show_confirm'] = true;
         $temp['type'] = 'has_active_topics';
         $temp['list'] = [];
@@ -237,7 +233,7 @@ class Course extends BaseModel
         return $temp;
     }
 
-    protected function getMessagesAfterUpdate(Course $course)
+    protected function getMessagesAfterUpdate(Course $course, $title)
     {
         $messages = collect();
 
@@ -247,7 +243,7 @@ class Course extends BaseModel
 
         return [
             'list' => $messages->toArray(),
-            'title' => 'Tener en cuenta',
+            'title' => $title,
             'type' => 'validations-after-update'
         ];
     }
@@ -271,10 +267,10 @@ class Course extends BaseModel
     {
         $validations = collect();
 
-        $is_required_course = $this->checkIfIsRequiredCourse(['to_delete' => true, 'active' => false], $school, $course);
+        $is_required_course = $this->checkIfIsRequiredCourse(['to_delete' => true, 'active' => false], $school, $course, verb: 'eliminar');
         if ($is_required_course['ok']) $validations->push($is_required_course);
 
-        $has_active_topics = $this->hasActiveTopics($data, $school, $course);
+        $has_active_topics = $this->hasActiveTopics($data, $school, $course, verb: 'eliminar');
         if ($has_active_topics['ok']) $validations->push($has_active_topics);
 
         $show_confirm = !($validations->where('show_confirm', false)->count() > 0);

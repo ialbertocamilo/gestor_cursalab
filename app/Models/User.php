@@ -340,15 +340,27 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function setCurrentCourses($return_courses = false)
+    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text');
+        $programs = collect();
+        $all_courses = [];
         // TODO: No considerar criterion_values que se excluyan (ciclo 0)
-        // TODO: Agregar segmentacion directa
 
+
+        if ($with_programs) $this->setProgramCourses($user,  $all_courses);
+
+        // TODO: Agregar segmentacion directa
+        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses);
+
+        return collect($all_courses);
+    }
+
+    public function setProgramCourses($user, $all_courses)
+    {
         $user_criterion_values_id = $user->criterion_values->pluck('id');
-        $all_programs = Block::with([
+        $current_active_programs = Block::with([
             'segments.values.criterion_value',
             'block_children.child' => [
                 'segments.values.criterion_value',
@@ -370,10 +382,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('active', ACTIVE)
             ->get();
 
-        $all_courses = [];
-
-        $programs = collect();
-        foreach ($all_programs as $program) {
+        foreach ($current_active_programs as $program) {
 
             $program_segment_valid = false;
 
@@ -458,27 +467,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                             endif;
                         }
-
-                        $blocks->push([
-                            'id' => $block_child->child->id,
-                            'name' => $block_child->child->name,
-                            'courses_count' => $courses->count(),
-                            'courses' => $courses->sortBy('position')->values()->all()
-                        ]);
+//                        $blocks->push([
+//                            'id' => $block_child->child->id,
+//                            'name' => $block_child->child->name,
+//                            'courses_count' => $courses->count(),
+//                            'courses' => $courses->sortBy('position')->values()->all()
+//                        ]);
                     endif;
                 }
-                $programs->push([
-                    'id' => $program->id,
-                    'name' => $program->name,
-                    'blocks' => $blocks,
-                ]);
-
+//                $programs->push([
+//                    'id' => $program->id,
+//                    'name' => $program->name,
+//                    'blocks' => $blocks,
+//                ]);
             endif;
         }
-
-        if ($return_courses) return collect($all_courses);
-
-        $user->courses = $programs;
     }
 
     public function validateSegmentationForUser(Collection $user_criterion_values, Collection $segment_values): bool

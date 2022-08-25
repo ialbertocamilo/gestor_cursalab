@@ -42,15 +42,21 @@ class TemaStoreUpdateRequest extends FormRequest
 
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
+            'validate' => 'required'
         ];
     }
 
-//    public function validationData()
-//    {
+    public function validationData()
+    {
+        $create = ($this->method() == 'POST');
+        $data = [];
+
+        // Al crear un Tema calificado, no se podrá activar hasta que se agregue una evaluación
+
 //        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
 //
 //        $data['active'] = $active;
-//
-//        return $this->merge($data)->all();
-//    }
+
+        return $this->merge($data)->all();
+    }
 }

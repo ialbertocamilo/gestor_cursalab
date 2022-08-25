@@ -147,7 +147,7 @@ class CursosController extends Controller
         $response = [
             'curso' => $response_curso,
             'msg' => 'Curso actualizado correctamente.',
-            'messages' => Course::getMessagesAfterUpdate($course)
+            'messages' => Course::getMessagesAfterUpdate($course, 'Curso actualizado correctamente.')
         ];
 
         return $this->success($response);
@@ -189,7 +189,7 @@ class CursosController extends Controller
         $response = [
             'curso' => $course,
             'msg' => 'Estado actualizado con éxito.',
-            'messages' => Course::getMessagesAfterUpdate($course)
+            'messages' => Course::getMessagesAfterUpdate($course, 'Curso actualizado correctamente.')
         ];
 
         return $this->success($response);

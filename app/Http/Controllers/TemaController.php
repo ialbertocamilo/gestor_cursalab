@@ -112,21 +112,20 @@ class TemaController extends Controller
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
 
-        $validate = Topic::validateTemaUpdateStatus($school, $course, $topic, $data['active']);
+        $validations = Topic::validateBeforeUpdate($school, $course, $topic, $data);
 
-        //        dd($validate, $data['estado']);
-        if (!$validate['validate'])
-            return $this->success(compact('validate'), 422);
+        if ($data['validate']):
+            if ($validations['list'] > 0)
+                return $this->success(compact('validations'), 'Ocurrió un error.', 422);
+        endif;
 
         $topic = Topic::storeRequest($data, $topic);
 
         $response = [
             'tema' => $topic,
             'msg' => ' Tema actualizado correctamente.',
-            'messages' => [],
+            'messages' => Topic::getMessagesAfterUpdate($topic, $data, 'Tema actualizado con éxito')
         ];
-
-//        $response['messages'] = Topic::getMessagesActions($topic, $data, 'Tema actualizado con éxito');
 
         return $this->success($response);
     }

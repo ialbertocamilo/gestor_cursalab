@@ -317,14 +317,15 @@ export default {
             let vue = this
             vue.courseUpdateStatusModal.open = false
             vue.showLoader()
-            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
-            const bodyData = {validateForm}
 
             if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
-                vue.hideLoader()
+                vue.hideLoader();
                 vue.courseValidationModalUpdateStatus.open = false;
-                return
-            };
+                return;
+            }
+
+            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
+            const bodyData = {validateForm}
 
             vue.$http.put(url, bodyData)
                 .then(async ({data}) => {
