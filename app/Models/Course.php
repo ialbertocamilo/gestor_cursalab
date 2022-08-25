@@ -163,224 +163,139 @@ class Course extends BaseModel
         return $course;
     }
 
-    protected function validationsOnUpdate(array $data, School $school, Course $course)
+    protected function validateBeforeUpdate(array $data, School $school, Course $course)
     {
         $validations = collect();
 
         $is_required_course = $this->checkIfIsRequiredCourse($data, $school, $course);
-
         if ($is_required_course['ok']) $validations->push($is_required_course);
+
+        $has_active_topics = $this->hasActiveTopics($data, $school, $course);
+        if ($has_active_topics['ok']) $validations->push($has_active_topics);
+
 
         $show_confirm = !($validations->where('show_confirm', false)->count() > 0);
 
         return [
             'list' => $validations->toArray(),
             'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
-            'show_confirm' => $show_confirm
+            'show_confirm' => $show_confirm,
+            'type' => 'validations-before-update'
         ];
     }
 
-    protected function checkIfIsRequiredCourse(array $data, School $school, Course $course)
+    protected function checkIfIsRequiredCourse(array $data, School $school, Course $course, $verb = 'inactivar')
     {
-        $requirements_of =  Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($course) {
+        $requirements_of = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($course) {
             $query->where('id', $course->id);
         })->get();
-        $is_required_course =$requirements_of->count() > 0;
-        $temp['ok'] = $data['active'] === false && $is_required_course;
+        $is_required_course = $requirements_of->count() > 0;
+        $will_be_deleted = $data['to_delete'] ?? false;
+        $will_be_inactivated = $data['active'] === false;
+        $temp['ok'] = (($will_be_inactivated || $will_be_deleted) && $is_required_course);
 
         if (!$temp['ok']) return $temp;
 
-        $temp['title'] = "No se puede inactivar el curso.";
-        $temp['subtitle'] = "Para poder inactivar el curso es necesario quitarlo como requisito de los siguientes cursos:";
+        $temp['title'] = "No se puede {$verb} el curso.";
+        $temp['subtitle'] = "Para poder {$verb} el curso es necesario quitarlo como requisito de los siguientes cursos:";
         $temp['show_confirm'] = false;
-        $temp['type'] = 'field_id_was_changed';
+        $temp['type'] = 'check_if_is_required_course';
         $temp['list'] = [];
 
         foreach ($requirements_of as $requirement) {
-            $requisito = Course::where('id', $requirement->model_id)->first();
+            $requisito = Course::find($requirement->model_id);
             $route = route('cursos.editCurso', [$school->id, $requirement->model_id]);
-            $temp['list'][] =  "<a href='{$route}'>" . $requisito->name . "</a>";
+            $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
         }
 
         return $temp;
     }
 
-
-    protected function validateCursoRequisito($data, $escuela, $curso)
+    public function hasActiveTopics($data, School $school, Course $course, $verb = 'inactivar')
     {
-        $req_curso = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($curso) {
-            $query->where('id', $curso->id);
-        })->get();
+        $will_be_inactivated = $data['active'] === false;
+        $has_active_topics = $course->topics->where('active', ACTIVE)->count() > 0;
+        $temp['ok'] = $will_be_inactivated && $has_active_topics;
 
-        if (in_array($data['active'], ['false', false, 0], true) && $req_curso->count() > 0) :
-            $validate = [];
-            foreach ($req_curso as $req) {
-                $requisito = Course::where('id', $req->model_id)->first();
-                $route = route('cursos.editCurso', [$escuela->id, $requisito->id]);
-                $validate[] = "<a href='{$route}'>" . $requisito->name . "</a>";
-            }
-            return [
-                'validate' => false,
-                'data' => $validate,
-                'type' => 'validate_curso_requisito',
-                'title' => 'Ocurrió un problema'
-            ];
-        endif;
-        return ['validate' => true];
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = "Tener en cuenta que al {$verb} el curso.";
+        $temp['subtitle'] = "Los siguientes temas también se {$verb}án:";
+        $temp['show_confirm'] = true;
+        $temp['type'] = 'has_active_topics';
+        $temp['list'] = [];
+
+        foreach ($course->topics as $topic) {
+            $route = route('temas.editTema', [$school->id, $course->id, $topic->id]);
+            $temp['list'][] = "<a href='{$route}' target='_blank'>" . $topic->name . "</a>";
+        }
+
+        return $temp;
     }
 
-    protected function getMessagesActions($curso, $title = 'Curso actualizado con éxito')
+    protected function getMessagesAfterUpdate(Course $course, $title)
     {
-        $messages = [];
-        if (($curso->wasChanged('active') || $curso->active === 1) && $curso->topics->count() > 0) :
-            $messages[] = [
-                'title' => $title,
-                'subtitle' => "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.",
-                'type' => 'update_message'
-            ];
-        endif;
+        $messages = collect();
+
+        $messages_on_update_status = $this->getMessagesOnUpdateStatus($course);
+
+        if ($messages_on_update_status['ok']) $messages->push($messages_on_update_status);
 
         return [
-            'title' => 'Aviso',
-            'data' => $messages
+            'list' => $messages->toArray(),
+            'title' => $title,
+            'type' => 'validations-after-update'
         ];
     }
 
-    protected function validateUpdateStatus($escuela, $curso, $estado)
+    public function getMessagesOnUpdateStatus($course)
     {
-        $req_curso = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($curso) {
-            $query->where('id', $curso->id);
-        })->get();
-        $cursos_requisitos = [];
-        foreach ($req_curso as $req) {
-            $cursos_requisitos[] = Course::where('id', $req->model_id)->first();
-        }
-        $topics = $curso->topics;
-        $hasActiveTema = $topics->where('active', 1)->count() > 0;
+        $temp['ok'] = ($course->wasChanged('active') or $course->active === 1) and $course->topics->count() > 0;
 
-        if (count($cursos_requisitos) > 0 || $hasActiveTema) :
+        if (!$temp['ok']) return $temp;
 
-            $validate = collect();
+        $temp['title'] = null;
+        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
+                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['show_confirm'] = true;
+        $temp['type'] = 'update_message_on_update';
 
-            if (!$hasActiveTema) {
-
-                $validacion = $this->avisoAllTemasInactive($escuela, $curso);
-                $validate->push($validacion);
-            }
-
-            if (count($cursos_requisitos) > 0) :
-
-                $validacion = $this->validateReqCursos($escuela, $cursos_requisitos, $curso);
-                $validate->push($validacion);
-
-            endif;
-
-            if ($hasActiveTema) :
-
-                $validacion = $this->validateHasActiveTema($escuela, $curso, $topics);
-                $validate->push($validacion);
-
-            endif;
-
-            if ($validate->count() === 0) return ['validate' => true];
-            // Si existe algún tema que impida el envío de formulario (show_confirm = false)
-            // no mostrar el botón de "Confirmar"
-            $count = $validate->where('show_confirm', false)->count();
-
-            return [
-                'validate' => false,
-                'data' => $validate->toArray(),
-                'title' => 'Alerta',
-                'show_confirm' => !($count > 0)
-            ];
-
-        endif;
-
-        return ['validate' => true];
-    }
-
-
-    protected function validateCursoEliminar($escuela, $curso)
-    {
-        $req_curso = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($curso) {
-            $query->where('id', $curso->id);
-        })->get();
-        $cursos_requisitos = [];
-        foreach ($req_curso as $req) {
-            $cursos_requisitos[] = Course::where('id', $req->model_id)->first();
-        }
-        $topics = $curso->topics;
-        $hasActiveTema = $topics->where('active', 1)->count() > 0;
-
-        if (count($cursos_requisitos) > 0 || $hasActiveTema) :
-
-            $validate = collect();
-
-            if (!$hasActiveTema) {
-
-                $validacion = $this->avisoAllTemasInactive($escuela, $curso);
-                $validate->push($validacion);
-            }
-
-            if (count($cursos_requisitos) > 0) :
-
-                $validacion = $this->validateReqCursos($escuela, $cursos_requisitos, $curso, 'eliminar');
-                $validate->push($validacion);
-
-            endif;
-
-            if ($validate->count() === 0) return ['validate' => true];
-            // Si existe algún tema que impida el envío de formulario (show_confirm = false)
-            // no mostrar el botón de "Confirmar"
-            $count = $validate->where('show_confirm', false)->count();
-
-            return [
-                'validate' => false,
-                'data' => $validate->toArray(),
-                'title' => 'Alerta',
-                'show_confirm' => !($count > 0)
-            ];
-
-        endif;
-
-        return ['validate' => true];
-    }
-
-    public function validateReqCursos($escuela, $req_cursos, $curso, $verb = 'desactivar')
-    {
-        $temp = [
-            'title' => "No se puede {$verb} este curso.",
-            'subtitle' => "Para poder {$verb} este curso es necesario quitar o cambiar el requisito en los siguientes cursos:",
-            'show_confirm' => false,
-            'type' => 'req_curso_validate'
-        ];
-        $list1 = [];
-
-        foreach ($req_cursos as $req) {
-            $route = route('cursos.editCurso', [$escuela->id, $req->id]);
-            $list1[] = "<a href='{$route}' target='_blank'>" . $req->name . "</a>";
-        }
-
-        $temp['list'] = $list1;
         return $temp;
     }
 
-    public function validateHasActiveTema($escuela, $curso, $temas, $verb = 'desactivar')
+    protected function validateBeforeDelete($data, School $school, Course $course)
     {
-        $temp = [
-            'title' => "Tener en cuenta al desactivar el curso.",
-            'subtitle' => "Los siguientes temas también se inactivarán:",
-            'show_confirm' => true,
-            'type' => 'has_active_tema'
+        $validations = collect();
+
+        $is_required_course = $this->checkIfIsRequiredCourse(['to_delete' => true, 'active' => false], $school, $course, verb: 'eliminar');
+        if ($is_required_course['ok']) $validations->push($is_required_course);
+
+        $has_active_topics = $this->hasActiveTopics($data, $school, $course, verb: 'eliminar');
+        if ($has_active_topics['ok']) $validations->push($has_active_topics);
+
+        $show_confirm = !($validations->where('show_confirm', false)->count() > 0);
+
+        return [
+            'list' => $validations->toArray(),
+            'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
+            'show_confirm' => $show_confirm,
+//            'show_confirm' => true,
+            'type' => 'validations-before-update'
         ];
-        $list1 = [];
-        foreach ($temas as $tema) {
-            $route = route('temas.editTema', [$escuela->id, $curso->id, $tema->id]);
-            $list1[] = "<a href='{$route}' target='_blank'>" . $tema->name . "</a>";
-        }
-        $temp['list'] = $list1;
-        return $temp;
+    }
+
+    protected function getMessagesAfterDelete(Course $course)
+    {
+        $messages = collect();
+
+        $show_confirm = false;
+
+        return [
+            'list' => $messages->toArray(),
+            'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
+            'show_confirm' => $show_confirm,
+            'type' => 'validations-before-update'
+        ];
     }
 
     public function avisoAllTemasInactive($escuela, $curso)
@@ -395,6 +310,7 @@ class Course extends BaseModel
         $temp['list'] = $list;
         return $temp;
     }
+
 
     protected function getCourseStatusByUser(User $user, Course $course): array
     {

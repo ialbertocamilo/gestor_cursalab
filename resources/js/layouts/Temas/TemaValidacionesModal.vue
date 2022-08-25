@@ -1,4 +1,3 @@
-
 <template>
     <DefaultDialog
         :options="options"
@@ -7,24 +6,13 @@
         @onConfirm="confirmModal"
     >
         <template v-slot:content>
-            <!--            <h1>{{ options.action }}</h1>-->
-            <!--            <h1>{{ resource }}</h1>-->
-            <!--            <h1>{{ validateData }}</h1>-->
-            <div
-                v-if="['validateUpdateStatus', 'validateDeleteTema', 'validateUpdateTema', 'messagesActions'].includes(options.action)">
-                <div
-                    v-for="(validate,i) in validateData.data" :key="i">
-                    <strong v-text="validate.title"/> <br>
-                    {{ validate.subtitle || "" }}
-                    <ul class="mt-1">
-                        <li v-for="(item, i) in validate.list" :key="i" v-html="item"/>
-                    </ul>
-                </div>
+            <h5>{{ options.action }}</h5>
+            <h5>{{ resource }}</h5>
+            <h5>{{ validateData }}</h5>
+            <div v-if="options.action === 'showAlertEvaluacion'" class="d-flex justify-content-center">
+                <strong v-text="validateData.data[0]"/> <br>
             </div>
-            <div v-else-if="options.action === 'showAlertEvaluacion'">
-                <strong v-text="validateData.data[0].title"/> <br>
-            </div>
-            <div v-else-if="options.action === 'validacionFormPage'">
+            <div v-else-if="options.action === 'validations-before-update'">
                 <div
                     v-if="resource && resource.hide_tipo_ev === 'qualified' && resource.evaluable === 'no'">
                     Estas a punto de cambiar el tipo de evaluación de evaluable calificada a no evaluable. Recuerda
@@ -53,6 +41,15 @@
                     </div>
                 </div>
             </div>
+            <div
+                v-else
+                v-for="(validation,i) in validateData.list" :key="i">
+                <strong v-text="validation.title ||'' "/> <br>
+                {{ validation.subtitle || "" }}
+                <ul class="mt-1">
+                    <li v-for="(item, i) in validation.list" :key="i" v-html="item"/>
+                </ul>
+            </div>
         </template>
     </DefaultDialog>
 </template>
@@ -69,12 +66,12 @@ export default {
             required: false
         },
         resource: {
-            required: true
+            required: false
         },
     },
     data() {
         return {
-            validateData: null,
+            validateData: [],
             checkbox: false
         }
     },

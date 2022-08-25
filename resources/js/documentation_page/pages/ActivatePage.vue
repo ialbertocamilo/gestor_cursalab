@@ -4,6 +4,11 @@
             Activar usuarios
         </v-card-title>
         <v-card-text class="ml-2">
+            <p>
+                Este proceso permite cambiar el estado de los usuarios a "activo". <br>
+                También aplica para la REVERSA DE CESES. <br>
+                Cuando se realiza este proceso se actualiza el dato "termination_date" del usuario a NULO.
+            </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
     </v-card>
@@ -16,8 +21,7 @@ export default {
     data() {
         return{
              api_description_options:{
-                title:'Activar Usuarios',
-                subtitle: 'Este proceso sirve para cambiar el estado de los usuarios en Cursalab. <br>También aplica para la REVERSA DE CESES.<br>Cuando se realiza este proceso se actualiza el dato "termination_date" del usuario a NULO.',
+                title:'Activar usuarios',
                 type:'POST',
                 route:'/integrations/activate_users',
                 parameters_type:[

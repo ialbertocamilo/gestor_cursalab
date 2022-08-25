@@ -65,7 +65,7 @@ export default {
                 showLeftIcn: false,
                 showCloseIcn: true,
             }
-            console.log('showAlert')
+            // console.log('showAlert')
             switch (type) {
                 case 'primary':
                     vue.$notification.primary(msg, options);
@@ -530,7 +530,7 @@ export default {
         downloadReportFromNode(url, data = null) {
             let vue = this
             vue.showLoader()
-            const base_api_reportes = process.env.MIX_API_REPORTES
+            const base_api_reportes = process.env.MIX_API_REPORTES;
             const nodeAPI = base_api_reportes + url
             vue.$http.post(nodeAPI, data)
                 .then((res) => {

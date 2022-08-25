@@ -191,7 +191,10 @@ export default {
                 '', this.resource, fields, file_fields
             );
 
-            if (!formData.get('file_imagen')) {
+            // Validate whether imagen has been set or not,
+            // from file or from gallery
+
+            if (!formData.get('file_imagen') && !this.resource.imagen) {
                 errors.push({
                     message: 'No ha seleccionado ninguna imágen'
                 })

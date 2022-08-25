@@ -22,7 +22,7 @@ Route::controller(CursosController::class)->group(function() {
 	Route::get('/{course}/encuesta', 'getEncuesta')->name('modulos.escuelas.cursos.encuesta');
 	Route::post('/{course}/encuesta', 'storeUpdateEncuesta')->name('modulos.escuelas.cursos.encuesta');
 
-	Route::post('/{course}', 'destroyCurso')->name('cursos.destroyCurso');
+	Route::post('/{course}/delete', 'destroyCurso')->name('cursos.destroyCurso');
 	// Route::post('/{course}/mover_curso', 'moverCurso')->name('cursos.moverCurso');
 
 	Route::put('/{course}/status', 'updateStatus');

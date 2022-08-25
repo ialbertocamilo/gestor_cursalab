@@ -533,7 +533,7 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
-        $user->setCurrentCourses();
+//        $user->getCurrentCourses();
 
         return $this->success(compact('user'));
     }

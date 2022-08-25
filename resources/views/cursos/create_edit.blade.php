@@ -13,7 +13,10 @@
                 $id_escuela = null;
             }
         @endphp
-        <curso-form-page modulo_id="{{ $id_escuela }}" categoria_id="{{ $id_escuela }}"
-            curso_id="{{ $id_curso }}" />
+        <curso-form-page
+            ref="CursosFormPage"
+            modulo_id="{{ $id_escuela }}"
+            categoria_id="{{ $id_escuela }}"
+            curso_id="{{ $id_curso }}"/>
     </v-app>
 @endsection

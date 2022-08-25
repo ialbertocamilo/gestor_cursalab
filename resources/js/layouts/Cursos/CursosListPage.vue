@@ -6,15 +6,6 @@
             <template v-slot:content>
                 <v-row justify="center">
 
-                    <!--                    <v-col cols="12">-->
-                    <!--                        <DefaultAutocomplete-->
-                    <!--                            clearable-->
-                    <!--                            placeholder="Seleccione una Carrera"-->
-                    <!--                            label="Carrera"-->
-                    <!--                            :items="selects.carreras"-->
-                    <!--                            v-model="filters.carrera"-->
-                    <!--                        />-->
-                    <!--                    </v-col>-->
                 </v-row>
             </template>
         </DefaultFilter>
@@ -22,9 +13,7 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-                <!--                <DefaultActivityButton-->
-                <!--                    :label="'Actividad'"-->
-                <!--                    @click="activity"/>-->
+
                 <DefaultModalButton
                     :label="'Curso'"
                     @click="openCRUDPage(`/${ruta}cursos/create`)"/>
@@ -54,10 +43,10 @@
                 :filters="filters"
                 @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del Curso - ${$event.name}`)"
                 @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
-                @delete="deleteCurso($event)"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                 @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
 
+                @delete="deleteCurso($event)"
+                @status="updateCourseStatus($event)"
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -75,29 +64,41 @@
                 :modulo_id="modulo_id"
                 :curso_escuela="escuela_id"
             />
+
             <DialogConfirm
-                :ref="modalDeleteOptions.ref"
-                v-model="modalDeleteOptions.open"
+                :ref="deleteConfirmationDialog.ref"
+                v-model="deleteConfirmationDialog.open"
                 width="450px"
                 title="Eliminar Curso"
                 subtitle="¿Está seguro de eliminar el curso?"
                 @onConfirm="confirmDelete"
-                @onCancel="modalDeleteOptions.open = false"
+                @onCancel="deleteConfirmationDialog.open = false"
             />
-            <CursoValidacionesModal
+            <CourseValidationsDelete
                 width="50vw"
-                :ref="modalCursosValidaciones.ref"
-                :options="modalCursosValidaciones"
-                @onCancel="closeFormModal(modalCursosValidaciones); closeFormModal(modalStatusOptions); closeFormModal(modalDeleteOptions)"
-                @onConfirm="callFunction"
-                :resource="delete_model"
+                :ref="courseValidationModal.ref"
+                :options="courseValidationModal"
+                @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(courseValidationModal,  null, confirmDelete(false))"
+                :resource="{}"
             />
-            <DefaultStatusModal
-                :options="modalStatusOptions"
-                :ref="modalStatusOptions.ref"
-                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters); openCursoValidacionesModal($event)"
-                @onCancel="closeFormModal(modalStatusOptions, dataTable, filters); closeFormModal(modalStatusOptions); closeFormModal(modalDeleteOptions)"
-                @onError="onErrorUpdateStatusCurso"
+
+            <DialogConfirm
+                :ref="courseUpdateStatusModal.ref"
+                v-model="courseUpdateStatusModal.open"
+                width="450px"
+                title="Cambiar de estado al curso"
+                subtitle="¿Está seguro de cambiar de estado al curso?"
+                @onConfirm="confirmUpdateStatus"
+                @onCancel="courseUpdateStatusModal.open = false"
+            />
+            <CourseValidationsUpdateStatus
+                width="50vw"
+                :ref="courseValidationModalUpdateStatus.ref"
+                :options="courseValidationModalUpdateStatus"
+                @onCancel="closeFormModal(courseValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(courseValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
+                :resource="{}"
             />
 
             <SegmentFormModal
@@ -119,12 +120,18 @@ import CursosEncuestaModal from "./CursosEncuestaModal";
 import MoverCursoModal from "./MoverCursoModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
-import DefaultStatusModal from "../Default/DefaultStatusModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
-    components: {CursosEncuestaModal, MoverCursoModal, DialogConfirm, CursoValidacionesModal, DefaultStatusModal, SegmentFormModal},
-    props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name','ruta'],
+    components: {
+        CursosEncuestaModal,
+        MoverCursoModal,
+        DialogConfirm,
+        'CourseValidationsDelete': CursoValidacionesModal,
+        'CourseValidationsUpdateStatus': CursoValidacionesModal,
+        SegmentFormModal
+    },
+    props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
         let vue = this
         let route_school = (vue.escuela_id !== '') ? `/escuelas/${vue.escuela_id}` : ``;
@@ -183,6 +190,8 @@ export default {
                     },
                 ],
             },
+            delete_model: null,
+            update_model: null,
             selects: {
                 modules: []
             },
@@ -196,46 +205,6 @@ export default {
                 open: false,
                 base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
             },
-            modalMoverCurso: {
-                ref: 'MoverCursoModal',
-                open: false,
-                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
-            },
-            modalDeleteOptions: {
-                ref: 'EscuelaDeleteModal',
-                title: 'Eliminar Escuela',
-                contentText: '¿Desea eliminar este registro?',
-                open: false,
-                endpoint: ''
-            },
-            modalStatusOptions: {
-                ref: 'CursoStatusModal',
-                open: false,
-                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
-                contentText: '¿Desea cambiar de estado a este registro?',
-                endpoint: '',
-            },
-            delete_model: null,
-            modalCursosValidaciones: {
-                ref: 'CursoValidacionesModal',
-                open: false,
-                base_endpoint: '',
-                hideConfirmBtn: false,
-                hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'CursosValidaciones',
-            },
-            modalCursosValidacionesDefault: {
-                ref: 'CursoValidacionesModal',
-                open: false,
-                base_endpoint: '',
-                hideConfirmBtn: false,
-                hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'CursosValidaciones',
-            },
             modalFormSegmentationOptions: {
                 ref: 'SegmentFormModal',
                 open: false,
@@ -244,11 +213,51 @@ export default {
                 confirmLabel: 'Guardar',
                 resource: 'segmentación',
             },
+
+            deleteConfirmationDialog: {
+                ref: 'EscuelaDeleteModal',
+                title: 'Eliminar Curso',
+                contentText: '¿Desea eliminar este registro?',
+                open: false,
+                endpoint: ''
+            },
+            courseValidationModal: {
+                ref: 'CourseListValidationModal',
+                open: false,
+            },
+
+            courseUpdateStatusModal: {
+                ref: 'CourseUpdateStatusModal',
+                title: 'Actualizar Curso',
+                contentText: '¿Desea actualizar este registro?',
+                open: false,
+                endpoint: ''
+            },
+            courseValidationModalUpdateStatus: {
+                ref: 'CourseListValidationModalUpdateStatus',
+                open: false,
+            },
+
+            courseValidationModalDefault: {
+                ref: 'CourseListValidationModal',
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: false,
+                hideCancelBtn: false,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'CursosValidaciones',
+            },
+
+            modalMoverCurso: {
+                ref: 'MoverCursoModal',
+                open: false,
+                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
+            },
         }
     },
     mounted() {
         let vue = this
-        // vue.getSelects();
 
         vue.filters.module = vue.modulo_id
         vue.filters.category = vue.escuela_id
@@ -266,101 +275,85 @@ export default {
         activity() {
             console.log('activity')
         },
-        deleteCurso(tema) {
+
+        deleteCurso(course) {
             let vue = this
-            vue.delete_model = tema
-            vue.modalDeleteOptions.open = true
+            vue.delete_model = course
+            vue.deleteConfirmationDialog.open = true
         },
-        async cleanModalCursosValidaciones() {
+        confirmDelete(validateForm = true) {
             let vue = this
-            await vue.$nextTick(() => {
-                vue.modalCursosValidaciones = Object.assign({}, vue.modalCursosValidaciones, vue.modalCursosValidacionesDefault)
-            })
-        },
-        confirmDelete(withValidations = true) {
-            let vue = this
+            vue.deleteConfirmationDialog.open = false
             vue.showLoader()
-            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}`
+            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}/delete`
+            const bodyData = {validateForm}
 
-            if (!withValidations) {
-                url += '?withValidations=1'
-            } else {
-                url += '?withValidations=0'
-            }
-
-            vue.$http.post(url)
+            vue.$http.post(url, bodyData)
                 .then(async ({data}) => {
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters)
-                    vue.delete_model = null
-                    vue.modalDeleteOptions.open = false
-                    // const messages = data.data.messages
-
-                    // if (messages.data.length > 0) {
-                    //     // console.log(messages.data)
-                    //     await vue.cleanModalCursosValidaciones()
-                    //     vue.modalCursosValidaciones.hideCancelBtn = true
-                    //     vue.modalCursosValidaciones.confirmLabel = 'Entendido'
-                    //     vue.modalCursosValidaciones.persistent = true
-                    //     await vue.openFormModal(vue.modalCursosValidaciones, messages, 'messagesActions', 'Aviso')
-                    // } else {
+                    this.hideLoader()
+                    const has_info_messages = data.data.messages.list.length > 0
+                    if (has_info_messages)
+                        await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
+                    else
                         vue.showAlert(data.data.msg)
-                        vue.hideLoader()
-                    // }
-                })
-                .catch(async ({data}) => {
-                    // await vue.cleanModalCursosValidaciones()
-                    // vue.loadingActionBtn = false
-                    // if (data.validate.show_confirm) {
-                    //     vue.modalCursosValidaciones.hideConfirmBtn = false
-                    //     vue.modalCursosValidaciones.hideCancelBtn = false
-                    //     vue.modalCursosValidaciones.cancelLabel = 'Cancelar'
-                    //     vue.modalCursosValidaciones.confirmLabel = 'Confirmar'
-                    // } else {
-                    //     vue.modalCursosValidaciones.hideConfirmBtn = true
-                    //     vue.modalCursosValidaciones.cancelLabel = 'Entendido'
-                    // }
-                    // await vue.openFormModal(vue.modalCursosValidaciones, data.validate, 'validateDeleteCurso', data.validate.title)
-                    vue.hideLoader()
-                })
-        },
-        async onErrorUpdateStatusCurso(data) {
-            let vue = this
-            console.log('onErrorUpdateStatusCurso', data)
-            await vue.cleanModalCursosValidaciones()
 
-            if (data.validate.show_confirm) {
-                vue.modalCursosValidaciones.hideConfirmBtn = false
-                vue.modalCursosValidaciones.hideCancelBtn = false
-                vue.modalCursosValidaciones.cancelLabel = 'Cancelar'
-                vue.modalCursosValidaciones.confirmLabel = 'Confirmar'
-            } else {
-                vue.modalCursosValidaciones.hideConfirmBtn = true
-                vue.modalCursosValidaciones.cancelLabel = 'Entendido'
-            }
-            await vue.openFormModal(vue.modalCursosValidaciones, data.validate, 'validateUpdateStatus', data.validate.title)
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                })
+                .catch(error => {
+                    if (error && error.errors)
+                        vue.errors = error.errors
+
+                    vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
+                    vue.loadingActionBtn = false
+                })
         },
-        async callFunction(data) {
+
+        updateCourseStatus(course) {
             let vue = this
-            console.log('double confirm')
-            if (data.confirmMethod === "validateDeleteCurso") {
-                vue.confirmDelete(false);
-            } else if (['updateStatus', 'validateUpdateStatus'].includes(data.confirmMethod)) {
-                vue.$refs[vue.modalStatusOptions.ref].onConfirm(false)
-            }
-            await vue.cleanModalCursosValidaciones()
-            vue.modalCursosValidaciones.open = false
+            vue.update_model = course
+            vue.courseUpdateStatusModal.open = true
         },
-        async openCursoValidacionesModal(data) {
+        confirmUpdateStatus(validateForm = true) {
             let vue = this
-            console.log("openCursoValidacionesModal", data)
-            if (data.hasOwnProperty('confirmMethod')) {
-                await vue.cleanModalCursosValidaciones()
-                vue.modalCursosValidaciones.hideCancelBtn = true
-                vue.modalCursosValidaciones.confirmLabel = 'Entendido'
-                vue.modalCursosValidaciones.persistent = true
-                await vue.openFormModal(vue.modalCursosValidaciones, data.data.data.messages, 'messagesActions', 'Aviso')
+            vue.courseUpdateStatusModal.open = false
+            vue.showLoader()
+
+            if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
+                vue.hideLoader();
+                vue.courseValidationModalUpdateStatus.open = false;
+                return;
             }
-        }
+
+            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
+            const bodyData = {validateForm}
+
+            vue.$http.put(url, bodyData)
+                .then(async ({data}) => {
+                    vue.hideLoader()
+                    // if(!validateForm){
+                    //     vue.showAlert(data.data.msg)
+                    //     vue.courseValidationModalUpdateStatus.open = false;
+                    //     return;
+                    // }
+
+                    const has_info_messages = data.data.messages.list.length > 0;
+                    if (has_info_messages) {
+                        await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
+                    } else {
+                        vue.showAlert(data.data.msg)
+                        vue.courseValidationModalUpdateStatus.open = false;
+                    }
+
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                })
+                .catch(error => {
+                    if (error && error.errors)
+                        vue.errors = error.errors
+
+                    vue.handleValidationsBeforeUpdate(error, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
+                    vue.loadingActionBtn = false
+                })
+        },
     }
 
 }
