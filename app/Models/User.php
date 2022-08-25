@@ -349,7 +349,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // TODO: No considerar criterion_values que se excluyan (ciclo 0)
 
 
-        if ($with_programs) $this->setProgramCourses($user,  $all_courses);
+        if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
         // TODO: Agregar segmentacion directa
         if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses);
@@ -357,7 +357,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return collect($all_courses);
     }
 
-    public function setProgramCourses($user, $all_courses)
+    public function setProgramCourses($user, &$all_courses)
     {
         $user_criterion_values_id = $user->criterion_values->pluck('id');
         $current_active_programs = Block::with([
@@ -481,6 +481,42 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //                    'blocks' => $blocks,
 //                ]);
             endif;
+        }
+    }
+
+    public function setCoursesWithDirectSegmentation($user, &$all_courses)
+    {
+        // Traer todos los cursos con segmentaciones activos
+        $course_segmentations = Course::with([
+            'segments.values.criterion_value',
+            'requirements',
+            'schools',
+            'topics' => [
+                'evaluation_type',
+                'requirements',
+                'medias.type'
+            ],
+            'polls.questions',
+            'topics.evaluation_type'
+        ])
+            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+            ->where('active', ACTIVE)->get();
+
+        $user_criterion_values_id = $user->criterion_values->pluck('id');
+
+        // Comparar los criterios del usuario con cada segmentacion de cada curso
+        foreach ($course_segmentations as $course) {
+
+            foreach ($course->segments as $segment) {
+                $course_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
+                $course_segment_valid = $this->validateSegmentationForUser($user_criterion_values_id, $course_segment_criterion_values_id);
+
+                if ($course_segment_valid) :
+                    $all_courses[] = $course;
+                    break;
+                endif;
+            }
+
         }
     }
 

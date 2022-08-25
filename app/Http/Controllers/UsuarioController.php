@@ -114,7 +114,7 @@ class UsuarioController extends Controller
             $user_criterion_value = $criterion->multiple ?
                 $value->pluck('id') : $value?->first()?->id;
 
-            $user_criteria[$criterion->code] = $user_criterion_value;
+            $user_criteria[$criterion->code] =  $user_criterion_value;
         }
 
 
@@ -135,6 +135,7 @@ class UsuarioController extends Controller
 //            }
 //        }
         $user->criterion_list = $user_criteria;
+
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
@@ -150,7 +151,7 @@ class UsuarioController extends Controller
                 'values' => function ($q) use ($current_workspace) {
                     $q->with('parents:id,criterion_id,value_text')
                         ->whereHas('workspaces', function ($q2) use ($current_workspace) {
-                            $q2->where('id', $current_workspace->id);
+                            $q2->where('id', $current_workspace?->id);
                         })
                         ->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
                             'value_text');
@@ -370,165 +371,6 @@ class UsuarioController extends Controller
         }
         // Fin registro reinicios
         return $this->success(['msg' => 'Reinicio total exitoso']);
-    }
-
-    public function crear(Request $request)
-    {
-        // return $request->all();
-//        info($request->all());
-        if ($request->usuario['id'] == 0) {
-
-            $already_exist = Usuario::where('dni', trim($request->usuario['dni']))->first();
-
-            if ($already_exist)
-                return response()->json(['error' => true, 'msg' => 'El DNI ya ha sido registrado.'], 422);
-
-            $modulo = Abconfig::findOrFail($request->usuario['modulo']['id']);
-
-            $codigo = $modulo->codigo_matricula . '-' . date('dmy');
-            $grupo_sistema = Grupo::firstOrCreate(['nombre' => $codigo, 'estado' => 1]);
-
-            // CREAR
-            $nuevo_usuario = new Usuario();
-            $nuevo_usuario->config_id = $request->usuario['modulo']['id'];
-            $nuevo_usuario->nombre = $request->usuario['nombre'];
-            $nuevo_usuario->grupo_id = $grupo_sistema->id;
-            // $nuevo_usuario->grupo_id = $request->usuario['grupo_sistema'];
-//            $nuevo_usuario->botica_id =  $request->usuario['botica_id'];
-            $nuevo_usuario->botica_id = $request->usuario['botica']['id'];
-//            $botica = Botica::with('criterio')->where('id', $request->usuario['botica_id'])->first();
-            $botica = Botica::with('criterio')->where('id', $request->usuario['botica']['id'])->first();
-            $nuevo_usuario->botica = $botica->nombre;
-            $nuevo_usuario->grupo = $botica->criterio_id;
-            $nuevo_usuario->grupo_nombre = $botica->criterio->valor;
-            $nuevo_usuario->dni = $request->usuario['dni'];
-            $nuevo_usuario->password = Hash::make($request->usuario['password']);
-            $nuevo_usuario->sexo = $request->usuario['sexo'] == 'M' ? 'MASCULINO' : 'FEMENINO';
-            $nuevo_usuario->cargo = $request->usuario['cargo'];
-
-            $nuevo_usuario->estado = $request->usuario['estado'];
-            $nuevo_usuario->save();
-
-            // //Consultar dias de configuracion
-            // $dias = $nuevo_usuario->config->duracion_dias;
-            // date_default_timezone_set('America/Lima');
-            // //insertar vigencia
-            // $vigencia = new Usuario_vigencia;
-            // $vigencia->usuario_id = $nuevo_usuario->id;
-            // $vigencia->fecha_inicio = date('Y-m-d');
-            // $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio. ' + '.$dias.' days'));
-            // $vigencia->save();
-
-            // ENCONTRAR EL ULTIMO CICLO ACTIVO
-            $ciclos = $request->ciclos;
-            $_ciclos = collect($request->ciclos);
-            $ciclos_activos = $_ciclos->where('estado', true);
-            $ultimo_ciclo_activo = $ciclos_activos->last();
-
-            foreach ($ciclos as $ciclo) {
-                $matricula = new Matricula;
-                $matricula->usuario_id = $nuevo_usuario->id;
-                $matricula->carrera_id = $request->carrera_id;
-                $matricula->ciclo_id = $ciclo['id'];
-                $matricula->secuencia_ciclo = $ciclo['secuencia'];
-                $matricula->presente = ($ultimo_ciclo_activo['id'] == $ciclo['id']) ? 1 : 0;
-                if (count($ciclos_activos) == 1 && $ciclo['estado'] == true) {
-                    $matricula->estado = 1;
-                } else if ($ciclo['secuencia'] == 0) {
-                    $matricula->estado = 0;
-                } else {
-                    $matricula->estado = $ciclo['estado'] ? 1 : 0;
-                }
-                $matricula->save();
-                DB::table('matricula_criterio')->insert([
-                    'matricula_id' => $matricula->id,
-                    'criterio_id' => $request->grupo
-                ]);
-            }
-            $hel = new HelperController();
-            Resumen_general::insert([
-                'usuario_id' => $nuevo_usuario->id,
-                'cur_asignados' => count($hel->help_cursos_x_matricula($nuevo_usuario->id)),
-            ]);
-            return $this->success(['msg' => 'Usuario creado con éxito.']);
-//            return response()->json(['msg'=> 'Usuario creado con éxito.'], 200);
-        } else {
-            // return $request->all();
-            // EDITAR
-            $usuario_editar = Usuario::find($request->usuario['id']);
-//            $usuario_editar->config_id = $request->usuario['modulo'];
-            $usuario_editar->nombre = $request->usuario['nombre'];
-            // $usuario_editar->grupo_id = $request->usuario['grupo_sistema'];
-            if ($usuario_editar->dni !== trim($request->usuario['dni'])) {
-                $already_exist = Usuario::where('dni', trim($request->usuario['dni']))->first();
-
-                if ($already_exist)
-                    return response()->json(['msg' => 'El DNI ya ha sido registrado.'], 422);
-
-                $usuario_editar->dni = trim($request->usuario['dni']);
-            }
-
-            if (isset($request->usuario['password']) and $request->usuario['password'] != "") {
-                $usuario_editar->password = Hash::make($request->usuario['password']);
-            }
-
-            $usuario_editar->sexo = $request->usuario['sexo'] == 'M' ? 'MASCULINO' : 'FEMENINO';
-            $usuario_editar->cargo = $request->usuario['cargo'];
-            $usuario_editar->estado = $request->usuario['estado'];
-//            $usuario_editar->botica_id =  $request->usuario['botica_id'];
-            $usuario_editar->botica_id = $request->usuario['botica']['id'];
-//            $botica = Botica::with('criterio')->where('id', $request->usuario['botica_id'])->first();
-            $botica = Botica::with('criterio')->where('id', $request->usuario['botica']['id'])->first();
-            $usuario_editar->botica = $botica->nombre;
-            $usuario_editar->grupo = $botica->criterio_id;
-            $usuario_editar->grupo_nombre = $botica->criterio->valor;
-            $usuario_editar->save();
-            // //Consultar dias de configuracion
-            // $dias = $usuario_editar->config->duracion_dias;
-            // date_default_timezone_set('America/Lima');
-            // //insertar vigencia
-            // $vigencia = $usuario_editar->vigencia;
-            // $vigencia->usuario_id = $usuario_editar->id;
-            // $vigencia->fecha_inicio = date('Y-m-d');
-            // $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio. ' + '.$dias.' days'));
-            // $vigencia->save();
-
-            // ENCONTRAR EL ULTIMO CICLO ACTIVO
-            $ciclos = $request->ciclos;
-            $_ciclos = collect($request->ciclos);
-            $ciclos_activos = $_ciclos->where('estado', true);
-            $ultimo_ciclo_activo = $ciclos_activos->last();
-
-            foreach ($ciclos as $ciclo) {
-                $matricula = Matricula::find($ciclo['matricula_id']);
-                $matricula->presente = ($ultimo_ciclo_activo['id'] == $ciclo['id']) ? 1 : 0;
-                if (count($ciclos_activos) == 1 && $ciclo['estado'] == true) {
-                    $matricula->estado = 1;
-                } else if ($ciclo['secuencia'] == 0) {
-                    $matricula->estado = 0;
-                } else {
-                    $matricula->estado = $ciclo['estado'] ? 1 : 0;
-                }
-                $matricula->save();
-            }
-            $helper = new HelperController();
-            $curso_ids_matricula = $helper->help_cursos_x_matricula($usuario_editar->id);
-            //LIMPIAR TABLAS RESUMENES
-            Resumen_x_curso::where('usuario_id', $usuario_editar->id)->whereNotIn('curso_id', $curso_ids_matricula)->update(['estado_rxc' => 0]);
-            // Resumen_general::where('usuario_id',$usuario_editar->id)->delete();
-            //ACTUALIZAR TABLAS RESUMENES
-            $rest_avance = new RestAvanceController();
-            $ab_conf = Abconfig::select('mod_evaluaciones')->where('id', $request->usuario['modulo'])->first(['mod_evaluaciones']);
-            $mod_eval = json_decode($ab_conf->mod_evaluaciones, true);
-            foreach ($curso_ids_matricula as $cur_id) {
-                // ACTUALIZAR RESUMENES
-                $rest_avance->actualizar_resumen_x_curso($usuario_editar->id, $cur_id, $mod_eval['nro_intentos']);
-            }
-            $rest_avance->actualizar_resumen_general($usuario_editar->id);
-            return $this->success(['msg' => 'Usuario actualizado con éxito.']);
-//            return response()->json(['msg'=> 'Usuario actualizado con éxito.'], 200);
-
-        }
     }
 
     public function getCoursesByUser(User $user)
