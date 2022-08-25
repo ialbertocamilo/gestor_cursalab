@@ -65,9 +65,15 @@
 
                         <div class="row">
                             <div class="logo-wrapper col-12 pt-3 pb-3">
+
+                                <!-- Logo -->
+
                                 <img v-bind:src="workspace.logo"
                                      class="logo"
                                      alt="">
+
+                                <!-- Edit button -->
+
                                 <div @click="editWorkspace(workspace.id)"
                                      v-if="isAdminInWorkspace(workspace.id)"
                                      class="edit-button">
@@ -75,6 +81,9 @@
                                         mdi-square-edit-outline
                                     </v-icon>
                                 </div>
+                            </div>
+                            <div class="col-12 text-center bg-white">
+                                <span>{{ workspace.name }}</span>
                             </div>
                             <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
                                 <v-icon class="icon" size="30px">mdi-sitemap</v-icon>
@@ -377,18 +386,20 @@ export default {
                 .then(({data}) => {
 
                     vue.userSession = data;
-                    vue.findAdminWorkspaces();
+                    vue.findConfigWorkspaces();
 
 
                 });
         }
         ,
         /**
-         * Find those workspaces the user has admin access to
+         * Find those workspaces the user has config access to
          */
-        findAdminWorkspaces() {
+        findConfigWorkspaces() {
 
             let vue = this;
+
+            if (!vue.userSession.user) return;
 
             // When user roles include admin (3)
             // allow configuration access
@@ -399,7 +410,7 @@ export default {
                     .user
                     .roles.forEach(r => {
 
-                    // Super users has access to all workspaces
+                    // Superusers has access to all workspaces
 
                     if (r.role_id === vue.superUserRoleId) {
                         vue.workspacesAdmin = vue.workspaces;
@@ -435,6 +446,9 @@ export default {
 
             let isAdmin = false;
             let vue = this;
+
+            if (!vue.userSession.user) return isAdmin;
+
             vue.userSession
                 .user
                 .roles.forEach(r => {
