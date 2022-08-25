@@ -44,6 +44,8 @@ class CriterionController extends Controller
     public function store(CriterionStoreRequest $request)
     {
         $data = $request->validated();
+        $workspace = get_current_workspace();
+        $data['workspace_id'] = $workspace?->id;
 
         Criterion::storeRequest($data);
 
@@ -53,6 +55,8 @@ class CriterionController extends Controller
     public function update(CriterionStoreRequest $request, Criterion $criterion)
     {
         $data = $request->validated();
+        $workspace = get_current_workspace();
+        $data['workspace_id'] = $workspace?->id;
 
 //        $validations = Criterion::validationsOnUpdate($criterion, $data);
 //

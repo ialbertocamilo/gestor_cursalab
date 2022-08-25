@@ -14,7 +14,7 @@ class CriterionValueController extends Controller
     {
         $request->merge(['criterion_id' => $criterion->id]);
         $current_workspace_id = get_current_workspace();
-        $request->merge(['workspace_id'=> $current_workspace_id]);
+        $request->merge(['workspace_id'=> $current_workspace_id?->id]);
 
         $criteria = CriterionValue::search($request);
 
@@ -36,7 +36,7 @@ class CriterionValueController extends Controller
     {
         $data = $request->validated();
         $current_workspace_id = get_current_workspace();
-        $data['workspace_id'] = $current_workspace_id;
+        $data['workspace_id'] = $current_workspace_id?->id;
 
         $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);;
         $data[$colum_name] = $data['name'];
@@ -60,7 +60,7 @@ class CriterionValueController extends Controller
     {
         $data = $request->validated();
         $current_workspace_id = get_current_workspace();
-        $data['workspace_id'] = $current_workspace_id;
+        $data['workspace_id'] = $current_workspace_id?->id;
 
         $colum_name = $criterion_value->getCriterionValueColumnName();;
         $data[$colum_name] = $data['name'];
