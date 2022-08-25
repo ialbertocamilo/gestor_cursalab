@@ -169,8 +169,9 @@ class RestQuizController extends Controller
             'tipo_evaluacion' => $topic->evaluation_type->code,
         ];
 
-        SummaryUser::setUserLastTimeEvaluation();
+        SummaryTopic::setUserLastTimeEvaluation($topic);
         SummaryCourse::setUserLastTimeEvaluation($topic->course);
+        SummaryUser::setUserLastTimeEvaluation();
         
         return response()->json(['error' => false, 'data' => $data], 200);
     }
@@ -183,24 +184,12 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::incrementUserAttempts($topic);
 
+        if (!$row) return ['error' => 1, 'data' => null];
+
         SummaryCourse::incrementUserAttempts($topic->course);
+        SummaryUser::incrementUserAttempts();
 
-        $res_general = SummaryUser::select('id', 'attempts')->where('user_id', $user_id)->first();
-        
-        if ($res_general) { // Actualiza
-            $suma_attempts = $res_general->attempts + 1;
-
-            SummaryUser::where('id', $res_general->id)->update(array('attempts' => $suma_attempts));
-        } else { // Inserta
-            $this->new_res_general($user_id);
-        }
-
-        if ($row)
-            $response = array('error' => 0, 'data' => $row->attempts);
-        else
-            $response = array('error' => 1, 'data' => null);
-
-        return $response;
+        return ['error' => 0, 'data' => $row->attempts];
     }
 
 }
