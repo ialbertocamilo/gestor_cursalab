@@ -1,9 +1,12 @@
 <template>
     <v-card elevation="0" class="mx-10">
         <v-card-title class="font-weight-bold">
-           Usuarios
+           Alta de usuarios (crear o actualizar)
         </v-card-title>
         <v-card-text class="ml-2">
+            <p>
+                Este proceso permite crear o actualizar usuarios usando como identificador el número de DNI.
+            </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
     </v-card>
@@ -16,11 +19,7 @@ export default {
     data() {
         return{
             api_description_options:{
-                title:'Actualizar/Crear usuarios',
-                subtitle:`El API toma como identificador de usuario el número de DNI,
-                en caso el DNI se encuentre dentro de nuestra base de datos actualizará la información,
-                caso contrario creará al usuario.<br>Para este API es necesario utilizar las apis de criterio 
-                y listado de valores para poder asignar los atributos de los usuarios`,
+                title:'Crear o actualizar usuarios',
                 type:'POST',
                 route:'/integrations/update_create_users',
                 parameters_type:[

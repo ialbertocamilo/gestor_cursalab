@@ -4,6 +4,11 @@
             Inactivar usuarios
         </v-card-title>
         <v-card-text class="ml-2">
+            <p>
+                Este proceso permite cambiar el estado de los usuarios a "inactivo". <br>
+                También aplica para la REVERSA DE ALTAS. <br>
+                Cuando se realiza este proceso se actualiza el dato "termination_date" con la fecha recibida en la colección.
+            </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
     </v-card>
@@ -16,8 +21,7 @@ export default {
     data() {
         return{
              api_description_options:{
-                title:'Inactivar Usuarios',
-                subtitle: '',
+                title:'Inactivar usuarios',
                 type:'POST',
                 route:'/integrations/inactivate_users',
                 parameters_type:[
