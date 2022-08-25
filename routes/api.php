@@ -42,7 +42,7 @@ Route::group(['prefix' => 'auth'], function () {
 
 });
 
-Route::group(['middleware' => 'auth:api'], function () {
+Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
