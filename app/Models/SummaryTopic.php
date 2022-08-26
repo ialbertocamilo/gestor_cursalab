@@ -6,6 +6,10 @@ class SummaryTopic extends Summary
 {
     protected $table = 'summary_topics';
 
+    protected $fillable = [
+        'last_time_evaluated_at', 'user_id', 'topic_id', 'views', 'attempts', 'downloads'
+    ];
+
     public function topic()
     {
         return $this->belongsTo(Topic::class);
