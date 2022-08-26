@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 use App\Models\SummaryCourse;
 use App\Models\Announcement;
+use App\Models\SummaryTopic;
 use App\Models\SummaryUser;
 use App\Models\Question;
 use App\Models\Topic;
@@ -213,7 +214,19 @@ class RestQuizController extends Controller
 
     public function contador_tema_reseteo(Topic $topic)
     {
-        
+        // $topic->load('course');
+
+        // $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
+
+        // $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
+
+        // $row = SummaryTopic::getCurrentRow($topic);
+
+        // if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft($attempts_limit))
+        // {
+
+        // }
+
     }
 
 }

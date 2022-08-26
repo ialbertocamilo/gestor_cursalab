@@ -57,10 +57,11 @@ class Summary extends BaseModel
         return $this->storeData($model, $user);
     }
 
-    protected function getCurrentRow($model, $user)
+    protected function getCurrentRow($model, $user = null)
     {
-        $query = self::select('id', 'attempts', 'views')
-                    ->where('user_id', $user->id);
+        $user = $user ?? auth()->user;
+
+        $query = self::where('user_id', $user->id);
         
         if ($model instanceof Topic)
             $query->where('topic_id', $model->id);

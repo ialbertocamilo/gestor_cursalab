@@ -42,4 +42,17 @@ class SummaryTopic extends Summary
             ]);
     }
 
+    public function hasFailed()
+    {
+        return ! $this->passed;
+    }
+
+    public function hasNoAttemptsLeft($attempts_limit = null)
+    {
+        $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
+
+        $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
+
+        $attempts_limit
+    }
 }
