@@ -59,7 +59,7 @@ class Summary extends BaseModel
 
     protected function getCurrentRow($model, $user)
     {
-        $query = self::select('id', 'attempts')
+        $query = self::select('id', 'attempts', 'views')
                     ->where('user_id', $user->id);
         
         if ($model instanceof Topic)
@@ -75,7 +75,7 @@ class Summary extends BaseModel
     {
         $user = $user ?? auth()->user;
 
-        $status = Taxonomy::getFirstData('', '', 'desarrollo');
+        // $source = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
 
         $data = self::create([
             'user_id' => $user->id,
@@ -84,19 +84,24 @@ class Summary extends BaseModel
             // 'last_time_evaluated_at' => now(),
             // 'fuente' => $fuente
             // 'libre' => $curso->libre,
-            'status_id' => $status->id,
         ]);
 
         if ($model instanceof Topic) {
-            
+
+            $status = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
+
             $data['topic_id'] = $model->id;
+            $data['status_id'] = $status->id;
             $data['downloads'] = 0;
         }
 
         if ($model instanceof Course) {
 
+            $status = Taxonomy::getFirstData('course', 'user-status', 'desarrollo');
             $assigneds = $model->topics->where('active', ACTIVE)->count();
+
             $data['course_id'] = $model->id;
+            $data['status_id'] = $status->id;
             $data['assigneds'] = $assigneds;
         }
 

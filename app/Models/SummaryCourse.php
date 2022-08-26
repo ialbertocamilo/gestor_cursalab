@@ -35,10 +35,4 @@ class SummaryCourse extends Summary
             ]);
     }
 
-    protected function incrementViews($course, $user = null)
-    {
-        $row = $this->getCurrentRow($course, $user);
-
-        
-    }
 }
