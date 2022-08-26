@@ -10,6 +10,7 @@ Route::controller(RestQuizController::class)->group(function() {
     Route::post('cargar_preguntas', 'cargar_preguntas');
     Route::post('evaluar_preguntas', 'evaluar_preguntas');
     Route::post('evaluar_abiertas', 'guardaEvaluacionAbierta');
+    Route::post('upd_reproducciones/{topic_id}', 'guarda_visitas_post');
     Route::get('eval_pendientes2/{user_id}/{cate_id}', 'evalPendientes2');
 
     Route::get('usuario_respuestas_eval/{user_id}/{post_id}', 'usuarioRespuestasEval');

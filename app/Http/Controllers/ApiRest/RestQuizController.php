@@ -198,4 +198,17 @@ class RestQuizController extends Controller
         return ['error' => 0, 'data' => $row->attempts];
     }
 
+    public function guarda_visitas_post(Topic $topic)
+    {
+        $topic->load('course.topics');
+
+        $row = SummaryTopic::incrementViews($topic);
+        
+        if (!$row) return ['error' => 1, 'data' => null];
+
+        SummaryCourse::incrementViews($topic->course);
+
+        return ['error' => 0, 'data' => $row->views];
+    }
+
 }

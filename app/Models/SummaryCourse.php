@@ -34,4 +34,11 @@ class SummaryCourse extends Summary
                 //'fuente' => 'resetm'
             ]);
     }
+
+    protected function incrementViews($course, $user = null)
+    {
+        $row = $this->getCurrentRow($course, $user);
+
+        
+    }
 }
