@@ -190,8 +190,6 @@ export default {
                     },
                 ],
             },
-            delete_model: null,
-            update_model: null,
             selects: {
                 modules: []
             },
@@ -200,6 +198,10 @@ export default {
                 // module: null,
                 // category: null
             },
+
+            delete_model: null,
+            update_model: null,
+
             modalCursoEncuesta: {
                 ref: 'CursoEncuestaModal',
                 open: false,
@@ -215,7 +217,7 @@ export default {
             },
 
             deleteConfirmationDialog: {
-                ref: 'EscuelaDeleteModal',
+                ref: 'CourseDeleteModal',
                 title: 'Eliminar Curso',
                 contentText: '¿Desea eliminar este registro?',
                 open: false,
@@ -240,6 +242,7 @@ export default {
 
             courseValidationModalDefault: {
                 ref: 'CourseListValidationModal',
+                action: null,
                 open: false,
                 base_endpoint: '',
                 hideConfirmBtn: false,
@@ -299,11 +302,8 @@ export default {
 
                     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
-                .catch(error => {
-                    if (error && error.errors)
-                        vue.errors = error.errors
-
-                    vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
+                .catch(async error => {
+                    await vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
         },
@@ -313,10 +313,14 @@ export default {
             vue.update_model = course
             vue.courseUpdateStatusModal.open = true
         },
-        confirmUpdateStatus(validateForm = true) {
+        async confirmUpdateStatus(validateForm = true) {
             let vue = this
             vue.courseUpdateStatusModal.open = false
             vue.showLoader()
+
+            if (validateForm)
+                vue.courseValidationModalUpdateStatus.action = null;
+
 
             if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
                 vue.hideLoader();
@@ -324,22 +328,18 @@ export default {
                 return;
             }
 
+
             let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
 
             vue.$http.put(url, bodyData)
                 .then(async ({data}) => {
                     vue.hideLoader()
-                    // if(!validateForm){
-                    //     vue.showAlert(data.data.msg)
-                    //     vue.courseValidationModalUpdateStatus.open = false;
-                    //     return;
-                    // }
-
                     const has_info_messages = data.data.messages.list.length > 0;
-                    if (has_info_messages) {
+
+                    if (has_info_messages)
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
-                    } else {
+                    else {
                         vue.showAlert(data.data.msg)
                         vue.courseValidationModalUpdateStatus.open = false;
                     }
@@ -347,9 +347,6 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(error => {
-                    if (error && error.errors)
-                        vue.errors = error.errors
-
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
