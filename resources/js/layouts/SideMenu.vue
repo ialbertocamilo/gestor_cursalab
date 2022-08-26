@@ -3,10 +3,17 @@
         <v-card-title
             @click="workspacesListIsVisible = !workspacesListIsVisible"
             class="title-logo-wrapper bg-white d-flex justify-content-center rounded-0">
-            <img v-if="userSession.session"
+            <img v-if="userSession.session && logoIsLoaded"
                  :src="userSession.session.workspace.logo"
                  :alt="userSession.session.workspace.name"
+                 @error="logoIsLoaded = false"
                  width="140">
+            <!-- Text to be shown when logo fails to load -->
+
+            <div v-if="!logoIsLoaded" style="width: 75%;">
+                {{ userSession.session.workspace.name }}
+            </div>
+
             <v-icon v-if="workspaces.length > 1"
                     class="caret">
                 {{ workspacesListIsVisible
@@ -63,6 +70,7 @@
                         dark
                         dense
                         :href="`${item.path}`"
+                        @click()
                         v-model="item.selected"
                         >
                             <v-list-item-icon >
@@ -80,6 +88,7 @@
 
 export default {
     data: () => ({
+        logoIsLoaded: true,
         workspacesListIsVisible: false,
         workspaces: [ ],
         userSession: { },
@@ -441,7 +450,8 @@ export default {
         this.loadSession();
     }
     ,
-    methods:{
+    methods: {
+
         verify_path(location,subpaths){
             return subpaths.find((e)=>{
                 let lt  = ((e.split('/')).length > 1 && location.length >1 ) ? (location[1]+'/'+location[2]) : location[1] ;
@@ -519,6 +529,12 @@ export default {
     /* height: 130px; */
     box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25);
     cursor: pointer;
+
+    line-height: 22px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
 }
 
 .title-logo-wrapper .caret {
