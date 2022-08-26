@@ -161,17 +161,23 @@ class RestQuizController extends Controller
         if ( count($questions) == 0 )
             return response()->json(['error' => true, 'data' => null], 200);
 
+        $row = SummaryTopic::setInitialData($topic);
+
         $data = [   
             'nombre' => $topic->name,
             'posteo_id' => $topic->id,
             'curso_id' => $topic->course_id,
             'preguntas' => $questions,
-            'tipo_evaluacion' => $topic->evaluation_type->code,
+            'tipo_evaluacion' => $topic->evaluation_type->code ?? NULL,
+            'attempt' => [
+                'started_at' => $row->current_quiz_started_at,
+                'finishes_at' => $row->current_quiz_started_at->addHour(),
+            ],
         ];
 
-        SummaryTopic::setUserLastTimeEvaluation($topic);
-        SummaryCourse::setUserLastTimeEvaluation($topic->course);
-        SummaryUser::setUserLastTimeEvaluation();
+        // SummaryTopic::setUserLastTimeEvaluation($topic);
+        // SummaryCourse::setUserLastTimeEvaluation($topic->course);
+        // SummaryUser::setUserLastTimeEvaluation();
         
         return response()->json(['error' => false, 'data' => $data], 200);
     }
@@ -190,6 +196,24 @@ class RestQuizController extends Controller
         SummaryUser::incrementUserAttempts();
 
         return ['error' => 0, 'data' => $row->attempts];
+    }
+
+    public function guarda_visitas_post(Topic $topic)
+    {
+        $topic->load('course.topics');
+
+        $row = SummaryTopic::incrementViews($topic);
+        
+        if (!$row) return ['error' => 1, 'data' => null];
+
+        SummaryCourse::incrementViews($topic->course);
+
+        return ['error' => 0, 'data' => $row->views];
+    }
+
+    public function contador_tema_reseteo(Topic $topic)
+    {
+        
     }
 
 }

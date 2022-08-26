@@ -397,8 +397,8 @@ Route::controller(UsuarioController::class)->group(function () {
         Route::get('index_reinicios', 'index_reinicios')->name('usuarios.index_reinicios');
         // ->middleware('permission:usuarios.index_reinicios');
         Route::get('reinicios_data', 'reinicios_data');
-        Route::get('buscarCursosxEscuela/{categoria_id}', 'buscarCursosxEscuela');
-        Route::get('buscarTemasxCurso/{curso_id}', 'buscarTemasxCurso');
+        Route::get('buscarCursosxEscuela/{school_id}', 'buscarCursosxEscuela');
+        Route::get('buscarTemasxCurso/{course_id}', 'buscarTemasxCurso');
         Route::post('validarReinicio', 'validarReinicioIntentos');
         Route::post('reiniciarIntentosMasivos', 'reiniciarIntentosMasivos');
     });

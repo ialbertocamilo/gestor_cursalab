@@ -27,7 +27,7 @@ class Summary extends BaseModel
 
         if ($row) {
 
-            if ( $model == 'topic' ) {
+            if ( $model instanceof Topic ) {
                 
                 $config_quiz = $user->subworspace->mod_evaluaciones;
 
@@ -46,15 +46,26 @@ class Summary extends BaseModel
         return $this->storeData($model, $user);
     }
 
+    protected function incrementViews($model, $user = null)
+    {
+        $user = $user ?? auth()->user;
+
+        $row = $this->getCurrentRow($model);
+
+        if ($row) return $row->update(['views' => $row->views + 1]);
+
+        return $this->storeData($model, $user);
+    }
+
     protected function getCurrentRow($model, $user)
     {
-        $query = self::select('id', 'attempts')
+        $query = self::select('id', 'attempts', 'views')
                     ->where('user_id', $user->id);
         
-        if ($model == 'topic')
+        if ($model instanceof Topic)
             $query->where('topic_id', $model->id);
 
-        if ($model == 'course')
+        if ($model instanceof Course)
             $query->where('course_id', $model->id);
         
         return $query->first();
@@ -64,27 +75,36 @@ class Summary extends BaseModel
     {
         $user = $user ?? auth()->user;
 
-        $status = Taxonomy::getFirstData('', '', 'desarrollo');
+        // $source = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
 
-        $row = self::create([
+        $data = self::create([
             'user_id' => $user->id,
-            'attempts' => 1,
-            'last_time_evaluated_at' => now(),
+            'attempts' => 0,
+            'views' => 1,
+            // 'last_time_evaluated_at' => now(),
             // 'fuente' => $fuente
             // 'libre' => $curso->libre,
-            'status_id' => $status->id,
         ]);
 
-        if ($model == 'topic')
-            $row['topic_id'] = $model->id;
+        if ($model instanceof Topic) {
 
-        if ($model == 'course') {
+            $status = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
 
-            $assigneds = $model->topics->where('active', ACTIVE)->count();
-            $row['course_id'] = $model->id;
-            $row['assigneds'] = $assigneds;
+            $data['topic_id'] = $model->id;
+            $data['status_id'] = $status->id;
+            $data['downloads'] = 0;
         }
 
-        return $row;
+        if ($model instanceof Course) {
+
+            $status = Taxonomy::getFirstData('course', 'user-status', 'desarrollo');
+            $assigneds = $model->topics->where('active', ACTIVE)->count();
+
+            $data['course_id'] = $model->id;
+            $data['status_id'] = $status->id;
+            $data['assigneds'] = $assigneds;
+        }
+
+        return self::create($data);
     }
 }

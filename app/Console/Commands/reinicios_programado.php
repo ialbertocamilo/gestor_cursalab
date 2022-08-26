@@ -47,57 +47,81 @@ class reinicios_programado extends Command
     {
        $this->reinicios_programado_v2();
     }
+
     private $ids_a_reiniciar = [];
+
     private function reinicios_programado_v2(){
+
         // $date_now = Date::now();
-        $modulos = Abconfig::select('id','mod_evaluaciones','reinicios_programado')->get();
-        $categorias = Categoria::select('id','config_id')->get();
-        $categorias_con_reinicios = Categoria::whereJsonContains('reinicios_programado->activado',true)->select('id','config_id','reinicios_programado')->get();
-        $cursos_con_reinicios = Curso::whereJsonContains('reinicios_programado->activado',true)->select('id','config_id','reinicios_programado')->get();
-        if(count($modulos)>0){
+        $modulos = Abconfig::select('id','mod_evaluaciones','reinicios_programado')
+                            ->get();
+        $categorias = Categoria::select('id', 'config_id')->get();
+
+        $categorias_con_reinicios = Categoria::query()
+            ->whereJsonContains('reinicios_programado->activado',true)
+            ->select('id','config_id','reinicios_programado')
+            ->get();
+
+        $cursos_con_reinicios = Curso::query()
+            ->whereJsonContains('reinicios_programado->activado',true)
+            ->select('id','config_id','reinicios_programado')
+            ->get();
+
+        if (count($modulos) > 0) {
+
             foreach ($modulos as $modulo) {
+
                 $mod_eval = json_decode($modulo->mod_evaluaciones, true);
-                //Desaprobados del módulo
+
+                // Desaprobados del módulo
+
                 $desaprobados = Prueba::whereIn('categoria_id',$categorias->where('config_id',$modulo->id)->pluck('id'))
                     ->where('intentos',$mod_eval['nro_intentos'])->where('resultado',0)
                     ->select('id','categoria_id','curso_id','usuario_id','posteo_id','last_ev')->get();
                 $r_cursos_modulo = $cursos_con_reinicios->where('config_id',$modulo->id); //Cursos con reinicio del modulo
                 $r_categorias_modulo = $categorias_con_reinicios->where('config_id',$modulo->id); //categorias con reinicio del modulo
-                //Reinicio por curso
+
+                // Reinicio por curso
+
                 $reinicios_x_curso = $desaprobados->whereIn('curso_id',$r_cursos_modulo->pluck('id'))->groupBy('curso_id');
                 foreach ($reinicios_x_curso as $curso_id => $r_curso) {
                     $curso =$r_cursos_modulo->where('id',$curso_id)->first();
                     $programado = json_decode($curso->reinicios_programado,true);
                     $this->reiniciar_prueba($programado,$r_curso);
                 }
-                //Reinicio por categoria
+
+                // Reinicio por categoria
+
                 $reinicios_x_categoria = $desaprobados->whereNotIn('curso_id',$r_cursos_modulo->pluck('id'))
                                         ->whereIn('categoria_id',$r_categorias_modulo->pluck('id'))
                                         ->groupBy('categoria_id');
                 foreach ($reinicios_x_categoria as $categoria_id => $r_categoria) {
                     $categoria = $r_categorias_modulo->where('id',$categoria_id)->first();
-                    // dd($categoria);
                     $programado = json_decode($categoria->reinicios_programado,true);
                     $this->reiniciar_prueba($programado,$r_categoria);
                 }
-                //Reinicio por modulo
-                if(($modulo->reinicios_programado) && json_decode($modulo->reinicios_programado)){
+
+                // Reinicio por modulo
+
+                if (($modulo->reinicios_programado) && json_decode($modulo->reinicios_programado)){
                     $reinicios_x_modulo = $desaprobados->whereNotIn('curso_id',$r_cursos_modulo->pluck('id'))
                                             ->whereNotIn('categoria_id',$r_categorias_modulo->pluck('id'));
                     $programado = json_decode($modulo->reinicios_programado,true);
-                    if($programado['activado']){
+
+                    if ($programado['activado']) {
                         $this->reiniciar_prueba($programado,$reinicios_x_modulo);
                     }
                 }
-
             }
         }
+
         Prueba::whereIn('id',$this->ids_a_reiniciar)->update([
             'intentos' => 0,
             'fuente' => 'reset'
         ]);
     }
     private function reiniciar_prueba($programado,$pruebas){
+
         $tiempo_en_minutos = $programado['tiempo_en_minutos'];
         $final = Carbon::now()->subMinutes($tiempo_en_minutos);
         $final->second = 59;
@@ -109,7 +133,7 @@ class reinicios_programado extends Command
         // ->whereBetween('last_ev',[$inicio,$final])->get();
         // ->whereDate('last_ev','>=',$inicio)->whereDate('last_ev','<=',$final)->get();
         //PONER ESTADO EN DESARROLLO
-        if(count($pr_a_reiniciar)>0){
+        if (count($pr_a_reiniciar)>0) {
             foreach ($pr_a_reiniciar as $pr) {
                 $reinicio = new Reinicio();
                 $reinicio->save_reset_user($pr,0,'por_tema');

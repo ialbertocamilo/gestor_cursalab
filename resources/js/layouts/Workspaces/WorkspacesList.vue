@@ -18,7 +18,12 @@
                         <v-icon class="icon">mdi-account</v-icon>
                         {{ userSession.user.fullname }}
                     </button>
-                   <v-icon class="stats-icon">mdi-logout</v-icon>
+
+                    <a @click="logout()">
+                        <v-icon class="stats-icon">mdi-logout</v-icon>
+                    </a>
+
+
                 </div>
             </div>
         </v-row>
@@ -550,6 +555,15 @@ export default {
                         window.location.href = '/welcome';
                     }
                 });
+        }
+        ,
+        logout() {
+
+            this.$http
+                .post('/logout')
+                .then(() => {
+                    window.location.href = '/login';
+                })
         }
     }
 }
