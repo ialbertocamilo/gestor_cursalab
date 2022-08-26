@@ -55,7 +55,6 @@ class SummaryTopic extends Summary
             $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
         }
 
-        // return 
-        // $attempts_limit
+        return $row->attempts >= $attempts_limit; 
     }
 }

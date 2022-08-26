@@ -222,10 +222,10 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::getCurrentRow($topic);
 
-        // if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft($attempts_limit))
-        // {
+        if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft($attempts_limit))
+        {
 
-        // }
+        }
 
     }
 

@@ -6,7 +6,7 @@ class Summary extends BaseModel
 {
     protected function setUserLastTimeEvaluation($model, $user = NULL)
     {
-        $user = $user ?? auth()->user;
+        $user = $user ?? auth()->user();
 
         $query = self::where('user_id', $user->id);
 
@@ -21,7 +21,7 @@ class Summary extends BaseModel
 
     protected function incrementUserAttempts($model, $setEvaluatedAt = true, $user = null)
     {
-        $user = $user ?? auth()->user;
+        $user = $user ?? auth()->user();
 
         $row = $this->getCurrentRow($model, $user);
 
@@ -48,7 +48,7 @@ class Summary extends BaseModel
 
     protected function incrementViews($model, $user = null)
     {
-        $user = $user ?? auth()->user;
+        $user = $user ?? auth()->user();
 
         $row = $this->getCurrentRow($model);
 
@@ -59,7 +59,7 @@ class Summary extends BaseModel
 
     protected function getCurrentRow($model, $user = null)
     {
-        $user = $user ?? auth()->user;
+        $user = $user ?? auth()->user();
 
         $query = self::where('user_id', $user->id);
         
@@ -74,7 +74,7 @@ class Summary extends BaseModel
 
     protected function storeData($model, $user = null)
     {
-        $user = $user ?? auth()->user;
+        $user = $user ?? auth()->user();
 
         // $source = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
 
