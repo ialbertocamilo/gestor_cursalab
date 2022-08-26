@@ -24,4 +24,14 @@ class SummaryCourse extends Summary
     {
         return $this->belongsTo(Taxonomy::class, 'status_id');
     }
+
+    public static function resetMasiveAttempts($coursesIds, $userId)
+    {
+        self::whereIn('course_id', $coursesIds)
+            ->where('user_id', $userId)
+            ->update([
+                'attempts' => 0,
+                //'fuente' => 'resetm'
+            ]);
+    }
 }

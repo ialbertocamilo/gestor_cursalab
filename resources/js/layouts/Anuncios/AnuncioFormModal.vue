@@ -287,10 +287,48 @@ export default {
 
             let valid = true;
             let errors = [];
+            let formData = this.getMultipartFormData(
+                '', this.resource, fields, file_fields
+            );
+
+            // Validation: At least one module should be selected
 
             if (this.resource.module_ids.length === 0) {
                 errors.push({
                     message: 'No hay ningún módulo seleccionado'
+                })
+                valid = false;
+            }
+
+            // Validation: imagen has been set or not,
+            // from file or from gallery
+
+            if (!formData.get('file_imagen') && !this.resource.imagen) {
+                errors.push({
+                    message: 'No ha seleccionado ninguna imágen'
+                })
+                valid = false;
+            }
+
+            // Validation: When a link has been set,
+            // check whether is valid or not
+
+            if (this.resource.link) {
+
+                if (!this.isValidHttpUrl(this.resource.link)) {
+                    errors.push({
+                        message: 'El link no es una URL válida'
+                    })
+                    valid = false;
+                }
+            }
+
+            // Validation: contenido is required
+
+            if (!this.resource.contenido) {
+
+                errors.push({
+                    message: 'El contenido es requerido'
                 })
                 valid = false;
             }
@@ -300,6 +338,18 @@ export default {
             }
 
             return valid;
+        }
+        ,
+        isValidHttpUrl(string) {
+            let url;
+
+            try {
+                url = new URL(string);
+            } catch (_) {
+                return false;
+            }
+
+            return url.protocol === "http:" || url.protocol === "https:";
         }
         ,
         loadSelects() {

@@ -28,4 +28,14 @@ class SummaryTopic extends Summary
         return SummaryTopic::create($data);
     }
 
+    public static function resetMasiveAttempts($topicsIds, $userId)
+    {
+        self::whereIn('topic_id', $topicsIds)
+            ->where('user_id', $userId)
+            ->update([
+                'attempts' => 0,
+                //'fuente' => 'resetm'
+            ]);
+    }
+
 }

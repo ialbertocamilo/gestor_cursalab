@@ -95,6 +95,7 @@ export default {
                     {text: "Banner", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre"},
                     {text: "Fecha de publicación", value: "publish_date", align: 'center', sortable: false},
+                    {text: "Venció", value: "expired", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [

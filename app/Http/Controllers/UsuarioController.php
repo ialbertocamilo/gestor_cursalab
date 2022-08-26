@@ -13,6 +13,7 @@ use App\Models\Cargo;
 use App\Models\Carrera;
 use App\Models\Categoria;
 use App\Models\Ciclo;
+use App\Models\Course;
 use App\Models\Criterio;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
@@ -25,6 +26,9 @@ use App\Models\Prueba;
 use App\Models\Reinicio;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
+use App\Models\School;
+use App\Models\SummaryCourse;
+use App\Models\SummaryTopic;
 use App\Models\User;
 use App\Models\Usuario;
 use App\Models\Workspace;
@@ -114,7 +118,7 @@ class UsuarioController extends Controller
             $user_criterion_value = $criterion->multiple ?
                 $value->pluck('id') : $value?->first()?->id;
 
-            $user_criteria[$criterion->code] =  $user_criterion_value;
+            $user_criteria[$criterion->code] = $user_criterion_value;
         }
 
 
@@ -135,7 +139,6 @@ class UsuarioController extends Controller
 //            }
 //        }
         $user->criterion_list = $user_criteria;
-
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
@@ -151,7 +154,7 @@ class UsuarioController extends Controller
                 'values' => function ($q) use ($current_workspace) {
                     $q->with('parents:id,criterion_id,value_text')
                         ->whereHas('workspaces', function ($q2) use ($current_workspace) {
-                            $q2->where('id', $current_workspace?->id);
+                            $q2->where('id', $current_workspace->id);
                         })
                         ->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
                             'value_text');
@@ -373,9 +376,168 @@ class UsuarioController extends Controller
         return $this->success(['msg' => 'Reinicio total exitoso']);
     }
 
+    public function crear(Request $request)
+    {
+        // return $request->all();
+//        info($request->all());
+        if ($request->usuario['id'] == 0) {
+
+            $already_exist = Usuario::where('dni', trim($request->usuario['dni']))->first();
+
+            if ($already_exist)
+                return response()->json(['error' => true, 'msg' => 'El DNI ya ha sido registrado.'], 422);
+
+            $modulo = Abconfig::findOrFail($request->usuario['modulo']['id']);
+
+            $codigo = $modulo->codigo_matricula . '-' . date('dmy');
+            $grupo_sistema = Grupo::firstOrCreate(['nombre' => $codigo, 'estado' => 1]);
+
+            // CREAR
+            $nuevo_usuario = new Usuario();
+            $nuevo_usuario->config_id = $request->usuario['modulo']['id'];
+            $nuevo_usuario->nombre = $request->usuario['nombre'];
+            $nuevo_usuario->grupo_id = $grupo_sistema->id;
+            // $nuevo_usuario->grupo_id = $request->usuario['grupo_sistema'];
+//            $nuevo_usuario->botica_id =  $request->usuario['botica_id'];
+            $nuevo_usuario->botica_id = $request->usuario['botica']['id'];
+//            $botica = Botica::with('criterio')->where('id', $request->usuario['botica_id'])->first();
+            $botica = Botica::with('criterio')->where('id', $request->usuario['botica']['id'])->first();
+            $nuevo_usuario->botica = $botica->nombre;
+            $nuevo_usuario->grupo = $botica->criterio_id;
+            $nuevo_usuario->grupo_nombre = $botica->criterio->valor;
+            $nuevo_usuario->dni = $request->usuario['dni'];
+            $nuevo_usuario->password = Hash::make($request->usuario['password']);
+            $nuevo_usuario->sexo = $request->usuario['sexo'] == 'M' ? 'MASCULINO' : 'FEMENINO';
+            $nuevo_usuario->cargo = $request->usuario['cargo'];
+
+            $nuevo_usuario->estado = $request->usuario['estado'];
+            $nuevo_usuario->save();
+
+            // //Consultar dias de configuracion
+            // $dias = $nuevo_usuario->config->duracion_dias;
+            // date_default_timezone_set('America/Lima');
+            // //insertar vigencia
+            // $vigencia = new Usuario_vigencia;
+            // $vigencia->usuario_id = $nuevo_usuario->id;
+            // $vigencia->fecha_inicio = date('Y-m-d');
+            // $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio. ' + '.$dias.' days'));
+            // $vigencia->save();
+
+            // ENCONTRAR EL ULTIMO CICLO ACTIVO
+            $ciclos = $request->ciclos;
+            $_ciclos = collect($request->ciclos);
+            $ciclos_activos = $_ciclos->where('estado', true);
+            $ultimo_ciclo_activo = $ciclos_activos->last();
+
+            foreach ($ciclos as $ciclo) {
+                $matricula = new Matricula;
+                $matricula->usuario_id = $nuevo_usuario->id;
+                $matricula->carrera_id = $request->carrera_id;
+                $matricula->ciclo_id = $ciclo['id'];
+                $matricula->secuencia_ciclo = $ciclo['secuencia'];
+                $matricula->presente = ($ultimo_ciclo_activo['id'] == $ciclo['id']) ? 1 : 0;
+                if (count($ciclos_activos) == 1 && $ciclo['estado'] == true) {
+                    $matricula->estado = 1;
+                } else if ($ciclo['secuencia'] == 0) {
+                    $matricula->estado = 0;
+                } else {
+                    $matricula->estado = $ciclo['estado'] ? 1 : 0;
+                }
+                $matricula->save();
+                DB::table('matricula_criterio')->insert([
+                    'matricula_id' => $matricula->id,
+                    'criterio_id' => $request->grupo
+                ]);
+            }
+            $hel = new HelperController();
+            Resumen_general::insert([
+                'usuario_id' => $nuevo_usuario->id,
+                'cur_asignados' => count($hel->help_cursos_x_matricula($nuevo_usuario->id)),
+            ]);
+            return $this->success(['msg' => 'Usuario creado con éxito.']);
+//            return response()->json(['msg'=> 'Usuario creado con éxito.'], 200);
+        } else {
+            // return $request->all();
+            // EDITAR
+            $usuario_editar = Usuario::find($request->usuario['id']);
+//            $usuario_editar->config_id = $request->usuario['modulo'];
+            $usuario_editar->nombre = $request->usuario['nombre'];
+            // $usuario_editar->grupo_id = $request->usuario['grupo_sistema'];
+            if ($usuario_editar->dni !== trim($request->usuario['dni'])) {
+                $already_exist = Usuario::where('dni', trim($request->usuario['dni']))->first();
+
+                if ($already_exist)
+                    return response()->json(['msg' => 'El DNI ya ha sido registrado.'], 422);
+
+                $usuario_editar->dni = trim($request->usuario['dni']);
+            }
+
+            if (isset($request->usuario['password']) and $request->usuario['password'] != "") {
+                $usuario_editar->password = Hash::make($request->usuario['password']);
+            }
+
+            $usuario_editar->sexo = $request->usuario['sexo'] == 'M' ? 'MASCULINO' : 'FEMENINO';
+            $usuario_editar->cargo = $request->usuario['cargo'];
+            $usuario_editar->estado = $request->usuario['estado'];
+//            $usuario_editar->botica_id =  $request->usuario['botica_id'];
+            $usuario_editar->botica_id = $request->usuario['botica']['id'];
+//            $botica = Botica::with('criterio')->where('id', $request->usuario['botica_id'])->first();
+            $botica = Botica::with('criterio')->where('id', $request->usuario['botica']['id'])->first();
+            $usuario_editar->botica = $botica->nombre;
+            $usuario_editar->grupo = $botica->criterio_id;
+            $usuario_editar->grupo_nombre = $botica->criterio->valor;
+            $usuario_editar->save();
+            // //Consultar dias de configuracion
+            // $dias = $usuario_editar->config->duracion_dias;
+            // date_default_timezone_set('America/Lima');
+            // //insertar vigencia
+            // $vigencia = $usuario_editar->vigencia;
+            // $vigencia->usuario_id = $usuario_editar->id;
+            // $vigencia->fecha_inicio = date('Y-m-d');
+            // $vigencia->fecha_fin = date('Y-m-d', strtotime($vigencia->fecha_inicio. ' + '.$dias.' days'));
+            // $vigencia->save();
+
+            // ENCONTRAR EL ULTIMO CICLO ACTIVO
+            $ciclos = $request->ciclos;
+            $_ciclos = collect($request->ciclos);
+            $ciclos_activos = $_ciclos->where('estado', true);
+            $ultimo_ciclo_activo = $ciclos_activos->last();
+
+            foreach ($ciclos as $ciclo) {
+                $matricula = Matricula::find($ciclo['matricula_id']);
+                $matricula->presente = ($ultimo_ciclo_activo['id'] == $ciclo['id']) ? 1 : 0;
+                if (count($ciclos_activos) == 1 && $ciclo['estado'] == true) {
+                    $matricula->estado = 1;
+                } else if ($ciclo['secuencia'] == 0) {
+                    $matricula->estado = 0;
+                } else {
+                    $matricula->estado = $ciclo['estado'] ? 1 : 0;
+                }
+                $matricula->save();
+            }
+            $helper = new HelperController();
+            $curso_ids_matricula = $helper->help_cursos_x_matricula($usuario_editar->id);
+            //LIMPIAR TABLAS RESUMENES
+            Resumen_x_curso::where('usuario_id', $usuario_editar->id)->whereNotIn('curso_id', $curso_ids_matricula)->update(['estado_rxc' => 0]);
+            // Resumen_general::where('usuario_id',$usuario_editar->id)->delete();
+            //ACTUALIZAR TABLAS RESUMENES
+            $rest_avance = new RestAvanceController();
+            $ab_conf = Abconfig::select('mod_evaluaciones')->where('id', $request->usuario['modulo'])->first(['mod_evaluaciones']);
+            $mod_eval = json_decode($ab_conf->mod_evaluaciones, true);
+            foreach ($curso_ids_matricula as $cur_id) {
+                // ACTUALIZAR RESUMENES
+                $rest_avance->actualizar_resumen_x_curso($usuario_editar->id, $cur_id, $mod_eval['nro_intentos']);
+            }
+            $rest_avance->actualizar_resumen_general($usuario_editar->id);
+            return $this->success(['msg' => 'Usuario actualizado con éxito.']);
+//            return response()->json(['msg'=> 'Usuario actualizado con éxito.'], 200);
+
+        }
+    }
+
     public function getCoursesByUser(User $user)
     {
-//        $user->getCurrentCourses();
+        $user->setCurrentCourses();
 
         return $this->success(compact('user'));
     }
@@ -397,7 +559,12 @@ class UsuarioController extends Controller
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 
-    //**************************************************** REINICIO MASIVOS DE NOTAS POR CURSO ********************************************************/
+    /*
+
+        REINICIO MASIVOS DE NOTAS POR CURSO
+
+     =========================================================================*/
+
     public function index_reinicios()
     {
         return view('masivo.index_reinicios');
@@ -405,148 +572,275 @@ class UsuarioController extends Controller
 
     public function reinicios_data()
     {
-        $modulos = Abconfig::where('estado', 1)->get();
-        $categorias = Categoria::where('estado', 1)->get();
-        return response()->json(compact('modulos', 'categorias'), 200);
+        // Get workspace saved in session
+
+        $session = session()->all();
+        $workspace = $session['workspace'];
+
+        // Load modules
+
+        $modules = Workspace::where('parent_id', $workspace->id)
+            ->select('id', 'name')
+            ->get();
+
+        // Load workspace's schools
+
+        $schools = School::whereHas('workspaces', function ($q) use ($workspace) {
+            $q->where('workspace_id', $workspace->id);
+        })->get();
+
+        return response()->json(compact( 'schools', 'modules'), 200);
     }
 
-    public function buscarCursosxEscuela($categoria_id)
+    public function buscarCursosxEscuela($school_id)
     {
-        $cursos = Curso::where('categoria_id', $categoria_id)->where('estado', 1)->get();
+        $cursos = Curso::join('course_school', 'course_school.course_id', '=', 'courses.id')
+            ->where('course_school.school_id', $school_id)
+            ->where('courses.active', ACTIVE)
+            ->select('courses.*')
+            ->get();
+
         return response()->json(compact('cursos'), 200);
     }
 
-    public function buscarTemasxCurso($curso_id)
+    public function buscarTemasxCurso($course_id)
     {
-        $posteos = Posteo::where('curso_id', $curso_id)->where('estado', 1)->get();
+        $posteos = Posteo::where('course_id', $course_id)
+            ->get();
+
         return response()->json(compact('posteos'), 200);
     }
 
     public function validarReinicioIntentos(Request $request)
     {
+
         $tipo = $request->tipo; // TODOS o SOLO DESAPROBADOS
         $admin = $request->admin;
-        $config = Abconfig::select('mod_evaluaciones')->where('id', $request->modulo)->first();
-        $mod_eval = json_decode($config->mod_evaluaciones, true);
-        $data = $this->validarDetallesReinicioIntentosMasivo($request->curso, $request->tema, $request->modulo, $tipo, $mod_eval, $admin['id']);
+        $curso = $request->curso;
+        $tema = $request->tema;
+        $subworkspaceId = $request->modulo;
+
+        // Load workspace configuration
+
+        $config = Workspace::select('mod_evaluaciones')
+            ->where('id', $subworkspaceId)
+            ->first();
+
+        if (is_array($config->mod_evaluaciones)) {
+            $mod_eval = $config->mod_evaluacione;
+        } else {
+            $mod_eval = json_decode($config->mod_evaluaciones, true);
+        }
+
+        $data = $this->validarDetallesReinicioIntentosMasivo(
+            $curso, $tema, $subworkspaceId, $tipo, $mod_eval
+        );
+
         return response()->json([
             'data' => $data,
             'mod_eval' => $mod_eval
         ], 200);
     }
 
-    public function validarDetallesReinicioIntentosMasivo($curso_id, $posteo_id, $modulo_id, $tipo, $mod_eval, $admin_id)
+    public function validarDetallesReinicioIntentosMasivo(
+        $courseId, $topicId, $subworkspaceId, $tipo, $mod_eval
+    ): array
     {
-        $query_usuarios = Prueba::with('usuario')
-            ->where('pruebas.fuente');
 
-        if ($posteo_id == null) $query_usuarios->where('pruebas.curso_id', $curso_id); // Por Curso
-        else $query_usuarios->where('pruebas.posteo_id', $posteo_id); // Por Tema
+        if ($topicId == null) {
 
-        if ($tipo['id'] == 1) { // Solo desaprobados
-            $query_usuarios->where('pruebas.resultado', 0)
-                ->where('pruebas.intentos', '>=', $mod_eval['nro_intentos']);
+            $usersQuery = SummaryCourse::query()
+                ->join('users', 'users.id', '=', 'summary_courses.user_id')
+                ->with('user')
+                ->where('summary_courses.course_id', $courseId)
+                ->where('users.subworkspace_id', $subworkspaceId)
+                ->select('summary_courses.*');
+
+            // "Desaprobados" only
+
+            if ($tipo['id'] == 1) {
+                $usersQuery->where('summary_courses.passed', 0)
+                    ->where('summary_courses.attempts', '>=', $mod_eval['nro_intentos']);
+            }
+
+            $users = $usersQuery->orderBy('summary_courses.grade_average')->get();
+
+        } else {
+
+            $usersQuery = SummaryTopic::query()
+                ->with('user')
+                ->where('summary_topics.topic_id', $topicId)
+                ->where('summary_topics.source_id')
+                ->whereHas('user', function($q) use ($subworkspaceId) {
+                    $q->subworkspace_id = $subworkspaceId;
+                });
+
+            // "Desaprobados" only
+
+            if ($tipo['id'] == 1) {
+                $usersQuery->where('summary_topics.passed', 0)
+                    ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos']);
+            }
+
+            $users = $usersQuery->orderBy('summary_topics.grade')->get();
         }
 
-        $usuarios = $query_usuarios->orderBy('pruebas.nota')->get();
+        // Add "selected" property to each item
 
-        foreach ($usuarios as $key => $usuario) {
-            $usuario->selected = false;
+        foreach ($users as $key => $user) {
+            $user->selected = false;
         }
+
         return [
-            'pruebas' => $usuarios,
-            'count_usuarios' => $usuarios->count()
+            'pruebas' => $users,
+            'count_usuarios' => $users->count()
         ];
     }
 
     public function reiniciarIntentosMasivos(Request $request)
     {
+
         $admin = $request->admin;
-        $config = Abconfig::select('mod_evaluaciones')->where('id', $request->modulo)->first();
-        $mod_eval = json_decode($config->mod_evaluaciones, true);
-        $usuarios = $request->usuarios;
-        $count_usuarios = count($usuarios);
-        if ($request->tema == null) {
-            $curso = Curso::where('id', $request->curso)->first();
-            $data = $this->reinicioMasivoxCurso($request->curso, $request->modulo, $mod_eval, $admin['id'], $usuarios);
-            $msg = "Se reiniciaron los intentos de " . $count_usuarios . " usuario(s) para el curso $curso->nombre.";
+        $subworkspaceId = $request->modulo;
+        $users = $request->usuarios;
+        $usersCount = count($users);
+        $topicId = $request->tema;
+        $courseId = $request->curso;
+
+        // Load workspace's "evaluaciones" configuration
+
+        $config = Workspace::select('mod_evaluaciones')
+            ->where('id', $subworkspaceId)
+            ->first();
+
+        if (is_array($config->mod_evaluaciones)) {
+            $mod_eval = $config->mod_evaluacione;
         } else {
-            $tema = Posteo::where('id', $request->tema)->first();
-            $data = $this->reinicioMasivoxTema($request->tema, $request->curso, $request->modulo, $mod_eval, $admin['id'], $usuarios);
-            $msg = "Se reiniciaron los intentos de " . $count_usuarios . " usuario(s) para el tema $tema->nombre.";
+            $mod_eval = json_decode($config->mod_evaluaciones, true);
         }
+
+        if ($topicId == null) {
+
+            $curso = Curso::where('id', $courseId)->first();
+            $this->reinicioMasivoxCurso(
+                $courseId, $subworkspaceId, $mod_eval, $admin['id'], $users
+            );
+            $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el curso $curso->name.";
+
+        } else {
+
+            $topic = Posteo::where('id', $topicId)->first();
+            $this->reinicioMasivoxTema(
+                $topicId, $courseId, $subworkspaceId, $mod_eval, $admin['id'], $users
+            );
+            $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el tema $topic->name.";
+        }
+
         return response()->json([
-            'data' => $data,
+            'data' => [],
             'mod_eval' => $mod_eval,
             'msg' => $msg
         ], 200);
     }
 
-    public function reinicioMasivoxCurso($curso_id, $modulo_id, $mod_eval, $admin_id, $usuarios)
+    /**
+     * Reset attempts by course
+     * @return void
+     */
+    public function reinicioMasivoxCurso(
+        $courseId, $subworkspaceId, $mod_eval, $adminId, $users
+    )
     {
-        // $rest = new RestAvanceController;
-        foreach ($usuarios as $key => $usuario) {
-            $usuario_id = $usuario['usuario']['id'];
-            $posteosIds = Prueba::join('posteos', 'posteos.id', 'pruebas.posteo_id')
-                ->join('cursos', 'cursos.id', 'posteos.curso_id')
-                ->where('pruebas.usuario_id', $usuario_id)
-                ->where('cursos.id', $curso_id)
-                ->pluck('pruebas.posteo_id');
-            $prueba_reinicio = Prueba::reinicioIntentosMasivos($posteosIds, $usuario_id);
-            // $visita          = Visita::where('usuario_id', $usuario_id)
-            //                         ->whereIn('post_id', $posteosIds)
-            //                         ->update([
-            //                                 'tipo_tema' => "",
-            //                                 'estado_tema' => ""
-            //                             ]);
 
-            // $rest->actualizar_resumen_x_curso($usuario_id, $curso_id, (int) $mod_eval['nro_intentos']);
-            // $rest->actualizar_resumen_general($usuario_id);
-            $reinicio = $this->actualizarReiniciosxReinicioIntentosMasivo('por_curso', $curso_id, $usuario_id, $admin_id);
+        foreach ($users as $key => $user) {
+
+            $userId = $user['user']['id'];
+
+            /**
+            $topicsIds = SummaryTopic::query()
+            ->join('topics', 'topics.id', 'summary_topics.topic_id')
+            ->join('courses', 'courses.id', 'topics.course_id')
+            ->where('summary_topics.user_id', $userId)
+            ->where('courses.id', $courseId)
+            ->pluck('summary_topics.topic_id');
+
+            SummaryTopic::resetMasiveAttempts(
+            $topicsIds, $userId
+            );
+             */
+            SummaryCourse::resetMasiveAttempts([$courseId], $userId);
+            $this->updateRestartsCount(
+                'por_curso', $courseId, $userId, $adminId
+            );
         }
     }
 
-    public function reinicioMasivoxTema($posteo_id, $curso_id, $modulo_id, $mod_eval, $admin_id, $usuarios)
+    public function reinicioMasivoxTema(
+        $topicId, $courseId, $subworkspaceId, $mod_eval, $adminId, $users
+    )
     {
-        // $rest = new RestAvanceController;
-        foreach ($usuarios as $key => $usuario) {
-            $usuario_id = $usuario['usuario']['id'];
-            $prueba_reinicio = Prueba::reinicioIntentosMasivos([$posteo_id], $usuario_id);
-            // $visita          = Visita::where('usuario_id', $usuario_id)
-            //                         ->where('post_id', $posteo_id)
-            //                         ->update([
-            //                                 'tipo_tema' => "",
-            //                                 'estado_tema' => ""
-            //                             ]);
+        foreach ($users as $key => $user) {
 
-            // $rest->actualizar_resumen_x_curso($usuario_id, $curso_id, (int) $mod_eval['nro_intentos']);
-            // $rest->actualizar_resumen_general($usuario_id);
-            $reinicio = $this->actualizarReiniciosxReinicioIntentosMasivo('por_tema', $posteo_id, $usuario_id, $admin_id);
+            $userId = $user['user']['id'];
+            SummaryTopic::resetMasiveAttempts([$topicId], $userId);
+            $this->updateRestartsCount(
+                'por_tema', $topicId, $userId, $adminId
+            );
         }
     }
 
-    public function actualizarReiniciosxReinicioIntentosMasivo($tipo, $recurso_id, $usuario_id, $admin_id)
+    /**
+     * Update topics and courses restarts count
+     *
+     * @param $type
+     * @param $resourceId
+     * @param $userId
+     * @param $adminId
+     * @return void
+     */
+    public function updateRestartsCount(
+        $type, $resourceId, $userId, $adminId
+    ): void
     {
-        switch ($tipo) {
-            case 'por_tema':
-                $reinicio = Reinicio::where('usuario_id', $usuario_id)->where('posteo_id', $recurso_id)->first();
-                break;
-            case 'por_curso':
-                $reinicio = Reinicio::where('usuario_id', $usuario_id)->where('curso_id', $recurso_id)->first();
-                break;
+
+        if ($type === 'por_tema') {
+
+            $summaryTopic = SummaryTopic::where('topic_id', $resourceId)
+                ->where('user_id', $userId)
+                ->first();
+
+            // Calculate number of restars
+
+            $restarts = $summaryTopic->restarts
+                ? $summaryTopic->restarts + 1
+                : 1;
+
+            // Update record
+
+            $summaryTopic->restarts =  $restarts;
+            $summaryTopic->restarter_id = $adminId;
+            $summaryTopic->save();
         }
-        if (!$reinicio) {
-            $reinicio = new Reinicio;
-            $reinicio->tipo = $tipo;
-            $reinicio->usuario_id = $usuario_id;
-            if ($tipo == 'por_tema') $reinicio->posteo_id = $recurso_id;
-            else if ($tipo == 'por_curso') $reinicio->curso_id = $recurso_id;
-            $reinicio->admin_id = $admin_id;
-            $reinicio->acumulado = 1;
-        } else {
-            $reinicio->acumulado = $reinicio->acumulado + 1;
+
+        if ($type === 'por_curso') {
+
+            $summaryCourse = SummaryCourse::where('course_id', $resourceId)
+                ->where('user_id', $userId)
+                ->first();
+
+            // Calculate number of restars
+
+            $restars = $summaryCourse->restarts
+                ? $summaryCourse->restarts + 1
+                : 1;
+
+            // Update record
+
+            $summaryCourse->restarts =  $restars;
+            $summaryCourse->restarter_id = $adminId;
+            $summaryCourse->save();
         }
-        $reinicio->save();
+
     }
     //**************************************************** REINICIO MASIVOS DE NOTAS POR CURSO ********************************************************/
 }
