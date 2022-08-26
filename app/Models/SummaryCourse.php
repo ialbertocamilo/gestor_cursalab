@@ -68,4 +68,14 @@ class SummaryCourse extends Summary
     //         // 'status_id' => 'desarrollo'
     //     ]);
     // }
+
+    public static function resetMasiveAttempts($coursesIds, $userId)
+    {
+        self::whereIn('course_id', $coursesIds)
+            ->where('user_id', $userId)
+            ->update([
+                'attempts' => 0,
+                //'fuente' => 'resetm'
+            ]);
+    }
 }
