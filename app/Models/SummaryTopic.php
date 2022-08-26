@@ -40,7 +40,7 @@ class SummaryTopic extends Summary
     //     if ($setLastTimeEvaluation)
     //         $data['last_time_evaluated_at'] = now();
 
-    //     if ( $row AND ($row->attempts < $config_quiz['nro_attempts']) ) 
+    //     if ( $row AND ($row->attempts < $config_quiz['nro_attempts']) )
     //         return $row->update($data);
 
     //     return SummaryTopic::storeData($topic, $user);
@@ -61,4 +61,14 @@ class SummaryTopic extends Summary
 
     //     return $row;
     // }
+
+    public static function resetMasiveAttempts($topicsIds, $userId)
+    {
+        self::whereIn('topic_id', $topicsIds)
+            ->where('user_id', $userId)
+            ->update([
+                'attempts' => 0,
+                //'fuente' => 'resetm'
+            ]);
+    }
 }
