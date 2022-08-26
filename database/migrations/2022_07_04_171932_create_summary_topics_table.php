@@ -28,13 +28,17 @@ return new class extends Migration
             $table->unsignedInteger('restarts')->nullable();
 
             $table->unsignedDecimal('grade', 8, 2)->nullable();
-            $table->boolean('passed')->nullable()->default(true);
+            $table->boolean('passed')->nullable();
 
             // $table->tinyInteger('historical')->nullable(); // ????
 
             // $table->timestamp('test_attempt_at')->nullable();
             $table->json('answers')->nullable();
             $table->timestamp('last_time_evaluated_at')->nullable();
+
+            $table->timestamp('current_quiz_started_at')->nullable();
+            $table->timestamp('current_quiz_finished_at')->nullable();
+            $table->boolean('taking_quiz')->nullable();
 
             $table->foreignId('restarter_id')->nullable()->constrained('users');
 
