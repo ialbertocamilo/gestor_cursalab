@@ -209,7 +209,7 @@ class RestQuizController extends Controller
 
         SummaryCourse::incrementViews($topic->course);
 
-        return ['error' => 0, 'data' => $row->views];
+        return ['error' => 0, 'data' => $row];
     }
 
     public function contador_tema_reseteo(Topic $topic)
