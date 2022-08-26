@@ -6,9 +6,9 @@
         @onConfirm="confirmModal"
     >
         <template v-slot:content>
-            <h5>{{ options.action }}</h5>
-            <h5>{{ resource }}</h5>
-            <h5>{{ validateData }}</h5>
+<!--            <h5>{{ options.action }}</h5>-->
+<!--            <h5>{{ resource }}</h5>-->
+<!--            <h5>{{ validateData }}</h5>-->
             <div v-if="options.action === 'showAlertEvaluacion'" class="d-flex justify-content-center">
                 <strong v-text="validateData.data[0]"/> <br>
             </div>

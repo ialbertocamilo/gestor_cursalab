@@ -94,12 +94,12 @@ class Topic extends BaseModel
         return $q->paginate($request->paginate);
     }
 
-    protected static function search_preguntas($request, $tema)
+    protected static function search_preguntas($request, $topic)
     {
-        $q = Question::whereHas('type', function ($t) use ($tema) {
-            $t->where('type_id', $tema->type_evaluation_id);
-        })
-            ->where('topic_id', $tema->id);
+        $question_type_code = $topic->evaluation_type->code === 'qualified' ? 'select-options' : 'written-answer';
+
+        $q = Question::whereRelation('type','code', $question_type_code)
+            ->where('topic_id', $topic->id);
 
         if ($request->q)
             $q->where('pregunta', 'like', "%$request->q%");
@@ -164,13 +164,13 @@ class Topic extends BaseModel
         }
     }
 
-    protected function validateBeforeUpdate(School $school, Course $course, Topic $topic, $data)
+    protected function validateBeforeUpdate(School $school, Topic $topic, $data)
     {
         $validations = collect();
 
         // Validar que sea el último tema activo y que se va a desactivar,
         // eso haría que se desactive el curso, validar si ese curso es requisito de otro e impedir que se desactive el tema
-        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic, $data);
+        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic);
         if ($last_topic_active_and_required_course['ok']) $validations->push($last_topic_active_and_required_course);
 
 
@@ -191,7 +191,7 @@ class Topic extends BaseModel
         ];
     }
 
-    public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic, array $data)
+    public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic)
     {
         $course_requirements_of = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
             $query->where('id', $topic->course->id);
@@ -199,7 +199,7 @@ class Topic extends BaseModel
         $is_required_course = $course_requirements_of->count() > 0;
 
         $last_active_topic = Topic::where('course_id', $topic->course_id)->where('active', 1)->get();
-        $is_last_active_topic = ($last_active_topic->count === 1 && $topic->active);
+        $is_last_active_topic = ($last_active_topic->count() === 1 && $topic->active);
 
         $temp['ok'] = ($is_last_active_topic && $is_required_course);
 
@@ -257,7 +257,7 @@ class Topic extends BaseModel
         $messages_on_create = $this->getMessagesOnCreate($topic);
         if ($messages_on_create['ok']) $messages->push($messages_on_create);
 
-        $messages_on_update_status = $this->getMessagesOnUpdateStatus($topic);
+        $messages_on_update_status = $this->getMessagesAfterUpdateStatus($topic, $data);
         if ($messages_on_update_status['ok']) $messages->push($messages_on_update_status);
 
         return [
@@ -297,9 +297,10 @@ class Topic extends BaseModel
         return $temp;
     }
 
-    public function getMessagesOnUpdateStatus($topic, $data)
+    public function getMessagesAfterUpdateStatus($topic, $data)
     {
-        $temp['ok'] = $topic->active !== $data['active'];
+
+        $temp['ok'] = $topic->wasChanged('active');
 
         if (!$temp['ok']) return $temp;
 
@@ -312,119 +313,52 @@ class Topic extends BaseModel
         return $temp;
     }
 
+    protected function validateBeforeDelete(School $school, Topic $topic, $data){
+        $validations = collect();
+
+        // Validar que sea el último tema activo y que se va a desactivar,
+        // eso haría que se desactive el curso, validar si ese curso es requisito de otro e impedir que se desactive el tema
+        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic);
+        if ($last_topic_active_and_required_course['ok']) $validations->push($last_topic_active_and_required_course);
 
 
-    protected function getMessagesActions($tema, $data, $title)
-    {
-        $messages = [];
+        // Validar si es tema es requisito de otro tema
+        $is_required_topic = $this->checkIfIsRequiredTopic($school, $topic, $data);
+        if ($is_required_topic['ok']) $validations->push($is_required_topic);
 
-        if (
-            // Al eliminar
-            $tema->active === 1 ||
-            // Al crear
-            (isset($data['active']) && $data['active'] == 1) ||
-            // Al actualizar desde listado (active) o desde formulario (active o assessable)
-            ($tema->wasChanged('active') || $tema->wasChanged('assessable'))
-        ) :
 
-            $messages[] = [
-                'title' => $title,
-                'subtitle' => "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.",
-                'type' => 'update_message'
-            ];
-
-        endif;
+        $show_confirm = !($validations->where('show_confirm', false)->count() > 0);
 
         return [
-            'title' => 'Aviso',
-            'data' => $messages
+            'list' => $validations->toArray(),
+//            'list' => [123,123,123],
+            'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
+            'show_confirm' => $show_confirm,
+//            'show_confirm' => true,
+            'type' => 'validations-before-update'
         ];
     }
 
-    protected function validateTemaUpdateStatus($escuela, $curso, $tema, $estado)
+    protected function getMessagesAfterDelete(Topic $topic, $title)
     {
-        $temas_activos = Topic::where('course_id', $tema->course_id)->where('active', 1)->get();
+        $messages = collect();
 
-        $req_cursos = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($tema) {
-            $query->where('id', $tema->course->id);
-        })->get();
-        $req_temas = Requirement::whereHasMorph('model', [Topic::class], function ($query) use ($tema) {
-            $query->where('id', $tema->id);
-        })->get();
+        $messages_on_delete = $this->getMessagesOnDelete($topic);
+        if ($messages_on_delete['ok']) $messages->push($messages_on_delete);
 
-        if ((($temas_activos->count() === 1 && $tema->estado == 1)
-                || $req_cursos->count() > 0
-                || $req_temas->count() > 0) && !$estado) :
+        $messages_on_create = $this->getMessagesOnCreate($topic);
+        if ($messages_on_create['ok']) $messages->push($messages_on_create);
 
-            $validate = collect();
 
-            if (($temas_activos->count() == 1 && $tema->estado == 1) && $req_cursos->count() > 0) :
-
-                $validacion = $this->validateReqCursos($req_cursos, $escuela, $curso, $tema);
-                $validate->push($validacion);
-            endif;
-
-            if ($req_temas->count() > 0) :
-
-                $validacion = $this->validateReqTemas($req_temas, $escuela, $curso, $tema);
-                $validate->push($validacion);
-            endif;
-
-            if ($validate->count() === 0) return ['validate' => true];
-
-            // Si existe algún tema que impida el envío de formulario (show_confirm = false)
-            // no mostrar el botón de "Confirmar"
-            $count = $validate->where('show_confirm', false)->count();
-
-            return [
-                'validate' => false,
-                'data' => $validate->toArray(),
-                'title' => 'Alerta',
-                'show_confirm' => !($count > 0)
-            ];
-            //            endif;
-
-        endif;
-
-        return ['validate' => true];
-    }
-
-    public function validateReqTemas($req_temas, $escuela, $curso, $tema, $verb = 'desactivar')
-    {
-        $temp = [
-            'title' => "No se puede {$verb} este tema.",
-            'subtitle' => "Para poder {$verb} este tema es necesario quitar o cambiar el requisito en los siguientes temas:",
-            'show_confirm' => false,
-            'type' => 'req_tema_validate'
+        return [
+            'list' => $messages->toArray(),
+            'title' => $title,
+            'type' => 'validations-after-update'
         ];
-        $list2 = [];
-        foreach ($req_temas as $req) {
-            $requisito = Topic::where('id', $req->requirement_id)->first();
-            $route = route('temas.editTema', [$escuela->id, $curso->id, $requisito->id]);
-            $list2[] = "<a href='{$route}' target='_blank'>" . $requisito->name . "</a>";
-        }
-        $temp['list'] = $list2;
-        return $temp;
     }
 
-    public function validateReqCursos($req_cursos, $escuela, $curso, $tema, $verb = 'desactivar')
-    {
-        $temp = [
-            'title' => "No se puede {$verb} este tema.",
-            'subtitle' => "Para poder {$verb} este tema es necesario quitar o cambiar el requisito en los siguientes cursos:",
-            'show_confirm' => false,
-            'type' => 'req_curso_validate'
-        ];
-        $list1 = [];
-        foreach ($req_cursos as $req) {
-            $requisito = Course::where('id', $req->requirement_id)->first();
-            $route = route('cursos.editCurso', [$escuela->id, $requisito->id]);
-            $list1[] = "<a href='{$route}' target='_blank'>" . $requisito->name . "</a>";
-        }
-        $temp['list'] = $list1;
-        return $temp;
-    }
+
+
 
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
