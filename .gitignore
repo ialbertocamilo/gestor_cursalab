@@ -24,6 +24,15 @@ package-lock.json
 /public/js/app.js
 /public/js/documentation_page.js
 /public/css/app.css
+
+/public/mix-manifest.json
+/public/css/*.map
+/public/js/*.map
+/public/fonts/vendor/@mdi/materialdesignicons-webfont.eot
+/public/fonts/vendor/@mdi/materialdesignicons-webfont.ttf
+/public/fonts/vendor/@mdi/materialdesignicons-webfont.woff
+/public/fonts/vendor/@mdi/materialdesignicons-webfont.woff2
+
 /.vagrant
 Homestead.json
 Homestead.yaml
