@@ -49,7 +49,7 @@ function convert($number)
 function clean_html(?string $text, int $limit = 100)
 {
 
-    return substr(strip_tags($text), 0, $limit);
+    return mb_substr(strip_tags($text), 0, $limit);
 }
 
 function secret($value)
