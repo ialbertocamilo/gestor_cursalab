@@ -214,13 +214,13 @@ class RestQuizController extends Controller
 
     public function contador_tema_reseteo(Topic $topic)
     {
-        // $topic->load('course');
+        $topic->load('course');
 
-        // $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
+        $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
 
-        // $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
+        $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
 
-        // $row = SummaryTopic::getCurrentRow($topic);
+        $row = SummaryTopic::getCurrentRow($topic);
 
         // if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft($attempts_limit))
         // {

@@ -49,10 +49,13 @@ class SummaryTopic extends Summary
 
     public function hasNoAttemptsLeft($attempts_limit = null)
     {
-        $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
+        if (!$attempts_limit)
+        {
+            $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
+            $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
+        }
 
-        $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
-
-        $attempts_limit
+        // return 
+        // $attempts_limit
     }
 }
