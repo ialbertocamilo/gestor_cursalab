@@ -452,7 +452,8 @@ class Topic extends BaseModel
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
                 foreach ($media_topics as $media) {
-                    if ($media->type->code == 'audio' && !str_contains('https', $media->value))
+                    if ($media->type_id == 'audio' && !str_contains('https', $media->value))
+                    // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
                         $media->value = get_media_url($media->valor);
                 }
 

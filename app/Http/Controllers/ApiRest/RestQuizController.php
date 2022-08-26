@@ -211,4 +211,9 @@ class RestQuizController extends Controller
         return ['error' => 0, 'data' => $row->views];
     }
 
+    public function contador_tema_reseteo(Topic $topic)
+    {
+        
+    }
+
 }
