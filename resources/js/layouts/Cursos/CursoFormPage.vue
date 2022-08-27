@@ -67,6 +67,26 @@
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="6">
+                            <DefaultInput
+                                numbersOnly
+                                dense
+                                label="Duración (en horas)"
+                                placeholder="Ingrese la duración del curso"
+                                v-model="resource.duration"
+                            />
+                        </v-col>
+                        <v-col cols="6">
+                            <DefaultInput
+                                numbersOnly
+                                dense
+                                label="Inversión"
+                                placeholder="Ingrese la inversión"
+                                v-model="resource.investment"
+                            />
+                        </v-col>
+                    </v-row>
+                    <v-row justify="center">
+                        <v-col cols="6">
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputLogo"
                                 v-model="resource.imagen"
@@ -161,8 +181,12 @@
     </section>
 </template>
 <script>
-const fields = ['name', 'reinicios_programado', 'active', 'position', 'imagen', 'plantilla_diploma', 'config_id', 'categoria_id',
-    'description', 'requisito_id', 'lista_escuelas'];
+const fields = [
+    'name', 'reinicios_programado', 'active', 'position', 'imagen',
+    'plantilla_diploma', 'config_id', 'categoria_id',
+    'description', 'requisito_id', 'lista_escuelas',
+    'duration', 'investment'
+];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 
@@ -170,7 +194,9 @@ export default {
     components: {CursoValidacionesModal},
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
-        let route_school = (this.categoria_id !== '') ? `/escuelas/${this.categoria_id}` : ``;
+        let route_school = (this.categoria_id !== '')
+                            ? `/escuelas/${this.categoria_id}`
+                            : ``;
 
         return {
             errors: [],
@@ -187,6 +213,8 @@ export default {
                 categoria_id: this.categoria_id,
                 active: false,
                 requisito_id: null,
+                duration: null,
+                investment: null,
                 scheduled_restarts: false,
                 scheduled_restarts_dias: null,
                 scheduled_restarts_horas: null,

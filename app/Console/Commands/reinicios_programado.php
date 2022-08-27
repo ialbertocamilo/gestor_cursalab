@@ -103,18 +103,30 @@ class reinicios_programado extends Command
             // Reset attempts
 
             if ($config) {
+
+                // Reset course attempts
+
                 SummaryCourse::resetFailedCourseAttemptsAllUsers(
                     $courseId, $config['nro_intentos'], $nextDateFromNow
                 );
 
+                // Update course's resets count
+
+                SummaryCourse::updateCourseRestartsCount($courseId);
+
+                // Reset topics attempts
+
                 SummaryCourse::resetCourseTopicsAttemptsAllUsers(
                     $courseId, $config['nro_intentos'], $nextDateFromNow
                 );
+
+                // Update topics' resets count
+
+                $topicsIds = SummaryCourse::getCourseTopicsIds($courseId);
+                foreach ($topicsIds as $topicId) {
+                    SummaryTopic::updateTopicRestartsCount($topicId);
+                }
             }
-
-            // Update resets count
-
-            SummaryCourse::updateCourseRestartsCount($courseId);
         }
     }
 

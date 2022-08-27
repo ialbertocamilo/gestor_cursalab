@@ -79,13 +79,16 @@ class SummaryTopic extends Summary
      * @return void
      */
     public static function updateTopicRestartsCount(
-        $topicId, $userId, $adminId
+        $topicId, $userId = null, $adminId = null
     ): void
     {
 
-        $summaryTopic = SummaryTopic::where('topic_id', $topicId)
-            ->where('user_id', $userId)
-            ->first();
+        $query = SummaryTopic::where('topic_id', $topicId);
+
+        if ($userId)
+            $query->where('user_id', $userId);
+
+        $summaryTopic = $query->first();
 
         // Calculate number of restars
 

@@ -12,6 +12,7 @@
         @click:clear="onClear"
         @input="updateValue"
         @keypress.enter="onKeyPressEnter"
+        @keypress="isNumber(event)"
         :rules="rules"
         :counter="counter"
         :type="type"
@@ -101,7 +102,11 @@ export default {
         },
         appendIcon: {
             default: null
-        }
+        },
+        numbersOnly: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
@@ -137,6 +142,20 @@ export default {
             let vue = this
             // console.log('onClickAppendIcon')
             vue.$emit('clickAppendIcon')
+        }
+        ,
+        isNumber: function(evt) {
+
+            if (!this.numbersOnly) return true;
+
+            evt = (evt) ? evt : window.event;
+            let expect = evt.target.value.toString() + evt.key.toString();
+
+            if (!/^[-+]?[0-9]*\.?[0-9]*$/.test(expect)) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
         }
     }
 }

@@ -34,9 +34,9 @@ use App\Models\Usuario;
 use App\Models\Workspace;
 use App\Services\CourseService;
 use App\Services\FileService;
-use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -217,77 +217,63 @@ class UsuarioController extends Controller
     // ==========================================================================================
 
 
-    // RESETEO DE USUARIOS
-    public function reset(Usuario $usuario)
+    /**
+     * List failed ("desaprobados") topics and courses for user
+     *
+     * @param User $user
+     * @return JsonResponse
+     */
+    public function reset(User $user): JsonResponse
     {
 
-        $config = $usuario->config;
-        $mod_eval = json_decode($config->mod_evaluaciones, true);
-        // lista temas evaluados
-        $temas = \DB::select(\DB::raw("SELECT t.id, t.nombre FROM pruebas p
-                                                INNER JOIN posteos t ON t.id = p.posteo_id
-                                                WHERE p.usuario_id = " . $usuario->id . "
-                                                AND p.resultado = 0
-                                                AND p.intentos >= " . $mod_eval['nro_intentos'] . "
-                                                ORDER BY p.id DESC"));
+        $subworkspace = Workspace::find($user->subworkspace_id);
+        $mod_eval = $subworkspace->mod_evaluaciones;
 
-        // lista cursos evaluados
-        $cursos = \DB::select(\DB::raw("SELECT c.id, c.nombre FROM pruebas p
-                                                INNER JOIN posteos t ON t.id = p.posteo_id
-                                                INNER JOIN cursos c ON c.id = t.curso_id
-                                                WHERE p.usuario_id = " . $usuario->id . "
-                                                AND p.resultado = 0
-                                                AND p.intentos >= " . $mod_eval['nro_intentos'] . "
-                                                GROUP BY t.curso_id
-                                                ORDER BY p.id DESC"));
+        $topics = SummaryTopic::query()
+            ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
+            ->where('summary_topics.passed', 0)
+            ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'])
+            ->where('summary_topics.user_id', $user->id)
+            ->select('topics.id', 'topics.name')
+            ->get();
 
-        return $this->success(compact('temas', 'cursos', 'usuario'));
+        $courses = [];
 
-        // return view('usuarios.reset', compact('usuario', 'temas', 'cursos'));
+        return $this->success(
+            compact('topics', 'courses', 'user')
+        );
     }
 
-    // Reiniciar
-    public function reset_x_tema(Usuario $usuario, Request $request)
+    /**
+     * Reset by topic
+     *
+     * @param User $user
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function reset_x_tema(User $user, Request $request)
     {
+        $admin = null;
+        if (Auth::check()) {
+
+            $admin = Auth::user();
+        }
+
         if ($request->has('p')) {
-            $posteo_id = $request->input('p');
-            // $prueba_reinicio = $usuario->rpta_pruebas()->where('posteo_id', $posteo_id)->delete();
-            $prueba_reinicio = Prueba::where('usuario_id', $usuario->id)->where('posteo_id', $posteo_id)
-                ->update([
-                    'intentos' => 0,
-                    // 'rptas_ok' => NULL,
-                    // 'rptas_fail' => NULL,
-                    // 'nota' => NULL,
-                    // 'resultado' => 0,
-                    // 'usu_rptas' => NULL,
-                    'fuente' => 'reset']);
-            //PONER ESTADO EN DESARROLLO
-            $posteo = Posteo::where('id', $posteo_id)->select('curso_id')->first();
-            $posteos = Posteo::where('curso_id', $posteo->curso_id)->select('id')->get();
-            if (count($posteos) == 1) {
-                $res = Resumen_x_curso::where('usuario_id', $usuario->id)->where('curso_id', $posteo->curso_id)->update([
-                    'estado' => 'desarrollo',
-                ]);
-            }
-            // Registrar reinicios
-            $user = \Auth::user();
-            $res = Reinicio::where('usuario_id', $usuario->id)->where('posteo_id', $posteo_id)->first();
-            if (!$res) {
 
-                $dip = new Reinicio;
-                $dip->tipo = 'por_tema';
-                $dip->usuario_id = $usuario->id;
-                $dip->posteo_id = $posteo_id;
-                $dip->curso_id = $posteo->curso_id;
-                $dip->admin_id = $user->id;
-                $dip->acumulado = 1;
-                $dip->save();
+            $topicId = $request->input('p');
 
-            } else {
-                $res->acumulado = $res->acumulado + 1;
-                $res->save();
-            }
-            // Fin registro reinicios
+            // Reset topics attempts
+
+            SummaryTopic::resetUserTopicsAttempts($user->id, [$topicId]);
+
+            // Update restarts count
+
+            SummaryTopic::updateTopicRestartsCount(
+                $topicId, $user->id, $admin->id
+            );
+
+
             return $this->success(['msg' => 'Reinicio por tema exitoso']);
         }
 
@@ -750,18 +736,35 @@ class UsuarioController extends Controller
 
             SummaryCourse::resetUserCoursesAttempts($userId, [$courseId]);
 
-            // Reset topics attempts
-
-            SummaryCourse::resetUserCourseTopicsAttempts($userId, $courseId);
-
             // Update restarts count
 
             SummaryCourse::updateCourseRestartsCount(
                 $courseId, $adminId, $userId
             );
+
+            // Reset topics attempts
+
+            SummaryTopic::resetUserTopicsAttempts($userId, $topicsIds);
+
+            // Update resets count
+
+            $topicsIds = SummaryCourse::getCourseTopicsIds($courseId, $userId);
+            foreach ($topicsIds as $topicId) {
+                SummaryTopic::updateTopicRestartsCount(
+                    $topicId, $userId, $adminId
+                );
+            }
         }
     }
 
+    /**
+     * Reset attempts by topic
+     *
+     * @param $topicId
+     * @param $adminId
+     * @param $users
+     * @return void
+     */
     public function reinicioMasivoxTema($topicId, $adminId, $users)
     {
         foreach ($users as $key => $user) {

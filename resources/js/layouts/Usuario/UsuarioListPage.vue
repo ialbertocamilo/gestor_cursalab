@@ -155,13 +155,17 @@ export default {
                     {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
                 ],
                 more_actions: [
-                    {text: "Actualizar Estado", icon: 'fa fa-circle', type: 'action', method_name: 'status'},
+                    {   text: "Actualizar Estado",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
+                    },
                     {
                         text: "Reiniciar",
                         icon: 'fas fa-history',
                         type: 'action',
                         method_name: 'reset',
-                        show_condition: 'pruebas_desaprobadas'
+                        //show_condition: 'pruebas_desaprobadas'
                     },
                 ]
             },
