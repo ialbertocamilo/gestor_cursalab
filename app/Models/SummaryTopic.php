@@ -9,7 +9,9 @@ class SummaryTopic extends Summary
     protected $table = 'summary_topics';
 
     protected $fillable = [
-        'last_time_evaluated_at', 'user_id', 'topic_id', 'views', 'attempts', 'downloads'
+        'user_id', 'topic_id', 'views', 'attempts', 'downloads', 'answers', 'restarts',
+        'current_quiz_started_at', 'current_quiz_finished_at', 'taking_quiz',
+        'last_time_evaluated_at',
     ];
 
     public function topic()
