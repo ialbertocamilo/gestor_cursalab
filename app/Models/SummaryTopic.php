@@ -71,4 +71,34 @@ class SummaryTopic extends Summary
                 //'fuente' => 'resetm'
             ]);
     }
+
+    /**
+     * Update topics restarts count
+     *
+     * @param $topicId
+     * @param $userId
+     * @param $adminId
+     * @return void
+     */
+    public static function updateTopicRestartsCount(
+        $topicId, $userId, $adminId
+    ): void
+    {
+
+        $summaryTopic = SummaryTopic::where('topic_id', $topicId)
+            ->where('user_id', $userId)
+            ->first();
+
+        // Calculate number of restars
+
+        $restarts = $summaryTopic->restarts
+            ? $summaryTopic->restarts + 1
+            : 1;
+
+        // Update record
+
+        $summaryTopic->restarts =  $restarts;
+        $summaryTopic->restarter_id = $adminId;
+        $summaryTopic->save();
+    }
 }

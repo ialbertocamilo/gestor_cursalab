@@ -78,4 +78,33 @@ class SummaryCourse extends Summary
                 //'fuente' => 'resetm'
             ]);
     }
+    /**
+     * Update courses restarts count
+     *
+     * @param $courseId
+     * @param $userId
+     * @param $adminId
+     * @return void
+     */
+    public static function updateCourseRestartsCount(
+        $courseId, $userId, $adminId
+    ): void
+    {
+
+        $summaryCourse = SummaryCourse::where('course_id', $courseId)
+            ->where('user_id', $userId)
+            ->first();
+
+        // Calculate number of restars
+
+        $restars = $summaryCourse->restarts
+            ? $summaryCourse->restarts + 1
+            : 1;
+
+        // Update record
+
+        $summaryCourse->restarts =  $restars;
+        $summaryCourse->restarter_id = $adminId;
+        $summaryCourse->save();
+    }
 }
