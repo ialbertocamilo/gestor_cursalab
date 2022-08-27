@@ -102,6 +102,8 @@ class SummaryTopic extends Summary
 
         $summaryTopic = $query->first();
 
+        if (!$summaryTopic) return;
+
         // Calculate number of restars
 
         $restarts = $summaryTopic->restarts
