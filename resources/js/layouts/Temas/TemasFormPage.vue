@@ -84,7 +84,7 @@
                                 v-model="resource.type_evaluation_id"
                                 :items="selects.evaluation_types"
                                 :rules="resource.assessable === 1 ? rules.tipo_ev : []"
-                                :disabled="resource.assessable === 0 || !resource.assessable"
+                                :disabled="resource.assessable === '0' || !resource.assessable"
                                 @onChange="showAlertEvaluacion"
                             />
                         </v-col>
@@ -340,7 +340,9 @@ export default {
                         data.variantes = false;
                         data.url = 'evaluaciones_abiertas';
                     }
-                    await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                    // await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                    vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+
                     vue.topicsValidationModal.hideConfirmBtn = false
                     vue.topicsValidationModal.cancelLabel = 'Cerrar'
                     await vue.openFormModal(vue.topicsValidationModal, data, 'validations-before-update', 'Atención')
@@ -374,7 +376,7 @@ export default {
             if (vue.topicsValidationModal.action === 'validations-after-update') {
                 vue.hideLoader();
                 vue.topicsValidationModal.open = false;
-                setTimeout(() => vue.closeModal(), 2000);
+                setTimeout(() => vue.leavePage(), 2000);
                 return;
             }
 
@@ -383,7 +385,7 @@ export default {
             let method = edit ? 'PUT' : 'POST';
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
-            formData.append('validateForm', validateForm ? "1": "0");
+            formData.append('validate', validateForm ? "1" : "0");
             vue.addMedias(formData)
             if (data.checkbox)
                 formData.append('check_tipo_ev', data.checkbox)
@@ -396,7 +398,7 @@ export default {
                         await vue.handleValidationsAfterUpdate(data.data, vue.topicsValidationModal, vue.topicsValidationModalDefault);
                     else {
                         vue.showAlert(data.data.msg)
-                        setTimeout(() => vue.closeModal(), 2000)
+                        setTimeout(() => vue.leavePage(), 2000)
                     }
                 })
                 .catch(async (error) => {
@@ -470,7 +472,7 @@ export default {
         },
         validateTipoEv() {
             let vue = this
-            if (!vue.resource.assessable) vue.resource.type_evaluation_id = null
+            if (vue.resource.assessable === '0') vue.resource.type_evaluation_id = null
 
             vue.resource.tipo_ev = null
             vue.resetFormValidation('TemaForm')
@@ -502,7 +504,9 @@ export default {
             const title = `Debe tener una evaluación ${tipo_ev}`;
             const data = {data: [title]}
 
-            await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
+            // await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
+            vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+
             vue.topicsValidationModal.width = "30vw"
             vue.topicsValidationModal.hideConfirmBtn = true
             vue.topicsValidationModal.cancelLabel = 'Entendido'

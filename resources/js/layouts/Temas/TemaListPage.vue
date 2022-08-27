@@ -52,35 +52,47 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
+
                 @delete="deleteTema($event)"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @status="updateTopicStatus($event)"
             />
 
             <DialogConfirm
-                v-model="modalDeleteOptions.open"
+                v-model="deleteConfirmationDialog.open"
                 width="450px"
                 title="Eliminar Tema"
                 subtitle="¿Está seguro de eliminar el tema?"
                 @onConfirm="confirmDelete"
-                @onCancel="modalDeleteOptions.open = false"
+                @onCancel="deleteConfirmationDialog.open = false"
             />
 
-            <TemaValidacionesModal
+            <TopicValidationsDelete
                 width="50vw"
-                :ref="modalTemasValidaciones.ref"
-                :options="modalTemasValidaciones"
-                @onCancel="closeFormModal(modalTemasValidaciones); closeFormModal(modalStatusOptions); closeFormModal(modalDeleteOptions)"
-                @onConfirm="callFunction"
-                :resource="delete_model"
+                :ref="topicValidationModal.ref"
+                :options="topicValidationModal"
+                @onCancel="closeFormModal(topicValidationModal); closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(topicValidationModal,  null, confirmDelete(false))"
+                :resource="{}"
             />
 
-            <DefaultStatusModal
-                :options="modalStatusOptions"
-                :ref="modalStatusOptions.ref"
-                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters); openTemaValidacionesModal($event)"
-                @onCancel="closeFormModal(modalStatusOptions, dataTable, filters)"
-                @onError="onErrorUpdateStatusTema"
+            <DialogConfirm
+                :ref="topicUpdateStatusModal.ref"
+                v-model="topicUpdateStatusModal.open"
+                width="450px"
+                title="Cambiar de estado al curso"
+                subtitle="¿Está seguro de cambiar de estado al curso?"
+                @onConfirm="confirmUpdateStatus"
+                @onCancel="topicUpdateStatusModal.open = false"
             />
+            <TopicValidationsUpdateStatus
+                width="50vw"
+                :ref="topicValidationModalUpdateStatus.ref"
+                :options="topicValidationModalUpdateStatus"
+                @onCancel="closeFormModal(topicValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(topicValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
+                :resource="{}"
+            />
+
         </v-card>
     </section>
 </template>
@@ -88,16 +100,25 @@
 <script>
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import TemaValidacionesModal from "./TemaValidacionesModal";
-import DefaultStatusModal from "../Default/DefaultStatusModal";
+
 export default {
-    components: {DialogConfirm, TemaValidacionesModal, DefaultStatusModal},
-    props: ['school_id', 'school_name', 'course_id', 'course_name','ruta'],
+    components: {
+        DialogConfirm,
+        'TopicValidationsDelete': TemaValidacionesModal,
+        'TopicValidationsUpdateStatus': TemaValidacionesModal,
+    },
+    props: ['school_id', 'school_name', 'course_id', 'course_name', 'ruta'],
     data() {
         let vue = this
         return {
             breadcrumbs: [
                 {title: 'Escuelas', text: `${this.school_name}`, disabled: false, href: `/escuelas`},
-                {title: 'Cursos', text: `${this.course_name}`, disabled: false, href: `/escuelas/${this.school_id}/cursos`},
+                {
+                    title: 'Cursos',
+                    text: `${this.course_name}`,
+                    disabled: false,
+                    href: `/escuelas/${this.school_id}/cursos`
+                },
                 {title: 'Temas', text: null, disabled: true, href: ''},
             ],
             dataTable: {
@@ -147,9 +168,6 @@ export default {
                 //     },
                 // ]
             },
-            modalDeleteOptions: {
-                open: false,
-            },
             selects: {
                 modules: []
             },
@@ -160,8 +178,32 @@ export default {
                 curso: null
             },
             delete_model: null,
-            modalTemasValidaciones: {
-                ref: 'TemaValidacionesModal',
+            update_model: null,
+
+            deleteConfirmationDialog: {
+                open: false,
+            },
+
+            topicValidationModal: {
+                ref: 'TopicListValidationModal',
+                open: false,
+            },
+
+            topicUpdateStatusModal: {
+                ref: 'CourseUpdateStatusModal',
+                title: 'Actualizar Curso',
+                contentText: '¿Desea actualizar este registro?',
+                open: false,
+                endpoint: ''
+            },
+            topicValidationModalUpdateStatus: {
+                ref: 'TopicListValidationModalUpdateStatus',
+                open: false,
+            },
+
+            topicValidationModalDefault: {
+                ref: 'TopicListValidationModal',
+                action: null,
                 open: false,
                 base_endpoint: '',
                 hideConfirmBtn: false,
@@ -169,23 +211,6 @@ export default {
                 confirmLabel: 'Confirmar',
                 cancelLabel: 'Cancelar',
                 resource: 'TemasValidaciones',
-            },
-            modalTemasValidacionesDefault: {
-                ref: 'TemaValidacionesModal',
-                open: false,
-                base_endpoint: '',
-                hideConfirmBtn: false,
-                hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'TemasValidaciones',
-            },
-            modalStatusOptions: {
-                ref: 'CursoStatusModal',
-                open: false,
-                base_endpoint: `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas`,
-                contentText: '¿Desea cambiar de estado a este registro?',
-                endpoint: '',
             },
         }
     },
@@ -213,101 +238,88 @@ export default {
         deleteTema(tema) {
             let vue = this
             vue.delete_model = tema
-            vue.modalDeleteOptions.open = true
+            vue.deleteConfirmationDialog.open = true
         },
-        async cleanModalTemasValidaciones() {
-            let vue = this
-            await vue.$nextTick(() => {
-                vue.modalTemasValidaciones = Object.assign({}, vue.modalTemasValidaciones, vue.modalTemasValidacionesDefault)
-            })
-        },
-        confirmDelete(withValidations = true) {
+        confirmDelete(validateForm = true) {
             let vue = this
             vue.showLoader()
+            vue.deleteConfirmationDialog.open = false
+
+            if (validateForm)
+                vue.topicValidationModal.action = null;
+
+            if (vue.topicValidationModal.action === 'validations-after-update') {
+                vue.hideLoader();
+                vue.topicValidationModal.open = false;
+                return;
+            }
+
             let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.delete_model.id}`
+            const bodyData = {validateForm}
 
-            if (!withValidations){
-                url += '?withValidations=1'
-            } else {
-                url += '?withValidations=0'
-            }
-
-            vue.$http.post(url)
+            vue.$http.post(url, bodyData)
                 .then(async ({data}) => {
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters)
-                    vue.delete_model = null
-                    vue.modalDeleteOptions.open = false
-                    // const messages = data.data.messages
-                    //
-                    // if (messages.data.length > 0) {
-                    //     // console.log(messages.data)
-                    //     await vue.cleanModalTemasValidaciones()
-                    //     vue.modalTemasValidaciones.hideCancelBtn = true
-                    //     vue.modalTemasValidaciones.confirmLabel = 'Entendido'
-                    //     vue.modalTemasValidaciones.persistent = true
-                    //     await vue.openFormModal(vue.modalTemasValidaciones, messages, 'messagesActions', 'Aviso')
-                    // } else {
-                        vue.showAlert(data.data.msg)
-                        vue.hideLoader()
-                    // }
-                })
-                .catch(async ({data}) => {
-                    // await vue.cleanModalTemasValidaciones()
-                    // vue.loadingActionBtn = false
-                    // // vue.modalTemasValidaciones.hideConfirmBtn = true
-                    // // vue.modalTemasValidaciones.cancelLabel = 'Entendido'
-                    // if (data.validate.show_confirm) {
-                    //     vue.modalTemasValidaciones.hideConfirmBtn = false
-                    //     vue.modalTemasValidaciones.hideCancelBtn = false
-                    //     vue.modalTemasValidaciones.cancelLabel = 'Cancelar'
-                    //     vue.modalTemasValidaciones.confirmLabel = 'Confirmar'
-                    // } else {
-                    //     vue.modalTemasValidaciones.hideConfirmBtn = true
-                    //     vue.modalTemasValidaciones.cancelLabel = 'Entendido'
-                    // }
-                    // await vue.openFormModal(vue.modalTemasValidaciones, data.validate, 'validateDeleteTema', data.validate.title)
                     vue.hideLoader()
+                    const has_info_messages = data.data.messages.list.length > 0
+                    if (has_info_messages)
+                        await vue.handleValidationsAfterUpdate(data.data, vue.topicValidationModal, vue.topicValidationModalDefault);
+                    else {
+                        vue.showAlert(data.data.msg);
+                        vue.topicValidationModal.open = false;
+                    }
+
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                })
+                .catch(async error => {
+                    await vue.handleValidationsBeforeUpdate(error, vue.topicValidationModal, vue.topicValidationModalDefault);
+                    vue.loadingActionBtn = false
                 })
         },
-        async onErrorUpdateStatusTema(data){
+
+        updateTopicStatus(course) {
             let vue = this
-            // console.log('onErrorUpdateStatusTema :: ', data)
-
-            await vue.cleanModalTemasValidaciones()
-
-            if (data.validate.show_confirm) {
-                vue.modalTemasValidaciones.hideConfirmBtn = false
-                vue.modalTemasValidaciones.hideCancelBtn = false
-                vue.modalTemasValidaciones.cancelLabel = 'Cancelar'
-                vue.modalTemasValidaciones.confirmLabel = 'Confirmar'
-            } else {
-                vue.modalTemasValidaciones.hideConfirmBtn = true
-                vue.modalTemasValidaciones.cancelLabel = 'Entendido'
-            }
-
-            await vue.openFormModal(vue.modalTemasValidaciones, data.validate, 'validateUpdateStatus', data.validate.title)
+            vue.update_model = course
+            vue.topicUpdateStatusModal.open = true
         },
-        async callFunction(data){
+        async confirmUpdateStatus(validateForm = true) {
             let vue = this
-            if (data.confirmMethod === "validateDeleteTema"){
-                vue.confirmDelete(false);
-            } else if(['updateStatus', 'validateUpdateStatus'].includes(data.confirmMethod) ){
-                vue.$refs[vue.modalStatusOptions.ref].onConfirm(false)
+            vue.topicUpdateStatusModal.open = false
+            vue.showLoader()
+
+            if (validateForm)
+                vue.topicValidationModalUpdateStatus.action = null;
+
+
+            if (vue.topicValidationModalUpdateStatus.action === 'validations-after-update') {
+                vue.hideLoader();
+                vue.topicValidationModalUpdateStatus.open = false;
+                return;
             }
-            await vue.cleanModalTemasValidaciones()
-            vue.modalTemasValidaciones.open = false
+
+
+            let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.update_model.id}/status`;
+            const bodyData = {validateForm}
+
+            vue.$http.put(url, bodyData)
+                .then(async ({data}) => {
+                    vue.hideLoader()
+                    const has_info_messages = data.data.messages.list.length > 0;
+                    console.log("has_info_messages :: ", has_info_messages)
+
+                    if (has_info_messages)
+                        await vue.handleValidationsAfterUpdate(data.data, vue.topicValidationModalUpdateStatus, vue.topicValidationModalDefault);
+                    else {
+                        vue.showAlert(data.data.msg)
+                        vue.topicValidationModalUpdateStatus.open = false;
+                    }
+
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                })
+                .catch(error => {
+                    vue.handleValidationsBeforeUpdate(error, vue.topicValidationModalUpdateStatus, vue.topicValidationModalDefault);
+                    vue.loadingActionBtn = false
+                })
         },
-        async openTemaValidacionesModal(data) {
-            let vue = this
-            console.log("openCursoValidacionesModal", data)
-            if (data.hasOwnProperty('confirmMethod')) {
-                await vue.cleanModalTemasValidaciones()
-                vue.modalTemasValidaciones.hideCancelBtn = true
-                vue.modalTemasValidaciones.confirmLabel = 'Entendido'
-                vue.modalTemasValidaciones.persistent = true
-                await vue.openFormModal(vue.modalTemasValidaciones, data.data.data.messages, 'messagesActions', 'Aviso')
-            }
-        }
     }
 
 }

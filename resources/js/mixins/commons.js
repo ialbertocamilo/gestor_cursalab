@@ -21,7 +21,6 @@ export default {
             let vue = this
             vue[overlay] = false;
         },
-
         async cleanValidationsModal(modal, modalDefault) {
             let vue = this
             await vue.$nextTick(() => vue.modal = JSON.parse(JSON.stringify(modalDefault)))
@@ -33,7 +32,9 @@ export default {
             let validations = errorObject.data.validations;
 
             if (validations.list.length > 0) {
+                // await vue.$nextTick(() => modalOptions = Object.assign({}, modalOptions, modalDefault))
                 await vue.cleanValidationsModal(modalOptions, modalDefault)
+
                 if (validations.type === 'validations-before-update') {
                     modalOptions.type = validations.type;
                     modalOptions.cancelLabel = !validations.show_confirm ? 'Entendido' : 'Cancelar';
@@ -45,6 +46,8 @@ export default {
         },
         async handleValidationsAfterUpdate(data, modalOptions, modalDefault) {
             let vue = this;
+            // await vue.$nextTick(() => modalOptions = Object.assign({}, modalOptions, modalDefault))
+            // modalOptions = Object.assign({}, modalOptions, modalDefault)
             await vue.cleanValidationsModal(modalOptions, modalDefault)
 
             modalOptions.type = data.messages.type;
@@ -57,7 +60,8 @@ export default {
 
             await vue.openFormModal(modalOptions, data.messages, 'validations-after-update', data.messages.title);
         },
-        confirmValidationModal(modalOptions, redirectRoute = null, callbackWithoutValidating = () => {}) {
+        confirmValidationModal(modalOptions, redirectRoute = null, callbackWithoutValidating = () => {
+        }) {
             // console.info("confirmValidationModal", modalOptions);
             if (modalOptions.type === 'validations-before-update') {
                 if (!modalOptions.hideConfirmBtn) callbackWithoutValidating()

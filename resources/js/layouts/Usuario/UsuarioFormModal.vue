@@ -217,7 +217,7 @@ export default {
             let vue = this
 
             vue.$nextTick(() => {
-                vue.resource = JSON.parse(JSON.stringify(vue.resourceDefault))
+                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
 
             let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/edit` : `form-selects`}`

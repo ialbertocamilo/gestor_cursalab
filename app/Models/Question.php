@@ -6,7 +6,7 @@ class Question extends BaseModel
 {
     protected $fillable = [
         'topic_id', 'type_id', 'pregunta',
-        'rptas_json', 'rpta_ok',
+        'rptas_json', 'rpta_ok', 'active'
     ];
 
     protected $casts = [
@@ -34,7 +34,7 @@ class Question extends BaseModel
         if ($random) $questions = $questions->shuffle()->all();
 
         $questions = $questions->take($limit);
-        
+
         if ($random) $this->setRandomOptions($questions);
 
         return $questions;

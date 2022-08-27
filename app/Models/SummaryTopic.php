@@ -6,6 +6,10 @@ class SummaryTopic extends Summary
 {
     protected $table = 'summary_topics';
 
+    protected $fillable = [
+        'last_time_evaluated_at', 'user_id', 'topic_id', 'views', 'attempts', 'downloads'
+    ];
+
     public function topic()
     {
         return $this->belongsTo(Topic::class);
@@ -16,51 +20,17 @@ class SummaryTopic extends Summary
         return $this->belongsTo(Taxonomy::class, 'status_id');
     }
 
-    // protected function setUserLastTimeEvaluation($topic, $user = NULL)
-    // {
-    //     $user = $user ?? auth()->user;
+    protected function setInitialData($topic)
+    {
+        $data = [
+            'user_id' => $user->id,
+            'topic_id' => $topic->id,
+            'current_quiz_started_at' => now(),
+            'attempts' => 1,
+        ];
 
-    //     return SummaryTopic::where('user_id', $user->id)
-    //             ->where('topic_id', $topic->id)
-    //             ->update(['last_time_evaluated_at' => now()]);
-    // }
-
-    // protected function incrementUserAttempts($topic, $setLastTimeEvaluation = true, $user = null)
-    // {
-    //     $user = $user ?? auth()->user;
-    //     $config_quiz = $user->subworspace->mod_evaluaciones;
-
-    //     $row = SummaryTopic::select('id', 'attempts')
-    //                 ->where('topic_id', $topic->id)
-    //                 ->where('user_id', $user->id)
-    //                 ->first();
-
-    //     $data = ['attempts' => $row->attempts + 1];
-
-    //     if ($setLastTimeEvaluation)
-    //         $data['last_time_evaluated_at'] = now();
-
-    //     if ( $row AND ($row->attempts < $config_quiz['nro_attempts']) )
-    //         return $row->update($data);
-
-    //     return SummaryTopic::storeData($topic, $user);
-    // }
-
-    // protected function storeData($topic, $user = null)
-    // {
-    //     $user = $user ?? auth()->user;
-
-    //     $row = SummaryTopic::create([
-    //         'user_id' => $user->id,
-    //         'topic_id' => $topic->id,
-    //         'attempts' => 1,
-    //         'last_time_evaluated_at' => now(),
-    //         // 'fuente' => $fuente
-    //         // 'status_id' => 'desarrollo'
-    //     ]);
-
-    //     return $row;
-    // }
+        return SummaryTopic::create($data);
+    }
 
     public static function resetMasiveAttempts($topicsIds, $userId)
     {
@@ -100,5 +70,21 @@ class SummaryTopic extends Summary
         $summaryTopic->restarts =  $restarts;
         $summaryTopic->restarter_id = $adminId;
         $summaryTopic->save();
+    }
+
+    public function hasFailed()
+    {
+        return ! $this->passed;
+    }
+
+    public function hasNoAttemptsLeft($attempts_limit = null)
+    {
+        if (!$attempts_limit)
+        {
+            $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
+            $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
+        }
+
+        return $row->attempts >= $attempts_limit;
     }
 }

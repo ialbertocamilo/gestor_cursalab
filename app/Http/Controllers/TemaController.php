@@ -40,6 +40,22 @@ class TemaController extends Controller
         return $this->success($temas);
     }
 
+    public function getFormSelects(School $school, Course $course, Topic $topic = null, $compactResponse = false)
+    {
+        $tags = []; //Tag::select('id', 'nombre')->get();
+        $q_requisitos = Topic::select('id', 'name')->where('course_id', $course->id);
+        if ($topic)
+            $q_requisitos->whereNotIn('id', [$topic->id]);
+
+        $requisitos = $q_requisitos->orderBy('position')->get();
+
+        $evaluation_types = Taxonomy::getDataForSelect('topic', 'evaluation-type');
+
+        $response = compact('tags', 'requisitos', 'evaluation_types');
+
+        return $compactResponse ? $response : $this->success($response);
+    }
+
     public function searchTema(School $school, Course $course, Topic $topic)
     {
         $topic->media = MediaTema::where('topic_id', $topic->id)->orderBy('position')->get();
@@ -53,7 +69,7 @@ class TemaController extends Controller
             $topic->hide_tipo_ev = $tax_type_eval->code;
         }
 
-        $tax_select = Taxonomy::where('group', 'question')->where('type', 'type')->where('code', 'select-optionsa')->first();
+        $tax_select = Taxonomy::where('group', 'question')->where('type', 'type')->where('code', 'select-options')->first();
 
         $topic->disabled_estado_toggle = false;
         $topic->cant_preguntas_evaluables_activas = 0;
@@ -73,22 +89,6 @@ class TemaController extends Controller
         ]);
     }
 
-    public function getFormSelects(School $school, Course $course, Topic $topic = null, $compactResponse = false)
-    {
-        $tags = []; //Tag::select('id', 'nombre')->get();
-        $q_requisitos = Topic::select('id', 'name')->where('course_id', $course->id);
-        if ($topic)
-            $q_requisitos->whereNotIn('id', [$topic->id]);
-
-        $requisitos = $q_requisitos->orderBy('position')->get();
-
-        $evaluation_types = Taxonomy::getDataForSelect('topic', 'evaluation-type');
-
-        $response = compact('tags', 'requisitos', 'evaluation_types');
-
-        return $compactResponse ? $response : $this->success($response);
-    }
-
     public function store(School $school, Course $course, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
@@ -99,10 +99,12 @@ class TemaController extends Controller
         $response = [
             'tema' => $tema,
             'msg' => ' Tema creado correctamente.',
-            'messages' => [],
+            'messages' => [
+                'list' => [],
+                'title' => null,
+                'type' => 'validations-after-update'
+            ],
         ];
-
-//        $response['messages'] = Topic::getMessagesActions($tema, $data, 'Tema creado con éxito');
 
         return $this->success($response);
     }
@@ -112,10 +114,10 @@ class TemaController extends Controller
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
 
-        $validations = Topic::validateBeforeUpdate($school, $course, $topic, $data);
-
         if ($data['validate']):
-            if ($validations['list'] > 0)
+            $validations = Topic::validateBeforeUpdate($school, $topic, $data);
+            info($validations['list']);
+            if (count($validations['list']) > 0)
                 return $this->success(compact('validations'), 'Ocurrió un error.', 422);
         endif;
 
@@ -132,53 +134,49 @@ class TemaController extends Controller
 
     public function destroy(School $school, Course $course, Topic $topic, Request $request)
     {
-        // TODO: Para la segunda fase
-//        if ($request->withValidations == 0) {
-//            $validate = Topic::validateTemaEliminar($topic, $course);
-//            //        dd($validate);
-//
-//            if (!$validate['validate'])
-//                return $this->success(compact('validate'), 422);
-//        }
+        $data = $request->all();
+        $data['to_delete'] = true;
+        $data['active'] = $topic->active;
+
+        if ($data['validateForm']):
+            $validations = Topic::validateBeforeDelete($school, $topic, $data);
+            if (count($validations['list']) > 0)
+                return $this->success(compact('validations'), 'Ocurrió un error.', 422);
+        endif;
 
         $topic->delete();
 
-//        $tema_evaluable = Topic::where('course_id', $course->id)->where('assessable', ACTIVE)->first();
-//        $course->assessable = $tema_evaluable ? 1 : 0;
-//        $course->save();
+        $tema_evaluable = Topic::where('course_id', $course->id)->where('assessable', ACTIVE)->first();
+        $course->assessable = $tema_evaluable ? 1 : 0;
+        $course->save();
 
         $response = [
             'tema' => $topic,
-            'msg' => ' Tema eliminado correctamente.'
+            'msg' => ' Tema eliminado correctamente.',
+            'messages' => Topic::getMessagesAfterDelete($topic,'Tema eliminado con éxito')
         ];
-
-//        $response['messages'] = Topic::getMessagesActions($topic, [], 'Tema eliminado con éxito');
 
         return $this->success($response);
     }
 
     public function updateStatus(School $school, Course $course, Topic $topic, Request $request)
     {
-//        $active = !(($topic->active === 1));
         $active = !$topic->active;
 
-//        if ($request->withValidations == 0) {
-//            $validate = Topic::validateTemaUpdateStatus($school, $course, $topic, $active);
-//            //        dd($validate);
-//
-//            if (!$validate['validate'])
-//                return $this->success(compact('validate'), 422);
-//        }
+        if ($request->validate):
+            $validations = Topic::validateBeforeUpdate($school, $topic, ['active' => $active]);
+            if ($validations['list'] > 0)
+                return $this->success(compact('validations'), 'Ocurrió un error.', 422);
+        endif;
 
         $topic->active = $active;
         $topic->save();
 
         $response = [
             'tema' => $topic,
-            'msg' => ' Estado actualizado con éxito.'
+            'msg' => ' Estado actualizado con éxito.',
+            'messages' => Topic::getMessagesAfterUpdate($topic,  ['active' => $active], 'Tema actualizado con éxito')
         ];
-
-//        $response['messages'] = Topic::getMessagesActions($topic, [], 'Tema actualizado con éxito');
 
         return $this->success($response);
     }
@@ -219,13 +217,13 @@ class TemaController extends Controller
     {
         $data = $request->validated();
 
-        $tipo_preg = ($topic->tipo_ev === 'calificada') ? 'selecciona' : 'texto';
+        $question_type_code = $topic->evaluation_type->code === 'qualified' ? 'select-options' : 'written-answer';
 
         Question::updateOrCreate(
             ['id' => $data['id']],
             [
                 'topic_id' => $topic->id,
-                'type_id' => $topic->type_evaluation_id,
+                'type_id' => Taxonomy::getFirstData('question', 'type', $question_type_code)?->id,
                 'pregunta' => html_entity_decode($data['pregunta']),
                 'rptas_json' => html_entity_decode($data['nuevasRptas']),
                 'rpta_ok' => $data['rpta_ok'],
@@ -237,10 +235,9 @@ class TemaController extends Controller
         // Si se desactiva la última pregunta del tema, según su tipo de evaluación ($tipo_pregunta)
         // se inactivará el tema
         // TODO: agregar modal de validación en listado de preguntas
-        $tipo_pregunta = $topic->tipo_ev == 'calificada' ? 'selecciona' : 'texto';
-        $tema_preguntas = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', '1');
+        $has_active_questions = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', '1')->count() > 0;
 
-        if ($tema_preguntas->count() === 0) :
+        if (!$has_active_questions):
             $topic->active = 0;
             $topic->save();
         endif;
@@ -274,10 +271,9 @@ class TemaController extends Controller
         // Si se elimina la última pregunta del tema, según su tipo de evaluación ($tipo_pregunta)
         // se inactivará el tema
         // TODO: agregar modal de validación en listado de preguntas
-        $tipo_pregunta = $topic->tipo_ev == 'calificada' ? 'selecciona' : 'texto';
-        $tema_preguntas = $topic->questions->where('tipo_pregunta', $tipo_pregunta)->where('estado', '1');
+        $has_active_questions = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', '1')->count() === 0;
 
-        if ($tema_preguntas->count() === 0) :
+        if (!$has_active_questions) :
             $topic->estado = 0;
             $topic->save();
         endif;

@@ -15,8 +15,8 @@ class MediaTema extends BaseModel
         'downloadable' => 'boolean',
     ];
 
-     public function type()
-     {
-         return $this->belongsTo(Taxonomy::class, 'type_id');
-     }
+    public function type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
 }
