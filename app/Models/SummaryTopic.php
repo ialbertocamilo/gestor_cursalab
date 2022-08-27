@@ -36,9 +36,7 @@ class SummaryTopic extends Summary
             $row->update($data);
         }
 
-
         return $row;
-        // return SummaryTopic::create($data);
     }
 
     public function isOutOfTimeForQuiz()
