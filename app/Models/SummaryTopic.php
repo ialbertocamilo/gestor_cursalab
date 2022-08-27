@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+
 class SummaryTopic extends Summary
 {
     protected $table = 'summary_topics';
@@ -44,7 +46,7 @@ class SummaryTopic extends Summary
         return now() >= $row->current_quiz_started_at->addHour();
     }
 
-    public static function resetMasiveAttempts($topicsIds, $userId)
+    public static function resetUserTopicsAttempts($userId, $topicsIds)
     {
         self::whereIn('topic_id', $topicsIds)
             ->where('user_id', $userId)
@@ -52,6 +54,62 @@ class SummaryTopic extends Summary
                 'attempts' => 0,
                 //'fuente' => 'resetm'
             ]);
+    }
+
+    /**
+     * Reset attemtps of failed topics (desaprobados)
+     * @param $topicsIds
+     * @param $attemptsLimit
+     * @param null $scheduleDate
+     * @return void
+     */
+    public static function resetFailedTopicsAttemptsAllUsers(
+        $topicsIds, $attemptsLimit, $scheduleDate = null
+    ): void
+    {
+
+        $query = SummaryTopic::whereIn('topic_id', $topicsIds)
+            ->where('passed', 0)
+            ->where('attempts', '>=', $attemptsLimit);
+
+        if ($scheduleDate)
+            $query->where('last_time_evaluated_at', '<=', $scheduleDate);
+
+        $query->update([
+            'attempts' => 0,
+            'last_time_evaluated_at' => Carbon::now()
+            //'fuente' => 'resetm'
+        ]);
+    }
+
+    /**
+     * Update topics restarts count
+     *
+     * @param $topicId
+     * @param $userId
+     * @param $adminId
+     * @return void
+     */
+    public static function updateTopicRestartsCount(
+        $topicId, $userId, $adminId
+    ): void
+    {
+
+        $summaryTopic = SummaryTopic::where('topic_id', $topicId)
+            ->where('user_id', $userId)
+            ->first();
+
+        // Calculate number of restars
+
+        $restarts = $summaryTopic->restarts
+            ? $summaryTopic->restarts + 1
+            : 1;
+
+        // Update record
+
+        $summaryTopic->restarts =  $restarts;
+        $summaryTopic->restarter_id = $adminId;
+        $summaryTopic->save();
     }
 
     public function hasFailed()
@@ -67,6 +125,6 @@ class SummaryTopic extends Summary
             $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
         }
 
-        return $row->attempts >= $attempts_limit; 
+        return $row->attempts >= $attempts_limit;
     }
 }

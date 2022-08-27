@@ -32,8 +32,10 @@ use App\Models\SummaryTopic;
 use App\Models\User;
 use App\Models\Usuario;
 use App\Models\Workspace;
+use App\Services\CourseService;
 use App\Services\FileService;
 use Auth;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -622,15 +624,8 @@ class UsuarioController extends Controller
 
         // Load workspace configuration
 
-        $config = Workspace::select('mod_evaluaciones')
-            ->where('id', $subworkspaceId)
-            ->first();
-
-        if (is_array($config->mod_evaluaciones)) {
-            $mod_eval = $config->mod_evaluacione;
-        } else {
-            $mod_eval = json_decode($config->mod_evaluaciones, true);
-        }
+        $subworkspace = Workspace::find($subworkspaceId);
+        $mod_eval = $subworkspace->mod_evaluaciones;
 
         $data = $this->validarDetallesReinicioIntentosMasivo(
             $curso, $tema, $subworkspaceId, $tipo, $mod_eval
@@ -649,7 +644,7 @@ class UsuarioController extends Controller
 
         if ($topicId == null) {
 
-            $usersQuery = SummaryCourse::query()
+            $query = SummaryCourse::query()
                 ->join('users', 'users.id', '=', 'summary_courses.user_id')
                 ->with('user')
                 ->where('summary_courses.course_id', $courseId)
@@ -659,15 +654,15 @@ class UsuarioController extends Controller
             // "Desaprobados" only
 
             if ($tipo['id'] == 1) {
-                $usersQuery->where('summary_courses.passed', 0)
+                $query->where('summary_courses.passed', 0)
                     ->where('summary_courses.attempts', '>=', $mod_eval['nro_intentos']);
             }
 
-            $users = $usersQuery->orderBy('summary_courses.grade_average')->get();
+            $users = $query->orderBy('summary_courses.grade_average')->get();
 
         } else {
 
-            $usersQuery = SummaryTopic::query()
+            $query = SummaryTopic::query()
                 ->with('user')
                 ->where('summary_topics.topic_id', $topicId)
                 ->where('summary_topics.source_id')
@@ -678,11 +673,11 @@ class UsuarioController extends Controller
             // "Desaprobados" only
 
             if ($tipo['id'] == 1) {
-                $usersQuery->where('summary_topics.passed', 0)
+                $query->where('summary_topics.passed', 0)
                     ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos']);
             }
 
-            $users = $usersQuery->orderBy('summary_topics.grade')->get();
+            $users = $query->orderBy('summary_topics.grade')->get();
         }
 
         // Add "selected" property to each item
@@ -697,7 +692,7 @@ class UsuarioController extends Controller
         ];
     }
 
-    public function reiniciarIntentosMasivos(Request $request)
+    public function reiniciarIntentosMasivos(Request $request): JsonResponse
     {
 
         $admin = $request->admin;
@@ -709,21 +704,14 @@ class UsuarioController extends Controller
 
         // Load workspace's "evaluaciones" configuration
 
-        $config = Workspace::select('mod_evaluaciones')
-            ->where('id', $subworkspaceId)
-            ->first();
-
-        if (is_array($config->mod_evaluaciones)) {
-            $mod_eval = $config->mod_evaluacione;
-        } else {
-            $mod_eval = json_decode($config->mod_evaluaciones, true);
-        }
+        $subworkspace = Workspace::find($subworkspaceId);
+        $mod_eval = $subworkspace->mod_evaluaciones;
 
         if ($topicId == null) {
 
             $curso = Curso::where('id', $courseId)->first();
             $this->reinicioMasivoxCurso(
-                $courseId, $subworkspaceId, $mod_eval, $admin['id'], $users
+                $courseId, $admin['id'], $users
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el curso $curso->name.";
 
@@ -731,7 +719,7 @@ class UsuarioController extends Controller
 
             $topic = Posteo::where('id', $topicId)->first();
             $this->reinicioMasivoxTema(
-                $topicId, $courseId, $subworkspaceId, $mod_eval, $admin['id'], $users
+                $topicId, $admin['id'], $users
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el tema $topic->name.";
         }
@@ -745,102 +733,50 @@ class UsuarioController extends Controller
 
     /**
      * Reset attempts by course
-     * @return void
-     */
-    public function reinicioMasivoxCurso(
-        $courseId, $subworkspaceId, $mod_eval, $adminId, $users
-    )
-    {
-
-        foreach ($users as $key => $user) {
-
-            $userId = $user['user']['id'];
-
-            /**
-            $topicsIds = SummaryTopic::query()
-            ->join('topics', 'topics.id', 'summary_topics.topic_id')
-            ->join('courses', 'courses.id', 'topics.course_id')
-            ->where('summary_topics.user_id', $userId)
-            ->where('courses.id', $courseId)
-            ->pluck('summary_topics.topic_id');
-
-            SummaryTopic::resetMasiveAttempts(
-            $topicsIds, $userId
-            );
-             */
-            SummaryCourse::resetMasiveAttempts([$courseId], $userId);
-            $this->updateRestartsCount(
-                'por_curso', $courseId, $userId, $adminId
-            );
-        }
-    }
-
-    public function reinicioMasivoxTema(
-        $topicId, $courseId, $subworkspaceId, $mod_eval, $adminId, $users
-    )
-    {
-        foreach ($users as $key => $user) {
-
-            $userId = $user['user']['id'];
-            SummaryTopic::resetMasiveAttempts([$topicId], $userId);
-            $this->updateRestartsCount(
-                'por_tema', $topicId, $userId, $adminId
-            );
-        }
-    }
-
-    /**
-     * Update topics and courses restarts count
      *
-     * @param $type
-     * @param $resourceId
-     * @param $userId
+     * @param $courseId
      * @param $adminId
+     * @param $users
      * @return void
      */
-    public function updateRestartsCount(
-        $type, $resourceId, $userId, $adminId
-    ): void
+    public function reinicioMasivoxCurso($courseId, $adminId, $users): void
     {
 
-        if ($type === 'por_tema') {
+        foreach ($users as $key => $user) {
 
-            $summaryTopic = SummaryTopic::where('topic_id', $resourceId)
-                ->where('user_id', $userId)
-                ->first();
+            $userId = $user['user']['id'];
 
-            // Calculate number of restars
+            // Reset course attempts
 
-            $restarts = $summaryTopic->restarts
-                ? $summaryTopic->restarts + 1
-                : 1;
+            SummaryCourse::resetUserCoursesAttempts($userId, [$courseId]);
 
-            // Update record
+            // Reset topics attempts
 
-            $summaryTopic->restarts =  $restarts;
-            $summaryTopic->restarter_id = $adminId;
-            $summaryTopic->save();
+            SummaryCourse::resetUserCourseTopicsAttempts($userId, $courseId);
+
+            // Update restarts count
+
+            SummaryCourse::updateCourseRestartsCount(
+                $courseId, $adminId, $userId
+            );
         }
-
-        if ($type === 'por_curso') {
-
-            $summaryCourse = SummaryCourse::where('course_id', $resourceId)
-                ->where('user_id', $userId)
-                ->first();
-
-            // Calculate number of restars
-
-            $restars = $summaryCourse->restarts
-                ? $summaryCourse->restarts + 1
-                : 1;
-
-            // Update record
-
-            $summaryCourse->restarts =  $restars;
-            $summaryCourse->restarter_id = $adminId;
-            $summaryCourse->save();
-        }
-
     }
-    //**************************************************** REINICIO MASIVOS DE NOTAS POR CURSO ********************************************************/
+
+    public function reinicioMasivoxTema($topicId, $adminId, $users)
+    {
+        foreach ($users as $key => $user) {
+
+            $userId = $user['user']['id'];
+
+            // Reset topics attempts
+
+            SummaryTopic::resetUserTopicsAttempts($userId, [$topicId]);
+
+            // Update restarts count
+
+            SummaryTopic::updateTopicRestartsCount(
+                $topicId, $userId, $adminId
+            );
+        }
+    }
 }
