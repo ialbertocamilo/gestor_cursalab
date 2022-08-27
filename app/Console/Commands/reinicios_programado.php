@@ -8,8 +8,13 @@ use App\Models\Prueba;
 use App\Models\Abconfig;
 use App\Models\Reinicio;
 use App\Models\Categoria;
+use App\Models\School;
+use App\Models\SummaryCourse;
+use App\Models\SummaryTopic;
+use App\Models\Workspace;
 use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class reinicios_programado extends Command
@@ -26,7 +31,27 @@ class reinicios_programado extends Command
      *
      * @var string
      */
-    protected $description = 'Se reinicia a los usuarios configurados por el cronometro a nivel de modulo,curso,categoria';
+    protected $description = 'Se reinicia a los usuarios configurados por el cronometro a nivel de subworkspace, curso, escuela';
+
+
+    /**
+     * Collection of courses with its workspace configuration
+     *
+     * @var array
+     */
+    protected array $coursesWorkspaces = [];
+
+    /**
+     * Array of unique courses ids to be reset
+     *
+     * @var array
+     */
+    protected array $coursesIds = [];
+
+    /**
+     * Workspaces collection
+     */
+    protected  $workspaces;
 
     /**
      * Create a new command instance.
@@ -52,92 +77,152 @@ class reinicios_programado extends Command
 
     private function reinicios_programado_v2(){
 
-        // $date_now = Date::now();
-        $modulos = Abconfig::select('id','mod_evaluaciones','reinicios_programado')
-                            ->get();
-        $categorias = Categoria::select('id', 'config_id')->get();
+        // Initialize workspaces collection
 
-        $categorias_con_reinicios = Categoria::query()
-            ->whereJsonContains('reinicios_programado->activado',true)
-            ->select('id','config_id','reinicios_programado')
-            ->get();
+        $this->workspaces = Workspace::all();
 
-        $cursos_con_reinicios = Curso::query()
-            ->whereJsonContains('reinicios_programado->activado',true)
-            ->select('id','config_id','reinicios_programado')
-            ->get();
+        // Generate list of courses to be reset
 
-        if (count($modulos) > 0) {
+        $this->findCoursesToBeReset();
 
-            foreach ($modulos as $modulo) {
+        // Reset attempts and update reset count
 
-                $mod_eval = json_decode($modulo->mod_evaluaciones, true);
+        foreach ($this->coursesWorkspaces as $course) {
 
-                // Desaprobados del módulo
+            $workspaceId = $course['workspaceId'];
+            $courseId = $course['courseId'];
+            $config = $this->getWorkspaceConfiguration($workspaceId);
+            $schedule = json_decode($course['scheduledRestarts'], true);
 
-                $desaprobados = Prueba::whereIn('categoria_id',$categorias->where('config_id',$modulo->id)->pluck('id'))
-                    ->where('intentos',$mod_eval['nro_intentos'])->where('resultado',0)
-                    ->select('id','categoria_id','curso_id','usuario_id','posteo_id','last_ev')->get();
-                $r_cursos_modulo = $cursos_con_reinicios->where('config_id',$modulo->id); //Cursos con reinicio del modulo
-                $r_categorias_modulo = $categorias_con_reinicios->where('config_id',$modulo->id); //categorias con reinicio del modulo
+            // Calculate date for the next reset,
+            // counting from current date
 
-                // Reinicio por curso
+            $nextDateFromNow = Carbon::now()->subMinutes($schedule['tiempo_en_minutos']);
+            $nextDateFromNow->second = 59;
 
-                $reinicios_x_curso = $desaprobados->whereIn('curso_id',$r_cursos_modulo->pluck('id'))->groupBy('curso_id');
-                foreach ($reinicios_x_curso as $curso_id => $r_curso) {
-                    $curso =$r_cursos_modulo->where('id',$curso_id)->first();
-                    $programado = json_decode($curso->reinicios_programado,true);
-                    $this->reiniciar_prueba($programado,$r_curso);
-                }
+            // Reset attempts
 
-                // Reinicio por categoria
+            if ($config) {
+                SummaryCourse::resetFailedCourseAttemptsAllUsers(
+                    $courseId, $config['nro_intentos'], $nextDateFromNow
+                );
 
-                $reinicios_x_categoria = $desaprobados->whereNotIn('curso_id',$r_cursos_modulo->pluck('id'))
-                                        ->whereIn('categoria_id',$r_categorias_modulo->pluck('id'))
-                                        ->groupBy('categoria_id');
-                foreach ($reinicios_x_categoria as $categoria_id => $r_categoria) {
-                    $categoria = $r_categorias_modulo->where('id',$categoria_id)->first();
-                    $programado = json_decode($categoria->reinicios_programado,true);
-                    $this->reiniciar_prueba($programado,$r_categoria);
-                }
-
-                // Reinicio por modulo
-
-                if (($modulo->reinicios_programado) && json_decode($modulo->reinicios_programado)){
-                    $reinicios_x_modulo = $desaprobados->whereNotIn('curso_id',$r_cursos_modulo->pluck('id'))
-                                            ->whereNotIn('categoria_id',$r_categorias_modulo->pluck('id'));
-                    $programado = json_decode($modulo->reinicios_programado,true);
-
-                    if ($programado['activado']) {
-                        $this->reiniciar_prueba($programado,$reinicios_x_modulo);
-                    }
-                }
+                SummaryCourse::resetCourseTopicsAttemptsAllUsers(
+                    $courseId, $config['nro_intentos'], $nextDateFromNow
+                );
             }
+
+            // Update resets count
+
+            SummaryCourse::updateCourseRestartsCount($courseId);
         }
-
-        Prueba::whereIn('id',$this->ids_a_reiniciar)->update([
-            'intentos' => 0,
-            'fuente' => 'reset'
-        ]);
     }
-    private function reiniciar_prueba($programado,$pruebas){
 
-        $tiempo_en_minutos = $programado['tiempo_en_minutos'];
-        $final = Carbon::now()->subMinutes($tiempo_en_minutos);
-        $final->second = 59;
-        $inicio = Carbon::now()->subMinutes($tiempo_en_minutos);
-        $inicio->second = 00;
-        // $pr_a_reiniciar = $pruebas->whereBetween('last_ev',[$inicio,$final]);
-        $pr_a_reiniciar = $pruebas->where('last_ev','<=',$final);
-        // $pr_a_reiniciar = Prueba::where('id',$pruebas->pluck('id'))->select('id','categoria_id','curso_id','usuario_id','posteo_id')
-        // ->whereBetween('last_ev',[$inicio,$final])->get();
-        // ->whereDate('last_ev','>=',$inicio)->whereDate('last_ev','<=',$final)->get();
-        //PONER ESTADO EN DESARROLLO
-        if (count($pr_a_reiniciar)>0) {
-            foreach ($pr_a_reiniciar as $pr) {
-                $reinicio = new Reinicio();
-                $reinicio->save_reset_user($pr,0,'por_tema');
-                $this->ids_a_reiniciar[] = $pr->id;
+    /**
+     * Get attempts configuration from workspace
+     */
+    private function getWorkspaceConfiguration($workspaceId) {
+
+        $workspace = $this->workspaces->find($workspaceId);
+        return $workspace->mod_evaluaciones;
+    }
+
+    /**
+     * Generate a list of courses to be reset
+     *
+     * @return void
+     */
+    private function findCoursesToBeReset(): void
+    {
+
+        // Courses with scheduled restarts
+
+        $coursesWithRestarts = Curso::query()
+            ->join('course_workspace', 'courses.id', '=', 'course_workspace.course_id')
+            ->whereJsonContains('courses.scheduled_restarts->activado',true)
+            ->select(
+                'courses.*',
+                'course_workspace.workspace_id',
+                'courses.scheduled_restarts'
+            )
+            ->get();
+
+        // Add courses to collection
+
+        $this->addCoursesToCollection($coursesWithRestarts);
+
+
+        // Courses from schools with scheduled restarts
+
+        $schoolsWithRestarts = School::query()
+            ->with('courses')
+            ->join('school_workspace', 'school_workspace.school_id', '=', 'schools.id')
+            ->whereJsonContains('schools.scheduled_restarts->activado',true)
+            ->select('schools.*','schools.scheduled_restarts', 'school_workspace.workspace_id')
+            ->groupBy('schools.id')
+            ->get();
+
+        // Add courses to collection
+
+        $this->addCoursesFromItemToCollection($schoolsWithRestarts);
+
+        // Courses from subworkspaces with scheduled restarts
+
+        $workspacesWithRestarts = Workspace::query()
+            ->with('courses')
+            ->join('course_workspace', 'course_workspace.workspace_id', '=', 'workspaces.id')
+            ->whereJsonContains('reinicios_programado->activado', true)
+            ->select('workspaces.*', DB::raw('reinicios_programado as scheduled_restarts'), 'course_workspace.workspace_id')
+            ->groupBy('workspaces.id')
+            ->get();
+
+
+        // Add courses to collection
+
+        $this->addCoursesFromItemToCollection($workspacesWithRestarts);
+    }
+
+    /**
+     * Add courses from items collection, all courses
+     * will use the same workspace id and schedule to restart
+     *
+     * @param $items
+     * @return void
+     */
+    private function addCoursesFromItemToCollection($items): void
+    {
+
+        foreach ($items as $item) {
+            $this->addCoursesToCollection(
+                $item->courses,
+                $item->workspace_id,
+                $item->scheduled_restarts
+            );
+        }
+    }
+
+    /**
+     * Add course and its respective workspace id to
+     * courses collection
+     *
+     * @param $courses
+     * @param $workspaceId
+     * @param $scheduleRestarts
+     * @return void
+     */
+    private function addCoursesToCollection(
+        $courses, $workspaceId = null, $scheduleRestarts = null
+    ): void
+    {
+        foreach ($courses as $course) {
+
+            if (!in_array($course->id, $this->coursesIds)) {
+                $this->coursesIds[] = $course->id;
+                $this->coursesWorkspaces[] = [
+                    'courseId' => $course->id,
+                    'workspaceId' => $workspaceId ?? $course->workspace_id,
+                    'scheduledRestarts' => $scheduleRestarts ?? $course->scheduled_restarts
+                ];
             }
         }
     }

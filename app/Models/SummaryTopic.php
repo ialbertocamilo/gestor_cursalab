@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+
 class SummaryTopic extends Summary
 {
     protected $table = 'summary_topics';
@@ -32,7 +34,7 @@ class SummaryTopic extends Summary
         return SummaryTopic::create($data);
     }
 
-    public static function resetMasiveAttempts($topicsIds, $userId)
+    public static function resetUserTopicsAttempts($userId, $topicsIds)
     {
         self::whereIn('topic_id', $topicsIds)
             ->where('user_id', $userId)
@@ -40,6 +42,32 @@ class SummaryTopic extends Summary
                 'attempts' => 0,
                 //'fuente' => 'resetm'
             ]);
+    }
+
+    /**
+     * Reset attemtps of failed topics (desaprobados)
+     * @param $topicsIds
+     * @param $attemptsLimit
+     * @param null $scheduleDate
+     * @return void
+     */
+    public static function resetFailedTopicsAttemptsAllUsers(
+        $topicsIds, $attemptsLimit, $scheduleDate = null
+    ): void
+    {
+
+        $query = SummaryTopic::whereIn('topic_id', $topicsIds)
+            ->where('passed', 0)
+            ->where('attempts', '>=', $attemptsLimit);
+
+        if ($scheduleDate)
+            $query->where('last_time_evaluated_at', '<=', $scheduleDate);
+
+        $query->update([
+            'attempts' => 0,
+            'last_time_evaluated_at' => Carbon::now()
+            //'fuente' => 'resetm'
+        ]);
     }
 
     /**
