@@ -150,19 +150,22 @@ class RestQuizController extends Controller
         $topic = Topic::with('evaluation_type', 'course')->find('id', $topic_id);
 
         if (!$topic) return response()->json(['data' => [], 'error' => true], 200);
-        
+
+        $row = SummaryTopic::setStartQuizData($topic);
+
+        if ($row->isOutOfTimeForQuiz())
+            return response()->json(['data' => [], 'error' => true], 200);
+
         $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
 
         $limit = $config_quiz['preg_x_ev'] ?? 5;
-        $is_random = $topic->evaluation_type->code == 'calificada';
-        $type_code = $topic->evaluation_type->code == 'calificada' ? 'selecciona' : 'texto';
+        $is_random = $topic->evaluation_type->code == 'qualified';
+        $type_code = $topic->evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer';
 
         $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
 
         if ( count($questions) == 0 )
             return response()->json(['error' => true, 'data' => null], 200);
-
-        $row = SummaryTopic::setInitialData($topic);
 
         $data = [   
             'nombre' => $topic->name,
@@ -216,17 +219,45 @@ class RestQuizController extends Controller
     {
         $topic->load('course');
 
-        $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
-
-        $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
-
         $row = SummaryTopic::getCurrentRow($topic);
 
-        if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft($attempts_limit))
-        {
+        $counter = false;
 
+        if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft($attempts_limit)) {
+
+            $times = [];
+
+            if ($topic->course->reinicios_programado)
+                $times[] = $topic->course->reinicios_programado;
+
+            if (auth()->user()->subworspace->reinicios_programado)
+                $times[] = auth()->user()->subworspace->reinicios_programado;
+
+            if (count($times) > 0) {
+                
+                $scheduled = false;
+                $minutes = 0;
+
+                foreach ($times as $time) {
+
+                    if ($time->activado) {
+
+                        $scheduled = true;
+                        $minutes = $time->tiempo_en_minutos;
+
+                        break;
+                    }
+                }
+
+                if ($scheduled AND $row->last_time_evaluated_at) {
+
+                    $finishes_at = $row->last_time_evaluated_at->addMinutes($minutes);
+                    $counter = $finishes_at->diff(now())->format('%y/%m/%d %H:%i:%s');
+                }
+            }
         }
 
+        return $counter;
     }
 
 }

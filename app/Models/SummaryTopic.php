@@ -9,7 +9,9 @@ class SummaryTopic extends Summary
     protected $table = 'summary_topics';
 
     protected $fillable = [
-        'last_time_evaluated_at', 'user_id', 'topic_id', 'views', 'attempts', 'downloads'
+        'user_id', 'topic_id', 'views', 'attempts', 'downloads', 'answers', 'restarts',
+        'current_quiz_started_at', 'current_quiz_finished_at', 'taking_quiz',
+        'last_time_evaluated_at',
     ];
 
     public function topic()
@@ -22,16 +24,26 @@ class SummaryTopic extends Summary
         return $this->belongsTo(Taxonomy::class, 'status_id');
     }
 
-    protected function setInitialData($topic)
+    protected function setStartQuizData($topic)
     {
-        $data = [
-            'user_id' => $user->id,
-            'topic_id' => $topic->id,
-            'current_quiz_started_at' => now(),
-            'attempts' => 1,
-        ];
+        $row = $this->getCurrentRow($topic);
 
-        return SummaryTopic::create($data);
+        if (!$row->taking_quiz) {
+
+            $data = [
+                'current_quiz_started_at' => now(),
+                'taking_quiz' => ACTIVE,
+            ];
+
+            $row->update($data);
+        }
+
+        return $row;
+    }
+
+    public function isOutOfTimeForQuiz()
+    {
+        return now() >= $row->current_quiz_started_at->addHour();
     }
 
     public static function resetUserTopicsAttempts($userId, $topicsIds)
