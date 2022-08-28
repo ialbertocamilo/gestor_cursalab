@@ -165,7 +165,7 @@ export default {
                         icon: 'fas fa-history',
                         type: 'action',
                         method_name: 'reset',
-                        //show_condition: 'pruebas_desaprobadas'
+                        show_condition: 'pruebas_desaprobadas'
                     },
                 ]
             },
