@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Route;
 
 // });
 
-Route::get('/rest/app_versions', [AuthController::class, 'appVersions']);
+Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
 Route::group(['prefix' => 'auth'], function () {
 
