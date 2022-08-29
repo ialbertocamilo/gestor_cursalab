@@ -183,7 +183,7 @@ class RestQuizController extends Controller
 
         $counter = false;
 
-        if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft($attempts_limit)) {
+        if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft()) {
 
             $times = [];
 

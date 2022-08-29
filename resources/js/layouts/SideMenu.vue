@@ -365,7 +365,7 @@ export default {
                         subpaths:["masivo/usuarios"],
                         selected:false,
                         permission:"reinicio_usuarios",
-                        role:["super-user","admin-TEMPORAL_INACTIVO"]
+                        role:["super-user","admin"]
                     },
                     {
                         title:"Subida masivos",
