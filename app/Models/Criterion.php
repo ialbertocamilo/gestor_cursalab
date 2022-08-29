@@ -20,6 +20,7 @@ class Criterion extends BaseModel
 
     protected $casts = [
         'required' => 'boolean',
+        'show_in_segmentation' => 'boolean',
     ];
 
     public function sluggable(): array

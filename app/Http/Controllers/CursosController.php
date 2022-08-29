@@ -110,7 +110,6 @@ class CursosController extends Controller
     public function storeCurso(School $school, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
-
         $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
 
@@ -129,6 +128,7 @@ class CursosController extends Controller
     public function updateCurso(School $school, Course $course, CursosStoreUpdateRequest $request)
     {
         $data = $request->validated();
+//        info($data);
 
         if ($data['validateForm']):
             $validations = Course::validateBeforeUpdate($data, $school, $course);

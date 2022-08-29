@@ -133,18 +133,12 @@ class Course extends BaseModel
                 $course->workspaces()->sync([$workspace->id]);
             endif;
 
-            $req_curso = Requirement::whereHasMorph('model', [Course::class], function ($query) use ($course) {
-                $query->where('id', $course->id);
-            })->first();
-
-            $course_requirements = [
-                'model_type' => Course::class,
-                'model_id' => $course->id,
-                'requirement_type' => Course::class,
-                'requirement_id' => $data['requisito_id']
-            ];
-
-            Requirement::storeRequest($course_requirements, $req_curso);
+            if ($data['requisito_id']):
+                Requirement::updateOrCreate(
+                    ['model_type' => Course::class, 'model_id' => $course->id,],
+                    ['requirement_type' => Course::class, 'requirement_id' => $data['requisito_id']]
+                );
+            endif;
 
 
             $course->schools()->sync($data['escuelas']);
@@ -156,7 +150,8 @@ class Course extends BaseModel
         } catch (\Exception $e) {
 
             DB::rollBack();
-            return $e;
+            Error::storeAndNotificateException($e, request());
+            abort(errorExceptionServer());
         }
 
         cache_clear_model(School::class);
@@ -325,14 +320,18 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
-        $requirement_course = $course->requirements->first();
+        $requirement_course = $course->models->first();
+//        info("requirement_course");
+//        info($requirement_course);
         if ($requirement_course) {
             $summary_requirement_course = SummaryCourse::with('course')
                 ->where('user_id', $user->id)
                 ->where('course_id', $requirement_course->id)
                 ->whereRelation('status', 'code', '=', 'aprobado')
                 ->first();
-
+//            info("requirement_course");
+//            info($summary_requirement_course);
+//
             if (!$summary_requirement_course) {
                 $available_course = false;
                 $status = 'bloqueado';
