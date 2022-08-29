@@ -254,7 +254,7 @@
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import draggable from 'vuedraggable'
 
-const fields = ['name', 'codigo_matricula', 'estado', 'reinicios_programado',
+const fields = ['name', 'codigo_matricula', 'active', 'reinicios_programado',
     'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo'];
 const file_fields = ['logo', 'plantilla_diploma'];
 export default {
@@ -283,7 +283,7 @@ export default {
                 plantilla_diploma: null,
                 file_plantilla_diploma: null,
                 codigo_matricula: null,
-                estado: false,
+                active: false,
                 reinicio_automatico: false,
                 reinicio_automatico_dias: null,
                 reinicio_automatico_horas: null,
