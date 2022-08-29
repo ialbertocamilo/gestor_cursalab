@@ -14,7 +14,7 @@ class FirebaseController extends Controller
 
     public function appVersions()
     {
-        return config('app.versions');
+        return response()->json(['data' => config('app.versions')], 200);
     }
 
     public function guardarToken(Request $request)
