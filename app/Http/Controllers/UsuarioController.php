@@ -543,8 +543,9 @@ class UsuarioController extends Controller
     {
         // info(!$user->active);
 
-        $status = !$user->active;
-        $user->update(['active' => $status]);
+        $user->active = !$user->active;
+
+        $user->save();
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
