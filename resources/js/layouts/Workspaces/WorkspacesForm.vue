@@ -67,13 +67,15 @@
                 <v-row>
                     <v-col cols="6">
                         <v-subheader class="mb-3 px-0">
-                            <strong>Obligatorios</strong>
+                            <strong>Por defecto</strong>
                         </v-subheader>
                         <v-checkbox
                             v-for="criterion in defaultCriteria"
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
-                            :label="generateCriterionTitle(criterion)">
+                            :label="generateCriterionTitle(criterion)"
+                            :disabled="criterion.code === 'module'"
+                        >
                         </v-checkbox>
                     </v-col>
                     <v-col cols="6">
@@ -112,7 +114,7 @@ export default {
         width: String
     },
     // data: () => ({
-    data(){ 
+    data(){
         return {
 
         errors: []

@@ -264,7 +264,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             endif;
 
-            $user->subworkspace_id = Workspace::where('criterion_value_id', $data['criterion_list']['module'])?->first()?->id;
+            $user->subworkspace_id = Workspace::where('criterion_value_id', $data['criterion_list']['module'])->first()?->id;
 
             $user->criterion_values()->sync(array_values($data['criterion_list_final']) ?? []);
 
