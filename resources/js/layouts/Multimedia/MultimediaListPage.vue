@@ -233,7 +233,7 @@ export default {
                             {text: "Título", value: "title", sortable: false},
                             {text: "Tipo", value: "tipo", sortable: false},
                             {text: "Fecha de subida", value: "created_at", sortable: false},
-                            {text: "Peso", value: "size", sortable: false},
+                            {text: "Peso", value: "formattedSize", sortable: false},
                             {text: "Opciones", value: "actions", align: 'center', sortable: false},
                         ],
                         actions: [
@@ -360,7 +360,8 @@ export default {
             console.log('detalles first parent component :: ', rowData)
         },
         download(rowData) {
-            console.log('download first parent component :: ', rowData)
+            const url = `/multimedia/${rowData.id}/download`
+            this.openInNewTab(url)
         },
         changePage(sum) {
             let vue = this

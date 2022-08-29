@@ -7,6 +7,37 @@ use Illuminate\Support\Facades\Storage;
 class FileService {
 
     /**
+     * Format file size showing its unit
+     * @param int|null $sizeInKB $
+     */
+    public static function formatSize(?int $sizeInKB): string
+    {
+        if (!$sizeInKB) return '-';
+
+        $size = '';
+        if ($sizeInKB < 1024) {
+
+            $size = "$sizeInKB KB";
+
+        } else {
+
+            $sizeInMB = round($sizeInKB / 1024, 2);
+
+            if ($sizeInMB < 1024) {
+
+                $size = "$sizeInMB MB";
+
+            } else {
+
+                $sizeInGB = round($sizeInKB / (1024 * 1024), 2);
+                $size = "$sizeInGB GB";
+            }
+        }
+
+        return $size;
+    }
+
+    /**
      * Generate bucket URL for file
      *
      * @param string|null $path
@@ -16,7 +47,7 @@ class FileService {
     {
         // Initiliaze path value if it is not set
         if (!$path) $path = '';
-        
+
         if (str_starts_with($path, 'https://')) return $path;
 
         $full_url = Storage::url($path);

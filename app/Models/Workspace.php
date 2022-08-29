@@ -309,7 +309,10 @@ class Workspace extends BaseModel
 
                 $module = Criterion::where('code', 'module')->first();
 
-                $criterion_value = $module->values()->create(['value_text' => $data['name'], 'active' => ACTIVE]);
+                $criterion_value = $module->values()->create([
+                    'value_text' => $data['name'],
+                    'active' => ACTIVE
+                ]);
 
                 $data['criterion_value_id'] = $criterion_value->id;
 
