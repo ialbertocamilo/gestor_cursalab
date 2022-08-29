@@ -31,7 +31,7 @@ class Summary extends BaseModel
                 
                 $config_quiz = $user->subworspace->mod_evaluaciones;
 
-                if ($row->attempts >= $config_quiz['nro_attempts'])
+                if ($row->attempts >= $config_quiz['nro_intentos'])
                     return false;
             }
 

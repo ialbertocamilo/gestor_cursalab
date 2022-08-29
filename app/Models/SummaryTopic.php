@@ -10,7 +10,7 @@ class SummaryTopic extends Summary
 
     protected $fillable = [
         'user_id', 'topic_id', 'views', 'attempts', 'downloads', 'answers', 'restarts',
-        'current_quiz_started_at', 'current_quiz_finished_at', 'taking_quiz',
+        'current_quiz_started_at', 'current_quiz_finishes_at', 'taking_quiz',
         'last_time_evaluated_at',
     ];
 
@@ -32,6 +32,7 @@ class SummaryTopic extends Summary
 
             $data = [
                 'current_quiz_started_at' => now(),
+                'current_quiz_finishes_at' => now()->addHour(),
                 'taking_quiz' => ACTIVE,
             ];
 
@@ -121,10 +122,28 @@ class SummaryTopic extends Summary
     {
         if (!$attempts_limit)
         {
-            $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
-            $attempts_limit = $config_quiz['nro_intentos'] ?? 5;
+            $config = auth()->user()->getSubworkspaceSetting('mod_evaluaciones');
+            $attempts_limit = $config['nro_intentos'] ?? 5;
         }
 
         return $row->attempts >= $attempts_limit;
+    }
+
+    protected function calculateGrade($correct_answers, $failed_answers)
+    {
+        return ($correct_answers == 0) ? 0 : ((20 / ($correct_answers + $failed_answers)) * $correct_answers);
+    }
+
+    protected function hasPassed($new_grade, $passing_grade = NULL)
+    {
+        if (!$passing_grade)
+            $passing_grade = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'nota_aprobatoria');
+
+        return $new_grade >= $passing_grade;
+    }
+
+    public function hasImprovedGrade($new_grade)
+    {
+        return $new_grade >= $this->grade;
     }
 }

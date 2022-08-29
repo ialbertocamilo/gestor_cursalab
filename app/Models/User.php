@@ -559,4 +559,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
         $user->save();
     }
+
+    public function getSubworkspaceSetting($field, $value = null)
+    {
+        // $user = $user ?? auth()->user();
+
+        $settings = $this->subworspace->$field;
+
+        if (!$settings) return NULL;
+
+        if ($value) return $settings[$value] ?? NULL;
+
+        return $settings;
+    }
 }

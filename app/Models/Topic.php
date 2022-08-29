@@ -485,4 +485,32 @@ class Topic extends BaseModel
             'last_topic_reviewed' => $last_topic_reviewed
         ];
     }
+
+    public function getNextOne()
+    {
+        return Topic::where('curso_id', $this->course_id)
+                ->whereNotIn('id',[$this->id])
+                ->where('position','>=', $this->position)
+                ->orderBy('position', 'ASC')
+                ->first();
+    }
+
+    protected function evaluateAnswers($respuestas, $topic)
+    {
+        $questions = Question::select('id', 'rpta_ok')->where('topic_id', $topic->id)->get();
+
+        $correct_answers = $failed_answers = 0;
+
+        foreach ($respuestas as $respuesta) {
+
+            $question = $questions->where('id', $respuesta['preg_id'])->first();
+
+            if ($question->rpta_ok == $respuesta['opc'])
+                $correct_answers++; continue;
+            
+            $failed_answers++;
+        }
+
+        return [$correct_answers, $failed_answers];
+    }
 }

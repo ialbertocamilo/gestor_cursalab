@@ -37,7 +37,7 @@ return new class extends Migration
             $table->timestamp('last_time_evaluated_at')->nullable();
 
             $table->timestamp('current_quiz_started_at')->nullable();
-            $table->timestamp('current_quiz_finished_at')->nullable();
+            $table->timestamp('current_quiz_finishes_at')->nullable();
             $table->boolean('taking_quiz')->nullable();
 
             $table->foreignId('restarter_id')->nullable()->constrained('users');
