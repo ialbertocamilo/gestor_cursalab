@@ -7,7 +7,7 @@ class SummaryUser extends Summary
     protected $table = 'summary_users';
 
     protected $fillable = [
-        'last_time_evaluated_at',
+        'last_time_evaluated_at', 'course_assigneds', 'user_id', 'attempts'
     ];
 
     public function user()

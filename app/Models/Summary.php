@@ -78,14 +78,14 @@ class Summary extends BaseModel
 
         // $source = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
 
-        $data = self::create([
+        $data = [
             'user_id' => $user->id,
             'attempts' => 0,
             'views' => 1,
             // 'last_time_evaluated_at' => now(),
             // 'fuente' => $fuente
             // 'libre' => $curso->libre,
-        ]);
+        ];
 
         if ($model instanceof Topic) {
 
