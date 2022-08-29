@@ -227,7 +227,8 @@
                                         />
                                     </v-col>
                                 </v-row>
-                                <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
+                                <div class="d-flex justify-content-center mt-1"
+                                     v-if="showErrorReinicios">
                                     <div style="color: #FF5252" class="v-messages__wrapper">
                                         <div class="v-messages__message">Validar hora de reinicio</div>
                                     </div>
@@ -316,12 +317,15 @@ export default {
             const dias = vue.resource.reinicio_automatico_dias
             const horas = vue.resource.reinicio_automatico_horas
             const minutos = vue.resource.reinicio_automatico_minutos
+
             if (!reinicio) {
                 return false
             }
-            if (dias > 0 || horas > 0 || minutos > 0) {
+
+            if (dias >= 0 && horas >= 0 && minutos > 0) {
                 return false
             }
+
             return true
         }
     },

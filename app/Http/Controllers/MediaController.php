@@ -46,14 +46,17 @@ class MediaController extends Controller
     {
 
 
-        $size = $multimedia->size === 0.0 ? '-' : $multimedia->size;
+        $type = $multimedia->getMediaType($multimedia->ext);
+        $type = $type . ' (' . strtoupper($multimedia->ext) . ')';
+
+
         $multimedia->file = $multimedia->ext === 'scorm'
                              ? $multimedia->file
                              : FileService::generateUrl($multimedia->file);
         $multimedia->preview = $multimedia->getPreview();
-        $multimedia->type = $multimedia->getMediaType($multimedia->ext);
+        $multimedia->type = $type;
         $multimedia->created = $multimedia->created_at->format('d/m/Y');
-        $multimedia->size = $size;
+        $multimedia->formattedSize = FileService::formatSize($multimedia->size);
         return $this->success([
             'multimedia' => $multimedia
         ]);

@@ -42,9 +42,9 @@
                             <v-col cols="4" class="multimedia-label" v-text="'Tipo:'"/>
                             <v-col cols="8" v-text="resource.type"/>
                             <v-col cols="4" class="multimedia-label" v-text="'Peso'"/>
-                            <v-col cols="8" v-text="resource.size"/>
+                            <v-col cols="8" v-text="resource.formattedSize"/>
                             <v-col cols="4" class="multimedia-label" v-text="'Fecha de creación:'"/>
-                            <v-col cols="8" v-text="resource.created_at"/>
+                            <v-col cols="8" v-text="resource.created"/>
                         </v-row>
                     </v-col>
                     <v-col cols="6" v-if="false">

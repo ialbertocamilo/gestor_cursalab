@@ -2,7 +2,8 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
+<!--                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>-->
+                    Módulos
                 <v-spacer/>
                 <!--                <DefaultActivityButton-->
                 <!--                    :label="'Actividad'"-->

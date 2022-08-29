@@ -110,7 +110,7 @@
                                             Módulo
                                         </th>
                                         <th class="text-left" style="width: 75% !important">
-                                            Carreras
+                                            Selector de criterios
                                         </th>
                                     </tr>
                                 </thead>
