@@ -375,6 +375,8 @@ class Topic extends BaseModel
 
         $schools_courses = [];
 
+        $topic_status_arr = config('topics.status');
+
         foreach ($courses as $course) {
             $course_status = Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
@@ -406,7 +408,8 @@ class Topic extends BaseModel
                     'intentos_restantes' => $topic_status['remaining_attempts'],
                     't_evaluacion' => $topic->evaluation_type->code,
                     'estado_tema' => $topic_status['status'],
-                    'estado_tema_str' => $topic_status['status'],
+//                    'estado_tema_str' => $topic_status['status'],
+                    'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                 ];
             }
 
@@ -507,7 +510,7 @@ class Topic extends BaseModel
 
             if ($question->rpta_ok == $respuesta['opc'])
                 $correct_answers++; continue;
-            
+
             $failed_answers++;
         }
 
