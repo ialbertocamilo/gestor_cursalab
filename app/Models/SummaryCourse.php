@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class SummaryCourse extends Summary
 {
@@ -68,19 +69,21 @@ class SummaryCourse extends Summary
      *
      * @param $courseId
      * @param $userId
-     * @return void
+     * @return Collection
      */
-    public static function resetUserCourseTopicsAttempts($userId, $courseId): void
+    public static function getCourseTopicsIds($courseId, $userId = null): Collection
     {
 
-        $topicsIds = SummaryTopic::query()
+        $query = SummaryTopic::query()
             ->join('topics', 'topics.id', 'summary_topics.topic_id')
             ->join('courses', 'courses.id', 'topics.course_id')
-            ->where('summary_topics.user_id', $userId)
-            ->where('courses.id', $courseId)
-            ->pluck('summary_topics.topic_id');
+            ->where('courses.id', $courseId);
 
-        SummaryTopic::resetUserTopicsAttempts($userId, $topicsIds);
+        if ($userId) {
+            $query->where('summary_topics.user_id', $userId);
+        }
+
+        return $query->pluck('summary_topics.topic_id');
     }
 
     /**

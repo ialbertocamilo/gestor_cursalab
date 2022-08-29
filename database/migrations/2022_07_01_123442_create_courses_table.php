@@ -29,6 +29,9 @@ return new class extends Migration
             $table->boolean('freely_eligible')->nullable()->default(false);
             $table->boolean('assessable')->nullable()->default(false);
 
+            $table->decimal('duration', 6,2)->nullable();
+            $table->decimal('investment', 10,2)->nullable();
+
             // $table->unsignedBigInteger('requisito_id');
             // $table->unsignedBigInteger('duplicado_id');
 

@@ -32,7 +32,7 @@
                           <v-tab class="justify-content-start">
                             <v-icon left>mdi mdi-history</v-icon> Reinicio por tema
                           </v-tab>
-
+<!--
                           <v-tab class="justify-content-start">
                             <v-icon left>mdi mdi-history</v-icon> Reinicio por curso
                           </v-tab>
@@ -40,7 +40,7 @@
                           <v-tab class="justify-content-start">
                             <v-icon left> mdi mdi-history</v-icon> Reinicio total
                           </v-tab>
-
+-->
                           <v-tab-item >
                             <v-card flat class="ml-5">
                               <v-card-text class="pr-0 pt-1">
@@ -61,6 +61,7 @@
                                         <v-row justify="space-around">
                                             <v-col cols="12" class="d-flex justify-content-center mx-0 px-0">
                                                 <DefaultAutocomplete clearable
+                                                                     itemText="name"
                                                                      :items="selects.temas"
                                                                      v-model="resource.p"
                                                                      return-object
@@ -236,10 +237,10 @@ export default {
 
             if (validateForm ) {
 
-                if (action == 'reset_x_tema')
+                if (action === 'reset_x_tema')
                     fields = ['p']
 
-                if (action == 'reset_x_curso')
+                if (action === 'reset_x_curso')
                     fields = ['c']
 
                 let formData = vue.getMultipartFormData('POST', vue.resource, fields);
@@ -249,11 +250,11 @@ export default {
                     .then(({data}) => {
                         vue.showAlert(data.data.msg)
 
-                        if (action == 'reset_total'){
+                        if (action == 'reset_total') {
                             this.hideLoader()
                             vue.closeModal()
                             vue.$emit('onReinicioTotal')
-                        }else{
+                        } else {
                             this.loadData(vue.resource)
                             this.hideLoader()
                         }
@@ -268,14 +269,17 @@ export default {
             vue.resetFormValidation('cursosForm')
             vue.resetFormValidation('totalForm')
             vue.resetFormValidation('temasForm')
-        },
+        }
+        ,
         loadData(resource) {
+
             let vue = this
             let url = `${vue.options.base_endpoint}/${resource.id}/reset`
+
             vue.$http.get(url).then(({data}) => {
-                vue.selects.temas = data.data.temas
-                vue.selects.cursos = data.data.cursos
-                vue.resource = data.data.usuario
+                vue.selects.temas = data.data.topics
+                vue.selects.cursos = data.data.courses
+                vue.resource = data.data.user
                 vue.resetValidation()
             });
         },
