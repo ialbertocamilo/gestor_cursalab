@@ -7,9 +7,10 @@ Route::controller(RestQuizController::class)->group(function() {
     // Route::get('/rest/evaluarpreguntas_v2/{id_video}/{id_user}/{rpta_ok}/{rpta_fail}/{usu_rptas}', 'ApiRest\RestAvanceController@evaluarpreguntas_v2');
     // Route::get('evaluarpreguntas_v2/{topic_id}/{user_id}/{rpta_ok}/{rpta_fail}/{usu_rptas}', 'evaluarpreguntas_v2');
 
-    Route::get('cargar_preguntas/{topic_id}', 'cargar_preguntas');
     Route::post('evaluar_preguntas', 'evaluar_preguntas');
     Route::post('evaluar_abiertas', 'guardaEvaluacionAbierta');
+    
+    Route::get('cargar_preguntas/{topic_id}', 'cargar_preguntas');
 
     Route::post('upd_reproducciones/{topic_id}', 'guarda_visitas_post');
     Route::post('contador_tema_reseteo/{topic_id}', 'contador_tema_reseteo');
