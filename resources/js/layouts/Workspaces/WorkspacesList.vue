@@ -220,7 +220,7 @@
 
                                 Roles
 
-                                <a href="/roles/index">
+                                <a href="/roles/">
                                     <div class="go-icon">
                                         <v-icon color="#5D5FEF">
                                             mdi-arrow-top-right-thin
@@ -239,7 +239,7 @@
                                 <v-icon>mdi-key-variant</v-icon>
                                 Permisos
 
-                                <a href="/permisos/index">
+                                <a href="/permisos/">
                                     <div class="go-icon">
                                         <v-icon color="#5D5FEF">
                                             mdi-arrow-top-right-thin
@@ -258,7 +258,7 @@
                                 <v-icon>mdi-account-tie</v-icon>
                                 Administradores
 
-                                <a href="/users/index">
+                                <a href="/users/">
                                     <div class="go-icon">
                                         <v-icon color="#5D5FEF">
                                             mdi-arrow-top-right-thin
@@ -419,6 +419,7 @@ export default {
 
                     if (r.role_id === vue.superUserRoleId) {
                         vue.workspacesAdmin = vue.workspaces;
+                        vue.canAccessConfiguration = true;
                     }
 
                     // Config users

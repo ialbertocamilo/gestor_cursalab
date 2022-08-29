@@ -45,6 +45,8 @@ return new class extends Migration
             $table->foreignId('source_id')->nullable()->constrained('taxonomies');
             $table->foreignId('status_id')->nullable()->constrained('taxonomies');
 
+            $table->boolean('active')->nullable();
+
             $table->timestamps();
             $table->softDeletes();
         });

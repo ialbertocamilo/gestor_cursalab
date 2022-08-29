@@ -31,6 +31,8 @@ class CriterionValueStoreRequest extends FormRequest
             'name' => "required|min:1|unique:criterion_values,{$column_name},{$id},id",
             'criterion_id' => "required",
 
+
+
             'workspace_id' => "nullable",
         ];
     }

@@ -40,7 +40,7 @@ return new class extends Migration
             $table->timestamp('last_time_evaluated_at')->nullable();
             $table->timestamp('certification_issued_at')->nullable();
 
-            // $table->boolean('active')->nullable()->default(true);
+             $table->boolean('active')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
