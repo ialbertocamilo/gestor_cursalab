@@ -146,25 +146,28 @@ class RestQuizController extends Controller
         return response()->json(['error' => false, 'data' => $data], 200);
     }
 
-    public function preguntasIntentos_v7($topic_id = null, $user_id = null, $fuente)
-    {
-        if ( !$topic_id && !$user_id ) return ['error' => 2, 'data' => null];
+    // public function preguntasIntentos_v7($topic_id = null, $user_id = null, $fuente)
+    // {
+    //     if ( !$topic_id && !$user_id ) return ['error' => 2, 'data' => null];
 
-        $topic = Topic::with('course.topics')->find($topic_id);
+    //     $topic = Topic::with('course.topics')->find($topic_id);
 
-        $row = SummaryTopic::incrementUserAttempts($topic);
+    //     $row = SummaryTopic::incrementUserAttempts($topic);
 
-        if (!$row) return ['error' => 1, 'data' => null];
+    //     if (!$row) return ['error' => 1, 'data' => null];
 
-        SummaryCourse::incrementUserAttempts($topic->course);
-        SummaryUser::incrementUserAttempts();
+    //     SummaryCourse::incrementUserAttempts($topic->course);
+    //     SummaryUser::incrementUserAttempts();
 
-        return ['error' => 0, 'data' => $row->attempts];
-    }
+    //     return ['error' => 0, 'data' => $row->attempts];
+    // }
 
     public function guarda_visitas_post(Topic $topic)
     {
         $topic->load('course.topics');
+
+        info('topic');
+        info($topic);
 
         $row = SummaryTopic::incrementViews($topic);
         
