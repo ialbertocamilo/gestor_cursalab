@@ -41,7 +41,7 @@ Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
 Route::group(['prefix' => 'auth'], function () {
 
-    Route::post('/login', [FirebaseController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login']);
 
 });
 
