@@ -166,14 +166,14 @@ class SummaryCourse extends Summary
         $cant_revisados = 0;
         $cant_desaprob = 0;
 
-        $asing = $helper->help_cursos_x_matricula_con_cursos_libre($usuario_id);
+        // $asing = $helper->help_cursos_x_matricula_con_cursos_libre($usuario_id);
 
-        $el_curso_esta_asignado = false;
-        if(count($asing)>0){
-            $el_curso_esta_asignado = in_array($topic->course_id,$asing);
-        }
+        // $el_curso_esta_asignado = false;
+        // if(count($asing)>0){
+        //     $el_curso_esta_asignado = in_array($topic->course_id,$asing);
+        // }
 
-        if($el_curso_esta_asignado){
+        // if($el_curso_esta_asignado){
             if(count($topics_qualified)>0){
                 $cant_aprob = DB::table('pruebas')
                 // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
@@ -290,10 +290,10 @@ class SummaryCourse extends Summary
                 // 'intentos' => $suma_intentos->intentos,
             ));
             // $helper->log_marker('RxC Update FIN');
-        }else{
-            Resumen_x_curso::where('usuario_id',$usuario_id)->where('curso_id',$topic->course_id)->update([
-                'estado_rxc'=>0
-            ]);
-        }
+        // }else{
+        //     Resumen_x_curso::where('usuario_id',$usuario_id)->where('curso_id',$topic->course_id)->update([
+        //         'estado_rxc'=>0
+        //     ]);
+        // }
     }
 }

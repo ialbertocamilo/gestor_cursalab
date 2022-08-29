@@ -106,7 +106,7 @@ class RestQuizController extends Controller
 
     public function cargar_preguntas($topic_id)
     {
-        $topic = Topic::with('evaluation_type', 'course')->find('id', $topic_id);
+        $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
 
         if (!$topic) return response()->json(['data' => [], 'error' => true], 200);
 
@@ -146,31 +146,38 @@ class RestQuizController extends Controller
         return response()->json(['error' => false, 'data' => $data], 200);
     }
 
-    public function preguntasIntentos_v7($topic_id = null, $user_id = null, $fuente)
-    {
-        if ( !$topic_id && !$user_id ) return ['error' => 2, 'data' => null];
+    // public function preguntasIntentos_v7($topic_id = null, $user_id = null, $fuente)
+    // {
+    //     if ( !$topic_id && !$user_id ) return ['error' => 2, 'data' => null];
 
-        $topic = Topic::with('course.topics')->find($topic_id);
+    //     $topic = Topic::with('course.topics')->find($topic_id);
 
-        $row = SummaryTopic::incrementUserAttempts($topic);
+    //     $row = SummaryTopic::incrementUserAttempts($topic);
 
-        if (!$row) return ['error' => 1, 'data' => null];
+    //     if (!$row) return ['error' => 1, 'data' => null];
 
-        SummaryCourse::incrementUserAttempts($topic->course);
-        SummaryUser::incrementUserAttempts();
+    //     SummaryCourse::incrementUserAttempts($topic->course);
+    //     SummaryUser::incrementUserAttempts();
 
-        return ['error' => 0, 'data' => $row->attempts];
-    }
+    //     return ['error' => 0, 'data' => $row->attempts];
+    // }
 
     public function guarda_visitas_post(Topic $topic)
     {
         $topic->load('course.topics');
+
+        info('topic');
+        info($topic);
 
         $row = SummaryTopic::incrementViews($topic);
         
         if (!$row) return ['error' => 1, 'data' => null];
 
         SummaryCourse::incrementViews($topic->course);
+
+        $row_user = SummaryUser::getCurrentRow(auth()->user());
+
+        if (!$row_user) SummaryUser::storeData(auth()->user());
 
         return ['error' => 0, 'data' => $row];
     }

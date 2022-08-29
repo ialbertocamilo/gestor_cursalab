@@ -62,6 +62,8 @@ class Summary extends BaseModel
         $user = $user ?? auth()->user();
 
         $query = self::where('user_id', $user->id);
+
+        info(get_class($model));
         
         if ($model instanceof Topic)
             $query->where('topic_id', $model->id);
@@ -78,14 +80,14 @@ class Summary extends BaseModel
 
         // $source = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
 
-        $data = self::create([
+        $data = [
             'user_id' => $user->id,
             'attempts' => 0,
             'views' => 1,
             // 'last_time_evaluated_at' => now(),
             // 'fuente' => $fuente
             // 'libre' => $curso->libre,
-        ]);
+        ];
 
         if ($model instanceof Topic) {
 
@@ -103,7 +105,13 @@ class Summary extends BaseModel
 
             $data['course_id'] = $model->id;
             $data['status_id'] = $status->id;
-            $data['assigneds'] = $assigneds;
+            $data['assigned'] = $assigneds;
+        }
+        
+        if ($model instanceof User) {
+
+            $assigneds = $model->getCurrentCourses()->count();
+            $data['courses_assigned'] = $assigneds;
         }
 
         return self::create($data);

@@ -62,9 +62,7 @@ class WorkspaceController extends Controller
     {
         // Load criteria
 
-        $workspace['criteria'] = Criterion::where('active', ACTIVE)
-                                          ->where('show_in_segmentation', 1)
-                                          ->get();
+        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
@@ -98,10 +96,14 @@ class WorkspaceController extends Controller
 
         $criteria = [];
 
+        $module_criterion = Criterion::where('code', 'module')->first();
+
         foreach ($criteriaSelected as $criterion_id => $is_selected)
         {
             if ( $is_selected ) $criteria[] = $criterion_id;
         }
+
+        $criteria[] = $module_criterion->id;
 
         $workspace->criterionWorkspace()->sync($criteria);
 
