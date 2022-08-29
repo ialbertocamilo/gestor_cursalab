@@ -9,11 +9,11 @@ Route::controller(RestQuizController::class)->group(function() {
 
     Route::post('evaluar_preguntas', 'evaluar_preguntas');
     Route::post('evaluar_abiertas', 'guardaEvaluacionAbierta');
-    
+
     Route::get('cargar_preguntas/{topic_id}', 'cargar_preguntas');
 
-    Route::post('upd_reproducciones/{topic_id}', 'guarda_visitas_post');
-    Route::post('contador_tema_reseteo/{topic_id}', 'contador_tema_reseteo');
+    Route::post('upd_reproducciones/{topic}', 'guarda_visitas_post');
+    Route::post('contador_tema_reseteo/{topic}', 'contador_tema_reseteo');
     
     Route::get('eval_pendientes2/{user_id}/{cate_id}', 'evalPendientes2');
 
