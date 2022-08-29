@@ -106,7 +106,7 @@ class RestQuizController extends Controller
 
     public function cargar_preguntas($topic_id)
     {
-        $topic = Topic::with('evaluation_type', 'course')->find('id', $topic_id);
+        $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
 
         if (!$topic) return response()->json(['data' => [], 'error' => true], 200);
 
