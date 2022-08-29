@@ -44,7 +44,7 @@ class SummaryTopic extends Summary
 
     public function isOutOfTimeForQuiz()
     {
-        return now() >= $row->current_quiz_started_at->addHour();
+        return now() >= $this->current_quiz_started_at->addHour();
     }
 
     public static function resetUserTopicsAttempts($userId, $topicsIds)
