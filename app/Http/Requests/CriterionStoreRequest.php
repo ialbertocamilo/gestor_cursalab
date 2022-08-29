@@ -30,6 +30,7 @@ class CriterionStoreRequest extends FormRequest
             'field_id' => 'required',
             'position' => 'required',
             'multiple' => 'required',
+            'show_in_segmentation' => 'required',
 
             'workspace_id' => 'nullable'
         ];
