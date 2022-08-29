@@ -14,6 +14,12 @@ class SummaryTopic extends Summary
         'last_time_evaluated_at',
     ];
 
+    protected $dates = [
+        'current_quiz_started_at',
+        'current_quiz_finishes_at',
+        'last_time_evaluated_at',
+    ];
+
     public function topic()
     {
         return $this->belongsTo(Topic::class);
