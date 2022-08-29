@@ -105,7 +105,7 @@ class Summary extends BaseModel
 
             $data['course_id'] = $model->id;
             $data['status_id'] = $status->id;
-            $data['assigneds'] = $assigneds;
+            $data['assigned'] = $assigneds;
         }
         
         if ($model instanceof User) {
