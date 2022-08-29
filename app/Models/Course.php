@@ -320,14 +320,18 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
-        $requirement_course = $course->requirements->first();
+        $requirement_course = $course->models->first();
+//        info("requirement_course");
+//        info($requirement_course);
         if ($requirement_course) {
             $summary_requirement_course = SummaryCourse::with('course')
                 ->where('user_id', $user->id)
                 ->where('course_id', $requirement_course->id)
                 ->whereRelation('status', 'code', '=', 'aprobado')
                 ->first();
-
+//            info("requirement_course");
+//            info($summary_requirement_course);
+//
             if (!$summary_requirement_course) {
                 $available_course = false;
                 $status = 'bloqueado';
