@@ -217,7 +217,7 @@ class RestQuizController extends Controller
             }
         }
 
-        return $counter;
+        return ['error' => 0, 'data' => $counter];
     }
 
 }
