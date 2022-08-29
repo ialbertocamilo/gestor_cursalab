@@ -419,6 +419,7 @@ export default {
 
                     if (r.role_id === vue.superUserRoleId) {
                         vue.workspacesAdmin = vue.workspaces;
+                        vue.canAccessConfiguration = true;
                     }
 
                     // Config users
