@@ -17,6 +17,11 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'versions' => [
+        'ios' => env('APP_VERSION_IOS'),
+        'android' => env('APP_VERSION_ANDROID'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

@@ -166,9 +166,6 @@ class RestQuizController extends Controller
     {
         $topic->load('course.topics');
 
-        info('topic');
-        info($topic);
-
         $row = SummaryTopic::incrementViews($topic);
         
         if (!$row) return ['error' => 1, 'data' => null];

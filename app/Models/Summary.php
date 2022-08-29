@@ -63,8 +63,6 @@ class Summary extends BaseModel
 
         $query = self::where('user_id', $user->id);
 
-        info(get_class($model));
-        
         if ($model instanceof Topic)
             $query->where('topic_id', $model->id);
 

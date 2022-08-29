@@ -4,33 +4,26 @@ namespace App\Http\Controllers;
 
 use Config;
 use Carbon\Carbon;
-use App\Models\Usuario_rest;
+use App\Models\User;
 use App\Models\Eventos;
 
 use Illuminate\Http\Request;
 
 class FirebaseController extends Controller
 {
-    public function __construct()
+
+    public function appVersions()
     {
-        $this->middleware('auth.jwt');
-        return auth()->shouldUse('api');
-        Carbon::setLocale('es');
+        return config('app.versions');
     }
 
     public function guardarToken(Request $request)
     {
-        // \Log::channel('eventos_virtuales')->info("USUARIO_ID  ====> $request->usuario_id");
-        // \Log::channel('eventos_virtuales')->info("Token ====> $request->token");
-//        $usuario = Usuario_rest::find($request->usuario_id, ['token_firebase', 'id']);
-        $usuario = Usuario_rest::find($request->usuario_id);
-        // $usuario = Usuario_rest::where('id', $request->usuario_id)->first(['token_firebase', 'id']);
-        $usuario->token_firebase = $request->token;
-        $usuario->save();
-        // \Log::channel('eventos_virtuales')->info("Usuario ====> $usuario->id");
+        auth()->user()->update(['token_firebase' => $request->fcm_token]);
 
         return response()->json(['msg' => 'Token guardado.'], 200);
     }
+
     // PRUEBAS NOTIFICACIONES INDIVIDUALES PUSH
     public function test_push_firebase()
     {

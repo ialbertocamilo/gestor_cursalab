@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\Test\TestController;
+use App\Http\Controllers\FirebaseController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,9 +37,11 @@ use Illuminate\Support\Facades\Route;
 
 // });
 
+Route::get('/rest/app_versions', [AuthController::class, 'appVersions']);
+
 Route::group(['prefix' => 'auth'], function () {
 
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [FirebaseController::class, 'login']);
 
 });
 
@@ -47,6 +50,8 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
 });
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
+
+    Route::post('/guardar_token_firebase', [FirebaseController::class, 'guardarToken']);
 
 
     Route::prefix('announcements')->group(base_path('routes/app/announcements.php'));
