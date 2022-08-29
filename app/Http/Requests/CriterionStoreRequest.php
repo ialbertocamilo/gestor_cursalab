@@ -42,9 +42,11 @@ class CriterionStoreRequest extends FormRequest
     {
         $data = [];
         $multiple = ($this->multiple === 'true' or $this->multiple === true or $this->multiple === 1 or $this->multiple === '1');
+        $show_in_segmentation = ($this->show_in_segmentation === 'true' or $this->show_in_segmentation === true or $this->show_in_segmentation === 1 or $this->show_in_segmentation === '1');
         $workspace_id = $this->workspace_id ?? session('workspace')['id'] ?? null;
 
         $data['multiple'] = $multiple;
+        $data['show_in_segmentation'] = $show_in_segmentation;
         $data['workspace_id'] = $workspace_id;
 
         return $this->merge($data)->all();
