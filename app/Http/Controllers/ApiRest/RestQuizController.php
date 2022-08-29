@@ -171,6 +171,7 @@ class RestQuizController extends Controller
         if (!$row) return ['error' => 1, 'data' => null];
 
         SummaryCourse::incrementViews($topic->course);
+        SummaryUser::storeData(auth()->user());
 
         return ['error' => 0, 'data' => $row];
     }

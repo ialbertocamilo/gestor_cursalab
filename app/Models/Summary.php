@@ -105,6 +105,12 @@ class Summary extends BaseModel
             $data['status_id'] = $status->id;
             $data['assigneds'] = $assigneds;
         }
+        
+        if ($model instanceof User) {
+
+            $assigneds = $model->getCurrentCourses()->count();
+            $data['course_assigneds'] = $assigneds;
+        }
 
         return self::create($data);
     }
