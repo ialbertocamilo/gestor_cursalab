@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use DB;
+
 class SummaryUser extends Summary
 {
     protected $table = 'summary_users';
@@ -22,59 +24,59 @@ class SummaryUser extends Summary
 
     protected function updateUserData($user = null)
     {
+        $user = $user ?? auth()->user();
+        $courses_id = $user->getCurrentCourses()->pluck('id');
         $row_user = SummaryUser::getCurrentRow();
 
-        $res_nota = DB::table('pruebas')
-                        // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                    ->join('posteos', 'posteos.id', 'pruebas.posteo_id')
-                    ->whereIn('pruebas.curso_id',$q_idsXcursos)
-                    ->where('posteos.estado', 1)
-                    // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                    ->select(DB::raw('AVG(IFNULL(pruebas.nota, 0)) AS nota_avg'))
-                    ->where('pruebas.usuario_id', $usuario_id)
-                    ->first();
+        $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
+                        // ->whereRelation('topic.course', 'active', ACTIVE)
+                        ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))
+                        // ->whereRelation('topic', 'active', ACTIVE)
+                        ->where('user_id', $user->id)
+                        ->first();
 
-        $nota_prom_gen = number_format((float)$res_nota->nota_avg, 2, '.', '');
+        // $nota_prom_gen = number_format((float)$res_nota->nota_avg, 2, '.', '');
+        $grade_average = round($res_nota->nota_avg, 2);
 
-        // $helper->log_marker('RG tot_completed_gen');
-        $tot_completed_gen = Resumen_x_curso::where('usuario_id', $usuario_id)
-                                            // TOMAR EN CUENTA SOLO LOS CURSOS ACTIVOS
-                                            ->where('estado_rxc', 1)
-                                            ->where('libre', 0)
-                                            ->whereIn('curso_id',$q_idsXcursos)
-                                            ->where('estado', 'aprobado')
-                                            ->count();
+        // $helper->log_marker('RG passed');
+        $passed = SummaryCourse::where('user_id', $user->id)
+                                ->whereRelation('status', 'code', 'aprobado')
+                                // ->whereRelation('course', 'active', ACTIVE)
+                                ->whereRelation('course.type', 'code', '<>', 'free')
+                                ->whereIn('course_id', $courses_id)
+                                ->count();
 
-
-        // \Log::info($row_user->assigned. '   =   '. $tot_completed_gen);
-        // porcentaje general
-        $percent_general = ($row_user->assigned > 0) ? (($tot_completed_gen / $row_user->assigned) * 100) : 0;
+        $percent_general = ($row_user->assigned > 0) ? (($passed / $row_user->assigned) * 100) : 0;
         $percent_general = ($percent_general > 100) ? 100 : $percent_general; // maximo porcentaje = 100
         $percent_general = round($percent_general);
+        
         // Calcula ranking
-        // $helper->log_marker('RG Calcula ranking');
-        $intentos_x_curso = Resumen_x_curso::select(DB::raw('SUM(intentos) as intentos'))
-                                            // TOMAR EN CUENTA SOLO LOS CURSOS ACTIVOS
-                                            ->whereIn('curso_id',$q_idsXcursos)
-                                            ->where('estado_rxc', 1)
-                                            ->where('libre', 0)
-                                            // TOMAR EN CUENTA SOLO LOS CURSOS ACTIVOS
-                                            ->where('usuario_id', $usuario_id)
+        $intentos_x_curso = SummaryCourse::select(DB::raw('SUM(attempts) as intentos'))
+                                            // ->whereRelation('course', 'active', ACTIVE)
+                                            ->whereRelation('course.type', 'code', '<>', 'free')
+                                            ->where('user_id', $user->id)
+                                            ->whereIn('course_id', $courses_id)
+
+                                            // ->where('libre', 0)
                                             ->first();
 
-        $intentos_gen = (isset($intentos_x_curso)) ? $intentos_x_curso->intentos : 0;
-        $rank_user = $this->calcular_puntos($tot_completed_gen, $nota_prom_gen, $intentos_gen);
+        $attempts = (isset($intentos_x_curso)) ? $intentos_x_curso->intentos : 0;
+        $score = User::calculate_rank($passed, $grade_average, $attempts);
 
         // $helper->log_marker('RG UPDATE');
-        $tot_com = ($tot_completed_gen > $row_user->assigned) ? $row_user->assigned : $tot_completed_gen;
+        $tot_com = ($passed > $row_user->assigned) ? $row_user->assigned : $passed;
 
-        Resumen_general::where('usuario_id', $usuario_id)->update(array(
-            'tot_completados' => $tot_com,
-            'nota_prom' => $nota_prom_gen,
-            'cur_asignados' => $row_user->assigned,
-            'intentos' => $intentos_gen,
-            'rank' => $rank_user,
-            'porcentaje' => $percent_general
-        ));
+        $user_data = [
+            'completed' => $tot_com,
+            'grade_average' => $grade_average,
+            // 'cur_asignados' => $row_user->assigned,
+            'attempts' => $attempts,
+            'score' => $score,
+            'advanced_percentage' => $percent_general
+        ];
+
+        $row_user->update($user_data);
+
+        return $row_user;
     }
 }
