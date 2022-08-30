@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\FileService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Storage;
@@ -16,8 +17,8 @@ class Media extends BaseModel
 
 
     const DEFAULT_AUDIO_IMG = "images/default-audio-img_119.png";
-    const DEFAULT_SCORM_IMG = "images/default-scorm-img_116.png";
-    const DEFAULT_VIDEO_IMG = "images/default-video-img_285.png";
+    const DEFAULT_SCORM_IMG = "images/default-scorm-img_116_360.png";
+    const DEFAULT_VIDEO_IMG = "images/default-video-img_285_360.png";
     const DEFAULT_PDF_IMG = "images/default-pdf-img_210.png";
 
     protected $table = 'media';
@@ -110,16 +111,20 @@ class Media extends BaseModel
             $path = 'office-files/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext5)) {
 
+            // Set values for file in S3 bucket
+
+            $path = 'scorm/' . $fileName;
+            $ext = 'scorm';
+
+            // Upload to project's uploads folder
+            // and uncompressed file
+
             $localpath = 'uploads/scorm/' . $name;
             $zip = new ZipArchive();
             $res = $zip->open($file, ZipArchive::CREATE);
             if ($res === TRUE) {
                 $zip->extractTo(public_path($localpath));
                 $zip->close();
-
-                $uploaded = true;
-                $path = url($localpath);
-                $ext = 'scorm';
             }
         }
 
@@ -255,12 +260,16 @@ class Media extends BaseModel
 
         if ($request->fecha) {
 
-            if (isset($request->fecha[0])) {
-                $query->whereDate('created_at', '>=', $request->fecha[0]);
+            // Only start date
+
+            if (isset($request->fecha[0]) && !isset($request->fecha[1])) {
+                $query->whereDate('created_at', '=', $request->fecha[0]);
             }
 
-            if (isset($request->fecha[1])) {
-                $query->whereDate('created_at', '<=', $request->fecha[1]);
+            // Date range
+
+            if (isset($request->fecha[0]) && isset($request->fecha[1])) {
+                $query->whereBetween('created_at', [$request->fecha[0], $request->fecha[1]]);
             }
         }
 
@@ -307,17 +316,17 @@ class Media extends BaseModel
         if (in_array(strtolower($ext), $valid_ext1)) {
             $preview = $this->file;
         } else if (in_array(strtolower($ext), $valid_ext2)) {
-            $preview = self::DEFAULT_VIDEO_IMG;
+            $preview = FileService::generateUrl(self::DEFAULT_VIDEO_IMG);
         } else if (in_array(strtolower($ext), $valid_ext3)) {
-            $preview = self::DEFAULT_AUDIO_IMG;
+            $preview = FileService::generateUrl(self::DEFAULT_AUDIO_IMG);
         } else if (in_array(strtolower($ext), $valid_ext4)) {
-            $preview = self::DEFAULT_PDF_IMG;
+            $preview = FileService::generateUrl(self::DEFAULT_PDF_IMG);
         } else if (in_array(strtolower($ext), $valid_ext6)) {
-            $preview = self::DEFAULT_PDF_IMG;
+            $preview = FileService::generateUrl(self::DEFAULT_PDF_IMG);
         } else if (in_array(strtolower($ext), $valid_ext5)) {
-            $preview = self::DEFAULT_SCORM_IMG;
+            $preview = FileService::generateUrl(self::DEFAULT_SCORM_IMG);
         } else {
-            $preview = self::DEFAULT_SCORM_IMG;
+            $preview = FileService::generateUrl(self::DEFAULT_SCORM_IMG);
         }
 
         return $preview;
@@ -333,6 +342,8 @@ class Media extends BaseModel
 
     public function streamDownloadFile()
     {
+
+
         $filename = Str::after($this->file, '/');
         // $stream = Storage::readStream($this->file);
 
