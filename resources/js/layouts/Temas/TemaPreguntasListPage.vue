@@ -64,6 +64,7 @@
                 @onConfirm="refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalOptions)"
                 :evaluable="evaluable"
+                :evaluation_type="evaluation_type"
             />
             <TemaPreguntasImport
                 width="50vw"
@@ -91,7 +92,18 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
     components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm},
-    props: ['modulo_id', 'modulo_name', 'categoria_id', 'categoria_name', 'curso_id', 'curso_name', 'tema_id', 'tema_name', 'evaluable'],
+    props: [
+        'modulo_id',
+        'modulo_name',
+        'categoria_id',
+        'categoria_name',
+        'curso_id',
+        'curso_name',
+        'tema_id',
+        'tema_name',
+        'evaluable',
+        'evaluation_type'
+    ],
     data() {
         let vue = this
         return {

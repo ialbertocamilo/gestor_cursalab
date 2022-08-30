@@ -31,4 +31,18 @@ class TemaPreguntaStoreRequest extends FormRequest
             'active' => 'required',
         ];
     }
+
+    public function validationData(): array
+    {
+        $data = [];
+        $evaluationType = $this->get('evaluation_type');
+
+        if ($evaluationType === 'open') {
+            $data['rpta_ok'] = 0;
+            $data['rptas_json'] = '{}';
+        }
+
+
+        return $this->merge($data)->all();
+    }
 }

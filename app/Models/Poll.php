@@ -114,9 +114,9 @@ class Poll extends BaseModel
 
         $count_approved_courses = SummaryCourse::select('id')
             ->whereRelation('course', 'active', ACTIVE)
+            ->whereRelation('status', 'code', 'aprobado')
             ->whereHas('course.type', fn($q) => $q->where('code', '<>', 'free'))
             ->where('user_id', $user->id)
-            ->where('status_id', $approved_status_taxonomy?->id)
             ->count();
 
         $general_percent = ($summary_user->courses_assigned > 0) ? (($count_approved_courses / $summary_user->courses_assigned) * 100) : 0;

@@ -12,7 +12,7 @@
         @click:clear="onClear"
         @input="updateValue"
         @keypress.enter="onKeyPressEnter"
-        @keypress="isNumber(event)"
+        @keypress="isNumber($event)"
         :rules="rules"
         :counter="counter"
         :type="type"

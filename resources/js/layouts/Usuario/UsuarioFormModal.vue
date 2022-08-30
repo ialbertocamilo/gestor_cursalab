@@ -51,6 +51,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.email"
+                            :rules="rules.email"
                             label="Correo electrónico"
                         />
                     </v-col>
@@ -142,6 +143,7 @@ export default {
                 surname: this.getRules(['required', 'max:100', 'text']),
                 document: this.getRules(['required', 'number', 'min:8']),
                 password: this.getRules(['required', 'min:8']),
+                email: this.getRules(['required', 'min:8']),
                 password_not_required: this.getRules([]),
             }
         }
@@ -171,7 +173,7 @@ export default {
             const base = `${vue.options.base_endpoint}`
             const method = edit ? 'put' : 'post';
 
-            if (validateForm) {
+            if (validateForm && vue.isValid()) {
                 let url = edit ? `${base}/${vue.resource.id}/update` : `${base}/store`;
                 let data = vue.resource
                 vue.parseCriterionValues()
@@ -193,8 +195,10 @@ export default {
                     })
             } else {
                 vue.hideLoader()
+                vue.sections.showCriteria = true
             }
-        },
+        }
+        ,
         parseCriterionValues() {
             let vue = this
             let temp = []
@@ -212,7 +216,30 @@ export default {
             let vue = this
             // CLOSE CRITERIA SECTION
             vue.sections.showCriteria = false
-        },
+        }
+        ,
+        isValid() {
+
+            let valid = true;
+            let errors = [];
+
+            // Validation: module is required
+
+            if (this.criterion_list.length === 0) {
+
+                errors.push({
+                    message: 'El criterio módulo es obligatorio'
+                })
+                valid = false;
+            }
+
+            if (!valid) {
+                this.errors = errors;
+            }
+
+            return valid;
+        }
+        ,
         async loadData(resource) {
             let vue = this
 

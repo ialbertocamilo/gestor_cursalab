@@ -6,13 +6,18 @@
     $escuela = \App\Models\School::find(request()->segment(2));
     $curso = \App\Models\Course::find(request()->segment(4));
     $tema = \App\Models\Topic::find(request()->segment(6));
+
+    $taxonomy = \App\Models\Taxonomy::find($tema->type_evaluation_id);
+    $evaluationTypeCode = $taxonomy->code ?? '';
     @endphp
     <v-app>
         @include('layouts.user-header')
-        <tema-preguntas-layout modulo_id="{{ request()->segment(2) }}" modulo_name="{{ $escuela->name ?? '' }}"
+        <tema-preguntas-layout
+            modulo_id="{{ request()->segment(2) }}" modulo_name="{{ $escuela->name ?? '' }}"
             categoria_id="{{ request()->segment(2) }}" categoria_name="{{ $escuela->name ?? '' }}"
             curso_id="{{ request()->segment(4) }}" curso_name="{{ $curso->name ?? '' }}"
             tema_id="{{ request()->segment(6) }}" tema_name="{{ $tema->name ?? '' }}"
-            evaluable="{{ $tema->type_evaluation_id }}" />
+            evaluable="{{ $tema->type_evaluation_id }}"
+            evaluation_type="{{ $evaluationTypeCode }}"></tema-preguntas-layout>
     </v-app>
 @endsection
