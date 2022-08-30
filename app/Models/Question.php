@@ -10,7 +10,7 @@ class Question extends BaseModel
     ];
 
     protected $casts = [
-        'rptas_json' => 'array',
+        'rptas_json' => 'json',
     ];
 
     public function type()
