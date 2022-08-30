@@ -162,7 +162,7 @@ class CursosController extends Controller
         endif;
 
         $course->delete();
-        $course->requirements()->delete();
+        $course->models()->delete();
 
         $response = [
             'curso' => $course,

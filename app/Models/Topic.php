@@ -10,7 +10,7 @@ class Topic extends BaseModel
         'name', 'slug', 'description', 'content', 'imagen',
         'position', 'visits_count', 'assessable',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
-         'active'
+        'active'
     ];
 
 //    protected $casts = [
@@ -98,7 +98,7 @@ class Topic extends BaseModel
     {
         $question_type_code = $topic->evaluation_type->code === 'qualified' ? 'select-options' : 'written-answer';
 
-        $q = Question::whereRelation('type','code', $question_type_code)
+        $q = Question::whereRelation('type', 'code', $question_type_code)
             ->where('topic_id', $topic->id);
 
         if ($request->q)
@@ -313,7 +313,8 @@ class Topic extends BaseModel
         return $temp;
     }
 
-    protected function validateBeforeDelete(School $school, Topic $topic, $data){
+    protected function validateBeforeDelete(School $school, Topic $topic, $data)
+    {
         $validations = collect();
 
         // Validar que sea el último tema activo y que se va a desactivar,
@@ -358,8 +359,6 @@ class Topic extends BaseModel
     }
 
 
-
-
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         if ($user_courses->count() === 0) return [];
@@ -389,7 +388,7 @@ class Topic extends BaseModel
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
                 foreach ($media_topics as $media) {
                     if ($media->type_id == 'audio' && !str_contains('https', $media->value))
-                    // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
+                        // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
                         $media->value = get_media_url($media->valor);
                 }
 
@@ -490,10 +489,10 @@ class Topic extends BaseModel
     public function getNextOne()
     {
         return Topic::where('curso_id', $this->course_id)
-                ->whereNotIn('id',[$this->id])
-                ->where('position','>=', $this->position)
-                ->orderBy('position', 'ASC')
-                ->first();
+            ->whereNotIn('id', [$this->id])
+            ->where('position', '>=', $this->position)
+            ->orderBy('position', 'ASC')
+            ->first();
     }
 
     protected function evaluateAnswers($respuestas, $topic)
@@ -507,11 +506,41 @@ class Topic extends BaseModel
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
             if ($question->rpta_ok == $respuesta['opc'])
-                $correct_answers++; continue;
+                $correct_answers++;
+            continue;
 
             $failed_answers++;
         }
 
         return [$correct_answers, $failed_answers];
+    }
+
+    protected function getTopicProgressByUser($user, Topic $topic)
+    {
+        $topic_grade = null;
+        $available_topic = true;
+        $topic_requirement = $topic->requirement;
+
+        if ($topic_requirement) :
+            $requirement_summary = SummaryTopic::with('status:id,code')
+                ->where('topic_id', $topic_requirement->id)
+                ->where('user_id', $user->id)->first();
+
+            $available_topic = in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
+        endif;
+
+        $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
+
+        if ($topic->evaluation_type->code === 'qualified' && $summary_topic)
+            $topic_grade = $summary_topic->grade;
+
+        $topic_status = $summary_topic?->status?->code ?? 'por-iniciar';
+
+
+        return [
+            'available' => $available_topic,
+            'grade' => $topic_grade,
+            'status' => $topic_status,
+        ];
     }
 }

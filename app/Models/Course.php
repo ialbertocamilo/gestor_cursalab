@@ -308,83 +308,6 @@ class Course extends BaseModel
     }
 
 
-    protected function getCourseStatusByUser(User $user, Course $course): array
-    {
-        $course_progress_percentage = 0;
-        $status = 'por-iniciar';
-        $available_course = true;
-        $poll_id = null;
-        $available_poll = false;
-        $enabled_poll = false;
-        $solved_poll = false;
-        $assigned_topics = 0;
-        $completed_topics = 0;
-
-        $requirement_course = $course->models->first();
-//        info("requirement_course");
-//        info($requirement_course);
-        if ($requirement_course) {
-            $summary_requirement_course = SummaryCourse::with('course')
-                ->where('user_id', $user->id)
-                ->where('course_id', $requirement_course->id)
-                ->whereRelation('status', 'code', '=', 'aprobado')
-                ->first();
-//            info("requirement_course");
-//            info($summary_requirement_course);
-//
-            if (!$summary_requirement_course) {
-                $available_course = false;
-                $status = 'bloqueado';
-            }
-        }
-
-        if ($available_course) {
-            $poll = $course->polls->first();
-            if ($poll) {
-                $poll_id = $poll->id;
-                $available_poll = true;
-
-                $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
-                    ->where('user_id', $user->id)->first();
-
-                if ($poll_questions_answers) $solved_poll = true;
-            }
-
-            $summary_course = $course->summaryByUser($user->id);
-
-            if ($summary_course) {
-                $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
-                $course_progress_percentage = $summary_course->advanced_percentage;
-                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
-                    $status = 'completado';
-                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
-                    $status = 'enc_pend';
-                elseif ($summary_course->status->code == 'desaprobado') :
-                    $status = 'desaprobado';
-                    $enabled_poll = true;
-                else :
-                    $status = 'continuar';
-                    $resolved_topics = $completed_topics + $summary_course->failed;
-                    if ($summary_course->assigned <= $resolved_topics)
-                        $available_poll = true;
-                endif;
-            }
-        }
-
-        return [
-            'status' => $status,
-            'progress_percentage' => $course_progress_percentage,
-            'available' => $available_course,
-            'poll_id' => $poll_id,
-            'available_poll' => $available_poll,
-            'enabled_poll' => $enabled_poll,
-            'solved_poll' => $solved_poll,
-            'exists_summary_course' => $available_course && $summary_course,
-            'assigned_topics' => $assigned_topics,
-            'completed_topics' => $completed_topics,
-        ];
-    }
-
     protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
         $schools = $user_courses->groupBy('schools.*.id');
@@ -486,4 +409,104 @@ class Course extends BaseModel
 
         return $data;
     }
+
+    protected function getCourseStatusByUser(User $user, Course $course): array
+    {
+        $course_progress_percentage = 0;
+        $status = 'por-iniciar';
+        $available_course = true;
+        $poll_id = null;
+        $available_poll = false;
+        $enabled_poll = false;
+        $solved_poll = false;
+        $assigned_topics = 0;
+        $completed_topics = 0;
+
+        $requirement_course = $course->models->first();
+//        info("requirement_course");
+//        info($requirement_course);
+        if ($requirement_course) {
+            $summary_requirement_course = SummaryCourse::with('course')
+                ->where('user_id', $user->id)
+                ->where('course_id', $requirement_course->id)
+                ->whereRelation('status', 'code', '=', 'aprobado')
+                ->first();
+//            info("requirement_course");
+//            info($summary_requirement_course);
+//
+            if (!$summary_requirement_course) {
+                $available_course = false;
+                $status = 'bloqueado';
+            }
+        }
+
+        if ($available_course) {
+            $poll = $course->polls->first();
+            if ($poll) {
+                $poll_id = $poll->id;
+                $available_poll = true;
+
+                $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
+                    ->where('user_id', $user->id)->first();
+
+                if ($poll_questions_answers) $solved_poll = true;
+            }
+
+            $summary_course = $course->summaryByUser($user->id);
+
+            if ($summary_course) {
+                $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
+                $course_progress_percentage = $summary_course->advanced_percentage;
+                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
+                    $status = 'completado';
+                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
+                    $status = 'enc_pend';
+                elseif ($summary_course->status->code == 'desaprobado') :
+                    $status = 'desaprobado';
+                    $enabled_poll = true;
+                else :
+                    $status = 'continuar';
+                    $resolved_topics = $completed_topics + $summary_course->failed;
+                    if ($summary_course->assigned <= $resolved_topics)
+                        $available_poll = true;
+                endif;
+            }
+        }
+
+        return [
+            'status' => $status,
+            'progress_percentage' => $course_progress_percentage,
+            'available' => $available_course,
+            'poll_id' => $poll_id,
+            'available_poll' => $available_poll,
+            'enabled_poll' => $enabled_poll,
+            'solved_poll' => $solved_poll,
+            'exists_summary_course' => $available_course && $summary_course,
+            'assigned_topics' => $assigned_topics,
+            'completed_topics' => $completed_topics,
+        ];
+    }
+
+    protected function getCourseProgressByUser($user, Course $course)
+    {
+        $course_requirement = $course->models->first();
+        if ($course_requirement) {
+            $requirement_summary = SummaryCourse::with('status:id,code')
+                ->where('course_id', $course_requirement->id)
+                ->where('user_id', $user->id)->first();
+
+            if ($requirement_summary && $requirement_summary->status->code != 'aprobado')
+                return ['average_grade' => 0, 'status' => 'bloqueado'];
+        }
+
+        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
+
+        $grade_average = $summary_course ? floatval($summary_course->grade_average) : 0;
+        $grade_average = $summary_course ?
+            ($summary_course->passed > 0 || $grade_average > 0) ? $grade_average : null
+            : null;
+
+        return ['average_grade' => $grade_average, 'status' => $summary_course->status->code ?? 'por-iniciar'];
+    }
+
 }
