@@ -140,6 +140,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasMany(SummaryCourse::class);
     }
 
+    public function summary_topics()
+    {
+        return $this->hasMany(SummaryTopic::class);
+    }
+
     public function getFullnameAttribute()
     {
         $fullname = $this->name;
@@ -582,7 +587,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
             $user->save();
         }
-        
+
     }
 
     public function getSubworkspaceSetting($field, $value = null)
@@ -596,5 +601,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($value) return $settings[$value] ?? NULL;
 
         return $settings;
+    }
+
+    protected function calculate_rank($count_approved_courses, $grade_average, $attempts): float|int
+    {
+        if ($grade_average == 0) return 0;
+
+        $puntos_cursos = $count_approved_courses * 150;
+        $puntos_promedio = $grade_average * 100;
+        $puntos_intentos = $attempts * 0.5;
+
+        return $puntos_promedio + $puntos_cursos - $puntos_intentos;
     }
 }

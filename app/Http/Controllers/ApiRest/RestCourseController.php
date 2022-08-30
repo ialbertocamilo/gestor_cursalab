@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PollAnswerStoreRequest;
 use App\Models\Course;
+use App\Models\PollQuestionAnswer;
+use App\Models\Taxonomy;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RestCourseController extends Controller
 {
@@ -17,4 +21,88 @@ class RestCourseController extends Controller
 
         return $this->successApp(['data' => $data]);
     }
+
+    public function loadPoll(Course $course)
+    {
+        $poll = $course->polls()->with([
+            'questions' => function ($q) {
+                $q->with('type:id,code')
+                    ->select('id', 'poll_id', 'titulo', 'type_id');
+            }
+        ])
+            ->select('id', 'titulo', 'imagen', 'anonima')
+            ->where('active', ACTIVE)
+            ->first();
+
+        return $this->success(compact('poll'));
+    }
+
+    public function savePollAnswers(PollAnswerStoreRequest $request)
+    {
+        $data = $request->validated();
+
+        $user = auth()->user();
+        $poll = Poll::find($data['enc_id']);
+        $course = Course::find($data['curso']);
+        $info = strip_tags($data['data']);
+        $decoded_info = urldecode($info);
+        $info = json_decode($decoded_info);
+
+        foreach ($info as $key_data => $value_data) {
+            if (!is_null($value_data) && $value_data->tipo == 'multiple') {
+                $multiple = array();
+                $ddd = array_count_values($value_data->respuesta);
+                if (!is_null($ddd)) {
+                    foreach ($ddd as $key => $value) {
+                        if ($value % 2 != 0) {
+                            array_push($multiple, $key);
+                        }
+                    }
+                }
+                $query1 = $this->updatePollAnswers($poll->id, $course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
+            }
+            if (!is_null($value_data) && $value_data->tipo == 'califica') {
+                $multiple = array();
+                $array_respuestas = $value_data->respuesta;
+                $ddd = array_count_values(array_column($array_respuestas, 'preg_cal'));
+                $ttt = array();
+                if (!is_null($array_respuestas) && count($array_respuestas) > 0) {
+                    foreach ($array_respuestas as $key => $value) {
+                        if (!is_null($value)) {
+                            foreach ($ddd as $key2 => $val2) {
+                                if ($key2 == $value->preg_cal) {
+                                    $ttt[$value->preg_cal] = $value;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!is_null($ttt) && count($ttt) > 0) {
+                    foreach ($ttt as $elemento) {
+                        array_push($multiple, $elemento);
+                    }
+                }
+                $query2 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
+            }
+            if (!is_null($value_data) && $value_data->tipo == 'texto') {
+                $query3 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, trim($value_data->respuesta));
+            }
+            if (!is_null($value_data) && $value_data->tipo == 'simple') {
+                $query4 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, $value_data->respuesta);
+            }
+        }
+
+        // update resumen encuesta
+        RestHelperController::updateSummaryPoll($user, $course);
+
+        // TODO: update summary course
+
+        RestHelperController::updateSummaryCourseByUser($user->id, $course->id);
+
+        return $this->success(['msg' => 'Encuesta guardada.']);
+    }
+
+
+
+
 }

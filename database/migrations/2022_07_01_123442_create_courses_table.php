@@ -28,6 +28,7 @@ return new class extends Migration
             // $table->string('modalidad');
             $table->boolean('freely_eligible')->nullable()->default(false);
             $table->boolean('assessable')->nullable()->default(false);
+            $table->foreignId('type_id')->nullable()->constrained('taxonomies');
 
             $table->decimal('duration', 6,2)->nullable();
             $table->decimal('investment', 10,2)->nullable();

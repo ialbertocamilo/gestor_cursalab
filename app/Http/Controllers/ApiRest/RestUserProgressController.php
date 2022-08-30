@@ -31,7 +31,6 @@ class RestUserProgressController extends Controller
 
 
         $response['summary_user'] = [
-            'name' => $user->fullname,
             'asignados' => $assigned_courses->count(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
@@ -58,8 +57,8 @@ class RestUserProgressController extends Controller
                 'name' => $school->name,
                 'imagen' => $school->imagen,
                 'porcentaje' => $school_status['percentage'],
-                'estado' => $school_status['status'],
-                'estado_str' => '',
+//                'estado' => $school_status['status'],
+//                'estado_str' => '',
                 'completados' => $school_status['completed'],
                 'asignados' => $courses->count(),
             ];
