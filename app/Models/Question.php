@@ -10,7 +10,7 @@ class Question extends BaseModel
     ];
 
     protected $casts = [
-        'rptas_json' => 'array',
+        'rptas_json' => 'json',
     ];
 
     public function type()
@@ -48,6 +48,8 @@ class Question extends BaseModel
 
             info('question->rptas_json');
             info($question->rptas_json);
+            info('question->rptas_json->toArray()');
+            info($question->rptas_json->toArray());
 
             foreach ($question->rptas_json as $key => $value)
             {
