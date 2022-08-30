@@ -9,7 +9,7 @@ class SummaryUser extends Summary
     protected $table = 'summary_users';
 
     protected $fillable = [
-        'last_time_evaluated_at', 'course_assigneds', 'user_id', 'attempts'
+        'last_time_evaluated_at', 'course_assigneds', 'user_id', 'attempts', 'score', 'grade_average', 'courses_completed'
     ];
 
     public function user()
@@ -58,11 +58,12 @@ class SummaryUser extends Summary
         $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
 
         $user_data = [
-            'completed' => $tot_com,
+            'courses_completed' => $tot_com,
             'grade_average' => $grade_average,
             // 'cur_asignados' => $row_user->courses_assigned,
             'attempts' => $attempts,
             'score' => $score,
+            'last_time_evaluated_at' => now(),
             'advanced_percentage' => $percent_general
         ];
 
