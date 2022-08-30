@@ -9,9 +9,9 @@ class Question extends BaseModel
         'rptas_json', 'rpta_ok', 'active'
     ];
 
-    protected $casts = [
-        'rptas_json' => 'json',
-    ];
+    // protected $casts = [
+    //     'rptas_json' => 'json',
+    // ];
 
     public function type()
     {
