@@ -146,154 +146,88 @@ class SummaryCourse extends Summary
     }
 
 
-    protected function updateRanking($topic)
+    protected function updateUserData($course, $user = null)
     {
-        // $helper = new HelperController();
+        $user = $user ?? auth()->user();
 
+        $active_topics = $course->topics->where('active', ACTIVE)->get();
 
-        // $active_topics = Posteo::where('curso_id', $topic->course_id)->where('estado', 1)->select('id','evaluable','tipo_ev')->get();
-        $active_topics = $topic->course->topics->where('active', ACTIVE)->get();
-        // $curso = Curso::where('id',$topic->course_id)->select('id','libre','categoria_id')->first();
+        $topics_for_review = $active_topics->where('assessable', '<>', 1)->pluck('id');
+        $topics_qualified = $active_topics->where('evaluation_type.code', 'qualified')->pluck('id');
+        $topics_open = $active_topics->where('evaluation_type.code', 'open')->pluck('id');
 
-        $cant_asignados = count($active_topics);
-        $topics_qualified =  $active_topics->where('evaluation_type.code', 'qualified');
-        $topics_open = $active_topics->where('evaluation_type.code', 'open');
-        $topics_for_review_only = $active_topics->where('assessable', '<>', 1);
-        // APROBADOS CALIFICADOS
-        // $helper->log_marker('RxC PRUEBAS');
-        $cant_aprob = 0;
-        $cant_abiertos = 0;
-        $cant_revisados = 0;
-        $cant_desaprob = 0;
+        $passed = $taken = $reviewed = $failed = 0;
 
-        // $asing = $helper->help_cursos_x_matricula_con_cursos_libre($usuario_id);
+        $max_attempts = $user->getSubworkspaceSetting('mod_evaluaciones', 'nro_intentos');
 
-        // $el_curso_esta_asignado = false;
-        // if(count($asing)>0){
-        //     $el_curso_esta_asignado = in_array($topic->course_id,$asing);
-        // }
+        $rows = SummaryTopic::with('status')
+                    ->whereIn('topic_id', $active_topics->pluck('id'))
+                    ->where('user_id', $user->id)
+                    ->get();
 
-        // if($el_curso_esta_asignado){
-            if(count($topics_qualified)>0){
-                $cant_aprob = DB::table('pruebas')
-                // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                ->whereIn('posteo_id',$topics_qualified->pluck('id'))
-                // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                ->where('pruebas.resultado', 1)
-                ->where('pruebas.usuario_id', $usuario_id)
-                ->where('pruebas.curso_id', $topic->course_id)
-                ->count();
-                $cant_desaprob = DB::table('pruebas AS u')
-                    ->whereIn('posteo_id',$topics_qualified->pluck('id'))
-                    ->where('u.resultado', 0)
-                    ->where('u.intentos', '>=', $max_intentos)
-                    ->where('u.usuario_id', $usuario_id)
-                    ->where('u.curso_id', $topic->course_id)
-                    ->count();
-            }
-            if(count($topics_open)>0){
-                // APROBADOS ABIERTOS
-                $cant_abiertos = DB::table('ev_abiertas')
-                // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                ->whereIn('posteo_id',$topics_open->pluck('id'))
-                // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                ->where('ev_abiertas.usuario_id', $usuario_id)
-                ->where('ev_abiertas.curso_id', $topic->course_id)
-                ->count();
-            }
-            if(count($topics_for_review_only)>0){
-                $cant_revisados = DB::table('visitas')
-                // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                ->whereIn('post_id',$topics_for_review_only->pluck('id'))
-                // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                ->where('visitas.usuario_id', $usuario_id)
-                ->where('visitas.curso_id', $topic->course_id)
-                ->where('visitas.estado_tema', "revisado")
-                ->count();
-            }
-            // REVISADOS (TEMAS NO EVALUABLES QUE FUERON VISTOS)
-            // Cambiar estado de resumen_x_curso
-            $tot_completados = $cant_aprob + $cant_abiertos + $cant_revisados;
+        if (count($topics_qualified) > 0) {
+            
+            $passed = $rows->where('passed', 1)
+                            ->whereIn('topic_id', $topics_qualified)
+                            ->count();
 
-            // Porcentaje avance por curso
-            $percent_curso = ($cant_asignados > 0) ? (($tot_completados / $cant_asignados) * 100) : 0;
-            $percent_curso = ($percent_curso > 100) ? 100 : $percent_curso; // Maximo porcentaje = 100
+            $failed = $rows->where('passed', '<>', 1)
+                            ->whereIn('topic_id', $topics_qualified)
+                            ->where('attempts', '>=', $max_attempts)
+                            ->count();
+        }
 
-            // Valida estados
-            $estado_curso = "desarrollo";
-            if ($tot_completados >= $cant_asignados) {
-                // $helper->log_marker('RxC Encuestas Respuestas');
-                $existe_encuesta = Curso_encuesta::select('id')->where('curso_id', $topic->course_id)->first();
-                if($existe_encuesta){
-                    $hizo_encuesta = DB::table('encuestas_respuestas')
-                    ->select('curso_id')
-                    ->where('usuario_id', $usuario_id)
-                    ->where('curso_id', $topic->course_id)
-                    ->first();
-                    if ($hizo_encuesta) {
-                        $estado_curso = "aprobado";
-                        // Genera diploma
-                        // $helper->log_marker('RxC Diplomas');
-                        Diploma::generar_diploma_x_curso_y_escuela($asing,$curso,$usuario_id);
-                    } else {
-                        $estado_curso = "enc_pend";
-                    }
-                }else {
-                    // Si el curso no tiene encuesta ASOCIADA, por defecto el curso ya está aprobado (validando que todos los temas se hayan completado)
-                    $estado_curso = "aprobado";
-                    // Genera/valida diploma para curso y escuela
-                    Diploma::generar_diploma_x_curso_y_escuela($asing,$curso,$usuario_id);
+        if (count($topics_open) > 0)
+            $taken = $rows->whereIn('topic_id', $topics_open)->count();
+
+        if(count($topics_for_review) > 0)
+            $reviewed = $rows->whereIn('topic_id', $topics_for_review)->count();
+            // ->where('visitas.estado_tema', "revisado")
+
+        $q_completed = $passed + $taken + $reviewed;
+
+        // Porcentaje avance por curso
+        $assigned = count($active_topics);
+        $advanced_percentage = ($assigned > 0) ? (($q_completed / $assigned) * 100) : 0;
+        $advanced_percentage = ($advanced_percentage > 100) ? 100 : $advanced_percentage; // Maximo porcentaje = 100
+
+        $grade_average = round($rows->whereIn('topic_id', $topics_qualified->pluck('id'))->average('grade'), 2);
+
+        $course_data = compact('assigned', 'passed', 'taken', 'reviewed', 'failed', 'grade_average', 'advanced_percentage');
+        $course_data['last_time_evaluated_at'] = now();
+
+        $status = 'desarrollo';
+
+        if ($q_completed >= $assigned) {
+
+            $poll = $course->polls()->first();
+
+            if ($poll) {
+
+                $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
+                
+                $status = 'enc_pend';
+
+                if ($poll_answers) {
+
+                    $status = 'aprobado';
+                    $course_data['certification_issued_at'] = now();
                 }
 
             } else {
-                // $helper->log_marker('RxC Pruebas tot_completados >= $cant_asignados');
 
-
-                if ($cant_desaprob >= $cant_asignados) {
-                    $estado_curso = "desaprobado";
-                }
+                $status = 'aprobado';
+                $course_data['certification_issued_at'] = now();
             }
-            // nueva Nota promedio CURSO
-            // $helper->log_marker('RxC nueva Nota promedio CURSO');
 
-            $res_nota = DB::table('pruebas')
-                // TOMAR EN CUENTA QUE EL TEMA ESTE ACTIVO
-                ->whereIn('posteo_id',$topics_qualified->pluck('id'))
-                ->select(DB::raw('AVG(IFNULL(nota, 0)) AS nota_avg'))
-                ->where('pruebas.usuario_id', $usuario_id)
-                ->where('pruebas.curso_id', $topic->course_id)
-                ->first();
+        } else {
 
-            $nota_prom_curso = number_format((float)$res_nota->nota_avg, 2, '.', '');
-            $visitas = Visita::select(DB::raw('SUM(sumatoria) as suma_visitas'))
-                    ->whereIn('post_id',$active_topics->pluck('id'))
-                    ->where('visitas.usuario_id', $usuario_id)
-                    ->where('visitas.curso_id', $topic->course_id)->first();
-            $suma_visitas = (isset($visitas)) ? $visitas->suma_visitas : 0;
-            /*-----------------------------------------------------------------------------------------------------------------------------------------*/
-            // $helper->log_marker('RxC Update');
-            if($tot_completados>0 || $cant_desaprob>0 || $nota_prom_curso>0){
-                $this->crear_actualizar_resumenes($usuario_id, $topic->course_id);
-            }
-            Resumen_x_curso::where('usuario_id', $usuario_id)->where('curso_id', $topic->course_id)->update(array(
-                'estado_rxc'=>1,
-                'asignados' => $cant_asignados,
-                'aprobados' => $cant_aprob,
-                'realizados' => $cant_abiertos,
-                'revisados' => $cant_revisados,
-                'desaprobados' => $cant_desaprob,
-                'nota_prom' => $nota_prom_curso,
-                'estado' => $estado_curso,
-                'porcentaje' => $percent_curso,
-                'visitas' => $suma_visitas,
-                'libre' => $curso->libre
-                // 'intentos' => $suma_intentos->intentos,
-            ));
-            // $helper->log_marker('RxC Update FIN');
-        // }else{
-        //     Resumen_x_curso::where('usuario_id',$usuario_id)->where('curso_id',$topic->course_id)->update([
-        //         'estado_rxc'=>0
-        //     ]);
-        // }
+            if ($failed >= $assigned)
+                $status = 'desaprobado';
+        }
+
+        $course_data['status_id'] = Taxonomy::getFirstData('course', 'user-status', $status)->id;
+
+        SummaryCourse::getCurrentRow($course)->update($course_data);
     }
 }
