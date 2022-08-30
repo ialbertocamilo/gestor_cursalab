@@ -50,6 +50,8 @@ class SummaryTopic extends Summary
 
     public function isOutOfTimeForQuiz()
     {
+        // info(now());
+        // info($this->current_quiz_finishes_at);
         return now() >= $this->current_quiz_finishes_at;
     }
 

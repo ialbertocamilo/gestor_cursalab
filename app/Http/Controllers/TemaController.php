@@ -195,7 +195,7 @@ class TemaController extends Controller
 
     public function showPregunta(School $school, Course $course, Topic $topic, Question $pregunta)
     {
-        $pregunta->rptas_json = json_decode($pregunta->rptas_json);
+        // $pregunta->rptas_json = json_decode($pregunta->rptas_json);
 
         $temp = collect();
         if ($pregunta->rptas_json) {
@@ -219,6 +219,10 @@ class TemaController extends Controller
 
         $question_type_code = $topic->evaluation_type->code === 'qualified' ? 'select-options' : 'written-answer';
 
+        // info('nuevasRptas');
+        // info($data['nuevasRptas']);
+        // info(json_decode($data['nuevasRptas'], true));
+
         Question::updateOrCreate(
             ['id' => $data['id']],
             [
@@ -227,7 +231,8 @@ class TemaController extends Controller
                 // 'pregunta' => html_entity_decode($data['pregunta']),
                 // 'rptas_json' => html_entity_decode($data['nuevasRptas']),
                 'pregunta' => $data['pregunta'],
-                'rptas_json' => $data['nuevasRptas'],
+                // 'rptas_json' => $data['nuevasRptas'],
+                'rptas_json' => json_decode($data['nuevasRptas'], true),
                 'rpta_ok' => $data['rpta_ok'],
                 'active' => $data['active'],
                 // 'position' => 'despues'
@@ -262,7 +267,7 @@ class TemaController extends Controller
         return $this->success($result);
     }
 
-    public function deletePregunta(School $school, Curso $course, Posteo $topic, Pregunta $pregunta)
+    public function deletePregunta(School $school, Course $course, Topic $topic, Question $pregunta)
     {
         $pregunta->delete();
 
@@ -273,10 +278,10 @@ class TemaController extends Controller
         // Si se elimina la última pregunta del tema, según su tipo de evaluación ($tipo_pregunta)
         // se inactivará el tema
         // TODO: agregar modal de validación en listado de preguntas
-        $has_active_questions = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', '1')->count() === 0;
+        $has_active_questions = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', ACTIVE)->count() === 0;
 
         if (!$has_active_questions) :
-            $topic->estado = 0;
+            $topic->active = 0;
             $topic->save();
         endif;
 

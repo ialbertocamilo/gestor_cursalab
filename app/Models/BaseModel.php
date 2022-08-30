@@ -27,7 +27,7 @@ class BaseModel extends Model implements Recordable
     use HasFactory;
     use Sluggable;
 
-    use UnixTimestampSerializable;
+    // use UnixTimestampSerializable;
 
     // use CustomMedia, CustomCRUD, CustomAudit;
     use CustomCRUD, CustomAudit;
