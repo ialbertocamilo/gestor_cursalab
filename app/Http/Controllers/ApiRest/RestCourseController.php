@@ -5,7 +5,9 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PollAnswerStoreRequest;
 use App\Models\Course;
+use App\Models\Poll;
 use App\Models\PollQuestionAnswer;
+use App\Models\SummaryCourse;
 use App\Models\Taxonomy;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -59,7 +61,7 @@ class RestCourseController extends Controller
                         }
                     }
                 }
-                $query1 = $this->updatePollAnswers($poll->id, $course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
+                $query1 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
             }
             if (!is_null($value_data) && $value_data->tipo == 'califica') {
                 $multiple = array();
@@ -92,12 +94,9 @@ class RestCourseController extends Controller
             }
         }
 
-        // update resumen encuesta
-        RestHelperController::updateSummaryPoll($user, $course);
+        Poll::updateSummariesAfterCompletingPoll($user, $course);
 
-        // TODO: update summary course
-
-        RestHelperController::updateSummaryCourseByUser($user->id, $course->id);
+        SummaryCourse::updateUserData($course, $user);
 
         return $this->success(['msg' => 'Encuesta guardada.']);
     }
