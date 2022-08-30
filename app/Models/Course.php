@@ -461,7 +461,7 @@ class Course extends BaseModel
                     $status = 'completado';
                 elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
                     $status = 'enc_pend';
-                elseif ($summary_course->status->code == 'desaprobado') :
+                elseif ($summary_course->status?->code == 'desaprobado') :
                     $status = 'desaprobado';
                     $enabled_poll = true;
                 else :
