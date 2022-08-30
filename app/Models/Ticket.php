@@ -41,14 +41,15 @@ class Ticket extends BaseModel
     {
         $query = self::with('user');
 
-        if ($request->q || $request->modulo)
-        {
-            $query->where(function($qu) use ($request){
+        if ($request->q || $request->modulo) {
 
-                $qu->whereHas('user', function($q) use ($request) {
+            $subworkspaceId = Workspace::getWorkspaceIdFromModule($request->modulo);
 
-                    if ($request->q)
-                    {
+            $query->where(function($qu) use ($request, $subworkspaceId){
+
+                $qu->whereHas('user', function($q) use ($request, $subworkspaceId) {
+
+                    if ($request->q) {
                         $q->where('name', 'like', "%$request->q%");
 
 //                        if (strlen($request->q) > 4)
@@ -56,7 +57,7 @@ class Ticket extends BaseModel
                     }
 
                     if ($request->modulo)
-                        $q->where('config_id', $request->modulo);
+                        $q->where('subworkspace_id', $subworkspaceId);
                 });
 
                 if ($request->q)

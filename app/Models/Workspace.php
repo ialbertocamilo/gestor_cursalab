@@ -257,19 +257,19 @@ class Workspace extends BaseModel
      */
     public static function getWorkspaceIdFromModule(?int $moduleId): mixed
     {
-        $subworkspace = Workspace::find($moduleId);
+        //$subworkspace = Workspace::find($moduleId);
 
 
-        // $workspace = Workspace::query()
-        //     ->join('criterion_workspace', 'criterion_workspace.workspace_id', '=', 'workspaces.id')
-        //     ->join('criterion_values', 'criterion_values.id', '=', 'criterion_workspace.criterion_id')
-        //     ->when($moduleId ?? null, function ($q) use ($moduleId) {
-        //         $q->where('criterion_workspace.criterion_id', $moduleId);
-        //     })
-        //     ->select('workspaces.*')
-        //     ->first();
+         $workspace = Workspace::query()
+             ->join('criterion_workspace', 'criterion_workspace.workspace_id', '=', 'workspaces.id')
+             ->join('criterion_values', 'criterion_values.id', '=', 'criterion_workspace.criterion_id')
+             ->when($moduleId ?? null, function ($q) use ($moduleId) {
+                 $q->where('criterion_workspace.criterion_id', $moduleId);
+             })
+             ->select('workspaces.*')
+             ->first();
 
-        return $workspace->parent_id ?? NULL;
+        return $workspace->id ?? NULL;
     }
 
     protected function searchSubWorkspace($request)
