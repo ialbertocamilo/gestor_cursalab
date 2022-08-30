@@ -89,8 +89,8 @@ class RestUserProgressController extends Controller
 
         $arr_estados = config('schools.arr_estados');
         $school_percentage = round($school_percentage);
-        info($arr_estados);
-        info($status);
+//        info($arr_estados);
+//        info($status);
 
 
         return [
