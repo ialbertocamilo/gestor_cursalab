@@ -274,13 +274,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             endif;
 
-            $user->subworkspace_id = Workspace::where('criterion_value_id', $data['criterion_list']['module'])->first()?->id;
+            $user->subworkspace_id = Workspace::query()
+                ->where('criterion_value_id', $data['criterion_list']['module'])
+                ->first()
+                ?->id;
 
-            $user->criterion_values()->sync(array_values($data['criterion_list_final']) ?? []);
+            $user->criterion_values()
+                ->sync(array_values($data['criterion_list_final']) ?? []);
+
 
             $user->save();
             DB::commit();
+
         } catch (\Exception $e) {
+
             info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
@@ -582,7 +589,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
             $user->save();
         }
-        
+
     }
 
     public function getSubworkspaceSetting($field, $value = null)
