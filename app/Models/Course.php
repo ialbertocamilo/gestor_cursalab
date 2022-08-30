@@ -69,6 +69,11 @@ class Course extends BaseModel
         return $this->hasMany(SummaryCourse::class);
     }
 
+    public function type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');

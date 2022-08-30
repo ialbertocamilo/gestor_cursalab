@@ -103,20 +103,18 @@ class Poll extends BaseModel
     }
 
 
-    protected function updateSummaryPoll($course, $user)
+    protected function updateSummariesAfterCompletingPoll($course, $user)
     {
-        $summary_user = SummaryCourse::updateUserData($course, $user);
+        $summary_user = $user->summary;
 
         $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+
         SummaryCourse::where('user_id', $user->id)->where('course_id', $course->id)
-            ->update([
-                'status_id' => $approved_status_taxonomy?->id,
-                'porcentaje' => '100',
-            ]);
+            ->update(['status_id' => $approved_status_taxonomy?->id, 'porcentaje' => '100',]);
 
         $count_approved_courses = SummaryCourse::select('id')
             ->whereRelation('course', 'active', ACTIVE)
-//            ->where('libre', 0)
+            ->whereHas('course.type', fn($q) => $q->where('code', '<>', 'free'))
             ->where('user_id', $user->id)
             ->where('status_id', $approved_status_taxonomy?->id)
             ->count();
@@ -127,10 +125,10 @@ class Poll extends BaseModel
 
         $rank_user = User::calculate_rank($count_approved_courses, $summary_user->grade_average, $summary_user->attempts);
 
-        $user->summary()->update(array(
+        $user->summary()->update([
             'courses_completed' => $count_approved_courses,
             'advanced_percentage' => $general_percent,
             'score' => $rank_user
-        ));
+        ]);
     }
 }
