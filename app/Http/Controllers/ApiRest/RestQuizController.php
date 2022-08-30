@@ -72,12 +72,13 @@ class RestQuizController extends Controller
         $data_ev['tema_id'] = $topic->id;
         $data_ev['intentos_realizados'] = $row->attempts;
 
-        SummaryCourse::updateRanking($topic);
+        SummaryCourse::updateUserData($topic->course);
+        SummaryUser::updateUserData();
 
-        $restAvanceController = new RestAvanceController();
+        // $restAvanceController = new RestAvanceController();
         // ACTUALIZAR RESUMENES
-        $restAvanceController->actualizar_resumen_x_curso($usuario_id, $row->curso_id, $config_evaluacion['nro_intentos']);
-        $restAvanceController->actualizar_resumen_general($usuario_id);
+        // $restAvanceController->actualizar_resumen_x_curso($usuario_id, $row->curso_id, $config_evaluacion['nro_intentos']);
+        // $restAvanceController->actualizar_resumen_general($usuario_id);
         // DB::table('resumen_general')->where('usuario_id',$usuario_id)->update([
         //     'last_time_evaluated_at' => now(),
         // ]);
@@ -123,9 +124,6 @@ class RestQuizController extends Controller
 
         $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
 
-        info('questions');
-        info($questions);
-
         if ( count($questions) == 0 )
             return response()->json(['error' => true, 'data' => null], 200);
 
@@ -138,7 +136,7 @@ class RestQuizController extends Controller
             'attempt' => [
                 'started_at' => $row->current_quiz_started_at,
                 'finishes_at' => $row->current_quiz_finishes_at,
-                'diff_in_minutes' => $row->current_quiz_finishes_at->diffInMinutes($row->current_quiz_started_at),
+                'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
             ],
         ];
 

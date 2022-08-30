@@ -64,6 +64,10 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
     Route::prefix('temas')->group(base_path('routes/app/topics.php'));
     Route::prefix('/')->group(base_path('routes/app/quizzes.php'));
+
+
+
+
 });
 
 Route::controller(TestController::class)->group(function() {

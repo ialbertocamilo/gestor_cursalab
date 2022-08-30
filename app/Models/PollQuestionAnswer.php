@@ -26,4 +26,21 @@ class PollQuestionAnswer extends BaseModel
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
+
+
+    protected function updatePollQuestionAnswers($course_id, $poll_question_id, $user_id, $question_type, $answers)
+    {
+        $question_type_taxonomy = Taxonomy::getFirstData('poll', 'tipo-pregunta', $question_type);
+
+        PollQuestionAnswer::updateOrInsert(
+            ['course_id' => $course_id, 'user_id' => $user_id],
+            [
+                'course_id' => $course_id,
+                'user_id' => $user_id,
+                'poll_question_id' => $poll_question_id,
+                'type_id' => $question_type_taxonomy?->id,
+                'respuestas' => $answers
+            ]
+        );
+    }
 }

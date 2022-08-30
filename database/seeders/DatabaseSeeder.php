@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(TaxonomySeederCourse::class);
         // $this->call(TaxonomySeederTopicEvaluationType::class);
         // $this->call(TaxonomySeederType::class);
+         $this->call(TaxonomySeederCourseType::class);
 
 
         // $this->call(BouncerSeeder::class);
@@ -32,6 +33,6 @@ class DatabaseSeeder extends Seeder
         // // Seeds for testing purposes
 
         // $this->call(TestSeeder::class);
-        $this->call(TestUserSeeder::class);
+//        $this->call(TestUserSeeder::class);
     }
 }

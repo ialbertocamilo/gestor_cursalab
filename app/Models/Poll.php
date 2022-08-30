@@ -52,7 +52,7 @@ class Poll extends BaseModel
         $workspace = $session['workspace'];
 
         $query = self::withCount('questions')
-                     ->where('workspace_id', $workspace->id);
+            ->where('workspace_id', $workspace->id);
 
         if ($request->q)
             $query->where('titulo', 'like', "%$request->q%");
@@ -100,5 +100,35 @@ class Poll extends BaseModel
         } else {
             return [];
         }
+    }
+
+
+    protected function updateSummariesAfterCompletingPoll($course, $user)
+    {
+        $summary_user = $user->summary;
+
+        $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+
+        SummaryCourse::where('user_id', $user->id)->where('course_id', $course->id)
+            ->update(['status_id' => $approved_status_taxonomy?->id, 'porcentaje' => '100',]);
+
+        $count_approved_courses = SummaryCourse::select('id')
+            ->whereRelation('course', 'active', ACTIVE)
+            ->whereRelation('status', 'code', 'aprobado')
+            ->whereHas('course.type', fn($q) => $q->where('code', '<>', 'free'))
+            ->where('user_id', $user->id)
+            ->count();
+
+        $general_percent = ($summary_user->courses_assigned > 0) ? (($count_approved_courses / $summary_user->courses_assigned) * 100) : 0;
+        $general_percent = min($general_percent, 100);
+        $general_percent = round($general_percent);
+
+        $rank_user = User::calculate_rank($count_approved_courses, $summary_user->grade_average, $summary_user->attempts);
+
+        $user->summary()->update([
+            'courses_completed' => $count_approved_courses,
+            'advanced_percentage' => $general_percent,
+            'score' => $rank_user
+        ]);
     }
 }

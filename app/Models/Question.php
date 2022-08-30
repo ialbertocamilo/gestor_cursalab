@@ -46,12 +46,7 @@ class Question extends BaseModel
         {
             $temp_questions = collect();
 
-            $rptas_json = $question->rptas_json;
-
-            info('rptas_json');
-            info($rptas_json);
-
-            foreach ($rptas_json as $key => $value)
+            foreach ($question->rptas_json as $key => $value)
             {
                 $temp_questions->push(['id' => $key, 'opc' => $value]);
             }
