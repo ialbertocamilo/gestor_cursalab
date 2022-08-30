@@ -130,6 +130,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsTo(Workspace::class, 'subworkspace_id');
     }
 
+    public function summary()
+    {
+        return $this->hasOne(SummaryUser::class);
+    }
+
+    public function summary_courses()
+    {
+        return $this->hasMany(SummaryCourse::class);
+    }
+
     public function getFullnameAttribute()
     {
         $fullname = $this->name;
@@ -354,7 +364,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // TODO: Agregar segmentacion directa
         if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses);
 
-        return collect($all_courses);
+        return collect($all_courses)->unique()->values();
     }
 
     public function setProgramCourses($user, &$all_courses)

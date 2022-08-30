@@ -224,8 +224,10 @@ class TemaController extends Controller
             [
                 'topic_id' => $topic->id,
                 'type_id' => Taxonomy::getFirstData('question', 'type', $question_type_code)?->id,
-                'pregunta' => html_entity_decode($data['pregunta']),
-                'rptas_json' => html_entity_decode($data['nuevasRptas']),
+                // 'pregunta' => html_entity_decode($data['pregunta']),
+                // 'rptas_json' => html_entity_decode($data['nuevasRptas']),
+                'pregunta' => $data['pregunta'],
+                'rptas_json' => $data['nuevasRptas'],
                 'rpta_ok' => $data['rpta_ok'],
                 'active' => $data['active'],
                 // 'position' => 'despues'
