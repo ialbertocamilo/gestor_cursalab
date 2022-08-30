@@ -43,7 +43,7 @@
                         </fieldset>
                     </v-col>
                 </v-row>
-                <v-row v-if="evaluable !== 'abierta'">
+                <v-row v-if="evaluation_type !== 'open'">
 
                     <v-col cols="12">
                         <!--                        <DefaultRichText-->
@@ -149,7 +149,11 @@ export default {
             required: true
         },
         width: String,
-        evaluable: String
+        evaluable: String,
+        evaluation_type: {
+            type: String,
+            required: true
+        }
     },
     data() {
         return {
@@ -161,6 +165,7 @@ export default {
                 rpta_ok: null,
                 active: true,
                 nuevasRptas: "",
+                evaluation_type: ''
             },
             resource: {},
             selects: {
@@ -172,7 +177,8 @@ export default {
             tempAnswer: null,
             text_validaciones: validaciones
         }
-    },
+    }
+    ,
     methods: {
         closeModal() {
             let vue = this;
@@ -185,7 +191,9 @@ export default {
             vue.errors = []
 
             vue.showLoader()
+            vue.resource.evaluation_type = vue.evaluation_type;
             const validateForm = vue.validateFieldsForm();
+
             // console.log(validateForm)
             vue.generarJson();
             if (validateForm) {
@@ -238,18 +246,28 @@ export default {
                 });
         },
         validateFieldsForm() {
+
             let vue = this
+
             // Validar pregunta no vacia
+
             if (!vue.resource.pregunta) {
                 // console.log('validacion pregunta no vacia')
                 vue.rules.pregunta = true
                 return false
             }
-            // Validar que exista al menos 2 respuestas
-            if (vue.resource.respuestas.length < 2){
-                // console.log('validacion cant preguntas')
-                return false
+
+            // Validar que exista al menos 2 respuestas, cuando
+            // la pregunta no es abierta
+
+            if (vue.evaluation_type !== 'open') {
+                if (vue.resource.respuestas.length < 2){
+                    // console.log('validacion cant preguntas')
+                    return false
+                }
             }
+
+
             // Validar que exista respuesta correcta
             // console.log('validaciones ok')
             // console.log(vue.resource.rpta_ok)
