@@ -46,7 +46,7 @@ class SummaryUser extends Summary
                                 ->whereIn('course_id', $courses_id)
                                 ->count();
 
-        $percent_general = ($row_user->assigned > 0) ? (($passed / $row_user->assigned) * 100) : 0;
+        $percent_general = ($row_user->courses_assigned > 0) ? (($passed / $row_user->courses_assigned) * 100) : 0;
         $percent_general = ($percent_general > 100) ? 100 : $percent_general; // maximo porcentaje = 100
         $percent_general = round($percent_general);
         
@@ -64,12 +64,12 @@ class SummaryUser extends Summary
         $score = User::calculate_rank($passed, $grade_average, $attempts);
 
         // $helper->log_marker('RG UPDATE');
-        $tot_com = ($passed > $row_user->assigned) ? $row_user->assigned : $passed;
+        $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
 
         $user_data = [
             'completed' => $tot_com,
             'grade_average' => $grade_average,
-            // 'cur_asignados' => $row_user->assigned,
+            // 'cur_asignados' => $row_user->courses_assigned,
             'attempts' => $attempts,
             'score' => $score,
             'advanced_percentage' => $percent_general
