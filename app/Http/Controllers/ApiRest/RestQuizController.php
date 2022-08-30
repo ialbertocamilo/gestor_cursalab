@@ -123,6 +123,9 @@ class RestQuizController extends Controller
 
         $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
 
+        info('questions');
+        info($questions);
+
         if ( count($questions) == 0 )
             return response()->json(['error' => true, 'data' => null], 200);
 
