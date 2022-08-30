@@ -14,6 +14,10 @@ class SummaryTopic extends Summary
         'last_time_evaluated_at',
     ];
 
+    protected $casts = [
+        'answers' => 'array',
+    ];
+
     protected $dates = [
         'current_quiz_started_at',
         'current_quiz_finishes_at',

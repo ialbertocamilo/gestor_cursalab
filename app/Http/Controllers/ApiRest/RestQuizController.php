@@ -75,16 +75,6 @@ class RestQuizController extends Controller
         SummaryCourse::updateUserData($topic->course);
         SummaryUser::updateUserData();
 
-        // $restAvanceController = new RestAvanceController();
-        // ACTUALIZAR RESUMENES
-        // $restAvanceController->actualizar_resumen_x_curso($usuario_id, $row->curso_id, $config_evaluacion['nro_intentos']);
-        // $restAvanceController->actualizar_resumen_general($usuario_id);
-        // DB::table('resumen_general')->where('usuario_id',$usuario_id)->update([
-        //     'last_time_evaluated_at' => now(),
-        // ]);
-        // DB::table('resumen_x_curso')->where('usuario_id',$usuario_id)->where('curso_id',$row->curso_id)->update([
-        //     'last_time_evaluated_at' => now(),
-        // ]);
         $data_ev['encuesta_pendiente'] = Curso_encuesta::getEncuestaPendiente($user->id, $topic->course_id);
 
         return response()->json(['error' => false, 'data' => $data_ev], 200);
@@ -225,4 +215,19 @@ class RestQuizController extends Controller
         return ['error' => 0, 'data' => $counter];
     }
 
+    public function preguntasRptasUsuario(Topic $topic)
+    {
+        $row = SummaryTopic::getCurrentRow($topic);
+
+        $questions_id = ( $row && $row->answers) ? collect($row->answers)->pluck('preg_id') : [];
+
+        $questions = Question::where('topic_id', $topic->id)
+                        ->whereIn('id', $questions_id)
+                        ->where('active', ACTIVE)
+                        ->get();
+
+        $status = count($questions) > 0;
+        
+        return ['error' => $status, 'data' => $questions];
+    }
 }
