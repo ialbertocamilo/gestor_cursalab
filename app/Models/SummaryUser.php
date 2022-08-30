@@ -29,19 +29,14 @@ class SummaryUser extends Summary
         $row_user = SummaryUser::getCurrentRow();
 
         $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
-                        // ->whereRelation('topic.course', 'active', ACTIVE)
                         ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))
-                        // ->whereRelation('topic', 'active', ACTIVE)
                         ->where('user_id', $user->id)
                         ->first();
 
-        // $nota_prom_gen = number_format((float)$res_nota->nota_avg, 2, '.', '');
         $grade_average = round($res_nota->nota_avg, 2);
 
-        // $helper->log_marker('RG passed');
         $passed = SummaryCourse::where('user_id', $user->id)
                                 ->whereRelation('status', 'code', 'aprobado')
-                                // ->whereRelation('course', 'active', ACTIVE)
                                 ->whereRelation('course.type', 'code', '<>', 'free')
                                 ->whereIn('course_id', $courses_id)
                                 ->count();
@@ -50,20 +45,16 @@ class SummaryUser extends Summary
         $percent_general = ($percent_general > 100) ? 100 : $percent_general; // maximo porcentaje = 100
         $percent_general = round($percent_general);
         
-        // Calcula ranking
         $intentos_x_curso = SummaryCourse::select(DB::raw('SUM(attempts) as intentos'))
                                             // ->whereRelation('course', 'active', ACTIVE)
                                             ->whereRelation('course.type', 'code', '<>', 'free')
                                             ->where('user_id', $user->id)
                                             ->whereIn('course_id', $courses_id)
-
-                                            // ->where('libre', 0)
                                             ->first();
 
         $attempts = (isset($intentos_x_curso)) ? $intentos_x_curso->intentos : 0;
         $score = User::calculate_rank($passed, $grade_average, $attempts);
 
-        // $helper->log_marker('RG UPDATE');
         $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
 
         $user_data = [
