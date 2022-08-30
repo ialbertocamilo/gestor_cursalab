@@ -109,8 +109,10 @@ class RestUserProgressController extends Controller
 
         if (!$data_school) return $this->success(['courses' => []]);
 
+        $course_status_arr = config('courses.status');
+        $topic_status_arr = config('topics.status');
         $school_courses = [];
-        foreach ($data_school as $school_id => $course){
+        foreach ($data_school as $school_id => $course) {
             $course_status = Course::getCourseProgressByUser($user, $course);
 
             $active_course_topics = $course->topics->where('active', ACTIVE)->sortBy('position');
@@ -125,16 +127,16 @@ class RestUserProgressController extends Controller
                     'disponible' => $topic_status['available'],
                     'nota' => $topic_status['grade'],
                     'estado' => $topic_status['status'],
-                    'estado_str' => $topic_status['status'],
+                    'estado_str' => $topic_status_arr[$topic_status['status']],
                 ];
             }
 
             $school_courses[] = [
                 'id' => $course->id,
                 'name' => $course->name,
-                'nota'=> $course_status['average_grade'],
+                'nota' => $course_status['average_grade'],
                 'estado' => $course_status['status'],
-                'estado_str' => $course_status['status'],
+                'estado_str' => $course_status_arr[$course_status['status']],
                 'temas' => $temp_topics
             ];
         }
