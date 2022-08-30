@@ -108,12 +108,12 @@ class RestQuizController extends Controller
     {
         $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
 
-        if (!$topic) return response()->json(['data' => [], 'error' => true], 200);
+        if (!$topic) return response()->json(['data' => ['msg' => 'Not found'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
 
         if ($row->isOutOfTimeForQuiz())
-            return response()->json(['data' => [], 'error' => true], 200);
+            return response()->json(['data' => ['msg' => 'Fuera de tiempo'], 'error' => true], 200);
 
         $limit = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'preg_x_ev');
 
