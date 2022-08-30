@@ -40,7 +40,8 @@ class RestQuizController extends Controller
             'correct_answers' => $correct_answers,
             'failed_answers' => $failed_answers,
             'passed' => $passed,
-            'answers' => json_encode($request->respuestas),
+            'answers' => $request->respuestas,
+            // 'answers' => json_encode($request->respuestas),
             'grade' => round($new_grade),
             'attempts' => $row->attempts + 1,
             'last_time_evaluated_at' => now(),
@@ -75,24 +76,10 @@ class RestQuizController extends Controller
         SummaryCourse::updateUserData($topic->course);
         SummaryUser::updateUserData();
 
-        $data_ev['encuesta_pendiente'] = Curso_encuesta::getEncuestaPendiente($user->id, $topic->course_id);
+        // Pendiente
+        // $data_ev['encuesta_pendiente'] = Curso_encuesta::getEncuestaPendiente($user->id, $topic->course_id);
 
         return response()->json(['error' => false, 'data' => $data_ev], 200);
-    }
-
-    public function guardaEvaluacionAbierta(Request $request)
-    {
-
-    }
-
-    public function evalPendientes2(Request $request)
-    {
-
-    }
-
-    public function usuarioRespuestasEval(Request $request)
-    {
-
     }
 
     public function cargar_preguntas($topic_id)
@@ -137,7 +124,7 @@ class RestQuizController extends Controller
         return response()->json(['error' => false, 'data' => $data], 200);
     }
 
-    // public function preguntasIntentos_v7($topic_id = null, $user_id = null, $fuente)
+    // public function preguntasIntentos_v7($topic_id = null, $user_id = null, $source)
     // {
     //     if ( !$topic_id && !$user_id ) return ['error' => 2, 'data' => null];
 
@@ -226,8 +213,31 @@ class RestQuizController extends Controller
                         ->where('active', ACTIVE)
                         ->get();
 
-        $status = count($questions) > 0;
+        return ['error' => count($questions) == 0, 'data' => $questions];
+    }
+
+    public function guardaEvaluacionAbierta(Request $request)
+    {
+        $answers = json_decode(urldecode($request->rptas), true);
+        $topic = Topic::with('course')->find($request->post_id);
+        // $source = $request->fuente;
+
+        if (!$topic) return ['error' => 2, 'msg' => 'Topic not found'];
+
+        $row = SummaryTopic::getCurrentRow($topic);
+
+        if (!$row) return ['error' => 0, 'msg' => 'Not found'];
+
+        if ($row->answers) return ['error' => 3, 'msg' => 'Respuestas ya registradas'];
+
+        $status_taken = Taxonomy::getFirstData('topic', 'user-status', 'realizado');
         
-        return ['error' => $status, 'data' => $questions];
+        // $answers = json_encode($answers, JSON_UNESCAPED_UNICODE);
+        $row->update(['answers' => $answers, 'status_id' => $status->id]);
+
+        SummaryCourse::updateUserData($topic->course);
+        SummaryUser::updateUserData();
+
+        return ['error' => 0, 'msg' => 'Respuestas registradas'];
     }
 }
