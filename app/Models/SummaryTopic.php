@@ -9,7 +9,7 @@ class SummaryTopic extends Summary
     protected $table = 'summary_topics';
 
     protected $fillable = [
-        'user_id', 'topic_id', 'views', 'attempts', 'downloads', 'answers', 'restarts',
+        'user_id', 'topic_id', 'status_id', 'views', 'attempts', 'downloads', 'answers', 'restarts',
         'current_quiz_started_at', 'current_quiz_finishes_at', 'taking_quiz',
         'last_time_evaluated_at',
     ];
@@ -53,7 +53,7 @@ class SummaryTopic extends Summary
         info($this);
         info('this->current_quiz_started_at');
         info($this->current_quiz_started_at);
-        
+
         return now() >= $this->current_quiz_started_at->addHour();
     }
 

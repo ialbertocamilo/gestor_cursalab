@@ -115,9 +115,9 @@ class RestQuizController extends Controller
         if ($row->isOutOfTimeForQuiz())
             return response()->json(['data' => [], 'error' => true], 200);
 
-        $config_quiz = auth()->user()->subworspace->mod_evaluaciones;
+        $limit = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'preg_x_ev');
 
-        $limit = $config_quiz['preg_x_ev'] ?? 5;
+        // $limit = $config_quiz['preg_x_ev'] ?? 5;
         $is_random = $topic->evaluation_type->code == 'qualified';
         $type_code = $topic->evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer';
 

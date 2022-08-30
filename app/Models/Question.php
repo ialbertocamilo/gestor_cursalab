@@ -27,7 +27,7 @@ class Question extends BaseModel
                     ->get();
     }
 
-    protected function getQuestionsForQuiz($topic, $limit, $random = true, $code = 'selecciona')
+    protected function getQuestionsForQuiz($topic, $limit = 5, $random = true, $code = 'selecciona')
     {
         $questions = Question::getByTopicAndType($topic, $code);
 
