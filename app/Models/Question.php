@@ -31,7 +31,7 @@ class Question extends BaseModel
     {
         $questions = Question::getByTopicAndType($topic, $code);
 
-        if ($random) $questions = $questions->shuffle()->all();
+        if ($random) $questions = $questions->shuffle();
 
         $questions = $questions->take($limit);
 
