@@ -58,7 +58,7 @@ class RestQuizController extends Controller
                 'passed' => $passed,
                 'answers' => $request->respuestas,
                 // 'answers' => json_encode($request->respuestas),
-                'grade' => round($new_grade),
+                'grade' => round($new_grade, 2),
             ];
 
             $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
@@ -193,8 +193,11 @@ class RestQuizController extends Controller
             if ($topic->course->reinicios_programado)
                 $times[] = $topic->course->reinicios_programado;
 
-            if (auth()->user()->subworspace->reinicios_programado)
-                $times[] = auth()->user()->subworspace->reinicios_programado;
+            if (auth()->user()->subworkspace->reinicios_programado)
+                $times[] = auth()->user()->subworkspace->reinicios_programado;
+
+            info('times');
+            info($times);
 
             if (count($times) > 0) {
                 

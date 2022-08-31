@@ -44,14 +44,14 @@
                         <v-col cols="12">
 
                             <DefaultModalSection
-                                title="Programación de reinicios"
+                                title="Intentos automáticos"
                             >
                                 <template slot="content">
                                     <v-row justify="center">
                                         <v-col cols="3" class="d-flex justify-content-center align-items-center">
                                             <DefaultToggle
-                                                active-label="Automático"
-                                                inactive-label="Manual"
+                                                active-label="Activo"
+                                                inactive-label="Inactivo"
                                                 v-model="resource.reinicio_automatico"
                                             />
                                         </v-col>

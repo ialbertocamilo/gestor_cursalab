@@ -34,6 +34,7 @@ class Workspace extends BaseModel
 
     protected $casts = [
         'mod_evaluaciones' => 'array',
+        'reinicios_programado' => 'array',
     ];
 
     public function users()

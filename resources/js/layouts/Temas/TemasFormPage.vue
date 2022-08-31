@@ -472,7 +472,7 @@ export default {
         },
         validateTipoEv() {
             let vue = this
-            if (vue.resource.assessable === '0') vue.resource.type_evaluation_id = null
+            if (['0', null, 0, false].includes(vue.resource.assessable)) vue.resource.type_evaluation_id = null
 
             vue.resource.tipo_ev = null
             vue.resetFormValidation('TemaForm')
