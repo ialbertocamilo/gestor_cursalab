@@ -393,8 +393,7 @@ class Curso extends Model
         if (($curso->wasChanged('active') || $curso->active) && $curso->topics->count() > 0):
             $messages[] = [
                 'title' => $title,
-                'subtitle' => "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.",
+                'subtitle' => "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.",
                 'type' => 'update_message'
             ];
         endif;

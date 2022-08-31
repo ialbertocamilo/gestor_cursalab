@@ -52,7 +52,7 @@
                         <DefaultToggle
                             v-model="resource.multiple"
                             type="multiple"
-                            label="¿Selección múltiple?"
+                            label="Selección múltiple"
                             :disabled="options.action === 'edit'"
                         />
                     </v-col>
@@ -60,7 +60,7 @@
                         <DefaultToggle
                             v-model="resource.show_in_segmentation"
                             type="show_in_segmentation"
-                            label="¿Mostrar en segmentación?"
+                            label="Mostrar en segmentación"
                             :disabled="options.action === 'edit'"
                         />
                     </v-col>

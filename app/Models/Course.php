@@ -9,9 +9,13 @@ class Course extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
-        'assessable', 'freely_eligible',
+        'assessable', 'freely_eligible', 'type_id',
         'position', 'scheduled_restarts', 'active',
         'duration', 'investment'
+    ];
+
+    protected $casts = [
+        'scheduled_restarts' => 'array',
     ];
 
     public function schools()
@@ -61,7 +65,7 @@ class Course extends BaseModel
 
     public function requirements()
     {
-        return $this->morphMany(Requirement::class, 'requirement');
+        return $this->morphMany(Requirement::class, 'model');
     }
 
     public function summaries()
@@ -101,8 +105,6 @@ class Course extends BaseModel
             $t->where('workspace_id', $workspace->id);
         });
 
-        info($request->all());
-
         if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->where('school_id', $request->school_id);
@@ -138,11 +140,21 @@ class Course extends BaseModel
                 $course->workspaces()->sync([$workspace->id]);
             endif;
 
-            if ($data['requisito_id']):
+            info('course->requirements()->get()');
+            info($course->requirements()->get());
+
+            if ($data['requisito_id']) :
                 Requirement::updateOrCreate(
                     ['model_type' => Course::class, 'model_id' => $course->id,],
                     ['requirement_type' => Course::class, 'requirement_id' => $data['requisito_id']]
                 );
+
+            else:
+
+                info('sin requisito');
+
+                $course->requirements()->delete();
+
             endif;
 
 
@@ -153,13 +165,14 @@ class Course extends BaseModel
             DB::commit();
 
         } catch (\Exception $e) {
-
+            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
         }
 
         cache_clear_model(School::class);
+        cache_clear_model(Requirement::class);
 
         return $course;
     }
@@ -256,8 +269,7 @@ class Course extends BaseModel
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = null;
-        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['subtitle'] = "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.";
         $temp['show_confirm'] = true;
         $temp['type'] = 'update_message_on_update';
 
@@ -457,7 +469,8 @@ class Course extends BaseModel
                 if ($poll_questions_answers) $solved_poll = true;
             }
 
-            $summary_course = $course->summaryByUser($user->id);
+            // $summary_course = $course->summaryByUser($user->id);
+            $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;

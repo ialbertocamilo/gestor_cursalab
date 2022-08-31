@@ -24,6 +24,11 @@ class SummaryTopic extends Summary
         'last_time_evaluated_at',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function topic()
     {
         return $this->belongsTo(Topic::class);
@@ -135,15 +140,16 @@ class SummaryTopic extends Summary
         return ! $this->passed;
     }
 
-    public function hasNoAttemptsLeft($attempts_limit = null)
+    public function hasNoAttemptsLeft($attempts_limit = null, $user = null)
     {
         if (!$attempts_limit)
         {
-            $config = auth()->user()->getSubworkspaceSetting('mod_evaluaciones');
+            $user = $user ?? auth()->user();
+            $config = $user->getSubworkspaceSetting('mod_evaluaciones');
             $attempts_limit = $config['nro_intentos'] ?? 5;
         }
 
-        return $row->attempts >= $attempts_limit;
+        return $this->attempts >= $attempts_limit;
     }
 
     protected function calculateGrade($correct_answers, $failed_answers)

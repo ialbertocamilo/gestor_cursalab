@@ -161,6 +161,7 @@ class SortingModel extends Model
 
             $model = "App" . '\\' . "Models" . '\\' . $request->model;
             $model = app($model);
+
             $resource = $model::find($request->id);
 
             $field = $request->field ?? 'position';

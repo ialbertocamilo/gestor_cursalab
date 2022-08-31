@@ -472,7 +472,7 @@ export default {
         },
         validateTipoEv() {
             let vue = this
-            if (vue.resource.assessable === '0') vue.resource.type_evaluation_id = null
+            if (['0', null, 0, false].includes(vue.resource.assessable)) vue.resource.type_evaluation_id = null
 
             vue.resource.tipo_ev = null
             vue.resetFormValidation('TemaForm')
@@ -510,7 +510,7 @@ export default {
             vue.topicsValidationModal.width = "30vw"
             vue.topicsValidationModal.hideConfirmBtn = true
             vue.topicsValidationModal.cancelLabel = 'Entendido'
-            await vue.openFormModal(vue.topicsValidationModal, data, 'showAlertEvaluacion', 'Atención')
+            await vue.openFormModal(vue.topicsValidationModal, data, 'showAlertEvaluacion', 'Debes de tener en cuenta')
         },
     }
 }

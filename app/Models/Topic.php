@@ -54,7 +54,7 @@ class Topic extends BaseModel
 
     public function requirements()
     {
-        return $this->morphMany(Requirement::class, 'requirement');
+        return $this->morphMany(Requirement::class, 'model');
     }
 
     public function evaluation_type()
@@ -196,10 +196,13 @@ class Topic extends BaseModel
 
     public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic)
     {
-        $course_requirements_of = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
-            $query->where('id', $topic->course->id);
-        })->get();
-        $is_required_course = $course_requirements_of->count() > 0;
+        // $course_requirements = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
+        //     $query->where('id', $topic->course->id);
+        // })->get();
+
+        $course_requirements = $topic->course->requirements()->get();
+
+        $is_required_course = $course_requirements->count() > 0;
 
         $last_active_topic = Topic::where('course_id', $topic->course_id)->where('active', 1)->get();
         $is_last_active_topic = ($last_active_topic->count() === 1 && $topic->active);
@@ -214,9 +217,9 @@ class Topic extends BaseModel
         $temp['type'] = 'last_active_topic_and_required_course';
         $temp['list'] = [];
 
-        foreach ($course_requirements_of as $requirement) {
-            $requisito = Course::find($requirement->model_id);
-            $route = route('cursos.editCurso', [$school->id, $requirement->model_id]);
+        foreach ($course_requirements as $requirement) {
+            $requisito = Course::find($requirement->requirement_id);
+            $route = route('cursos.editCurso', [$school->id, $requirement->requirement_id]);
             $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
         }
 
@@ -225,10 +228,13 @@ class Topic extends BaseModel
 
     public function checkIfIsRequiredTopic(School $school, Topic $topic, $data, $verb = 'inactivar')
     {
-        $requirements_of = Requirement::whereHasMorph('requirement', [Topic::class], function ($query) use ($topic) {
-            $query->where('id', $topic->id);
-        })->get();
-        $is_required_topic = $requirements_of->count() > 0;
+        // $requirements = Requirement::whereHasMorph('requirement', [Topic::class], function ($query) use ($topic) {
+        //     $query->where('id', $topic->id);
+        // })->get();
+
+        $requirements = $topic->requirements()->get();
+
+        $is_required_topic = $requirements->count() > 0;
         $will_be_deleted = $data['to_delete'] ?? false;
         $will_be_inactivated = $data['active'] === false;
         $temp['ok'] = (($will_be_inactivated || $will_be_deleted) && $is_required_topic);
@@ -241,9 +247,9 @@ class Topic extends BaseModel
         $temp['type'] = 'check_if_is_required_topic';
         $temp['list'] = [];
 
-        foreach ($requirements_of as $requirement) {
-            $requisito = Topic::find($requirement->model_id);
-            $route = route('temas.editTema', [$school->id, $topic->course->id, $requirement->model_id]);
+        foreach ($requirements as $requirement) {
+            $requisito = Topic::find($requirement->requirement_id);
+            $route = route('temas.editTema', [$school->id, $topic->course->id, $requirement->requirement_id]);
             $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
         }
 
@@ -277,8 +283,7 @@ class Topic extends BaseModel
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = null;
-        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['subtitle'] = "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.";
         $temp['show_confirm'] = true;
         $temp['type'] = 'update_message_on_update';
 
@@ -292,8 +297,7 @@ class Topic extends BaseModel
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = null;
-        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['subtitle'] = "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.";
         $temp['show_confirm'] = true;
         $temp['type'] = 'update_message_on_update';
 
@@ -308,8 +312,7 @@ class Topic extends BaseModel
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = null;
-        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['subtitle'] = "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.";
         $temp['show_confirm'] = true;
         $temp['type'] = 'update_message_on_update';
 
@@ -371,7 +374,7 @@ class Topic extends BaseModel
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
 
         $sub_workspace = $user->subworkspace;
-        $mod_eval = json_decode($sub_workspace->mod_evaluaciones, true);
+        $mod_eval = $sub_workspace->mod_evaluaciones;
 
         $max_attempts = (int)$mod_eval['nro_intentos'];
 
@@ -403,7 +406,7 @@ class Topic extends BaseModel
                     'contenido' => $topic->contenido,
                     'media' => $media_topics,
                     'evaluable' => $topic->assessable ? 'si' : 'no',
-                    'tipo_ev' => $topic->evaluation_type->code,
+                    'tipo_ev' => $topic->evaluation_type->code ?? NULL,
                     'nota' => $topic_status['grade'],
                     'disponible' => $topic_status['available'],
                     'intentos_restantes' => $topic_status['remaining_attempts'],
@@ -447,13 +450,15 @@ class Topic extends BaseModel
         $grade = 0;
         $available_topic = false;
         $remaining_attempts = $max_attempts;
-        $summary_topic = $topic->summaryByUser($user->id);
+        // $summary_topic = $topic->summaryByUser($user->id);
+        $summary_topic = SummaryTopic::getCurrentRow($topic, $user);
         $last_topic_reviewed = null;
-        $topic_status = 'por-iniciar';
+        // $topic_status = 'por-iniciar';
+        $topic_status = $summary_topic->status->code ?? 'por-iniciar';
 
-        if ($topic->assesable && $topic->evaluation_type->code === 'qualified') {
+        if ($topic->assessable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
-                $topic_status = $summary_topic->passed ? 'aprobado' : 'desaprobado';
+                // $topic_status = $summary_topic->passed ? 'aprobado' : 'desaprobado';
                 $grade = $summary_topic->grade;
                 $sub = $max_attempts - $summary_topic->attempts;
                 $remaining_attempts = max($sub, 0);
@@ -491,7 +496,7 @@ class Topic extends BaseModel
 
     public function getNextOne()
     {
-        return Topic::where('curso_id', $this->course_id)
+        return Topic::where('course_id', $this->course_id)
             ->whereNotIn('id', [$this->id])
             ->where('position', '>=', $this->position)
             ->orderBy('position', 'ASC')
@@ -509,8 +514,10 @@ class Topic extends BaseModel
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
             if ($question->rpta_ok == $respuesta['opc'])
+            {
                 $correct_answers++;
-            continue;
+                continue;
+            }
 
             $failed_answers++;
         }

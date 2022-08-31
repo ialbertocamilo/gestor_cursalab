@@ -76,11 +76,12 @@ class CursosController extends Controller
 
     public function searchCurso(School $school, Course $course)
     {
-        $scheduled_restarts = json_decode($course->scheduled_restarts);
-        $course->scheduled_restarts = $scheduled_restarts->activado ?? false;
-        $course->scheduled_restarts_dias = $scheduled_restarts->reinicio_dias ?? 0;
-        $course->scheduled_restarts_horas = $scheduled_restarts->reinicio_horas ?? 0;
-        $course->scheduled_restarts_minutos = $scheduled_restarts->reinicio_minutos ?? 0;
+        // $scheduled_restarts = json_decode($course->scheduled_restarts);
+        $scheduled_restarts = $course->scheduled_restarts;
+        $course->scheduled_restarts_activado = $scheduled_restarts['activado'] ?? false;
+        $course->scheduled_restarts_dias = $scheduled_restarts['reinicio_dias'] ?? 0;
+        $course->scheduled_restarts_horas = $scheduled_restarts['reinicio_horas'] ?? 0;
+        $course->scheduled_restarts_minutos = $scheduled_restarts['reinicio_minutos'] ?? 0;
         $form_selects = $this->getFormSelects($school, $course, true);
         $course->makeHidden('scheduled_restarts');
 

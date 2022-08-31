@@ -41,10 +41,10 @@
                                     height="100%"
                                 >
                                     <div class="text-h6 text-center">
-                                        Bloque {{ i + 1 }} / {{ segments.length }} 
+                                        Bloque {{ i + 1 }} / {{ segments.length }}
                                     </div>
 
-                                    <v-divider class="mx-12" /> 
+                                    <v-divider class="mx-12" />
 
                                     <segment :segments="segments" :segment="row" :criteria="criteria" class="mx-5" :options="options" @borrar_segment="borrarBloque"/>
                                <!--  <v-row
@@ -130,7 +130,9 @@ export default {
             vue.$refs.segmentForm.resetValidation()
         },
         getNewSegment() {
+
             return {
+                id: `new-segment-${Date.now()}`,
                 criteria_selected: [],
             }
         },
@@ -143,7 +145,8 @@ export default {
         borrarBloque(segment) {
 
             let vue = this;
-            
+            if (vue.segments.length === 1) return;
+
             vue.segments = vue.segments.filter((obj, idx) => {
                  return obj.id != segment.id
             });
@@ -170,7 +173,7 @@ export default {
             if (validateForm ) {
 
                 // let formData = vue.getMultipartFormData(method, vue.segments, fields);
-                let formData = JSON.stringify({ 
+                let formData = JSON.stringify({
                     model_type: vue.model_type,
                     model_id: vue.resource.id,
                     segments: vue.segments
@@ -213,6 +216,7 @@ export default {
                 let _data = data.data
 
                 vue.segments = _data.segments
+                if (vue.segments.length === 0) this.addSegmentation()
                 vue.criteria = _data.criteria
             })
 

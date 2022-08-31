@@ -43,7 +43,7 @@ class CleanOverdueQuizzes extends Command
      */
     public function handle()
     {
-        $rows = SummaryTopic::with('topic.course')
+        $rows = SummaryTopic::with('topic.course', 'user.subworkspace')
                     ->where('taking_quiz', ACTIVE)
                     ->where('current_quiz_finishes_at', '<=', now())
                     ->get();
@@ -52,7 +52,7 @@ class CleanOverdueQuizzes extends Command
 
             try {
 
-                if ($row->hasNoAttemptsLeft()) continue;
+                if ($row->hasNoAttemptsLeft(null, $row->user)) continue;
 
                 $total_questions = Question::where('topic_id', $row->topic_id)->count();
 
@@ -81,7 +81,7 @@ class CleanOverdueQuizzes extends Command
                 $row->update($data_ev);
 
                 $row_course = SummaryCourse::updateUserData($row->topic->course);
-                $row_user = SummaryUser::updateUserData();
+                $row_user = SummaryUser::updateUserData($row->user);
 
             } catch (\Exception $e) {
 

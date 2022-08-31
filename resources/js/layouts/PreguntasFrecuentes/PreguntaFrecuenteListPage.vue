@@ -76,7 +76,7 @@ export default {
                 endpoint: '/preguntas-frecuentes/search',
                 ref: 'PreguntaFrecuenteTable',
                 headers: [
-                    {text: "Orden", value: "position",  align: 'center', model: "Pregunta_frecuente"},
+                    {text: "Orden", value: "position",  align: 'center', model: "Post"},
                     {text: "Pregunta", value: "title"},
                     {text: "Respuesta", value: "content"},
                     {text: "Fecha de creación", value: "created_at", align: 'center'},

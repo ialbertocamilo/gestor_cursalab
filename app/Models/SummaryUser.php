@@ -26,7 +26,7 @@ class SummaryUser extends Summary
     {
         $user = $user ?? auth()->user();
         $courses_id = $user->getCurrentCourses()->pluck('id');
-        $row_user = SummaryUser::getCurrentRow();
+        $row_user = SummaryUser::getCurrentRow($user);
 
         $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
                         ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))

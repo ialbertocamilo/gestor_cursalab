@@ -38,12 +38,12 @@ class Segment extends BaseModel
 
     protected function getCriteriaByWorkspace($workspace)
     {
-        return Criterion::select('id', 'name', 'position', 'code')->with(['values' => function($q) use ($workspace){
-                $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
-                // $q->select('id', 'value_text', 'position');
-                $q->whereIn('id', $values->pluck('id')->toArray());
-            }])
-            ->whereHas('workspaces', function($q) use ($workspace){
+        return Criterion::select('id', 'name', 'position', 'code')->with(['values' => function ($q) use ($workspace) {
+            $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
+            // $q->select('id', 'value_text', 'position');
+            $q->whereIn('id', $values->pluck('id')->toArray());
+        }])
+            ->whereHas('workspaces', function ($q) use ($workspace) {
                 $q->where('workspace_id', $workspace->id);
             })
             ->get();
@@ -51,19 +51,17 @@ class Segment extends BaseModel
 
     protected function getSegmentsByModel($criteria, $model_type, $model_id)
     {
-        if ($model_type AND $model_id) {
+        if ($model_type and $model_id) {
 
             $segments = Segment::with(['values' => ['type:id,name,code', 'criterion:id,name,code,position', 'criterion_value:id,value_text']])
                 ->where('model_type', $model_type)
                 ->where('model_id', $model_id)
                 ->get();
 
-            foreach ($segments as $key => $segment)
-            {
+            foreach ($segments as $key => $segment) {
                 $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
 
-                foreach($criteria_selected AS $key => $criterion)
-                {
+                foreach ($criteria_selected as $key => $criterion) {
                     $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
 
                     $segment_values_selected = [];
@@ -99,9 +97,10 @@ class Segment extends BaseModel
             DB::beginTransaction();
 
             Segment::where('model_type', $request->model_type)->where('model_id', $request->model_id)
-                    ->whereNotIn('id', $segments_id)->delete();
+                ->whereNotIn('id', $segments_id)->delete();
 
             foreach ($request->segments as $key => $segment_row) {
+                if (count($segment_row['criteria_selected']) == 0) continue;
 
                 $data = [
                     'model_type' => $request->model_type,
@@ -110,7 +109,10 @@ class Segment extends BaseModel
                     'active' => ACTIVE,
                 ];
 
-                $segment = !empty($segment_row['id']) ? Segment::find($segment_row['id']) : Segment::create($data);
+//                $segment = !empty($segment_row['id']) ?
+                $segment = str_contains($segment_row['id'], "new-segment-") ?
+                    Segment::create($data)
+                    : Segment::find($segment_row['id']);
 
                 $values = [];
 
@@ -132,7 +134,7 @@ class Segment extends BaseModel
 
             DB::commit();
 
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
 
             info($e);
 
