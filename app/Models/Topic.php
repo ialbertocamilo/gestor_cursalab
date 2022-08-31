@@ -403,7 +403,7 @@ class Topic extends BaseModel
                     'contenido' => $topic->contenido,
                     'media' => $media_topics,
                     'evaluable' => $topic->assessable ? 'si' : 'no',
-                    'tipo_ev' => $topic->evaluation_type->code,
+                    'tipo_ev' => $topic->evaluation_type->code ?? NULL,
                     'nota' => $topic_status['grade'],
                     'disponible' => $topic_status['available'],
                     'intentos_restantes' => $topic_status['remaining_attempts'],
