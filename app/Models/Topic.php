@@ -277,8 +277,7 @@ class Topic extends BaseModel
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = null;
-        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['subtitle'] = "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.";
         $temp['show_confirm'] = true;
         $temp['type'] = 'update_message_on_update';
 
@@ -292,8 +291,7 @@ class Topic extends BaseModel
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = null;
-        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['subtitle'] = "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.";
         $temp['show_confirm'] = true;
         $temp['type'] = 'update_message_on_update';
 
@@ -308,8 +306,7 @@ class Topic extends BaseModel
         if (!$temp['ok']) return $temp;
 
         $temp['title'] = null;
-        $temp['subtitle'] = "Este cambio produce actualizaciones en el avance de los usuarios, que se ejecutarán dentro de 20 minutos.
-                        Las actualizaciones se verán reflejadas en la app y en los reportes al finalizar este proceso.";
+        $temp['subtitle'] = "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.";
         $temp['show_confirm'] = true;
         $temp['type'] = 'update_message_on_update';
 
