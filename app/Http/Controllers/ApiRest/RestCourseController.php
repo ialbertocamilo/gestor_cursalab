@@ -32,7 +32,7 @@ class RestCourseController extends Controller
                     ->select('id', 'poll_id', 'titulo', 'type_id');
             }
         ])
-            ->select('id', 'titulo', 'imagen', 'anonima')
+            ->select('id', 'titulo', 'imagen', 'anonima', 'opciones')
             ->where('active', ACTIVE)
             ->first();
 
