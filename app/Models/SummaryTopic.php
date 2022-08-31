@@ -135,11 +135,12 @@ class SummaryTopic extends Summary
         return ! $this->passed;
     }
 
-    public function hasNoAttemptsLeft($attempts_limit = null)
+    public function hasNoAttemptsLeft($attempts_limit = null, $user = null)
     {
         if (!$attempts_limit)
         {
-            $config = auth()->user()->getSubworkspaceSetting('mod_evaluaciones');
+            $user = $user ?? auth()->user();
+            $config = $user->getSubworkspaceSetting('mod_evaluaciones');
             $attempts_limit = $config['nro_intentos'] ?? 5;
         }
 
