@@ -140,9 +140,6 @@ class Course extends BaseModel
                 $course->workspaces()->sync([$workspace->id]);
             endif;
 
-            info('course->requirements()->get()');
-            info($course->requirements()->get());
-
             if ($data['requisito_id']) :
                 Requirement::updateOrCreate(
                     ['model_type' => Course::class, 'model_id' => $course->id,],
@@ -150,8 +147,6 @@ class Course extends BaseModel
                 );
 
             else:
-
-                info('sin requisito');
 
                 $course->requirements()->delete();
 
@@ -474,7 +469,9 @@ class Course extends BaseModel
 
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
+                $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
+
                 if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
                 elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
