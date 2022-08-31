@@ -450,7 +450,7 @@ class Topic extends BaseModel
         // $topic_status = 'por-iniciar';
         $topic_status = $summary_topic->status->code ?? 'por-iniciar';
 
-        if ($topic->assesable && $topic->evaluation_type->code === 'qualified') {
+        if ($topic->assessable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
                 // $topic_status = $summary_topic->passed ? 'aprobado' : 'desaprobado';
                 $grade = $summary_topic->grade;
