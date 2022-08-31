@@ -24,6 +24,11 @@ class SummaryTopic extends Summary
         'last_time_evaluated_at',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function topic()
     {
         return $this->belongsTo(Topic::class);
