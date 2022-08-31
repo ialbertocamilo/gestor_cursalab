@@ -10,6 +10,7 @@ use App\Models\SummaryCourse;
 use App\Models\Announcement;
 use App\Models\SummaryTopic;
 use App\Models\SummaryUser;
+use App\Models\Taxonomy;
 use App\Models\Question;
 use App\Models\Topic;
 
