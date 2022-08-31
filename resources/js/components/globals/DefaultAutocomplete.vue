@@ -36,6 +36,7 @@
             <slot name="customItems" :item="item"/>
         </template>
         <template v-slot:selection="{ item, index }" v-if="multiple">
+            <div class="pt-1"></div>
             <v-chip small v-if="index < countShowValues">
                 <span>{{ item[itemText] }}</span>
             </v-chip>
