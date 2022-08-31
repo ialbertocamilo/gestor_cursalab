@@ -434,7 +434,7 @@ class Course extends BaseModel
         $available_course = true;
         $poll_id = null;
         $available_poll = false;
-        $enabled_poll = false;
+        $enabled_poll = true;
         $solved_poll = false;
         $assigned_topics = 0;
         $completed_topics = 0;
@@ -481,9 +481,9 @@ class Course extends BaseModel
                     $status = 'enc_pend';
                 elseif ($summary_course->status?->code == 'desaprobado') :
                     $status = 'desaprobado';
-                    $enabled_poll = true;
                 else :
                     $status = 'continuar';
+                    $enabled_poll = false;
                     $resolved_topics = $completed_topics + $summary_course->failed;
                     if ($summary_course->assigned <= $resolved_topics)
                         $available_poll = true;
