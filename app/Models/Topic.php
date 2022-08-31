@@ -54,7 +54,7 @@ class Topic extends BaseModel
 
     public function requirements()
     {
-        return $this->morphMany(Requirement::class, 'requirement');
+        return $this->morphMany(Requirement::class, 'model');
     }
 
     public function evaluation_type()
@@ -196,10 +196,13 @@ class Topic extends BaseModel
 
     public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic)
     {
-        $course_requirements_of = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
-            $query->where('id', $topic->course->id);
-        })->get();
-        $is_required_course = $course_requirements_of->count() > 0;
+        // $course_requirements = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
+        //     $query->where('id', $topic->course->id);
+        // })->get();
+
+        $course_requirements = $topic->course->requirements()->get();
+
+        $is_required_course = $course_requirements->count() > 0;
 
         $last_active_topic = Topic::where('course_id', $topic->course_id)->where('active', 1)->get();
         $is_last_active_topic = ($last_active_topic->count() === 1 && $topic->active);
@@ -214,9 +217,9 @@ class Topic extends BaseModel
         $temp['type'] = 'last_active_topic_and_required_course';
         $temp['list'] = [];
 
-        foreach ($course_requirements_of as $requirement) {
-            $requisito = Course::find($requirement->model_id);
-            $route = route('cursos.editCurso', [$school->id, $requirement->model_id]);
+        foreach ($course_requirements as $requirement) {
+            $requisito = Course::find($requirement->requirement_id);
+            $route = route('cursos.editCurso', [$school->id, $requirement->requirement_id]);
             $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
         }
 
@@ -225,10 +228,13 @@ class Topic extends BaseModel
 
     public function checkIfIsRequiredTopic(School $school, Topic $topic, $data, $verb = 'inactivar')
     {
-        $requirements_of = Requirement::whereHasMorph('requirement', [Topic::class], function ($query) use ($topic) {
-            $query->where('id', $topic->id);
-        })->get();
-        $is_required_topic = $requirements_of->count() > 0;
+        // $requirements = Requirement::whereHasMorph('requirement', [Topic::class], function ($query) use ($topic) {
+        //     $query->where('id', $topic->id);
+        // })->get();
+
+        $requirements = $topic->requirements()->get();
+
+        $is_required_topic = $requirements->count() > 0;
         $will_be_deleted = $data['to_delete'] ?? false;
         $will_be_inactivated = $data['active'] === false;
         $temp['ok'] = (($will_be_inactivated || $will_be_deleted) && $is_required_topic);
@@ -241,9 +247,9 @@ class Topic extends BaseModel
         $temp['type'] = 'check_if_is_required_topic';
         $temp['list'] = [];
 
-        foreach ($requirements_of as $requirement) {
-            $requisito = Topic::find($requirement->model_id);
-            $route = route('temas.editTema', [$school->id, $topic->course->id, $requirement->model_id]);
+        foreach ($requirements as $requirement) {
+            $requisito = Topic::find($requirement->requirement_id);
+            $route = route('temas.editTema', [$school->id, $topic->course->id, $requirement->requirement_id]);
             $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
         }
 
