@@ -746,11 +746,12 @@ class UsuarioController extends Controller
 
             // Reset topics attempts
 
+            $topicsIds = SummaryCourse::getCourseTopicsIds($courseId, $userId);
+            
             SummaryTopic::resetUserTopicsAttempts($userId, $topicsIds);
 
             // Update resets count
 
-            $topicsIds = SummaryCourse::getCourseTopicsIds($courseId, $userId);
             foreach ($topicsIds as $topicId) {
                 SummaryTopic::updateTopicRestartsCount(
                     $topicId, $userId, $adminId
