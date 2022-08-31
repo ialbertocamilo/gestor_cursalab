@@ -211,7 +211,7 @@ export default {
                 file_plantilla_diploma: null,
                 config_id: this.modulo_id,
                 categoria_id: this.categoria_id,
-                active: false,
+                active: true,
                 requisito_id: null,
                 duration: null,
                 investment: null,

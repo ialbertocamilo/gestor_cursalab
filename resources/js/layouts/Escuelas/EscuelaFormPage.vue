@@ -44,14 +44,14 @@
                         <v-col cols="12">
 
                             <DefaultModalSection
-                                title="Programación de reinicios"
+                                title="Intentos automáticos"
                             >
                                 <template slot="content">
                                     <v-row justify="center">
                                         <v-col cols="3" class="d-flex justify-content-center align-items-center">
                                             <DefaultToggle
-                                                active-label="Automático"
-                                                inactive-label="Manual"
+                                                active-label="Activo"
+                                                inactive-label="Inactivo"
                                                 v-model="resource.reinicio_automatico"
                                             />
                                         </v-col>
@@ -135,7 +135,7 @@ export default {
                 file_imagen: null,
                 file_plantilla_diploma:null,
                 position: null,
-                active: false,
+                active: true,
                 reinicio_automatico: false,
                 reinicio_automatico_dias: null,
                 reinicio_automatico_horas: null,
