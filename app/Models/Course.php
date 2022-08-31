@@ -14,6 +14,10 @@ class Course extends BaseModel
         'duration', 'investment'
     ];
 
+    protected $casts = [
+        'scheduled_restarts' => 'array',
+    ];
+
     public function schools()
     {
         return $this->belongsToMany(School::class);

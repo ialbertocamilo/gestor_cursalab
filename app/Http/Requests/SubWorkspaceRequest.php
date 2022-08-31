@@ -41,4 +41,12 @@ class SubWorkspaceRequest extends FormRequest
    
         return $reglas;
     }
+
+    public function validationData()
+    {
+        $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
+        $data['mod_evaluaciones'] = $this->mod_evaluaciones ? json_decode($this->mod_evaluaciones, true) : [];
+
+        return $this->merge($data)->all();
+    }
 }

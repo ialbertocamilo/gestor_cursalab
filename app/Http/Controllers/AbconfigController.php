@@ -36,11 +36,11 @@ class AbconfigController extends Controller
     {
         $workspace = Workspace::where('criterion_value_id', $module->id)->first();
 
-        $reinicio_automatico = json_decode($workspace->reinicios_programado);
-        $module->reinicio_automatico = $reinicio_automatico->activado ?? false;
-        $module->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
-        $module->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
-        $module->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
+        // $reinicio_automatico = json_decode($workspace->reinicios_programado);
+        $module->reinicio_automatico = $reinicio_automatico['activado'] ?? false;
+        $module->reinicio_automatico_dias = $reinicio_automatico['reinicio_dias'] ?? 0;
+        $module->reinicio_automatico_horas = $reinicio_automatico['reinicio_horas'] ?? 0;
+        $module->reinicio_automatico_minutos = $reinicio_automatico['reinicio_minutos'] ?? 0;
 
 
         $workspace->load('main_menu');
@@ -56,7 +56,7 @@ class AbconfigController extends Controller
             $item->active = $workspace->side_menu->where('id', $item->id)->first() !== NULL;
         });
 
-        $evaluacion = json_decode($workspace->mod_evaluaciones);
+        // $evaluacion = json_decode($workspace->mod_evaluaciones);
         $module->preg_x_ev = $evaluacion->preg_x_ev ?? NULL;
         $module->nota_aprobatoria = $evaluacion->nota_aprobatoria ?? NULL;
         $module->nro_intentos = $evaluacion->nro_intentos ?? NULL;

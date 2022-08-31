@@ -49,7 +49,8 @@ class CursosStoreUpdateRequest extends FormRequest
         $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
 
         $data['active'] = $active;
-        $data['validateForm'] = !!$this->validateForm;;
+        $data['validateForm'] = !!$this->validateForm;
+        $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
 
         return $this->merge($data)->all();
     }

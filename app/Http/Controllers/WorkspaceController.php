@@ -134,11 +134,11 @@ class WorkspaceController extends Controller
     {
         // $workspace = Workspace::where('criterion_value_id', $subworkspace->id)->first();
 
-        $reinicio_automatico = json_decode($subworkspace->reinicios_programado);
-        $subworkspace->reinicio_automatico = $reinicio_automatico->activado ?? false;
-        $subworkspace->reinicio_automatico_dias = $reinicio_automatico->reinicio_dias ?? 0;
-        $subworkspace->reinicio_automatico_horas = $reinicio_automatico->reinicio_horas ?? 0;
-        $subworkspace->reinicio_automatico_minutos = $reinicio_automatico->reinicio_minutos ?? 0;
+        $reinicio_automatico = $subworkspace->reinicios_programado;
+        $subworkspace->reinicio_automatico = $reinicio_automatico['activado'] ?? false;
+        $subworkspace->reinicio_automatico_dias = $reinicio_automatico['reinicio_dias'] ?? 0;
+        $subworkspace->reinicio_automatico_horas = $reinicio_automatico['reinicio_horas'] ?? 0;
+        $subworkspace->reinicio_automatico_minutos = $reinicio_automatico['reinicio_minutos'] ?? 0;
 
 
         $subworkspace->load('main_menu');
@@ -154,10 +154,10 @@ class WorkspaceController extends Controller
             $item->active = $subworkspace->side_menu->where('id', $item->id)->first() !== NULL;
         });
 
-        $evaluacion = json_decode($subworkspace->mod_evaluaciones);
-        $subworkspace->preg_x_ev = $evaluacion->preg_x_ev ?? NULL;
-        $subworkspace->nota_aprobatoria = $evaluacion->nota_aprobatoria ?? NULL;
-        $subworkspace->nro_intentos = $evaluacion->nro_intentos ?? NULL;
+        $evaluacion = $subworkspace->mod_evaluaciones;
+        $subworkspace->preg_x_ev = $evaluacion['preg_x_ev'] ?? NULL;
+        $subworkspace->nota_aprobatoria = $evaluacion['nota_aprobatoria'] ?? NULL;
+        $subworkspace->nro_intentos = $evaluacion['nro_intentos'] ?? NULL;
 
         return $this->success([
             'modulo' => $subworkspace,
