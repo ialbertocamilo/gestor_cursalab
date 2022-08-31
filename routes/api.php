@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiRest\AuthController;
+use App\Http\Controllers\ApiRest\RestAyudaController;
 use App\Http\Controllers\Test\TestController;
 use App\Http\Controllers\FirebaseController;
 use Illuminate\Support\Facades\Route;
@@ -42,7 +43,6 @@ Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 Route::group(['prefix' => 'auth'], function () {
 
     Route::post('/login', [AuthController::class, 'login']);
-
 });
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
@@ -66,11 +66,12 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::prefix('/')->group(base_path('routes/app/quizzes.php'));
 
 
-
-
+    Route::get('preguntas_seccion_ayuda', [RestAyudaController::class, 'preguntas_seccion_ayuda']);
+    Route::get('preguntas_frecuentes', [RestAyudaController::class, 'preguntas_frecuentes']);
+    Route::post('registra_ayuda', [RestAyudaController::class, 'registra_ayuda']);
 });
 
-Route::controller(TestController::class)->group(function() {
+Route::controller(TestController::class)->group(function () {
 
     Route::get('/test/users', 'users');
     Route::get('/test/workspaces', 'workspaces');

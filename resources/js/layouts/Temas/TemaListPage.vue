@@ -128,6 +128,7 @@ export default {
                     {text: "Orden", value: "orden", align: 'center', model: 'Topic'},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre"},
+                    {text: "Evaluable", value: "assessable", sortable: false},
                     {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
