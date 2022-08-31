@@ -45,7 +45,10 @@
                                 v-model="resource.description"
                             />
                         </v-col>
-                        <v-col cols="12">
+
+                    </v-row>
+                    <v-row>
+                        <v-col cols="6">
                             <DefaultAutocomplete
                                 dense
                                 label="Requisito"
@@ -63,6 +66,18 @@
                                     </v-list-item-content>
                                 </template>
                             </DefaultAutocomplete>
+                        </v-col>
+                        <v-col cols="6">
+                            <DefaultAutocomplete
+                                show-required
+                                :rules="rules.types"
+                                dense
+                                label="Tipo de curso"
+                                v-model="resource.type_id"
+                                :items="selects.types"
+                                item-text="name"
+                                item-value="id"
+                            />
                         </v-col>
                     </v-row>
                     <v-row justify="center">
@@ -183,7 +198,7 @@
 <script>
 const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
-    'plantilla_diploma', 'config_id', 'categoria_id',
+    'plantilla_diploma', 'config_id', 'categoria_id', 'type_id',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment'
 ];
@@ -195,8 +210,8 @@ export default {
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         let route_school = (this.categoria_id !== '')
-                            ? `/escuelas/${this.categoria_id}`
-                            : ``;
+            ? `/escuelas/${this.categoria_id}`
+            : ``;
 
         return {
             errors: [],
@@ -213,6 +228,7 @@ export default {
                 categoria_id: this.categoria_id,
                 active: true,
                 requisito_id: null,
+                type_id: null,
                 duration: null,
                 investment: null,
                 scheduled_restarts_activado: false,
@@ -225,11 +241,13 @@ export default {
             rules: {
                 name: this.getRules(['required']),
                 lista_escuelas: this.getRules(['required']),
+                types: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
             },
             selects: {
                 requisito_id: [],
                 lista_escuelas: [],
+                types: [],
             },
             loadingActionBtn: false,
             courseValidationModal: {
@@ -274,8 +292,8 @@ export default {
 
         if (+this.$props.categoria_id) {
             let exists = this.resource
-                             .lista_escuelas
-                             .includes(+this.$props.categoria_id);
+                .lista_escuelas
+                .includes(+this.$props.categoria_id);
             if (!exists) {
                 this.resource.lista_escuelas.push(+this.$props.categoria_id);
             }
@@ -310,7 +328,7 @@ export default {
             let method = edit ? 'PUT' : 'POST';
 
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
-            formData.append('validateForm', validateForm ? "1": "0");
+            formData.append('validateForm', validateForm ? "1" : "0");
             vue.setJSONReinicioProgramado(formData)
 
             vue.$http.post(url, formData)
@@ -359,6 +377,7 @@ export default {
 
                     vue.selects.requisito_id = response.requisitos
                     vue.selects.lista_escuelas = response.escuelas
+                    vue.selects.types = response.types
                     if (vue.curso_id !== '') {
                         vue.resource = Object.assign({}, response.curso)
                     }

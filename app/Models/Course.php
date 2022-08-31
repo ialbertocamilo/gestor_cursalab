@@ -377,7 +377,6 @@ class Course extends BaseModel
                     ];
                 }
 
-
                 $school_courses[] = [
                     'id' => $course->id,
                     'nombre' => $course->name,
