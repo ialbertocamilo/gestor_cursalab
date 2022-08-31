@@ -9,7 +9,7 @@ class PollQuestionAnswer extends BaseModel
     protected $table = 'poll_question_answers';
 
     protected $fillable = [
-        'encuesta_id', 'curso_id', 'pregunta_id', 'usuario_id', 'respuestas', 'tipo_pregunta', 'created_at', 'updated_at'
+        'encuesta_id', 'course_id', 'pregunta_id', 'user_id', 'respuestas', 'type_id', 'created_at', 'updated_at'
     ];
 
     public function pregunta()
