@@ -541,7 +541,7 @@ class Topic extends BaseModel
 
         $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
 
-        if ($topic->evaluation_type->code === 'qualified' && $summary_topic)
+        if ($topic->evaluation_type?->code === 'qualified' && $summary_topic)
             $topic_grade = $summary_topic->grade;
 
         $topic_status = $summary_topic?->status?->code ?? 'por-iniciar';
