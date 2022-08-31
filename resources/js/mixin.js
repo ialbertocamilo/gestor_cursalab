@@ -13,11 +13,11 @@ const extensiones = {
     scorm: ["zip", "scorm"]
 };
 const default_media_images = {
-    video: "images/default-video-img_285.png",
+    video: "images/default-video-img_285_360.png",
     audio: "images/default-audio-img_119.png",
     pdf: "images/default-pdf-img_210.png",
-    excel: "images/default-scorm-img_116.png",
-    scorm: "images/default-scorm-img_116.png",
+    excel: "images/default-scorm-img_116_360.png",
+    scorm: "images/default-scorm-img_116_360.png",
 }
 
 export default {

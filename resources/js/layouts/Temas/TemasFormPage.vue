@@ -510,7 +510,7 @@ export default {
             vue.topicsValidationModal.width = "30vw"
             vue.topicsValidationModal.hideConfirmBtn = true
             vue.topicsValidationModal.cancelLabel = 'Entendido'
-            await vue.openFormModal(vue.topicsValidationModal, data, 'showAlertEvaluacion', 'Atención')
+            await vue.openFormModal(vue.topicsValidationModal, data, 'showAlertEvaluacion', 'Debes de tener en cuenta')
         },
     }
 }
