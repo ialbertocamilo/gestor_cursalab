@@ -447,10 +447,11 @@ class Topic extends BaseModel
         $grade = 0;
         $available_topic = false;
         $remaining_attempts = $max_attempts;
-        $summary_topic = $topic->summaryByUser($user->id);
+        // $summary_topic = $topic->summaryByUser($user->id);
+        $summary_topic = SummaryTopic::getCurrentRow($topic, $user);
         $last_topic_reviewed = null;
         // $topic_status = 'por-iniciar';
-        $topic_status = $summary_topic->status->code;
+        $topic_status = $summary_topic->status->code ?? 'por-iniciar';
 
         if ($topic->assesable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
