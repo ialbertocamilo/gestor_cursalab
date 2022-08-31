@@ -206,10 +206,10 @@ class RestQuizController extends Controller
 
                 foreach ($times as $time) {
 
-                    if ($time->activado) {
+                    if ($time['activado']) {
 
                         $scheduled = true;
-                        $minutes = $time->tiempo_en_minutos;
+                        $minutes = $time['tiempo_en_minutos'];
 
                         break;
                     }

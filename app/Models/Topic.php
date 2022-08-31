@@ -371,7 +371,7 @@ class Topic extends BaseModel
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
 
         $sub_workspace = $user->subworkspace;
-        $mod_eval = json_decode($sub_workspace->mod_evaluaciones, true);
+        $mod_eval = $sub_workspace->mod_evaluaciones;
 
         $max_attempts = (int)$mod_eval['nro_intentos'];
 
