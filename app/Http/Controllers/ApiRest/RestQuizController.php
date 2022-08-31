@@ -85,7 +85,7 @@ class RestQuizController extends Controller
         $data_ev['curso'] = $topic->course;
         $data_ev['curso_id'] = $topic->course_id;
         $data_ev['tema_id'] = $topic->id;
-        $data_ev['intentos_realizados'] = $row->attempts;
+        // $data_ev['intentos_realizados'] = $row->attempts;
         $data_ev['encuesta_pendiente'] = NULL;
 
         $row_course = SummaryCourse::updateUserData($topic->course);
