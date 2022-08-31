@@ -157,7 +157,7 @@ class Course extends BaseModel
             DB::commit();
 
         } catch (\Exception $e) {
-
+            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());

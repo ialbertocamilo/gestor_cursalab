@@ -114,14 +114,14 @@
                                             <DefaultToggle
                                                 active-label="Automático"
                                                 inactive-label="Manual"
-                                                v-model="resource.scheduled_restarts"
+                                                v-model="resource.scheduled_restarts_activado"
                                             />
                                         </v-col>
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Días"
                                                 v-model="resource.scheduled_restarts_dias"
-                                                :disabled="!resource.scheduled_restarts"
+                                                :disabled="!resource.scheduled_restarts_activado"
                                                 type="number"
                                                 dense
                                             />
@@ -130,7 +130,7 @@
                                             <DefaultInput
                                                 label="Horas"
                                                 v-model="resource.scheduled_restarts_horas"
-                                                :disabled="!resource.scheduled_restarts"
+                                                :disabled="!resource.scheduled_restarts_activado"
                                                 type="number"
                                                 dense
                                             />
@@ -139,7 +139,7 @@
                                             <DefaultInput
                                                 label="Minutos"
                                                 v-model="resource.scheduled_restarts_minutos"
-                                                :disabled="!resource.scheduled_restarts"
+                                                :disabled="!resource.scheduled_restarts_activado"
                                                 type="number"
                                                 dense
                                             />
@@ -215,7 +215,7 @@ export default {
                 requisito_id: null,
                 duration: null,
                 investment: null,
-                scheduled_restarts: false,
+                scheduled_restarts_activado: false,
                 scheduled_restarts_dias: null,
                 scheduled_restarts_horas: null,
                 scheduled_restarts_minutos: 1,
@@ -329,7 +329,7 @@ export default {
                 (parseInt(vue.resource.scheduled_restarts_horas) * 60) +
                 (parseInt(vue.resource.scheduled_restarts_dias) * 1440)
             const data = {
-                activado: vue.resource.scheduled_restarts,
+                activado: vue.resource.scheduled_restarts_activado,
                 tiempo_en_minutos: minutes,
                 reinicio_dias: vue.resource.scheduled_restarts_dias,
                 reinicio_horas: vue.resource.scheduled_restarts_horas,
