@@ -29,10 +29,10 @@ class RestCourseController extends Controller
         $poll = $course->polls()->with([
             'questions' => function ($q) {
                 $q->with('type:id,code')
-                    ->select('id', 'poll_id', 'titulo', 'type_id');
+                    ->select('id', 'poll_id', 'titulo', 'type_id', 'opciones');
             }
         ])
-            ->select('id', 'titulo', 'imagen', 'anonima', 'opciones')
+            ->select('id', 'titulo', 'imagen', 'anonima')
             ->where('active', ACTIVE)
             ->first();
 
