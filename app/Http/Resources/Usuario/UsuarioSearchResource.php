@@ -17,6 +17,7 @@ class UsuarioSearchResource extends JsonResource
         return [
             'id' => $this->id,
             'nombre' => $this->fullname,
+            'name' => $this->fullname,
             'image' => space_url($this->config?->logo) ?? 'No logo',
             'document' => $this->document ?? 'Sin documento',
             'module' => $this->config->etapa ?? 'No module',
