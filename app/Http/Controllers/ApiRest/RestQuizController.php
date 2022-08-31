@@ -58,7 +58,7 @@ class RestQuizController extends Controller
                 'passed' => $passed,
                 'answers' => $request->respuestas,
                 // 'answers' => json_encode($request->respuestas),
-                'grade' => round($new_grade),
+                'grade' => round($new_grade, 2),
             ];
 
             $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
