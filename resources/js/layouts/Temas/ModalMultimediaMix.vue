@@ -62,7 +62,10 @@ export default {
             vue.titulo = null
             vue.multimedia = null
             vue.$refs.TemaMultimediaTextForm.reset()
-            vue.$refs.inputLogo.$refs.dropzoneDefault.removeAll()
+
+            if (vue.$refs.inputLogo && vue.$refs.inputLogo.$refs.dropzoneDefault)
+                vue.$refs.inputLogo.$refs.dropzoneDefault.removeAll()
+
             vue.$emit('close')
         },
         confirmModal() {

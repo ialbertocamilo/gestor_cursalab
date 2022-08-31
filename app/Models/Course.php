@@ -460,7 +460,8 @@ class Course extends BaseModel
                 if ($poll_questions_answers) $solved_poll = true;
             }
 
-            $summary_course = $course->summaryByUser($user->id);
+            // $summary_course = $course->summaryByUser($user->id);
+            $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;

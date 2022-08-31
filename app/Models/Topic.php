@@ -400,7 +400,7 @@ class Topic extends BaseModel
                     'contenido' => $topic->contenido,
                     'media' => $media_topics,
                     'evaluable' => $topic->assessable ? 'si' : 'no',
-                    'tipo_ev' => $topic->evaluation_type->code,
+                    'tipo_ev' => $topic->evaluation_type->code ?? NULL,
                     'nota' => $topic_status['grade'],
                     'disponible' => $topic_status['available'],
                     'intentos_restantes' => $topic_status['remaining_attempts'],
@@ -444,10 +444,11 @@ class Topic extends BaseModel
         $grade = 0;
         $available_topic = false;
         $remaining_attempts = $max_attempts;
-        $summary_topic = $topic->summaryByUser($user->id);
+        // $summary_topic = $topic->summaryByUser($user->id);
+        $summary_topic = SummaryTopic::getCurrentRow($topic, $user);
         $last_topic_reviewed = null;
         // $topic_status = 'por-iniciar';
-        $topic_status = $summary_topic->status->code;
+        $topic_status = $summary_topic->status->code ?? 'por-iniciar';
 
         if ($topic->assesable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
