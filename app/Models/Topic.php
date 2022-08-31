@@ -508,8 +508,10 @@ class Topic extends BaseModel
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
             if ($question->rpta_ok == $respuesta['opc'])
+            {
                 $correct_answers++;
-            continue;
+                continue;
+            }
 
             $failed_answers++;
         }
