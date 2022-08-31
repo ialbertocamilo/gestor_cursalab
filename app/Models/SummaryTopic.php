@@ -54,6 +54,8 @@ class SummaryTopic extends Summary
 
     public function isOutOfTimeForQuiz()
     {
+        if (!$this->current_quiz_finishes_at) return false;
+        
         return now() >= $this->current_quiz_finishes_at;
     }
 
@@ -160,5 +162,10 @@ class SummaryTopic extends Summary
     public function hasImprovedGrade($new_grade)
     {
         return $new_grade >= $this->grade;
+    }
+
+    public function hasAttemptsLeft($attempts_limit = null)
+    {
+        return ! $this->hasNoAttemptsLeft($attempts_limit);
     }
 }

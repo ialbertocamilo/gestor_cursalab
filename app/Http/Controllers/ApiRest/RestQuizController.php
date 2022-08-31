@@ -28,8 +28,11 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::getCurrentRow($topic);
 
+        if ($row->hasNoAttemptsLeft())  
+            return response()->json(['error' => true, 'msg' => 'Sin intentos restantes.'], 200);
+
         if (!$row)
-            return response()->json(['error' => true, 'msg' => 'Evaluación no existe.'], 200);
+            return response()->json(['error' => true, 'msg' => 'La evaluación no existe.'], 200);
 
         [$correct_answers, $failed_answers] = Topic::evaluateAnswers($request->respuestas, $topic);
 
@@ -37,19 +40,25 @@ class RestQuizController extends Controller
         $passed = SummaryTopic::hasPassed($new_grade);
 
         $data_ev = [
-            'correct_answers' => $correct_answers,
-            'failed_answers' => $failed_answers,
-            'passed' => $passed,
-            'answers' => $request->respuestas,
-            // 'answers' => json_encode($request->respuestas),
-            'grade' => round($new_grade),
             'attempts' => $row->attempts + 1,
             'last_time_evaluated_at' => now(),
+            'current_quiz_started_at' => NULL,
+            'current_quiz_finishes_at' => NULL,
+            'taking_quiz' => NULL,
         ];
 
         $next_topic = NULL;
 
         if ($row->hasImprovedGrade($new_grade)) {
+
+            $data_ev = $data_ev + [  
+                'correct_answers' => $correct_answers,
+                'failed_answers' => $failed_answers,
+                'passed' => $passed,
+                'answers' => $request->respuestas,
+                // 'answers' => json_encode($request->respuestas),
+                'grade' => round($new_grade),
+            ];
 
             $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
             $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
@@ -62,7 +71,11 @@ class RestQuizController extends Controller
 
             $data_ev['ev_updated']      = 1;
             $data_ev['ev_updated_msg']  = "(1) Evaluación actualizada";
+
         } else {
+
+            $row->update($data_ev);
+            
             $data_ev['ev_updated']      = 0;
             $data_ev['ev_updated_msg']  = "(0) Evaluación no actualizada (nota obtenida menor que nota existente)";
         }
@@ -72,12 +85,16 @@ class RestQuizController extends Controller
         $data_ev['curso_id'] = $topic->course_id;
         $data_ev['tema_id'] = $topic->id;
         $data_ev['intentos_realizados'] = $row->attempts;
+        $data_ev['encuesta_pendiente'] = NULL;
 
-        SummaryCourse::updateUserData($topic->course);
-        SummaryUser::updateUserData();
+        $row_course = SummaryCourse::updateUserData($topic->course);
+        $row_user = SummaryUser::updateUserData();
 
-        // Pendiente
-        // $data_ev['encuesta_pendiente'] = Curso_encuesta::getEncuestaPendiente($user->id, $topic->course_id);
+        if ( $row_course->status->code == 'enc_pend' ) {
+
+            $poll = $topic->course->polls()->first();
+            $data_ev['encuesta_pendiente'] = $poll->id ?? NULL;
+        }
 
         return response()->json(['error' => false, 'data' => $data_ev], 200);
     }
@@ -89,6 +106,9 @@ class RestQuizController extends Controller
         if (!$topic) return response()->json(['data' => ['msg' => 'Not found'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
+
+        if ($row->hasNoAttemptsLeft())  
+            return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
         if ($row->isOutOfTimeForQuiz())
             return response()->json(['data' => ['msg' => 'Fuera de tiempo'], 'error' => true], 200);
@@ -111,8 +131,8 @@ class RestQuizController extends Controller
             'preguntas' => $questions,
             'tipo_evaluacion' => $topic->evaluation_type->code ?? NULL,
             'attempt' => [
-                'started_at' => $row->current_quiz_started_at,
-                'finishes_at' => $row->current_quiz_finishes_at,
+                'started_at' => $row->current_quiz_started_at->format('d/m/Y G:i a'),
+                'finishes_at' => $row->current_quiz_finishes_at->format('d/m/Y G:i a'),
                 'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
             ],
         ];
