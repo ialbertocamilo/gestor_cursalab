@@ -25,24 +25,24 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('buscar:incidencias {desde_back}')->dailyAt('06:00');
+        // $schedule->command('buscar:incidencias {desde_back}')->dailyAt('06:00');
 
         $schedule->command('reinicios:programados')->everyMinute();
-        $schedule->command('delete:err_masivos')->dailyAt('03:00');
+        // $schedule->command('delete:err_masivos')->dailyAt('03:00');
 
-        $schedule->command('resumen:update_resumen_general')->everyFifteenMinutes();
+        // $schedule->command('resumen:update_resumen_general')->everyFifteenMinutes();
         $schedule->command('notificaciones:enviar')->everyMinute();
         
         $schedule->command('quizzes:finish-summary-overdue')->everyMinute();
 
         // Meetings
-        $schedule->command('meeting:update-status')->hourly();
-        $schedule->command('meeting:update-attendance-detail')->everyFiveMinutes();
-        $schedule->command('meeting:verify-finish-status')->everyTenMinutes();
-        $schedule->command('meeting:update-url-start')->everyTenMinutes();
+        // $schedule->command('meeting:update-status')->hourly();
+        // $schedule->command('meeting:update-attendance-detail')->everyFiveMinutes();
+        // $schedule->command('meeting:verify-finish-status')->everyTenMinutes();
+        // $schedule->command('meeting:update-url-start')->everyTenMinutes();
 
         // Accounts
-        $schedule->command('account:update-tokens')->monthly();
+        // $schedule->command('account:update-tokens')->monthly();
 
         $schedule->command('errores:eliminar-antiguos')->dailyAt('00:00');
     }
