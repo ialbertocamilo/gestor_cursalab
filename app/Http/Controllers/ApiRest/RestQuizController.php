@@ -193,8 +193,8 @@ class RestQuizController extends Controller
             if ($topic->course->reinicios_programado)
                 $times[] = $topic->course->reinicios_programado;
 
-            if (auth()->user()->subworspace->reinicios_programado)
-                $times[] = auth()->user()->subworspace->reinicios_programado;
+            if (auth()->user()->subworkspace->reinicios_programado)
+                $times[] = auth()->user()->subworkspace->reinicios_programado;
 
             if (count($times) > 0) {
                 
