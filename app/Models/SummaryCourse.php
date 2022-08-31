@@ -192,7 +192,8 @@ class SummaryCourse extends Summary
         $advanced_percentage = ($assigned > 0) ? (($q_completed / $assigned) * 100) : 0;
         $advanced_percentage = ($advanced_percentage > 100) ? 100 : $advanced_percentage; // Maximo porcentaje = 100
 
-        $grade_average = round($rows->whereIn('topic_id', $topics_qualified->pluck('id'))->average('grade'), 2);
+        $grade_average = $rows->whereIn('topic_id', $topics_qualified->pluck('id'))->average('grade');
+        $grade_average = round($grade_average ?? 0, 2);
 
         $course_data = compact('assigned', 'passed', 'taken', 'reviewed', 'failed', 'grade_average', 'advanced_percentage');
         $course_data['last_time_evaluated_at'] = now();
