@@ -65,7 +65,7 @@ class Course extends BaseModel
 
     public function requirements()
     {
-        return $this->morphMany(Requirement::class, 'requirement');
+        return $this->morphMany(Requirement::class, 'model');
     }
 
     public function summaries()
@@ -105,8 +105,6 @@ class Course extends BaseModel
             $t->where('workspace_id', $workspace->id);
         });
 
-        info($request->all());
-
         if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->where('school_id', $request->school_id);
@@ -142,11 +140,21 @@ class Course extends BaseModel
                 $course->workspaces()->sync([$workspace->id]);
             endif;
 
-            if ($data['requisito_id']):
+            info('course->requirements()->get()');
+            info($course->requirements()->get());
+
+            if ($data['requisito_id']) :
                 Requirement::updateOrCreate(
                     ['model_type' => Course::class, 'model_id' => $course->id,],
                     ['requirement_type' => Course::class, 'requirement_id' => $data['requisito_id']]
                 );
+
+            else:
+
+                info('sin requisito');
+
+                $course->requirements()->delete();
+
             endif;
 
 
@@ -164,6 +172,7 @@ class Course extends BaseModel
         }
 
         cache_clear_model(School::class);
+        cache_clear_model(Requirement::class);
 
         return $course;
     }

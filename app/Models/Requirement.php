@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Requirement extends Model
+class Requirement extends BaseModel
 {
     protected $table = 'requirements';
 
@@ -28,7 +28,7 @@ class Requirement extends Model
         return $this->morphTo();
     }
 
-    protected static function storeRequest($data, $requirement = null)
+    protected function storeRequest($data, $requirement = null)
     {
         try {
 
