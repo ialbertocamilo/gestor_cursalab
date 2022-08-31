@@ -28,6 +28,8 @@ class RestTopicController extends Controller
     {
         $user = auth()->user() ?? $user;
 
+        $topic->load('course');
+
         $summary_topic = SummaryTopic::select('id')
             ->where('topic_id', $topic->id)
             ->where('user_id', $user->id)

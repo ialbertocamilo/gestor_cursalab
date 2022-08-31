@@ -491,7 +491,7 @@ class Topic extends BaseModel
 
     public function getNextOne()
     {
-        return Topic::where('curso_id', $this->course_id)
+        return Topic::where('course_id', $this->course_id)
             ->whereNotIn('id', [$this->id])
             ->where('position', '>=', $this->position)
             ->orderBy('position', 'ASC')
