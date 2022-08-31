@@ -24,6 +24,7 @@ class PosteoSearchResource extends JsonResource
             'active' => (bool)$topic->active,
             'orden' => $topic->position,
             'assessable' => $topic->assessable ? 'Sí' : 'No',
+            'es_evaluable' => $topic->assessable,
             'preguntas_count' => $topic->questions_count,
 
             'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $topic->id]),
