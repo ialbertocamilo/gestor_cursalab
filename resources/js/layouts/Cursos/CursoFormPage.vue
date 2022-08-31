@@ -79,7 +79,7 @@
                             <DefaultInput
                                 numbersOnly
                                 dense
-                                label="Inversión"
+                                label="Inversión (en soles)"
                                 placeholder="Ingrese la inversión"
                                 v-model="resource.investment"
                             />

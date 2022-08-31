@@ -11,12 +11,14 @@
                 <DefaultErrors :errors="errors" />
 
                 <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-end">
+                    <v-col cols="12" class="d-flex justify-content-end pr-3">
                         <v-btn
-                            class="-"
+                            class="- add-button"
+                            color="primary"
                             @click="addSegmentation()"
                         >
-                            Agregar bloque
+                            <v-icon class="" v-text="'mdi-plus'"/>
+                            Bloque
                         </v-btn>
                     </v-col>
                 </v-row>
@@ -38,6 +40,7 @@
                               :key="i"
                             >
                                 <v-sheet
+                                    class="group-sheet"
                                     height="100%"
                                 >
                                     <div class="text-h6 text-center">
@@ -228,3 +231,15 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+
+.add-button {
+    margin-right: 35px;
+}
+
+.group-sheet {
+    padding-bottom: 40px;
+}
+
+</style>
