@@ -129,14 +129,6 @@ class TaxonomySeederAppMenu extends Seeder
 
             'group' => 'system',
             'type' => 'side_menu',
-            'name' => 'Malla',
-            'code' => 'malla',
-        ]);
-
-        Taxonomy::create([
-
-            'group' => 'system',
-            'type' => 'side_menu',
             'name' => 'Cursos',
             'code' => 'cursos',
         ]);
@@ -171,14 +163,6 @@ class TaxonomySeederAppMenu extends Seeder
             'type' => 'main_menu',
             'name' => 'Progreso',
             'code' => 'progreso',
-        ]);
-
-        Taxonomy::create([
-
-            'group' => 'system',
-            'type' => 'main_menu',
-            'name' => 'Malla',
-            'code' => 'malla',
         ]);
 
         Taxonomy::create([

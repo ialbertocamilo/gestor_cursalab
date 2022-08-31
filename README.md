@@ -16,10 +16,3 @@ Se mantiene frontend y backend en el mismo proyecto (gestor)
 ## Chagelog
 
 ### Agosto 2022
-
-ALTER TABLE `users` ADD `browser` VARCHAR(50) NULL AFTER `windows`;
-
-ALTER TABLE `users` CHANGE `android` `android` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '0',
-CHANGE `ios` `ios` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '0',
-CHANGE `huawei` `huawei` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '0',
-CHANGE `windows` `windows` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '0';
