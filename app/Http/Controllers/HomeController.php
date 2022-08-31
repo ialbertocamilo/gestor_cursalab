@@ -105,13 +105,14 @@ class HomeController extends Controller
     {
         $data = $request->all();
 
-        $folder =  isset($data['model_id']) ? "mce-uploads/{$type}/{$data['model_id']}" : "mce-uploads/{$type}";
+        $folder =  isset($data['model_id']) ? "/mce-uploads/{$type}/{$data['model_id']}" : "/mce-uploads/{$type}";
 
-        $path = $data['image']->storePublicly($folder, 'do_spaces');
+        $path = $data['image']->storePublicly($folder, 's3');
 
         // $location = asset('storage/' . $path);
 
-        $location = Storage::url($path);
+//        $location = Storage::url($path);
+        $location = get_media_url($path);
 
         return compact('location');
     }
