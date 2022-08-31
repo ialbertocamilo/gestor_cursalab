@@ -4,13 +4,14 @@
             <legend>{{ label }}</legend>
 
             <v-card elevation="0" class="mx-4" v-if="description">
-                <small v-text="description" />
+                <small v-text="description"/>
             </v-card>
 
             <!-- AAAA {{ fileSelected }}  -->
 
             <!-- <v-card elevation="0" class="my-1" v-if="TypeOf(fileSelected) === 'object' || fileSelected === null"> -->
-            <v-card elevation="0" class="my-1" v-if="(TypeOf(fileSelected) === 'object' && !fileSelected.ext ) || fileSelected === null">
+            <v-card elevation="0" class="my-1"
+                    v-if="(TypeOf(fileSelected) === 'object' && !fileSelected.ext ) || fileSelected === null">
                 <v-card-text>
                     <DropzoneDefault
                         :ref="dropzoneDefault"
@@ -22,18 +23,18 @@
 
             <v-card v-else elevation="0">
                 <v-card-text class="d-flex justify-content-center align-items-center flex-column">
-                <!--     <span class="media-tag" @click="removeMediaPreview">
-                        &nbsp;<v-icon small color="red" title="Quitar" v-text="'mdi-close-circle-outline'" style="font-size: 30px;"/>&nbsp;
-                    </span>
-                    <v-img v-if="TypeOf(fileSelected) === 'object'" contain width="276" max-height="200"
-                               :src="infoMedia(fileSelected).preview"
-                    />
-                    <v-img v-else contain width="276" height="200"
-                           :src="bucketBaseUrl + '/' + fileSelected" -->
-                <span class="media-tag"
-                      @click="removeMediaPreview"
-                >&nbsp;<v-icon small color="red" title="Quitar" v-text="'mdi-close-circle-outline'"
-                               style="font-size: 30px;"/>&nbsp;</span>
+                    <!--     <span class="media-tag" @click="removeMediaPreview">
+                            &nbsp;<v-icon small color="red" title="Quitar" v-text="'mdi-close-circle-outline'" style="font-size: 30px;"/>&nbsp;
+                        </span>
+                        <v-img v-if="TypeOf(fileSelected) === 'object'" contain width="276" max-height="200"
+                                   :src="infoMedia(fileSelected).preview"
+                        />
+                        <v-img v-else contain width="276" height="200"
+                               :src="bucketBaseUrl + '/' + fileSelected" -->
+                    <span class="media-tag"
+                          @click="removeMediaPreview"
+                    >&nbsp;<v-icon small color="red" title="Quitar" v-text="'mdi-close-circle-outline'"
+                                   style="font-size: 30px;"/>&nbsp;</span>
                     <v-img contain width="276" height="200"
                            :src="getMediaPreview"
                            v-if="TypeOf(fileSelected) !== 'undefined'"
@@ -113,34 +114,37 @@ export default {
     computed: {
         getMediaPreview() {
             let vue = this
-            let preview = this.bucketBaseUrl + '/' + "images/default-scorm-img_116.png"
+            // let preview = this.bucketBaseUrl + '/' + "images/default-scorm-img_116_360.png"
+            let preview = "images/default-scorm-img_116_360.png"
 
             if (vue.TypeOf(this.fileSelected) === 'string') {
                 const extension = this.fileSelected.split('.').at(-1).toLowerCase()
-                if (vue.mixin_extensiones.image.includes(extension)) {
+
+                if (vue.mixin_extensiones.image.includes(extension))
                     return this.bucketBaseUrl + '/' + vue.fileSelected
-                } else {
+                else {
                     for (const mixinExtensionesKey in vue.mixin_extensiones) {
-                        if (vue.mixin_extensiones[mixinExtensionesKey].includes(extension)) {
+                        if (vue.mixin_extensiones[mixinExtensionesKey].includes(extension))
                             preview = vue.mixin_default_media_images[mixinExtensionesKey]
-                        }
                     }
                 }
+
             } else if (vue.TypeOf(this.fileSelected) === 'object' && this.fileSelected.ext) {
                 const extension = this.fileSelected.ext
-                if (vue.mixin_extensiones.image.includes(extension)) {
+
+                if (vue.mixin_extensiones.image.includes(extension))
                     return this.bucketBaseUrl + '/' + vue.fileSelected.file
-                } else {
+                else {
                     for (const mixinExtensionesKey in vue.mixin_extensiones) {
-                        if (vue.mixin_extensiones[mixinExtensionesKey].includes(extension)) {
+                        if (vue.mixin_extensiones[mixinExtensionesKey].includes(extension))
                             preview = vue.mixin_default_media_images[mixinExtensionesKey]
-                        }
                     }
                 }
             }
+
             return vue.fileSelected
-                    ? this.bucketBaseUrl + '/' + preview
-                    : null
+                ? this.bucketBaseUrl + '/' + preview
+                : null
         }
     },
     created() {
@@ -186,7 +190,7 @@ export default {
             let vue = this
             vue.modalPreviewMultimedia.open = false
         },
-        removeAllFilesFromDropzone(){
+        removeAllFilesFromDropzone() {
             let vue = this
             if (vue.$refs.dropzoneDefault)
                 vue.$refs.dropzoneDefault.limpiarArchivo()

@@ -57,7 +57,7 @@ export default {
                 endpoint: '/criterios/search',
                 ref: 'TipoCriterioTable',
                 headers: [
-                    {text: "Orden", value: "position", align: 'center', model: "TipoCriterio", sortable: false},
+                    {text: "Orden", value: "position", align: 'center', model: "Criterion", sortable: false},
                     {text: "Nombre", value: "name"},
                     // {text: "Nombre Plural", value: "nombre_plural"},
                     {text: "Tipo", value: "data_type", sortable: false},
