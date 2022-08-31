@@ -23,7 +23,7 @@ class PosteoSearchResource extends JsonResource
             'image' => get_media_url($topic->imagen),
             'active' => (bool)$topic->active,
             'orden' => $topic->position,
-            'es_evaluable' => $topic->assessable ? 'Sí' : 'No',
+            'assessable' => $topic->assessable ? 'Sí' : 'No',
             'preguntas_count' => $topic->questions_count,
 
             'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $topic->id]),
