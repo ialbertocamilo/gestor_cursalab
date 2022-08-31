@@ -449,11 +449,12 @@ class Topic extends BaseModel
         $remaining_attempts = $max_attempts;
         $summary_topic = $topic->summaryByUser($user->id);
         $last_topic_reviewed = null;
-        $topic_status = 'por-iniciar';
+        // $topic_status = 'por-iniciar';
+        $topic_status = $summary_topic->status->code;
 
         if ($topic->assesable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
-                $topic_status = $summary_topic->passed ? 'aprobado' : 'desaprobado';
+                // $topic_status = $summary_topic->passed ? 'aprobado' : 'desaprobado';
                 $grade = $summary_topic->grade;
                 $sub = $max_attempts - $summary_topic->attempts;
                 $remaining_attempts = max($sub, 0);
