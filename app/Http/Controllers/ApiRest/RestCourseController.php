@@ -61,7 +61,7 @@ class RestCourseController extends Controller
                         }
                     }
                 }
-                $query1 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
+                $query1 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
             }
             if (!is_null($value_data) && $value_data->tipo == 'califica') {
                 $multiple = array();
@@ -84,13 +84,13 @@ class RestCourseController extends Controller
                         array_push($multiple, $elemento);
                     }
                 }
-                $query2 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
+                $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
             }
             if (!is_null($value_data) && $value_data->tipo == 'texto') {
-                $query3 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, trim($value_data->respuesta));
+                $query3 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, trim($value_data->respuesta));
             }
             if (!is_null($value_data) && $value_data->tipo == 'simple') {
-                $query4 = PollQuestionAnswer::updatePollAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, $value_data->respuesta);
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, $value_data->respuesta);
             }
         }
 
