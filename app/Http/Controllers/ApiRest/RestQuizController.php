@@ -196,6 +196,9 @@ class RestQuizController extends Controller
             if (auth()->user()->subworkspace->reinicios_programado)
                 $times[] = auth()->user()->subworkspace->reinicios_programado;
 
+            info('times');
+            info($times);
+
             if (count($times) > 0) {
                 
                 $scheduled = false;
