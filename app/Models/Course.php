@@ -9,7 +9,7 @@ class Course extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
-        'assessable', 'freely_eligible',
+        'assessable', 'freely_eligible', 'type_id',
         'position', 'scheduled_restarts', 'active',
         'duration', 'investment'
     ];
