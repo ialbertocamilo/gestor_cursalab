@@ -151,7 +151,7 @@ class SummaryCourse extends Summary
         $user = $user ?? auth()->user();
         $row_course = SummaryCourse::getCurrentRow($course);
 
-        $active_topics = $course->topics->where('active', ACTIVE)->get();
+        $active_topics = $course->topics->where('active', ACTIVE);
 
         $topics_for_review = $active_topics->where('assessable', '<>', 1)->pluck('id');
         $topics_qualified = $active_topics->where('evaluation_type.code', 'qualified')->pluck('id');
