@@ -143,7 +143,7 @@ class SummaryTopic extends Summary
             $attempts_limit = $config['nro_intentos'] ?? 5;
         }
 
-        return $row->attempts >= $attempts_limit;
+        return $this->attempts >= $attempts_limit;
     }
 
     protected function calculateGrade($correct_answers, $failed_answers)
