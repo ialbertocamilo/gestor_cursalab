@@ -140,9 +140,6 @@ class Course extends BaseModel
                 $course->workspaces()->sync([$workspace->id]);
             endif;
 
-            info('course->requirements()->get()');
-            info($course->requirements()->get());
-
             if ($data['requisito_id']) :
                 Requirement::updateOrCreate(
                     ['model_type' => Course::class, 'model_id' => $course->id,],
@@ -150,8 +147,6 @@ class Course extends BaseModel
                 );
 
             else:
-
-                info('sin requisito');
 
                 $course->requirements()->delete();
 
