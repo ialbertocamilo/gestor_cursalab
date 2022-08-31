@@ -135,7 +135,7 @@ export default {
                 file_imagen: null,
                 file_plantilla_diploma:null,
                 position: null,
-                active: false,
+                active: true,
                 reinicio_automatico: false,
                 reinicio_automatico_dias: null,
                 reinicio_automatico_horas: null,
