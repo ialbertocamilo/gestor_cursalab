@@ -629,6 +629,7 @@ class UsuarioController extends Controller
         $courseId, $topicId, $subworkspaceId, $tipo, $mod_eval
     ): array
     {
+        $attempts = $mod_eval['nro_intentos'] ?? 3;
 
         if ($topicId == null) {
 
@@ -643,7 +644,7 @@ class UsuarioController extends Controller
 
             if ($tipo['id'] == 1) {
                 $query->where('summary_courses.passed', 0)
-                    ->where('summary_courses.attempts', '>=', $mod_eval['nro_intentos']);
+                    ->where('summary_courses.attempts', '>=', $attempts);
             }
 
             $users = $query->orderBy('summary_courses.grade_average')->get();
@@ -662,7 +663,7 @@ class UsuarioController extends Controller
 
             if ($tipo['id'] == 1) {
                 $query->where('summary_topics.passed', 0)
-                    ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos']);
+                    ->where('summary_topics.attempts', '>=', $attempts);
             }
 
             $users = $query->orderBy('summary_topics.grade')->get();
@@ -747,7 +748,7 @@ class UsuarioController extends Controller
             // Reset topics attempts
 
             $topicsIds = SummaryCourse::getCourseTopicsIds($courseId, $userId);
-            
+
             SummaryTopic::resetUserTopicsAttempts($userId, $topicsIds);
 
             // Update resets count
