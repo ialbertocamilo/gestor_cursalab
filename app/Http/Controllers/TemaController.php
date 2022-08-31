@@ -213,11 +213,14 @@ class TemaController extends Controller
         return $this->success(['pregunta' => $pregunta]);
     }
 
-    public function storePregunta(School $school, Course $course, Topic $topic, TemaPreguntaStoreRequest $request)
-    {
+    public function storePregunta(
+        School $school, Course $course, Topic $topic, TemaPreguntaStoreRequest $request
+    ) {
         $data = $request->validated();
 
-        $question_type_code = $topic->evaluation_type->code === 'qualified' ? 'select-options' : 'written-answer';
+        $question_type_code = $topic->evaluation_type->code === 'qualified'
+                                ? 'select-options'
+                                : 'written-answer';
 
         // info('nuevasRptas');
         // info($data['nuevasRptas']);

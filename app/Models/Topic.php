@@ -96,10 +96,13 @@ class Topic extends BaseModel
 
     protected static function search_preguntas($request, $topic)
     {
-        $question_type_code = $topic->evaluation_type->code === 'qualified' ? 'select-options' : 'written-answer';
+        $question_type_code = $topic->evaluation_type->code === 'qualified'
+                                ? 'select-options'
+                                : 'written-answer';
+        $typeId = Taxonomy::getFirstData('question', 'type', $question_type_code)?->id;
 
-        $q = Question::whereRelation('type', 'code', $question_type_code)
-            ->where('topic_id', $topic->id);
+        $q = Question::where('type_id', $typeId)
+                      ->where('topic_id', $topic->id);
 
         if ($request->q)
             $q->where('pregunta', 'like', "%$request->q%");

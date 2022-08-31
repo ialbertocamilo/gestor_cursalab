@@ -14,6 +14,10 @@ class SummaryTopic extends Summary
         'last_time_evaluated_at',
     ];
 
+    protected $casts = [
+        'answers' => 'array',
+    ];
+
     protected $dates = [
         'current_quiz_started_at',
         'current_quiz_finishes_at',
@@ -50,6 +54,8 @@ class SummaryTopic extends Summary
 
     public function isOutOfTimeForQuiz()
     {
+        if (!$this->current_quiz_finishes_at) return false;
+        
         return now() >= $this->current_quiz_finishes_at;
     }
 
@@ -137,7 +143,7 @@ class SummaryTopic extends Summary
             $attempts_limit = $config['nro_intentos'] ?? 5;
         }
 
-        return $row->attempts >= $attempts_limit;
+        return $this->attempts >= $attempts_limit;
     }
 
     protected function calculateGrade($correct_answers, $failed_answers)
@@ -156,5 +162,10 @@ class SummaryTopic extends Summary
     public function hasImprovedGrade($new_grade)
     {
         return $new_grade >= $this->grade;
+    }
+
+    public function hasAttemptsLeft($attempts_limit = null)
+    {
+        return ! $this->hasNoAttemptsLeft($attempts_limit);
     }
 }
