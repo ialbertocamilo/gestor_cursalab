@@ -71,6 +71,7 @@ class AuthController extends Controller
             'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
+            'module' => $user->subworkspace,
 //            'carrera' => $carrera,
 //            'ciclo' => $ciclo
 //            "grupo" => $user->grupo,
