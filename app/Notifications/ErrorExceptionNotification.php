@@ -51,7 +51,7 @@ class ErrorExceptionNotification extends Notification
 
         return (new SlackMessage)
                 ->from('GESTOR', ':computer:')
-                ->to('#log_aulas_virtuales')
+                // ->to('#log_aulas_virtuales')
                 ->error()
                 ->content('*' . $this->notifier . '* se encontró con un error en *' . $this->error->url .'*')
                 ->attachment(function ($attachment) use ($url) {
