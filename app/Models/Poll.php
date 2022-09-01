@@ -106,7 +106,7 @@ class Poll extends BaseModel
     protected function updateSummariesAfterCompletingPoll($course, $user)
     {
 //        $summary_user = $user->summary;
-        $summary_user = SummaryUser::getCurrentRow(auth()->user());
+        $summary_user = SummaryUser::getCurrentRow($user);
 
         $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
 
@@ -114,6 +114,7 @@ class Poll extends BaseModel
         info("updateSummariesAfterCompletingPoll");
         info($summary_course);
         $summary_course->update(['status_id' => $approved_status_taxonomy?->id, 'advanced_percentage' => '100',]);
+        info($summary_course);
 
         $count_approved_courses = SummaryCourse::select('id')
             ->whereRelation('course', 'active', ACTIVE)
