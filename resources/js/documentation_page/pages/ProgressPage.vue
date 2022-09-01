@@ -5,7 +5,7 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-               Esta api retorna el el avance de los usuarios en un determinado tiempo. 
+                Esta API retorna el avance de los usuarios dentro de un rango de fechas.<br>
             </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
@@ -28,18 +28,18 @@
                             parameters:[
                                 {
                                     name:'start_date',
-                                    type:'Texto (String)',
-                                    description:'Se indica la fecha inicial a consultar (21/04/2022).'
+                                    type:'Texto (String) - Formato (YYYY-MM-DD)',
+                                    description:'Se indica la fecha inicial a consultar.'
                                 },
                                 {
                                     name:'end_date',
-                                    type:'Texto (String)',
-                                    description:'Se indica la fecha final a consultar (21/05/2022).'
+                                    type:'Texto (String) - Formato (YYYY-MM-DD)',
+                                    description:'Se indica la fecha final a consultar.'
                                 },
                                 {
                                     name:'page',
-                                    type:'Texto (String)',
-                                    description:'Número de página a consultar.'
+                                    type:'Número (int)',
+                                    description:'Número de página a consultar.(100 por página)'
                                 }
                             ],
                         },
@@ -79,13 +79,13 @@
         const axios = require('axios');
         const data = JSON.stringify(
             {
-            "start_date":"21/04/2022",
+            "start_date":"2022/21/04/",
             "end_date":"21/05/2022",
             "page":"1",
             }
         );
         const config = {
-            method: 'get',
+            method: 'post',
             url: base_url+'/integrations/progress',
             headers: { 
                 'secretKey': 'asd-i4qEJK46[hdj', 
@@ -106,20 +106,24 @@
     type:'language-js',
     code:
     `
-    "data":{[
+    "data":[{
+        "Workspace":"Espacio de trabajo (Farmacias Peruanas, Real Plaza, Química Suiza, etc)",
         "Módulo":"Módulo al que pertecene el usuario.",
         "Identificador":"Valor único que identifica al usuario",
         "Apellidos y Nombres":"Nombre completo del usuario",
         "Genero":"Género del usuario",
-        "Estado (Usuario)":"Estado del usuario dentro de la plataforma.",
+        "Estado (Usuario)":"Los valores a tomar son Activo o Inactivo",
+        "code_escuela":"Identificador de la escuela",
         "Escuela":"Escuela a la que pertenece el curso",
+        "Modalidad":"Modalidad del curso (regular,extracurricular o libre)",
+        "code_curso":"Identificador del curso",
         "Curso":"Nombre del Curso",
         "Nota promedio":"Nota promedio que el usuario tiene en el curso",
         "Temas asignados":"Cantidad de temas asignados al usuario",
         "Temas completados":"Cantidad de temas completados por el usuario",
         "Porcentaje":"Porcentaje de avance del usuario en el curso",
         "Resultado":"El resultado del usuario en el curso(pendiente,encuesta pendiente,aprobado,desaprobado)",
-    ]}`
+    }]`
     }
                     ],
                     }
