@@ -47,15 +47,8 @@ class RestCourseController extends Controller
         $poll = Poll::find($data['enc_id']);
         $course = Course::find($data['curso']);
         $info = $data['data'];
-        info("savePollAnswers");
-//        info($info);
-//        $info = strip_tags($data['data']);
-//        $decoded_info = urldecode($info);
-//        $info = json_decode($decoded_info);
 
         foreach ($info as $value_data) {
-            info("value_data");
-            info($value_data);
             if (!is_null($value_data) && $value_data['tipo'] == 'multiple') {
                 $multiple = array();
                 $ddd = array_count_values($value_data['respuesta']);
