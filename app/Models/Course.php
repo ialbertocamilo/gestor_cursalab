@@ -389,7 +389,9 @@ class Course extends BaseModel
                     'encuesta_habilitada' => $course_status['enabled_poll'],
                     'encuesta_resuelta' => $course_status['solved_poll'],
                     'encuesta_id' => $course_status['poll_id'],
-                    'temas_asignados' => $course_status['assigned_topics'],
+                    'temas_asignados' => $course_status['exists_summary_course'] ?
+                        $course_status['assigned_topics']
+                        : $topics->count(),
                     'temas_completados' => $course_status['completed_topics'],
                     'porcentaje' => $course_status['progress_percentage'],
                     'ultimo_tema_visto' => $last_topic_reviewed
