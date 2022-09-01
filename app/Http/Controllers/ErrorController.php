@@ -51,7 +51,7 @@ class ErrorController extends Controller
 
     public function edit(Error $error)
     {
-        $error->load('platform', 'user', 'usuario', 'status');
+        $error->load('platform', 'user', 'status');
 
         $platforms = Taxonomy::getDataForSelect('system', 'platform');
         $statuses = Taxonomy::getDataForSelect('error', 'status');
