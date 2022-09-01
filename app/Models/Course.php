@@ -389,9 +389,7 @@ class Course extends BaseModel
                     'encuesta_habilitada' => $course_status['enabled_poll'],
                     'encuesta_resuelta' => $course_status['solved_poll'],
                     'encuesta_id' => $course_status['poll_id'],
-                    'temas_asignados' => $course_status['exists_summary_course'] ?
-                        $course_status['assigned_topics'] :
-                        $topics->count(),
+                    'temas_asignados' => $course_status['assigned_topics'],
                     'temas_completados' => $course_status['completed_topics'],
                     'porcentaje' => $course_status['progress_percentage'],
                     'ultimo_tema_visto' => $last_topic_reviewed
@@ -433,7 +431,7 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
-        $requirement_course = $course->models->first();
+        $requirement_course = $course->requirements->first();
 //        info("requirement_course");
 //        info($requirement_course);
         if ($requirement_course) {
@@ -458,6 +456,7 @@ class Course extends BaseModel
                 $available_poll = true;
 
                 $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
+                    ->where('course_id', $course->id)
                     ->where('user_id', $user->id)->first();
 
                 if ($poll_questions_answers) $solved_poll = true;
@@ -468,6 +467,7 @@ class Course extends BaseModel
 
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
+                $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
                 if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
@@ -501,7 +501,7 @@ class Course extends BaseModel
 
     protected function getCourseProgressByUser($user, Course $course)
     {
-        $course_requirement = $course->models->first();
+        $course_requirement = $course->requirements->first();
         if ($course_requirement) {
             $requirement_summary = SummaryCourse::with('status:id,code')
                 ->where('course_id', $course_requirement->id)

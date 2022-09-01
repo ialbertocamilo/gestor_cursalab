@@ -46,14 +46,12 @@ class RestCourseController extends Controller
         $user = auth()->user();
         $poll = Poll::find($data['enc_id']);
         $course = Course::find($data['curso']);
-        $info = strip_tags($data['data']);
-        $decoded_info = urldecode($info);
-        $info = json_decode($decoded_info);
+        $info = $data['data'];
 
-        foreach ($info as $key_data => $value_data) {
-            if (!is_null($value_data) && $value_data->tipo == 'multiple') {
+        foreach ($info as $value_data) {
+            if (!is_null($value_data) && $value_data['tipo'] == 'multiple') {
                 $multiple = array();
-                $ddd = array_count_values($value_data->respuesta);
+                $ddd = array_count_values($value_data['respuesta']);
                 if (!is_null($ddd)) {
                     foreach ($ddd as $key => $value) {
                         if ($value % 2 != 0) {
@@ -61,11 +59,11 @@ class RestCourseController extends Controller
                         }
                     }
                 }
-                $query1 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
+                $query1 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
             }
-            if (!is_null($value_data) && $value_data->tipo == 'califica') {
+            if (!is_null($value_data) && $value_data['tipo'] == 'califica') {
                 $multiple = array();
-                $array_respuestas = $value_data->respuesta;
+                $array_respuestas = $value_data['respuesta'];
                 $ddd = array_count_values(array_column($array_respuestas, 'preg_cal'));
                 $ttt = array();
                 if (!is_null($array_respuestas) && count($array_respuestas) > 0) {
@@ -84,13 +82,13 @@ class RestCourseController extends Controller
                         array_push($multiple, $elemento);
                     }
                 }
-                $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, json_encode($multiple, JSON_UNESCAPED_UNICODE));
+                $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
             }
-            if (!is_null($value_data) && $value_data->tipo == 'texto') {
-                $query3 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, trim($value_data->respuesta));
+            if (!is_null($value_data) && $value_data['tipo'] == 'texto') {
+                $query3 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], trim($value_data['respuesta']));
             }
-            if (!is_null($value_data) && $value_data->tipo == 'simple') {
-                $query4 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data->id, $user->id, $value_data->tipo, $value_data->respuesta);
+            if (!is_null($value_data) && $value_data['tipo'] == 'simple') {
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
             }
         }
 
