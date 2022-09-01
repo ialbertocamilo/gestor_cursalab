@@ -56,7 +56,7 @@ export default {
                 vue.modalMultimediaTextOptions.title = vue.data.label
                 vue.modalMultimediaTextOptions.open = true
             } else if (type === 'link') {
-                vue.modalMultimediaTextOptions.title = vue.data.label
+                vue.modalMultimediaTextOptions.title = 'Link (Genially, SCORM, etc.)'//vue.data.label
                 vue.modalMultimediaTextOptions.open = true
             } else {
                 vue.modalMultimediaMixOptions.title = vue.data.label
