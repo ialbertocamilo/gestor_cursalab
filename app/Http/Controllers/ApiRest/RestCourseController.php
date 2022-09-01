@@ -46,11 +46,12 @@ class RestCourseController extends Controller
         $user = auth()->user();
         $poll = Poll::find($data['enc_id']);
         $course = Course::find($data['curso']);
-        $info = strip_tags($data['data']);
-        $decoded_info = urldecode($info);
-        $info = json_decode($decoded_info);
+        $info = $data['data'];
+//        $info = strip_tags($data['data']);
+//        $decoded_info = urldecode($info);
+//        $info = json_decode($decoded_info);
 
-        foreach ($info as $key_data => $value_data) {
+        foreach ($info as $value_data) {
             if (!is_null($value_data) && $value_data->tipo == 'multiple') {
                 $multiple = array();
                 $ddd = array_count_values($value_data->respuesta);
