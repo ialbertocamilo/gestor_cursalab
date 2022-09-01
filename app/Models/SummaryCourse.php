@@ -50,18 +50,18 @@ class SummaryCourse extends Summary
     ): void
     {
 
-       $query = self::where('course_id', $courseId)
-                    ->where('passed', 0)
-                    ->where('attempts', '>=', $attemptsLimit);
+        $query = self::where('course_id', $courseId)
+            ->where('passed', 0)
+            ->where('attempts', '>=', $attemptsLimit);
 
-       if ($scheduleDate)
-           $query->where('last_time_evaluated_at', '<=', $scheduleDate);
+        if ($scheduleDate)
+            $query->where('last_time_evaluated_at', '<=', $scheduleDate);
 
         $query->update([
-                'attempts' => 0,
-                'last_time_evaluated_at' => Carbon::now()
-                //'fuente' => 'resetm'
-            ]);
+            'attempts' => 0,
+            'last_time_evaluated_at' => Carbon::now()
+            //'fuente' => 'resetm'
+        ]);
     }
 
     /**
@@ -140,7 +140,7 @@ class SummaryCourse extends Summary
 
         // Update record
 
-        $summaryCourse->restarts =  $restars;
+        $summaryCourse->restarts = $restars;
         $summaryCourse->restarter_id = $adminId;
         $summaryCourse->save();
     }
@@ -162,28 +162,28 @@ class SummaryCourse extends Summary
         $max_attempts = $user->getSubworkspaceSetting('mod_evaluaciones', 'nro_intentos');
 
         $rows = SummaryTopic::with('status')
-                    ->whereIn('topic_id', $active_topics->pluck('id'))
-                    ->where('user_id', $user->id)
-                    ->get();
+            ->whereIn('topic_id', $active_topics->pluck('id'))
+            ->where('user_id', $user->id)
+            ->get();
 
         if (count($topics_qualified) > 0) {
-            
+
             $passed = $rows->where('passed', 1)
-                            ->whereIn('topic_id', $topics_qualified)
-                            ->count();
+                ->whereIn('topic_id', $topics_qualified)
+                ->count();
 
             $failed = $rows->where('passed', '<>', 1)
-                            ->whereIn('topic_id', $topics_qualified)
-                            ->where('attempts', '>=', $max_attempts)
-                            ->count();
+                ->whereIn('topic_id', $topics_qualified)
+                ->where('attempts', '>=', $max_attempts)
+                ->count();
         }
 
         if (count($topics_open) > 0)
             $taken = $rows->whereIn('topic_id', $topics_open)->count();
 
-        if(count($topics_for_review) > 0)
+        if (count($topics_for_review) > 0)
             $reviewed = $rows->whereIn('topic_id', $topics_for_review)->count();
-            // ->where('visitas.estado_tema', "revisado")
+        // ->where('visitas.estado_tema', "revisado")
 
         $q_completed = $passed + $taken + $reviewed;
 
@@ -207,7 +207,7 @@ class SummaryCourse extends Summary
             if ($poll) {
 
                 $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
-                
+
                 $status = 'enc_pend';
 
                 if ($poll_answers) {
