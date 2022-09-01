@@ -117,7 +117,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      */
     public function routeNotificationForSlack($notification)
     {
-        return $notification->webhookUrl ?? config('slack.routes.general');
+        return $notification->webhookUrl ?? config('slack.routes.support');
     }
 
     public function criterion_values()
