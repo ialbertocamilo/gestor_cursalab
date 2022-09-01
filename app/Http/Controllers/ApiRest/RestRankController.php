@@ -59,6 +59,7 @@ class RestRankController extends Controller
 
 
         $ranking = $q_ranking->whereRelation('user', 'active', ACTIVE)
+            ->whereNotNull('last_time_evaluated_at')
             ->orderBy('score', 'desc')
             ->orderBy('last_time_evaluated_at', 'asc')
             ->take(10)
