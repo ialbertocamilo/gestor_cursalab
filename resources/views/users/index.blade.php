@@ -10,9 +10,11 @@
                         <h5 class="no-margin-bottom">Administrador</h5>
                         <div class="ml-2">
                             @if ($super_user)
-                                <a href="{{ route('users.create') }}" class="btn bg-green float-right"><i
-                                        class="fa fa-plus"></i>
-                                    Crear</a>
+                                <a href="{{ route('users.create') }}"
+                                   class="btn bg-green float-right">
+                                    <i class="fa fa-plus"></i>
+                                    Crear
+                                </a>
                             @endif
                         </div>
                     </div>

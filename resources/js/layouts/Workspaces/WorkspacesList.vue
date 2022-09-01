@@ -177,7 +177,8 @@
             <v-col cols="10" class="configurations-wrapper">
                 <v-row class="justify-content-center pt-5">
                     <div class="col-3">
-                        <h4>Usuarios</h4>
+                        <h4>General</h4>
+
                         <div class="card p-3">
                             <h5>
                                 <v-icon>mdi-account-cog</v-icon>
@@ -194,15 +195,20 @@
                                 logotipo, colores, etc.
                             </p>
                         </div>
+                    </div>
+                    <div class="col-3">
+                        <h4>Administradores y Roles</h4>
 
-                        <div class="card p-3 mt-3">
+                        <div class="card p-3">
                             <h5>
-                                <v-icon>mdi-account-group</v-icon>
-                                Usuarios
+                                <v-icon>mdi-account-tie</v-icon>
+                                Administradores
 
-                                <a href="/usuarios">
+                                <a href="/users/">
                                     <div class="go-icon">
-                                        <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
+                                        <v-icon color="#5D5FEF">
+                                            mdi-arrow-top-right-thin
+                                        </v-icon>
                                     </div>
                                 </a>
                             </h5>
@@ -211,10 +217,8 @@
                                 logotipo, colores, etc.
                             </p>
                         </div>
-                    </div>
-                    <div class="col-3">
-                        <h4>Roles y permisos</h4>
-                        <div class="card p-3">
+
+                        <div class="card p-3 mt-3">
                             <h5>
                                 <v-icon>mdi-notebook</v-icon>
 
@@ -234,31 +238,16 @@
                             </p>
                         </div>
 
-                        <div class="card p-3 mt-3">
+                    </div>
+                    <div class="col-3">
+                        <h4>Atención al Cliente</h4>
+
+                        <div class="card p-3">
                             <h5>
-                                <v-icon>mdi-key-variant</v-icon>
-                                Permisos
+                                <v-icon>mdi-frequently-asked-questions</v-icon>
+                                Preguntas Frecuentes
 
-                                <a href="/permisos/">
-                                    <div class="go-icon">
-                                        <v-icon color="#5D5FEF">
-                                            mdi-arrow-top-right-thin
-                                        </v-icon>
-                                    </div>
-                                </a>
-                            </h5>
-                            <p>
-                                Configura datos generales del ambiente y de branding como el
-                                logotipo, colores, etc.
-                            </p>
-                        </div>
-
-                        <div class="card p-3 mt-3">
-                            <h5>
-                                <v-icon>mdi-account-tie</v-icon>
-                                Administradores
-
-                                <a href="/users/">
+                                <a href="/preguntas-frecuentes">
                                     <div class="go-icon">
                                         <v-icon color="#5D5FEF">
                                             mdi-arrow-top-right-thin

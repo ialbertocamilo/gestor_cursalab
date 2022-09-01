@@ -211,7 +211,7 @@ export default {
                         path: "/users",
                         subpaths: ["users"],
                         selected: false,
-                        role: ["super-user"]
+                        role: ["super-user", "config"]
                     },
                     {
                         title: "Criterios",
@@ -220,7 +220,7 @@ export default {
                         subpaths: ["criterios", "valores"],
                         selected: false,
                         permission: "criterios",
-                        role: ["super-user", "admin"]
+                        role: ["super-user", "config"]
                     }
                     // {
                     //     title:"Supervisores",
@@ -471,7 +471,7 @@ export default {
                         path: "/preguntas-frecuentes",
                         subpaths: ["preguntas-frecuentes"],
                         selected: false,
-                        role: ["super-user"]
+                        role: ["super-user", "config"]
                     },
                     {
                         title: "Formulario de Ayuda",
