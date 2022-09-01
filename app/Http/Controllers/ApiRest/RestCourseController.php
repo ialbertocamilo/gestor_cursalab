@@ -92,7 +92,7 @@ class RestCourseController extends Controller
             }
         }
 
-        Poll::updateSummariesAfterCompletingPoll($user, $course);
+        Poll::updateSummariesAfterCompletingPoll($course, $user);
 
         SummaryCourse::updateUserData($course, $user);
 

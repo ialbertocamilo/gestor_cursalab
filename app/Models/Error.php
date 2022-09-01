@@ -14,10 +14,10 @@ class Error extends Model
 {
     protected $fillable = [
         'message', 'file', 'file_path', 'line', 'stack_trace', 'code', 'ip', 'url',
-        'status_id', 'platform_id', 'user_id', 'usuario_id',
-        'platform_name', 'platform_family', 'platform_version',
-        'browser_name', 'browser_family', 'browser_version',
-        'device_family', 'device_model',
+        'platform_name', 'platform_family_id', 'platform_version_id',
+        'browser_name', 'browser_family_id', 'browser_version_id',
+        'device_family_id', 'device_model_id',
+        'status_id', 'platform_id', 'user_id',
     ];
 
     // public function scopeById($query, $value)
@@ -35,14 +35,9 @@ class Error extends Model
     //     return $query->where('stack_trace', 'like', "%$value%");
     // }
 
-    public function usuario()
-    {
-        return $this->belongsTo(Usuario::class, 'usuario_id');
-    }
-
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function platform()
@@ -55,9 +50,24 @@ class Error extends Model
         return $this->belongsTo(Taxonomy::class, 'status_id');
     }
 
+    public function device_family()
+    {
+        return $this->belongsTo(Taxonomy::class, 'device_family_id');
+    }
+
+    public function browser_family()
+    {
+        return $this->belongsTo(Taxonomy::class, 'browser_family_id');
+    }
+
+    public function platform_family()
+    {
+        return $this->belongsTo(Taxonomy::class, 'platform_family_id');
+    }
+
     public function getNotifierData($user, $platform_code)
     {
-        if (!$user) return 'Anònimo';
+        if (!$user) return 'Anónimo';
 
         $notifier = $user->name;
 
@@ -69,30 +79,20 @@ class Error extends Model
 
     protected function getPlatformByCode($code)
     {
-        $platform = cache()->rememberForever('taxonomias_platforms_' . $code,  function () use ($code) {
-
-            return Taxonomy::where('type', 'platform')
-                            ->where('group', 'system')
-                            ->where('code', $code)
-                            ->where('active', 1)
-                            ->first();
-        });
-
-        return $platform;
+        return Taxonomy::where('type', 'platform')
+                        ->where('group', 'system')
+                        ->where('code', $code)
+                        ->where('active', ACTIVE)
+                        ->first();
     }
 
     protected function getStatusByCode($code)
     {
-        $status = cache()->rememberForever('taxonomias_error_statuses_' . $code,  function () use ($code) {
-
-            return Taxonomy::where('type', 'status')
-                            ->where('group', 'error')
-                            ->where('code', $code)
-                            ->where('active', 1)
-                            ->first();
-        });
-
-        return $status;
+        return Taxonomy::where('type', 'status')
+                        ->where('group', 'error')
+                        ->where('code', $code)
+                        ->where('active', ACTIVE)
+                        ->first();
     }
 
     protected function getErrorCode($exception)
@@ -122,10 +122,10 @@ class Error extends Model
         if ( $this->errorIsFaviconIco($request->getRequestUri()) ) return false;
         if ( $this->errorIsUnauthenticated($message, $filename) ) return false;
         if ( $this->errorIsZoom3001($exception, $code, $additional_message) ) return false;
-        if ( $this->errorIsJSMaps($request->getRequestUri(), $filename) ) return false;
+        if ( $this->errorIsFileMaps($request->getRequestUri(), $filename) ) return false;
 
-        $platform_code = $request->is('api/*') ? 'app' : 'gestor';
-        $user_field = $platform_code == 'app' ? 'usuario_id' : 'user_id';
+        $platform_code = $request->is('api/*') ? 'app' : 'web';
+        // $user_field = $platform_code == 'app' ? 'usuario_id' : 'user_id';
         $platform = Error::getPlatformByCode($platform_code);
         $status = Error::getStatusByCode('pending');
 
@@ -144,7 +144,7 @@ class Error extends Model
             'file' => $filename,
             'file_path' => $exception->getFile(),
             'line' => $exception->getLine(),
-            $user_field => \Auth::id(),
+            'user_id' => \Auth::id(),
             'code' => $code,
             'url' => $request->getRequestUri(),
             'ip' => $request->ip(),
@@ -152,7 +152,7 @@ class Error extends Model
             'status_id' => $status->id ?? NULL,
         ];
 
-        $new_data = $new_data + $this->getErrorUserDeviceInfo();
+        $new_data = $new_data + $this->getUserDeviceInfo();
 
         $error = Error::create($new_data);
 
@@ -183,7 +183,7 @@ class Error extends Model
             'file' => $data['method'] ?? '',
             'file_path' => '',
             'line' => '',
-            'usuario_id' => \Auth::id(),
+            'user_id' => \Auth::id(),
             'code' => $data['code'] ?? '',
             'url' => '',
             'ip' => $request->ip(),
@@ -191,7 +191,7 @@ class Error extends Model
             'status_id' => $status->id ?? NULL,
         ];
 
-        $new_data = $new_data + $this->getErrorUserDeviceInfo();
+        $new_data = $new_data + $this->getUserDeviceInfo();
 
         $error = Error::create($new_data);
 
@@ -213,21 +213,20 @@ class Error extends Model
         $code = 422;
 
         $platform_code = $request->is('api/*') ? 'app' : 'gestor';
-        $user_field = $platform_code == 'app' ? 'usuario_id' : 'user_id';
         $platform = Error::getPlatformByCode($platform_code);
         $status = Error::getStatusByCode('pending');
 
         $new_data = [
             'message' => $message,
-            $user_field => \Auth::id(),
+            'user_id' => \Auth::id(),
             'code' => $code,
             'url' => $request->getRequestUri(),
-            'ip' => $request->ip(),
+            // 'ip' => $request->ip(),
             'platform_id' => $platform->id ?? NULL,
             'status_id' => $status->id ?? NULL,
         ];
 
-        $new_data = $new_data + $this->getErrorUserDeviceInfo();
+        $new_data = $new_data + $this->getUserDeviceInfo();
 
         $error = Error::create($new_data);
 
@@ -241,22 +240,21 @@ class Error extends Model
 
     public function getZoomMessageFromEvent($data)
     {
-        if (isset($data['evento_id']) AND $data['evento_id'])
+        if (isset($data['meeting_id']) AND $data['meeting_id'])
         {
-            $evento = Eventos::find($data['evento_id']);
+            $meeting = Eventos::find($data['meeting_id']);
 
-            if ($evento)
+            if ($meeting)
             {
-                $cuenta_zoom = $evento->cuenta_zoom;
-                $estado = $cuenta_zoom->estado ? 'activo' : 'inactivo';
+                $account = $meeting->account;
+                $status = $account->active ? 'activo' : 'inactivo';
 
-                return "[ Cuenta ID {$cuenta_zoom->id} => {$cuenta_zoom->correo} con estado {$estado} ]";
+                return "[ Cuenta ID {$account->id} => {$account->email} con estado {$status} ]";
             }
         }
 
         return '';
     }
-
 
     public function sendErrorExceptionNotification($error, $platform_code)
     {
@@ -282,23 +280,6 @@ class Error extends Model
         return true;
     }
 
-    public function getErrorUserDeviceInfo()
-    {
-        return [
-
-            'browser_name' => Browser::browserName(),
-            'browser_family' => Browser::browserFamily(),
-            'browser_version' => Browser::browserVersion(),
-
-            'platform_name' => Browser::platformName(),
-            'platform_family' => Browser::platformFamily(),
-            'platform_version' => Browser::platformVersion(),
-
-            'device_family' => Browser::deviceFamily(),
-            'device_model' => Browser::deviceModel(),
-        ];
-    }
-
     protected function getUserDeviceInfo()
     {
         $browser_family = Taxonomy::getFirstOrCreate('browser', 'browser_family', Browser::browserFamily());
@@ -314,11 +295,11 @@ class Error extends Model
 
             'ip' => request()->ip(),
 
-            // 'browser_name' => Browser::browserName(),
+//            'browser_name' => Browser::browserName(),
             'browser_family_id' => $browser_family->id ?? NULL,
             'browser_version_id' => $browser_version->id ?? NULL,
 
-            // 'platform_name' => Browser::platformName(),
+//            'platform_name' => Browser::platformName(),
             'platform_family_id' => $platform_family->id ?? NULL,
             'platform_version_id' => $platform_version->id ?? NULL,
 
@@ -368,14 +349,15 @@ class Error extends Model
 
     public function errorIsFaviconIco($uri)
     {
-        return $uri == '/favicon.png';
+        return $uri == '/favicon.ico';
     }
 
-    public function errorIsJSMaps($uri, $filename)
+    public function errorIsFileMaps($uri, $filename)
     {
         $uris = [
             '/vendor/popper.js/umd/popper.min.js.map',
-            '/vendor/bootstrap/js/bootstrap.min.js.map'
+            '/vendor/bootstrap/js/bootstrap.min.js.map',
+            '/vendor/bootstrap/css/bootstrap.min.css.map',
         ];
 
         if (in_array($uri, $uris) AND $filename == 'RouteCollection.php')
@@ -386,7 +368,7 @@ class Error extends Model
 
     protected function search($request)
     {
-        $query = self::with('user', 'usuario', 'platform', 'status');
+        $query = self::with('user', 'platform', 'status', 'device_family', 'browser_family', 'platform_family');
 
         if ($request->q)
         {

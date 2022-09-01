@@ -10,7 +10,9 @@ class SummaryCourse extends Summary
     protected $table = 'summary_courses';
 
     protected $fillable = [
-        'last_time_evaluated_at', 'user_id', 'course_id', 'status_id', 'assigned', 'attempts', 'views', 'advanced_percentage', 'grade_average', 'passed', 'taken', 'reviewed', 'failed', 'completed', 'restarts', 'restarter_id', 'certification_issued_at',
+        'last_time_evaluated_at', 'user_id', 'course_id', 'status_id', 'assigned', 'attempts',
+        'views', 'advanced_percentage', 'grade_average', 'passed', 'taken', 'reviewed', 'failed',
+        'completed', 'restarts', 'restarter_id', 'certification_issued_at',
     ];
 
     public function course()
@@ -189,6 +191,12 @@ class SummaryCourse extends Summary
 
         // Porcentaje avance por curso
         $assigned = count($active_topics);
+//        info($course->name);
+//        info("PASSED :: ". $passed);
+//        info("TAKEN :: ". $taken);
+//        info("REVISADOS :: ". $reviewed);
+//        info("ASSIGNED ". $assigned);
+//        info("q_completed ". $q_completed);
         $advanced_percentage = ($assigned > 0) ? (($q_completed / $assigned) * 100) : 0;
         $advanced_percentage = ($advanced_percentage > 100) ? 100 : $advanced_percentage; // Maximo porcentaje = 100
 
@@ -201,17 +209,19 @@ class SummaryCourse extends Summary
         $status = 'desarrollo';
 
         if ($q_completed >= $assigned) {
+//            info("1");
 
             $poll = $course->polls()->first();
 
             if ($poll) {
-
+//                info("2");
+//                info("USER ID :: ". $user->id); info("CURSO ID :: ". $course->id);
                 $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
-
+//                info($poll_answers);
                 $status = 'enc_pend';
 
                 if ($poll_answers) {
-
+//                    info("3");
                     $status = 'aprobado';
                     $course_data['certification_issued_at'] = now();
                 }
@@ -232,6 +242,8 @@ class SummaryCourse extends Summary
         $course_data['attempts'] = $row_course->attempts + 1;
 
         $row_course->update($course_data);
+
+        info($row_course);
 
         return $row_course;
     }

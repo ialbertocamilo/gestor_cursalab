@@ -77,6 +77,12 @@ class RestQuizController extends Controller
 
             $row->update($data_ev);
 
+            $data_ev = $data_ev + [
+                    'correct_answers' => $correct_answers,
+                    'failed_answers' => $failed_answers,
+                    'grade' => round($new_grade, 2),
+                ];
+
             $data_ev['ev_updated']      = 0;
             $data_ev['ev_updated_msg']  = "(0) Evaluación no actualizada (nota obtenida menor que nota existente)";
         }

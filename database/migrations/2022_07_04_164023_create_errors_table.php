@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('file')->nullable();
             $table->string('file_path')->nullable();
               
-            $table->unsignedTinyInteger('line', 6)->nullable();
+            $table->unsignedTinyInteger('line')->nullable();
               
             $table->text('stack_trace')->nullable();
               
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('url')->nullable();
 
             $table->foreignId('status_id')->nullable()->constrained('taxonomies');
-            $table->foreignId('user_id')->nullable()->constrained('user');
+            $table->foreignId('user_id')->nullable()->constrained('users');
 
               // `browser_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
               // `platform_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,

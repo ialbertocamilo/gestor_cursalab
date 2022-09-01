@@ -389,7 +389,9 @@ class Course extends BaseModel
                     'encuesta_habilitada' => $course_status['enabled_poll'],
                     'encuesta_resuelta' => $course_status['solved_poll'],
                     'encuesta_id' => $course_status['poll_id'],
-                    'temas_asignados' => $course_status['assigned_topics'],
+                    'temas_asignados' => $course_status['exists_summary_course'] ?
+                        $course_status['assigned_topics']
+                        : $topics->count(),
                     'temas_completados' => $course_status['completed_topics'],
                     'porcentaje' => $course_status['progress_percentage'],
                     'ultimo_tema_visto' => $last_topic_reviewed
@@ -466,7 +468,7 @@ class Course extends BaseModel
             $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
             if ($summary_course) {
-                $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
+                $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewed;
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
                 if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
