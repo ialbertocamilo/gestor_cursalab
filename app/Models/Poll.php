@@ -119,7 +119,7 @@ class Poll extends BaseModel
             ->where('user_id', $user->id)
             ->count();
 
-        $general_percent = ($summary_user->assigned > 0) ? (($count_approved_courses / $summary_user->assigned) * 100) : 0;
+        $general_percent = ($summary_user->courses_assigned > 0) ? (($count_approved_courses / $summary_user->courses_assigned) * 100) : 0;
         $general_percent = min($general_percent, 100);
         $general_percent = round($general_percent);
 
