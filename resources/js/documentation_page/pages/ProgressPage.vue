@@ -1,80 +1,84 @@
 <template>
     <v-card elevation="0" class="mx-10">
         <v-card-title class="font-weight-bold">
-            Progreso de usuarios
+            Avance de usuarios
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-                Esta API retorna el avance de los usuarios dentro de un rango de fechas.<br>
+                Este proceso retorna el avance de los usuarios en la plataforma,
+                dentro de un rango de fechas.<br />
+                El avance corresponde a todos los cursos COMPLETADOS por los
+                usuarios, dentro del rango de fechas establecido.
             </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
     </v-card>
 </template>
 <script>
-    import descriptionApi from '../components/description_api.vue';
-    let base_url = window.location.origin;
-    export default {
-        components: {descriptionApi},
-        data() {
-            return{
-                 api_description_options:{
-                    title:'Activar usuarios',
-                    type:'POST',
-                    route:'/integrations/progress',
-                    parameters_type:[
-                        {
-                            title:'Parámetros (body)',
-                            parameters:[
-                                {
-                                    name:'start_date',
-                                    type:'Texto (String) - Formato (YYYY-MM-DD)',
-                                    description:'Se indica la fecha inicial a consultar.'
-                                },
-                                {
-                                    name:'end_date',
-                                    type:'Texto (String) - Formato (YYYY-MM-DD)',
-                                    description:'Se indica la fecha final a consultar.'
-                                },
-                                {
-                                    name:'page',
-                                    type:'Número (int)',
-                                    description:'Número de página a consultar.(100 por página)'
-                                }
-                            ],
-                        },
-                        {
-                            title:'Parámetros (header)',
-                            parameters:[
-                                {
-                                    name:'secretKey',
-                                    type:'String',
-                                    description:'Clave secreta asociada a la cuenta del administrador.'
-                                },
-                                {
-                                    name:'Authorization',
-                                    type:'String',
-                                    description:`
+import descriptionApi from "../components/description_api.vue";
+let base_url = window.location.origin;
+export default {
+    components: { descriptionApi },
+    data() {
+        return {
+            api_description_options: {
+                title: "User progress",
+                type: "POST",
+                route: "/integrations/user_progress",
+                parameters_type: [
+                    {
+                        title: "Parámetros (body)",
+                        parameters: [
+                            {
+                                name: "start_date",
+                                type: "Fecha (date) - Formato (YYYY-MM-DD)",
+                                description:
+                                    "Se indica la fecha inicial a consultar."
+                            },
+                            {
+                                name: "end_date",
+                                type: "Fecha (date) - Formato (YYYY-MM-DD)",
+                                description:
+                                    "Se indica la fecha final a consultar."
+                            },
+                            {
+                                name: "page",
+                                type: "Número (int)",
+                                description:
+                                    "Número de página a consultar (500 por página)"
+                            }
+                        ]
+                    },
+                    {
+                        title: "Parámetros (header)",
+                        parameters: [
+                            {
+                                name: "secretKey",
+                                type: "String",
+                                description:
+                                    "Clave secreta asociada a la cuenta del administrador."
+                            },
+                            {
+                                name: "Authorization",
+                                type: "String",
+                                description: `
                                         Token asociado a la cuenta del administrador concatenado con el tipo de token.<br>Ejemplo:<br>
     <pre class='language-js line-numbers'>
         <code>
             token:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
         </code>
     </pre>`
-                                }
-                            ]
-                        }
-                    ],
-                    example_code:{
-                        title:'Ejemplo',
-                        tabs:[
-                            'Request', 'Response (200)'
-                        ],
-                        content_tabs:[
-                            {
-    type:'language-js',
-    code:
-    `   
+                            }
+                        ]
+                    }
+                ],
+                example_code: {
+                    title: "Ejemplo",
+                    tabs: ["Request", "Response (200)"],
+                    content_tabs: [
+                        {
+                            type: "language-js",
+                            code: `   
         const base_url = '${base_url}';
         const axios = require('axios');
         const data = JSON.stringify(
@@ -101,34 +105,51 @@
             console.log(error);
         });
     `
-    },
-    {
-    type:'language-js',
-    code:
-    `
-    "data":[{
-        "Workspace":"Espacio de trabajo (Farmacias Peruanas, Real Plaza, Química Suiza, etc)",
-        "Módulo":"Módulo al que pertecene el usuario.",
-        "Identificador":"Valor único que identifica al usuario",
-        "Apellidos y Nombres":"Nombre completo del usuario",
-        "Genero":"Género del usuario",
-        "Estado (Usuario)":"Los valores a tomar son Activo o Inactivo",
-        "code_escuela":"Identificador de la escuela",
-        "Escuela":"Escuela a la que pertenece el curso",
-        "Modalidad":"Modalidad del curso (regular,extracurricular o libre)",
-        "code_curso":"Identificador del curso",
-        "Curso":"Nombre del Curso",
-        "Nota promedio":"Nota promedio que el usuario tiene en el curso",
-        "Temas asignados":"Cantidad de temas asignados al usuario",
-        "Temas completados":"Cantidad de temas completados por el usuario",
-        "Porcentaje":"Porcentaje de avance del usuario en el curso",
-        "Resultado":"El resultado del usuario en el curso(pendiente,encuesta pendiente,aprobado,desaprobado)",
-    }]`
-    }
-                    ],
-                    }
+                        },
+                        {
+                            type: "language-js",
+                            code: `
+    "data":[
+        {
+            "workspace" : "Espacio de trabajo (Farmacias Peruanas, Real Plaza, Química Suiza, etc)",
+            "module" : "Módulo (empresa) al que pertecene el usuario (Mifarma, Inkafarma, etc.)",
+            "user_name" : "Valor único que identifica al usuario",
+            "name" : "Nombre completo del usuario",
+            "total_assigned" : "Cantidad total de cursos asignados",
+            "total_completed" : "Cantidad total de cursos completados",
+            "total_percentage" : "Porcentaje total de avance en la plataforma",
+            "completed_courses":[
+                {
+                    "school_code" : "Identificador de la Escuela",
+                    "school" : "Escuela a la que pertenece el curso",
+                    "course_code" : "Identificador del curso",
+                    "course" : "Nombre del Curso",
+                    "modality" : "Modalidad del curso (regular, extracurricular o libre)",
+                    "score" : "Nota promedio que el usuario tiene en el curso",
+                    "percentage" : "Porcentaje de avance del usuario en el curso",
+                    "result" : "El resultado del usuario en el curso (aprobado, desaprobado)",
+                    "date" : "Fecha de curso completado",
                 },
-            }
+                {
+                    "school_code" : "Identificador de la Escuela",
+                    "school" : "Escuela a la que pertenece el curso",
+                    "course_code" : "Identificador del curso",
+                    "course" : "Nombre del Curso",
+                    "modality" : "Modalidad del curso (regular, extracurricular o libre)",
+                    "score" : "Nota promedio que el usuario tiene en el curso",
+                    "percentage" : "Porcentaje de avance del usuario en el curso",
+                    "result" : "El resultado del usuario en el curso (aprobado, desaprobado)",
+                    "date" : "Fecha de curso completado",
+                },
+            ]
+            
         }
+    ]`
+                        }
+                    ]
+                }
+            }
+        };
     }
-    </script>
+};
+</script>
