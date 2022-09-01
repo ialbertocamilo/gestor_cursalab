@@ -18,6 +18,7 @@ const default_media_images = {
     pdf: "images/default-pdf-img_210.png",
     excel: "images/default-scorm-img_116_360.png",
     scorm: "images/default-scorm-img_116_360.png",
+    link: "images/default-scorm-img_116_360.png",
 }
 
 export default {
@@ -31,6 +32,7 @@ export default {
                 {label: 'Audio', icon: 'mdi mdi-headset', type: 'audio'},
                 {label: 'PDF', icon: 'mdi mdi-file-pdf-box', type: 'pdf'},
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
+                {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'}
             ],
             mixin_extensiones: extensiones,
             mixin_default_media_images: default_media_images

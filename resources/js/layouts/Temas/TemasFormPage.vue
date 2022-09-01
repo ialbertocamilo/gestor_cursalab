@@ -152,7 +152,9 @@
                                         <td>{{ media.value || media.file.name }}</td>
                                         <td>
                                             <div class="d-flex justify-content-center">
-                                                <DefaultToggle v-model="media.embed" no-label :disabled="media.disabled"
+                                                <DefaultToggle v-model="media.embed"
+                                                               no-label
+                                                               :disabled="media.disabled"
                                                                @onChange="verifyDisabledMediaEmbed"/>
                                             </div>
                                         </td>
@@ -161,7 +163,7 @@
                                                 <DefaultToggle
                                                     v-model="media.downloadable"
                                                     no-label
-                                                    :disabled="['youtube', 'vimeo', 'scorm'].includes(media.type_id)"
+                                                    :disabled="['youtube', 'vimeo', 'scorm', 'link'].includes(media.type_id)"
                                                 />
                                             </div>
                                         </td>
