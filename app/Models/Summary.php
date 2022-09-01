@@ -28,7 +28,7 @@ class Summary extends BaseModel
         if ($row) {
 
             if ( $model instanceof Topic ) {
-                
+
                 $config_quiz = $user->subworspace->mod_evaluaciones;
 
                 if ($row->attempts >= $config_quiz['nro_intentos'])
@@ -39,7 +39,7 @@ class Summary extends BaseModel
 
             if ($setEvaluatedAt)
                 $data['last_time_evaluated_at'] = now();
-            
+
             return $row->update($data);
         }
 
@@ -53,6 +53,7 @@ class Summary extends BaseModel
         $row = $this->getCurrentRow($model);
 
         if ($row) return $row->update(['views' => $row->views + 1]);
+
 
         return $this->storeData($model, $user);
     }
@@ -68,7 +69,7 @@ class Summary extends BaseModel
 
         if ($model instanceof Course)
             $query->where('course_id', $model->id);
-        
+
         return $query->first();
     }
 
@@ -105,7 +106,7 @@ class Summary extends BaseModel
             $data['status_id'] = $status->id;
             $data['assigned'] = $assigneds;
         }
-        
+
         if ($model instanceof User) {
 
             $assigneds = $model->getCurrentCourses()->count();

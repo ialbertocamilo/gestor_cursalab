@@ -78,14 +78,14 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::prefix('ayudas')->middleware('checkrol:admin')->group(base_path('routes/cms/ayudas.php'));
-    Route::prefix('preguntas-frecuentes')->middleware('checkrol:admin')->group(base_path('routes/cms/preguntas_frecuentes.php'));
+    Route::prefix('preguntas-frecuentes')->middleware('checkrol:config')->group(base_path('routes/cms/preguntas_frecuentes.php'));
     Route::prefix('notificaciones_push')->middleware('checkrol:admin')->group(base_path('routes/cms/notificaciones_push.php'));
     Route::prefix('soporte')->middleware('checkrol:admin')->group(base_path('routes/cms/soporte.php'));
 
 
-    Route::prefix('users')->middleware('checkrol:trainer,admin')->group(base_path('routes/cms/users.php'));
+    Route::prefix('users')->middleware('checkrol:config')->group(base_path('routes/cms/users.php'));
     Route::prefix('permisos')->middleware('checkrol:admin')->group(base_path('routes/cms/permisos.php'));
-    Route::prefix('roles')->middleware('checkrol:admin')->group(base_path('routes/cms/roles.php'));
+    Route::prefix('roles')->middleware('checkrol:config')->group(base_path('routes/cms/roles.php'));
 
 
     Route::prefix('errores')->middleware('checkrol:admin')->group(base_path('routes/cms/errores.php'));
@@ -96,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('usuarios')->middleware('checkrol:admin')->group(base_path('routes/cms/usuarios.php'));
     Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
     Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
-    Route::prefix('criterios')->middleware('checkrol:admin')->group(base_path('routes/cms/criteria.php'));
+    Route::prefix('criterios')->middleware('checkrol:config')->group(base_path('routes/cms/criteria.php'));
     Route::prefix('supervisores')->middleware('checkrol:admin')->group(base_path('routes/cms/supervisores.php'));
 
 

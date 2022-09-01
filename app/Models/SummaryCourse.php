@@ -10,7 +10,9 @@ class SummaryCourse extends Summary
     protected $table = 'summary_courses';
 
     protected $fillable = [
-        'last_time_evaluated_at', 'user_id', 'course_id', 'status_id', 'assigned', 'attempts', 'views'
+        'last_time_evaluated_at', 'user_id', 'course_id', 'status_id', 'assigned', 'attempts',
+        'views', 'advanced_percentage', 'grade_average', 'passed', 'taken', 'reviewed', 'failed',
+        'completed', 'restarts', 'restarter_id', 'certification_issued_at',
     ];
 
     public function course()
@@ -50,18 +52,18 @@ class SummaryCourse extends Summary
     ): void
     {
 
-       $query = self::where('course_id', $courseId)
-                    ->where('passed', 0)
-                    ->where('attempts', '>=', $attemptsLimit);
+        $query = self::where('course_id', $courseId)
+            ->where('passed', 0)
+            ->where('attempts', '>=', $attemptsLimit);
 
-       if ($scheduleDate)
-           $query->where('last_time_evaluated_at', '<=', $scheduleDate);
+        if ($scheduleDate)
+            $query->where('last_time_evaluated_at', '<=', $scheduleDate);
 
         $query->update([
-                'attempts' => 0,
-                'last_time_evaluated_at' => Carbon::now()
-                //'fuente' => 'resetm'
-            ]);
+            'attempts' => 0,
+            'last_time_evaluated_at' => Carbon::now()
+            //'fuente' => 'resetm'
+        ]);
     }
 
     /**
@@ -140,7 +142,7 @@ class SummaryCourse extends Summary
 
         // Update record
 
-        $summaryCourse->restarts =  $restars;
+        $summaryCourse->restarts = $restars;
         $summaryCourse->restarter_id = $adminId;
         $summaryCourse->save();
     }
@@ -162,33 +164,39 @@ class SummaryCourse extends Summary
         $max_attempts = $user->getSubworkspaceSetting('mod_evaluaciones', 'nro_intentos');
 
         $rows = SummaryTopic::with('status')
-                    ->whereIn('topic_id', $active_topics->pluck('id'))
-                    ->where('user_id', $user->id)
-                    ->get();
+            ->whereIn('topic_id', $active_topics->pluck('id'))
+            ->where('user_id', $user->id)
+            ->get();
 
         if (count($topics_qualified) > 0) {
-            
+
             $passed = $rows->where('passed', 1)
-                            ->whereIn('topic_id', $topics_qualified)
-                            ->count();
+                ->whereIn('topic_id', $topics_qualified)
+                ->count();
 
             $failed = $rows->where('passed', '<>', 1)
-                            ->whereIn('topic_id', $topics_qualified)
-                            ->where('attempts', '>=', $max_attempts)
-                            ->count();
+                ->whereIn('topic_id', $topics_qualified)
+                ->where('attempts', '>=', $max_attempts)
+                ->count();
         }
 
         if (count($topics_open) > 0)
             $taken = $rows->whereIn('topic_id', $topics_open)->count();
 
-        if(count($topics_for_review) > 0)
+        if (count($topics_for_review) > 0)
             $reviewed = $rows->whereIn('topic_id', $topics_for_review)->count();
-            // ->where('visitas.estado_tema', "revisado")
+        // ->where('visitas.estado_tema', "revisado")
 
         $q_completed = $passed + $taken + $reviewed;
 
         // Porcentaje avance por curso
         $assigned = count($active_topics);
+//        info($course->name);
+//        info("PASSED :: ". $passed);
+//        info("TAKEN :: ". $taken);
+//        info("REVISADOS :: ". $reviewed);
+//        info("ASSIGNED ". $assigned);
+//        info("q_completed ". $q_completed);
         $advanced_percentage = ($assigned > 0) ? (($q_completed / $assigned) * 100) : 0;
         $advanced_percentage = ($advanced_percentage > 100) ? 100 : $advanced_percentage; // Maximo porcentaje = 100
 
@@ -207,7 +215,7 @@ class SummaryCourse extends Summary
             if ($poll) {
 
                 $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
-                
+
                 $status = 'enc_pend';
 
                 if ($poll_answers) {

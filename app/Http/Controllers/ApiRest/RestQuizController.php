@@ -29,7 +29,7 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::getCurrentRow($topic);
 
-        if ($row->hasNoAttemptsLeft())  
+        if ($row->hasNoAttemptsLeft())
             return response()->json(['error' => true, 'msg' => 'Sin intentos restantes.'], 200);
 
         if (!$row)
@@ -52,7 +52,7 @@ class RestQuizController extends Controller
 
         if ($row->hasImprovedGrade($new_grade)) {
 
-            $data_ev = $data_ev + [  
+            $data_ev = $data_ev + [
                 'correct_answers' => $correct_answers,
                 'failed_answers' => $failed_answers,
                 'passed' => $passed,
@@ -76,7 +76,13 @@ class RestQuizController extends Controller
         } else {
 
             $row->update($data_ev);
-            
+
+            $data_ev = $data_ev + [
+                    'correct_answers' => $correct_answers,
+                    'failed_answers' => $failed_answers,
+                    'grade' => round($new_grade, 2),
+                ];
+
             $data_ev['ev_updated']      = 0;
             $data_ev['ev_updated_msg']  = "(0) Evaluación no actualizada (nota obtenida menor que nota existente)";
         }
@@ -108,7 +114,7 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::setStartQuizData($topic);
 
-        if ($row->hasNoAttemptsLeft())  
+        if ($row->hasNoAttemptsLeft())
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
         if ($row->isOutOfTimeForQuiz())
@@ -125,7 +131,7 @@ class RestQuizController extends Controller
         if ( count($questions) == 0 )
             return response()->json(['error' => true, 'data' => null], 200);
 
-        $data = [   
+        $data = [
             'nombre' => $topic->name,
             'posteo_id' => $topic->id,
             'curso_id' => $topic->course_id,
@@ -141,7 +147,7 @@ class RestQuizController extends Controller
         // SummaryTopic::setUserLastTimeEvaluation($topic);
         // SummaryCourse::setUserLastTimeEvaluation($topic->course);
         // SummaryUser::setUserLastTimeEvaluation();
-        
+
         return response()->json(['error' => false, 'data' => $data], 200);
     }
 
@@ -166,7 +172,7 @@ class RestQuizController extends Controller
         $topic->load('course.topics');
 
         $row = SummaryTopic::incrementViews($topic);
-        
+
         if (!$row) return ['error' => 1, 'data' => null];
 
         SummaryCourse::incrementViews($topic->course);
@@ -197,7 +203,7 @@ class RestQuizController extends Controller
                 $times[] = auth()->user()->subworkspace->reinicios_programado;
 
             if (count($times) > 0) {
-                
+
                 $scheduled = false;
                 $minutes = 0;
 
@@ -252,7 +258,7 @@ class RestQuizController extends Controller
         if ($row->answers) return ['error' => 3, 'msg' => 'Respuestas ya registradas'];
 
         $status_taken = Taxonomy::getFirstData('topic', 'user-status', 'realizado');
-        
+
         // $answers = json_encode($answers, JSON_UNESCAPED_UNICODE);
         $row->update(['answers' => $answers, 'status_id' => $status->id]);
 
