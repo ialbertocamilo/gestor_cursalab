@@ -209,16 +209,20 @@ class SummaryCourse extends Summary
         $status = 'desarrollo';
 
         if ($q_completed >= $assigned) {
+            info("1");
 
             $poll = $course->polls()->first();
 
             if ($poll) {
+                info("2");
 
                 $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
 
                 $status = 'enc_pend';
 
                 if ($poll_answers) {
+                    info("3");
+
 
                     $status = 'aprobado';
                     $course_data['certification_issued_at'] = now();
@@ -240,6 +244,8 @@ class SummaryCourse extends Summary
         $course_data['attempts'] = $row_course->attempts + 1;
 
         $row_course->update($course_data);
+
+        info($row_course);
 
         return $row_course;
     }
