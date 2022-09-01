@@ -67,7 +67,7 @@ class RestRankController extends Controller
         $temp = [];
         foreach ($ranking as $rank) {
             $temp[] = [
-                'usuario_id' => $user->id,
+                'usuario_id' => $rank->user_id,
                 'nombre' => $rank->user->fullname,
                 'rank' => $rank->score,
                 'last_ev' => $rank->last_time_evaluated_at
