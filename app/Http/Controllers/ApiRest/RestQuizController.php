@@ -260,7 +260,7 @@ class RestQuizController extends Controller
         $status_taken = Taxonomy::getFirstData('topic', 'user-status', 'realizado');
 
         // $answers = json_encode($answers, JSON_UNESCAPED_UNICODE);
-        $row->update(['answers' => $answers, 'status_id' => $status->id]);
+        $row->update(['answers' => $answers, 'status_id' => $status_taken->id]);
 
         SummaryCourse::updateUserData($topic->course);
         SummaryUser::updateUserData();
