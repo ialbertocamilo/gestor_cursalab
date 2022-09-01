@@ -70,19 +70,26 @@ class School extends BaseModel
                 $workspace->schools()->attach($school);
             endif;
 
+            // Generate code when is not defined
+
+            if (!$school->code) {
+                $school->code = 'S' . str_pad($school->id, 2, '0', STR_PAD_LEFT);
+                $school->save();
+            }
+
             DB::commit();
 
         } catch (\Exception $e) {
-            
+
             DB::rollBack();
 
             info($e);
-            
+
             return $e;
         }
 
         cache_clear_model(Course::class);
-        
+
         return $school;
     }
 }
