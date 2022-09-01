@@ -215,9 +215,9 @@ class SummaryCourse extends Summary
 
             if ($poll) {
                 info("2");
-
+                info("USER ID :: ". $user->id); info("CURSO ID :: ". $course->id);
                 $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
-
+                info($poll_answers);
                 $status = 'enc_pend';
 
                 if ($poll_answers) {
