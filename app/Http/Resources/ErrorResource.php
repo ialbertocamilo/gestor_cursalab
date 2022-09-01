@@ -27,10 +27,10 @@ class ErrorResource extends JsonResource
             ],
             'status' => [
                 'color' => config('errors.status-colors')[$this->status->code ?? ''],
-                'text' => $this->status->nombre ?? 'No definido',
+                'text' => $this->status->name ?? 'No definido',
             ],
-            'platform' => $this->platform->nombre ?? 'No definido',
-            'user' => $this->user->name ?? $this->usuario->dni ?? 'Anónimo',
+            'platform' => $this->platform->name ?? 'No definido',
+            'user' => $this->user->name ?? 'Anónimo',
             // 'image' => space_url($this->imagen),
             // 'active' => $this->estado ? true : false,
 

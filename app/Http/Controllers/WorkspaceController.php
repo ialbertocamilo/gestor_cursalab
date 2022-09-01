@@ -31,7 +31,6 @@ class WorkspaceController extends Controller
      */
     public function list(): View|Factory|Application
     {
-
         return view(
             'workspaces.list',
             []
