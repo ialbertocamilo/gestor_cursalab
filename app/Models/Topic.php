@@ -159,6 +159,14 @@ class Topic extends BaseModel
             //////
 
             $tema->save();
+
+            // Generate code when is not defined
+
+            if (!$tema->code) {
+                $tema->code = 'T' . str_pad($tema->id, 2, '0', STR_PAD_LEFT);
+                $tema->save();
+            }
+
             DB::commit();
             return $tema;
         } catch (\Exception $e) {

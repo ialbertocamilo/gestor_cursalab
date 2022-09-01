@@ -155,6 +155,13 @@ class Course extends BaseModel
 
             $course->schools()->sync($data['escuelas']);
 
+            // Generate code when is not defined
+
+            if (!$course->code) {
+                $course->code = 'C' . str_pad($course->id, 2, '0', STR_PAD_LEFT);
+                $course->save();
+            }
+
             // $course->save();
 
             DB::commit();
