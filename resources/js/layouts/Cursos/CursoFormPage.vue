@@ -292,7 +292,8 @@ export default {
             vue.loadingActionBtn = true
             vue.showLoader()
             const validForm = vue.validateForm('CursoForm')
-            if (!validForm) {
+
+            if (!validForm || !vue.isValid()) {
                 this.hideLoader()
                 vue.loadingActionBtn = false
                 return
@@ -365,6 +366,26 @@ export default {
                 })
             return 0;
         },
+        isValid() {
+
+            let valid = true;
+            let errors = [];
+
+            // Validation: At least one school should be selected
+
+            if (this.resource.lista_escuelas.length === 0) {
+                errors.push({
+                    message: 'Debe seleccionar una escuela'
+                })
+                valid = false;
+            }
+
+            if (!valid) {
+                this.errors = errors;
+            }
+
+            return valid;
+        }
     }
 }
 </script>
