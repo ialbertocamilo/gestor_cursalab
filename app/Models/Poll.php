@@ -106,7 +106,7 @@ class Poll extends BaseModel
     protected function updateSummariesAfterCompletingPoll($course, $user)
     {
 //        $summary_user = $user->summary;
-        $summary_user = Summary::getCurrentRow($course, $user);
+        $summary_user = Summary::getCurrentRow($user, $user->id);
         info("updateSummariesAfterCompletingPoll");
         info($summary_user);
 
