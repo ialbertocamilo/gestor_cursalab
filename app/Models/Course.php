@@ -466,7 +466,7 @@ class Course extends BaseModel
             $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
             if ($summary_course) {
-                $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
+                $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewed;
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
                 if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
