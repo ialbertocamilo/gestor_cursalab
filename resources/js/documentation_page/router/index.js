@@ -9,48 +9,54 @@ import ValoresPage from  '../pages/ValoresPage.vue';
 import UserPage from  '../pages/UserPage.vue';
 import InactivatePage from  '../pages/InactivatePage.vue';
 import ActivatePage from  '../pages/ActivatePage.vue';
+import ProgressPage from  '../pages/ProgressPage.vue';
 
 Vue.use(VueRouter);
 const routes = [
 	{
-        path: "/documentacion-api",
+        path: "/documentation-api",
 		name: "index",
 		component:SecretKeyPage,
     },
     {
-        path: "/documentacion-api/secret-key",
+        path: "/documentation-api/secret-key",
 		name: "secret_key",
 		component:SecretKeyPage,
     },
 	{
-        path: "/documentacion-api/token",
+        path: "/documentation-api/token",
 		name: "TokenPage",
 		component:TokenPage,
     },
 	{
-        path: "/documentacion-api/criterions",
+        path: "/documentation-api/criterions",
 		name: "CriteriosPage",
 		component:CriteriosPage,
     },
 	{
-        path: "/documentacion-api/criterion-values",
+        path: "/documentation-api/criterion-values",
 		name: "ValoresPage",
 		component:ValoresPage,
     },
 	{
-        path: "/documentacion-api/update-create-users",
+        path: "/documentation-api/update-create-users",
 		name: "UserPage",
 		component:UserPage,
     },
 	{
-        path: "/documentacion-api/inactivate-users",
+        path: "/documentation-api/inactivate-users",
 		name: "inactivar_usuarios",
 		component:InactivatePage,
     },
 	{
-        path: "/documentacion-api/activate-users",
+        path: "/documentation-api/activate-users",
 		name: "inactivar_usuarios",
 		component:ActivatePage,
+    },
+	{
+        path: "/documentation-api/progress",
+		name: "inactivar_usuarios",
+		component:ProgressPage,
     }
 	
 ]

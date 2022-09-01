@@ -354,7 +354,7 @@ class Course extends BaseModel
                         $last_item = ($topic->id == $topics->last()->id);
                         if ($topics_view?->views) {
                             $passed_tests = $summary_topics->where('posteo_id', $topic->id)->where('passed', 1)->first();
-                            if ($topic->evaluation_type->code == 'calificada' && $passed_tests && !$last_item) continue;
+                            if ($topic->evaluation_type?->code == 'calificada' && $passed_tests && !$last_item) continue;
                             $last_topic = ($topic->id);
                             break;
                         }
@@ -376,7 +376,6 @@ class Course extends BaseModel
                         'ultimo_tema_visto' => $last_topic_reviewed,
                     ];
                 }
-
 
                 $school_courses[] = [
                     'id' => $course->id,
@@ -469,9 +468,7 @@ class Course extends BaseModel
 
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewved;
-                $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
-
                 if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
                 elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :

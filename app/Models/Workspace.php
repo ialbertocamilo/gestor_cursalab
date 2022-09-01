@@ -283,9 +283,9 @@ class Workspace extends BaseModel
 
         $query->whereNotNull('parent_id');
 
-        info('workspace');
+        // info('workspace');
 
-        info(session('workspace'));
+        // info(session('workspace'));
 
         if (session('workspace') || $request->workspace_id)
             $query->where('parent_id', $request->workspace_id ?? session('workspace')->id);
@@ -298,7 +298,7 @@ class Workspace extends BaseModel
 
     protected static function storeSubWorkspaceRequest($data, $subworkspace = null)
     {
-        info(session('workspace'));
+        // info(session('workspace'));
 
         try {
 

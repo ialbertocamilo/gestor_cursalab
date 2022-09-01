@@ -8,6 +8,7 @@ use App\Http\Requests\Curso\MoverCursoRequest;
 use App\Http\Requests\CursoStoreRequest;
 
 use App\Http\Resources\Curso\CursoSearchResource;
+use App\Models\Taxonomy;
 use DB;
 
 // use App\Perfil;
@@ -61,6 +62,8 @@ class CursosController extends Controller
 
         $requisitos = collect();
 
+        $types = Taxonomy::getSelectData('course', 'type');
+
         foreach ($req_cursos as $req) {
             $requisitos->push((object)[
                 'id' => $req->id,
@@ -69,7 +72,7 @@ class CursosController extends Controller
             ]);
         }
 
-        $response = compact('escuelas', 'requisitos');
+        $response = compact('escuelas', 'requisitos', 'types');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -105,6 +108,7 @@ class CursosController extends Controller
             'curso' => $course,
             'requisitos' => $form_selects['requisitos'],
             'escuelas' => $form_selects['escuelas'],
+            'types' => $form_selects['types'],
         ]);
     }
 

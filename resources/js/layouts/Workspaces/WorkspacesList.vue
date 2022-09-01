@@ -19,9 +19,9 @@
                         {{ userSession.user.fullname }}
                     </button>
 
-                    <a @click="logout()">
+                  <!--   <a @click="logout()">
                         <v-icon class="stats-icon">mdi-logout</v-icon>
-                    </a>
+                    </a> -->
 
 
                 </div>

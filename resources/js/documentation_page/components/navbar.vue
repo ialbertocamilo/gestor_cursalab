@@ -63,51 +63,56 @@ export default {
               {
                   icon:'mdi-security',
                   title:'Authorization',
-                  link:'/documentacion-api/secret-key',
+                  link:'/documentation-api/secret-key',
                   isGroup :true,
                   subItems:[
                         {
                             icon:'mdi-key',
                             title:'Clave secreta',
-                            link:'/documentacion-api/secret-key',
+                            link:'/documentation-api/secret-key',
                         },
                         {
                             icon:'mdi-fingerprint',
                             title:'Token',
-                            link:'/documentacion-api/token',
+                            link:'/documentation-api/token',
                         },
                   ]
               },
               {
                   icon:'mdi-cloud-sync',
                   title:"Lista de API's",
-                  link:'/documentacion-api/list-apis',
+                  link:'/documentation-api/list-apis',
                   isGroup :true,
                   subItems:[
                         {
                             icon:'mdi-format-list-bulleted',
                             title:'Criterios',
-                            link:'/documentacion-api/criterions',
+                            link:'/documentation-api/criterions',
                         },
                         {
                             icon:'mdi-playlist-plus',
                             title:'Valores por criterio',
-                            link:'/documentacion-api/criterion-values',
+                            link:'/documentation-api/criterion-values',
                         },
                         {
                             icon:'mdi-account-convert',
                             title:'Alta de usuarios',
-                            link:'/documentacion-api/update-create-users',
+                            link:'/documentation-api/update-create-users',
                         },
                         {
                             icon:'mdi-account-check',
                             title:'Activar usuarios',
-                            link:'/documentacion-api/activate-users',
+                            link:'/documentation-api/activate-users',
                         },
                         {
                             icon:'mdi-account-off',
                             title:'Inactivar usuarios',
-                            link:'/documentacion-api/inactivate-users',
+                            link:'/documentation-api/inactivate-users',
+                        },
+                        {
+                            icon:'mdi-chart-areaspline',
+                            title:'Avance de usuarios',
+                            link:'/documentation-api/progress',
                         }
                   ]
               }

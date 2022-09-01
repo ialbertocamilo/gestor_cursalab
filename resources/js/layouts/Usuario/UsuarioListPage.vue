@@ -139,7 +139,7 @@ export default {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
                 headers: [
-                    {text: "Nombres y Apellidos", value: "nombre"},
+                    {text: "Nombres y Apellidos", value: "name"},
                     {text: "Documento", value: "document", align: 'left', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
