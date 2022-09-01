@@ -10,4 +10,9 @@ Route::controller(RestCourseController::class)->group(function() {
 
     Route::post('/guardar_encuesta_curso_id', 'savePollAnswers');
 
+    Route::get('/diplomas', 'getCertificates');
+
+    Route::get('/diplomas', 'getCertificates');
+
+
 });
