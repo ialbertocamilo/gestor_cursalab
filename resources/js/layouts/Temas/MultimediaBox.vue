@@ -55,6 +55,9 @@ export default {
             if (['youtube', 'vimeo'].includes(type)) {
                 vue.modalMultimediaTextOptions.title = vue.data.label
                 vue.modalMultimediaTextOptions.open = true
+            } else if (type === 'link') {
+                vue.modalMultimediaTextOptions.title = vue.data.label
+                vue.modalMultimediaTextOptions.open = true
             } else {
                 vue.modalMultimediaMixOptions.title = vue.data.label
                 vue.modalMultimediaMixOptions.open = true

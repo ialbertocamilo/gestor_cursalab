@@ -78,7 +78,9 @@ class Topic extends BaseModel
 
     protected static function search($request, $paginate = 15)
     {
-        $q = self::withCount(['questions'])->where('course_id', $request->course_id);
+        $q = self::with('evaluation_type:id,code,name', 'questions.type')
+//            ->withCount('questions')
+            ->where('course_id', $request->course_id);
         // $q = self::withCount('preguntas')
         //     ->where('categoria_id', $request->categoria_id)
         //     ->where('course_id', $request->course_id);
@@ -99,9 +101,8 @@ class Topic extends BaseModel
         $question_type_code = $topic->evaluation_type->code === 'qualified'
                                 ? 'select-options'
                                 : 'written-answer';
-        $typeId = Taxonomy::getFirstData('question', 'type', $question_type_code)?->id;
-
-        $q = Question::where('type_id', $typeId)
+        info($question_type_code);
+        $q = Question::whereRelation('type', 'code', $question_type_code)
                       ->where('topic_id', $topic->id);
 
         if ($request->q)
