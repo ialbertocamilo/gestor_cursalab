@@ -10,7 +10,7 @@ class SummaryTopic extends Summary
 
     protected $fillable = [
         'user_id', 'topic_id', 'status_id', 'views', 'attempts', 'downloads', 'answers', 'restarts',
-        'current_quiz_started_at', 'current_quiz_finishes_at', 'taking_quiz', 'grade',
+        'current_quiz_started_at', 'current_quiz_finishes_at', 'taking_quiz', 'grade', 'passed',
         'last_time_evaluated_at',
     ];
 
