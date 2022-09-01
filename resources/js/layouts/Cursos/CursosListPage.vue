@@ -145,7 +145,7 @@ export default {
                 ref: 'cursosTable',
                 headers: [
                     {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombres", value: "custom_curso_nombre", sortable: false},
+                    {text: "Nombre", value: "custom_curso_nombre", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -182,13 +182,21 @@ export default {
                         type: 'route',
                         route: 'edit_route'
                     },
+                    // {
+                    //     text: "Eliminar",
+                    //     icon: 'far fa-trash-alt',
+                    //     type: 'action',
+                    //     method_name: 'delete'
+                    // },
+                ],
+                more_actions: [
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
                         type: 'action',
                         method_name: 'delete'
                     },
-                ],
+                ]
             },
             selects: {
                 modules: []

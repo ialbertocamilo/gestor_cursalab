@@ -29,7 +29,8 @@ class RoleController extends Controller
         } else {
             $roles = Role::paginate();
         }
-        return view('roles.index', compact('roles'));
+        $super_user = auth()->user()->isAn('super-user');
+        return view('roles.index', compact('roles', 'super_user'));
     }
 
     public function create()
