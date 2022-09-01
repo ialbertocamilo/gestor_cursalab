@@ -433,7 +433,7 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
-        $requirement_course = $course->models->first();
+        $requirement_course = $course->requirements->first();
 //        info("requirement_course");
 //        info($requirement_course);
         if ($requirement_course) {
@@ -501,7 +501,7 @@ class Course extends BaseModel
 
     protected function getCourseProgressByUser($user, Course $course)
     {
-        $course_requirement = $course->models->first();
+        $course_requirement = $course->requirements->first();
         if ($course_requirement) {
             $requirement_summary = SummaryCourse::with('status:id,code')
                 ->where('course_id', $course_requirement->id)
