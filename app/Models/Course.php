@@ -454,10 +454,12 @@ class Course extends BaseModel
         if ($available_course) {
             $poll = $course->polls->first();
             if ($poll) {
+                info($poll);
                 $poll_id = $poll->id;
                 $available_poll = true;
 
                 $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
+                    ->where('course_id', $course->id)
                     ->where('user_id', $user->id)->first();
 
                 if ($poll_questions_answers) $solved_poll = true;
