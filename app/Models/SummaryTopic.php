@@ -10,7 +10,7 @@ class SummaryTopic extends Summary
 
     protected $fillable = [
         'user_id', 'topic_id', 'status_id', 'views', 'attempts', 'downloads', 'answers', 'restarts',
-        'current_quiz_started_at', 'current_quiz_finishes_at', 'taking_quiz',
+        'current_quiz_started_at', 'current_quiz_finishes_at', 'taking_quiz', 'grade',
         'last_time_evaluated_at',
     ];
 
@@ -60,7 +60,7 @@ class SummaryTopic extends Summary
     public function isOutOfTimeForQuiz()
     {
         if (!$this->current_quiz_finishes_at) return false;
-        
+
         return now() >= $this->current_quiz_finishes_at;
     }
 
