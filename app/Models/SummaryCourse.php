@@ -209,21 +209,19 @@ class SummaryCourse extends Summary
         $status = 'desarrollo';
 
         if ($q_completed >= $assigned) {
-            info("1");
+//            info("1");
 
             $poll = $course->polls()->first();
 
             if ($poll) {
-                info("2");
-                info("USER ID :: ". $user->id); info("CURSO ID :: ". $course->id);
+//                info("2");
+//                info("USER ID :: ". $user->id); info("CURSO ID :: ". $course->id);
                 $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
-                info($poll_answers);
+//                info($poll_answers);
                 $status = 'enc_pend';
 
                 if ($poll_answers) {
-                    info("3");
-
-
+//                    info("3");
                     $status = 'aprobado';
                     $course_data['certification_issued_at'] = now();
                 }

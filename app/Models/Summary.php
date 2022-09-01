@@ -83,6 +83,7 @@ class Summary extends BaseModel
             'user_id' => $user->id,
             'attempts' => 0,
             'views' => 1,
+            'advanced_percentage' => 1,
             // 'last_time_evaluated_at' => now(),
             // 'fuente' => $fuente
             // 'libre' => $curso->libre,
