@@ -9,12 +9,19 @@ class PosteoSearchResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
      */
     public function toArray($request)
     {
         $topic = $this;
+
+        $questions_count = $topic->assessable ?
+            ($topic->evaluation_type->code === 'qualified' ?
+                $topic->questions->where('type.code', 'select-options')->count()
+                : $topic->questions->where('type.code', 'written-answer')->count()
+            )
+            : null;
 
         return [
             'id' => $topic->id,
@@ -25,7 +32,8 @@ class PosteoSearchResource extends JsonResource
             'orden' => $topic->position,
             'assessable' => $topic->assessable ? 'Sí' : 'No',
             'es_evaluable' => $topic->assessable,
-            'preguntas_count' => $topic->questions_count,
+//            'preguntas_count' => $topic->questions_count,
+            'preguntas_count' => $questions_count,
 
             'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $topic->id]),
             'evaluacion_route' => route('temas.preguntas_list', [$request->school_id, $request->course_id, $topic->id]),
