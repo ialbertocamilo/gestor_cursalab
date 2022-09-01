@@ -105,7 +105,10 @@ class Poll extends BaseModel
 
     protected function updateSummariesAfterCompletingPoll($course, $user)
     {
-        $summary_user = $user->summary;
+//        $summary_user = $user->summary;
+        $summary_user = Summary::getCurrentRow($course, $user);
+        info("updateSummariesAfterCompletingPoll");
+        info($summary_user);
 
         $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
 
