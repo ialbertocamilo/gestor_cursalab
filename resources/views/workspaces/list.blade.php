@@ -5,11 +5,10 @@
 @endsection
 
 @section('content')
-    <div class="row bg-white justify-content-center">
-        <div class="col-10">
-            @include('layouts.user-header')
-        </div>
-    </div>
+
+    <script id="header-template" type="text/xhtml">
+        @include('layouts.user-header')
+    </script>
     <v-app>
         <workspaces-list-layout></workspaces-list-layout>
     </v-app>

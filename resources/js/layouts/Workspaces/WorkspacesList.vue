@@ -12,7 +12,7 @@
                      alt="We connect">
             </div>
             <div class="col-6">
-                <div v-html="header"></div>
+                <div v-html="headerTemplate"></div>
                 <!--
                 <div v-if="userSession.user"
                     class="user-button-wrapper">
@@ -291,6 +291,8 @@ export default {
         WorkspacesForm
     },
     data: () => ({
+        headerTemplate : ''
+        ,
         superUserRoleId : 1
         ,
         configRoleId: 2
@@ -321,7 +323,7 @@ export default {
     mounted() {
 
         this.loadData();
-
+        this.initializeHeaderTemplate();
     }
     ,
     watch: {
@@ -335,6 +337,11 @@ export default {
     }
     ,
     methods: {
+        initializeHeaderTemplate() {
+            this.headerTemplate = document
+                        .getElementById('header-template').innerHTML;
+        }
+        ,
         /**
          * Open form to edit workspace, and update the session workspace
          *
