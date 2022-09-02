@@ -44,7 +44,6 @@ class UserStoreRequest extends FormRequest
 
     public function validationData()
     {
-        info($this->document);
         $this->mergeIfMissing(['active' => INACTIVE]);
 
         return $this->all();
