@@ -82,7 +82,7 @@ class RestRankController extends Controller
             ];
         }
 
-        if (!$current && count($temp) === 10) $temp[] = [
+        if (!$current && $ranking_usuario['position']) $temp[] = [
             'usuario_id' => $ranking_usuario['usuario_id'],
             'nombre' => $ranking_usuario['nombre'],
             'rank' => $ranking_usuario['rank'],
@@ -94,17 +94,20 @@ class RestRankController extends Controller
 
     private function cargar_position_user($user, $tipo, $data)
     {
+
         $summary_user = SummaryUser::getCurrentRow($user);
+        if (!$summary_user) return ['position' => null];
 
         if ($tipo == 'general')
             $q_ranking = SummaryUser::whereRelation('user', 'subworkspace_id', $user->subworkspace_id);
 
         $ranks_before_user = $q_ranking->whereRelation('user', 'active', ACTIVE)
             ->whereNotNull('last_time_evaluated_at')
-            ->where('score', '>=', $summary_user->score)
+            ->where('score', '>=', $summary_user->score ?? 0)
             ->orderBy('score', 'desc')
             ->orderBy('last_time_evaluated_at', 'asc')
             ->get();
+
         $position = 1;
         $nombre = 'Este usuario es de test (No entra en el ranking)';
         $last_ev = null;
@@ -116,9 +119,10 @@ class RestRankController extends Controller
             }
             $position++;
         }
-        $rank = $summary_user->score;
+        $rank = $summary_user?->score;
 
         return [
+            'appears_in_ranking' => $appears_in_ranking,
             'usuario_id' => $user->id,
             'last_ev' => $last_ev,
             'nombre' => $nombre,
