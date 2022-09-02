@@ -521,7 +521,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'topics.evaluation_type'
         ])
             ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
-            ->where('active', ACTIVE)->get();
+            ->whereRelation('workspace', 'id', $user->subworkspace->workspace->id)
+            ->where('active', ACTIVE)
+            ->get();
 
         $user_criteria = $user->criterion_values->groupBy('criterion_id');
 

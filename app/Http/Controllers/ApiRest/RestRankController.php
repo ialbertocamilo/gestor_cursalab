@@ -69,18 +69,27 @@ class RestRankController extends Controller
 
         $temp = [];
         $i = 0;
+        $current = false;
         foreach ($ranking as $rank) {
             $i++;
+            $current = $i === $ranking_usuario['position'];
             $temp[] = [
                 'usuario_id' => $rank->user_id,
                 'nombre' => $rank->user->fullname,
                 'rank' => $rank->score,
-                'current' => $i === $ranking_usuario['position'],
+                'current' => $current,
                 'last_ev' => $rank->last_time_evaluated_at
             ];
         }
 
-        return ['ranking' => $temp, 'ranking_usuario' => $ranking_usuario];
+        if (!$current && count($temp) === 10) $temp[] = [
+            'usuario_id' => $ranking_usuario['usuario_id'],
+            'nombre' => $ranking_usuario['nombre'],
+            'rank' => $ranking_usuario['rank'],
+            'last_ev' => $ranking_usuario['last_ev']
+        ];
+
+        return ['ranking' => $temp,/* 'ranking_usuario' => $ranking_usuario*/];
     }
 
     private function cargar_position_user($user, $tipo, $data)
@@ -98,9 +107,11 @@ class RestRankController extends Controller
             ->get();
         $position = 1;
         $nombre = 'Este usuario es de test (No entra en el ranking)';
+        $last_ev = null;
         foreach ($ranks_before_user as $ranks) {
             if ($ranks->user_id == $user->id) {
                 $nombre = $user->fullname;
+                $last_ev = $ranks->last_time_evaluated_at;
                 break;
             }
             $position++;
@@ -109,6 +120,7 @@ class RestRankController extends Controller
 
         return [
             'usuario_id' => $user->id,
+            'last_ev' => $last_ev,
             'nombre' => $nombre,
             'rank' => $rank,
             'position' => $position
