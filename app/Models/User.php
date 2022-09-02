@@ -521,7 +521,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'topics.evaluation_type'
         ])
             ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
-            ->whereRelation('workspace', 'id', $user->subworkspace->workspace->id)
+//            ->whereRelation('workspace', 'id', $user->subworkspace->workspace->id)
             ->where('active', ACTIVE)
             ->get();
 
