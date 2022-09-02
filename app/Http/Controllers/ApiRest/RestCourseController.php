@@ -100,6 +100,32 @@ class RestCourseController extends Controller
     }
 
 
+    public function getCertificates()
+    {
+        $user = auth()->user();
+
+        $user_courses_id = $user->getCurrentCourses()->pluck('id');
+
+
+        $certificates = SummaryCourse::with('course:id,name')
+            ->where('user_id', $user->id)
+            ->whereIn('course_id', $user_courses_id)
+            ->whereNotNull('certification_issued_at')
+            ->get();
+        $temp = [];
+
+        foreach ($certificates as $certificate) {
+            $temp[] = [
+                'course_id' => $certificate->course_id,
+                'name' => $certificate->course->name,
+                'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
+                'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
+            ];
+        }
+
+
+        return $this->success(['data' => $temp]);
+    }
 
 
 }

@@ -19,6 +19,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Middleware\CheckRol;
 use App\Http\Controllers\CursosController;
+use App\Http\Controllers\GestorController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\UsuarioController;
 
@@ -39,8 +40,11 @@ Route::get('home', [DashboardController::class, 'index'])->name('home');
 // DESCARGAS
 Route::get('dnx/{id}', 'GestorController@descargaArchivo');
 Route::get('dnv/{id}', 'GestorController@descargaVideo');
-Route::get('tools/ver_diploma/{iduser}/{idvideo}', 'GestorController@verCertificado');
-Route::get('tools/dnc/{iduser}/{idvideo}', 'GestorController@descargaCertificado');
+
+//Route::get('tools/ver_diploma/{iduser}/{idvideo}', 'GestorController@verCertificado');
+Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 'verCertificado']);
+//Route::get('tools/dnc/{iduser}/{idvideo}', 'GestorController@descargaCertificado');
+Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descargaCertificado']);
 
 Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', 'GestorController@verCertificadoEscuela');
 Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', 'GestorController@descargaCertificadoEscuela');

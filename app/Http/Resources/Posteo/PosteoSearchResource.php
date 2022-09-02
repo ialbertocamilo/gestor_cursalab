@@ -22,7 +22,8 @@ class PosteoSearchResource extends JsonResource
                 : $topic->questions->where('type.code', 'written-answer')->count()
             )
             : null;
-
+//        info($topic->questions);
+//        info( $topic->questions->where('type.code', 'select-options')->count());
         return [
             'id' => $topic->id,
             'nombre' => $topic->name,
