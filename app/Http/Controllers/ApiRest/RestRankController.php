@@ -53,7 +53,7 @@ class RestRankController extends Controller
         //Tipo -> general,zonal,botica
         if ($tipo == 'general')
             $q_ranking = SummaryUser::withWhereHas('user', function ($q) use ($user) {
-                $q->select('id', 'name')
+                $q->select('id', 'name', 'lastname', 'surname')
                     ->where('subworkspace_id', $user->subworkspace_id);
             });
 
@@ -96,7 +96,7 @@ class RestRankController extends Controller
         $nombre = 'Este usuario es de test (No entra en el ranking)';
         foreach ($ranks_before_user as $ranks) {
             if ($ranks->user_id == $user->id) {
-                $nombre = $user->name;
+                $nombre = $user->fullname;
                 break;
             }
             $position++;
