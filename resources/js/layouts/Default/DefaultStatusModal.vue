@@ -11,7 +11,7 @@
             <br>
             El registro pasará a estar
             "{{ !resource.active ? 'Activo' : 'Inactivo' }}"
-            {{ !resource.active ? '' : 'y los usuarios asignados no podrán verlo' }}
+<!--            {{ !resource.active ? '' : 'y los usuarios asignados no podrán verlo' }}-->
         </template>
     </DefaultAlertDialog>
 </template>
