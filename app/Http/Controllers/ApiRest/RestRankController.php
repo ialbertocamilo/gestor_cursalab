@@ -82,7 +82,7 @@ class RestRankController extends Controller
             ];
         }
 
-        if (!$current && $ranking_usuario['position']) $temp[] = [
+        if (!$current && $ranking_usuario['position'] && count($temp) === 10) $temp[] = [
             'usuario_id' => $ranking_usuario['usuario_id'],
             'nombre' => $ranking_usuario['nombre'],
             'rank' => $ranking_usuario['rank'],
