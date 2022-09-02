@@ -50,6 +50,8 @@ class RestRankController extends Controller
     /*--------------------------------------------------------SUBFUNCIONES----------------------------------------------------------------*/
     private function cargar_ranking($user, $tipo, $data = null)
     {
+        $ranking_usuario = $this->cargar_position_user($user, $tipo, $data);
+
         //Tipo -> general,zonal,botica
         if ($tipo == 'general')
             $q_ranking = SummaryUser::withWhereHas('user', function ($q) use ($user) {
@@ -66,16 +68,17 @@ class RestRankController extends Controller
             ->get();
 
         $temp = [];
+        $i = 0;
         foreach ($ranking as $rank) {
+            $i++;
             $temp[] = [
                 'usuario_id' => $rank->user_id,
                 'nombre' => $rank->user->fullname,
                 'rank' => $rank->score,
+                'current' => $i === $ranking_usuario['position'],
                 'last_ev' => $rank->last_time_evaluated_at
             ];
         }
-
-        $ranking_usuario = $this->cargar_position_user($user, $tipo, $data);
 
         return ['ranking' => $temp, 'ranking_usuario' => $ranking_usuario];
     }
