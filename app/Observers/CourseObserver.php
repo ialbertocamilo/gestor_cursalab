@@ -32,7 +32,7 @@ class CourseObserver
                 // Usuarios impactados por segmentación del curso
                 $users = $course->getUsersBySegmentation();
 
-                Summary::updateUserDataByCourse($users, $course);
+                Summary::updateUsersDataByCourse($users, $course);
                     // Actualizar resumen de usuarios (cantidades y avance)
                         // - filtrar por usuarios impactados en resumenes
                         // calcular y actualizar datos

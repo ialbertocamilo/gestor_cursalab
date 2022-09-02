@@ -120,5 +120,11 @@ class Summary extends BaseModel
     protected function updateUsersDataByCourse($users, $course)
     {
         $course_rows =  SummaryCourse::where('course_id', $course->id)->get();
+
+        foreach ($course_rows AS $row)
+        {
+            
+            // SummaryUser::   
+        }
     }
 }
