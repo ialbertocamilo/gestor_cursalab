@@ -508,6 +508,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses)
     {
+//        dd($user->subworkspace);
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
@@ -521,7 +522,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'topics.evaluation_type'
         ])
             ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
-//            ->whereRelation('workspace', 'id', $user->subworkspace->workspace->id)
+            ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
             ->where('active', ACTIVE)
             ->get();
 
