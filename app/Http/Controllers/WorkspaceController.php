@@ -169,6 +169,7 @@ class WorkspaceController extends Controller
     {
         $main_menu = Taxonomy::where('group', 'system')->where('type', 'main_menu')
                             ->select('id', 'name')
+                            ->where('active', ACTIVE)
                             ->get();
 
         $main_menu->each(function ($item) {
@@ -177,6 +178,7 @@ class WorkspaceController extends Controller
 
         $side_menu = Taxonomy::where('group', 'system')->where('type', 'side_menu')
                             ->select('id', 'name')
+                            ->where('active', ACTIVE)
                             ->get();
 
         $side_menu->each(function ($item) {
