@@ -17,9 +17,17 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // App versions
+
     'versions' => [
         'ios' => env('APP_VERSION_IOS'),
         'android' => env('APP_VERSION_ANDROID'),
+    ],
+
+    // Evaluation Quiz Config
+
+    'quizzes' => [
+        'duration' => env('QUIZZES_DURATION', 1), // in hours
     ],
 
     /*

@@ -31,12 +31,12 @@ class RestRankController extends Controller
     }
     /***********************************REDISEÑO******************* */
     //CARGAR RANKINGS
-    public function cargarRankingBotica($user_id = null, $botica)
+    public function cargarRankingBotica($user_id = null, $botica = null)
     {
         return $this->cargar_ranking($user_id, 'usuarios.botica', $botica);
     }
 
-    public function cargarRankingZona($user_id = null, $grupo)
+    public function cargarRankingZona($user_id = null, $grupo = null)
     {
         return $this->cargar_ranking($user_id, 'usuarios.grupo', $grupo);
     }

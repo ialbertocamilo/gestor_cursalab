@@ -27,8 +27,21 @@ class CourseObserver
     {
         if ( $course->isDirty('active') ) {
 
+            if ($course->hasBeenSegmented()) {
+
+                // Usuarios impactados por segmentación del curso
+                $users = $course->getUsersBySegmentation();
+
+                Summary::updateUserDataByCourse($users, $course);
+                    // Actualizar resumen de usuarios (cantidades y avance)
+                        // - filtrar por usuarios impactados en resumenes
+                        // calcular y actualizar datos
+            }
+
+
+
             // Ocultar si ya no le pertenece
-            SummaryCourse::where('course_id', $course_id)->update(['hidden' => !$course->active]);
+                // SummaryCourse::where('course_id', $course_id)->update(['hidden' => !$course->active]);
 
         }
     }
@@ -41,7 +54,17 @@ class CourseObserver
      */
     public function deleted(Course $course)
     {
-        //
+        if ($course->hasBeenSegmented()) {
+
+            $users = $course->getUsersBySegmentation();
+
+        }
+
+        // Usuarios impactados por segmentación del curso
+
+            // Actualizar resumen de usuarios (cantidades y avance)
+                // - filtrar por usuarios impactados en resumenes
+                // calcular y actualizar datos
     }
 
     /**
