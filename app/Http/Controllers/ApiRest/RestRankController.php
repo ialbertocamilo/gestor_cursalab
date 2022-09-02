@@ -122,7 +122,6 @@ class RestRankController extends Controller
         $rank = $summary_user?->score;
 
         return [
-            'appears_in_ranking' => $appears_in_ranking,
             'usuario_id' => $user->id,
             'last_ev' => $last_ev,
             'nombre' => $nombre,
