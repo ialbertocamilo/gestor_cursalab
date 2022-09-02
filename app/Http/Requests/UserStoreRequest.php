@@ -33,7 +33,7 @@ class UserStoreRequest extends FormRequest
             'password' => "{$pass}|max:255",
 
             'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
-            'document' => 'required|min:8',
+            'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
             'criterion_list_final' => 'nullable',
             'criterion_list' => 'nullable',
@@ -44,6 +44,7 @@ class UserStoreRequest extends FormRequest
 
     public function validationData()
     {
+        info($this->document);
         $this->mergeIfMissing(['active' => INACTIVE]);
 
         return $this->all();
