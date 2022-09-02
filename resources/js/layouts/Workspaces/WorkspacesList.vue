@@ -6,12 +6,14 @@
         ======================================== -->
 
         <v-row class="justify-content-center pt-3 pb-3">
-            <div class="col-8">
+            <div class="col-4">
                 <img src="/img/we-connect-logo.png"
                      class="logo"
                      alt="We connect">
             </div>
-            <div class="col-2">
+            <div class="col-6">
+                <div v-html="header"></div>
+                <!--
                 <div v-if="userSession.user"
                     class="user-button-wrapper">
                     <button class="mr-3">
@@ -19,12 +21,11 @@
                         {{ userSession.user.fullname }}
                     </button>
 
-                  <!--   <a @click="logout()">
+                    <a @click="logout()">
                         <v-icon class="stats-icon">mdi-logout</v-icon>
-                    </a> -->
-
-
+                    </a>
                 </div>
+                -->
             </div>
         </v-row>
 
@@ -33,7 +34,7 @@
         ======================================== -->
 
         <v-row class="justify-content-center">
-            <div class="col-8">
+            <div class="col-10">
                 <h1>
                     Bienvenido(a) a WeConnect 2.0
                 </h1>
@@ -285,6 +286,7 @@
 import WorkspacesForm from "./WorkspacesForm";
 
 export default {
+    props: [ 'header' ],
     components: {
         WorkspacesForm
     },

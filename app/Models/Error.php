@@ -360,7 +360,12 @@ class Error extends Model
             '/vendor/bootstrap/css/bootstrap.min.css.map',
         ];
 
-        if (in_array($uri, $uris) AND $filename == 'RouteCollection.php')
+        $files = [
+            'AbstractRouteCollection.php',
+            'RouteCollection.php',
+        ];
+
+        if (in_array($uri, $uris) AND in_array($files, $filename))
             return true;
 
         return false;
