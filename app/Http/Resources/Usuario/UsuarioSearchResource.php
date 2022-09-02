@@ -14,13 +14,14 @@ class UsuarioSearchResource extends JsonResource
      */
     public function toArray($request)
     {
+
         return [
             'id' => $this->id,
             'nombre' => $this->fullname,
             'name' => $this->fullname,
             'image' => space_url($this->config?->logo) ?? 'No logo',
             'document' => $this->document ?? 'Sin documento',
-            'module' => $this->config->etapa ?? 'No module',
+            'module' => $this->resource->subworkspace->name ?? 'No module',
             'active' => !!$this->active,
 //            'pruebas_desaprobadas' => $this->rpta_pruebas_dessaprob($this->config) ? true : false,
             'reporte_route' => route('exportar.node', ['dni' => $this->dni]),
