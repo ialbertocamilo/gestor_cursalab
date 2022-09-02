@@ -409,7 +409,7 @@ export default {
                 })
         },
         images_upload_handler(blobInfo, success, failure) {
-            console.log(blobInfo.blob());
+            // console.log(blobInfo.blob());
             let formdata = new FormData();
             formdata.append("image", blobInfo.blob(), blobInfo.filename());
             formdata.append("model_id", null);
@@ -502,7 +502,7 @@ export default {
             let vue = this
             vue.topicsValidationModal.hideConfirmBtn = true
             const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
-            const tipo_ev = evaluation_type.name === 'qualified' ? 'Calificada' : 'Abierta';
+            const tipo_ev = evaluation_type.name === "Calificada" ? 'Calificada' : 'Abierta';
             const title = `Debe tener una evaluación ${tipo_ev}`;
             const data = {data: [title]}
 

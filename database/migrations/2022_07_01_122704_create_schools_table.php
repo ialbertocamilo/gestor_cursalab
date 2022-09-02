@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('external_id')->nullable()->index();
 
             $table->string('name');
+            $table->string('code')->nullable();
             $table->string('description')->nullable();
 
             $table->string('imagen')->nullable();

@@ -10,11 +10,13 @@
         <div class="vertical"></div>
         <div class="main-header-options">
 
+            @if (Request::path() != 'workspaces/list')
             <a href="/workspaces/list"
                 class="mr-3">
                 <i class="fa fa-th"></i>
             </a>
-
+            @endif
+            
             <a href="{{ route('logout') }}"
                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="fas fa-sign-out-alt"></i>

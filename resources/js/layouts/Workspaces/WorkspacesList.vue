@@ -12,6 +12,7 @@
                      alt="We connect">
             </div>
             <div class="col-2">
+                <!--
                 <div v-if="userSession.user"
                     class="user-button-wrapper">
                     <button class="mr-3">
@@ -19,12 +20,11 @@
                         {{ userSession.user.fullname }}
                     </button>
 
-                  <!--   <a @click="logout()">
+                    <a @click="logout()">
                         <v-icon class="stats-icon">mdi-logout</v-icon>
-                    </a> -->
-
-
+                    </a>
                 </div>
+                -->
             </div>
         </v-row>
 
