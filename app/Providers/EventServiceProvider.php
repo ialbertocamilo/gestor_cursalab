@@ -7,9 +7,9 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
-use App\Observers\CursoObserver;
-use App\Observers\PosteoObserver;
-use App\Observers\CategoriaObserver;
+use App\Observers\CourseObserver;
+// use App\Observers\PosteoObserver;
+// use App\Observers\CategoriaObserver;
 
 use App\Models\Curso;
 use App\Models\Posteo;
@@ -37,9 +37,11 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
 
-        Posteo::observe(PosteoObserver::class);
-        Curso::observe(CursoObserver::class);
-        Categoria::observe(CategoriaObserver::class);
+        // Course::observe(CourseObserver::class);
+        
+        // Posteo::observe(PosteoObserver::class);
+        // Curso::observe(CursoObserver::class);
+        // Categoria::observe(CategoriaObserver::class);
     }
 
     /**

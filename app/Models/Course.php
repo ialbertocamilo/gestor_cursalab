@@ -530,4 +530,41 @@ class Course extends BaseModel
         return ['average_grade' => $grade_average, 'status' => $summary_course->status->code ?? 'por-iniciar'];
     }
 
+    public function hasBeenSegmented()
+    {
+        return $this->segments->where('active', ACTIVE)->count();
+    }
+
+    public function getUsersBySegmentation()
+    {
+        $this->load('segments.values');
+
+        if ( !$this->hasBeenSegmented() ) return [];
+
+        $users = collect();
+
+        foreach ($this->segments as $key => $segment) {
+            
+            $result = User::whereHas('criterion_values', function ($q) use ($segment) {
+
+                        $grouped = $segments->values->groupBy('criterion_id');
+
+                        foreach ($grouped as $key => $values) {
+
+                            $ids = $values->pluck('criterion_value_id');
+
+                            $q->whereIn('id', $ids);
+                        }
+                    })
+                    ->when($users, function($q) use ($users) {
+                        $q->whereNotIn('id', $users->pluck('id'));
+                    })
+                    ->get();
+
+            $users = $users->merge($result);
+        }
+
+        return $users;
+    }
+
 }
