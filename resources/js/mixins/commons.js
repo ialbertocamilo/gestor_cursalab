@@ -30,7 +30,7 @@ export default {
             if (errorObject.http_code !== 422) return;
 
             let validations = errorObject.data.validations;
-
+            // console.log(validations)
             if (validations.list.length > 0) {
                 // await vue.$nextTick(() => modalOptions = Object.assign({}, modalOptions, modalDefault))
                 await vue.cleanValidationsModal(modalOptions, modalDefault)
