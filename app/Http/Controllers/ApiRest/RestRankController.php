@@ -88,6 +88,7 @@ class RestRankController extends Controller
             $q_ranking = SummaryUser::whereRelation('user', 'subworkspace_id', $user->subworkspace_id);
 
         $ranks_before_user = $q_ranking->whereRelation('user', 'active', ACTIVE)
+            ->whereNotNull('last_time_evaluated_at')
             ->where('score', '>=', $summary_user->score)
             ->orderBy('score', 'desc')
             ->orderBy('last_time_evaluated_at', 'asc')
