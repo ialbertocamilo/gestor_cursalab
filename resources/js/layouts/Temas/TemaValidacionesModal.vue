@@ -26,6 +26,15 @@
                         </div>
                     </div>
                 </div>
+                <div
+                    v-if="validateData.list && validateData.list.length > 0"
+                    v-for="(validation,i) in validateData.list" :key="i">
+                    <strong v-text="validation.title ||'' "/> <br>
+                    {{ validation.subtitle || "" }}
+                    <ul class="mt-1">
+                        <li v-for="(item, i) in validation.list" :key="i" v-html="item"/>
+                    </ul>
+                </div>
                 <div class="mt-2">
                     <label class="form-check-label"
                            v-text="'Si deseas descargar el reporte antes del cambio da click aquí 👇'"/>
