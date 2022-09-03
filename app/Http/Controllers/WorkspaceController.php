@@ -36,6 +36,20 @@ class WorkspaceController extends Controller
             []
         );
     }
+    public function list_criterios(): View|Factory|Application
+    {
+        return view(
+            'criteria.list_in_wk',
+            []
+        );
+    }
+    public function list_criterios_values(): View|Factory|Application
+    {
+        return view(
+            'criterion_values.list_in_wk',
+            []
+        );
+    }
 
     /**
      * Process request to search workspaces
@@ -97,9 +111,8 @@ class WorkspaceController extends Controller
 
         $module_criterion = Criterion::where('code', 'module')->first();
 
-        foreach ($criteriaSelected as $criterion_id => $is_selected)
-        {
-            if ( $is_selected ) $criteria[] = $criterion_id;
+        foreach ($criteriaSelected as $criterion_id => $is_selected) {
+            if ($is_selected) $criteria[] = $criterion_id;
         }
 
         $criteria[] = $module_criterion->id;
@@ -113,7 +126,7 @@ class WorkspaceController extends Controller
 
     // Sub Workspaces
 
-    public function searchSubWorkspace (Request $request)
+    public function searchSubWorkspace(Request $request)
     {
         $subworkspaces = Workspace::searchSubWorkspace($request);
         SubWorkspaceResource::collection($subworkspaces);
@@ -168,18 +181,18 @@ class WorkspaceController extends Controller
     public function getFormSelects($compactResponse = false)
     {
         $main_menu = Taxonomy::where('group', 'system')->where('type', 'main_menu')
-                            ->select('id', 'name')
-                            ->where('active', ACTIVE)
-                            ->get();
+            ->select('id', 'name')
+            ->where('active', ACTIVE)
+            ->get();
 
         $main_menu->each(function ($item) {
             $item->active = false;
         });
 
         $side_menu = Taxonomy::where('group', 'system')->where('type', 'side_menu')
-                            ->select('id', 'name')
-                            ->where('active', ACTIVE)
-                            ->get();
+            ->select('id', 'name')
+            ->where('active', ACTIVE)
+            ->get();
 
         $side_menu->each(function ($item) {
             $item->active = false;
