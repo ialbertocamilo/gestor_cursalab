@@ -39,7 +39,7 @@ class Topic extends BaseModel
 
     public function requirement()
     {
-        return $this->belongsTo(Topic::class);
+        return $this->belongsTo(Topic::class, 'topic_requirement_id' );
     }
 
     public function medias()
@@ -211,7 +211,7 @@ class Topic extends BaseModel
     public function checkIfEvaluationTypeWillBeChanged(School $school, Topic $topic, $data)
     {
         $assessable = isset($data['assessable']) ? $data['assessable'] : 0;
-        
+
         if ($topic->assessable == 0 || $assessable == 0) return ['ok' => false];
 
         $is_or_will_be_assessable = $topic->assessable || ($assessable === 1);
@@ -505,7 +505,7 @@ class Topic extends BaseModel
             }
         }
 
-        $topic_requirement = $topic->requirements->first();
+        $topic_requirement = $topic->requirement()->first();
 
         if (!$topic_requirement) {
             $available_topic = true;
@@ -525,7 +525,7 @@ class Topic extends BaseModel
         return [
 //            'topic_name' => $topic->name,
             'status' => $topic_status,
-            'topic_requirement' => $topic_requirement,
+            'topic_requirement' => $topic_requirement?->id,
             'grade' => $grade,
             'available' => $available_topic,
             'remaining_attempts' => $remaining_attempts,
