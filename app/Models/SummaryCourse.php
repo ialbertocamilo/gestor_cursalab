@@ -243,7 +243,7 @@ class SummaryCourse extends Summary
 
         $row_course->update($course_data);
 
-        info($row_course);
+        // info($row_course);
 
         return $row_course;
     }
