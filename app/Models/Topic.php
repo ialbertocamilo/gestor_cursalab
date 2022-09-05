@@ -210,9 +210,11 @@ class Topic extends BaseModel
 
     public function checkIfEvaluationTypeWillBeChanged(School $school, Topic $topic, $data)
     {
-        if ($topic->assessable == 0 || $data['assessable'] == 0) return ['ok' => false];
+        $assessable = isset($data['assessable']) ? $data['assessable'] : 0;
+        
+        if ($topic->assessable == 0 || $assessable == 0) return ['ok' => false];
 
-        $is_or_will_be_assessable = $topic->assessable || ($data['assessable'] === 1);
+        $is_or_will_be_assessable = $topic->assessable || ($assessable === 1);
         $evaluation_type = $topic->evaluation_type;
         $questions_by_evaluation_type = $topic->questions()
             ->whereRelation('type', 'code', $evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer')->count();
