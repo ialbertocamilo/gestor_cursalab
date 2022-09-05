@@ -185,7 +185,7 @@
                                 <v-icon>mdi-account-cog</v-icon>
                                 Criterios
 
-                                <a href="/criterios">
+                                <a href="/workspaces/criterios">
                                     <div class="go-icon">
                                         <v-icon color="#5D5FEF">mdi-arrow-top-right-thin</v-icon>
                                     </div>
