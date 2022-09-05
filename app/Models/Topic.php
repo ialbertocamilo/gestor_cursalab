@@ -575,7 +575,7 @@ class Topic extends BaseModel
                 ->where('topic_id', $topic_requirement->id)
                 ->where('user_id', $user->id)->first();
 
-            $available_topic = in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
+            $available_topic = $requirement_summary && in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
         $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
