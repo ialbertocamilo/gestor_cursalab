@@ -123,8 +123,8 @@ class Summary extends BaseModel
 
         foreach ($course_rows AS $row)
         {
+            // SummaryUser::
             
-            // SummaryUser::   
         }
     }
 }

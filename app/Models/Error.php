@@ -368,7 +368,7 @@ class Error extends Model
             'RouteCollection.php',
         ];
 
-        if (in_array($uri, $uris) AND in_array($files, $filename))
+        if (in_array($uri, $uris) AND in_array($filename, $files))
             return true;
 
         return false;
