@@ -31,6 +31,7 @@
                             v-model="resource.nombre"
                             label="Nombre"
                             :rules="rules.nombre"
+                            counter="100"
                         />
                     </v-col>
                 </v-row>

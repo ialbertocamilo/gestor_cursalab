@@ -210,7 +210,7 @@ class Topic extends BaseModel
 
     public function checkIfEvaluationTypeWillBeChanged(School $school, Topic $topic, $data)
     {
-        $assessable = isset($data['assessable']) ? $data['assessable'] : 0;
+        $assessable = $data['assessable'] ?? $topic->assessable;
 
         if ($topic->assessable == 0 || $assessable == 0) return ['ok' => false];
 

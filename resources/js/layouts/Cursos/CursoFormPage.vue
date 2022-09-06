@@ -20,6 +20,7 @@
                                 v-model="resource.name"
                                 :rules="rules.name"
                                 show-required
+                                counter="120"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -239,7 +240,7 @@ export default {
             },
             resource: {},
             rules: {
-                name: this.getRules(['required']),
+                name: this.getRules(['required', 'max:120']),
                 lista_escuelas: this.getRules(['required']),
                 types: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),

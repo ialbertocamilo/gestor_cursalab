@@ -24,7 +24,7 @@ class CursosStoreUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
+            'name' => 'required|max:120',
             'description' => 'nullable',
             'position' => 'nullable',
             'active' => 'required',

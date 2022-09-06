@@ -22,6 +22,7 @@
         :single-line="singeLine"
         :suffix="suffix"
         :prefix="prefix"
+
     >
         <template v-slot:append v-if="appendIcon">
             <v-btn plain icon :ripple="false" @click="onClickAppendIcon">
