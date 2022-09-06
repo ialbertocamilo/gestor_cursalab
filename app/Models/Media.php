@@ -110,11 +110,12 @@ class Media extends BaseModel
         } else if (in_array(strtolower($ext), $valid_ext6)) {
             $path = 'office-files/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext5)) {
+            $name_scorm = $this->verify_scorm($file,$name);
 
             // Set values for file in S3 bucket
 
-            $path = 'scorm/' . $fileName;
-            $ext = 'scorm';
+//            $path = 'scorm/' . $fileName;
+//            $ext = 'scorm';
 
             // Upload to project's uploads folder
             // and uncompressed file
@@ -125,6 +126,10 @@ class Media extends BaseModel
             if ($res === TRUE) {
                 $zip->extractTo(public_path($localpath));
                 $zip->close();
+
+                $uploaded = true;
+                $path = url($localpath);
+                $ext = 'scorm';
             }
         }
 
@@ -136,6 +141,12 @@ class Media extends BaseModel
             if ($result) {
                 $uploaded = true;
             }
+        }
+
+        if(isset($name_scorm) && $name_scorm['find_main_file']){
+            $name = $name.'/'.$name_scorm['nombre'];
+//            $path = url('uploads/scorm/'.$name);
+            $path = $name;
         }
 
         // Insert Media
@@ -156,6 +167,27 @@ class Media extends BaseModel
             return $media;
 
         return $path;
+    }
+
+    public static function verify_scorm($file,$name){
+        $zip = new ZipArchive();
+        $zip->open($file);
+        $find_main_file = false;
+        $tipos_scorm = config('constantes.tipos_scorm');
+        $nombre = '';
+        for( $i = 0; $i < $zip->numFiles; $i++ ){
+            $stat = $zip->statIndex( $i );
+            if (!str_contains($stat['name'], '/') && in_array($stat['name'],$tipos_scorm)) {
+                // $nombre = str_replace(" ","-",strtolower($name)).'-'. rand(300, 600).'/'.$stat['name'];
+                $nombre = $stat['name'];
+                $find_main_file = true;
+                if($stat['name']=='index.html'){
+                    break;
+                }
+            }
+        }
+        $zip->close();
+        return compact('nombre','find_main_file');
     }
 
     protected function requestUploadFile($data, $field)

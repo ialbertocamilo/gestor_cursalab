@@ -39,7 +39,7 @@ class Topic extends BaseModel
 
     public function requirement()
     {
-        return $this->belongsTo(Topic::class, 'topic_requirement_id' );
+        return $this->belongsTo(Topic::class, 'topic_requirement_id');
     }
 
     public function medias()
@@ -192,7 +192,7 @@ class Topic extends BaseModel
 
 
         // Validar si se está cambiando entre calificada y abierta, y no tiene preguntas del nuevo tipo de calificacion
-        $evaluation_type_will_be_changed = $this->checkIfEvaluationTypeWillBeChanged($school, $topic, $data);
+        $evaluation_type_will_be_changed = $this->checkIfEvaluationTypeWillBeChanged($topic, $data);
         if ($evaluation_type_will_be_changed['ok']) $validations->push($evaluation_type_will_be_changed);
 
 
@@ -208,7 +208,7 @@ class Topic extends BaseModel
         ];
     }
 
-    public function checkIfEvaluationTypeWillBeChanged(School $school, Topic $topic, $data)
+    public function checkIfEvaluationTypeWillBeChanged(Topic $topic, $data)
     {
         $assessable = $data['assessable'] ?? $topic->assessable;
 
@@ -220,7 +220,7 @@ class Topic extends BaseModel
             ->whereRelation('type', 'code', $evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer')->count();
         $have_questions_of_new_type = $questions_by_evaluation_type > 0;
 
-        $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && $data['active'];
+        $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && ($data['active'] || $data['active'] == 'true');
 
         if (!$temp['ok']) return $temp;
 
@@ -433,9 +433,13 @@ class Topic extends BaseModel
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
                 foreach ($media_topics as $media) {
-                    if ($media->type_id == 'audio' && !str_contains('https', $media->value))
-                        // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
-                        $media->value = get_media_url($media->valor);
+                    // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
+                    if ($media->type_id === 'scorm') {
+                        $path = explode('.', $media->value);
+                        $media->value = asset("public/uploads/{$path[0]}");
+                    }
+//                    if (in_array($media->type_id, ['video']) && !str_contains('https', $media->value))
+//                        $media->value = get_media_url($media->value);
                 }
 
                 $topics_data[] = [
