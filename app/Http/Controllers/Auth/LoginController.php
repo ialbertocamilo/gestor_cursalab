@@ -143,7 +143,7 @@ class LoginController extends Controller
         // as the default workspace, since user has not
         // selected a workspace yet
 
-        // session(['workspace' => $workspaces[0]]);
+        session(['workspace' => $workspaces[0]]);
 
         // When there is more than 1 workspace show
         // workspaces selector, or show welcome page
@@ -151,7 +151,7 @@ class LoginController extends Controller
 
         if (count($workspaces) > 1) {
             
-            session()->forget('workspace');
+            // session()->forget('workspace');
 
             return redirect('/workspaces/list');
 
