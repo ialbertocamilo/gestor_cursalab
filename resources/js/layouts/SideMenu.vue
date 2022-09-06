@@ -220,7 +220,7 @@ export default {
                         subpaths: ["criterios", "valores"],
                         selected: false,
                         permission: "criterios",
-                        role: ["super-user", "config"]
+                        role: ["super-user", "config", "admin"]
                     }
                     // {
                     //     title:"Supervisores",
