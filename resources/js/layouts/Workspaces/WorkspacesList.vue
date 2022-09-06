@@ -191,10 +191,7 @@
                                     </div>
                                 </a>
                             </h5>
-                            <p>
-                                Configura datos generales del ambiente y de branding como el
-                                logotipo, colores, etc.
-                            </p>
+                            <p>Los criterios son atributos que comparten los usuarios, permiten realizar segmentación de contenido (anuncios y cursos).</p>
                         </div>
                     </div>
                     <div class="col-3">
@@ -213,10 +210,7 @@
                                     </div>
                                 </a>
                             </h5>
-                            <p>
-                                Configura datos generales del ambiente y de branding como el
-                                logotipo, colores, etc.
-                            </p>
+                            <p>Los administradores tienen acceso a diferentes secciones del gestor de contenidos según su rol.</p>
                         </div>
 
                         <div class="card p-3 mt-3">
@@ -233,10 +227,7 @@
                                     </div>
                                 </a>
                             </h5>
-                            <p>
-                                Configura datos generales del ambiente y de branding como el
-                                logotipo, colores, etc.
-                            </p>
+                            <p>Los roles permiten organizar y controlar el acceso de los administradores a las distintas secciones del gestor.</p>
                         </div>
 
                     </div>
@@ -256,10 +247,7 @@
                                     </div>
                                 </a>
                             </h5>
-                            <p>
-                                Configura datos generales del ambiente y de branding como el
-                                logotipo, colores, etc.
-                            </p>
+                            <p>Las preguntas frecuentes permiten guiar al usuario en la aplicación web/móvil.</p>
                         </div>
                     </div>
                 </v-row>
