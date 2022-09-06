@@ -140,6 +140,7 @@ export default {
                 ref: 'UsuarioTable',
                 headers: [
                     {text: "Nombres y Apellidos", value: "name"},
+                    {text: "Módulo", value: "module"},
                     {text: "Documento", value: "document", align: 'left', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
@@ -235,14 +236,14 @@ export default {
             const url = `/usuarios/get-list-selects`
             vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.sub_workspaces = data.data.sub_workspaces
 
+                    vue.selects.sub_workspaces = data.data.sub_workspaces
                     vue.filters.subworkspace_id = parseInt(param_subworkspace)
 
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
 
         },

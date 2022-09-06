@@ -55,7 +55,8 @@ class TemaStoreUpdateRequest extends FormRequest
 
 //        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
 //
-//        $data['active'] = $active;
+       if ( ! $this->has('assessable') )
+            $data['assessable'] = 0;
 
         return $this->merge($data)->all();
     }

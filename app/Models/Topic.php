@@ -39,7 +39,7 @@ class Topic extends BaseModel
 
     public function requirement()
     {
-        return $this->belongsTo(Topic::class);
+        return $this->belongsTo(Topic::class, 'topic_requirement_id' );
     }
 
     public function medias()
@@ -99,11 +99,11 @@ class Topic extends BaseModel
     protected static function search_preguntas($request, $topic)
     {
         $question_type_code = $topic->evaluation_type->code === 'qualified'
-                                ? 'select-options'
-                                : 'written-answer';
+            ? 'select-options'
+            : 'written-answer';
         info($question_type_code);
         $q = Question::whereRelation('type', 'code', $question_type_code)
-                      ->where('topic_id', $topic->id);
+            ->where('topic_id', $topic->id);
 
         if ($request->q)
             $q->where('pregunta', 'like', "%$request->q%");
@@ -191,6 +191,11 @@ class Topic extends BaseModel
         if ($is_required_topic['ok']) $validations->push($is_required_topic);
 
 
+        // Validar si se está cambiando entre calificada y abierta, y no tiene preguntas del nuevo tipo de calificacion
+        $evaluation_type_will_be_changed = $this->checkIfEvaluationTypeWillBeChanged($school, $topic, $data);
+        if ($evaluation_type_will_be_changed['ok']) $validations->push($evaluation_type_will_be_changed);
+
+
         $show_confirm = !($validations->where('show_confirm', false)->count() > 0);
 
         return [
@@ -203,13 +208,39 @@ class Topic extends BaseModel
         ];
     }
 
+    public function checkIfEvaluationTypeWillBeChanged(School $school, Topic $topic, $data)
+    {
+        $assessable = isset($data['assessable']) ? $data['assessable'] : 0;
+
+        if ($topic->assessable == 0 || $assessable == 0) return ['ok' => false];
+
+        $is_or_will_be_assessable = $topic->assessable || ($assessable === 1);
+        $evaluation_type = $topic->evaluation_type;
+        $questions_by_evaluation_type = $topic->questions()
+            ->whereRelation('type', 'code', $evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer')->count();
+        $have_questions_of_new_type = $questions_by_evaluation_type > 0;
+
+        $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && $data['active'];
+
+        if (!$temp['ok']) return $temp;
+
+        $temp['title'] = "No se puede inactivar el tema.";
+        $temp['subtitle'] = "Para poder inactivar el tema es necesario agregarle una evaluación.";
+        $temp['show_confirm'] = false;
+        $temp['type'] = 'check_if_evaluation_type_will_change_and_has_active_questions';
+        $temp['list'] = [];
+
+
+        return $temp;
+    }
+
     public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic)
     {
-        // $course_requirements = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
-        //     $query->where('id', $topic->course->id);
-        // })->get();
+        $course_requirements = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
+            $query->where('id', $topic->course->id);
+        })->get();
 
-        $course_requirements = $topic->course->requirements()->get();
+//        $course_requirements = $topic->course->requirements()->get();
 
         $is_required_course = $course_requirements->count() > 0;
 
@@ -237,11 +268,11 @@ class Topic extends BaseModel
 
     public function checkIfIsRequiredTopic(School $school, Topic $topic, $data, $verb = 'inactivar')
     {
-        // $requirements = Requirement::whereHasMorph('requirement', [Topic::class], function ($query) use ($topic) {
-        //     $query->where('id', $topic->id);
-        // })->get();
+        $requirements = Requirement::whereHasMorph('requirement', [Topic::class], function ($query) use ($topic) {
+            $query->where('id', $topic->id);
+        })->get();
 
-        $requirements = $topic->requirements()->get();
+//        $requirements = $topic->requirements()->get();
 
         $is_required_topic = $requirements->count() > 0;
         $will_be_deleted = $data['to_delete'] ?? false;
@@ -474,7 +505,7 @@ class Topic extends BaseModel
             }
         }
 
-        $topic_requirement = $topic->requirements->first();
+        $topic_requirement = $topic->requirement()->first();
 
         if (!$topic_requirement) {
             $available_topic = true;
@@ -494,7 +525,7 @@ class Topic extends BaseModel
         return [
 //            'topic_name' => $topic->name,
             'status' => $topic_status,
-            'topic_requirement' => $topic_requirement,
+            'topic_requirement' => $topic_requirement?->id,
             'grade' => $grade,
             'available' => $available_topic,
             'remaining_attempts' => $remaining_attempts,
@@ -522,8 +553,7 @@ class Topic extends BaseModel
 
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
-            if ($question->rpta_ok == $respuesta['opc'])
-            {
+            if ($question->rpta_ok == $respuesta['opc']) {
                 $correct_answers++;
                 continue;
             }
@@ -545,7 +575,7 @@ class Topic extends BaseModel
                 ->where('topic_id', $topic_requirement->id)
                 ->where('user_id', $user->id)->first();
 
-            $available_topic = in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
+            $available_topic = $requirement_summary && in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
         $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();

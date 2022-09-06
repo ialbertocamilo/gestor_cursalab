@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('course_id')->nullable()->constrained('courses');
 
             $table->string('name')->nullable();
+            $table->string('code')->nullable();
             $table->string('slug')->nullable();
             $table->text('description')->nullable();
             $table->text('content')->nullable();

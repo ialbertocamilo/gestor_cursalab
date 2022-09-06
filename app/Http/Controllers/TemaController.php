@@ -163,9 +163,10 @@ class TemaController extends Controller
     {
         $active = !$topic->active;
 
-        if ($request->validate):
+        if ($request->validateForm):
             $validations = Topic::validateBeforeUpdate($school, $topic, ['active' => $active]);
-            if ($validations['list'] > 0)
+
+            if (count($validations['list']) > 0)
                 return $this->success(compact('validations'), 'Ocurrió un error.', 422);
         endif;
 

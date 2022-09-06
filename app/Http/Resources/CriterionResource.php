@@ -25,6 +25,7 @@ class CriterionResource extends JsonResource
 
             'values_count' => $criterion->values_count,
             'values_route' => route('criterion_values.list', $criterion->id),
+            'values_route_wk' => route('criterion_values_wk.list', $criterion->id),
 
             'created_at' => $criterion->created_at ? $criterion->created_at->format('d/m/Y g:i a') : 'No definido',
             'updated_at' => $criterion->created_at ? $criterion->updated_at->format('d/m/Y g:i a') : 'No definido',

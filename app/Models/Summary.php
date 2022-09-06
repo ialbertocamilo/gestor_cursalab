@@ -83,7 +83,7 @@ class Summary extends BaseModel
             'user_id' => $user->id,
             'attempts' => 0,
             'views' => 1,
-            'advanced_percentage' => 1,
+            'advanced_percentage' => 0,
             // 'last_time_evaluated_at' => now(),
             // 'fuente' => $fuente
             // 'libre' => $curso->libre,
@@ -115,5 +115,16 @@ class Summary extends BaseModel
         }
 
         return self::create($data);
+    }
+
+    protected function updateUsersDataByCourse($users, $course, $action)
+    {
+        $course_rows =  SummaryCourse::where('course_id', $course->id)->get();
+
+        foreach ($course_rows AS $row)
+        {
+            // SummaryUser::
+            
+        }
     }
 }

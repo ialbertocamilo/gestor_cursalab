@@ -45,9 +45,11 @@ class SummaryTopic extends Summary
 
         if (!$row->taking_quiz) {
 
+            $duration = config('app.quizzes.duration');
+
             $data = [
                 'current_quiz_started_at' => now(),
-                'current_quiz_finishes_at' => now()->addHour(),
+                'current_quiz_finishes_at' => now()->addHours($duration),
                 'taking_quiz' => ACTIVE,
             ];
 
