@@ -436,11 +436,10 @@ class Topic extends BaseModel
                     // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
                     if ($media->type_id === 'scorm') {
                         $path = explode('.', $media->value);
-                        $media->value = "public/uploads/{$path[0]}";
+                        $media->value = asset("public/uploads/{$path[0]}");
                     }
-
-                    if (in_array($media->type_id, ['audio', 'video']) && !str_contains('https', $media->value))
-                        $media->value = get_media_url($media->value);
+//                    if (in_array($media->type_id, ['video']) && !str_contains('https', $media->value))
+//                        $media->value = get_media_url($media->value);
                 }
 
                 $topics_data[] = [
