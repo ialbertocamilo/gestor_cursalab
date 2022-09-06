@@ -7,7 +7,6 @@
     >
         <template v-slot:content>
             <v-form ref="anuncioForm">
-
                 <DefaultErrors :errors="errors" />
 
                 <v-row justify="space-around">
@@ -31,7 +30,9 @@
                             v-model="resource.nombre"
                             label="Nombre"
                             :rules="rules.nombre"
-                            counter="100"
+                            maxlength="120"
+                            :max="120"
+                            hint="Máximo 120 caracteres"
                         />
                     </v-col>
                 </v-row>
@@ -43,7 +44,8 @@
                             v-model="resource.imagen"
                             label="Imagen"
                             :file-types="['image']"
-                            @onSelect="setFile($event, resource, 'imagen')"/>
+                            @onSelect="setFile($event, resource, 'imagen')"
+                        />
                     </v-col>
 
                     <v-col cols="6" class="d-flex-- justify-content-center">
@@ -52,7 +54,8 @@
                             v-model="resource.archivo"
                             label="PDF"
                             :file-types="['pdf']"
-                            @onSelect="setFile($event, resource, 'archivo')"/>
+                            @onSelect="setFile($event, resource, 'archivo')"
+                        />
                     </v-col>
                 </v-row>
 
@@ -105,33 +108,36 @@
                             :rules="rules.contenido"
                         />
                     </v-col>
-
                 </v-row>
 
                 <v-row align="start" align-content="center">
                     <v-col cols="4" class="--d-flex --justify-content-start">
-                        <DefaultToggle v-model="resource.active"/>
+                        <DefaultToggle v-model="resource.active" />
                     </v-col>
                 </v-row>
             </v-form>
         </template>
-
     </DefaultDialog>
 </template>
 
 <script>
-
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import moment from "moment";
 
 const fields = [
-    'nombre', 'active', 'destino', 'link', 'module_ids',
-    'contenido', 'publish_date', 'end_date'
+    "nombre",
+    "active",
+    "destino",
+    "link",
+    "module_ids",
+    "contenido",
+    "publish_date",
+    "end_date"
 ];
-const file_fields = ['imagen', 'archivo'];
+const file_fields = ["imagen", "archivo"];
 
 export default {
-    components: {DefaultRichText},
+    components: { DefaultRichText },
     props: {
         options: {
             type: Object,
@@ -144,7 +150,7 @@ export default {
             errors: [],
             resourceDefault: {
                 id: null,
-                nombre: '',
+                nombre: "",
                 imagen: null,
                 file_imagen: null,
                 archivo: null,
@@ -156,30 +162,30 @@ export default {
                 active: true,
                 publish_date: null,
                 end_date: null,
-                contenido: ''
+                contenido: ""
             },
-            resource: { },
+            resource: {},
             selects: {
                 modules: [],
-                destinos: [],
+                destinos: []
             },
 
             rules: {
-                module_ids: this.getRules(['required']),
-                nombre: this.getRules(['required', 'max:100']),
-                imagen: this.getRules(['required']),
-                contenido: this.getRules(['required'])
+                module_ids: this.getRules(["required"]),
+                nombre: this.getRules(["required", "max:100"]),
+                imagen: this.getRules(["required"]),
+                contenido: this.getRules(["required"])
                 // dni: this.getRules(['required', 'number'])
             },
 
             modalDateFilter1: {
-                open: false,
+                open: false
             },
 
             modalDateFilter2: {
-                open: false,
-            },
-        }
+                open: false
+            }
+        };
     },
     methods: {
         closeModal() {

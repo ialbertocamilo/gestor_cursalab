@@ -62,12 +62,6 @@ class CourseObserver
 
             Summary::updateUsersDataByCourse($users, $course, 'deleted');
         }
-
-        // Usuarios impactados por segmentación del curso
-
-            // Actualizar resumen de usuarios (cantidades y avance)
-                // - filtrar por usuarios impactados en resumenes
-                // calcular y actualizar datos
     }
 
     /**
