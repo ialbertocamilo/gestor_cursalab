@@ -145,7 +145,8 @@ class Media extends BaseModel
 
         if(isset($name_scorm) && $name_scorm['find_main_file']){
             $name = $name.'/'.$name_scorm['nombre'];
-            $path = url('uploads/scorm/'.$name);
+//            $path = url('uploads/scorm/'.$name);
+            $path = $name;
         }
 
         // Insert Media
