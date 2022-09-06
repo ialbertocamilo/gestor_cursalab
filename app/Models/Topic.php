@@ -39,7 +39,7 @@ class Topic extends BaseModel
 
     public function requirement()
     {
-        return $this->belongsTo(Topic::class, 'topic_requirement_id' );
+        return $this->belongsTo(Topic::class, 'topic_requirement_id');
     }
 
     public function medias()
@@ -433,9 +433,14 @@ class Topic extends BaseModel
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
                 foreach ($media_topics as $media) {
-                    if ($media->type_id == 'audio' && !str_contains('https', $media->value))
-                        // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
-                        $media->value = get_media_url($media->valor);
+                    // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
+                    if ($media->type_id === 'scorm') {
+                        $path = explode('.', $media->value);
+                        $media->value = "public/uploads/{$path[0]}";
+                    }
+
+                    if (in_array($media->type_id, ['audio', 'video']) && !str_contains('https', $media->value))
+                        $media->value = get_media_url($media->value);
                 }
 
                 $topics_data[] = [
