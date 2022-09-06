@@ -435,8 +435,8 @@ class Topic extends BaseModel
                 foreach ($media_topics as $media) {
                     // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
                     if ($media->type_id === 'scorm') {
-                        $path = explode('.', $media->value);
-                        $media->value = asset("public/uploads/{$path[0]}");
+//                        $path = explode('.', $media->value);
+                        $media->value = asset("public/uploads/scorm/{$media->value}");
                     }
 //                    if (in_array($media->type_id, ['video']) && !str_contains('https', $media->value))
 //                        $media->value = get_media_url($media->value);
