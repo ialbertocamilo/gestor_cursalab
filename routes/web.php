@@ -100,7 +100,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('usuarios')->middleware('checkrol:admin')->group(base_path('routes/cms/usuarios.php'));
     Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
     Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
-    Route::prefix('criterios')->middleware('checkrol:config')->group(base_path('routes/cms/criteria.php'));
+    Route::prefix('criterios')->middleware('checkrol:config,admin')->group(base_path('routes/cms/criteria.php'));
     Route::prefix('supervisores')->middleware('checkrol:admin')->group(base_path('routes/cms/supervisores.php'));
 
 
