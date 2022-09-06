@@ -212,7 +212,6 @@ class Topic extends BaseModel
     {
         $assessable = $data['assessable'] ?? $topic->assessable;
 
-
         if ($topic->assessable == 0 || $assessable == 0) return ['ok' => false];
 
         $is_or_will_be_assessable = $topic->assessable || ($assessable === 1);
@@ -221,13 +220,9 @@ class Topic extends BaseModel
             ->whereRelation('type', 'code', $evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer')->count();
         $have_questions_of_new_type = $questions_by_evaluation_type > 0;
 
-//        info($is_or_will_be_assessable);
-//        info($questions_by_evaluation_type);
-//        info($data['active']);
-        $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && $data['active'];
+        $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && ($data['active'] || $data['active'] == 'true');
 
         if (!$temp['ok']) return $temp;
-        info($temp);
 
         $temp['title'] = "No se puede inactivar el tema.";
         $temp['subtitle'] = "Para poder inactivar el tema es necesario agregarle una evaluación.";
