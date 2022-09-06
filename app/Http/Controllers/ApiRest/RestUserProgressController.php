@@ -20,7 +20,7 @@ class RestUserProgressController extends Controller
         $assigned_courses = $user->getCurrentCourses();
         $summary_user = $user->summary;
 
-        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
+        $completed_courses = $summary_user ? $summary_user->courses_completed : 0;
         $pending_courses = $assigned_courses->count() - $completed_courses;
         $disapproved_courses = $summary_user ?
             $user->summary_courses()->whereRelation('status', 'code', 'disapproved')->count()
