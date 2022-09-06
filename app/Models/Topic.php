@@ -432,15 +432,15 @@ class Topic extends BaseModel
                 $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
-                foreach ($media_topics as $media) {
+//                foreach ($media_topics as $media) {
                     // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
-                    if ($media->type_id === 'scorm') {
+//                    if ($media->type_id === 'scorm') {
 //                        $path = explode('.', $media->value);
-                        $media->value = asset("public/uploads/scorm/{$media->value}");
-                    }
+//                        $media->value = asset("public/uploads/scorm/{$media->value}");
+//                    }
 //                    if (in_array($media->type_id, ['video']) && !str_contains('https', $media->value))
 //                        $media->value = get_media_url($media->value);
-                }
+//                }
 
                 $topics_data[] = [
                     'id' => $topic->id,
