@@ -2,15 +2,15 @@
     <section class="section-list">
         <v-card flat elevation="0">
             <v-card-title>
-                Temas: {{ topic_id ? 'Editar' : 'Crear' }}
+                Temas: {{ topic_id ? "Editar" : "Crear" }}
             </v-card-title>
         </v-card>
         <!--        <DefaultDivider/>-->
-        <br>
+        <br />
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="TemaForm">
-                    <DefaultSectionLabel label="Contenido General"/>
+                    <DefaultSectionLabel label="Contenido General" />
                     <v-row justify="center">
                         <v-col cols="6">
                             <DefaultInput
@@ -20,6 +20,8 @@
                                 placeholder="Ingrese un nombre"
                                 v-model="resource.name"
                                 :rules="rules.name"
+                                maxlength="120"
+                                hint="Máximo 120 caracteres"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -40,19 +42,25 @@
                                 api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
                                 v-model="resource.content"
                                 :init="{
-                                content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
-                                height: 175,
-                                menubar: false,
-                                language: 'es',
-                                force_br_newlines : true,
-                                force_p_newlines : false,
-                                forced_root_block : '',
-                                plugins: ['lists image preview anchor', 'code', 'paste','link'],
-                                toolbar:
-                                    'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
-                                images_upload_handler: images_upload_handler,
-                            }"/>
-
+                                    content_style:
+                                        'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                    height: 175,
+                                    menubar: false,
+                                    language: 'es',
+                                    force_br_newlines: true,
+                                    force_p_newlines: false,
+                                    forced_root_block: '',
+                                    plugins: [
+                                        'lists image preview anchor',
+                                        'code',
+                                        'paste',
+                                        'link'
+                                    ],
+                                    toolbar:
+                                        'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                    images_upload_handler: images_upload_handler
+                                }"
+                            />
                         </v-col>
                         <v-col cols="4">
                             <DefaultSelectOrUploadMultimedia
@@ -60,10 +68,11 @@
                                 v-model="resource.imagen"
                                 label="Imagen"
                                 :file-types="['image']"
-                                @onSelect="setFile($event, resource,'imagen')"/>
+                                @onSelect="setFile($event, resource, 'imagen')"
+                            />
                         </v-col>
                     </v-row>
-                    <DefaultSectionLabel label="Método de Evaluación"/>
+                    <DefaultSectionLabel label="Método de Evaluación" />
                     <v-row justify="center">
                         <v-col cols="4">
                             <DefaultSelect
@@ -83,8 +92,15 @@
                                 label="Tipo Evaluación"
                                 v-model="resource.type_evaluation_id"
                                 :items="selects.evaluation_types"
-                                :rules="resource.assessable === 1 ? rules.tipo_ev : []"
-                                :disabled="resource.assessable === '0' || !resource.assessable"
+                                :rules="
+                                    resource.assessable === 1
+                                        ? rules.tipo_ev
+                                        : []
+                                "
+                                :disabled="
+                                    resource.assessable === '0' ||
+                                        !resource.assessable
+                                "
                                 @onChange="showAlertEvaluacion"
                             />
                         </v-col>
@@ -98,48 +114,90 @@
                             />
                         </v-col>
                     </v-row>
-                    <br>
-                    <DefaultSectionLabel label="Multimedia"/>
-                    <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
-                    <br>
+                    <br />
+                    <DefaultSectionLabel label="Multimedia" />
+                    <TemaMultimediaTypes
+                        @addMultimedia="addMultimedia($event)"
+                    />
+                    <br />
                     <v-row justify="center">
                         <v-col cols="12">
-
                             <table class="table table-hover">
                                 <thead class="bg-default-primary">
-                                <tr>
-                                    <th class="text-left white--text" v-text="'Tipo'"/>
-                                    <th class="text-left white--text"
-                                        style="max-width: 25% !important;     justify-content: right !important;"
-                                        v-text="'Título'"/>
-                                    <th class="text-center white--text" v-text="'Archivo'"/>
-                                    <!--                                <th class="text-center white&#45;&#45;text" v-text="'Valor'"/>-->
-                                    <th class="text-center white--text" v-text="'¿Embebido?'"/>
-                                    <th class="text-center white--text" v-text="'¿Descargable?'"/>
-                                    <th class="text-center white--text" v-text="'Eliminar'"/>
-                                </tr>
+                                    <tr>
+                                        <th
+                                            class="text-left white--text"
+                                            v-text="'Tipo'"
+                                        />
+                                        <th
+                                            class="text-left white--text"
+                                            style="max-width: 25% !important;     justify-content: right !important;"
+                                            v-text="'Título'"
+                                        />
+                                        <th
+                                            class="text-center white--text"
+                                            v-text="'Archivo'"
+                                        />
+                                        <!--                                <th class="text-center white&#45;&#45;text" v-text="'Valor'"/>-->
+                                        <th
+                                            class="text-center white--text"
+                                            v-text="'¿Embebido?'"
+                                        />
+                                        <th
+                                            class="text-center white--text"
+                                            v-text="'¿Descargable?'"
+                                        />
+                                        <th
+                                            class="text-center white--text"
+                                            v-text="'Eliminar'"
+                                        />
+                                    </tr>
                                 </thead>
                                 <draggable
                                     v-model="resource.media"
                                     group="multimedias"
-                                    @start="drag=true"
-                                    @end="drag=false"
+                                    @start="drag = true"
+                                    @end="drag = false"
                                     ghost-class="ghost"
                                     tag="tbody"
                                 >
                                     <!--                                    <transition-group type="transition" name="flip-list">-->
-                                    <tr v-if="resource.media && resource.media.length === 0">
-                                        <td class="text-center" colspan="6"
-                                            v-text="'No hay multimedias seleccionados'"/>
+                                    <tr
+                                        v-if="
+                                            resource.media &&
+                                                resource.media.length === 0
+                                        "
+                                    >
+                                        <td
+                                            class="text-center"
+                                            colspan="6"
+                                            v-text="
+                                                'No hay multimedias seleccionados'
+                                            "
+                                        />
                                     </tr>
                                     <tr
                                         v-else
                                         style="cursor: pointer"
-                                        v-for="(media, media_index) in resource.media" :key="media.media_index">
+                                        v-for="(media,
+                                        media_index) in resource.media"
+                                        :key="media.media_index"
+                                    >
                                         <td>
-                                            <div class="multimedia-box"
-                                                 style="height: 40px !important; width: 40px !important;">
-                                                <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
+                                            <div
+                                                class="multimedia-box"
+                                                style="height: 40px !important; width: 40px !important;"
+                                            >
+                                                <i
+                                                    :class="
+                                                        mixin_multimedias.find(
+                                                            el =>
+                                                                el.type ===
+                                                                media.type_id
+                                                        ).icon ||
+                                                            'mdi mdi-loading'
+                                                    "
+                                                />
                                             </div>
                                         </td>
                                         <td>
@@ -149,44 +207,79 @@
                                                 dense
                                             />
                                         </td>
-                                        <td>{{ media.value || media.file.name }}</td>
                                         <td>
-                                            <div class="d-flex justify-content-center">
-                                                <DefaultToggle v-model="media.embed"
-                                                               no-label
-                                                               :disabled="media.disabled"
-                                                               @onChange="verifyDisabledMediaEmbed"/>
+                                            {{ media.value || media.file.name }}
+                                        </td>
+                                        <td>
+                                            <div
+                                                class="d-flex justify-content-center"
+                                            >
+                                                <DefaultToggle
+                                                    v-model="media.embed"
+                                                    no-label
+                                                    :disabled="media.disabled"
+                                                    @onChange="
+                                                        verifyDisabledMediaEmbed
+                                                    "
+                                                />
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="d-flex justify-content-center">
+                                            <div
+                                                class="d-flex justify-content-center"
+                                            >
                                                 <DefaultToggle
                                                     v-model="media.downloadable"
                                                     no-label
-                                                    :disabled="['youtube', 'vimeo', 'scorm', 'link'].includes(media.type_id)"
+                                                    :disabled="
+                                                        [
+                                                            'youtube',
+                                                            'vimeo',
+                                                            'scorm',
+                                                            'link'
+                                                        ].includes(
+                                                            media.type_id
+                                                        )
+                                                    "
                                                 />
                                             </div>
                                         </td>
                                         <td class="text-center">
                                             <DefaultDeleteBtnIcon
-                                                @click="deleteMedia(media_index)"/>
+                                                @click="
+                                                    deleteMedia(media_index)
+                                                "
+                                            />
                                         </td>
                                     </tr>
                                     <!--                                    </transition-group>-->
                                 </draggable>
                             </table>
                         </v-col>
-
                     </v-row>
                     <v-row>
                         <v-col cols="5">
                             <!--                            <DefaultToggle v-model="resource.active"/>-->
                             <DefaultToggle
                                 v-model="resource.active"
-                                :disabled="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"/>
+                                :disabled="
+                                    resource &&
+                                        resource.assessable === 1 &&
+                                        resource.cant_preguntas_evaluables_activas ===
+                                            0
+                                "
+                            />
                             <small
-                                v-if="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"
-                                v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
+                                v-if="
+                                    resource &&
+                                        resource.assessable === 1 &&
+                                        resource.cant_preguntas_evaluables_activas ===
+                                            0
+                                "
+                                v-text="
+                                    'No se podrá activar el tema hasta que se le asigne o active una evaluación.'
+                                "
+                            />
                         </v-col>
                     </v-row>
                 </v-form>
@@ -198,7 +291,6 @@
                     :loading="loadingActionBtn"
                 />
             </v-card-actions>
-
         </v-card>
         <TemaValidacionesModal
             :width="topicsValidationModal.width"
@@ -211,22 +303,37 @@
     </section>
 </template>
 <script>
-
 import MultimediaBox from "./MultimediaBox";
 // import DefaultRichText from "../../components/globals/DefaultRichText";
 import TemaMultimediaTypes from "./TemaMultimediaTypes";
-import draggable from 'vuedraggable'
+import draggable from "vuedraggable";
 import TemaValidacionesModal from "./TemaValidacionesModal";
 import Editor from "@tinymce/tinymce-vue";
 
-const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'course_id'];
+const fields = [
+    "name",
+    "description",
+    "content",
+    "imagen",
+    "position",
+    "assessable",
+    "topic_requirement_id",
+    "type_evaluation_id",
+    "active",
+    "course_id"
+];
 
-const file_fields = ['imagen'];
+const file_fields = ["imagen"];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal},
-    props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
+    components: {
+        editor: Editor,
+        TemaMultimediaTypes,
+        MultimediaBox,
+        draggable,
+        TemaValidacionesModal
+    },
+    props: ["modulo_id", "school_id", "course_id", "topic_id"],
     data() {
         return {
             drag: false,
@@ -250,69 +357,71 @@ export default {
             },
             selects: {
                 assessable: [
-                    {id: 1, nombre: 'Si'},
-                    {id: 0, nombre: 'No'},
+                    { id: 1, nombre: "Si" },
+                    { id: 0, nombre: "No" }
                 ],
                 evaluation_types: [],
                 requisitos: []
             },
             resource: {},
             rules: {
-                name: this.getRules(['required']),
+                name: this.getRules(["required"]),
                 // assessable: this.getRules(['required']),
-                tipo_ev: this.getRules(['required']),
-                position: this.getRules(['required', 'number']),
+                tipo_ev: this.getRules(["required"]),
+                position: this.getRules(["required", "number"])
             },
             loadingActionBtn: false,
             topicsValidationModal: {
-                ref: 'TemaValidacionesModal',
-                open: false,
+                ref: "TemaValidacionesModal",
+                open: false
             },
             topicsValidationModalDefault: {
-                ref: 'TemaValidacionesModal',
+                ref: "TemaValidacionesModal",
                 action: null,
-                width: '50vw',
+                width: "50vw",
                 open: false,
-                base_endpoint: '',
+                base_endpoint: "",
                 hideConfirmBtn: false,
                 hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'TemasValidaciones',
+                confirmLabel: "Confirmar",
+                cancelLabel: "Cancelar",
+                resource: "TemasValidaciones",
                 persistent: false,
                 showCloseIcon: true
-            },
-        }
+            }
+        };
     },
     computed: {
         showErrorReinicios() {
-            let vue = this
-            const reinicio = vue.resource.reinicio_automatico
-            const dias = vue.resource.reinicio_automatico_dias
-            const horas = vue.resource.reinicio_automatico_horas
-            const minutos = vue.resource.reinicio_automatico_minutos
+            let vue = this;
+            const reinicio = vue.resource.reinicio_automatico;
+            const dias = vue.resource.reinicio_automatico_dias;
+            const horas = vue.resource.reinicio_automatico_horas;
+            const minutos = vue.resource.reinicio_automatico_minutos;
             if (!reinicio) {
-                return false
+                return false;
             }
             return !(dias > 0 || horas > 0 || minutos > 0);
-        },
+        }
     },
     async mounted() {
-        let vue = this
-        vue.showLoader()
-        await this.loadData()
-        vue.hideLoader()
+        let vue = this;
+        vue.showLoader();
+        await this.loadData();
+        vue.hideLoader();
     },
     methods: {
         leavePage() {
-            let vue = this
+            let vue = this;
             window.location.href = vue.base_endpoint;
         },
         async validate() {
-            let vue = this
-            if (vue.topic_id !== '') {
-
-                if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.tipo_ev) {
+            let vue = this;
+            if (vue.topic_id !== "") {
+                if (
+                    vue.resource.hide_evaluable !== vue.resource.assessable ||
+                    vue.resource.hide_tipo_ev !== vue.resource.tipo_ev
+                ) {
                     let data = {
                         tema: vue.resource.id,
                         curso: vue.resource.course_id,
@@ -322,91 +431,124 @@ export default {
                         cursos_libres: false,
                         UsuariosActivos: true,
                         UsuariosInactivos: false,
-                        url: 'temas_noevaluables'
-                    }
-                    if (vue.resource.hide_evaluable === 'no' || vue.resource.hide_tipo_ev === 'qualified') {
-                        data.carrera = []
-                        data.ciclo = []
-                        data.temasActivos = true
-                        data.temasInactivos = true
-                        if (vue.resource.hide_tipo_ev === 'qualified') {
+                        url: "temas_noevaluables"
+                    };
+                    if (
+                        vue.resource.hide_evaluable === "no" ||
+                        vue.resource.hide_tipo_ev === "qualified"
+                    ) {
+                        data.carrera = [];
+                        data.ciclo = [];
+                        data.temasActivos = true;
+                        data.temasInactivos = true;
+                        if (vue.resource.hide_tipo_ev === "qualified") {
                             // Mostrar modal con check y opcion de descarga (endpoint notas por temas)
                             data.aprobados = true;
                             data.desaprobados = true;
                             data.validacion = false;
                             data.variantes = false;
-                            data.url = 'notas_tema';
+                            data.url = "notas_tema";
                         }
-                    } else if (vue.resource.hide_tipo_ev === 'open') {
+                    } else if (vue.resource.hide_tipo_ev === "open") {
                         // endpoint evaluaciones abiertas)
                         data.variantes = false;
-                        data.url = 'evaluaciones_abiertas';
+                        data.url = "evaluaciones_abiertas";
                     }
                     // await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
-                    vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                    vue.topicsValidationModal = Object.assign(
+                        {},
+                        vue.topicsValidationModal,
+                        vue.topicsValidationModalDefault
+                    );
 
-                    vue.topicsValidationModal.hideConfirmBtn = false
-                    vue.topicsValidationModal.cancelLabel = 'Cerrar'
-                    await vue.openFormModal(vue.topicsValidationModal, data, 'validations-before-update', 'Atención')
-                    return
+                    vue.topicsValidationModal.hideConfirmBtn = false;
+                    vue.topicsValidationModal.cancelLabel = "Cerrar";
+                    await vue.openFormModal(
+                        vue.topicsValidationModal,
+                        data,
+                        "validations-before-update",
+                        "Atención"
+                    );
+                    return;
                 }
             }
-            return vue.sendForm({checkbox: false})
+            return vue.sendForm({ checkbox: false });
         },
         sendForm(data, validateForm = true) {
-            let vue = this
+            let vue = this;
 
             // if (data.confirmMethod === 'messagesActions') {
             //     vue.leavePage()
             //     return
             // }
 
-            vue.topicsValidationModal.open = false
-            vue.loadingActionBtn = true
-            vue.showLoader()
-            const validForm = vue.validateForm('TemaForm')
-            const hasMultimedia = vue.resource.media.length > 0
+            vue.topicsValidationModal.open = false;
+            vue.loadingActionBtn = true;
+            vue.showLoader();
+            const validForm = vue.validateForm("TemaForm");
+            const hasMultimedia = vue.resource.media.length > 0;
 
             if (!validForm || !hasMultimedia) {
-                vue.hideLoader()
-                vue.loadingActionBtn = false
+                vue.hideLoader();
+                vue.loadingActionBtn = false;
                 if (!hasMultimedia)
-                    vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
-                return
+                    vue.showAlert(
+                        "Debe seleccionar al menos un multimedia",
+                        "warning"
+                    );
+                return;
             }
 
-            if (vue.topicsValidationModal.action === 'validations-after-update') {
+            if (
+                vue.topicsValidationModal.action === "validations-after-update"
+            ) {
                 vue.hideLoader();
                 vue.topicsValidationModal.open = false;
                 setTimeout(() => vue.leavePage(), 2000);
                 return;
             }
 
-            const edit = vue.topic_id !== ''
-            let url = `${vue.base_endpoint}/${edit ? `update/${vue.topic_id}` : 'store'}`
-            let method = edit ? 'PUT' : 'POST';
+            const edit = vue.topic_id !== "";
+            let url = `${vue.base_endpoint}/${
+                edit ? `update/${vue.topic_id}` : "store"
+            }`;
+            let method = edit ? "PUT" : "POST";
 
-            let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
-            formData.append('validate', validateForm ? "1" : "0");
-            vue.addMedias(formData)
-            if (data.checkbox)
-                formData.append('check_tipo_ev', data.checkbox)
+            let formData = vue.getMultipartFormData(
+                method,
+                vue.resource,
+                fields,
+                file_fields
+            );
+            formData.append("validate", validateForm ? "1" : "0");
+            vue.addMedias(formData);
+            if (data.checkbox) formData.append("check_tipo_ev", data.checkbox);
 
-            vue.$http.post(url, formData)
-                .then(async ({data}) => {
-                    this.hideLoader()
-                    const has_info_messages = data.data.messages.list.length > 0
+            vue.$http
+                .post(url, formData)
+                .then(async ({ data }) => {
+                    this.hideLoader();
+                    const has_info_messages =
+                        data.data.messages.list.length > 0;
                     if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(data.data, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                        await vue.handleValidationsAfterUpdate(
+                            data.data,
+                            vue.topicsValidationModal,
+                            vue.topicsValidationModalDefault
+                        );
                     else {
-                        vue.showAlert(data.data.msg)
-                        setTimeout(() => vue.leavePage(), 2000)
+                        vue.showAlert(data.data.msg);
+                        setTimeout(() => vue.leavePage(), 2000);
                     }
                 })
-                .catch(async (error) => {
-                    await vue.handleValidationsBeforeUpdate(error, vue.topicsValidationModal, vue.topicsValidationModalDefault);
-                    vue.loadingActionBtn = false
-                })
+                .catch(async error => {
+                    await vue.handleValidationsBeforeUpdate(
+                        error,
+                        vue.topicsValidationModal,
+                        vue.topicsValidationModalDefault
+                    );
+                    vue.loadingActionBtn = false;
+                });
         },
         images_upload_handler(blobInfo, success, failure) {
             console.log(blobInfo.blob());
@@ -416,51 +558,58 @@ export default {
 
             axios
                 .post("/upload-image/temas", formdata)
-                .then((res) => {
+                .then(res => {
                     success(res.data.location);
                 })
-                .catch((err) => {
-                    console.log(err)
+                .catch(err => {
+                    console.log(err);
                     failure("upload failed!");
                 });
         },
         addMedias(formData) {
-            let vue = this
+            let vue = this;
             vue.resource.media.forEach((el, index) => {
-                if (el.file)
-                    formData.append(`medias[${index}][file]`, el.file)
-                else
-                    formData.append(`medias[${index}][valor]`, el.value)
+                if (el.file) formData.append(`medias[${index}][file]`, el.file);
+                else formData.append(`medias[${index}][valor]`, el.value);
 
-                formData.append(`medias[${index}][titulo]`, el.title)
-                formData.append(`medias[${index}][tipo]`, el.type_id)
-                formData.append(`medias[${index}][embed]`, Number(el.embed))
-                formData.append(`medias[${index}][descarga]`, Number(el.downloadable))
-            })
+                formData.append(`medias[${index}][titulo]`, el.title);
+                formData.append(`medias[${index}][tipo]`, el.type_id);
+                formData.append(`medias[${index}][embed]`, Number(el.embed));
+                formData.append(
+                    `medias[${index}][descarga]`,
+                    Number(el.downloadable)
+                );
+            });
         },
         deleteMedia(media_index) {
-            let vue = this
-            vue.resource.media.splice(media_index, 1)
+            let vue = this;
+            vue.resource.media.splice(media_index, 1);
         },
         async loadData() {
-            let vue = this
+            let vue = this;
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-            })
-            let url = `${vue.base_endpoint}/${vue.topic_id === '' ? 'form-selects' : `search/${vue.topic_id}`}`
-            await vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.requisitos = data.data.requisitos
-                    vue.selects.evaluation_types = data.data.evaluation_types
-                    if (vue.topic_id !== '') {
-                        vue.resource = Object.assign({}, data.data.tema)
-                        vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
-                    }
-                })
+                vue.resource = Object.assign(
+                    {},
+                    vue.resource,
+                    vue.resourceDefault
+                );
+            });
+            let url = `${vue.base_endpoint}/${
+                vue.topic_id === "" ? "form-selects" : `search/${vue.topic_id}`
+            }`;
+            await vue.$http.get(url).then(({ data }) => {
+                vue.selects.requisitos = data.data.requisitos;
+                vue.selects.evaluation_types = data.data.evaluation_types;
+                if (vue.topic_id !== "") {
+                    vue.resource = Object.assign({}, data.data.tema);
+                    vue.resource.assessable =
+                        vue.resource.assessable == 1 ? 1 : 0;
+                }
+            });
             return 0;
         },
         addMultimedia(multimedia) {
-            let vue = this
+            let vue = this;
             vue.resource.media.push({
                 title: multimedia.titulo,
                 value: multimedia.valor || null,
@@ -468,16 +617,17 @@ export default {
                 type_id: multimedia.type,
                 embed: true,
                 downloadable: false,
-                disabled: false,
-            })
+                disabled: false
+            });
             vue.verifyDisabledMediaEmbed();
         },
         validateTipoEv() {
-            let vue = this
-            if (['0', null, 0, false].includes(vue.resource.assessable)) vue.resource.type_evaluation_id = null
+            let vue = this;
+            if (["0", null, 0, false].includes(vue.resource.assessable))
+                vue.resource.type_evaluation_id = null;
 
-            vue.resource.tipo_ev = null
-            vue.resetFormValidation('TemaForm')
+            vue.resource.tipo_ev = null;
+            vue.resetFormValidation("TemaForm");
 
             // Si se está creando un tema y es assessable = 'si'
             // no se puede activar hasta que tenga una evalacion
@@ -488,34 +638,46 @@ export default {
         },
         verifyDisabledMediaEmbed() {
             let vue = this;
-            const f = vue.resource.media.filter((e) => e.embed == true);
+            const f = vue.resource.media.filter(e => e.embed == true);
             if (f.length == 1) {
-                const idx = vue.resource.media.findIndex((e) => e.embed == true);
+                const idx = vue.resource.media.findIndex(e => e.embed == true);
                 if (idx > -1) {
                     vue.resource.media[idx].disabled = true;
                 }
             } else {
-                vue.resource.media.map(e => e.disabled = false);
+                vue.resource.media.map(e => (e.disabled = false));
             }
         },
         async showAlertEvaluacion() {
-            let vue = this
-            vue.topicsValidationModal.hideConfirmBtn = true
-            const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
-            const tipo_ev = evaluation_type.name === 'qualified' ? 'Calificada' : 'Abierta';
+            let vue = this;
+            vue.topicsValidationModal.hideConfirmBtn = true;
+            const evaluation_type = vue.selects.evaluation_types.find(
+                el => el.id === vue.resource.type_evaluation_id
+            );
+            const tipo_ev =
+                evaluation_type.name === "qualified" ? "Calificada" : "Abierta";
             const title = `Debe tener una evaluación ${tipo_ev}`;
-            const data = {data: [title]}
+            const data = { data: [title] };
 
             // await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
-            vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+            vue.topicsValidationModal = Object.assign(
+                {},
+                vue.topicsValidationModal,
+                vue.topicsValidationModalDefault
+            );
 
-            vue.topicsValidationModal.width = "30vw"
-            vue.topicsValidationModal.hideConfirmBtn = true
-            vue.topicsValidationModal.cancelLabel = 'Entendido'
-            await vue.openFormModal(vue.topicsValidationModal, data, 'showAlertEvaluacion', 'Debes de tener en cuenta')
-        },
+            vue.topicsValidationModal.width = "30vw";
+            vue.topicsValidationModal.hideConfirmBtn = true;
+            vue.topicsValidationModal.cancelLabel = "Entendido";
+            await vue.openFormModal(
+                vue.topicsValidationModal,
+                data,
+                "showAlertEvaluacion",
+                "Debes de tener en cuenta"
+            );
+        }
     }
-}
+};
 </script>
 <style lang="scss">
 @import "resources/sass/variables";
@@ -525,12 +687,12 @@ export default {
     padding: 10px 0;
     border-radius: 9px;
     opacity: 0.3;
-    background: #CCC;
+    background: #ccc;
 }
 
 .date_reinicios_error {
     padding: 10px 0;
-    border: #FF5252 2px solid;
+    border: #ff5252 2px solid;
     border-radius: 5px;
 }
 
@@ -543,8 +705,8 @@ export default {
     -ms-hyphens: auto;
     hyphens: auto;
     font-weight: 400;
-    color: #FF5252;
-    caret-color: #FF5252;
+    color: #ff5252;
+    caret-color: #ff5252;
 }
 
 .box_date_reinicios {

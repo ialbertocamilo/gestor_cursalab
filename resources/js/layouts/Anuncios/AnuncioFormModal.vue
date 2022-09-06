@@ -7,7 +7,6 @@
     >
         <template v-slot:content>
             <v-form ref="anuncioForm">
-
                 <DefaultErrors :errors="errors" />
 
                 <v-row justify="space-around">
@@ -31,6 +30,8 @@
                             v-model="resource.nombre"
                             label="Nombre"
                             :rules="rules.nombre"
+                            maxlength="120"
+                            hint="Máximo 120 caracteres"
                         />
                     </v-col>
                 </v-row>
@@ -42,7 +43,8 @@
                             v-model="resource.imagen"
                             label="Imagen"
                             :file-types="['image']"
-                            @onSelect="setFile($event, resource, 'imagen')"/>
+                            @onSelect="setFile($event, resource, 'imagen')"
+                        />
                     </v-col>
 
                     <v-col cols="6" class="d-flex-- justify-content-center">
@@ -51,7 +53,8 @@
                             v-model="resource.archivo"
                             label="PDF"
                             :file-types="['pdf']"
-                            @onSelect="setFile($event, resource, 'archivo')"/>
+                            @onSelect="setFile($event, resource, 'archivo')"
+                        />
                     </v-col>
                 </v-row>
 
@@ -104,33 +107,36 @@
                             :rules="rules.contenido"
                         />
                     </v-col>
-
                 </v-row>
 
                 <v-row align="start" align-content="center">
                     <v-col cols="4" class="--d-flex --justify-content-start">
-                        <DefaultToggle v-model="resource.active"/>
+                        <DefaultToggle v-model="resource.active" />
                     </v-col>
                 </v-row>
             </v-form>
         </template>
-
     </DefaultDialog>
 </template>
 
 <script>
-
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import moment from "moment";
 
 const fields = [
-    'nombre', 'active', 'destino', 'link', 'module_ids',
-    'contenido', 'publish_date', 'end_date'
+    "nombre",
+    "active",
+    "destino",
+    "link",
+    "module_ids",
+    "contenido",
+    "publish_date",
+    "end_date"
 ];
-const file_fields = ['imagen', 'archivo'];
+const file_fields = ["imagen", "archivo"];
 
 export default {
-    components: {DefaultRichText},
+    components: { DefaultRichText },
     props: {
         options: {
             type: Object,
@@ -143,7 +149,7 @@ export default {
             errors: [],
             resourceDefault: {
                 id: null,
-                nombre: '',
+                nombre: "",
                 imagen: null,
                 file_imagen: null,
                 archivo: null,
@@ -155,158 +161,159 @@ export default {
                 active: true,
                 publish_date: null,
                 end_date: null,
-                contenido: ''
+                contenido: ""
             },
-            resource: { },
+            resource: {},
             selects: {
                 modules: [],
-                destinos: [],
+                destinos: []
             },
 
             rules: {
-                module_ids: this.getRules(['required']),
-                nombre: this.getRules(['required', 'max:100']),
-                imagen: this.getRules(['required']),
-                contenido: this.getRules(['required'])
+                module_ids: this.getRules(["required"]),
+                nombre: this.getRules(["required", "max:100"]),
+                imagen: this.getRules(["required"]),
+                contenido: this.getRules(["required"])
                 // dni: this.getRules(['required', 'number'])
             },
 
             modalDateFilter1: {
-                open: false,
+                open: false
             },
 
             modalDateFilter2: {
-                open: false,
-            },
-        }
+                open: false
+            }
+        };
     },
     methods: {
         closeModal() {
-            let vue = this
+            let vue = this;
             // vue.options.open = false
-            vue.resetSelects()
-            vue.resetValidation()
-            vue.$emit('onCancel')
-        }
-        ,
+            vue.resetSelects();
+            vue.resetValidation();
+            vue.$emit("onCancel");
+        },
         resetValidation() {
-            let vue = this
+            let vue = this;
             // if (vue.options.action !== 'edit'){
-            vue.$refs.inputPDF.removeAllFilesFromDropzone()
-            vue.$refs.inputImagen.removeAllFilesFromDropzone()
+            vue.$refs.inputPDF.removeAllFilesFromDropzone();
+            vue.$refs.inputImagen.removeAllFilesFromDropzone();
             // vue.resource.contenido = ""
             // }
-            vue.$refs.anuncioForm.resetValidation()
-        }
-        ,
+            vue.$refs.anuncioForm.resetValidation();
+        },
         confirmModal() {
+            let vue = this;
 
-            let vue = this
+            vue.errors = [];
 
-            vue.errors = []
+            this.showLoader();
 
-            this.showLoader()
+            const validateForm = vue.validateForm("anuncioForm");
+            const edit = vue.options.action === "edit";
 
-            const validateForm = vue.validateForm('anuncioForm')
-            const edit = vue.options.action === 'edit'
-
-            let base = `${vue.options.base_endpoint}`
+            let base = `${vue.options.base_endpoint}`;
             let url = vue.resource.id
-                        ? `${base}/${vue.resource.id}/update`
-                        : `${base}/store`;
+                ? `${base}/${vue.resource.id}/update`
+                : `${base}/store`;
 
-            let method = edit ? 'PUT' : 'POST';
+            let method = edit ? "PUT" : "POST";
 
             if (validateForm && vue.isValid()) {
-
                 let formData = vue.getMultipartFormData(
-                    method, vue.resource, fields, file_fields
+                    method,
+                    vue.resource,
+                    fields,
+                    file_fields
                 );
 
                 vue.$http
-                   .post(url, formData)
-                   .then(({data}) => {
-
-                        vue.closeModal()
-                        vue.showAlert(data.data.msg)
-                        vue.$emit('onConfirm')
-
-                   }).catch((error) => {
-
-                       if (error && error.errors)
-                            vue.errors = error.errors
-
-
+                    .post(url, formData)
+                    .then(({ data }) => {
+                        vue.closeModal();
+                        vue.showAlert(data.data.msg);
+                        vue.$emit("onConfirm");
                     })
+                    .catch(error => {
+                        if (error && error.errors) vue.errors = error.errors;
+                    });
             }
 
-            this.hideLoader()
-        }
-        ,
+            this.hideLoader();
+        },
         resetSelects() {
-            let vue = this
-            vue.selects.modules = []
-            vue.selects.destinos = []
-        }
-        ,
+            let vue = this;
+            vue.selects.modules = [];
+            vue.selects.destinos = [];
+        },
         async loadData(resource) {
+            let vue = this;
 
-            let vue = this
-
-            vue.errors = []
+            vue.errors = [];
 
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-            })
+                vue.resource = Object.assign(
+                    {},
+                    vue.resource,
+                    vue.resourceDefault
+                );
+            });
 
-            let base = `${vue.options.base_endpoint}`
+            let base = `${vue.options.base_endpoint}`;
             let url = resource
-                        ? `${base}/${resource.id}/edit`
-                        : `${base}/create`;
+                ? `${base}/${resource.id}/edit`
+                : `${base}/create`;
 
-            await vue.$http.get(url).then(({data}) => {
-
-                vue.selects.modules = data.data.modules
-                vue.selects.destinos = data.data.destinos
+            await vue.$http.get(url).then(({ data }) => {
+                vue.selects.modules = data.data.modules;
+                vue.selects.destinos = data.data.destinos;
 
                 if (resource) {
                     vue.resource = Object.assign({}, data.data.announcement);
 
                     if (vue.resource.publish_date)
-                        vue.resource.publish_date = vue.resource.publish_date.substring(0, 10)
+                        vue.resource.publish_date = vue.resource.publish_date.substring(
+                            0,
+                            10
+                        );
 
                     if (vue.resource.end_date)
-                        vue.resource.end_date = vue.resource.end_date.substring(0, 10)
+                        vue.resource.end_date = vue.resource.end_date.substring(
+                            0,
+                            10
+                        );
                 }
-            })
+            });
 
             return 0;
-        }
-        ,
+        },
         isValid() {
-
             let valid = true;
             let errors = [];
             let formData = this.getMultipartFormData(
-                '', this.resource, fields, file_fields
+                "",
+                this.resource,
+                fields,
+                file_fields
             );
 
             // Validation: At least one module should be selected
 
             if (this.resource.module_ids.length === 0) {
                 errors.push({
-                    message: 'No hay ningún módulo seleccionado'
-                })
+                    message: "No hay ningún módulo seleccionado"
+                });
                 valid = false;
             }
 
             // Validation: imagen has been set or not,
             // from file or from gallery
 
-            if (!formData.get('file_imagen') && !this.resource.imagen) {
+            if (!formData.get("file_imagen") && !this.resource.imagen) {
                 errors.push({
-                    message: 'No ha seleccionado ninguna imágen'
-                })
+                    message: "No ha seleccionado ninguna imágen"
+                });
                 valid = false;
             }
 
@@ -314,11 +321,10 @@ export default {
             // check whether is valid or not
 
             if (this.resource.link) {
-
                 if (!this.isValidHttpUrl(this.resource.link)) {
                     errors.push({
-                        message: 'El link no es una URL válida'
-                    })
+                        message: "El link no es una URL válida"
+                    });
                     valid = false;
                 }
             }
@@ -326,10 +332,9 @@ export default {
             // Validation: contenido is required
 
             if (!this.resource.contenido) {
-
                 errors.push({
-                    message: 'El contenido es requerido'
-                })
+                    message: "El contenido es requerido"
+                });
                 valid = false;
             }
 
@@ -338,8 +343,7 @@ export default {
             }
 
             return valid;
-        }
-        ,
+        },
         isValidHttpUrl(string) {
             let url;
 
@@ -350,11 +354,10 @@ export default {
             }
 
             return url.protocol === "http:" || url.protocol === "https:";
-        }
-        ,
-        loadSelects() {
-            let vue = this
         },
+        loadSelects() {
+            let vue = this;
+        }
     }
-}
+};
 </script>

@@ -2,11 +2,11 @@
     <section class="section-list">
         <v-card flat elevation="0">
             <v-card-title>
-                Escuelas: {{ categoria_id ? 'Editar' : 'Crear' }}
+                Escuelas: {{ categoria_id ? "Editar" : "Crear" }}
             </v-card-title>
         </v-card>
         <!--        <DefaultDivider/>-->
-        <br>
+        <br />
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="EscuelaForm">
@@ -19,6 +19,8 @@
                                 show-required
                                 v-model="resource.name"
                                 :rules="rules.name"
+                                maxlength="120"
+                                hint="Máximo 120 caracteres"
                             />
                         </v-col>
                     </v-row>
@@ -29,7 +31,8 @@
                                 v-model="resource.imagen"
                                 label="Logo"
                                 :file-types="['image']"
-                                @onSelect="setFile($event, resource,'imagen')"/>
+                                @onSelect="setFile($event, resource, 'imagen')"
+                            />
                         </v-col>
                         <v-col cols="6">
                             <DefaultSelectOrUploadMultimedia
@@ -37,29 +40,42 @@
                                 v-model="resource.plantilla_diploma"
                                 label="Plantilla de Diploma (Medida: 1743x1553 píxeles)  "
                                 :file-types="['image']"
-                                @onSelect="setFile($event, resource,'plantilla_diploma')"/>
+                                @onSelect="
+                                    setFile(
+                                        $event,
+                                        resource,
+                                        'plantilla_diploma'
+                                    )
+                                "
+                            />
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col cols="12">
-
-                            <DefaultModalSection
-                                title="Intentos automáticos"
-                            >
+                            <DefaultModalSection title="Intentos automáticos">
                                 <template slot="content">
                                     <v-row justify="center">
-                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                        <v-col
+                                            cols="3"
+                                            class="d-flex justify-content-center align-items-center"
+                                        >
                                             <DefaultToggle
                                                 active-label="Activo"
                                                 inactive-label="Inactivo"
-                                                v-model="resource.reinicio_automatico"
+                                                v-model="
+                                                    resource.reinicio_automatico
+                                                "
                                             />
                                         </v-col>
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Días"
-                                                v-model="resource.reinicio_automatico_dias"
-                                                :disabled="!resource.reinicio_automatico"
+                                                v-model="
+                                                    resource.reinicio_automatico_dias
+                                                "
+                                                :disabled="
+                                                    !resource.reinicio_automatico
+                                                "
                                                 type="number"
                                                 dense
                                             />
@@ -67,8 +83,12 @@
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Horas"
-                                                v-model="resource.reinicio_automatico_horas"
-                                                :disabled="!resource.reinicio_automatico"
+                                                v-model="
+                                                    resource.reinicio_automatico_horas
+                                                "
+                                                :disabled="
+                                                    !resource.reinicio_automatico
+                                                "
                                                 type="number"
                                                 dense
                                             />
@@ -76,32 +96,43 @@
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Minutos"
-                                                v-model="resource.reinicio_automatico_minutos"
-                                                :disabled="!resource.reinicio_automatico"
+                                                v-model="
+                                                    resource.reinicio_automatico_minutos
+                                                "
+                                                :disabled="
+                                                    !resource.reinicio_automatico
+                                                "
                                                 type="number"
                                                 dense
                                             />
                                         </v-col>
                                     </v-row>
-                                    <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
+                                    <div
+                                        class="d-flex justify-content-center mt-1"
+                                        v-if="showErrorReinicios"
+                                    >
                                         <!--                                        <small class="ml-2 date_reinicios_error_message"-->
                                         <!--                                               v-if="showErrorReinicios"-->
                                         <!--                                               v-text="'Validar hora de reinicio'"/>-->
-                                        <div style="color: #FF5252" class="v-messages__wrapper">
-                                            <div class="v-messages__message">Validar hora de reinicio</div>
+                                        <div
+                                            style="color: #FF5252"
+                                            class="v-messages__wrapper"
+                                        >
+                                            <div class="v-messages__message">
+                                                Validar hora de reinicio
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
                             </DefaultModalSection>
                         </v-col>
-
                     </v-row>
                     <v-row>
                         <v-col cols="2">
-<!--                            <DefaultFormLabel-->
-<!--                                label="Estado"-->
-<!--                            />-->
-                            <DefaultToggle v-model="resource.active"/>
+                            <!--                            <DefaultFormLabel-->
+                            <!--                                label="Estado"-->
+                            <!--                            />-->
+                            <DefaultToggle v-model="resource.active" />
                         </v-col>
                     </v-row>
                 </v-form>
@@ -117,11 +148,19 @@
     </section>
 </template>
 <script>
-const fields = ['name', 'nombre_ciclo_0', 'active', 'position', 'config_id',
-    'imagen', 'scheduled_restarts', 'modalidad'];
-const file_fields = ['imagen','plantilla_diploma'];
+const fields = [
+    "name",
+    "nombre_ciclo_0",
+    "active",
+    "position",
+    "config_id",
+    "imagen",
+    "scheduled_restarts",
+    "modalidad"
+];
+const file_fields = ["imagen", "plantilla_diploma"];
 export default {
-    props: ["modulo_id", 'categoria_id'],
+    props: ["modulo_id", "categoria_id"],
     data() {
         return {
             base_endpoint: `/escuelas`,
@@ -131,121 +170,138 @@ export default {
                 name: null,
                 nombre_ciclo_0: null,
                 imagen: null,
-                plantilla_diploma:null,
+                plantilla_diploma: null,
                 file_imagen: null,
-                file_plantilla_diploma:null,
+                file_plantilla_diploma: null,
                 position: null,
                 active: true,
                 reinicio_automatico: false,
                 reinicio_automatico_dias: null,
                 reinicio_automatico_horas: null,
-                reinicio_automatico_minutos: 1,
+                reinicio_automatico_minutos: 1
             },
             resource: {},
             rules: {
-                name: this.getRules(['required']),
-                modalidad: this.getRules(['required']),
-                position: this.getRules(['required', 'number']),
+                name: this.getRules(["required"]),
+                modalidad: this.getRules(["required"]),
+                position: this.getRules(["required", "number"])
             },
             selects: {
                 modalidad: [
-                    {id: 'regular', nombre: 'REGULAR (dentro de malla)'},
-                    {id: 'extra', nombre: 'EXTRACURRICULAR (fuera de malla)'},
-                    {id: 'libre', nombre: 'LIBRE (no forma parte del progreso)'}
+                    { id: "regular", nombre: "REGULAR (dentro de malla)" },
+                    { id: "extra", nombre: "EXTRACURRICULAR (fuera de malla)" },
+                    {
+                        id: "libre",
+                        nombre: "LIBRE (no forma parte del progreso)"
+                    }
                 ]
             },
             loadingActionBtn: false
-        }
+        };
     },
     computed: {
         showErrorReinicios() {
-            let vue = this
-            const reinicio = vue.resource.reinicio_automatico
-            const dias = vue.resource.reinicio_automatico_dias
-            const horas = vue.resource.reinicio_automatico_horas
-            const minutos = vue.resource.reinicio_automatico_minutos
+            let vue = this;
+            const reinicio = vue.resource.reinicio_automatico;
+            const dias = vue.resource.reinicio_automatico_dias;
+            const horas = vue.resource.reinicio_automatico_horas;
+            const minutos = vue.resource.reinicio_automatico_minutos;
             if (!reinicio) {
-                return false
+                return false;
             }
             if (dias > 0 || horas > 0 || minutos > 0) {
-                return false
+                return false;
             }
-            return true
+            return true;
         }
     },
     async mounted() {
-        this.showLoader()
-        await this.loadData()
-        this.hideLoader()
+        this.showLoader();
+        await this.loadData();
+        this.hideLoader();
     },
     methods: {
         closeModal() {
-            let vue = this
+            let vue = this;
             // window.history.back()
             window.location.href = vue.base_endpoint;
         },
         confirmModal() {
-            let vue = this
-            vue.loadingActionBtn = true
-            this.showLoader()
-            const validateForm = vue.validateForm('EscuelaForm')
+            let vue = this;
+            vue.loadingActionBtn = true;
+            this.showLoader();
+            const validateForm = vue.validateForm("EscuelaForm");
             if (!validateForm) {
-                this.hideLoader()
-                vue.loadingActionBtn = false
-                return
+                this.hideLoader();
+                vue.loadingActionBtn = false;
+                return;
             }
-            const edit = vue.categoria_id !== ''
-            let url = `${vue.base_endpoint}/${edit ? `update/${vue.categoria_id}` : 'store'}`
-            let method = edit ? 'PUT' : 'POST';
+            const edit = vue.categoria_id !== "";
+            let url = `${vue.base_endpoint}/${
+                edit ? `update/${vue.categoria_id}` : "store"
+            }`;
+            let method = edit ? "PUT" : "POST";
 
-            const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
-            vue.getJSONReinicioProgramado(formData)
+            const formData = vue.getMultipartFormData(
+                method,
+                vue.resource,
+                fields,
+                file_fields
+            );
+            vue.getJSONReinicioProgramado(formData);
 
-            let data = {}
-            vue.$http.post(url, formData)
-                .then(({data}) => {
-                    this.hideLoader()
-                    vue.showAlert(data.data.msg)
-                    setTimeout(() => {
-                        window.location.href = `${vue.base_endpoint}`
-                    }, 2000)
-                })
+            let data = {};
+            vue.$http.post(url, formData).then(({ data }) => {
+                this.hideLoader();
+                vue.showAlert(data.data.msg);
+                setTimeout(() => {
+                    window.location.href = `${vue.base_endpoint}`;
+                }, 2000);
+            });
         },
         getJSONReinicioProgramado(formData) {
-            let vue = this
-            const minutes = parseInt(vue.resource.reinicio_automatico_minutos) +
-                (parseInt(vue.resource.reinicio_automatico_horas) * 60) +
-                (parseInt(vue.resource.reinicio_automatico_dias) * 1440)
+            let vue = this;
+            const minutes =
+                parseInt(vue.resource.reinicio_automatico_minutos) +
+                parseInt(vue.resource.reinicio_automatico_horas) * 60 +
+                parseInt(vue.resource.reinicio_automatico_dias) * 1440;
             const data = {
                 activado: vue.resource.reinicio_automatico,
                 tiempo_en_minutos: minutes,
                 reinicio_dias: vue.resource.reinicio_automatico_dias,
                 reinicio_horas: vue.resource.reinicio_automatico_horas,
-                reinicio_minutos: vue.resource.reinicio_automatico_minutos,
-            }
-            let json = JSON.stringify(data)
-            formData.append('scheduled_restarts', json)
+                reinicio_minutos: vue.resource.reinicio_automatico_minutos
+            };
+            let json = JSON.stringify(data);
+            formData.append("scheduled_restarts", json);
         },
         resetValidation() {
-            let vue = this
-            vue.resetFormValidation('EscuelaForm')
+            let vue = this;
+            vue.resetFormValidation("EscuelaForm");
         },
         async loadData() {
-            let vue = this
+            let vue = this;
             vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-            })
-            let url = `${vue.base_endpoint}/${vue.categoria_id === '' ? 'form-selects' : `search/${vue.categoria_id}`}`
-            await vue.$http.get(url)
-                .then(({data}) => {
-                    if (vue.categoria_id !== '') {
-                        vue.resource = Object.assign({}, data.data.escuela)
-                    }
-                })
+                vue.resource = Object.assign(
+                    {},
+                    vue.resource,
+                    vue.resourceDefault
+                );
+            });
+            let url = `${vue.base_endpoint}/${
+                vue.categoria_id === ""
+                    ? "form-selects"
+                    : `search/${vue.categoria_id}`
+            }`;
+            await vue.$http.get(url).then(({ data }) => {
+                if (vue.categoria_id !== "") {
+                    vue.resource = Object.assign({}, data.data.escuela);
+                }
+            });
             return 0;
-        },
+        }
     }
-}
+};
 </script>
 <style lang="scss">
 @import "resources/sass/variables";
@@ -255,12 +311,12 @@ export default {
     padding: 10px 0;
     border-radius: 9px;
     opacity: 0.3;
-    background: #CCC;
+    background: #ccc;
 }
 
 .date_reinicios_error {
     padding: 10px 0;
-    border: #FF5252 2px solid;
+    border: #ff5252 2px solid;
     border-radius: 5px;
 }
 
@@ -273,8 +329,8 @@ export default {
     -ms-hyphens: auto;
     hyphens: auto;
     font-weight: 400;
-    color: #FF5252;
-    caret-color: #FF5252;
+    color: #ff5252;
+    caret-color: #ff5252;
 }
 
 .box_date_reinicios {

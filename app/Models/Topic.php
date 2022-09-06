@@ -412,7 +412,7 @@ class Topic extends BaseModel
                     'nombre' => $topic->name,
                     'requisito_id' => $topic_status['topic_requirement'],
                     'imagen' => $topic->imagen,
-                    'contenido' => $topic->contenido,
+                    'contenido' => $topic->content,
                     'media' => $media_topics,
                     'evaluable' => $topic->assessable ? 'si' : 'no',
                     'tipo_ev' => $topic->evaluation_type->code ?? NULL,
