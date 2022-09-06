@@ -31,6 +31,7 @@
                             label="Nombre"
                             :rules="rules.nombre"
                             maxlength="120"
+                            :max="120"
                             hint="Máximo 120 caracteres"
                         />
                     </v-col>

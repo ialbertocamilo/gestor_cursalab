@@ -24,6 +24,7 @@
                             v-model="resource.nombre"
                             label="Nombre"
                             maxlength="120"
+                            :max="120"
                             hint="Máximo 120 caracteres"
                         />
                     </v-col>

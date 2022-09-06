@@ -21,6 +21,7 @@
                                 v-model="resource.name"
                                 :rules="rules.name"
                                 maxlength="120"
+                                :max="120"
                                 hint="Máximo 120 caracteres"
                             />
                         </v-col>
@@ -649,10 +650,13 @@ export default {
             }
         },
         async showAlertEvaluacion() {
-            let vue = this
-            vue.topicsValidationModal.hideConfirmBtn = true
-            const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
-            const tipo_ev = evaluation_type.name === 'qualified' ? 'Calificada' : 'Abierta';
+            let vue = this;
+            vue.topicsValidationModal.hideConfirmBtn = true;
+            const evaluation_type = vue.selects.evaluation_types.find(
+                el => el.id === vue.resource.type_evaluation_id
+            );
+            const tipo_ev =
+                evaluation_type.name === "qualified" ? "Calificada" : "Abierta";
             const title = `Debe tener una evaluación ${tipo_ev}`;
             const data = { data: [title] };
 

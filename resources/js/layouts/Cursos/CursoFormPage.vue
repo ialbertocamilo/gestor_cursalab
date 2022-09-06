@@ -21,6 +21,7 @@
                                 :rules="rules.name"
                                 show-required
                                 maxlength="120"
+                                :max="120"
                                 hint="Máximo 120 caracteres"
                             />
                         </v-col>
