@@ -7,7 +7,10 @@ return [
 		'multiple'=> 'Opción múltiple',
 		'califica'=>'Calificar del 1 al 5'
     ],
-
+    'tipos_scorm'=>[
+        'index.html',
+        'story.html',
+    ],
     'modalidad' => [
     	  'regular' => 'REGULAR (dentro de malla)',
 		    'extra'=> 'EXTRACURRICULAR (fuera de la malla)',

@@ -192,7 +192,7 @@ class Topic extends BaseModel
 
 
         // Validar si se está cambiando entre calificada y abierta, y no tiene preguntas del nuevo tipo de calificacion
-        $evaluation_type_will_be_changed = $this->checkIfEvaluationTypeWillBeChanged($school, $topic, $data);
+        $evaluation_type_will_be_changed = $this->checkIfEvaluationTypeWillBeChanged($topic, $data);
         if ($evaluation_type_will_be_changed['ok']) $validations->push($evaluation_type_will_be_changed);
 
 
@@ -208,9 +208,10 @@ class Topic extends BaseModel
         ];
     }
 
-    public function checkIfEvaluationTypeWillBeChanged(School $school, Topic $topic, $data)
+    public function checkIfEvaluationTypeWillBeChanged(Topic $topic, $data)
     {
         $assessable = $data['assessable'] ?? $topic->assessable;
+
 
         if ($topic->assessable == 0 || $assessable == 0) return ['ok' => false];
 
@@ -220,9 +221,13 @@ class Topic extends BaseModel
             ->whereRelation('type', 'code', $evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer')->count();
         $have_questions_of_new_type = $questions_by_evaluation_type > 0;
 
+//        info($is_or_will_be_assessable);
+//        info($questions_by_evaluation_type);
+//        info($data['active']);
         $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && $data['active'];
 
         if (!$temp['ok']) return $temp;
+        info($temp);
 
         $temp['title'] = "No se puede inactivar el tema.";
         $temp['subtitle'] = "Para poder inactivar el tema es necesario agregarle una evaluación.";
