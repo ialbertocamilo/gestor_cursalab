@@ -214,14 +214,14 @@ class SummaryCourse extends Summary
             $poll = $course->polls()->first();
 
             if ($poll) {
-//                info("2");
-//                info("USER ID :: ". $user->id); info("CURSO ID :: ". $course->id);
+                info("2");
+                info("USER ID :: ". $user->id); info("CURSO ID :: ". $course->id);
                 $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->count();
-//                info("COUNT POLL ANSWERS :: ".$poll_answers);
+                info("COUNT POLL ANSWERS :: ".$poll_answers);
                 $status = 'enc_pend';
 
                 if ($poll_answers > 0) {
-//                    info("3");
+                    info("3");
                     $status = 'aprobado';
                     $course_data['certification_issued_at'] = now();
                 }
@@ -238,7 +238,7 @@ class SummaryCourse extends Summary
                 $status = 'desaprobado';
         }
 
-//        info("UPDATE TO ". $status);
+        info("UPDATE TO ". $status);
         $course_data['status_id'] = Taxonomy::getFirstData('course', 'user-status', $status)->id;
         $course_data['attempts'] = $row_course->attempts + 1;
 
