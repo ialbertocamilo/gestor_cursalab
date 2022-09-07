@@ -164,7 +164,7 @@ class UserController extends Controller
         $user->update($data);
 
         // 2. Actualizar roles
-
+        Bouncer::sync($user)->roles([]);
         if (isset($data['workspacessel']) && is_array($data['workspacessel']) && count($data['workspacessel']) > 0) {
             foreach ($data['workspacessel'] as $wk => $val) {
                 if (isset($data['rolestowk'][$wk]) && is_array($data['rolestowk'][$wk]) && count($data['rolestowk'][$wk]) > 0 && !is_null($data['rolestowk'][$wk][0])) {
