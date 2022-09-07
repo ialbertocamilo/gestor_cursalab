@@ -466,7 +466,9 @@ class Course extends BaseModel
 
                 $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
                     ->where('course_id', $course->id)
-                    ->where('user_id', $user->id)->first();
+                    ->where('user_id', $user->id)->count();
+
+                info($poll_questions_answers);
 
                 if ($poll_questions_answers) $solved_poll = true;
             }
@@ -544,7 +546,7 @@ class Course extends BaseModel
         $users = collect();
 
         foreach ($this->segments as $key => $segment) {
-            
+
             $result = User::whereHas('criterion_values', function ($q) use ($segment) {
 
                         $grouped = $segments->values->groupBy('criterion_id');
