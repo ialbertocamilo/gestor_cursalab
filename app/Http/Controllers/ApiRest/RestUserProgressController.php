@@ -21,10 +21,16 @@ class RestUserProgressController extends Controller
         $summary_user = $user->summary;
 
 //        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
-        $completed_courses = $summary_user ? $user->summary_courses()->whereRelation('status', 'code', 'aprobado')->count() : 0;
+        $completed_courses = $summary_user ?
+            $user->summary_courses()
+                ->whereHas('courses', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
+                ->whereRelation('status', 'code', 'aprobado')->count()
+            : 0;
         $pending_courses = $assigned_courses->count() - $completed_courses;
         $disapproved_courses = $summary_user ?
-            $user->summary_courses()->whereRelation('status', 'code', 'desaprobado')->count()
+            $user->summary_courses()
+                ->whereHas('courses', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
+                ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
 
         $general_percentage = $assigned_courses->count() > 0 && $summary_user ? $summary_user->advanced_percentage : 0;
