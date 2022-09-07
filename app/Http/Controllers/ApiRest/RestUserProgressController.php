@@ -23,13 +23,13 @@ class RestUserProgressController extends Controller
 //        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
         $completed_courses = $summary_user ?
             $user->summary_courses()
-                ->whereHas('courses', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
+                ->whereHas('course', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
                 ->whereRelation('status', 'code', 'aprobado')->count()
             : 0;
         $pending_courses = $assigned_courses->count() - $completed_courses;
         $disapproved_courses = $summary_user ?
             $user->summary_courses()
-                ->whereHas('courses', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
+                ->whereHas('course', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
                 ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
 
