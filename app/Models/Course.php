@@ -360,7 +360,7 @@ class Course extends BaseModel
                         $topics_view = $summary_topics->where('topic_id', $topic->id)->first();
                         $last_item = ($topic->id == $topics->last()->id);
                         if ($topics_view?->views) {
-                            $passed_tests = $summary_topics->where('posteo_id', $topic->id)->where('passed', 1)->first();
+                            $passed_tests = $summary_topics->where('topic_id', $topic->id)->where('passed', 1)->first();
                             if ($topic->evaluation_type?->code == 'calificada' && $passed_tests && !$last_item) continue;
                             $last_topic = ($topic->id);
                             break;

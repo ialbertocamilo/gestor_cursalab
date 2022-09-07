@@ -32,19 +32,35 @@ class PollQuestionAnswer extends BaseModel
     {
         $question_type_taxonomy = Taxonomy::getFirstData('poll', 'tipo-pregunta', $question_type);
 
-        PollQuestionAnswer::updateOrInsert(
-            [
-                'course_id' => $course_id, 'user_id' => $user_id,
-                'poll_question_id' => $poll_question_id
-            ],
-            [
+        $poll_question_answer = PollQuestionAnswer::where('course_id', $course_id)
+            ->where('user_id', $user_id)->where('poll_question_id', $poll_question_id)
+            ->first();
+
+        if ($poll_question_answer) {
+            $poll_question_answer->update(['respuestas' => $answers,]);
+        } else {
+            PollQuestionAnswer::create([
                 'course_id' => $course_id,
                 'user_id' => $user_id,
-//                'poll_question_id' => $poll_question_id,
+                'poll_question_id' => $poll_question_id,
                 'type_id' => $question_type_taxonomy?->id,
                 'respuestas' => $answers
-            ]
-        );
-        cache_clear_model(PollQuestionAnswer::class);
+            ]);
+        }
+//        PollQuestionAnswer::updateOrInsert(
+//            [
+//                'course_id' => $course_id, 'user_id' => $user_id,
+//                'poll_question_id' => $poll_question_id
+//            ],
+//            [
+//                'course_id' => $course_id,
+//                'user_id' => $user_id,
+////                'poll_question_id' => $poll_question_id,
+//                'type_id' => $question_type_taxonomy?->id,
+//                'respuestas' => $answers,
+//
+//            ]
+//        );
+//        cache_clear_model(PollQuestionAnswer::class);
     }
 }
