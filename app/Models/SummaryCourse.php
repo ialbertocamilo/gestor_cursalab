@@ -221,7 +221,7 @@ class SummaryCourse extends Summary
                 $status = 'enc_pend';
 
                 if ($poll_answers > 0) {
-//                    info("3");
+                    info("3");
                     $status = 'aprobado';
                     $course_data['certification_issued_at'] = now();
                 }
@@ -238,6 +238,7 @@ class SummaryCourse extends Summary
                 $status = 'desaprobado';
         }
 
+        info("UPDATE TO ". $status);
         $course_data['status_id'] = Taxonomy::getFirstData('course', 'user-status', $status)->id;
         $course_data['attempts'] = $row_course->attempts + 1;
 
