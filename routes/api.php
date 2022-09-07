@@ -72,12 +72,12 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::post('registra_ayuda', [RestAyudaController::class, 'registra_ayuda']);
 });
 
-Route::controller(TestController::class)->group(function () {
-
-    Route::get('/test/users', 'users');
-    Route::get('/test/workspaces', 'workspaces');
-    Route::get('/test/schools', 'schools');
-    Route::get('/test/courses', 'courses');
-
-    Route::get('/test/blocks', 'blocks');
-});
+//Route::controller(TestController::class)->group(function () {
+//
+//    Route::get('/test/users', 'users');
+//    Route::get('/test/workspaces', 'workspaces');
+//    Route::get('/test/schools', 'schools');
+//    Route::get('/test/courses', 'courses');
+//
+//    Route::get('/test/blocks', 'blocks');
+//});
