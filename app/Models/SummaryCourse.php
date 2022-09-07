@@ -220,7 +220,7 @@ class SummaryCourse extends Summary
                 info("COUNT POLL ANSWERS :: ".$poll_answers);
                 $status = 'enc_pend';
 
-                if ($poll_answers) {
+                if ($poll_answers > 0) {
 //                    info("3");
                     $status = 'aprobado';
                     $course_data['certification_issued_at'] = now();
