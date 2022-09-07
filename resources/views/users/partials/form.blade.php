@@ -149,7 +149,25 @@
             </div>
         @endisset
     </div>
+    <div class="col-md-3">
+        <div class="col-sm-9">
+            {{ Form::label('estado', 'Estado', ['class'=>'form-control-label m-0'] ) }}
+            <div class="form-check">
+                {{ Form::radio('active', '1', false, ['class'=>'form-check-input', 'id'=>'estado1']) }}
+                <label class="form-check-label" for="estado1">
+                    Activo
+                </label>
+            </div>
+            <div class="form-check">
+                {{ Form::radio('active', '0', true, ['class'=>'form-check-input', 'id'=>'estado2']) }}
+                <label class="form-check-label" for="estado2">
+                    Inactivo
+                </label>
+            </div>
+        </div>
+    </div>
 </div>
+
 <div class="line"></div>
 <div class="form-group row">
     <div class="col-sm-4 offset-sm-3">
