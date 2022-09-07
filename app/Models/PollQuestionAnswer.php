@@ -45,5 +45,6 @@ class PollQuestionAnswer extends BaseModel
                 'respuestas' => $answers
             ]
         );
+        cache_clear_model(PollQuestionAnswer::class);
     }
 }
