@@ -200,7 +200,7 @@ class SummaryCourse extends Summary
         $advanced_percentage = ($assigned > 0) ? (($q_completed / $assigned) * 100) : 0;
         $advanced_percentage = ($advanced_percentage > 100) ? 100 : $advanced_percentage; // Maximo porcentaje = 100
 
-        $grade_average = $rows->whereIn('topic_id', $topics_qualified->pluck('id'))->average('grade');
+        $grade_average = $rows->whereIn('topic_id', $topics_qualified)->average('grade');
         $grade_average = round($grade_average ?? 0, 2);
         info($topics_qualified->pluck('id')->toArray());
         info("COUNT TOPICS QUALIFIED :: ". $topics_qualified->count());
