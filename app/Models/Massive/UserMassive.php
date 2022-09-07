@@ -2,10 +2,11 @@
 
 namespace App\Models\Massive;
 
+use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Illuminate\Support\Collection;
 
 class UserMassive implements ToCollection
 {
@@ -18,7 +19,6 @@ class UserMassive implements ToCollection
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
         $this->process_user($rows,$headers,$criteria);
-        dd($this->errors);
     }
     private function process_user($users,$headers,$criteria){
         
@@ -28,7 +28,8 @@ class UserMassive implements ToCollection
             $headers->each(function ($obj) use ($data_criteria, $data_users, $user) {
                 if ($obj['is_criterion']) {
                     $data_criteria->push([
-                        'criterion_id' => $obj['id'],
+                        'criterion_code' => $obj['criterion_code'],
+                        'criterion_id' => $obj['criterion_id'],
                         'criterion_name' => $obj['criterion_name'],
                         'required' => $obj['required'],
                         'value_excel'=>trim($user[$obj['index']]),
@@ -45,6 +46,8 @@ class UserMassive implements ToCollection
             $data_user = $this->prepare_data_user($data_users,$data_criteria,$criteria);
             if(!$data_user['has_error']){
                 //Insert user and criteria
+                $user = User::where('document',$data_user['user']['document'])->first();
+                User::storeRequest($data_user['user'],$user);
                 $this->processed_users ++;
             }else{
                 //set errors
@@ -71,13 +74,14 @@ class UserMassive implements ToCollection
         $user['criterion_list'] = [];
         foreach ($data_criteria as $dc) {
             $criterion = $criteria->where('id',$dc['criterion_id'])->first();
-            $criterion_value_id = $criterion->values->where('value_text',$dc['value_excel'])->first()?->id;
+            $criterion_value_id = $criterion->values->where('value_text',$dc['value_excel'])->first();
             if(!$criterion_value_id && $dc['required']){
                 $has_error = true;
                 $errors_index[] = $dc['index'];
             }
-            $criterion_list[$dc['criterion_id']] = $criterion_value_id;
+            $user['criterion_list'][$dc['criterion_code']] = $criterion_value_id->id;
         }
+        $user['criterion_list_final'] = [];
         return compact('has_error','user','errors_index');
     }
     private function process_header($headers,$criteria){
@@ -91,7 +95,8 @@ class UserMassive implements ToCollection
             }
             $data_excel->push([
                 'is_criterion' => boolval($criterion),
-                'id' => $criterion ? $criterion->id : null,
+                'criterion_code' => $criterion ? $criterion->code : null,
+                'criterion_id' => $criterion ? $criterion->id : null,
                 'header_static_code'=> isset($data['code']) ? $data['code'] : null,
                 'criterion_name' => $criterion ? $criterion->name : null,
                 'required' => $criterion ? $criterion->required : true,
