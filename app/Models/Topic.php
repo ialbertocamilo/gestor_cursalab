@@ -224,8 +224,8 @@ class Topic extends BaseModel
 
         if (!$temp['ok']) return $temp;
 
-        $temp['title'] = "No se puede inactivar el tema.";
-        $temp['subtitle'] = "Para poder inactivar el tema es necesario agregarle una evaluación.";
+        $temp['title'] = "No se puede activar el tema.";
+        $temp['subtitle'] = "Para poder activar el tema es necesario agregarle una evaluación.";
         $temp['show_confirm'] = false;
         $temp['type'] = 'check_if_evaluation_type_will_change_and_has_active_questions';
         $temp['list'] = [];
