@@ -202,6 +202,8 @@ class SummaryCourse extends Summary
 
         $grade_average = $rows->whereIn('topic_id', $topics_qualified->pluck('id'))->average('grade');
         $grade_average = round($grade_average ?? 0, 2);
+        info($topics_qualified->pluck('id')->toArray());
+        info("COUNT TOPICS QUALIFIED :: ". $topics_qualified->count());
         info("GRADE AVERGAE UPDATED :: " . $grade_average);
 
         $course_data = compact('assigned', 'passed', 'taken', 'reviewed', 'failed', 'grade_average', 'advanced_percentage');
