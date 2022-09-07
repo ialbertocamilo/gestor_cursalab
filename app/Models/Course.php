@@ -468,7 +468,7 @@ class Course extends BaseModel
                     ->where('course_id', $course->id)
                     ->where('user_id', $user->id)->count();
 
-                info($poll_questions_answers);
+//                info($poll_questions_answers);
 
                 if ($poll_questions_answers) $solved_poll = true;
             }
