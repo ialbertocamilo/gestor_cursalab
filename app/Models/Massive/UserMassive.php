@@ -96,8 +96,12 @@ class UserMassive implements ToCollection
                 $user[$dt['code']] = ($dt['value_excel'] == 'Active') ? 1 : 0;
             }
         }
-        dd($user);
-        $user['password'] =  $user['document'];
+        try {
+            $user['password'] =  $user['document'];
+
+        } catch (\Throwable $th) {
+           dd($user);
+        }
         $user['criterion_list'] = [];
         foreach ($data_criteria as $dc) {
             //Validación de requerido
