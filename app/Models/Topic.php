@@ -39,7 +39,7 @@ class Topic extends BaseModel
 
     public function requirement()
     {
-        return $this->belongsTo(Topic::class);
+        return $this->belongsTo(Topic::class, 'topic_requirement_id');
     }
 
     public function medias()
@@ -192,7 +192,7 @@ class Topic extends BaseModel
 
 
         // Validar si se está cambiando entre calificada y abierta, y no tiene preguntas del nuevo tipo de calificacion
-        $evaluation_type_will_be_changed = $this->checkIfEvaluationTypeWillBeChanged($school, $topic, $data);
+        $evaluation_type_will_be_changed = $this->checkIfEvaluationTypeWillBeChanged($topic, $data);
         if ($evaluation_type_will_be_changed['ok']) $validations->push($evaluation_type_will_be_changed);
 
 
@@ -208,20 +208,24 @@ class Topic extends BaseModel
         ];
     }
 
-    public function checkIfEvaluationTypeWillBeChanged(School $school, Topic $topic, $data)
+    public function checkIfEvaluationTypeWillBeChanged(Topic $topic, $data)
     {
-        $is_or_will_be_assessable = $topic->assessable || $data['assesable'] === 1;
+        $assessable = $data['assessable'] ?? $topic->assessable;
+
+        if ($topic->assessable == 0 || $assessable == 0) return ['ok' => false];
+
+        $is_or_will_be_assessable = $topic->assessable || ($assessable === 1);
         $evaluation_type = $topic->evaluation_type;
         $questions_by_evaluation_type = $topic->questions()
             ->whereRelation('type', 'code', $evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer')->count();
         $have_questions_of_new_type = $questions_by_evaluation_type > 0;
 
-        $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && $data['active'];
+        $temp['ok'] = $is_or_will_be_assessable && !$have_questions_of_new_type && ($data['active'] || $data['active'] == 'true');
 
         if (!$temp['ok']) return $temp;
 
-        $temp['title'] = "No se puede inactivar el tema.";
-        $temp['subtitle'] = "Para poder inactivar el tema es necesario agregarle una evaluación.";
+        $temp['title'] = "No se puede activar el tema.";
+        $temp['subtitle'] = "Para poder activar el tema es necesario agregarle una evaluación.";
         $temp['show_confirm'] = false;
         $temp['type'] = 'check_if_evaluation_type_will_change_and_has_active_questions';
         $temp['list'] = [];
@@ -428,18 +432,22 @@ class Topic extends BaseModel
                 $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
-                foreach ($media_topics as $media) {
-                    if ($media->type_id == 'audio' && !str_contains('https', $media->value))
-                        // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
-                        $media->value = get_media_url($media->valor);
-                }
+//                foreach ($media_topics as $media) {
+                    // if ($media->type->code == 'audio' && !str_contains('https', $media->value))
+//                    if ($media->type_id === 'scorm') {
+//                        $path = explode('.', $media->value);
+//                        $media->value = asset("public/uploads/scorm/{$media->value}");
+//                    }
+//                    if (in_array($media->type_id, ['video']) && !str_contains('https', $media->value))
+//                        $media->value = get_media_url($media->value);
+//                }
 
                 $topics_data[] = [
                     'id' => $topic->id,
                     'nombre' => $topic->name,
                     'requisito_id' => $topic_status['topic_requirement'],
                     'imagen' => $topic->imagen,
-                    'contenido' => $topic->contenido,
+                    'contenido' => $topic->content,
                     'media' => $media_topics,
                     'evaluable' => $topic->assessable ? 'si' : 'no',
                     'tipo_ev' => $topic->evaluation_type->code ?? NULL,
@@ -501,7 +509,7 @@ class Topic extends BaseModel
             }
         }
 
-        $topic_requirement = $topic->requirements->first();
+        $topic_requirement = $topic->requirement()->first();
 
         if (!$topic_requirement) {
             $available_topic = true;
@@ -521,7 +529,7 @@ class Topic extends BaseModel
         return [
 //            'topic_name' => $topic->name,
             'status' => $topic_status,
-            'topic_requirement' => $topic_requirement,
+            'topic_requirement' => $topic_requirement?->id,
             'grade' => $grade,
             'available' => $available_topic,
             'remaining_attempts' => $remaining_attempts,
@@ -571,7 +579,7 @@ class Topic extends BaseModel
                 ->where('topic_id', $topic_requirement->id)
                 ->where('user_id', $user->id)->first();
 
-            $available_topic = in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
+            $available_topic = $requirement_summary && in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
         $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();

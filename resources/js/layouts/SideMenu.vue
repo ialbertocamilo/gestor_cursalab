@@ -220,7 +220,7 @@ export default {
                         subpaths: ["criterios", "valores"],
                         selected: false,
                         permission: "criterios",
-                        role: ["super-user", "config"]
+                        role: ["super-user", "config", "admin"]
                     }
                     // {
                     //     title:"Supervisores",
@@ -461,7 +461,7 @@ export default {
                 ]
             },
             {
-                title: "ATENCIÓN AL CLIENTE",
+                title: "ATENCIÓN AL COLABORADOR",
                 icon: "fas fa-headset",
                 active: false,
                 items: [

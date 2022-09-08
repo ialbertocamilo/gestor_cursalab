@@ -360,7 +360,7 @@ class Course extends BaseModel
                         $topics_view = $summary_topics->where('topic_id', $topic->id)->first();
                         $last_item = ($topic->id == $topics->last()->id);
                         if ($topics_view?->views) {
-                            $passed_tests = $summary_topics->where('posteo_id', $topic->id)->where('passed', 1)->first();
+                            $passed_tests = $summary_topics->where('topic_id', $topic->id)->where('passed', 1)->first();
                             if ($topic->evaluation_type?->code == 'calificada' && $passed_tests && !$last_item) continue;
                             $last_topic = ($topic->id);
                             break;
@@ -466,7 +466,9 @@ class Course extends BaseModel
 
                 $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
                     ->where('course_id', $course->id)
-                    ->where('user_id', $user->id)->first();
+                    ->where('user_id', $user->id)->count();
+
+//                info($poll_questions_answers);
 
                 if ($poll_questions_answers) $solved_poll = true;
             }
@@ -544,7 +546,7 @@ class Course extends BaseModel
         $users = collect();
 
         foreach ($this->segments as $key => $segment) {
-            
+
             $result = User::whereHas('criterion_values', function ($q) use ($segment) {
 
                         $grouped = $segments->values->groupBy('criterion_id');

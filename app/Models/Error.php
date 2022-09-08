@@ -117,7 +117,7 @@ class Error extends Model
 
         $code = Error::getErrorCode($exception);
 
-        if ( $this->errorIsManagedByFormRequest($message, $filename) ) return false;
+        if ( $this->errorIsManagedByFormRequest($message, $filename, $exception->getLine()) ) return false;
         if ( $this->errorIsTokenExpired($message, $filename) ) return false;
         if ( $this->errorIsFaviconIco($request->getRequestUri()) ) return false;
         if ( $this->errorIsUnauthenticated($message, $filename) ) return false;
@@ -308,9 +308,12 @@ class Error extends Model
         ];
     }
 
-    public function errorIsManagedByFormRequest($message, $filename)
+    public function errorIsManagedByFormRequest($message, $filename, $line = null)
     {
         if ($message == 'The given data was invalid.' AND $filename == 'FormRequest.php')
+            return true;
+
+        if ($line == 138 AND $filename == 'FormRequest.php')
             return true;
 
         return false;
@@ -365,7 +368,7 @@ class Error extends Model
             'RouteCollection.php',
         ];
 
-        if (in_array($uri, $uris) AND in_array($files, $filename))
+        if (in_array($uri, $uris) AND in_array($filename, $files))
             return true;
 
         return false;

@@ -24,7 +24,7 @@ class CursosStoreUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
+            'name' => 'required|max:120',
             'description' => 'nullable',
             'position' => 'nullable',
             'active' => 'required',
@@ -35,6 +35,7 @@ class CursosStoreUpdateRequest extends FormRequest
 
             'duration' => 'nullable' ,
             'investment' => 'nullable',
+            'type_id' => 'nullable',
 
             'imagen' => 'nullable',
             'plantilla_diploma' => 'nullable',

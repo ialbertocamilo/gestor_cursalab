@@ -216,6 +216,8 @@ export default {
             let vue = this
             // CLOSE CRITERIA SECTION
             vue.sections.showCriteria = false
+            if (vue.resource)
+                vue.resource.password = null;
         }
         ,
         isValid() {

@@ -26,9 +26,9 @@ class UserController extends Controller
     {
         if ($request->has('q')) {
             $question = $request->input('q');
-            $users = User::whereIsNot('user', 'super-user')->where('name', 'like', '%' . $question . '%')->paginate();
+            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->where('name', 'like', '%' . $question . '%')->paginate();
         } else {
-            $users = User::whereIsNot('user', 'super-user')->paginate();
+            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->paginate();
         }
         $super_user = auth()->user()->isAn('super-user');
         return view('users.index', compact('users', 'super_user'));
@@ -75,7 +75,6 @@ class UserController extends Controller
     {
         //cambiar valor de name en el request
         $data = $request->all();
-        $data['password'] = Hash::make($request->password);
 
         $employee = Taxonomy::getFirstData('user', 'type', 'employee');
         $data['type_id'] = $employee->id;
@@ -96,7 +95,7 @@ class UserController extends Controller
             ->with('info', 'usero guardado con éxito');
     }
 
-    public function edit(user $user)
+    public function edit(User $user)
     {
         $get_workspaces = Workspace::all()->where('parent_id', null);
         $get_roles = Role::all()->where('name', '!=', 'super-user');
@@ -152,7 +151,7 @@ class UserController extends Controller
      * @param  \App\user  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, user $user)
+    public function update(Request $request, User $user)
     {
         // 1. Actualizar el usuario
         $data = $request->all();
@@ -165,7 +164,7 @@ class UserController extends Controller
         $user->update($data);
 
         // 2. Actualizar roles
-
+        Bouncer::sync($user)->roles([]);
         if (isset($data['workspacessel']) && is_array($data['workspacessel']) && count($data['workspacessel']) > 0) {
             foreach ($data['workspacessel'] as $wk => $val) {
                 if (isset($data['rolestowk'][$wk]) && is_array($data['rolestowk'][$wk]) && count($data['rolestowk'][$wk]) > 0 && !is_null($data['rolestowk'][$wk][0])) {

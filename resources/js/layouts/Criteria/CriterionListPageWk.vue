@@ -4,9 +4,9 @@
             <v-card-title>
                 Criterios
                 <v-spacer/>
-                <!-- <DefaultModalButton
+                <DefaultModalButton
                     :label="'Criterio'"
-                    @click="openFormModal(modalOptions)"/> -->
+                    @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -72,7 +72,14 @@ export default {
                         type: 'route',
                         // method_name: 'reset',
                         count: 'values_count',
-                        route: 'values_route'
+                        route: 'values_route_wk'
+                    },
+
+                    {
+                        text: "Editar",
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit'
                     },
 
                 ],

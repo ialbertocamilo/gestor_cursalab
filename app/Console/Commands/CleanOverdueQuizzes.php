@@ -80,7 +80,7 @@ class CleanOverdueQuizzes extends Command
 
                 $row->update($data_ev);
 
-                $row_course = SummaryCourse::updateUserData($row->topic->course);
+                $row_course = SummaryCourse::updateUserData($row->topic->course, $row->user);
                 $row_user = SummaryUser::updateUserData($row->user);
 
             } catch (\Exception $e) {

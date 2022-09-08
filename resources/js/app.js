@@ -109,6 +109,7 @@ Vue.component("tema-form-page", require("./layouts/Temas/TemasFormPage"));
 Vue.component("anuncio-layout", require("./layouts/Anuncios/AnuncioListPage"));
 Vue.component("cargo-layout", require("./layouts/Cargos/CargoListPage"));
 Vue.component("criterion-layout", require("./layouts/Criteria/CriterionListPage"));
+Vue.component("criterion-layout-wk", require("./layouts/Criteria/CriterionListPageWk"));
 Vue.component("criterion-value-layout", require("./layouts/Criteria/CriterionValues/CriterionValueListPage"));
 Vue.component("encuesta-layout", require("./layouts/Encuestas/EncuestaListPage"));
 Vue.component("incidencia-layout", require("./layouts/Incidencias/IncidenciaListPage"));

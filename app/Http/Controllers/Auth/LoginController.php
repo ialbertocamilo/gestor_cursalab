@@ -150,6 +150,8 @@ class LoginController extends Controller
         // otherwise
 
         if (count($workspaces) > 1) {
+            
+            // session()->forget('workspace');
 
             return redirect('/workspaces/list');
 

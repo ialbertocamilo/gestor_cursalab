@@ -20,13 +20,20 @@ class RestUserProgressController extends Controller
         $assigned_courses = $user->getCurrentCourses();
         $summary_user = $user->summary;
 
-        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
+//        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
+        $completed_courses = $summary_user ?
+            $user->summary_courses()
+                ->whereHas('course', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
+                ->whereRelation('status', 'code', 'aprobado')->count()
+            : 0;
         $pending_courses = $assigned_courses->count() - $completed_courses;
         $disapproved_courses = $summary_user ?
-            $user->summary_courses()->whereRelation('status', 'code', 'disapproved')->count()
+            $user->summary_courses()
+                ->whereHas('course', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
+                ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
 
-        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? $summary_user->advanced_percentage : 0;
+        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->count()) * 100) : 0;
         $general_percentage = min($general_percentage, 100);
 
 
@@ -38,7 +45,13 @@ class RestUserProgressController extends Controller
             'porcentaje' => $general_percentage,
         ];
 
-        $response['progress_detail_by_school'] = $this->getProgressDetailSchoolsByUser($assigned_courses, $user);
+        $regular_courses = $assigned_courses->where('type.code', 'regular');
+        $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular');
+        $free_courses = $assigned_courses->where('type.code', 'free');
+
+        $response['regular_schools'] = $this->getProgressDetailSchoolsByUser($regular_courses, $user);
+        $response['extracurricular_schools'] = $this->getProgressDetailSchoolsByUser($extracurricular_courses, $user);
+        $response['free_schools'] = $this->getProgressDetailSchoolsByUser($free_courses, $user);
 
         return $this->success($response);
     }
@@ -51,6 +64,7 @@ class RestUserProgressController extends Controller
         foreach ($schools as $school_id => $courses) {
             $school = $courses->first()->schools->where('id', $school_id)->first();
             $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
+            $courses_data = $this->getSchoolProgress($courses);
 
             $data[] = [
                 'id' => $school->id,
@@ -61,10 +75,11 @@ class RestUserProgressController extends Controller
 //                'estado_str' => '',
                 'completados' => $school_status['completed'],
                 'asignados' => $courses->count(),
+                'courses' => $courses_data
             ];
         }
 
-        return ['schools' => $data];
+        return $data;
     }
 
     public function getSchoolProgressByUser(School $school, $courses, $user)
@@ -100,21 +115,22 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function getSchoolProgress(School $school)
+    public function getSchoolProgress($courses)
     {
         $user = auth()->user();
-        $assigned_courses = $user->getCurrentCourses();
-
-        $schools = $assigned_courses->groupBy('schools.*.id');
-
-        $data_school = $schools[$school->id] ?? null;
-
-        if (!$data_school) return $this->success(['courses' => []]);
+//        $assigned_courses = $user->getCurrentCourses();
+//
+//        $schools = $assigned_courses->groupBy('schools.*.id');
+//
+//        $data_school = $schools[$school->id] ?? null;
+//
+//        if (!$data_school) return $this->success(['courses' => []]);
 
         $course_status_arr = config('courses.status');
         $topic_status_arr = config('topics.status');
         $school_courses = [];
-        foreach ($data_school as $school_id => $course) {
+//        foreach ($data_school as $school_id => $course) {
+        foreach ($courses as $course) {
             $course_status = Course::getCourseProgressByUser($user, $course);
 
             $active_course_topics = $course->topics->where('active', ACTIVE)->sortBy('position');
@@ -143,6 +159,7 @@ class RestUserProgressController extends Controller
             ];
         }
 
-        return $this->success(['courses' => $school_courses]);
+        return $school_courses;
+//        return $this->success(['courses' => $school_courses]);
     }
 }

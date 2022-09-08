@@ -24,7 +24,7 @@ class AnnouncementStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'nombre' => 'required|min:3',
+            'nombre' => 'required|min:3|max:120',
             'contenido' => 'required',
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',

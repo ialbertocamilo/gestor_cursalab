@@ -2,7 +2,10 @@
 
 namespace App\Models\Massive;
 
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Criterion;
+use App\Models\CriterionValue;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\UsuarioController;
@@ -12,9 +15,28 @@ class UserMassive implements ToCollection
 {
     public $errors = [];
     public $processed_users = 0;
+    public $current_workspace = null;
     public function collection(Collection $rows){
         $user =  new UsuarioController();
-        $criteria = $user->getFormSelects(true);
+        // $criteria = $user->getFormSelects(true);
+        $this->current_workspace = get_current_workspace();
+        $current_workspace = $this->current_workspace;
+        $criteria = Criterion::query()
+            ->with([
+                // 'values' => function ($q) use ($current_workspace) {
+                //     $q->with('parents:id,criterion_id,value_text')
+                //         // ->whereHas('workspaces', function ($q2) use ($current_workspace) {
+                //         //     $q2->where('id', $current_workspace->id);
+                //         // })
+                //         ->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
+                //             'value_text');
+                // },
+                'field_type:id,code'
+            ])
+            // ->whereRelation('workspaces', 'id', $current_workspace?->id)
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
+            ->orderBy('position')
+            ->get();
         //obtenemos las cabezeras
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
@@ -33,7 +55,7 @@ class UserMassive implements ToCollection
                         'criterion_name' => $obj['criterion_name'],
                         'required' => $obj['required'],
                         'value_excel'=>trim($user[$obj['index']]),
-                        'index' => $obj['index']
+                        'index' => $obj['index'],
                     ]);
                 } else {
                     $data_users->push([
@@ -70,18 +92,37 @@ class UserMassive implements ToCollection
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];
+            if($dt['code']=='active'){
+                $user[$dt['code']] = ($dt['value_excel'] == 'Activo') ? 1 : 0;
+            }
         }
+        $user['password'] =  $user['document'];
         $user['criterion_list'] = [];
         foreach ($data_criteria as $dc) {
-            $criterion = $criteria->where('id',$dc['criterion_id'])->first();
-            $criterion_value_id = $criterion->values->where('value_text',$dc['value_excel'])->first();
-            if(!$criterion_value_id && $dc['required']){
-                $has_error = true;
-                $errors_index[] = $dc['index'];
+            if(!empty($dc['value_excel'])){
+                $criterion = $criteria->where('id',$dc['criterion_id'])->first();
+                $code_criterion = $criterion->field_type->code;
+                if(isset($code_criterion) && $code_criterion =='date'){
+                    $dc['value_excel'] =  $this->excelDateToDate($dc['value_excel']);
+                }
+                $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
+                $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
+                if(!$criterion_value){
+                    // $has_error = true;
+                    // $errors_index[] = $dc['index'];
+                    $criterion_value = new CriterionValue();
+                    $criterion_value[$colum_name] = $dc['value_excel'];
+                    // $criterion_value->value_text = $dc['value_excel']; //Falta cambiar
+                    // $criterion_value->value_boolean = ($code_criterion == 'boolean');
+                    $criterion_value->criterion_id = $criterion->id;
+                    $criterion_value->active = 1;
+                    $criterion_value->save();
+                    $criterion_value->workspaces()->syncWithoutDetaching([$this->current_workspace->id]);
+                }
+                $user['criterion_list'][$dc['criterion_code']] = $criterion_value->id;
             }
-            $user['criterion_list'][$dc['criterion_code']] = $criterion_value_id->id;
         }
-        $user['criterion_list_final'] = [];
+        $user['criterion_list_final'] = $user['criterion_list'];
         return compact('has_error','user','errors_index');
     }
     private function process_header($headers,$criteria){
@@ -101,21 +142,35 @@ class UserMassive implements ToCollection
                 'criterion_name' => $criterion ? $criterion->name : null,
                 'required' => $criterion ? $criterion->required : true,
                 'name_header' => mb_strtoupper(trim($header_excel)),
-                'index' => $index
+                'index' => $index,
             ]);
-            // 'date' => $tc->type  == 'Fecha' ? 1 : 0,
-            // 'type' => $tc->data_type,
         });
         return $data_excel;
     }
     private function is_static_header($value){
         $static_headers = collect([
+            ['header_name'=>'ESTADO','code'=>'active'],
             ['header_name'=>'NOMBRES','code'=>'name'],
             ['header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
             ['header_name'=>'APELLIDO MATERNO','code'=>'surname'],
-            ['header_name'=>'IDENTIFICADOR','code'=>'document'],
+            ['header_name'=>'DOCUMENTO','code'=>'document'],
+            ['header_name'=>'NÚMERO DE TELÉFONO','code'=>'person_number'],
+            ['header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'phone_number'],
             ['header_name'=>'EMAIL','code'=>'email']
         ]);
         return $static_headers->where('header_name',$value)->first();
+    }
+    private function excelDateToDate($fecha, $rows = 0, $i = 0)
+    {
+        if(_validateDate($fecha,'Y-m-d')){
+            return $fecha;
+        }
+        if(_validateDate($fecha,'Y-m-d')){
+            // return date("d/m/Y",$fecha);
+            return Carbon::parse($fecha)->format('d/m/Y');
+        }
+        $php_date =  $fecha - 25569;
+        $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));
+        return $date;
     }
 }

@@ -24,7 +24,7 @@ class TemaStoreUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
+            'name' => 'required|max:120',
             'description' => 'nullable',
             'content' => 'nullable',
             'active' => 'required',
@@ -53,9 +53,11 @@ class TemaStoreUpdateRequest extends FormRequest
 
         // Al crear un Tema calificado, no se podrá activar hasta que se agregue una evaluación
 
-//        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
+        $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
+        $data['active'] = $active;
 //
-//        $data['active'] = $active;
+       if ( ! $this->has('assessable') )
+            $data['assessable'] = 0;
 
         return $this->merge($data)->all();
     }

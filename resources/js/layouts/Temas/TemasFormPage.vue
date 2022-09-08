@@ -20,6 +20,7 @@
                                 placeholder="Ingrese un nombre"
                                 v-model="resource.name"
                                 :rules="rules.name"
+                                counter="120"
                             />
                         </v-col>
                         <v-col cols="6">
@@ -258,7 +259,7 @@ export default {
             },
             resource: {},
             rules: {
-                name: this.getRules(['required']),
+                name: this.getRules(['required', 'max:120']),
                 // assessable: this.getRules(['required']),
                 tipo_ev: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
