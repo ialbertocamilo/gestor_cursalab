@@ -100,7 +100,7 @@ class UserMassive implements ToCollection
             $user['password'] =  $user['document'];
 
         } catch (\Throwable $th) {
-           dd($user);
+           dd($user,$data_users);
         }
         $user['criterion_list'] = [];
         foreach ($data_criteria as $dc) {
