@@ -23,6 +23,18 @@ class CriterionController extends Controller
         return $this->success($criteria);
     }
 
+    public function searchWk(Request $request)
+    {
+        // $workspace = get_current_workspace();
+        // $request->merge(['workspace_id'=> $workspace?->id]);
+
+        $criteria = Criterion::search($request);
+
+        CriterionResource::collection($criteria);
+
+        return $this->success($criteria);
+    }
+
     public function getFormSelects($compactResponse = false)
     {
         $data_types = Taxonomy::getDataForSelect('criterion', 'type');

@@ -54,7 +54,7 @@ export default {
     data() {
         return {
             dataTable: {
-                endpoint: '/criterios/search',
+                endpoint: '/criterios/search-wk',
                 ref: 'TipoCriterioTable',
                 headers: [
                     {text: "Orden", value: "position", align: 'center', model: "Criterion", sortable: false},
