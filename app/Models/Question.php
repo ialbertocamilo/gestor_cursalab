@@ -45,8 +45,8 @@ class Question extends BaseModel
         foreach ($questions as $question)
         {
             $temp_questions = collect();
-            info($question->id);
-            info($question->rptas_json);
+//            info($question->id);
+//            info($question->rptas_json);
             foreach ($question->rptas_json as $key => $value)
             {
 //                info($key." => ".$value);

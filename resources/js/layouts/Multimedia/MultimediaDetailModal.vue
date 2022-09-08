@@ -27,7 +27,7 @@
                             />
                         </div>
                         <DefaultButton
-                            v-if="resource.type !== 'Scorm'"
+                            v-if="resource.ext !== 'scorm'"
                             append-icon="mdi-download"
                             label="Descargar"
                             @click="downloadMultimedia"
