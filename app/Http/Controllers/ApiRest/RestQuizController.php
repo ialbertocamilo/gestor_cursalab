@@ -276,6 +276,7 @@ class RestQuizController extends Controller
         $workspace = $user->subworkspace->parent;
 
         $polls = Poll::whereRelation('type', 'code', 'libre')
+            ->whereRelation('questions', 'active', ACTIVE)
             ->where('workspace_id', $workspace->id)
             ->where('active', ACTIVE)->get();
 
