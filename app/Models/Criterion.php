@@ -79,7 +79,7 @@ class Criterion extends BaseModel
         $field = $request->sortBy ?? 'name';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $query->orderBy($field, $sort);
+        $query->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->paginate);
     }
