@@ -61,23 +61,17 @@ class TemaController extends Controller
         $topic->media = MediaTema::where('topic_id', $topic->id)->orderBy('position')->get();
         $topic->tags = [];
 
-        $topic->hide_evaluable = ($topic->assessable == 1) ? 1 : 0;
+        $topic->hide_evaluable = $topic->assessable;
 
-        $topic->hide_tipo_ev = '';
-        if (!is_null($topic->type_evaluation_id)) {
-            $tax_type_eval = Taxonomy::where('group', 'topic')->where('type', 'evaluation-type')->where('id', $topic->type_evaluation_id)->first();
-            $topic->hide_tipo_ev = $tax_type_eval->code;
-        }
-
-        $tax_select = Taxonomy::where('group', 'question')->where('type', 'type')->where('code', 'select-options')->first();
+        $topic->hide_tipo_ev = $topic->type_evaluation_id;
 
         $topic->disabled_estado_toggle = false;
-        $topic->cant_preguntas_evaluables_activas = 0;
-        if (!is_null($tax_select)) {
-            $preguntas_evaluables = $topic->questions->where('active', 1)->where('type_id', $tax_select->id);
-            $topic->disabled_estado_toggle = $topic->assessable == 1 && $preguntas_evaluables->count() === 0;
-            $topic->cant_preguntas_evaluables_activas = $preguntas_evaluables->count();
-        }
+        $topic->has_qualified_questions = $topic->countQuestionsByTypeEvaluation('select-options') > 0;
+        $topic->has_open_questions = $topic->countQuestionsByTypeEvaluation('written-answer') > 0;
+
+        $topic->disabled_estado_toggle = $topic->assessable === 1 &&
+            $topic->countQuestionsByTypeEvaluation($topic->evaluation_type->code === 'qualified' ? 'select-options' : 'written-answer') === 0;
+
         $form_selects = $this->getFormSelects($school, $course, $topic, true);
         $topic->tipo_ev = $topic->hide_tipo_ev;
 
@@ -153,7 +147,7 @@ class TemaController extends Controller
         $response = [
             'tema' => $topic,
             'msg' => ' Tema eliminado correctamente.',
-            'messages' => Topic::getMessagesAfterDelete($topic,'Tema eliminado con éxito')
+            'messages' => Topic::getMessagesAfterDelete($topic, 'Tema eliminado con éxito')
         ];
 
         return $this->success($response);
@@ -176,7 +170,7 @@ class TemaController extends Controller
         $response = [
             'tema' => $topic,
             'msg' => ' Estado actualizado con éxito.',
-            'messages' => Topic::getMessagesAfterUpdate($topic,  ['active' => $active], 'Tema actualizado con éxito')
+            'messages' => Topic::getMessagesAfterUpdate($topic, ['active' => $active], 'Tema actualizado con éxito')
         ];
 
         return $this->success($response);
@@ -216,12 +210,13 @@ class TemaController extends Controller
 
     public function storePregunta(
         School $school, Course $course, Topic $topic, TemaPreguntaStoreRequest $request
-    ) {
+    )
+    {
         $data = $request->validated();
 
         $question_type_code = $topic->evaluation_type->code === 'qualified'
-                                ? 'select-options'
-                                : 'written-answer';
+            ? 'select-options'
+            : 'written-answer';
 
         // info('nuevasRptas');
         // info($data['nuevasRptas']);

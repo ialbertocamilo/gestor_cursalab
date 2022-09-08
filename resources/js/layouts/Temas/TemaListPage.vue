@@ -72,7 +72,7 @@
                 :options="topicValidationModal"
                 @onCancel="closeFormModal(topicValidationModal); closeFormModal(deleteConfirmationDialog)"
                 @onConfirm="confirmValidationModal(topicValidationModal,  null, confirmDelete(false))"
-                :resource="{}"
+                :resource="delete_model"
             />
 
             <DialogConfirm
@@ -90,7 +90,7 @@
                 :options="topicValidationModalUpdateStatus"
                 @onCancel="closeFormModal(topicValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
                 @onConfirm="confirmValidationModal(topicValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
-                :resource="{}"
+                :resource="update_model"
             />
 
         </v-card>

@@ -67,6 +67,14 @@ class Topic extends BaseModel
         return $this->hasMany(SummaryTopic::class);
     }
 
+    public function countQuestionsByTypeEvaluation($code)
+    {
+        return $this->questions()
+            ->where('active', ACTIVE)
+            ->whereRelation('type', 'code', $code)
+            ->count();
+    }
+
     public function summaryByUser($user_id, array $withRelations = null)
     {
         return $this->summaries()

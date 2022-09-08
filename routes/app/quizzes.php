@@ -14,11 +14,13 @@ Route::controller(RestQuizController::class)->group(function() {
 
     Route::post('upd_reproducciones/{topic}', 'guarda_visitas_post');
     Route::post('contador_tema_reseteo/{topic}', 'contador_tema_reseteo');
-    
+
     // Route::get('eval_pendientes2/{user_id}/{cate_id}', 'evalPendientes2');
 
     // Route::get('usuario_respuestas_eval/{user_id}/{post_id}', 'usuarioRespuestasEval');
-    // 
+    //
     Route::get('preguntas_rptas_usuario/{topic}', 'preguntasRptasUsuario');
+
+    Route::get('lista_enc_libres', 'getFreePolls');
 
 });

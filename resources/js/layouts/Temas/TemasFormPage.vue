@@ -182,12 +182,9 @@
                     <v-row>
                         <v-col cols="5">
                             <!--                            <DefaultToggle v-model="resource.active"/>-->
-                            <DefaultToggle
-                                v-model="resource.active"
-                                :disabled="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"/>
-                            <small
-                                v-if="resource && resource.assessable === 1 && resource.cant_preguntas_evaluables_activas === 0"
-                                v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
+                            <DefaultToggle v-model="resource.active" :disabled="resource.disabled_estado_toggle"/>
+                            <small v-if="resource.disabled_estado_toggle"
+                                   v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -247,7 +244,9 @@ export default {
                 hide_evaluable: null,
                 hide_tipo_ev: null,
                 disabled_estado_toggle: false,
-                cant_preguntas_evaluables_activas: 0
+                has_qualified_questions: 0,
+                has_open_questions: 0,
+                'update-validations': [],
             },
             selects: {
                 assessable: [
@@ -285,19 +284,6 @@ export default {
             },
         }
     },
-    computed: {
-        showErrorReinicios() {
-            let vue = this
-            const reinicio = vue.resource.reinicio_automatico
-            const dias = vue.resource.reinicio_automatico_dias
-            const horas = vue.resource.reinicio_automatico_horas
-            const minutos = vue.resource.reinicio_automatico_minutos
-            if (!reinicio) {
-                return false
-            }
-            return !(dias > 0 || horas > 0 || minutos > 0);
-        },
-    },
     async mounted() {
         let vue = this
         vue.showLoader()
@@ -311,9 +297,23 @@ export default {
         },
         async validate() {
             let vue = this
+            const validForm = vue.validateForm('TemaForm')
+            const hasMultimedia = vue.resource.media.length > 0
+
+            if (!validForm || !hasMultimedia) {
+                vue.hideLoader()
+                vue.loadingActionBtn = false
+                if (!hasMultimedia)
+                    vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
+                return
+            }
             if (vue.topic_id !== '') {
 
-                if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.tipo_ev) {
+                if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.type_evaluation_id) {
+                    const evaluation_types = vue.selects.evaluation_types;
+                    const indexSelected = evaluation_types.findIndex(el => el.id === vue.resource.hide_tipo_ev);
+                    let selectedType = {code: null};
+                    if (indexSelected > -1) selectedType = evaluation_types[indexSelected];
                     let data = {
                         tema: vue.resource.id,
                         curso: vue.resource.course_id,
@@ -323,14 +323,16 @@ export default {
                         cursos_libres: false,
                         UsuariosActivos: true,
                         UsuariosInactivos: false,
-                        url: 'temas_noevaluables'
+                        url: 'temas_noevaluables',
+                        selectedType,
                     }
-                    if (vue.resource.hide_evaluable === 'no' || vue.resource.hide_tipo_ev === 'qualified') {
+
+                    if (vue.resource.hide_evaluable === 0 || selectedType.code === 'qualified') {
                         data.carrera = []
                         data.ciclo = []
                         data.temasActivos = true
                         data.temasInactivos = true
-                        if (vue.resource.hide_tipo_ev === 'qualified') {
+                        if (selectedType.code === 'qualified') {
                             // Mostrar modal con check y opcion de descarga (endpoint notas por temas)
                             data.aprobados = true;
                             data.desaprobados = true;
@@ -338,7 +340,7 @@ export default {
                             data.variantes = false;
                             data.url = 'notas_tema';
                         }
-                    } else if (vue.resource.hide_tipo_ev === 'open') {
+                    } else if (selectedType.code === 'open') {
                         // endpoint evaluaciones abiertas)
                         data.variantes = false;
                         data.url = 'evaluaciones_abiertas';
@@ -479,13 +481,24 @@ export default {
 
             vue.resource.tipo_ev = null
             vue.resetFormValidation('TemaForm')
-
-            // Si se está creando un tema y es assessable = 'si'
-            // no se puede activar hasta que tenga una evalacion
-            if (vue.resource.cant_preguntas_evaluables_activas === 0) {
-                vue.resource.disabled_estado_toggle = true;
-                vue.resource.active = false;
+        },
+        validateCountQuestions() {
+            let vue = this;
+            if (vue.resource) {
+                if (vue.resource.assessable === 1) {
+                    const evaluation_types = vue.selects.evaluation_types;
+                    const indexSelected = evaluation_types.findIndex(el => el.id === vue.resource.type_evaluation_id);
+                    if (indexSelected > -1) {
+                        const selectedType = evaluation_types[indexSelected];
+                        const canNotActive = selectedType.code === 'qualified' ?
+                            !vue.resource.has_qualified_questions :
+                            !vue.resource.has_open_questions;
+                        if (canNotActive) vue.resource.active = false;
+                        return canNotActive;
+                    }
+                }
             }
+            return false;
         },
         verifyDisabledMediaEmbed() {
             let vue = this;
@@ -501,6 +514,8 @@ export default {
         },
         async showAlertEvaluacion() {
             let vue = this
+            vue.resource.disabled_estado_toggle = vue.validateCountQuestions();
+
             vue.topicsValidationModal.hideConfirmBtn = true
             const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
             const tipo_ev = evaluation_type.name === "Calificada" ? 'Calificada' : 'Abierta';

@@ -103,7 +103,7 @@ class Taxonomy extends Model
             ->where('group', $groupName)
             ->where('active', 1)
             ->orderBy('name', 'ASC')
-            ->get(['name', 'id', 'name as nombre']);
+            ->get(['name', 'id', 'code', 'name as nombre']);
     }
 
     /**
