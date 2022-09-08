@@ -452,8 +452,8 @@ export default {
                     {
                         title: "Subida masivos",
                         icon: "fas fa-share-square",
-                        path: "/masivo/index",
-                        subpaths: ["masivo/index"],
+                        path: "/masivos",
+                        subpaths: ["masivos"],
                         selected: false,
                         permission: "proceso_masivo",
                         role: ["super-user", "admin-TEMPORAL_INACTIVO"]
