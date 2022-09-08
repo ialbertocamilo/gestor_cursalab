@@ -76,7 +76,7 @@ class Criterion extends BaseModel
         if ($request->workspace_id)
             $query->whereRelation('workspaces', 'id', $request->workspace_id);
 
-        $field = $request->sortBy ?? 'position';
+        $field = $request->sortBy ?? 'name';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort);
