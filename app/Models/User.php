@@ -147,7 +147,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function getFullnameAttribute()
     {
-        $fullname = $this->name;
+        if($this->fullname){
+            return $this->fullname;
+        }
 
         if ($this->lastname) $fullname .= ' ' . $this->lastname;
 
