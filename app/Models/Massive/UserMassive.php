@@ -107,6 +107,9 @@ class UserMassive implements ToCollection
                     $dc['value_excel'] =  $this->excelDateToDate($dc['value_excel']);
                 }
                 $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
+                if($criterion->code=='module'){
+                    $colum_name = 'external_value';
+                }
                 $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
                 if(!$criterion_value){
                     // $has_error = true;
