@@ -162,6 +162,7 @@ Vue.component(
 Vue.component("migrar-avance", require("./layouts/MigrarAvance.vue"));
 Vue.component("reinicios-masivos", require("./layouts/Masivos/ReiniciosMasivos.vue"));
 
+Vue.component("subida-masiva-layout", require("./layouts/SubidaMasiva/MasivoLayout.vue"));
 
 Vue.component("meetings-layout", require("./layouts/Meetings/MeetingsListPage.vue"));
 Vue.component("accounts-layout", require("./layouts/Accounts/AccountListPage.vue"));
