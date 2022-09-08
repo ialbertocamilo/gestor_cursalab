@@ -99,6 +99,7 @@ class UserMassive implements ToCollection
         $user['password'] =  $user['document'];
         $user['criterion_list'] = [];
         foreach ($data_criteria as $dc) {
+            //Validación de requerido
             if(!empty($dc['value_excel'])){
                 $criterion = $criteria->where('id',$dc['criterion_id'])->first();
                 $code_criterion = $criterion->field_type->code;
@@ -154,8 +155,8 @@ class UserMassive implements ToCollection
             ['header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
             ['header_name'=>'APELLIDO MATERNO','code'=>'surname'],
             ['header_name'=>'DOCUMENTO','code'=>'document'],
-            ['header_name'=>'NÚMERO DE TELÉFONO','code'=>'person_number'],
-            ['header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'phone_number'],
+            ['header_name'=>'NÚMERO DE TELÉFONO','code'=>'phone_number'],
+            ['header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
             ['header_name'=>'EMAIL','code'=>'email']
         ]);
         return $static_headers->where('header_name',$value)->first();
