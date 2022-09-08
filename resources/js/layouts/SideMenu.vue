@@ -461,7 +461,7 @@ export default {
                 ]
             },
             {
-                title: "ATENCIÓN AL CLIENTE",
+                title: "ATENCIÓN AL COLABORADOR",
                 icon: "fas fa-headset",
                 active: false,
                 items: [
