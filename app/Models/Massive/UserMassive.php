@@ -151,9 +151,10 @@ class UserMassive implements ToCollection
     private function is_static_header($value){
         $static_headers = collect([
             ['header_name'=>'ESTADO','code'=>'active'],
+            ['header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
             ['header_name'=>'NOMBRES','code'=>'name'],
             ['header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
-            ['header_name'=>'APELLIDO MATERNO','code'=>'surname'],
+            // ['header_name'=>'APELLIDO MATERNO','code'=>'surname'],
             ['header_name'=>'DOCUMENTO','code'=>'document'],
             ['header_name'=>'NÚMERO DE TELÉFONO','code'=>'phone_number'],
             ['header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
