@@ -23,10 +23,10 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-<!--                <DefaultActivityButton-->
-<!--                    :label="'Importar Evaluación'"-->
-<!--                    @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"-->
-<!--                />-->
+                <DefaultActivityButton
+                    :label="'Importar Evaluación'"
+                    @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
+                />
                 <DefaultModalButton
                     @click="openFormModal(modalOptions, null, 'create')"
                     :label="'Pregunta'"/>

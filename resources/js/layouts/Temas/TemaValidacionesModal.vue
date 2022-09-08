@@ -14,7 +14,7 @@
             </div>
             <div v-else-if="options.action === 'validations-before-update'">
                 <div
-                    v-if="resource && validateData.selectedType.code === 'qualified' && (resource.assessable === 0 || resource.assessable === null)">
+                    v-if="resource && (validateData.selectedType && validateData.selectedType.code === 'qualified') && (resource.assessable === 0 || resource.assessable === null)">
                     Estas a punto de cambiar el tipo de evaluación de evaluable calificada a no evaluable. Recuerda
                     que es necesario si el avance se mantendrá o se borrará.<br/>
                     <div>
