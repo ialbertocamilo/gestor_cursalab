@@ -19,30 +19,32 @@ use App\Models\Matricula;
 use App\Models\Ev_abierta;
 use App\Models\PosteoCompas;
 use App\Models\Usuario_rest;
+use Illuminate\Http\Request;
 use App\Models\ReporteBD2019;
 use App\Models\CambiosMasivos;
 use App\Models\Usuario_upload;
+use App\Imports\UsuariosImport;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
 use App\Models\Usuario_version;
 use App\Models\UsuariosActivos;
 use App\Models\UsuariosMasivos;
+use App\Imports\CursosSubirImport;
 use App\Models\Curricula_criterio;
+
 use App\Models\Matricula_criterio;
 use App\Models\UsuariosDesactivos;
 use App\Models\Encuestas_respuesta;
+use App\Models\Massive\UserMassive;
 
-use Illuminate\Http\Request;
-use App\Imports\UsuariosImport;
-use App\Imports\CursosSubirImport;
 use App\Exports\ExportReporteBD2019;
+use App\Exports\UserMassiveTemplate;
 
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Storage;
-
 use App\Imports\MigracionPerfilImport;
-use App\Imports\UsuariosFarmaHistorialImport;
 
+use Illuminate\Support\Facades\Storage;
+use App\Imports\UsuariosFarmaHistorialImport;
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
@@ -67,7 +69,34 @@ class MasivoController extends Controller
         ));
         return view('masivo.index')->with(compact('data','info_error'));
     }
+    public function downloadTemplateUser(){
+        return Excel::download(new UserMassiveTemplate, 'plantilla_usuarios.xlsx');
+    }
+    public function createUpdateUsers(Request $request){
+        $input = $request->all();
+        $rules = array(
+            'file_usuarios'   => 'required',
+        );
 
+        $validator = \Validator::make($input, $rules);
+  
+        if ($validator->fails()){
+            return response()->json(['info'=>'Archivo requerido.']);
+        }
+        if ($request->hasFile("file_usuarios")){
+            // try {
+                $import = new UserMassive();
+                Excel::import($import, $request->file('file_usuarios'));
+                // $info = '';
+                // $info =$info.$import->get_qinsert().' nuevo(s) usuarios(s) <br>';
+                // $info =$info.$import->get_q_updates().' usuario(s) actualizados <br>';
+                // $info =$info.$import->get_q_errors().' error(es) detectado(s) <br>';
+                // $error= ($import->get_q_errors()>0) ? true : false;
+                // $q_error = $import->get_q_errors();
+                return $this->success(['msg' => 'Usuarios creados correctamente.']);
+        }
+        return response()->json(['info'=>'Error']);
+    }
     // public function index(Request $request){
     //     $data = [];
     //     $err_usu = DB::table('err_masivos')->where('type_masivo','usuarios')->count();
