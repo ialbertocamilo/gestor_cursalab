@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Carbon::setLocale('es');
-        Bouncer::cache();
+        //Bouncer::cache();
         // Passport::loadKeysFrom(base_path(config('passport.key_path')));
         Bouncer::useRoleModel(Role::class);
     }

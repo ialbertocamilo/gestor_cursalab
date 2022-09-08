@@ -1,5 +1,8 @@
-const mix = require('laravel-mix');
+const mix = require("laravel-mix");
 mix.disableNotifications();
+
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+    .BundleAnalyzerPlugin;
 
 /*
  |--------------------------------------------------------------------------
@@ -12,5 +15,14 @@ mix.disableNotifications();
  |
  */
 
-mix.js('resources/js/documentation_page/app.js', 'public/js/documentation_page.js').js('resources/js/app.js', 'public/js')
-.sass('resources/sass/app.scss', 'public/css').sourceMaps();
+mix.js("resources/js/app.js", "public/js")
+    .js(
+        "resources/js/documentation_page/app.js",
+        "public/js/documentation_page.js"
+    )
+    .sass("resources/sass/app.scss", "public/css")
+    .sourceMaps();
+
+module.exports = {
+    plugins: [new BundleAnalyzerPlugin()]
+};
