@@ -93,7 +93,7 @@ class UserMassive implements ToCollection
             }
             $user[$dt['code']] = $dt['value_excel'];
             if($dt['code']=='active'){
-                $user[$dt['code']] = ($dt['value_excel'] == 'Activo') ? 1 : 0;
+                $user[$dt['code']] = ($dt['value_excel'] == 'Active') ? 1 : 0;
             }
         }
         $user['password'] =  $user['document'];
