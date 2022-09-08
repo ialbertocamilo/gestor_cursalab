@@ -7,14 +7,15 @@
         no-padding-card-text
     >
         <template v-slot:content>
-            <v-form ref="TemaMultimediaTextForm">
+            <v-form ref="TemaMultimediaTextForm" @submit.prevent="null">
                 <v-row>
                     <v-col cols="12">
                         <DefaultInput
                             label="Título"
                             placeholder="Ingresar título"
                             v-model="titulo"
-                            :rules="rules.titulo"/>
+                            :rules="rules.titulo"
+                        />
                     </v-col>
                     <v-col cols="12">
                         <DefaultSelectOrUploadMultimedia
@@ -70,6 +71,7 @@ export default {
         },
         confirmModal() {
             let vue = this
+            event.preventDefault();
             const validateForm = vue.validateForm('TemaMultimediaTextForm')
             if (validateForm) {
                 const data = {
