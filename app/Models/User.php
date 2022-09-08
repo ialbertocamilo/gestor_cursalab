@@ -150,7 +150,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if($this->fullname){
             return $this->fullname;
         }
-
+        $fullname = $this->name;
         if ($this->lastname) $fullname .= ' ' . $this->lastname;
 
         if ($this->surname) $fullname .= ' ' . $this->surname;
