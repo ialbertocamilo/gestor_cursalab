@@ -4,26 +4,20 @@
                 <v-card-title>Descripción: </v-card-title>
 				<v-card-text class="py-0">
 					<!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
-                    Se crea a los usuarios según los datos indicados en el excel.
+                    Se crea o actualiza a los usuarios según los datos indicados en el excel.
 				</v-card-text>
-                <v-card-title>Puntos a tomar en cuenta: </v-card-title>
+                <!-- <v-card-title>Puntos a tomar en cuenta: </v-card-title>
                 <v-card-text>
                     <ul>
-                        <!-- <li>
-                            <b>Nombres de hojas:</b> Insertar  - Nuevos
-                        </li> -->
                         <li class="mt-2">
                             <b>Columnas del excel:</b> Módulo, Área, Sede, DNI, Apellidos y Nombres, Genero,Carrera, Ciclo, Cargo
                         </li>
-						<!-- <li class="mt-2">
-                            <b>Acción: </b>   Nuevo, datos
-                        </li> -->
                         <li class="mt-2">Los errores encontrados en la subida masiva los podrás arreglar desde el botón "Ver errores" 👇</li>
                     </ul>
-                </v-card-text>
-                <v-card-actions class="d-flex justify-center">
+                </v-card-text> -->
+                <!-- <v-card-actions class="d-flex justify-center">
 					<modalErrores :q_error="q_error" tipo="usuarios"></modalErrores>
-				</v-card-actions>
+				</v-card-actions> -->
         </v-col>
         <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
             <v-row justify="center">
@@ -80,7 +74,7 @@
                     let data = new FormData();
                     data.append("file_usuarios", this.archivo);
                     // console.log(data);
-                    axios.post('/masivo/subir_usuarios',data).then((res)=>{
+                    axios.post('/masivos/create-update-users',data).then((res)=>{
                         let info = res.data.info;
                         this.loading_guardar = false;
                         if(res.data.error){

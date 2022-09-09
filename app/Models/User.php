@@ -60,7 +60,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username', 'slug', 'alias',
+        'name', 'lastname', 'surname', 'username','fullname', 'slug', 'alias','person_number','phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
@@ -147,8 +147,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function getFullnameAttribute()
     {
+        // if($this->fullname){
+        //     return $this->fullname;
+        // }
         $fullname = $this->name;
-
         if ($this->lastname) $fullname .= ' ' . $this->lastname;
 
         if ($this->surname) $fullname .= ' ' . $this->surname;

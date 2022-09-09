@@ -286,7 +286,7 @@ export default {
             dialog.open = true;
         },
         async openFormModal(dialog, rowData = null, action = null, title = null) {
-            console.log("open modal")
+            // console.log("open modal")
             let vue = this;
 
             if (action != 'status' && action != 'delete')

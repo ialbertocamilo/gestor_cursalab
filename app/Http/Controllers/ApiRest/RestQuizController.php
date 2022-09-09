@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
+use App\Models\Poll;
+use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -53,13 +55,13 @@ class RestQuizController extends Controller
         if ($row->hasImprovedGrade($new_grade)) {
 
             $data_ev = $data_ev + [
-                'correct_answers' => $correct_answers,
-                'failed_answers' => $failed_answers,
-                'passed' => $passed,
-                'answers' => $request->respuestas,
-                // 'answers' => json_encode($request->respuestas),
-                'grade' => round($new_grade, 2),
-            ];
+                    'correct_answers' => $correct_answers,
+                    'failed_answers' => $failed_answers,
+                    'passed' => $passed,
+                    'answers' => $request->respuestas,
+                    // 'answers' => json_encode($request->respuestas),
+                    'grade' => round($new_grade, 2),
+                ];
 
             $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
             $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
@@ -70,8 +72,8 @@ class RestQuizController extends Controller
 
             $next_topic = $passed ? $topic->getNextOne() : NULL;
 
-            $data_ev['ev_updated']      = 1;
-            $data_ev['ev_updated_msg']  = "(1) Evaluación actualizada";
+            $data_ev['ev_updated'] = 1;
+            $data_ev['ev_updated_msg'] = "(1) Evaluación actualizada";
 
         } else {
 
@@ -83,8 +85,8 @@ class RestQuizController extends Controller
                     'grade' => round($new_grade, 2),
                 ];
 
-            $data_ev['ev_updated']      = 0;
-            $data_ev['ev_updated_msg']  = "(0) Evaluación no actualizada (nota obtenida menor que nota existente)";
+            $data_ev['ev_updated'] = 0;
+            $data_ev['ev_updated_msg'] = "(0) Evaluación no actualizada (nota obtenida menor que nota existente)";
         }
 
         $data_ev['tema_siguiente'] = $next_topic->id ?? NULL;
@@ -97,7 +99,7 @@ class RestQuizController extends Controller
         $row_course = SummaryCourse::updateUserData($topic->course);
         $row_user = SummaryUser::updateUserData();
 
-        if ( $row_course->status->code == 'enc_pend' ) {
+        if ($row_course->status->code == 'enc_pend') {
 
             $poll = $topic->course->polls()->first();
             $data_ev['encuesta_pendiente'] = $poll->id ?? NULL;
@@ -128,7 +130,7 @@ class RestQuizController extends Controller
 
         $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
 
-        if ( count($questions) == 0 )
+        if (count($questions) == 0)
             return response()->json(['error' => true, 'data' => null], 200);
 
         $data = [
@@ -192,7 +194,7 @@ class RestQuizController extends Controller
 
         $counter = false;
 
-        if ($row AND $row->hasFailed() AND $row->hasNoAttemptsLeft()) {
+        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft()) {
 
             $times = [];
 
@@ -218,7 +220,7 @@ class RestQuizController extends Controller
                     }
                 }
 
-                if ($scheduled AND $row->last_time_evaluated_at) {
+                if ($scheduled and $row->last_time_evaluated_at) {
 
                     $finishes_at = $row->last_time_evaluated_at->addMinutes($minutes);
                     $counter = $finishes_at->diff(now())->format('%y/%m/%d %H:%i:%s');
@@ -233,12 +235,12 @@ class RestQuizController extends Controller
     {
         $row = SummaryTopic::getCurrentRow($topic);
 
-        $questions_id = ( $row && $row->answers) ? collect($row->answers)->pluck('preg_id') : [];
+        $questions_id = ($row && $row->answers) ? collect($row->answers)->pluck('preg_id') : [];
 
         $questions = Question::where('topic_id', $topic->id)
-                        ->whereIn('id', $questions_id)
-                        ->where('active', ACTIVE)
-                        ->get();
+            ->whereIn('id', $questions_id)
+            ->where('active', ACTIVE)
+            ->get();
 
         return ['error' => count($questions) == 0, 'data' => $questions];
     }
@@ -266,5 +268,34 @@ class RestQuizController extends Controller
         SummaryUser::updateUserData();
 
         return ['error' => 0, 'msg' => 'Respuestas registradas'];
+    }
+
+    public function getFreePolls()
+    {
+        $user = auth()->user();
+        $workspace = $user->subworkspace->parent;
+
+        $polls = Poll::whereRelation('type', 'code', 'libre')
+            ->whereRelation('questions', 'active', ACTIVE)
+            ->where('workspace_id', $workspace->id)
+            ->where('active', ACTIVE)->get();
+
+        $temp = [];
+        foreach ($polls as $poll) {
+            $q_answer = PollQuestionAnswer::whereRelation('pregunta.poll', 'id', $poll->id)
+                ->where('user_id', $user->id)
+                ->first();
+
+            $temp[] = [
+                'id' => $poll->id,
+                'tipo' => $poll->type->code,
+                'titulo' => $poll->titulo,
+                'imagen' => get_media_url($poll->imagen),
+                'estado' => $poll->active,
+                'solved_poll' => (bool)$q_answer
+            ];
+        }
+
+        return $this->success(['polls' => $temp]);
     }
 }

@@ -23,7 +23,7 @@ class UsuarioAyudaResource extends JsonResource
             'estado' => $estados[$this->status] ?? 'No definido',
             'status' => [
                 'text' => $estados[$this->status] ?? 'No definido',
-                'color' => $colors[$this->status] ?? 'white'
+                'color' => $colors[$this->status] ?? 'default'
             ],
             'reason' => clean_html($this->reason, 60),
             'detail' => $this->detail,
@@ -31,8 +31,8 @@ class UsuarioAyudaResource extends JsonResource
             'nombre' => $this->user->name ?? '',
             'image' => '', //space_url($this->usuario->config->logo ?? ''),
 
-            'created_at' => $this->created_at->format('d/m/Y g:i a'),
-            'updated_at' => $this->updated_at->format('d/m/Y g:i a'),
+            'created_at' => $this->created_at?->format('d/m/Y g:i a'),
+            'updated_at' => $this->updated_at?->format('d/m/Y g:i a'),
         ];
 
         if ($request->view == 'show')

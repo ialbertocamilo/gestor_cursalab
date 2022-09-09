@@ -184,7 +184,7 @@ export default ({
           { text: 'Motivo', value: 'motivo' },
         //   { text: 'Detalle', value: 'detalle' },
           { text: 'Fecha de registro', value: 'created_at' },
-          { text: 'Estado', value: 'estado' },
+          { text: 'Estado', value: 'status.text' },
           { text: 'Ver', value: 'actions', sortable: false },
         ],
         estados:['todos','pendiente','revisando','solucionado'],

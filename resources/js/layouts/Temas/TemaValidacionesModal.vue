@@ -6,15 +6,15 @@
         @onConfirm="confirmModal"
     >
         <template v-slot:content>
-<!--            <h5>{{ options.action }}</h5>-->
-<!--            <h5>{{ resource }}</h5>-->
-<!--            <h5>{{ validateData }}</h5>-->
+            <!--            <h5>{{ options.action }}</h5>-->
+            <!--            <h5>{{ resource }}</h5>-->
+            <!--            <h5>{{ validateData }}</h5>-->
             <div v-if="options.action === 'showAlertEvaluacion'" class="d-flex justify-content-center">
                 <strong v-text="validateData.data[0]"/> <br>
             </div>
             <div v-else-if="options.action === 'validations-before-update'">
                 <div
-                    v-if="resource && resource.hide_tipo_ev === 'qualified' && resource.evaluable === 'no'">
+                    v-if="resource && (validateData.selectedType && validateData.selectedType.code === 'qualified') && (resource.assessable === 0 || resource.assessable === null)">
                     Estas a punto de cambiar el tipo de evaluación de evaluable calificada a no evaluable. Recuerda
                     que es necesario si el avance se mantendrá o se borrará.<br/>
                     <div>
