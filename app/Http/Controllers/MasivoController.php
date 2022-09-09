@@ -93,7 +93,7 @@ class MasivoController extends Controller
                 // $info =$info.$import->get_q_errors().' error(es) detectado(s) <br>';
                 // $error= ($import->get_q_errors()>0) ? true : false;
                 // $q_error = $import->get_q_errors();
-                return $this->success(['msg' => 'Usuarios creados correctamente.']);
+                return $this->success(['msg' => 'Usuarios creados correctamente.','datos_procesados'=>$import->processed_users,'errores'=>$import->errors]);
         }
         return response()->json(['info'=>'Error']);
     }

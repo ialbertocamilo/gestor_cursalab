@@ -93,10 +93,13 @@ class UserMassive implements ToCollection
             }
             $user[$dt['code']] = $dt['value_excel'];
             if($dt['code']=='active'){
-                $user[$dt['code']] = ($dt['value_excel'] == 'Activo') ? 1 : 0;
+                $user[$dt['code']] = ($dt['value_excel'] == 'Active') ? 1 : 0;
             }
         }
-        $user['password'] =  $user['document'];
+        if(!$has_error){
+            $user['password'] =  $user['document'];
+        }
+
         $user['criterion_list'] = [];
         foreach ($data_criteria as $dc) {
             //Validación de requerido
@@ -107,6 +110,9 @@ class UserMassive implements ToCollection
                     $dc['value_excel'] =  $this->excelDateToDate($dc['value_excel']);
                 }
                 $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
+                if($criterion->code=='module'){
+                    $colum_name = 'external_value';
+                }
                 $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
                 if(!$criterion_value){
                     // $has_error = true;
@@ -151,6 +157,7 @@ class UserMassive implements ToCollection
     private function is_static_header($value){
         $static_headers = collect([
             ['header_name'=>'ESTADO','code'=>'active'],
+            ['header_name'=>'Username','code'=>'username'],
             ['header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
             ['header_name'=>'NOMBRES','code'=>'name'],
             ['header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
