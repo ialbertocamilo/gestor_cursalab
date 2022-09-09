@@ -76,7 +76,7 @@ class UserController extends Controller
         //cambiar valor de name en el request
         $data = $request->all();
 
-        $employee = Taxonomy::getFirstData('user', 'type', 'employee');
+        $employee = Taxonomy::getFirstData('user', 'type', 'client');
         $data['type_id'] = $employee->id;
 
         $user = User::create($data);

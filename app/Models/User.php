@@ -60,7 +60,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username','fullname', 'slug', 'alias','person_number','phone_number',
+        'name', 'lastname', 'surname', 'username', 'fullname', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
@@ -143,6 +143,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function summary_topics()
     {
         return $this->hasMany(SummaryTopic::class);
+    }
+
+    public function scopeOnlyAppUser($q)
+    {
+        $q->whereNotNull('subworkspace_id');
+    }
+
+    public function scopeFilterText($q, $filter)
+    {
+        $q->where(function ($q) use ($filter) {
+            $q->whereRaw('document like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('name like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
+        });
     }
 
     public function getFullnameAttribute()
@@ -341,14 +356,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query = self::query();
         $query->with('subworkspace');
 
-        if ($request->q) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', "%$request->q%");
-                $q->orWhere('lastname', 'like', "%$request->q%");
-                $q->orWhere('surname', 'like', "%$request->q%");
-                $q->orWhere('email', 'like', "%$request->q%");
-            });
-        }
+        if ($request->q)
+            $query->filterText($request->q);
 
         if ($request->subworkspace_id)
             $query->where('subworkspace_id', $request->subworkspace_id);
@@ -363,6 +372,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->rowsPerPage);
+    }
+
+    protected function searchSupervisors()
+    {
+
     }
 
     public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true)
@@ -524,7 +538,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'polls.questions',
             'topics.evaluation_type'
         ])
-            ->whereHas('topics', function ($q) {$q->where('active', ACTIVE);})
+            ->whereHas('topics', function ($q) {
+                $q->where('active', ACTIVE);
+            })
             ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
             ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
             ->where('active', ACTIVE)

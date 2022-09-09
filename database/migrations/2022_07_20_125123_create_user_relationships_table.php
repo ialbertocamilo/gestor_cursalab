@@ -19,6 +19,9 @@ return new class extends Migration
             $table->morphs('model');
 
             $table->foreignId('relation_type_id')->nullable()->constrained('taxonomies');
+
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

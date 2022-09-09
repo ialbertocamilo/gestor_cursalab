@@ -29,6 +29,7 @@ use App\Models\Resumen_x_curso;
 use App\Models\School;
 use App\Models\SummaryCourse;
 use App\Models\SummaryTopic;
+use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\Usuario;
 use App\Models\Workspace;
@@ -176,6 +177,7 @@ class UsuarioController extends Controller
     public function store(UserStoreRequest $request)
     {
         $data = $request->validated();
+        $data['type_id'] = Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
         User::storeRequest($data);
 
@@ -579,7 +581,7 @@ class UsuarioController extends Controller
             $q->where('workspace_id', $workspace->id);
         })->get();
 
-        return response()->json(compact( 'schools', 'modules'), 200);
+        return response()->json(compact('schools', 'modules'), 200);
     }
 
     public function buscarCursosxEscuela($school_id)
@@ -655,7 +657,7 @@ class UsuarioController extends Controller
                 ->with('user')
                 ->where('summary_topics.topic_id', $topicId)
                 ->where('summary_topics.source_id')
-                ->whereHas('user', function($q) use ($subworkspaceId) {
+                ->whereHas('user', function ($q) use ($subworkspaceId) {
                     $q->subworkspace_id = $subworkspaceId;
                 });
 
