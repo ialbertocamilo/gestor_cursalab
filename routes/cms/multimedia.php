@@ -13,5 +13,4 @@ Route::controller(MediaController::class)->group(function() {
 
     Route::post('/upload', 'upload');
     Route::get('/{media}/download', 'downloadExternalFile');
-    Route::get('/topic/{media_topic_id}/download', 'downloadMediaTopicExternalFile')->name('media.download.media_topic');
 });

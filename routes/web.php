@@ -46,6 +46,9 @@ Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 
 //Route::get('tools/dnc/{iduser}/{idvideo}', 'GestorController@descargaCertificado');
 Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descargaCertificado']);
 
+Route::get('multimedia/topic/{media_topic_id}/download', [\App\Http\Controllers\MediaController::class, 'downloadMediaTopicExternalFile'])->name('media.download.media_topic');
+
+
 Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', 'GestorController@verCertificadoEscuela');
 Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', 'GestorController@descargaCertificadoEscuela');
 /**************************** ADJUNTAR ARCHIVOS **************************************/
@@ -69,7 +72,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('general')->middleware('checkrol:admin')->group(base_path('routes/cms/general.php'));
     Route::prefix('common')->middleware('checkrol:admin')->group(base_path('routes/cms/common.php'));
-
 
 
     Route::prefix('anuncios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/anuncios.php'));
