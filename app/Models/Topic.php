@@ -442,7 +442,8 @@ class Topic extends BaseModel
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
-                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link']) ? get_media_url($media->value) : null;
+                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                        ? route('media.download.media_topic', [$media->id]) : null;
                 }
 
                 $topics_data[] = [
