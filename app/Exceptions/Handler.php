@@ -71,7 +71,17 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         Error::storeAndNotificateException($exception, $request);
-
+        if($request->is('integrations*') && $this->isHttpException($exception)){
+            switch ($exception->getStatusCode()) 
+                {
+                case 405:
+                    return response()->json(['data' =>['message'=>'Method not allowed.']],405);
+                break;
+                case 404:
+                    return response()->json(['data' =>['message'=>'Route not found.']],404);
+                break;
+            }
+        }
         // if ($exception instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
         //     return response()->json(['error' => 'token is expired'], 400);
         // } elseif ($exception instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
