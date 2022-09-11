@@ -14,12 +14,8 @@ class Integrations extends Model
 {
     protected function updateCreateUsers($users){
         $user_massive = new UserMassive();
-
         $users_collect = collect();
         $static_headers = $user_massive->getStaticHeaders();
-        // $static_headers_api = collect(
-        //     ['active','document','fullname','name','lastname','user_name','person_number','phone_number','email_address']
-        // );
         $criteria = Criterion::select('id as criterion_id','name','code')->where('active',1)->orderBy('position')->get();
         $static_header_api = $static_headers->pluck('code');
         $users_collect->push($static_headers->pluck('header_name')->merge($criteria->pluck('name')));
@@ -33,15 +29,14 @@ class Integrations extends Model
             }
             $users_collect->push($temp_user);
         }
-        dd($users_collect);
         //Procesar data
-        $us->collection($users_collect,true);
+        $user_massive->collection($users_collect);
         $data = [
-            'inserted_users' =>$us->q_inserts,
-            'updated_users' =>$us->q_updates,
-            'amount_errors' => $us->q_errors,
-            'processed_data' => $users_collect->count()-1,
-            'errors' =>  $us->errores
+            // 'inserted_users' =>$us->q_inserts,
+            // 'updated_users' =>$us->q_updates,
+            // 'amount_errors' => $us->q_errors,
+            'processed_data' => $user_massive->processed_users,
+            'errors' =>  $user_massive->errores
         ];
         return  ['data'=>$data,'code'=>200];
     }
