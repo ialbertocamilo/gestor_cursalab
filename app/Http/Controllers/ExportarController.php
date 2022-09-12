@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Criterion;
 use Illuminate\Http\Request;
 use App\Models\Usuario;
 use App\Models\Prueba;
@@ -73,7 +74,7 @@ class ExportarController extends Controller
 
     public function index2()
     {
-        $modulos = \DB::select("SELECT id, etapa FROM `ab_config` WHERE estado = 1");
+        $modulos = Criterion::getValuesForSelect('module');
         return view('exportar_vue.index', compact('modulos'));
     }
 

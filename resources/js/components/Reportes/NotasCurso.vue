@@ -1,346 +1,315 @@
 <template>
-	<v-main>
-		<!-- Resumen del reporte -->
-		<ResumenExpand titulo="Resumen del reporte">
-			<template v-slot:resumen>
-				Descarga el avance de los cursos desarrollados, hasta el momento, por los usuarios.
-			</template>
-			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-			<list-item
-				titulo="Grupo sistema"
-				subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
-			/>
-			<list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
-			<list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-			<list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-			<list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
-			<list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
-			<list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
-			<list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
-			<list-item titulo="Última sesión" subtitulo="Fecha de la última sesión en la plataforma" />
-			<list-item titulo="Visitas por curso" subtitulo="Cantidad de visitas al curso" />
-			<list-item
-				titulo="Nota promedio"
-				subtitulo="El promedio de las notas de los temas evaluables dentro del curso"
-			/>
-			<list-item titulo="Temas asignados" subtitulo="Cantidad de temas asignados al curso" />
-			<list-item titulo="Temas completados" subtitulo="Cantidad de temas completados del curso" />
-			<list-item
-				titulo="Porcentaje"
-				subtitulo="Porcentaje del curso (cantidad de temas completados sobre la cantidad de temas asignados)"
-			/>
-			<list-item
-				titulo="Resultado"
-				subtitulo="Resultado de cada curso, considerando la nota mínima aprobatoria configurada"
-			/>
-			<list-item titulo="Última visita" subtitulo="Fecha de la última visita realizada al curso" />
-			<list-item
-				titulo="Estado del curso"
-				subtitulo="Representa si el curso esta activo/inactivo en la plataforma"
-			/>
-			<list-item titulo="Ciclo del curso" subtitulo="Ciclo/Ciclos al que pertenece el curso" />
-		</ResumenExpand>
-		<!-- Formulario del reporte -->
-		<form @submit.prevent="exportNotasCurso" class="row">
-			<!-- Modulo -->
-			<div class="col-sm-4 mb-3">
-				<b-form-text text-variant="muted">Módulo</b-form-text>
-				<select v-model="modulo" class="form-control" @change="moduloChange">
-					<option value>- [Todos] -</option>
-					<option v-for="(item, index) in Modulos" :key="index" :value="item.id">
-						{{ item.etapa }}
-					</option>
-				</select>
-			</div>
-			<!-- Escuela -->
-			<div class="col-sm-4 mb-3">
-				<b-form-text text-variant="muted">Escuela</b-form-text>
-				<select
-					v-model="escuela"
-					class="form-control"
-					:disabled="!Escuelas[0]"
-					@change="escuelaChange"
-				>
-					<option value>- [Todos] -</option>
-					<option v-for="(item, index) in Escuelas" :key="index" :value="item.id">
-						{{ item.nombre }}
-					</option>
-				</select>
-			</div>
-			<!-- Curso -->
-			<div class="col-sm-4 mb-3">
-				<b-form-text text-variant="muted">Curso</b-form-text>
-				<select v-model="curso" class="form-control" :disabled="!Cursos[0]">
-					<option value>- [Todos] -</option>
-					<option v-for="(item, index) in Cursos" :key="index" :value="item.id">
-						{{ item.nombre }}
-					</option>
-				</select>
-			</div>
-			<v-divider class="col-12 mb-0 p-0"></v-divider>
+    <v-main>
+        <!-- Resumen del reporte -->
 
-			<!-- Filtros secundarios -->
-			<div class="col-12 d-flex">
-				<!-- Filtros Checkboxs -->
-				<div class="col-8 px-0">
-					<EstadoFiltro ref="EstadoFiltroComponent" @emitir-cambio="cargarGrupos" />
-					<v-divider class="col-12 p-0 m-0"></v-divider>
-					<!--          Nuevos filtros         -->
-					<div class="col-lg-12 col-xl-12 mb-3">
-						<small class="form-text text-muted">Áreas {{ ` (${Grupos.length}) ` || "" }}</small>
-						<v-select
-							attach
-							solo
-							chips
-							clearable
-							multiple
-							hide-details="false"
-							v-model="grupo"
-							:menu-props="{ overflowY: true, maxHeight: '250' }"
-							:items="Grupos"
-							:label="modulo ? 'Selecciona uno o mas Áreas' : 'Selecciona un #Modulo'"
-							:loading="loadingGrupos"
-							:disabled="!Grupos[0]"
-							:background-color="!Grupos[0] ? 'grey lighten-3' : 'light-blue lighten-5'"
-						></v-select>
-					</div>
-					<v-divider class="col-12 p-0 m-0"></v-divider>
-					<div class="col">
-						<small class="form-text text-muted text-bold">Resultado del Curso :</small>
-						<div class="d-flex mt-2">
-							<div class="col-3 p-0 mr-auto d-flex align-center">
-								<v-checkbox
-									class="my-0 mr-2"
-									label="Completados"
-									color="success"
-									v-model="completados"
-									hide-details="false"
-								/>
-								<div
-									tooltip="Resultados promedio de temas del curso iguales o superiores a la nota mínima aprobatoria asignada al curso."
-									tooltip-position="top"
-								>
-									<v-icon class="info-icon">mdi-information-outline</v-icon>
-								</div>
-							</div>
-							<div class="col-3 p-0 mr-auto d-flex align-center">
-								<v-checkbox
-									class="my-0 mr-2"
-									label="Encuesta pendiente"
-									color="primary"
-									v-model="encuesta_pendiente"
-									hide-details="false"
-								/>
-								<div
-									tooltip="Estado luego de aprobar evaluación del curso pero con encuesta pendiente."
-									tooltip-position="top"
-								>
-									<v-icon class="info-icon">mdi-information-outline</v-icon>
-								</div>
-							</div>
-							<div class="col-3 p-0 mr-auto d-flex align-center">
-								<v-checkbox
-									class="my-0 mr-2"
-									label="En desarrollo"
-									color="red"
-									v-model="desarollo"
-									hide-details="false"
-								/>
-								<div
-									tooltip="El colaborador aún no obtiene todas las calificaciones de los temas del curso aprobadas. Puede que las tenga desaprobadas pero con intentos restantes disponibles."
-									tooltip-position="top"
-								>
-									<v-icon class="info-icon">mdi-information-outline</v-icon>
-								</div>
-							</div>
-							<div class="col-3 p-0 mr-auto d-flex align-center">
-								<v-checkbox
-									class="my-0 mr-2"
-									label="Desaprobados"
-									color="warning"
-									v-model="desaprobados"
-									hide-details="false"
-								/>
-								<div
-									tooltip="Tras agotar todos los intentos de temas del curso y obtener resultados inferiores a la nota mínima aprobatoria asignada al tema, se considera desaprobación."
-									tooltip-position="top"
-								>
-									<v-icon class="info-icon">mdi-information-outline</v-icon>
-								</div>
-							</div>
-						</div>
-					</div>
-					<v-divider class="col-12 p-0 m-0"></v-divider>
-					<div class="col">
-						<small class="text-muted text-bold">Tipo de Escuelas</small>
-						<div class="d-flex align-center p-0 mr-auto mt-2">
-							<v-checkbox
-								label="Escuelas Libres"
-								color="primary"
-								class="my-0 mr-4"
-								v-model="cursos_libres"
-								hide-details="false"
-								:disabled="((modulo != '') && (escuela != ''))"
-							/>
-							<div
-								tooltip="Escuelas con cursos que no se cuentan en el progreso"
-								tooltip-position="top"
-							>
-								<v-icon class="info-icon">mdi-information-outline</v-icon>
-							</div>
-						</div>
-					</div>
-					<v-divider class="col-12 p-0 m-0"></v-divider>
-					<CheckValidar ref="checkValidacion" />
-				</div>
-				<!--          Fechas          -->
-				<div class="col-4 ml-auto">
-					<FechaFiltro ref="FechasFiltros" />
-				</div>
-			</div>
-			<v-divider class="col-12 mb-5 p-0"></v-divider>
-			<button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-				<i class="fas fa-download"></i>
-				<span>Descargar</span>
-			</button>
-		</form>
-	</v-main>
+        <ResumenExpand titulo="Resumen del reporte">
+            <template v-slot:resumen>
+                Descarga el avance de los cursos desarrollados, hasta el momento, por los usuarios.
+            </template>
+            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
+            <list-item
+                titulo="Grupo sistema"
+                subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
+            />
+            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
+            <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
+            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
+            <list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
+            <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
+            <list-item titulo="Última sesión" subtitulo="Fecha de la última sesión en la plataforma" />
+            <list-item titulo="Visitas por curso" subtitulo="Cantidad de visitas al curso" />
+            <list-item
+                titulo="Nota promedio"
+                subtitulo="El promedio de las notas de los temas evaluables dentro del curso"
+            />
+            <list-item titulo="Temas asignados" subtitulo="Cantidad de temas asignados al curso" />
+            <list-item titulo="Temas completados" subtitulo="Cantidad de temas completados del curso" />
+            <list-item
+                titulo="Porcentaje"
+                subtitulo="Porcentaje del curso (cantidad de temas completados sobre la cantidad de temas asignados)"
+            />
+            <list-item
+                titulo="Resultado"
+                subtitulo="Resultado de cada curso, considerando la nota mínima aprobatoria configurada"
+            />
+            <list-item titulo="Última visita" subtitulo="Fecha de la última visita realizada al curso" />
+            <list-item
+                titulo="Estado del curso"
+                subtitulo="Representa si el curso esta activo/inactivo en la plataforma"
+            />
+            <list-item titulo="Ciclo del curso" subtitulo="Ciclo/Ciclos al que pertenece el curso" />
+        </ResumenExpand>
+
+        <!-- Formulario del reporte -->
+        <form @submit.prevent="exportNotasCurso" class="row">
+            <!-- Modulo -->
+            <div class="col-sm-4 mb-3">
+                <b-form-text text-variant="muted">Módulo</b-form-text>
+                <select v-model="modulo"
+                        class="form-control">
+                    <option value>- [Todos] -</option>
+                    <option v-for="(item, index) in modules"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <!-- Escuela -->
+            <div class="col-sm-4 mb-3">
+                <b-form-text text-variant="muted">Escuela</b-form-text>
+                <select
+                    v-model="escuela"
+                    class="form-control"
+                    :disabled="!schools[0]"
+                    @change="escuelaChange"
+                >
+                    <option value>- [Todos] -</option>
+                    <option v-for="(item, index) in schools"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <!-- Curso -->
+            <div class="col-sm-4 mb-3">
+                <b-form-text text-variant="muted">Curso</b-form-text>
+                <select v-model="curso"
+                        class="form-control"
+                        :disabled="!courses[0]">
+                    <option value>- [Todos] -</option>
+                    <option v-for="(item, index) in courses"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <v-divider class="col-12 mb-0 p-0"></v-divider>
+
+            <!-- Filtros secundarios -->
+            <div class="col-12 d-flex">
+                <!-- Filtros Checkboxs -->
+                <div class="col-12 px-0">
+                    <EstadoFiltro ref="EstadoFiltroComponent"
+                                  @emitir-cambio="" />
+                    <v-divider class="col-12 p-0 m-0"></v-divider>
+                    <div class="col">
+                        <small class="form-text text-muted text-bold">
+                            Resultado del Curso :
+                        </small>
+                        <div class="d-flex mt-2">
+                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                                <v-checkbox
+                                    class="my-0 mr-2"
+                                    label="Completados"
+                                    color="success"
+                                    v-model="aprobados"
+                                    hide-details="false"
+                                />
+                                <div
+                                    tooltip="Resultados promedio de temas del curso iguales o superiores a la nota mínima aprobatoria asignada al curso."
+                                    tooltip-position="top"
+                                >
+                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                                </div>
+                            </div>
+                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                                <v-checkbox
+                                    class="my-0 mr-2"
+                                    label="Encuesta pendiente"
+                                    color="primary"
+                                    v-model="encuestaPendiente"
+                                    hide-details="false"
+                                />
+                                <div
+                                    tooltip="Estado luego de aprobar evaluación del curso pero con encuesta pendiente."
+                                    tooltip-position="top"
+                                >
+                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                                </div>
+                            </div>
+                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                                <v-checkbox
+                                    class="my-0 mr-2"
+                                    label="En desarrollo"
+                                    color="red"
+                                    v-model="desarrollo"
+                                    hide-details="false"
+                                />
+                                <div
+                                    tooltip="El colaborador aún no obtiene todas las calificaciones de los temas del curso aprobadas. Puede que las tenga desaprobadas pero con intentos restantes disponibles."
+                                    tooltip-position="top"
+                                >
+                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                                </div>
+                            </div>
+                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                                <v-checkbox
+                                    class="my-0 mr-2"
+                                    label="Desaprobados"
+                                    color="warning"
+                                    v-model="desaprobados"
+                                    hide-details="false"
+                                />
+                                <div
+                                    tooltip="Tras agotar todos los intentos de temas del curso y obtener resultados inferiores a la nota mínima aprobatoria asignada al tema, se considera desaprobación."
+                                    tooltip-position="top"
+                                >
+                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <CheckValidar ref="checkValidacion" />
+                </div>
+                <!--          Fechas          -->
+<!--                <div class="col-4 ml-auto">-->
+<!--                    <FechaFiltro ref="FechasFiltros" />-->
+<!--                </div>-->
+            </div>
+            <v-divider class="col-12 mb-5 p-0"></v-divider>
+            <button type="submit"
+                    class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                <i class="fas fa-download"></i>
+                <span>Descargar</span>
+            </button>
+        </form>
+    </v-main>
 </template>
 
 <script>
-import CheckValidar from "./partials/CheckValidar.vue";
-import FechaFiltro from "./partials/FechaFiltro.vue";
-import ListItem from "./partials/ListItem.vue";
-import ResumenExpand from "./partials/ResumenExpand.vue";
-import EstadoFiltro from "./partials/EstadoFiltro.vue";
+
+import CheckValidar from "./partials/CheckValidar.vue"
+import FechaFiltro from "./partials/FechaFiltro.vue"
+import ListItem from "./partials/ListItem.vue"
+import ResumenExpand from "./partials/ResumenExpand.vue"
+import EstadoFiltro from "./partials/EstadoFiltro.vue"
+
 export default {
-	components: { EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
-	props: {
-		Modulos: Array,
-		API_FILTROS: "",
-		API_REPORTES: ""
-	},
-	data() {
-		return {
-			Escuelas: [],
-			Cursos: [],
-			//
-			Grupos: [],
-			Carreras: [],
-			Ciclos: [],
-			grupo: [],
-			carrera: [],
-			ciclo: [],
-			loadingGrupos: false,
-			loadingCarreras: false,
-			loadingCiclos: false,
-			//
-			modulo: "",
-			escuela: "",
-			curso: "",
-			//
-			completados: true,
-			desaprobados: true,
-			encuesta_pendiente: true,
-			desarollo: true,
-			//
-			cursos_libres:false,
-		};
-	},
-	methods: {
-		exportNotasCurso() {
-			this.showLoader()
-			let UFC = this.$refs.EstadoFiltroComponent;
-			let FechaFiltro = this.$refs.FechasFiltros;
-			let params = {
-				cursos_libres : this.cursos_libres,
-				//
-				modulo: this.modulo,
-				escuela: this.escuela,
-				curso: this.curso,
-				start: FechaFiltro.start,
-				end: FechaFiltro.end,
-				//
-				grupo: this.grupo,
-				carrera: this.carrera,
-				ciclo: this.ciclo,
-				//
-				completados: this.completados,
-				desaprobados: this.desaprobados,
-				encuesta_pendiente: this.encuesta_pendiente,
-				desarollo: this.desarollo,
-				//
-				UsuariosActivos: UFC.UsuariosActivos,
-				UsuariosInactivos: UFC.UsuariosInactivos,
-				validacion: this.$refs.checkValidacion.validacion
-			};
-			axios
-				.post(this.API_REPORTES + "notas_cursos", params)
-				.then((res) => {
-					if (!res.data.error) this.$emit("emitir-reporte", res);
-					else {
-						alert("Se ha encontrado el siguiente error : " + res.data.error);
-						this.hideLoader()
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-					console.log(error.message);
-					alert("Se ha encontrado el siguiente error : " + error);
-					this.hideLoader()
-				});
-		},
-		async moduloChange() {
-			this.escuela = "";
-			this.curso = "";
-			this.Escuelas = "";
-			this.Cursos = "";
-			this.Grupos = [];
-			this.grupo = [];
-			if (!this.modulo) return false;
-			var res = await axios.post(this.API_FILTROS + "cambia_modulo_carga_escuela", {
-				mod: this.modulo
-			});
-			this.Escuelas = res.data;
-			this.cargarGrupos();
-		},
-		async escuelaChange() {
-			this.curso = "";
-			this.Cursos = "";
-			if (!this.escuela) return false;
-			this.cursos_libres =false;
-			var res = await axios.post(this.API_FILTROS + "cambia_escuela_carga_curso", {
-				esc: this.escuela,
-				mod: this.modulo
-			});
-			this.Cursos = res.data;
-		},
-		cargarGrupos() {
-			if(!this.modulo) return false;
-			this.loadingGrupos = true;
-			let params = {};
-			this.modulo ? (params.mod = this.modulo) : "";
-			let UFC = this.$refs.EstadoFiltroComponent;
-			this.Grupos = [];
-			params.UsuariosActivos = UFC.UsuariosActivos;
-			params.UsuariosInactivos = UFC.UsuariosInactivos;
-			axios.post(this.API_FILTROS + "cargar_grupos", { params }).then((res) => {
-				res.data.forEach((el) => {
-					let NewJSON = {};
-					NewJSON.text = el.valor;
-					NewJSON.value = el.id;
-					this.Grupos.push(NewJSON);
-				});
-				this.loadingGrupos = false;
-			});
-		}
-	}
-};
+    components: { EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
+    props: {
+        workspaceId: 0,
+        modules: Array,
+        reportsBaseUrl: ''
+    },
+    data() {
+        return {
+            schools: [],
+            courses: [],
+
+            //
+            modulo: "",
+            escuela: "",
+            curso: "",
+            //
+            aprobados: true,
+            desaprobados: true,
+            encuestaPendiente: true,
+            desarrollo: true
+        };
+    }
+    ,
+    mounted() {
+        this.fetchFiltersData()
+    }
+    ,
+    methods: {
+        /**
+         *
+         * @returns {Promise<void>}
+         */
+        async fetchFiltersData () {
+
+            // Fetch schools
+
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}`
+            let responseSchools = await axios({
+                url: urlSchools,
+                method: 'get'
+            })
+
+            this.schools = responseSchools.data
+
+        }
+        ,
+        async exportNotasCurso() {
+
+            // show loading spinner
+
+            this.showLoader()
+
+            let UFC = this.$refs.EstadoFiltroComponent;
+            this.Grupos = [];
+
+            // Perform request to generate report
+
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: {
+                        workspaceId: this.workspaceId,
+                        modulos: this.modulo ? [this.modulo] : [],
+                        escuelas: this.escuela ? [this.escuela] : [],
+                        cursos: this.curso ? [this.curso] : [],
+
+                        UsuariosActivos: UFC.UsuariosActivos,
+                        UsuariosInactivos: UFC.UsuariosInactivos,
+
+                        aprobados: this.aprobados,
+                        desaprobados: this.desaprobados,
+                        desarrollo: this.desarrollo,
+                        encuestaPendiente : this.encuestaPendiente
+                    }
+                })
+
+                // Emit event to parent component
+
+                this.$emit('emitir-reporte', response)
+
+            } catch (ex) {
+                console.log(ex.message)
+            }
+
+            // Hide loading spinner
+
+            this.hideLoader()
+        }
+        ,
+        /**
+         * Fetch courses
+         * @returns {Promise<boolean>}
+         */
+        async escuelaChange() {
+            this.curso = null;
+            this.tema = null;
+            this.courses = [];
+            this.topics = [];
+
+            if (!this.escuela) return false;
+
+            this.cursos_libres =false;
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
+            let res = await axios({
+                url,
+                method: 'get'
+            });
+            this.courses = res.data;
+        },
+    }
+}
+
 </script>
 
 <style>
 .v-label {
-	display: contents !important;
+    display: contents !important;
 }
 </style>

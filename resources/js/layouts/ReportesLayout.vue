@@ -4,20 +4,27 @@
         <v-card flat class="elevation-0 --mb-4">
             <v-tabs vertical class="reports-menu">
 
+<!--
+
+TABS
+
+============================================================================ -->
+
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Notas de usuario
                     </span>
                 </v-tab>
-
+-->
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-lock</v-icon>
+                    <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -36,28 +43,28 @@
                         Visitas
                     </span>
                 </v-tab>
-
+-->
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Notas por tema
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Temas no evaluables
                     </span>
                 </v-tab>
-
+-->
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                         Notas por curso
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -122,29 +129,40 @@
                 </v-tab>
 
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon> 
+                    <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Reuniones
                     </span>
                 </v-tab>
+-->
+<!--
 
+TABS CONTENT
+
+============================================================================ -->
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <NotasUsuario :API_REPORTES="API_REPORTES"/>
+                            <NotasUsuario
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                :API_REPORTES="API_REPORTES"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+-->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Usuarios :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                            <Usuarios :workspaceId="workspaceId"
+                                      :modules="modules"
+                                      :reportsBaseUrl="reportsBaseUrl"
                                       @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -164,19 +182,27 @@
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Visitas :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                            <Visitas :workspaceId="workspaceId"
+                                     :modules="modules"
+                                     :reportsBaseUrl="reportsBaseUrl"
+                                     :API_FILTROS="API_FILTROS"
+                                     :API_REPORTES="API_REPORTES"
                                      @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+                -->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <NotasTema :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                            <NotasTema :workspaceId="workspaceId"
+                                       :modules="modules"
+                                       :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+                <!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -186,14 +212,19 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item>
+                -->
+                <v-tab-item v-if="workspaceId > 0">
                     <v-card flat>
                         <v-card-text>
-                            <NotasCurso :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                        @emitir-reporte="crearReporte"/>
+                            <NotasCurso
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -285,13 +316,14 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+-->
             </v-tabs>
         </v-card>
         <!-- </v-app> -->
     </v-app>
 </template>
 <script>
+
 const FileSaver = require("file-saver");
 const moment = require("moment");
 moment.locale("es");
@@ -338,6 +370,10 @@ export default {
     },
     data() {
         return {
+            workspaceId: 0,
+            modules: [],
+            reportsBaseUrl: '',
+
             value: "",
             Modulos: [],
             Admins: [],
@@ -348,19 +384,51 @@ export default {
             API_REPORTES: process.env.MIX_API_REPORTES,
         };
     },
+    mounted () {
+        this.reportsBaseUrl = this.getReportsBaseUrl()
+        this.fetchData()
+    }
+    ,
     methods: {
+        async fetchData() {
+
+            // Fetch current session workspace
+
+            let url = `../usuarios/session`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            this.workspaceId = response.data.session.workspace.id
+
+            // Fetch modules and admins
+
+            let url2 = `${this.reportsBaseUrl}/filtros/datosiniciales/${this.workspaceId}`
+
+            let response2 = await axios({
+                url: url2,
+                method: 'get'
+            })
+
+            this.modules = response2.data.modules
+            this.admins = response2.data.admins
+        }
+        ,
         async crearReporte(res) {
+
+            if (!res.data.ruta_descarga) return
+
+            this.showLoader()
+
             try {
-                var dateNow = res.data.createAt; //Este es el nombre del excel creado con Date.Now()
-                var extension = res.data.extension;
-                var modulo = res.data.modulo;
-                // Excel Nombre : Nombre del modulo + Fecha convertida + Hora convertida + Extension
-                let ExcelNuevoNombre =
-                    modulo + moment(res.createAt).format("L") + " " + moment(res.createAt).format("LT");
+                let urlReporte = `${this.reportsBaseUrl}/${res.data.ruta_descarga}`
+
                 // La extension la define el back-end, ya que el quien crea el archivo
-                FileSaver.saveAs(`/storage/${dateNow + extension}`, ExcelNuevoNombre + extension);
-                // this.hideLoader()
-                this.hideLoader()
+
+                FileSaver.saveAs(urlReporte, res.data.new_name)
+
+
             } catch (error) {
                 console.log(error);
                 // this.hideLoader()
@@ -373,11 +441,11 @@ export default {
         ...mapState(["User"])
     },
     async beforeCreate() {
-        var res = await axios("/exportar/obtenerdatos");
-        this.Modulos = res.data.modulos;
-        this.Admins = res.data.users;
-        this.$store.commit("setUser", res.data.user[0]);
-        this.VademecumList = res.data.vademecums;
+        // var res = await axios("/exportar/obtenerdatos");
+        // this.Modulos = res.data.modulos;
+        // this.Admins = res.data.users;
+        // this.$store.commit("setUser", res.data.user[0]);
+        // this.VademecumList = res.data.vademecums;
     }
 };
 </script>

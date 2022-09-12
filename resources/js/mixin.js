@@ -152,6 +152,20 @@ export default {
             return bucketBaseUrl;
         }
         ,
+        getReportsBaseUrl() {
+            // Get base URL from head meta
+
+            let metaEl = document.querySelector('meta[name=REPORTS_BASE_URL]')
+            let reportsBaseUrl = metaEl.getAttribute('content')
+
+            // Remove trailing slash and generate URL
+
+            reportsBaseUrl = reportsBaseUrl
+                                .replace(/\/+$/, '')
+
+            return reportsBaseUrl
+        }
+        ,
         infoMedia(item) {
 
             if (!item.ext) return false;
