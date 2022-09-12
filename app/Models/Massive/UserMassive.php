@@ -155,9 +155,13 @@ class UserMassive implements ToCollection
         return $data_excel;
     }
     private function is_static_header($value){
-        $static_headers = collect([
+        $static_headers = $this->getStaticHeaders();
+        return $static_headers->where('header_name',$value)->first();
+    }
+    public function getStaticHeaders(){
+        return collect([
             ['header_name'=>'ESTADO','code'=>'active'],
-            ['header_name'=>'Username','code'=>'username'],
+            ['header_name'=>'USERNAME','code'=>'username'],
             ['header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
             ['header_name'=>'NOMBRES','code'=>'name'],
             ['header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
@@ -167,7 +171,6 @@ class UserMassive implements ToCollection
             ['header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
             ['header_name'=>'EMAIL','code'=>'email']
         ]);
-        return $static_headers->where('header_name',$value)->first();
     }
     private function excelDateToDate($fecha, $rows = 0, $i = 0)
     {
