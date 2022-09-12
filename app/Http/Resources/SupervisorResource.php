@@ -14,15 +14,16 @@ class SupervisorResource extends JsonResource
      */
     public function toArray($request)
     {
-        $user_relationship = $this;
+        $supervisor = $this;
+
         return [
-            'id' => $user_relationship->user->id,
-            'nombre' => $user_relationship->user->fullname,
+            'id' => $supervisor->id,
+            'nombre' => $supervisor->fullname,
 //            'apellidos' => $user_relationship->apellido_paterno . ' ' . $user_relationship->apellido_materno,
-            'dni' => $user_relationship->user->document,
-            'modulo' => $user_relationship->user->subworkspace->name,
-//            'usuarios_count' => $user_relationship->usuarios_count,
-//            'criterios_count' => $user_relationship->criterios_count,
+            'dni' => $supervisor->document,
+            'modulo' => $supervisor->subworkspace->name,
+            'users_count' => $supervisor->users_count,
+            'segments_count' => $supervisor->segments_count,
             'active' => 1
         ];
     }

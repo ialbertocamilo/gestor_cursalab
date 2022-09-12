@@ -33,7 +33,7 @@
                         <DefaultAutocomplete
                             clearable dense
                             :items="modulos"
-                            v-model="filters.modulos"
+                            v-model="filters.subworkspace"
                             placeholder="Módulo"
                             multiple
                             :count-show-values="1"
@@ -109,7 +109,7 @@ export default {
         return {
             filters: {
                 q: '',
-                modulos: []
+                subworkspace: []
             },
             dataTable: {
                 endpoint: '/supervisores/search',
@@ -127,14 +127,14 @@ export default {
                         icon: 'fas fa-th-large',
                         type: 'action',
                         method_name: 'asignarCriterios',
-                        count: 'criterios_count'
+                        count: 'segments_count'
                     },
                     {
                         text: "Usuarios",
                         icon: 'fas fa-user',
                         type: 'action',
                         method_name: 'asignarUsuarios',
-                        count: 'usuarios_count'
+                        count: 'users_count'
                     },
                     {
                         text: "Eliminar",

@@ -22,8 +22,9 @@
 </template>
 <script>
 import AsignacionXDni from './AsignacionXDni.vue';
+
 export default {
-    components:{AsignacionXDni},
+    components: {AsignacionXDni},
     props: {
         options: {
             type: Object,
@@ -31,15 +32,15 @@ export default {
         },
         width: String
     },
-    data(){
-        return{
+    data() {
+        return {
             resourceDefault: {
                 id: null,
             },
             resource: {},
         }
     },
-    methods:{
+    methods: {
         closeModal() {
             let vue = this
             vue.$emit('onCancel')
@@ -47,13 +48,13 @@ export default {
         async confirmModal() {
             let vue = this;
             vue.showLoader();
-            const data ={
-                resources:vue.$refs.AsignacionUsuarioSupervisor.usuarios_ok,
-                supervisor:vue.resource.id,
-                type:'dni'
+            const data = {
+                resources: vue.$refs.AsignacionUsuarioSupervisor.usuarios_ok,
+                supervisor: vue.resource.id,
+                type: 'dni'
             }
-            
-            await axios.post('supervisores/set-data-supervisor',data).then(()=>{
+
+            await axios.post('supervisores/set-data-supervisor', data).then(() => {
                 vue.hideLoader();
                 vue.$notification.success('Se ha asignado correctamente los usuarios.', {
                     timer: 15,
@@ -62,7 +63,7 @@ export default {
                 });
                 vue.resetSelects();
                 vue.$emit('onConfirm')
-            }).catch(()=>{
+            }).catch(() => {
                 alert('Hubo un error al procesar la data.');
                 vue.hideLoader();
             })
@@ -70,20 +71,20 @@ export default {
         resetSelects() {
             let vue = this;
             let AsignacionUsuarioSupervisor = vue.$refs.AsignacionUsuarioSupervisor;
-            if(AsignacionUsuarioSupervisor){
-                AsignacionUsuarioSupervisor.autocomplete_loading= false;
-                AsignacionUsuarioSupervisor.file= null;
-                AsignacionUsuarioSupervisor.input_filtro_usuarios_ok= "";
-                AsignacionUsuarioSupervisor.loading_filtros_usuarios_ok= false;
-                AsignacionUsuarioSupervisor.usuarios_ok= [];
-                AsignacionUsuarioSupervisor.usuarios_error= [];
-                AsignacionUsuarioSupervisor.dialog_guardar= false;
-                AsignacionUsuarioSupervisor.search= null;
-                AsignacionUsuarioSupervisor.debounce= null;
-                AsignacionUsuarioSupervisor.filtro_result= [];
+            if (AsignacionUsuarioSupervisor) {
+                AsignacionUsuarioSupervisor.autocomplete_loading = false;
+                AsignacionUsuarioSupervisor.file = null;
+                AsignacionUsuarioSupervisor.input_filtro_usuarios_ok = "";
+                AsignacionUsuarioSupervisor.loading_filtros_usuarios_ok = false;
+                AsignacionUsuarioSupervisor.usuarios_ok = [];
+                AsignacionUsuarioSupervisor.usuarios_error = [];
+                AsignacionUsuarioSupervisor.dialog_guardar = false;
+                AsignacionUsuarioSupervisor.search = null;
+                AsignacionUsuarioSupervisor.debounce = null;
+                AsignacionUsuarioSupervisor.filtro_result = [];
             }
         },
-         resetValidation() {
+        resetValidation() {
             let vue = this
         },
         async loadData(resource) {
@@ -92,9 +93,10 @@ export default {
             vue.$nextTick(() => {
                 vue.resource = resource;
             })
-            await axios.get(`supervisores/get-data/${resource.id}/dni`).then((e)=>{
-                vue.$refs.AsignacionUsuarioSupervisor.usuarios_ok = e.data.data;
-            })
+            await vue.$http.get(`supervisores/get-data/${resource.id}/dni`)
+                .then((e) => {
+                    vue.$refs.AsignacionUsuarioSupervisor.usuarios_ok = e.data.data;
+                })
             return 0;
         },
         loadSelects() {

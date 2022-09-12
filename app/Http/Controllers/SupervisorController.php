@@ -40,11 +40,12 @@ class SupervisorController extends Controller
             ->select('id', 'document', 'name', 'lastname', 'surname')
             ->onlyAppUser()
             ->limit(40)
-            ->get()
-            ->map(function ($usuario) {
-                if ($usuario->isSupervisor())
-                    $usuario->fullname = $usuario->fullname . ' (es supervisor)';
-            });
+            ->get();
+
+        $users->map(function ($user) {
+            if ($user->isSupervisor())
+                $user->fullname = $user->fullname . ' (es supervisor)';
+        });
 
         return $this->success(['users' => $users]);
     }
@@ -59,7 +60,11 @@ class SupervisorController extends Controller
     {
         $data = $request->all();
 
-        UserRelationship::createRelationAs(code: 'supervise', users: $data, model_type: null, model_id: null);
+        $users_id = array_column($data, 'id');
+
+        $users = User::with('subworkspace.module_criterion_value')->whereIn('id', $users_id)->get();
+
+        UserRelationship::setUsersAsSupervisor($users);
 
         return $this->success([]);
     }
@@ -76,9 +81,10 @@ class SupervisorController extends Controller
         return $this->success(['msg' => 'Se eliminó el supervisor correctamente.']);
     }
 
-    public function getData($supervisor, $type)
+    public function getData(User $supervisor, $type)
     {
-        $data = Supervisor::getData($supervisor, $type);
+        $data = UserRelationship::getDataToAssignSupervised($supervisor, $type);
+
         return $this->success($data);
     }
 

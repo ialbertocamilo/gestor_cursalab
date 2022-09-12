@@ -5,6 +5,7 @@ namespace App\Models;
 // use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -143,6 +144,25 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function summary_topics()
     {
         return $this->hasMany(SummaryTopic::class);
+    }
+
+    public function relationships()
+    {
+        return $this->hasMany(UserRelationship::class, 'user_id');
+    }
+
+    public function supervised_users()
+    {
+        return $this->relationships()
+            ->whereRelation('type', 'code', 'supervise')
+            ->where('model_type', User::class);
+    }
+
+    public function supervised_segments()
+    {
+        return $this->relationships()
+            ->whereRelation('type', 'code', 'supervise')
+            ->where('model_type', Segment::class);
     }
 
     public function scopeOnlyAppUser($q)

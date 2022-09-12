@@ -8,6 +8,9 @@ class UserRelationship extends BaseModel
 {
     protected $table = 'user_relationships';
 
+    protected $fillable = [
+        'user_id', 'relation_type_id', 'model_id', 'model_type',
+    ];
 
     public function supervisor()
     {
@@ -26,16 +29,31 @@ class UserRelationship extends BaseModel
 
     protected function search($request)
     {
-        $q = self::query();
+        $q = User::query();
+//        $q = self::query();
 
-        if ($request->code)
-            $q->whereRelation('type', 'code', $request->code);
+        if ($request->code):
+            $q->whereRelation('relationships.type', 'code', $request->code);
+            if ($request->code === 'supervise'):
+//                $q->withCount(['supervised_users', 'supervise_segments']);
+                $q->withCount([
+                    'relationships as users_count' => function ($q_relationships) {
+                        $q_relationships->whereRelation('type', 'code', 'supervise')
+                            ->where('model_type', User::class);
+                    },
+                    'relationships as segments_count' => function ($q_relationships) {
+                        $q_relationships->whereRelation('type', 'code', 'supervise')
+                            ->where('model_type', Segment::class);
+                    },
+                ]);
+            endif;
+        endif;
 
-        $q->withWhereHas('supervisor', function ($query) use ($request) {
+        $q->withWhereHas('subworkspace', function ($query) use ($request) {
             if ($request->subworkspace)
-                $query->whereRelation('subworkspace', 'id', $request->subworkspace);
+                $query->whereIn('id', $request->subworkspace);
             else
-                $query->whereRelation('subworkspace.parent', 'id', $request->workspace);
+                $query->whereRelation('parent', 'id', $request->workspace);
         });
 
 
@@ -48,25 +66,59 @@ class UserRelationship extends BaseModel
 
     }
 
-    protected function createRelationAs($code, $users, $model_type, $model_id)
+    protected function createRelation($relation_type, $user, $model_type, $model_id)
     {
-        $temp = [];
-        $relation_type = Taxonomy::getFirstData('user', 'action', $code);
         $now = now()->format('Y-m-d H:i:s');
 
-        foreach ($users as $user) {
-            $temp = [
-                'user_id' => $user['id'] ?? $user->id,
-                'relation_type_id' => $relation_type->id,
-                'model_type' => $model_type,
-                'model_id' => $model_id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
+        $temp = [
+            'user_id' => $user->id,
+            'relation_type_id' => $relation_type->id,
+            'model_type' => $model_type,
+            'model_id' => $model_id,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
 
-        DB::table('user_relationships')->insert($temp);
+        self::create($temp);
     }
 
+    protected function getDataToAssignSupervised($supervisor, $type)
+    {
+        $data = $type === 'dni' ?
+            $supervisor->supervised_users
+            : $supervisor->supervised_segments;
+
+        return $data;
+    }
+
+    protected function setUsersAsSupervisor($users)
+    {
+        $relation_type = Taxonomy::getFirstData('user', 'action', 'supervise');
+
+        foreach ($users as $user) {
+            // Create segment and segment_values
+            $segment = Segment::create([
+                'name' => "Segmentación de supervisor",
+                'model_type' => User::class,
+                'model_id' => $user->id,
+                'active' => ACTIVE,
+            ]);
+
+            $subworkspace = $user->subworkspace;
+
+            $values = [
+                [
+                    'criterion_value_id' => $subworkspace->criterion_value_id,
+                    'criterion_id' => $subworkspace->module_criterion_value->criterion_id,
+                    'type_id' => null,
+                ]
+            ];
+
+            $segment->values()->sync($values);
+
+            self::createRelation($relation_type, $user, Segment::class, $segment->id);
+        }
+
+    }
 
 }
