@@ -183,7 +183,7 @@ class UserMassive implements ToCollection
             ['required'=>true,'header_name'=>'DOCUMENTO','code'=>'document'],
             ['required'=>false,'header_name'=>'NÚMERO DE TELÉFONO','code'=>'phone_number'],
             ['required'=>true,'header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
-            ['required'=>true,'header_name'=>'EMAIL','code'=>'email']
+            ['required'=>false,'header_name'=>'EMAIL','code'=>'email']
         ]);
     }
     private function excelDateToDate($fecha, $rows = 0, $i = 0)
