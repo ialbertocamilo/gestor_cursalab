@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -125,7 +126,11 @@ class UserMassive implements ToCollection
                     $criterion_value->criterion_id = $criterion->id;
                     $criterion_value->active = 1;
                     $criterion_value->save();
-                    $criterion_value->workspaces()->syncWithoutDetaching([$this->current_workspace->id]);
+                    DB::table('criterion_workspace')->insert([
+                        'criterion_id'=>$criterion_value->id,
+                        'workspace_id'=> $this->current_workspace->id
+                    ])
+                    // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
                 }
                 $user['criterion_list'][$dc['criterion_code']] = $criterion_value->id;
             }
