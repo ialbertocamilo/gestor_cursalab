@@ -127,11 +127,17 @@ class UserMassive implements ToCollection
                     $criterion_value->criterion_id = $criterion->id;
                     $criterion_value->active = 1;
                     $criterion_value->save();
+                    // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
+                }
+                $workspace_value = DB::table('criterion_value_workspace')->where([
+                    'workspace_id'=> $this->current_workspace->id,
+                    'criterion_value_id'=>$criterion_value->id
+                ])->first();
+                if(!$workspace_value){
                     DB::table('criterion_value_workspace')->insert([
                         'workspace_id'=> $this->current_workspace->id,
                         'criterion_value_id'=>$criterion_value->id
                     ]);
-                    // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
                 }
                 $user['criterion_list'][$dc['criterion_code']] = $criterion_value->id;
             }
