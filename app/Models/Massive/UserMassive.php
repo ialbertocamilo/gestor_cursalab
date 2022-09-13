@@ -131,6 +131,7 @@ class UserMassive implements ToCollection
             }
         }
         $user['criterion_list_final'] = $user['criterion_list'];
+        dd($user);
         return compact('has_error','user','errors_index');
     }
     private function process_header($headers,$criteria){
