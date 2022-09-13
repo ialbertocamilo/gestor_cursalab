@@ -121,6 +121,7 @@ class UserMassive implements ToCollection
                     // $errors_index[] = $dc['index'];
                     $criterion_value = new CriterionValue();
                     $criterion_value[$colum_name] = $dc['value_excel'];
+                    $criterion_value['value_text'] = $dc['value_excel'];
                     // $criterion_value->value_text = $dc['value_excel']; //Falta cambiar
                     // $criterion_value->value_boolean = ($code_criterion == 'boolean');
                     $criterion_value->criterion_id = $criterion->id;
