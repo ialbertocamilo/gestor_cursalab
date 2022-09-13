@@ -28,10 +28,7 @@ package-lock.json
 /public/mix-manifest.json
 /public/css/*.map
 /public/js/*.map
-/public/fonts/vendor/@mdi/materialdesignicons-webfont.eot
-/public/fonts/vendor/@mdi/materialdesignicons-webfont.ttf
-/public/fonts/vendor/@mdi/materialdesignicons-webfont.woff
-/public/fonts/vendor/@mdi/materialdesignicons-webfont.woff2
+/public/fonts/vendor/*
 
 /.vagrant
 Homestead.json

@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use DB;
+
+use Illuminate\Support\Facades\DB;
 
 class SummaryUser extends Summary
 {
@@ -44,7 +45,7 @@ class SummaryUser extends Summary
         $percent_general = ($row_user->courses_assigned > 0) ? (($passed / $row_user->courses_assigned) * 100) : 0;
         $percent_general = ($percent_general > 100) ? 100 : $percent_general; // maximo porcentaje = 100
         $percent_general = round($percent_general);
-        
+
         $intentos_x_curso = SummaryCourse::select(DB::raw('SUM(attempts) as intentos'))
                                             // ->whereRelation('course', 'active', ACTIVE)
                                             ->whereRelation('course.type', 'code', '<>', 'free')

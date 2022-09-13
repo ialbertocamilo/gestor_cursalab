@@ -200,8 +200,11 @@ class SummaryCourse extends Summary
         $advanced_percentage = ($assigned > 0) ? (($q_completed / $assigned) * 100) : 0;
         $advanced_percentage = ($advanced_percentage > 100) ? 100 : $advanced_percentage; // Maximo porcentaje = 100
 
-        $grade_average = $rows->whereIn('topic_id', $topics_qualified->pluck('id'))->average('grade');
+        $grade_average = $rows->whereIn('topic_id', $topics_qualified)->average('grade');
         $grade_average = round($grade_average ?? 0, 2);
+//        info($topics_qualified->toArray());
+//        info("COUNT TOPICS QUALIFIED :: ". $topics_qualified->count());
+//        info("GRADE AVERGAE UPDATED :: " . $grade_average);
 
         $course_data = compact('assigned', 'passed', 'taken', 'reviewed', 'failed', 'grade_average', 'advanced_percentage');
         $course_data['last_time_evaluated_at'] = now();
@@ -216,11 +219,11 @@ class SummaryCourse extends Summary
             if ($poll) {
 //                info("2");
 //                info("USER ID :: ". $user->id); info("CURSO ID :: ". $course->id);
-                $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->first();
-//                info($poll_answers);
+                $poll_answers = PollQuestionAnswer::where('user_id', $user->id)->where('course_id', $course->id)->count();
+//                info("COUNT POLL ANSWERS :: ".$poll_answers);
                 $status = 'enc_pend';
 
-                if ($poll_answers) {
+                if ($poll_answers > 0) {
 //                    info("3");
                     $status = 'aprobado';
                     $course_data['certification_issued_at'] = now();
@@ -238,10 +241,13 @@ class SummaryCourse extends Summary
                 $status = 'desaprobado';
         }
 
+//        info("UPDATE TO ". $status);
         $course_data['status_id'] = Taxonomy::getFirstData('course', 'user-status', $status)->id;
         $course_data['attempts'] = $row_course->attempts + 1;
 
+//        info($row_course->status_id);
         $row_course->update($course_data);
+//        info($row_course->status_id);
 
         // info($row_course);
 
