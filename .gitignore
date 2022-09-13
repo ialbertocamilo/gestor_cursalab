@@ -37,3 +37,5 @@ npm-debug.log
 yarn-error.log
 .env
 .env.remoto
+
+/public/fonts/vendor/@mdi
