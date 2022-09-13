@@ -55,8 +55,7 @@ class UsuarioController extends Controller
         if (Auth::check()) {
 
             $user = Auth::user();
-            $session = $request->session()->all();
-            $workspace = $session['workspace'];
+            $workspace = session('workspace');
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
             $roles = AssignedRole::getUserAssignedRoles($user->id);
 
