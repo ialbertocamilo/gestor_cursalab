@@ -60,6 +60,7 @@ class UserMassive implements ToCollection
                 } else {
                     $data_users->push([
                         'code' => $obj['header_static_code'],
+                        'required'=>$obj['header_static_required'],
                         'value_excel'=>trim($user[$obj['index']]),
                         'index' => $obj['index']
                     ]);
@@ -86,7 +87,7 @@ class UserMassive implements ToCollection
         $errors_index = [];
         $user = [];
         foreach ($data_users as $key => $dt) {
-            if(empty($dt['value_excel'])){
+            if(empty($dt['value_excel']) && $dt['required']){
                 $has_error = true;
                 $errors_index[] = $dt['index'];
                 continue;
@@ -110,9 +111,9 @@ class UserMassive implements ToCollection
                     $dc['value_excel'] =  $this->excelDateToDate($dc['value_excel']);
                 }
                 $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
-                if($criterion->code=='module'){
-                    $colum_name = 'external_value';
-                }
+                // if($criterion->code=='module'){
+                //     $colum_name = 'external_value';
+                // }
                 $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
                 if(!$criterion_value){
                     // $has_error = true;
@@ -146,6 +147,7 @@ class UserMassive implements ToCollection
                 'criterion_code' => $criterion ? $criterion->code : null,
                 'criterion_id' => $criterion ? $criterion->id : null,
                 'header_static_code'=> isset($data['code']) ? $data['code'] : null,
+                'header_static_required'=> isset($data['required']) ? $data['required'] : true,
                 'criterion_name' => $criterion ? $criterion->name : null,
                 'required' => $criterion ? $criterion->required : true,
                 'name_header' => mb_strtoupper(trim($header_excel)),
@@ -160,24 +162,24 @@ class UserMassive implements ToCollection
     }
     public function getStaticHeaders(){
         return collect([
-            ['header_name'=>'ESTADO','code'=>'active'],
-            ['header_name'=>'USERNAME','code'=>'username'],
-            ['header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
-            ['header_name'=>'NOMBRES','code'=>'name'],
-            ['header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
-            // ['header_name'=>'APELLIDO MATERNO','code'=>'surname'],
-            ['header_name'=>'DOCUMENTO','code'=>'document'],
-            ['header_name'=>'NÚMERO DE TELÉFONO','code'=>'phone_number'],
-            ['header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
-            ['header_name'=>'EMAIL','code'=>'email']
+            ['required'=>true,'header_name'=>'ESTADO','code'=>'active'],
+            ['required'=>true,'header_name'=>'USERNAME','code'=>'username'],
+            ['required'=>true,'header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
+            ['required'=>true,'header_name'=>'NOMBRES','code'=>'name'],
+            ['required'=>true,'header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
+            ['required'=>true,'header_name'=>'APELLIDO MATERNO','code'=>'surname'],
+            ['required'=>true,'header_name'=>'DOCUMENTO','code'=>'document'],
+            ['required'=>false,'header_name'=>'NÚMERO DE TELÉFONO','code'=>'phone_number'],
+            ['required'=>true,'header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
+            ['required'=>true,'header_name'=>'EMAIL','code'=>'email']
         ]);
     }
     private function excelDateToDate($fecha, $rows = 0, $i = 0)
     {
-        if(_validateDate($fecha,'Y-m-d')){
+        if(_validateDate($fecha,'Y-m-d') || _validateDate($fecha,'d-m-Y')){
             return $fecha;
         }
-        if(_validateDate($fecha,'Y-m-d')){
+        if(_validateDate($fecha,'Y/m/d') || _validateDate($fecha,'d/m/Y')){
             // return date("d/m/Y",$fecha);
             return Carbon::parse($fecha)->format('d/m/Y');
         }
