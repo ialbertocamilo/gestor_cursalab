@@ -49,20 +49,21 @@ class UserMassive implements ToCollection
             $data_users = collect();
             $data_criteria = collect();
             $headers->each(function ($obj) use ($data_criteria, $data_users, $user) {
+                $value_excel = is_null($user[$obj['index']]) ? '' : trim($user[$obj['index']]);
                 if ($obj['is_criterion']) {
                     $data_criteria->push([
                         'criterion_code' => $obj['criterion_code'],
                         'criterion_id' => $obj['criterion_id'],
                         'criterion_name' => $obj['criterion_name'],
                         'required' => $obj['required'],
-                        'value_excel'=>trim($user[$obj['index']]),
+                        'value_excel'=>$value_excel,
                         'index' => $obj['index'],
                     ]);
                 } else {
                     $data_users->push([
                         'code' => $obj['header_static_code'],
                         'required'=>$obj['header_static_required'],
-                        'value_excel'=>trim($user[$obj['index']]),
+                        'value_excel'=>$value_excel,
                         'index' => $obj['index']
                     ]);
                 }
