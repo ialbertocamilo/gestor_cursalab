@@ -460,7 +460,7 @@ export default {
                     },
                     {
                         title: "Documentación API",
-                        icon: "mdi mdi-cloud-sync",
+                        icon: "fas fa-file",
                         path: "/documentation-api",
                         subpaths: ["documentation-api"],
                         selected: false,
