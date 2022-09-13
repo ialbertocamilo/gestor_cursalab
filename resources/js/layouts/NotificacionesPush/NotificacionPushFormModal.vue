@@ -13,10 +13,10 @@
                     <v-row>
                         <v-col cols="12" class="d-flex justify-content-center">
                             <DefaultInput clearable
-                                v-model="nueva_notificacion.titulo"
-                                :rules="rules.titulo"
-                                label="Título"
-                                placeholder="Ingresa un título"
+                                          v-model="nueva_notificacion.titulo"
+                                          :rules="rules.titulo"
+                                          label="Título"
+                                          placeholder="Ingresa un título"
                             />
                         </v-col>
                         <v-col cols="12" md="12" lg="12">
@@ -32,11 +32,11 @@
                         </v-col>
                     </v-row>
 
-                    <v-divider />
+                    <v-divider/>
 
                     <strong class="my-3">Previsualización:</strong>
 
-                    <v-divider />
+                    <v-divider/>
 
                     <v-row>
                         <v-col cols="12" md="6" lg="6" class="pa-0">
@@ -81,18 +81,18 @@
                             </v-card>
                         </v-col>
                     </v-row>
-              <!--       <v-row>
-                        <v-col cols="12" md="2" lg="2" class="--vertical-align">
-                            <label
-                                class="form-control-label texto-negrita"
-                                style="font-size: 1.15em !important"
-                                >Destinatarios</label
-                            >
-                        </v-col>
-                        <v-col cols="12" md="10" lg="10"> </v-col>
-                    </v-row>
- -->
-                    <v-divider />
+                    <!--       <v-row>
+                              <v-col cols="12" md="2" lg="2" class="--vertical-align">
+                                  <label
+                                      class="form-control-label texto-negrita"
+                                      style="font-size: 1.15em !important"
+                                      >Destinatarios</label
+                                  >
+                              </v-col>
+                              <v-col cols="12" md="10" lg="10"> </v-col>
+                          </v-row>
+       -->
+                    <v-divider/>
 
                     <strong class="my-3">Destinatarios:</strong>
 
@@ -100,76 +100,76 @@
                         <v-col cols="12" md="12" lg="12" class="--vertical-align">
                             <table class="table table-hover">
                                 <thead class="">
-                                    <tr>
-                                        <th style="width: 5% !important">
-                                            <input type="checkbox"
-                                                   v-model="cbxAll"
-                                                   @change="allModules()" />
-                                        </th>
-                                        <th class="text-left" style="width: 20% !important">
-                                            Módulo
-                                        </th>
-                                        <th class="text-left" style="width: 75% !important">
-                                            Selector de criterios
-                                        </th>
-                                    </tr>
+                                <tr>
+                                    <th style="width: 5% !important">
+                                        <input type="checkbox"
+                                               v-model="cbxAll"
+                                               @change="allModules()"/>
+                                    </th>
+                                    <th class="text-left" style="width: 20% !important">
+                                        Módulo
+                                    </th>
+                                    <th class="text-left" style="width: 75% !important">
+                                        Selector de criterios
+                                    </th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(module, index) in modules" :key="index">
-                                        <td>
-                                            <input type="checkbox"
-                                                   v-model="module.modulo_selected" />
-                                        </td>
-                                        <td>
-                                            {{ module.nombre }}
-                                        </td>
-                                        <td>
-                                            <v-autocomplete
-                                                :items="module.carreras"
-                                                multiple
-                                                chips
-                                                dense
-                                                v-model="module.carreras_selected"
-                                                hide-details="auto"
-                                                item-text="nombre"
-                                                item-value="id"
-                                                return-object
-                                                :disabled="!module.modulo_selected"
-                                            >
-                                                <template v-slot:prepend-item>
-                                                    <v-list-item ripple @click="toggle(index)">
-                                                        <v-list-item-action>
-                                                            <v-icon
-                                                                :color="
+                                <tr v-for="(module, index) in modules" :key="index">
+                                    <td>
+                                        <input type="checkbox"
+                                               v-model="module.modulo_selected"/>
+                                    </td>
+                                    <td>
+                                        {{ module.nombre }}
+                                    </td>
+                                    <td>
+                                        <v-autocomplete
+                                            :items="module.carreras"
+                                            multiple
+                                            chips
+                                            dense
+                                            v-model="module.carreras_selected"
+                                            hide-details="auto"
+                                            item-text="nombre"
+                                            item-value="id"
+                                            return-object
+                                            :disabled="!module.modulo_selected"
+                                        >
+                                            <template v-slot:prepend-item>
+                                                <v-list-item ripple @click="toggle(index)">
+                                                    <v-list-item-action>
+                                                        <v-icon
+                                                            :color="
                                                                     module.carreras_selected.length > 0
                                                                     ? 'indigo darken-4' : ''
                                                                 "
-                                                            >
-                                                                {{ icon(index) }}
-                                                            </v-icon>
-                                                        </v-list-item-action>
-                                                        <v-list-item-content>
-                                                            <v-list-item-title>
-                                                                Seleccionar todas las carreras
-                                                            </v-list-item-title>
-                                                        </v-list-item-content>
-                                                    </v-list-item>
-                                                    <v-divider class="mt-2"></v-divider>
-                                                </template>
-                                                <template v-slot:selection="{ item, index }">
-                                                    <v-chip v-if="index < 3">
-                                                        <span>{{ item.nombre }}</span>
-                                                    </v-chip>
-                                                    <span v-if="index === 3"
-                                                          class="grey--text caption">
+                                                        >
+                                                            {{ icon(index) }}
+                                                        </v-icon>
+                                                    </v-list-item-action>
+                                                    <v-list-item-content>
+                                                        <v-list-item-title>
+                                                            Seleccionar todas las carreras
+                                                        </v-list-item-title>
+                                                    </v-list-item-content>
+                                                </v-list-item>
+                                                <v-divider class="mt-2"></v-divider>
+                                            </template>
+                                            <template v-slot:selection="{ item, index }">
+                                                <v-chip v-if="index < 3">
+                                                    <span>{{ item.nombre }}</span>
+                                                </v-chip>
+                                                <span v-if="index === 3"
+                                                      class="grey--text caption">
                                                         (+{{ module.carreras_selected.length - 3 }} carrera{{
-                                                            module.carreras_selected.length - 3 > 1 ? "s" : ""
-                                                        }})
+                                                        module.carreras_selected.length - 3 > 1 ? "s" : ""
+                                                    }})
                                                     </span>
-                                                </template>
-                                            </v-autocomplete>
-                                        </td>
-                                    </tr>
+                                            </template>
+                                        </v-autocomplete>
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
                         </v-col>
@@ -177,25 +177,25 @@
 
                 </v-card-text>
 
-               <!--  <v-divider></v-divider>
+                <!--  <v-divider></v-divider>
 
-                <v-card-actions class="d-flex justify-center">
-                    <v-btn
-                        color="#727b84"
-                        class="text-white text-capitalize size-1rem"
-                        @click="closeModal()"
-                    >
-                        Cancelar
-                    </v-btn>
-                    <v-btn
-                        color="#2c32e4"
-                        class="text-white text-capitalize size-1rem"
-                        type="submit"
-                        :disabled="!existeDestinatarios"
-                    >
-                        Enviar
-                    </v-btn>
-                </v-card-actions> -->
+                 <v-card-actions class="d-flex justify-center">
+                     <v-btn
+                         color="#727b84"
+                         class="text-white text-capitalize size-1rem"
+                         @click="closeModal()"
+                     >
+                         Cancelar
+                     </v-btn>
+                     <v-btn
+                         color="#2c32e4"
+                         class="text-white text-capitalize size-1rem"
+                         type="submit"
+                         :disabled="!existeDestinatarios"
+                     >
+                         Enviar
+                     </v-btn>
+                 </v-card-actions> -->
             </v-form>
         </template>
 
@@ -203,7 +203,7 @@
 </template>
 <script>
 export default {
-    props:{
+    props: {
         options: {
             type: Object,
             required: true
@@ -295,8 +295,8 @@ export default {
         },
         seleccionarAlgunasCarreras(index) {
             let vue = this;
-            return  vue.modules[index].carreras_selected.length > 0 &&
-                    !vue.seleccionarTodasLasCarreras;
+            return vue.modules[index].carreras_selected.length > 0 &&
+                !vue.seleccionarTodasLasCarreras;
         },
         icon(index) {
             let vue = this;
@@ -362,7 +362,7 @@ export default {
             if (validar) {
                 vue.generarJson();
                 // return;
-                axios
+                vue.$http
                     .post(
                         "/notificaciones_push/enviarNotificacionCustom",
                         vue.nueva_notificacion
@@ -382,7 +382,7 @@ export default {
 
                     })
                     .catch((err) => {
-                        console.log(err.response.data);
+                        // console.log(err.response.data);
                         vue.$notification.error(err.response.data.msg, {
                             timer: 10,
                             title: err.response.data.title,
@@ -435,18 +435,22 @@ export default {
 input[type="checkbox"] {
     transform: scale(1.5);
 }
+
 .notificationCenter {
     z-index: 1000 !important;
 }
+
 .os-preview {
     color: #939393;
 }
+
 .container-custom-preview {
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
 }
+
 .box-notificacion {
     background: white;
     border: black;
@@ -456,6 +460,7 @@ input[type="checkbox"] {
     margin-right: 7% !important;
     margin-left: 7% !important;
 }
+
 .img-prev {
     background-repeat: no-repeat;
     background-size: 100%;
@@ -465,6 +470,7 @@ input[type="checkbox"] {
     justify-content: center;
     align-items: center;
 }
+
 /*.vertical-align {
     display: flex !important;
     align-items: center !important;
@@ -491,6 +497,7 @@ input[type="checkbox"] {
 .texto-negrita {
     font-weight: bold !important;
 }
+
 .notificacion_texto {
     white-space: normal;
     text-align: left;

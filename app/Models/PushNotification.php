@@ -51,11 +51,10 @@ class PushNotification extends Model
             $result = curl_exec($ch);
             curl_close($ch);
             $result = json_decode($result, true);
-
+            info($result);
         } catch (\Exception $e) {
-
+            info($e);
             Error::storeAndNotificateException($e, request());
-
         }
 
         return $result;
