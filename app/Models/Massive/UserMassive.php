@@ -176,10 +176,10 @@ class UserMassive implements ToCollection
     }
     private function excelDateToDate($fecha, $rows = 0, $i = 0)
     {
-        if(_validateDate($fecha,'Y-m-d')){
+        if(_validateDate($fecha,'Y-m-d') || _validateDate($fecha,'d-m-Y')){
             return $fecha;
         }
-        if(_validateDate($fecha,'Y-m-d')){
+        if(_validateDate($fecha,'Y/m/d') || _validateDate($fecha,'d/m/Y')){
             // return date("d/m/Y",$fecha);
             return Carbon::parse($fecha)->format('d/m/Y');
         }
