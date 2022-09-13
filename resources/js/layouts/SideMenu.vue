@@ -438,7 +438,7 @@ export default {
                         subpaths: ["notificaciones_push"],
                         selected: false,
                         permission: "notificaciones",
-                        role: ["super-user", "admin-TEMPORAL_INACTIVO"]
+                        role: ["super-user", "admin"]
                     },
                     {
                         title: "Reinicio de usuarios",
@@ -457,6 +457,15 @@ export default {
                         selected: false,
                         permission: "proceso_masivo",
                         role: ["super-user", "admin-TEMPORAL_INACTIVO"]
+                    },
+                    {
+                        title: "Documentación API",
+                        icon: "mdi mdi-cloud-sync",
+                        path: "/documentation-api",
+                        subpaths: ["documentation-api"],
+                        selected: false,
+                        permission: "documentation_api",
+                        role: ["super-user", "admin"]
                     }
                 ]
             },
