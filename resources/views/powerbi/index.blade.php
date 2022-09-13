@@ -1,9 +1,11 @@
-@extends('layouts.appback')
-
 @section('content')
+
 <v-app>
+  
   @include('layouts.user-header')
-  <learning-analytics-embed :pbi_url="'{{env('PBI_URL')}}'" />
+
+  <learning-analytics-embed :pbi_url="'{{ $pbi_url ?? '' }}'" />
+
 </v-app>
 
 @endsection

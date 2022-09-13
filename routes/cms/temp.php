@@ -33,11 +33,14 @@ use App\Http\Controllers\AyudaAppController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportesSupervisoresController;
 use App\Http\Controllers\MigrarAvanceController;
+use App\Http\Controllers\GeneralController;
 
+// Route::get('dashboard_pbi', function () {
+//     return view('powerbi.index');
+// })->name('dashboard_pbi');
 
-Route::get('dashboard_pbi', function () {
-    return view('powerbi.index');
-})->name('dashboard_pbi');
+Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView']);
+
 // DOCUMENTACIÓN DE APIS
 Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 // Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
