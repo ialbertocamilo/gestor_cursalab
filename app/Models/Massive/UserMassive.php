@@ -127,9 +127,9 @@ class UserMassive implements ToCollection
                     $criterion_value->criterion_id = $criterion->id;
                     $criterion_value->active = 1;
                     $criterion_value->save();
-                    DB::table('criterion_workspace')->insert([
-                        'criterion_id'=>$criterion_value->id,
-                        'workspace_id'=> $this->current_workspace->id
+                    DB::table('criterion_value_workspace')->insert([
+                        'workspace_id'=> $this->current_workspace->id,
+                        'criterion_value_id'=>$criterion_value->id
                     ]);
                     // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
                 }
