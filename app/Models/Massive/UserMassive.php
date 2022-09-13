@@ -165,7 +165,7 @@ class UserMassive implements ToCollection
             ['header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
             ['header_name'=>'NOMBRES','code'=>'name'],
             ['header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
-            // ['header_name'=>'APELLIDO MATERNO','code'=>'surname'],
+            ['header_name'=>'APELLIDO MATERNO','code'=>'surname'],
             ['header_name'=>'DOCUMENTO','code'=>'document'],
             ['header_name'=>'NÚMERO DE TELÉFONO','code'=>'phone_number'],
             ['header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
