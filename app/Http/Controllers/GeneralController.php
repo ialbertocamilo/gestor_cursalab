@@ -175,4 +175,12 @@ class GeneralController extends Controller
 
         return $this->success(compact('data'));
     }
+
+    public function getPowerBiView()
+    {
+        $workspace = get_current_workspace();
+        $pbi_url = $workspace->url_powerbi ?? 'Not provided';
+
+        return view('powerbi.index', compact('pbi_url'));
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -111,27 +112,37 @@ class UserMassive implements ToCollection
                     $dc['value_excel'] =  $this->excelDateToDate($dc['value_excel']);
                 }
                 $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
-                if($criterion->code=='module'){
-                    $colum_name = 'external_value';
-                }
+                // if($criterion->code=='module'){
+                //     $colum_name = 'external_value';
+                // }
                 $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
                 if(!$criterion_value){
                     // $has_error = true;
                     // $errors_index[] = $dc['index'];
                     $criterion_value = new CriterionValue();
                     $criterion_value[$colum_name] = $dc['value_excel'];
+                    $criterion_value['value_text'] = $dc['value_excel'];
                     // $criterion_value->value_text = $dc['value_excel']; //Falta cambiar
                     // $criterion_value->value_boolean = ($code_criterion == 'boolean');
                     $criterion_value->criterion_id = $criterion->id;
                     $criterion_value->active = 1;
                     $criterion_value->save();
-                    $criterion_value->workspaces()->syncWithoutDetaching([$this->current_workspace->id]);
+                    // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
+                }
+                $workspace_value = DB::table('criterion_value_workspace')->where([
+                    'workspace_id'=> $this->current_workspace->id,
+                    'criterion_value_id'=>$criterion_value->id
+                ])->first();
+                if(!$workspace_value){
+                    DB::table('criterion_value_workspace')->insert([
+                        'workspace_id'=> $this->current_workspace->id,
+                        'criterion_value_id'=>$criterion_value->id
+                    ]);
                 }
                 $user['criterion_list'][$dc['criterion_code']] = $criterion_value->id;
             }
         }
         $user['criterion_list_final'] = $user['criterion_list'];
-        dd($user);
         return compact('has_error','user','errors_index');
     }
     private function process_header($headers,$criteria){
@@ -172,7 +183,7 @@ class UserMassive implements ToCollection
             ['required'=>true,'header_name'=>'DOCUMENTO','code'=>'document'],
             ['required'=>false,'header_name'=>'NÚMERO DE TELÉFONO','code'=>'phone_number'],
             ['required'=>true,'header_name'=>'NÚMERO DE PERSONA COLABORADOR','code'=>'person_number'],
-            ['required'=>true,'header_name'=>'EMAIL','code'=>'email']
+            ['required'=>false,'header_name'=>'EMAIL','code'=>'email']
         ]);
     }
     private function excelDateToDate($fecha, $rows = 0, $i = 0)
