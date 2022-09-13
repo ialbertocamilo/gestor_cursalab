@@ -129,7 +129,7 @@ class UserMassive implements ToCollection
                     DB::table('criterion_workspace')->insert([
                         'criterion_id'=>$criterion_value->id,
                         'workspace_id'=> $this->current_workspace->id
-                    ])
+                    ]);
                     // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
                 }
                 $user['criterion_list'][$dc['criterion_code']] = $criterion_value->id;
