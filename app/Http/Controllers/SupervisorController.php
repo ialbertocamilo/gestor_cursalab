@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Criterion;
 use App\Models\Supervisor;
 use App\Models\User;
 use App\Models\UserRelationship;
@@ -71,7 +72,8 @@ class SupervisorController extends Controller
 
     public function setDataSupervisor(Request $request)
     {
-        Supervisor::setDataSupervisor($request->all());
+//        Supervisor::setDataSupervisor($request->all());
+        UserRelationship::setDataSupervisor($request->all());
         return $this->success([]);
     }
 
@@ -90,7 +92,7 @@ class SupervisorController extends Controller
 
     public function tipoCriterios()
     {
-        $data = Supervisor::tipoCriterios();
+        $data = Criterion::select('name as nombre', 'id')->get();
         return $this->success($data);
     }
 

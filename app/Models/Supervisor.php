@@ -23,11 +23,6 @@ class Supervisor extends User
         return $this->belongsTo(CriterionValue::class, 'criterion_value_id');
     }
 
-    public function supervised()
-    {
-        return $this->
-    }
-
     static function searchSupervisor($request)
     {
         $query = User::query()

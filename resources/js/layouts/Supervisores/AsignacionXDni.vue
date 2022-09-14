@@ -177,7 +177,7 @@ export default {
                 let data = {
                     filtro,
                 };
-                axios
+                vue.$http
                     .post(vue.apiSearchUser, data)
                     .then(({data}) => {
                         vue.filtro_result = data.data.users;

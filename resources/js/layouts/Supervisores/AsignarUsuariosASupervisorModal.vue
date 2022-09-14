@@ -54,7 +54,7 @@ export default {
                 type: 'dni'
             }
 
-            await axios.post('supervisores/set-data-supervisor', data).then(() => {
+            await vue.$http.post('supervisores/set-data-supervisor', data).then(() => {
                 vue.hideLoader();
                 vue.$notification.success('Se ha asignado correctamente los usuarios.', {
                     timer: 15,

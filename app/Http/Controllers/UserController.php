@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminStoreRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserStoreRequest;
@@ -26,7 +27,7 @@ class UserController extends Controller
     {
         if ($request->has('q')) {
             $question = $request->input('q');
-            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->where('name', 'like', '%' . $question . '%')->paginate();
+            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->filterText($question)->paginate();
         } else {
             $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->paginate();
         }
@@ -71,7 +72,7 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(UserStoreRequest $request)
+    public function store(AdminStoreRequest $request)
     {
         //cambiar valor de name en el request
         $data = $request->all();
@@ -151,7 +152,7 @@ class UserController extends Controller
      * @param  \App\user  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(AdminStoreRequest $request, User $user)
     {
         // 1. Actualizar el usuario
         $data = $request->all();

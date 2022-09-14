@@ -177,6 +177,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $q->orWhereRaw('name like ?', ["%{$filter}%"]);
             $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
             $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('email like ?', ["%{$filter}%"]);
         });
     }
 

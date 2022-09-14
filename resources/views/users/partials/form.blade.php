@@ -11,7 +11,7 @@
 <div class="form-group row">
     {{ Form::label('name', 'Nombre', ['class' => 'col-sm-3 form-control-label']) }}
     <div class="col-sm-9">
-        {{ Form::text('name', null, ['class' => 'form-control']) }}
+        {{ Form::text('name', null, ['class' => 'form-control', 'required']) }}
     </div>
 </div>
 <div class="form-group row">
@@ -88,8 +88,8 @@
                                         @endif
                                         {{ $wk->name }}
                                         <input type="hidden" id="roles_{{ $wk->id }}"
-                                            name="rolestowk[{{ $wk->slug }}][]" value=""
-                                            ref="roles_{{ $wk->id }}">
+                                               name="rolestowk[{{ $wk->slug }}][]" value=""
+                                               ref="roles_{{ $wk->id }}">
                                     </label>
                                 </div>
                                 <div class="col-md-6">
@@ -109,13 +109,13 @@
                                                     }
                                                 @endphp
                                                 <workspace-rol :workspaces="{{ $workspaces }}"
-                                                    :roles="{{ $roles }}" :toworkspace="'{{ $wk->id }}'"
-                                                    :roleselects="{{ $selected }}" />
+                                                               :roles="{{ $roles }}" :toworkspace="'{{ $wk->id }}'"
+                                                               :roleselects="{{ $selected }}"/>
                                             @endif
                                         @endforeach
                                     @else
                                         <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
-                                            :toworkspace="'{{ $wk->id }}'" />
+                                                       :toworkspace="'{{ $wk->id }}'"/>
                                     @endif
                                 </div>
                             </div>
@@ -134,13 +134,13 @@
                                         {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null) }}
                                         {{ $wk->name }}
                                         <input type="hidden" id="roles_{{ $wk->id }}"
-                                            name="rolestowk[{{ $wk->slug }}][]" value=""
-                                            ref="roles_{{ $wk->id }}">
+                                               name="rolestowk[{{ $wk->slug }}][]" value=""
+                                               ref="roles_{{ $wk->id }}">
                                     </label>
                                 </div>
                                 <div class="col-md-6">
                                     <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
-                                        :toworkspace="'{{ $wk->id }}'" />
+                                                   :toworkspace="'{{ $wk->id }}'"/>
                                 </div>
                             </div>
                         </div>
@@ -175,3 +175,21 @@
         {{ Form::submit('Guardar', ['class' => 'btn btn-primary']) }}
     </div>
 </div>
+
+{{--@section('js')--}}
+{{--    @parent--}}
+{{--    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">--}}
+{{--    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>--}}
+{{--    <script>--}}
+
+{{--        $('form').submit(function (event) {--}}
+{{--            event.preventDefault();--}}
+{{--            console.log("HOLA K ACE?");--}}
+{{--            let selected = $('.rolestowk').val();--}}
+{{--            console.log(selected)--}}
+{{--            // $(this).unbind('submit').submit();--}}
+{{--        });--}}
+{{--    </script>--}}
+
+{{--@endsection--}}
+
