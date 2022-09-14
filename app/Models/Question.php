@@ -6,7 +6,7 @@ class Question extends BaseModel
 {
     protected $fillable = [
         'topic_id', 'type_id', 'pregunta',
-        'rptas_json', 'rpta_ok', 'active'
+        'rptas_json', 'rpta_ok', 'active', 'required', 'score',
     ];
 
     protected $casts = [

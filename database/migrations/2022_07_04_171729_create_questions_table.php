@@ -22,7 +22,9 @@ return new class extends Migration
             $table->text('rptas_json');
             $table->text('rpta_ok');
 
-            $table->boolean('active')->nullable()->default(true);
+            $table->boolean('active')->nullable();
+            $table->boolean('required')->nullable();
+            $table->decimal('score', 8, 2)->nullable();
 
             $table->timestamps();
             $table->softDeletes();
