@@ -62,6 +62,10 @@ export default {
                 sel += value.id
             });
             vue.$root.$refs['roles_' + vue.toworkspace].value = sel
+            let workspace = vue.workspaces.find(el => el.id == vue.toworkspace);
+            const ckbx_id = `workspacessel[${workspace.slug}][]`;
+            let wk_ckbx = document.getElementById(ckbx_id);
+            wk_ckbx.checked = true;
         }
     },
     methods: {
