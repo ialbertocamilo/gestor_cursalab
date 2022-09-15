@@ -130,7 +130,7 @@ class Integrations extends Model
         $users_dni = isset($data['users_document']) ?  collect($data['users_document']) : collect(); 
         $users_dni = $static_headers->merge($users_dni);
         $users_email = isset($data['users_email']) ?  collect($data['users_email']) : collect(); 
-        $users_inactived = $users_email->merge($users_dni);
+        $users_inactived = $users_dni->merge($users_email);
         //Procesar data
         $model_massive_state_user->state_user_massive = $state_user_massive;
         $model_massive_state_user->collection($users_inactived);
