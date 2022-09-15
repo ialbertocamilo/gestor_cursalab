@@ -80,11 +80,11 @@
                                         @if ($existe)
                                             @foreach ($workspaces_roles as $wksk => $wksv)
                                                 @if ($wksk == $wk->slug)
-                                                    {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, $wksk, ['id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
+                                                    {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, $wksk, ['class' => 'display-none','id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
                                                 @endif
                                             @endforeach
                                         @else
-                                            {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, [ 'id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
+                                            {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, ['class' => 'display-none', 'id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
                                         @endif
                                         {{ $wk->name }}
                                         <input type="hidden" id="roles_{{ $wk->id }}"
@@ -138,7 +138,7 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <label class="form-control-label">
-                                        {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, [ 'id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
+                                        {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, ['class' => 'display-none', 'id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
                                         {{ $wk->name }}
                                         <input type="hidden" id="roles_{{ $wk->id }}"
                                                name="rolestowk[{{ $wk->slug }}][]" value=""
