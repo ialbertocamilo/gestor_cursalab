@@ -1,155 +1,165 @@
 <template>
-	<v-main>
-		<!-- Resumen del reporte -->
-		<ResumenExpand titulo="Resumen del reporte">
-			<template v-slot:resumen>
-				Descarga el registro de reinicios de intentos de evaluación realizados por los
-				administradores a los usuarios.
-			</template>
-			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres" subtitulo="Datos personales" />
-			<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
-			<list-item titulo="Ciclo actual (Usuario)" subtitulo="Ciclo actual en la que se encuentra" />
-			<list-item titulo="Tipo reinicio" subtitulo="Tipo de reinicio realizado (al tema o curso)" />
-			<list-item titulo="Curso" subtitulo="Nombre del curso" />
-			<list-item titulo="Tema" subtitulo="Nombre del tema" />
-			<list-item
-				titulo="Reinicios"
-				subtitulo="Cantidad de reinicios realizados (Por tipo de reinicio)"
-			/>
-			<list-item titulo="Fecha" subtitulo="Fecha en la que se realizó el reinicio" />
-			<list-item
-				titulo="Administrador responsable"
-				subtitulo="Administrador que realizó el reinicio"
-			/>
-		</ResumenExpand>
-		<!-- Formulario del reporte -->
-		<form @submit.prevent="exportRenicios" class="row col-xl-10 col-sm-12">
-			<!-- Admins -->
-			<div class="col-sm-6 mb-2">
-				<b-form-text text-variant="muted">Administrador</b-form-text>
-				<select v-model="admin" class="form-control">
-					<option value="">- Seleccionar Administrador -</option>
-					<option value="ALL">[TODOS]</option>
-					<option v-for="(item, index) in Admins" :key="index" :value="item.id">
-						{{ item.name }}
-					</option>
-				</select>
-			</div>
-			<!-- Tipos -->
-			<div class="col-sm-6 mb-2">
-				<b-form-text text-variant="muted">Tipo</b-form-text>
-				<select v-model="tipo" class="form-control" :disabled="!admin || admin == 'ALL'">
-					<option value="">- Seleccionar Tipo de reinicio -</option>
-					<option value="ALL">[TODOS]</option>
-					<option value="por_tema">Reinicios por tema</option>
-					<option value="por_curso">Reinicios por curso</option>
-					<option value="total">Reinicios totales</option>
-				</select>
-			</div>
-			<div class="col-sm-6 mb-2">
-				<b-form-text text-variant="muted">Fecha inicial</b-form-text>
-				<div class="input-group">
-					<b-form-datepicker
-						v-model="start"
-						button-only
-						button-variant="light"
-						locale="es-PE"
-						aria-controls="date-start"
-						today-button
-						label-today-button="Hoy"
-						reset-button
-						label-reset-button="Reiniciar"
-						selected-variant="danger"
-					></b-form-datepicker>
-					<input
-						type="date"
-						autocomplete="off"
-						class="datepicker form-control hasDatepicker"
-						v-model="start"
-					/>
-				</div>
-			</div>
-			<div class="col-sm-6 mb-2">
-				<b-form-text text-variant="muted">Fecha final</b-form-text>
-				<div class="input-group">
-					<b-form-datepicker
-						v-model="end"
-						button-only
-						button-variant="light"
-						locale="es-PE"
-						aria-controls="date-start"
-						today-button
-						label-today-button="Hoy"
-						reset-button
-						label-reset-button="Reiniciar"
-						selected-variant="danger"
-					></b-form-datepicker>
-					<input
-						type="date"
-						autocomplete="off"
-						class="datepicker form-control hasDatepicker"
-						v-model="end"
-					/>
-				</div>
-			</div>
+    <v-main>
+        <!-- Resumen del reporte -->
+        <ResumenExpand titulo="Resumen del reporte">
+            <template v-slot:resumen>
+                Descarga el registro de reinicios de intentos de evaluación realizados por los
+                administradores a los usuarios.
+            </template>
+            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
+            <list-item titulo="DNI, Apellidos y nombres" subtitulo="Datos personales" />
+            <list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+            <list-item titulo="Ciclo actual (Usuario)" subtitulo="Ciclo actual en la que se encuentra" />
+            <list-item titulo="Tipo reinicio" subtitulo="Tipo de reinicio realizado (al tema o curso)" />
+            <list-item titulo="Curso" subtitulo="Nombre del curso" />
+            <list-item titulo="Tema" subtitulo="Nombre del tema" />
+            <list-item
+                titulo="Reinicios"
+                subtitulo="Cantidad de reinicios realizados (Por tipo de reinicio)"
+            />
+            <list-item titulo="Fecha" subtitulo="Fecha en la que se realizó el reinicio" />
+            <list-item
+                titulo="Administrador responsable"
+                subtitulo="Administrador que realizó el reinicio"
+            />
+        </ResumenExpand>
+        <!-- Formulario del reporte -->
+        <form @submit.prevent="exportRenicios"
+              class="row col-xl-10 col-sm-12">
+            <!-- Admins -->
+            <div class="col-sm-6 mb-2">
+                <b-form-text text-variant="muted">Administrador</b-form-text>
+                <select v-model="admin" class="form-control">
+                    <option value="">- Seleccionar Administrador -</option>
+                    <option value="ALL">[TODOS]</option>
+                    <option v-for="(item, index) in admins"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-6"></div>
+            <div class="col-sm-6 mb-2">
+                <b-form-text text-variant="muted">Fecha inicial</b-form-text>
+                <div class="input-group">
+                    <b-form-datepicker
+                        v-model="start"
+                        button-only
+                        button-variant="light"
+                        locale="es-PE"
+                        aria-controls="date-start"
+                        today-button
+                        label-today-button="Hoy"
+                        reset-button
+                        label-reset-button="Reiniciar"
+                        selected-variant="danger"
+                    ></b-form-datepicker>
+                    <input
+                        type="date"
+                        autocomplete="off"
+                        class="datepicker form-control hasDatepicker"
+                        v-model="start"
+                    />
+                </div>
+            </div>
+            <div class="col-sm-6 mb-2">
+                <b-form-text text-variant="muted">Fecha final</b-form-text>
+                <div class="input-group">
+                    <b-form-datepicker
+                        v-model="end"
+                        button-only
+                        button-variant="light"
+                        locale="es-PE"
+                        aria-controls="date-start"
+                        today-button
+                        label-today-button="Hoy"
+                        reset-button
+                        label-reset-button="Reiniciar"
+                        selected-variant="danger"
+                    ></b-form-datepicker>
+                    <input
+                        type="date"
+                        autocomplete="off"
+                        class="datepicker form-control hasDatepicker"
+                        v-model="end"
+                    />
+                </div>
+            </div>
 
-			<div class="col-sm-12 mb-2 mt-4">
-				<div class="col-sm-4 pl-0 mt-5">
-					<button type="submit" class="btn btn-md btn-primary btn-block">
-						<i class="fas fa-download"></i> <span>Descargar</span>
-					</button>
-				</div>
-			</div>
-		</form>
-	</v-main>
+            <div class="col-sm-12 mb-2 mt-4">
+                <div class="col-sm-4 pl-0 mt-5">
+                    <button type="submit" class="btn btn-md btn-primary btn-block">
+                        <i class="fas fa-download"></i> <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </v-main>
 </template>
 
 <script>
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 export default {
-	components: { ResumenExpand, ListItem },
-	props: {
-		Admins: Array,
-		API_REPORTES: ""
-	},
-	data() {
-		return {
-			Tipos: [],
-			admin: "",
-			tipo: "",
-			start: "",
-			end: ""
-			// API_URL: process.env.MIX_API_REPORTES,
-		};
-	},
-	methods: {
-		exportRenicios() {
-			this.showLoader()
-			let params = {
-				admin: this.admin,
-				tipo: this.tipo,
-				start: this.start,
-				end: this.end
-			};
-			axios
-				.post(this.API_REPORTES + "reinicios", params)
-				.then((res) => {
-					if (!res.data.error) this.$emit("emitir-reporte", res);
-					else {
-						alert("Se ha encontrado el siguiente error : " + res.data.error);
-						this.hideLoader()
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-					console.log(error.message);
-					alert("Se ha encontrado el siguiente error : " + error);
-					this.hideLoader()
-				});
-		}
-	}
+    components: { ResumenExpand, ListItem },
+    props: {
+        workspaceId: 0,
+        admins: Array,
+        reportsBaseUrl: ''
+    },
+    data() {
+        return {
+            Tipos: [],
+            admin: "",
+            tipo: "",
+            start: "",
+            end: ""
+            // API_URL: process.env.MIX_API_REPORTES,
+        };
+    },
+    methods: {
+        async exportRenicios() {
+            // show loading spinner
+
+            this.showLoader()
+
+            let UFC = this.$refs.EstadoFiltroComponent;
+
+            // Perform request to generate report
+
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/reinicios`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: {
+                        workspaceId: this.workspaceId,
+                        admin: this.admin,
+                        start: this.start,
+                        end: this.end
+                    }
+                })
+
+                // When there are no results notify user,
+                // download report otherwise
+
+                if (response.data.alert) {
+                    this.showAlert(response.data.alert, 'warning')
+                } else {
+                    // Emit event to parent component
+                    this.$emit('emitir-reporte', response)
+                }
+
+            } catch (ex) {
+                console.log(ex.message)
+            }
+
+            // Hide loading spinner
+
+            this.hideLoader()
+        }
+    }
 };
 </script>
 

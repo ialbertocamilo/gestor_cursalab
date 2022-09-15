@@ -245,7 +245,6 @@ export default {
             this.showLoader()
 
             let UFC = this.$refs.EstadoFiltroComponent;
-            this.Grupos = [];
 
             // Perform request to generate report
 
@@ -270,9 +269,15 @@ export default {
                     }
                 })
 
-                // Emit event to parent component
+                // When there are no results notify user,
+                // download report otherwise
 
-                this.$emit('emitir-reporte', response)
+                if (response.data.alert) {
+                    this.showAlert(response.data.alert, 'warning')
+                } else {
+                    // Emit event to parent component
+                    this.$emit('emitir-reporte', response)
+                }
 
             } catch (ex) {
                 console.log(ex.message)

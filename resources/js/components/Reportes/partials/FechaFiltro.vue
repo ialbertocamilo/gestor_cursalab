@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div class="mb-3">
-			<small class="text-muted text-bold">Fecha inicial</small>
+			<small class="text-muted">Fecha inicial</small>
 			<div class="input-group">
 				<input
 					type="date"
@@ -25,7 +25,7 @@
 			</div>
 		</div>
 		<div class="mb-3">
-			<small class="text-muted text-bold">Fecha final :</small>
+			<small class="text-muted">Fecha final</small>
 			<div class="input-group">
 				<input
 					type="date"
