@@ -21,7 +21,7 @@ export default {
             api_description_options:{
                 title:'Crear o actualizar usuarios',
                 type:'POST',
-                route:'/integrations/update_create_users',
+                route:'/integrations/update-create-users',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -150,7 +150,7 @@ let data = JSON.stringify({
             "phone_number": number,
             "email_address": text,
             "criterions": {
-                module
+                "module":text,
                 "user_action_id":text,
                 "document_type_id":text,
                 "business_unit_id":text,
@@ -203,7 +203,7 @@ let data = JSON.stringify({
 );
 var config = {
     method: 'post',
-    url: base_url+'/integrations/update_create_users',
+    url: base_url+'/integrations/update-create-users',
     headers: { 
         'secretKey': 'f*hdj[!GbdZQ4{#zKlot', 
         'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ...', 

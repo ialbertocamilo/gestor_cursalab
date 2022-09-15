@@ -145,6 +145,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasMany(SummaryTopic::class);
     }
 
+    public function scopeFilterText($q, $filter)
+    {
+        $q->where(function ($q) use ($filter) {
+            $q->whereRaw('document like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('name like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
+        });
+    }
+
     public function getFullnameAttribute()
     {
         // if($this->fullname){

@@ -23,7 +23,7 @@ export default {
              api_description_options:{
                 title:'Activar usuarios',
                 type:'POST',
-                route:'/integrations/activate_users',
+                route:'/integrations/activate-users',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -82,7 +82,7 @@ code:
     );
     const config = {
         method: 'post',
-        url: base_url+'/integrations/activate_users',
+        url: base_url+'/integrations/activate-users',
         headers: { 
             'secretKey': 'asd-i4qEJK46[hdj', 
             'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9....', 
