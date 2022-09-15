@@ -25,12 +25,13 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->has('q')) {
-            $question = $request->input('q');
-            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->where('name', 'like', '%' . $question . '%')->paginate();
-        } else {
-            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->paginate();
-        }
+        $q = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports');
+
+        if ($request->has('q'))
+           $q->filterText($request->q);
+
+        $users = $q->orderBy('name')->paginate();
+
         $super_user = auth()->user()->isAn('super-user');
         return view('users.index', compact('users', 'super_user'));
     }
@@ -157,6 +158,7 @@ class UserController extends Controller
     {
         // 1. Actualizar el usuario
         $data = $request->all();
+//        dd($data);
 
         if (!is_null($request->password)) {
             $data['password'] = $request->password;

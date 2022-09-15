@@ -18,56 +18,64 @@
 .c-white {
     color: white;
 }
+
 .v-text-field--outlined.v-input--dense .v-label--active {
     top: 0;
 }
 </style>
 <script>
-const fields = ['workspaces','roles','toworkspace'];
+const fields = ['workspaces', 'roles', 'toworkspace'];
 export default {
     props: [
-        "workspaces","roles","toworkspace","roleselects"
+        "workspaces", "roles", "toworkspace", "roleselects"
     ],
-    data(){
+    data() {
         return {
-        applicants:[
-            {
-                previous: '',
-                expiration:''
-            }
+            applicants: [
+                {
+                    previous: '',
+                    expiration: ''
+                }
             ],
-                resourceDefault: {
-                    workspaces: [],
-                    roles: [],
-                    toworkspace: [],
-                },
-                resource: {},
-                selects: {
-                    workspaces: [],
-                    roles: [],
-                },
+            resourceDefault: {
+                workspaces: [],
+                roles: [],
+                toworkspace: [],
+            },
+            resource: {},
+            selects: {
+                workspaces: [],
+                roles: [],
+            },
         }
     },
     mounted() {
         let vue = this
         vue.selects.roles = vue.roles;
-        vue.resource.roles =vue.roleselects;
+        vue.resource.roles = vue.roleselects;
         let sel = '';
 
-        if (vue.roleselects !== undefined){
+        if (vue.roleselects !== undefined) {
             vue.roleselects.filter((value, index) => {
-                if(index > 0)
-                    sel+=','
+                if (index > 0)
+                    sel += ','
                 sel += value.id
             });
-            vue.$root.$refs['roles_'+vue.toworkspace].value = sel
+            vue.$root.$refs['roles_' + vue.toworkspace].value = sel
         }
     },
-    methods : {
+    methods: {
         upd(value) {
             let vue = this
+            let checbox = vue.$root.$refs['roles_' + vue.toworkspace]
 
-            vue.$root.$refs['roles_'+vue.toworkspace].value = value
+            checbox.value = value
+            // console.log("UPDATE");
+            // console.log(checbox.value);
+            let workspace = vue.workspaces.find(el => el.id == vue.toworkspace);
+            const ckbx_id = `workspacessel[${workspace.slug}][]`;
+            let wk_ckbx = document.getElementById(ckbx_id);
+            wk_ckbx.checked = checbox.value !== "";
         },
     }
 };

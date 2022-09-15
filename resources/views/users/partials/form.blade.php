@@ -80,11 +80,11 @@
                                         @if ($existe)
                                             @foreach ($workspaces_roles as $wksk => $wksv)
                                                 @if ($wksk == $wk->slug)
-                                                    {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, $wksk) }}
+                                                    {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, $wksk, ['class' => 'display-none', 'id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
                                                 @endif
                                             @endforeach
                                         @else
-                                            {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, ['onchange' => "disableSelect(this, $wk->id)"]) }}
+                                            {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, ['class' => 'display-none',  'id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
                                         @endif
                                         {{ $wk->name }}
                                         <input type="hidden" id="roles_{{ $wk->id }}"
@@ -93,7 +93,7 @@
                                     </label>
                                 </div>
 
-{{--                                <pre>{{$existe}}</pre>--}}
+                                {{--                                <pre>{{$existe}}</pre>--}}
                                 @if ($existe)
                                     <div class="col-md-6" id="div-select-{{$wk->id}}">
 
@@ -119,7 +119,7 @@
                                     </div>
 
                                 @else
-                                    <div class="col-md-6 wk-div-disabled" id="div-select-{{$wk->id}}">
+                                    <div class="col-md-6" id="div-select-{{$wk->id}}">
 
                                         <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
                                                        :toworkspace="'{{ $wk->id }}'"/>
@@ -138,14 +138,14 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <label class="form-control-label">
-                                        {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, ['onchange' => "disableSelect(this, $wk->id)"]) }}
+                                        {{ Form::checkbox('workspacessel[' . $wk->slug . '][]', $wk->id, null, ['class' => 'display-none',  'id' => 'workspacessel[' . $wk->slug . '][]' ]) }}
                                         {{ $wk->name }}
                                         <input type="hidden" id="roles_{{ $wk->id }}"
                                                name="rolestowk[{{ $wk->slug }}][]" value=""
                                                ref="roles_{{ $wk->id }}">
                                     </label>
                                 </div>
-                                <div class="col-md-6 wk-div-disabled" id="div-select-{{$wk->id}}">
+                                <div class="col-md-6" id="div-select-{{$wk->id}}">
                                     <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
                                                    :toworkspace="'{{ $wk->id }}'"/>
                                 </div>
@@ -188,6 +188,10 @@
         .wk-div-disabled {
             pointer-events: none;
             opacity: 0.4;
+        }
+
+        .display-none {
+            display: none;
         }
     </style>
     @parent
