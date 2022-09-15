@@ -12,16 +12,16 @@ use App\Http\Requests\CreateUpdateUserRequest;
 class IntegrationsController extends Controller
 {
     public function updateCreateUsers(CreateUpdateUserRequest $request){
-        // try {
+        try {
             $users = $request->get('users');
             $workspace_id = $request->get('workspace_id');
             $response = Integrations::updateCreateUsers($users,$workspace_id);
             return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
-        // } catch (\Throwable $th) {
-        //     return response()->json(
-        //         ['message'=>'Server error.']
-        //     ,500);
-        // }
+        } catch (\Throwable $th) {
+            return response()->json(
+                ['message'=>'Server error.']
+            ,500);
+        }
     }
     public function getSecretKey(AuthRequest $request){
         try {
