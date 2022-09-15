@@ -156,7 +156,6 @@ export default {
 /* Custom class */
 .grupo_title{
     font-size: 0.73em!important;
-    /* font-weight: bold!important; */
     white-space: normal;
 }
 .item_icon{
