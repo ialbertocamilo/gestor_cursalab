@@ -12,8 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class UserMassive implements ToCollection
-{
+class UserMassive implements ToCollection{
     public $errors = [];
     public $processed_users = 0;
     public $current_workspace = null;

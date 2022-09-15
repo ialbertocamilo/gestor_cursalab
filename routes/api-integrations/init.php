@@ -9,8 +9,8 @@
             Route::get('/criteria', 'getCriteria');
             Route::get('/criterion/{criterion_id}/values', 'getValuesCriterion');
             Route::post('/update-create-users', 'updateCreateUsers');
-            // Route::post('/inactivate-users', 'InactivateUsers');
-            // Route::post('/activate-users', 'ActivateUsers');
+            Route::post('/inactivate-users', 'inactivateUsers');
+            Route::post('/activate-users', 'activateUsers');
         });
     });
 ?>

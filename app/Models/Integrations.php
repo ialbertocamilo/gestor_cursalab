@@ -9,6 +9,7 @@ use App\Models\Massive\UserMassive;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Auth\LoginController;
+use App\Models\Massive\ChangeStateUserMassive;
 
 class Integrations extends Model
 {
@@ -112,5 +113,47 @@ class Integrations extends Model
             ],
             'code'=>200
         ];
+    }
+    protected function inactivateUsers($data){
+        return $this->change_status_user($data,0,'quantity_inactivated');
+    }
+    protected function activateUsers($data){
+        return $this->change_status_user($data,1,'quantity_activated');
+    }
+    private function change_status_user($data,$state_user_massive,$name_parameter){
+        $verify_parameters = $this->parameters_allow( ['users_document','users_email'],$data);
+        if($verify_parameters['code']!=200){
+            return $verify_parameters;
+        }
+        $model_massive_state_user = new ChangeStateUserMassive();
+        $static_headers = $model_massive_state_user->getStaticHeader();
+        $users_dni = isset($data['users_document']) ?  collect($data['users_document']) : collect(); 
+        $users_dni = $static_headers->merge($users_dni);
+        $users_email = isset($data['users_email']) ?  collect($data['users_email']) : collect(); 
+        $users_inactived = $users_dni->merge($users_email);
+        //Procesar data
+        $model_massive_state_user->state_user_massive = $state_user_massive;
+        $model_massive_state_user->collection($users_inactived);
+        $data = [
+            $name_parameter =>$model_massive_state_user->q_change_status,
+            'amount_errors' => $model_massive_state_user->q_errors,
+            'processed_data' => $users_inactived->count(),
+            'errors' =>  $model_massive_state_user->errors
+        ];
+        
+        return  ['data'=>$data,'code'=>200];
+    }
+    private function parameters_allow($parameters_allow,$data){
+        $error = false;
+        $message = '';
+        $code = 200;
+        foreach ($data as $parameter_name => $value) {
+            if(!in_array($parameter_name,$parameters_allow)){
+                $error = true;
+                $code = 400;
+                $message = "The parameter '".$parameter_name."' not allowed.";
+            }
+        }
+        return  ['data'=>['errors'=>$error,'message'=>$message],'code'=>$code];
     }
 }
