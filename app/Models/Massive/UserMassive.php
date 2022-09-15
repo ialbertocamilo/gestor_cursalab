@@ -19,7 +19,9 @@ class UserMassive implements ToCollection{
     public function collection(Collection $rows){
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
-        $this->current_workspace = get_current_workspace();
+        if(!is_null($this->current_workspace)){
+            $this->current_workspace = get_current_workspace();
+        }
         $current_workspace = $this->current_workspace;
         $criteria = Criterion::query()
             ->with([
@@ -90,7 +92,10 @@ class UserMassive implements ToCollection{
         foreach ($data_users as $key => $dt) {
             if(empty($dt['value_excel']) && $dt['required']){
                 $has_error = true;
-                $errors_index[] = $dt['index'];
+                $errors_index[] = [
+                    'index'=>$dt['index'],
+                    'message'=>'The field '.$dt['code']. ' is required'
+                ];
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];

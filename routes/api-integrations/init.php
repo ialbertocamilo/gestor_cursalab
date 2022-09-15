@@ -7,6 +7,7 @@
         Route::post('/auth-user', 'authUser');
         Route::group(['middleware' => ['auth.guard:api','secretKey']],function () {
             Route::get('/criteria', 'getCriteria');
+            Route::get('/workspaces', 'getWorkspaces');
             Route::get('/criterion/{criterion_id}/values', 'getValuesCriterion');
             Route::post('/update-create-users', 'updateCreateUsers');
             Route::post('/inactivate-users', 'inactivateUsers');

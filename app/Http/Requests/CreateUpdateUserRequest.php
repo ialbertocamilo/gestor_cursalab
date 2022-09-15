@@ -21,12 +21,15 @@ class CreateUpdateUserRequest extends FormRequest
     {
         return [
             'users' => 'required|array',
+            'workspace_id' => 'required|exists:workspaces,id'
         ];
     }
     public function messages(){
         return [
             'users.required' => 'The field users is required.',
             'users.array' => 'The fieds users may be an array.',
+            'workspace_id.required' => 'The field workspace_id is required.',
+            'workspace_id.exists' => 'Workspace not found.'
         ];
     }
     protected function failedValidation(Validator $validator)

@@ -13,14 +13,35 @@ class IntegrationsController extends Controller
 {
     public function updateCreateUsers(CreateUpdateUserRequest $request){
         // try {
-            $users = $request->get('users'); 
-            $response = Integrations::updateCreateUsers($users);
+            $users = $request->get('users');
+            $workspace_id = $request->get('workspace_id');
+            $response = Integrations::updateCreateUsers($users,$workspace_id);
             return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
         // } catch (\Throwable $th) {
         //     return response()->json(
         //         ['message'=>'Server error.']
         //     ,500);
         // }
+    }
+    public function getSecretKey(AuthRequest $request){
+        try {
+            $response = Integrations::getSecretKey($request);
+            return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
+        } catch (\Throwable $th) {
+            return response()->json(
+                ['message'=>'Server error.']
+            ,500);
+        }
+    }
+    public function authUser(AuthRequest $request){
+        try {
+            $response = Integrations::authUser($request);
+            return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
+        } catch (\Throwable $th) {
+            return response()->json(
+                ['message'=>'Server error.']
+            ,500);
+        }
     }
     public function getCriteria(){
         try {
@@ -42,19 +63,9 @@ class IntegrationsController extends Controller
             ,500);
         }
     }
-    public function authUser(AuthRequest $request){
+    public function getWorkspaces(){
         try {
-            $response = Integrations::authUser($request);
-            return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
-        } catch (\Throwable $th) {
-            return response()->json(
-                ['message'=>'Server error.']
-            ,500);
-        }
-    }
-    public function getSecretKey(AuthRequest $request){
-        try {
-            $response = Integrations::getSecretKey($request);
+            $response = Integrations::getWorkspaces();
             return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             return response()->json(
