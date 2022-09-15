@@ -23,7 +23,7 @@ export default {
              api_description_options:{
                 title:'Inactivar usuarios',
                 type:'POST',
-                route:'/integrations/inactivate_users',
+                route:'/integrations/inactivate-users',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -90,7 +90,7 @@ code:
     );
     const config = {
         method: 'post',
-        url: base_url+'/integrations/inactivate_users',
+        url: base_url+'/integrations/inactivate-users',
         headers: { 
             'secretKey': 'asd-i4qEJK46[hdj', 
             'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9....', 

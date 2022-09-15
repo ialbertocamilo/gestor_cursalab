@@ -23,7 +23,7 @@ export default {
             api_description_options:{
                 title:'Generar un nuevo token',
                 type:'POST',
-                route:'/integrations/auth_user',
+                route:'/integrations/auth-user',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -66,7 +66,7 @@ const axios = require('axios');
 const data = JSON.stringify({"email":"admin@admin.com","password":"4239872439"});
 const config = {
     method: 'post',
-    url: base_url+'/integrations/auth_user',
+    url: base_url+'/integrations/auth-user',
     headers: { 
         'secretKey': '982alsdh$%as', 
         'Content-Type': 'application/json'

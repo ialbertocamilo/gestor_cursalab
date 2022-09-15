@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserStoreRequest extends FormRequest
+class AdminStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -39,8 +39,7 @@ class UserStoreRequest extends FormRequest
             'phone_number' => 'nullable',
             'person_number' => 'nullable',
 
-            'criterion_list_final' => 'nullable',
-            'criterion_list' => 'nullable',
+            'workspacessel' => 'required'
         ];
 
         return $rules;
@@ -58,6 +57,7 @@ class UserStoreRequest extends FormRequest
         return [
             'name.required' => 'El dato "nombre" es requerido',
             'password.required' => 'El dato "contraseña" es requerido',
+            'workspacessel.required' => 'Debe seleccionar al menos un rol',
             'email.required' => 'El dato "correo" es requerido',
             'email.email' => 'El dato "correo " debe tener formato abc@ejemplo.com',
             'email.unique' => 'Este correo ya ha sido regitrado: intente con otro'

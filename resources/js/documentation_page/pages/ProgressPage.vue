@@ -24,7 +24,7 @@ export default {
             api_description_options: {
                 title: "User progress",
                 type: "POST",
-                route: "/integrations/user_progress",
+                route: "/integrations/user-progress",
                 parameters_type: [
                     {
                         title: "Parámetros (body)",
@@ -90,7 +90,7 @@ export default {
         );
         const config = {
             method: 'post',
-            url: base_url+'/integrations/progress',
+            url: base_url+'/integrations/user-progress',
             headers: { 
                 'secretKey': 'asd-i4qEJK46[hdj', 
                 'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9....', 

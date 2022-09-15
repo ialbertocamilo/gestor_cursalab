@@ -9,6 +9,7 @@ use App\Models\Criterion;
 use App\Models\Eventos;
 use App\Models\Matricula;
 use App\Models\PushNotification;
+use App\Models\User;
 use App\Models\Usuario;
 use Carbon\Carbon;
 use Illuminate\Contracts\Foundation\Application;
@@ -54,7 +55,7 @@ class PushNotificationsFirebaseController extends Controller
         foreach ($modules as $module) {
             $module->modulo_selected = false;
             $module->carreras_selected = false;
-            $module->carreras = Criterion::getValuesForSelect('career');
+            $module->carreras = Criterion::getValuesForSelect('position_name');
         }
 
         return $this->success(get_defined_vars());
@@ -68,23 +69,29 @@ class PushNotificationsFirebaseController extends Controller
      */
     public function enviarNotificacionCustom(Request $request)
     {
+//        dd($request->all());
         $destinatarios = json_decode($request->destinatarios);
         $_destinatarios = collect();
 
         // todo: when replacement for Matricula table is defined
-//        foreach ($destinatarios as $mod) {
-//
-//            foreach ($mod->carreras as $carr) {
-//
+        foreach ($destinatarios as $mod) {
+
+            foreach ($mod->carreras as $carr) {
+//                dd($carr->carrera_id);
+                $users = User::whereHas('criterion_values', function ($q) use ($carr) {
+                    $q->whereIn('id', [$carr->carrera_id]);
+                })
+                    ->pluck('id');
+
 //                $usuarios_matriculas = Matricula::where('carrera_id', $carr->carrera_id)
 //                                                ->where('presente', 1)
 //                                                ->get(['usuario_id']);
 //
-//                foreach ($usuarios_matriculas as $us) {
-//                    $_destinatarios->push($us->usuario_id);
-//                }
-//            }
-//        }
+                foreach ($users as $us)
+                    $_destinatarios->push($us);
+
+            }
+        }
 
         // Calculates notification time
 
@@ -93,8 +100,10 @@ class PushNotificationsFirebaseController extends Controller
         $intervalo = 15;
         $_detalles_json = collect();
         $i = 1;
-        $chunk = array_chunk($_destinatarios->all(), $push_chunk);
-        $ahora = Carbon::now();
+        $chunk = array_chunk($_destinatarios->unique()->values()->all(), $push_chunk);
+//        $chunk = array_chunk($_destinatarios->all(), $push_chunk);
+//        dd($chunk);
+        $ahora = now();
         $ahora->addMinutes($envio_inicio);
 
         foreach ($chunk as $key => $agrupado) {
@@ -117,31 +126,30 @@ class PushNotificationsFirebaseController extends Controller
         $nueva_notificacion->texto = $request->texto;
         $nueva_notificacion->destinatarios = $request->destinatarios;
         $nueva_notificacion->creador_id = $request->creador_id;
-        $nueva_notificacion->estado_envio= 1; // PENDIENTE (aún no iniciado)
+        $nueva_notificacion->estado_envio = 1; // PENDIENTE (aún no iniciado)
         $nueva_notificacion->detalles_json = json_encode($_detalles_json);
-        $nueva_notificacion->success= 0;
-        $nueva_notificacion->failure= 0;
+        $nueva_notificacion->success = 0;
+        $nueva_notificacion->failure = 0;
         $nueva_notificacion->save();
 
         return response()->json([
                 'error' => false,
-                'title'=> 'Notificación registrada',
+                'title' => 'Notificación registrada',
                 'msg' => "Se enviará durante los próximos minutos."
             ]
-            ,200
+            , 200
         );
     }
-
 
 
     public function enviarNotificacionFormularioEvento($evento_id)
     {
         $evento = Eventos::where('id', $evento_id)->first();
         $asistentes_evento = ActividadEvento::where('evento_id', $evento->id)
-                                            ->where('estado', 1)
-                                            ->pluck('usuario_id');
+            ->where('estado', 1)
+            ->pluck('usuario_id');
         $array_tokens = Usuario::whereIn('id', $asistentes_evento)->whereNotNull('token_firebase')->pluck('token_firebase');
-        info($array_tokens);
+//        info($array_tokens);
 
         $data_notificacion = array(
             'tipo' => 'notificacion_formulario',
@@ -164,7 +172,7 @@ class PushNotificationsFirebaseController extends Controller
 
         } catch (\Throwable $th) {
 
-            info($th);
+//            info($th);
             return response()->json([
                 'error' => true,
                 'msg' => 'Error en el servidor, intente en un minuto.'
@@ -180,7 +188,6 @@ class PushNotificationsFirebaseController extends Controller
 
         return $this->success($notificaciones);
     }
-
 
 
     public function getData()
@@ -227,9 +234,10 @@ class PushNotificationsFirebaseController extends Controller
         return response()->json(compact('modulos', '_notificaciones', 'paginate'), 200);
     }
 
-    public function detalle(PushNotification $notificacion){
+    public function detalle(PushNotification $notificacion)
+    {
 
-        $estado = ['PENDIENTE','ENVIADO'];
+        $estado = ['PENDIENTE', 'ENVIADO'];
         $segmentacion = json_decode($notificacion->destinatarios);
         $resumen_estado['alcanzados'] = $notificacion->success;
         $resumen_estado['no_alcanzados'] = $notificacion->failure;
@@ -238,19 +246,19 @@ class PushNotificationsFirebaseController extends Controller
         $resumen_estado['objetivo'] = 0;
         $lotes = collect();
 
-        foreach($detalles_json as $dj){
+        foreach ($detalles_json as $dj) {
             $q_users = count($dj->usuarios);
-            $resumen_estado['objetivo'] +=$q_users ;
+            $resumen_estado['objetivo'] += $q_users;
             $lotes->push([
-                'datetime'=> $dj->hora_envio,
-                'quantity' =>$q_users,
-                'estado' =>  $estado[$dj->estado_envio]
+                'datetime' => $dj->hora_envio,
+                'quantity' => $q_users,
+                'estado' => $estado[$dj->estado_envio]
             ]);
         }
 
         $resumen_estado['pendientes'] = $resumen_estado['objetivo'] - ($resumen_estado['alcanzados'] + $resumen_estado['no_alcanzados']);
-        $resumen_estado['pendientes']<=0 && $resumen_estado['pendientes'] = 0;
+        $resumen_estado['pendientes'] <= 0 && $resumen_estado['pendientes'] = 0;
 
-        return response()->json(compact('segmentacion','resumen_estado','lotes'), 200);
+        return response()->json(compact('segmentacion', 'resumen_estado', 'lotes'), 200);
     }
 }

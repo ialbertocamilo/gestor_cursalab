@@ -65,7 +65,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
-        'external_id', 'fcm_token', 'token_firebase',
+        'external_id', 'fcm_token', 'token_firebase','secret_key'
     ];
 
     protected $with = ['roles', 'abilities'];
@@ -143,6 +143,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function summary_topics()
     {
         return $this->hasMany(SummaryTopic::class);
+    }
+
+    public function scopeFilterText($q, $filter)
+    {
+        $q->where(function ($q) use ($filter) {
+            $q->whereRaw('document like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('name like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
+        });
     }
 
     public function getFullnameAttribute()
