@@ -244,12 +244,10 @@ export default {
     ,
     methods: {
         /**
-         *
+         * Fetch schools
          * @returns {Promise<void>}
          */
         async fetchFiltersData () {
-
-            // Fetch schools
 
             let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}`
             let responseSchools = await axios({

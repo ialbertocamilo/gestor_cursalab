@@ -87,14 +87,14 @@ TABS
                         Versiones usadas
                     </span>
                 </v-tab>
-
+-->
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-file-account-outline</v-icon>
                     <span class="pt-2">
                         Usuario Uploads
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -122,14 +122,15 @@ TABS
                         Checklist General
                     </span>
                 </v-tab>
+-->
 
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-numeric</v-icon>
                     <span class="pt-2">
                         Ranking
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -264,16 +265,18 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+-->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <UsuarioUploads :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                            @emitir-reporte="crearReporte"/>
+                            <UsuarioUploads
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -312,16 +315,19 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+-->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Ranking :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                     @emitir-reporte="crearReporte"/>
+                            <Ranking
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
