@@ -12,6 +12,8 @@
             Route::post('/update-create-users', 'updateCreateUsers');
             Route::post('/inactivate-users', 'inactivateUsers');
             Route::post('/activate-users', 'activateUsers');
+
+            Route::get('/user-progress', 'progressUser');
         });
     });
 ?>

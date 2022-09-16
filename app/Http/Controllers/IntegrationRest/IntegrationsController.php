@@ -23,6 +23,16 @@ class IntegrationsController extends Controller
             ,500);
         }
     }
+    public function progressUser(Request $request){
+        // try {
+            $response = Integrations::progressUser($request);
+            return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
+        // } catch (\Throwable $th) {
+        //     return response()->json(
+        //         ['message'=>'Server error.']
+        //     ,500);
+        // }
+    }
     public function getSecretKey(AuthRequest $request){
         try {
             $response = Integrations::getSecretKey($request);

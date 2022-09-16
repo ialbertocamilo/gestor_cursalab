@@ -11,9 +11,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Auth\LoginController;
 use App\Models\Massive\ChangeStateUserMassive;
+use App\Http\Resources\UserIntegrationResource;
 
 class Integrations extends Model
 {
+    protected function progressUser($request){
+        $users = User::with(['subworkspace:id,name,parent_id','subworkspace.parent:id,name'])
+                    ->whereNotNull('subworkspace_id')->select('id','username','fullname','subworkspace_id')
+                    ->paginate(500);
+        UserIntegrationResource::collection($users);
+        return  ['data'=>['users'=>$users],'code'=>200];
+    }
     protected function updateCreateUsers($users,$workspace_id){
         $user_massive = new UserMassive();
         $user_massive->current_workspace = Workspace::where('id',$workspace_id)->first();
