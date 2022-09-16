@@ -15,12 +15,11 @@ class UserIntegrationResource extends JsonResource
      */
     public function toArray($request)
     {
-        $user = User::find($this->id);
-        $assigned_courses =  $user->getCurrentCourses();
-        $summary_user = $user->summary;
+        $assigned_courses =  $this->getCurrentCourses();
+        $summary_user = $this->summary;
         $summary_courses_user = 
            ($summary_user)
-            ? $summary_courses_user = $user->summary_courses()
+            ? $summary_courses_user = $this->summary_courses()
                 // ->with(['course:id,name,type_id','course.type:id,name','course.schools:id,name'])
                 ->with(['course:id,name,type_id','course'=>[
                     'type:id,name','schools:id,name'
