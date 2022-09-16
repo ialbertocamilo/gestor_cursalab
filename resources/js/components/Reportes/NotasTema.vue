@@ -107,7 +107,7 @@
             </div>
             <v-divider class="col-12 mb-0 p-0"></v-divider>
             <!-- Filtros secundarios -->
-            <div class="col-12 d-flex">
+            <div class="col-6 d-flex">
 
                 <EstadoFiltro ref="EstadoFiltroComponent"
                               @emitir-cambio="" />
@@ -116,9 +116,9 @@
             </div>
 
             <!--          Fechas          -->
-<!--            <div class="col-6">-->
+            <div class="col-6">
 <!--                <FechaFiltro ref="FechasFiltros" />-->
-<!--            </div>-->
+            </div>
 
             <div class="col-12">
                 <small class="text-muted text-bold">Resultado del Tema :</small>
@@ -185,12 +185,7 @@
                     </div>
                 </div>
             </div>
-            <v-divider class="col-12 p-0 m-0"></v-divider>
-
-
-
-
-            <v-divider class="col-12 mb-5 p-0"></v-divider>
+            <v-divider class="col-12 p-0 m-0 mb-4"></v-divider>
 
             <button type="submit"
                     class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
@@ -209,6 +204,7 @@ import FechaFiltro from "./partials/FechaFiltro.vue";
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
+
 export default {
     components: {
         EstadoFiltro,
@@ -248,12 +244,10 @@ export default {
     ,
     methods: {
         /**
-         *
+         * Fetch schools
          * @returns {Promise<void>}
          */
         async fetchFiltersData () {
-
-            // Fetch schools
 
             let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}`
             let responseSchools = await axios({
@@ -271,7 +265,7 @@ export default {
             this.showLoader()
 
             let UFC = this.$refs.EstadoFiltroComponent;
-            this.Grupos = [];
+            //let fechaFiltro = this.$refs.FechasFiltros;
 
             // Perform request to generate report
 
@@ -297,9 +291,15 @@ export default {
                     }
                 })
 
-                // Emit event to parent component
+                // When there are no results notify user,
+                // download report otherwise
 
-                this.$emit('emitir-reporte', response)
+                if (response.data.alert) {
+                    this.showAlert(response.data.alert, 'warning')
+                } else {
+                    // Emit event to parent component
+                    this.$emit('emitir-reporte', response)
+                }
 
             } catch (ex) {
                 console.log(ex.message)

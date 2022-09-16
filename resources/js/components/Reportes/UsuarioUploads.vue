@@ -1,81 +1,94 @@
 <template>
-	<v-main>
-		<!-- <div class="col-12">
-			<h3>Reporte de los informes subidos por los usuarios</h3>
-		</div> -->
-		<!-- Resumen del reporte -->
-		<ResumenExpand titulo="Resumen del reporte">
-			<template v-slot:resumen>
-				Descarga los archivos o links subidos por los usuarios a la plataforma.
-			</template>
-			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-			<list-item
-				titulo="Grupo sistema"
-				subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
-			/>
-			<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
-			<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-			<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
-			<list-item titulo="Ciclo actual (Usuario)" subtitulo="Ciclo actual en la que se encuentra" />
-			<list-item titulo="Cargo" subtitulo="Cargo que tiene asignado el usuario" />
-			<list-item titulo="Link" subtitulo="Link adjuntado por el usuario" />
-			<list-item titulo="Archivo" subtitulo="Archivo subido por el usuario" />
-			<list-item titulo="Descripción" subtitulo="Descripción adjunta por el usuario" />
-			<list-item titulo="Fecha de carga" subtitulo="Fecha en la que se adjunto el archivo" />
-		</ResumenExpand>
-		<!-- Formulario del reporte -->
+    <v-main>
+        <!-- <div class="col-12">
+            <h3>Reporte de los informes subidos por los usuarios</h3>
+        </div> -->
+        <!-- Resumen del reporte -->
+        <ResumenExpand titulo="Resumen del reporte">
+            <template v-slot:resumen>
+                Descarga los archivos o links subidos por los usuarios a la plataforma.
+            </template>
+            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
+            <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
+            <list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+            <list-item titulo="Ciclo actual (Usuario)" subtitulo="Ciclo actual en la que se encuentra" />
+            <list-item titulo="Cargo" subtitulo="Cargo que tiene asignado el usuario" />
+            <list-item titulo="Link" subtitulo="Link adjuntado por el usuario" />
+            <list-item titulo="Archivo" subtitulo="Archivo subido por el usuario" />
+            <list-item titulo="Descripción" subtitulo="Descripción adjunta por el usuario" />
+            <list-item titulo="Fecha de carga" subtitulo="Fecha en la que se adjunto el archivo" />
+        </ResumenExpand>
+        <!-- Formulario del reporte -->
 
-		<!-- <div class="col-sm-12 mt-4">
+        <!-- <div class="col-sm-12 mt-4">
 
       <button @click="descargarUsuarioUploads" class="btn btn-md btn-primary"><i class="fas fa-download"></i> <span>Descargar</span></button>
     </div> -->
-		<v-divider class="col-12 m-0 p-0"></v-divider>
-		<div class="col-6">
-			<EstadoFiltro ref="EstadoFiltroComponent" />
-		</div>
-		<div class="px-4">
-			<button
-				@click="descargarUsuarioUploads"
-				class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2 mt-5"
-			>
-				<i class="fas fa-download"></i>
-				<span>Descargar</span>
-			</button>
-		</div>
-	</v-main>
+        <v-divider class="col-12 m-0 p-0"></v-divider>
+        <div class="col-6">
+            <EstadoFiltro ref="EstadoFiltroComponent" />
+        </div>
+        <div class="px-4">
+            <button
+                @click="descargarUsuarioUploads"
+                class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2 mt-5"
+            >
+                <i class="fas fa-download"></i>
+                <span>Descargar</span>
+            </button>
+        </div>
+    </v-main>
 </template>
 
 <script>
-import ListItem from "./partials/ListItem.vue";
-import ResumenExpand from "./partials/ResumenExpand.vue";
-import EstadoFiltro from "./partials/EstadoFiltro.vue";
+import ListItem from "./partials/ListItem.vue"
+import ResumenExpand from "./partials/ResumenExpand.vue"
+import EstadoFiltro from "./partials/EstadoFiltro.vue"
+
 export default {
-	components: { EstadoFiltro, ResumenExpand, ListItem },
-	props: ["API_REPORTES"],
-	methods: {
-		descargarUsuarioUploads() {
-			let UFC = this.$refs.EstadoFiltroComponent;
-			axios
-				.post(this.API_REPORTES + "usuario_uploads", {
-					UsuariosActivos: UFC.UsuariosActivos,
-					UsuariosInactivos: UFC.UsuariosInactivos
-				})
-				.then((res) => {
-					if (!res.data.error) this.$emit("emitir-reporte", res);
-					else {
-						alert("Se ha encontrado el siguiente error : " + res.data.error);
-						this.hideLoader()
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-					console.log(error.message);
-					alert("Se ha encontrado el siguiente error : " + error);
-					this.hideLoader()
-				});
-		}
-	}
+    components: { EstadoFiltro, ResumenExpand, ListItem },
+    props: {
+        workspaceId: 0,
+        reportsBaseUrl: ''
+    },
+    methods: {
+        async descargarUsuarioUploads() {
+            this.showLoader()
+            let UFC = this.$refs.EstadoFiltroComponent;
+
+            // Perform request to generate report
+
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/user_uploads`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: {
+                        workspaceId: this.workspaceId,
+                        UsuariosActivos: UFC.UsuariosActivos,
+                        UsuariosInactivos: UFC.UsuariosInactivos
+                    }
+                })
+
+                // When there are no results notify user,
+                // download report otherwise
+
+                if (response.data.alert) {
+                    this.showAlert(response.data.alert, 'warning')
+                } else {
+                    // Emit event to parent component
+                    this.$emit('emitir-reporte', response)
+                }
+
+            } catch (ex) {
+                console.log(ex.message)
+            }
+
+            // Hide loading spinner
+
+            this.hideLoader()
+        }
+    }
 };
 </script>
 <style></style>

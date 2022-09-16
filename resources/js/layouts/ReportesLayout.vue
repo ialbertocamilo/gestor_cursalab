@@ -10,89 +10,91 @@ TABS
 
 ============================================================================ -->
 
-<!--
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Notas de usuario
                     </span>
                 </v-tab>
--->
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
                     </span>
                 </v-tab>
-<!--
+
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                         Avance de currícula
                     </span>
                 </v-tab>
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-certificate</v-icon>
                     <span class="pt-2">
                         Diplomas
                     </span>
                 </v-tab>
+-->
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Visitas
                     </span>
                 </v-tab>
--->
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Notas por tema
                     </span>
                 </v-tab>
-<!--
+
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Temas no evaluables
                     </span>
                 </v-tab>
--->
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                         Notas por curso
                     </span>
                 </v-tab>
-<!--
+
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Evaluaciones abiertas
                     </span>
                 </v-tab>
 
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-restart</v-icon>
                     <span class="pt-2">
                         Reinicios
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Versiones usadas
                     </span>
                 </v-tab>
-
+-->
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-file-account-outline</v-icon>
                     <span class="pt-2">
                         Usuario Uploads
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -120,14 +122,15 @@ TABS
                         Checklist General
                     </span>
                 </v-tab>
+-->
 
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-numeric</v-icon>
                     <span class="pt-2">
                         Ranking
                     </span>
                 </v-tab>
-
+<!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -140,7 +143,7 @@ TABS
 TABS CONTENT
 
 ============================================================================ -->
-<!--
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -151,7 +154,7 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
--->
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -162,15 +165,19 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-<!--
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <AvanceCurricula :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                             @emitir-reporte="crearReporte"/>
+                            <AvanceCurricula
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+                <!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -179,19 +186,19 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+                -->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Visitas :workspaceId="workspaceId"
-                                     :modules="modules"
-                                     :reportsBaseUrl="reportsBaseUrl"
-                                     :API_FILTROS="API_FILTROS"
-                                     :API_REPORTES="API_REPORTES"
-                                     @emitir-reporte="crearReporte"/>
+                            <Visitas
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                -->
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -202,17 +209,19 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <!--
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <TemasNoEvaluables :Modulos="Modulos" :API_FILTROS="API_FILTROS"
-                                               :API_REPORTES="API_REPORTES"
-                                               @emitir-reporte="crearReporte"/>
+                            <TemasNoEvaluables
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                -->
+
                 <v-tab-item v-if="workspaceId > 0">
                     <v-card flat>
                         <v-card-text>
@@ -224,12 +233,15 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-<!--
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <EvaAbiertas :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                         @emitir-reporte="crearReporte"/>
+                            <EvaAbiertas
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -237,12 +249,14 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Renicios :Admins="Admins" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                            <Renicios :workspaceId="workspaceId"
+                                      :admins="admins"
+                                      :reportsBaseUrl="reportsBaseUrl"
                                       @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -251,16 +265,18 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+-->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <UsuarioUploads :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                            @emitir-reporte="crearReporte"/>
+                            <UsuarioUploads
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -299,16 +315,19 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+-->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Ranking :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                     @emitir-reporte="crearReporte"/>
+                            <Ranking
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
+<!--
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -372,11 +391,12 @@ export default {
         return {
             workspaceId: 0,
             modules: [],
+            admins: [],
             reportsBaseUrl: '',
 
             value: "",
             Modulos: [],
-            Admins: [],
+
             VademecumList: [],
             VideotecaList: [],
             // URL DE LAS APIS
