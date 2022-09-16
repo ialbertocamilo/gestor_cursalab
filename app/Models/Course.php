@@ -435,14 +435,14 @@ class Course extends BaseModel
         $available_course = true;
         $poll_id = null;
         $available_poll = false;
-        $enabled_poll = true;
+        $enabled_poll = false;
         $solved_poll = false;
         $assigned_topics = 0;
         $completed_topics = 0;
 
         $requirement_course = $course->requirements->first();
-//        info("requirement_course");
-//        info($requirement_course);
+        // info("requirement_course");
+        // info($requirement_course);
         if ($requirement_course) {
             $summary_requirement_course = SummaryCourse::with('course')
                 ->where('user_id', $user->id)
@@ -451,13 +451,12 @@ class Course extends BaseModel
                 ->first();
 //            info("requirement_course");
 //            info($summary_requirement_course);
-//
             if (!$summary_requirement_course) {
                 $available_course = false;
                 $status = 'bloqueado';
             }
         }
-
+        // info($available_course);
         if ($available_course) {
             $poll = $course->polls->first();
             if ($poll) {
@@ -469,13 +468,12 @@ class Course extends BaseModel
                     ->where('user_id', $user->id)->count();
 
 //                info($poll_questions_answers);
-
                 if ($poll_questions_answers) $solved_poll = true;
             }
 
             // $summary_course = $course->summaryByUser($user->id);
             $summary_course = SummaryCourse::getCurrentRow($course, $user);
-
+            
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewed;
                 $assigned_topics = $summary_course->assigned;
@@ -486,13 +484,16 @@ class Course extends BaseModel
                     $status = 'enc_pend';
                 elseif ($summary_course->status?->code == 'desaprobado') :
                     $status = 'desaprobado';
+                    $enabled_poll = true;
                 else :
                     $status = 'continuar';
-                    $enabled_poll = false;
                     $resolved_topics = $completed_topics + $summary_course->failed;
                     if ($summary_course->assigned <= $resolved_topics)
-                        $available_poll = true;
+                        $enabled_poll = true;
                 endif;
+
+                if ($course_progress_percentage === 100)
+                    $enabled_poll = true;
             }
         }
 
