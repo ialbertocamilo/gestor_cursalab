@@ -473,7 +473,7 @@ class Course extends BaseModel
 
             // $summary_course = $course->summaryByUser($user->id);
             $summary_course = SummaryCourse::getCurrentRow($course, $user);
-            
+
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewed;
                 $assigned_topics = $summary_course->assigned;
@@ -492,7 +492,7 @@ class Course extends BaseModel
                         $enabled_poll = true;
                 endif;
 
-                if ($course_progress_percentage === 100)
+                if ($course_progress_percentage == 100)
                     $enabled_poll = true;
             }
         }
