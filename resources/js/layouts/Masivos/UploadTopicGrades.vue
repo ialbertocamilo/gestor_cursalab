@@ -180,7 +180,8 @@ export default {
             vue.showLoader()
             let formData = new FormData();
             formData.append("file", vue.archivo);
-            formData.append("course", vue.select.coursee);
+            formData.append("course", vue.select.course);
+            formData.append("evaluation_type", vue.select.evaluation_type);
             vue.select.topics.forEach(topic => formData.append("topics[]", topic));
 
             vue.$http.post(`${vue.base_url}/upload`, formData)
