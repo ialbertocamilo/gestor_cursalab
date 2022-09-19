@@ -20,7 +20,7 @@ class CourseIntegrationResource extends JsonResource
                 'school'=>$school->name
             ];
         });
-        $user_active_having_course = Course::getCountUsersSegmented($this->segments);
+        $user_active_having_course = $this->usersSegmented($this->segments,'');
         return [
             "year_course"=> date('Y',strtotime($this->created_at)),
             "budget"=>$this->investment,

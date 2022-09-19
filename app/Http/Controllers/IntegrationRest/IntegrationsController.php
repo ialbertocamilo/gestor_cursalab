@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\IntegrationRest;
 
+use App\Models\Course;
 use App\Models\Integrations;
 use Illuminate\Http\Request;
 use App\Http\Requests\AuthRequest;
@@ -24,14 +25,25 @@ class IntegrationsController extends Controller
         }
     }
     public function getCourses(Request $request){
-        // try {
+        try {
             $response = Integrations::getCourses($request);
             return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
-        // } catch (\Throwable $th) {
-        //     return response()->json(
-        //         ['message'=>'Server error.']
-        //     ,500);
-        // }
+        } catch (\Throwable $th) {
+            return response()->json(
+                ['message'=>'Server error.']
+            ,500);
+        }
+    }
+    public function getCourseProgress(Course $course,Request $request){
+        try {
+            $request->course = $course;
+            $response = Integrations::getCourseProgress($request);
+            return response()->json($response['data'], $response['code'] ? $response['code'] : 500);
+        } catch (\Throwable $th) {
+            return response()->json(
+                ['message'=>'Server error.']
+            ,500);
+        }
     }
     public function progressUser(Request $request){
         try {

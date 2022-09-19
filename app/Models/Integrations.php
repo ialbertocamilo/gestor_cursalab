@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Models\Massive\ChangeStateUserMassive;
 use App\Http\Resources\UserIntegrationResource;
 use App\Http\Resources\CourseIntegrationResource;
+use App\Http\Resources\CourseProgressIntegrationResource;
 
 class Integrations extends Model
 {
@@ -22,6 +23,18 @@ class Integrations extends Model
                     ->paginate(500);
         UserIntegrationResource::collection($users);
         return  ['data'=>['users'=>$users],'code'=>200];
+    }
+    protected function getCourseProgress($request){
+        $course = $request->course;
+        $course->load('segments.values');
+        $users_id_segmented = $course->usersSegmented($course->segments,'users_id');
+        $segmented_users = User::whereIn('id',$users_id_segmented)->where('active',1)
+        ->with(['summary_courses'=>function($q)use($course){
+            $q->where('course_id',$course->id)->select('id','course_id','user_id','status_id','created_at');
+        },'summary_courses.status:id,name'])->select('id','document','fullname')->paginate(500);
+        CourseProgressIntegrationResource::collection($segmented_users);
+        return  ['data'=>['segmented_users'=>$segmented_users],'code'=>200];
+
     }
     protected function getCourses($request){
         $courses = Course::with(['segments.values','type:id,name','schools:id,name'])

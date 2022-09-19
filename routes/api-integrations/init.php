@@ -16,6 +16,7 @@
             Route::get('/user-progress', 'progressUser');
 
             Route::get('/courses', 'getCourses');
+            Route::get('/course-progress/{course}', 'getCourseProgress');
         });
     });
 ?>
