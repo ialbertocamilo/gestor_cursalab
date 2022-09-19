@@ -14,6 +14,8 @@
             Route::post('/activate-users', 'activateUsers');
 
             Route::get('/user-progress', 'progressUser');
+
+            Route::get('/courses', 'getCourses');
         });
     });
 ?>

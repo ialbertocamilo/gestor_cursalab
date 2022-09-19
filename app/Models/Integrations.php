@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Auth\LoginController;
 use App\Models\Massive\ChangeStateUserMassive;
 use App\Http\Resources\UserIntegrationResource;
+use App\Http\Resources\CourseIntegrationResource;
 
 class Integrations extends Model
 {
@@ -21,6 +22,16 @@ class Integrations extends Model
                     ->paginate(500);
         UserIntegrationResource::collection($users);
         return  ['data'=>['users'=>$users],'code'=>200];
+    }
+    protected function getCourses($request){
+        $courses = Course::with(['segments.values','type:id,name','schools:id,name'])
+        ->select('id','type_id','name', 'duration', 'investment','created_at')
+        ->withCount(['summaries'=>function ($q) {
+            $q->whereRelation('user','active',ACTIVE)->where('passed', true);
+        }])
+        ->paginate(100);
+        CourseIntegrationResource::collection($courses);
+        return  ['data'=>['courses'=>$courses],'code'=>200];
     }
     protected function updateCreateUsers($users,$workspace_id){
         $user_massive = new UserMassive();

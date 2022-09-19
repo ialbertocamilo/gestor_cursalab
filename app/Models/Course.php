@@ -537,7 +537,33 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
+    protected function getCountUsersSegmented($segments){
+        $segments_where = [];
+        foreach ($segments as $segment) {
+            $criteria = $segment->values->groupBy('criterion_id');
+            $where_users_segment=[];
 
+            foreach ($criteria as $criterion_values) {
+                $where_users_segment[] = $criterion_values->pluck('criterion_value_id');
+                # code...
+            }
+            $segments_where[] = $where_users_segment;
+        }
+
+        $users = DB::table('criterion_value_user');
+        $users_id_course = [];
+        foreach ($segments_where as $segment_where) {
+            foreach ($segment_where as $where_user) {
+                $users->orWhere(function($q) use($where_user){
+                    $q->whereIn('criterion_value_id',$where_user);
+                });
+            }
+            $users_id = $users->groupBy('user_id')->select('user_id',DB::raw('count(user_id) as count_group_user_id'))
+            ->having('count_group_user_id','=',count($segment_where))->pluck('user_id')->toArray();
+            $users_id_course = array_merge($users_id_course,$users_id);
+        }
+        return User::where('active',1)->whereIn('id',$users_id_course)->select('id')->count();
+    }
     public function getUsersBySegmentation()
     {
         $this->load('segments.values');
