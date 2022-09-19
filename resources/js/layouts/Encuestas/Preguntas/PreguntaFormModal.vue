@@ -22,6 +22,7 @@
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultSelect clearable
                                        :items="selects.tipos"
+                                       :item-value="'id'"
                                        v-model="resource.type_id"
                                        label="Tipo"
                                        return-object
@@ -32,11 +33,11 @@
                 </v-row>
 
                 <v-row justify="space-around"
-                       v-show="['simple', 'multiple'].includes(resource.type_id)">
+                       v-show="showOptions()">
 
                     <v-col cols="12" class="d-flex justify-content-center align-center">
                         <div class="label">
-                            Opciones: {{ resource.type_id }}
+                            Opciones:
                         </div>
                         <v-btn
                             text icon
@@ -112,6 +113,7 @@ export default {
             selects: {
                 tipos: [],
             },
+            optionsTypes: [],
 
             rules: {
                 // modulo: this.getRules(['required']),
@@ -123,6 +125,20 @@ export default {
         }
     },
     methods: {
+        /**
+         * Check whether options should be shown or not,
+         * according to question type
+         * @returns {boolean|boolean}
+         */
+        showOptions() {
+            if (typeof this.resource.type_id === 'object') {
+                return this.resource.type_id ? this.optionsTypes.includes(this.resource.type_id.id)
+                                             : false
+            } else {
+                return this.resource.type_id ? this.optionsTypes.includes(this.resource.type_id)
+                                             : false
+            }
+        },
         addOption()
         {
             let vue = this
@@ -203,6 +219,15 @@ export default {
             await vue.$http.get(url).then(({data}) => {
 
                 vue.selects.tipos = data.data.tipos
+
+                // Generate array with ids of "opcion" types
+                vue.optionsTypes = []
+                data.data.tipos.forEach(t => {
+                    if (t.code === 'opcion-simple' ||
+                        t.code === 'opcion-multiple') {
+                        vue.optionsTypes.push(t.id)
+                    }
+                })
 
                 if (resource) {
                     vue.resource = Object.assign({}, data.data.pollquestion)
