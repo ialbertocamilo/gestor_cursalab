@@ -172,7 +172,7 @@ class MassiveUploadTopicGrades implements ToCollection
 
         if ($a_topic_was_created) {
             SummaryCourse::getCurrentRowOrCreate($this->course, $user);
-            SummaryCourse::updateUserData($this->course, $user);
+            SummaryCourse::updateUserData($this->course, $user, update_attempts: false);
 
             SummaryUser::getCurrentRowOrCreate($user, $user);
             SummaryUser::updateUserData($user);
