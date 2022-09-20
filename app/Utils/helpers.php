@@ -232,3 +232,13 @@ function cache_clear_model($model)
 function get_media_url($path = ''){
     return FileService::generateUrl($path);
 }
+
+function excelDateToDate($fecha, $format, $rows = 0, $i = 0)
+{
+    try {
+        $php_date = $fecha - 25569;
+        return date($format, strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));
+    } catch (\Throwable $th) {
+        return null;
+    }
+}

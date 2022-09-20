@@ -73,6 +73,25 @@ class Summary extends BaseModel
         return $query->first();
     }
 
+    protected function getCurrentRowOrCreate($model, $user = null)
+    {
+        $user = $user ?? auth()->user();
+
+        $query = self::where('user_id', $user->id);
+
+        if ($model instanceof Topic)
+            $query->where('topic_id', $model->id);
+
+        if ($model instanceof Course)
+            $query->where('course_id', $model->id);
+
+        $row = $query->first();
+
+        if (!$row) $row = $this->storeData($model, $user);
+
+        return $row;
+    }
+
     protected function storeData($model, $user = null)
     {
         $user = $user ?? auth()->user();
@@ -124,7 +143,7 @@ class Summary extends BaseModel
         foreach ($course_rows AS $row)
         {
             // SummaryUser::
-            
+
         }
     }
 }

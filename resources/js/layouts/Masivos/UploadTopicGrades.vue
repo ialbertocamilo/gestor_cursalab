@@ -89,7 +89,7 @@
                                             label="Seleccione su archivo"
                                             placeholder="Seleccione su archivo"
                                             outlined
-                                            @change="handleFileUpload"
+                                            v-model="archivo"
                                         />
                                     </v-col>
                                     <v-col cols="12" md="12" lg="12" class="d-flex justify-center"
@@ -160,7 +160,7 @@ export default {
         loadTopics() {
             let vue = this;
 
-            if (!vue.select.school || !vue.select.course ) {
+            if (!vue.select.school || !vue.select.course) {
                 vue.arrays.courses = [];
                 vue.arrays.topics = [];
                 return;
@@ -168,7 +168,7 @@ export default {
 
             const school = vue.arrays.schools.find(school => school.id == vue.select.school);
             const course = school.courses.find(course => course.id == vue.select.course);
-            const only_qualified_topics = vue.select.evaluation_type === 'assessable' ? 1: 0;
+            const only_qualified_topics = vue.select.evaluation_type === 'assessable' ? 1 : 0;
             vue.arrays.topics = course.topics.filter(topic => topic.assessable == only_qualified_topics);
         },
         uploadExcel() {
@@ -186,46 +186,44 @@ export default {
 
             vue.$http.post(`${vue.base_url}/upload`, formData)
                 .then(({data}) => {
-                    console.log(data);
-                    /* if (data.info.length > 0) {
-                         let headers = ["DNI", "NOTA (Opcional)"];
-                         let values = ["dni", "nota"];
-                         vue.descargarExcelFromArray(
-                             headers,
-                             values,
-                             data.info,
-                             "No procesados_" + Math.floor(Math.random() * 1000),
-                             "Se han encontrado observaciones. Descargar lista de observaciones"
-                         );
-                     } else {
-                         vue.showAlert("Se ha procesado correctamente el excel.");
-                     }
-                     vue.hideLoader()*/
-                })
-                .catch((err) => {
+                    console.log(data.data.info);
+                    const has_error_messages = data.data.info.length > 0;
 
-                    vue.hideLoader()
-                });
+                    if (!has_error_messages) {
+                        const success_message = data.data.msg;
+                        vue.showAlert(success_message);
+                        vue.hideLoader();
+                        return;
+                    }
+
+                    let headers = ["DNI", "NOTA", "INTENTOS", "VISITAS", "#RESPUESTAS CORRECTAS",
+                        "#RESPUESTAS INCORRECTAS", "FECHA DE EVALUACIÓN", "Observación"];
+                    let values =["dni", "nota", 'attempts','views', 'correct_answers', 'failed_answers',
+                        'last_time_evaluated_at', "info"];
+                    vue.descargarExcelFromArray(
+                        headers,
+                        values,
+                        data.data.info,
+                        "No procesados_" + Math.floor(Math.random() * 1000),
+                        "Se han encontrado observaciones. Descargar lista de observaciones"
+                    );
+                    vue.hideLoader();
+                })
         },
         disabledButton() {
             let vue = this;
 
             if (!vue.select.school) return true;
             if (!vue.select.course) return true;
-            if (vue.select.topics.length === 0) return true;
+            // if (vue.select.topics.length === 0) return true;
             return !vue.archivo;
-        },
-        handleFileUpload() {
-            let vue = this;
-            vue.archivo = this.$refs.file.files[0];
         },
         descargarPlantilla() {
             let vue = this;
-            // let headers = ["DNI", "NOTA","FECHA DE EVALUACIÓN (FORMATO: 27/09/2021)","Hora (FORMATO 24 horas ejemplo: 14:28)"];
-            // let values = ["dni", "nota","last_ev","hora"];
-            //   Comment para hacer merge
-            let headers = ["DNI", "NOTA"];
-            let values = ["dni", "nota"];
+            let headers = ["DNI", "NOTA", "INTENTOS", "VISITAS", "#RESPUESTAS CORRECTAS",
+                "#RESPUESTAS INCORRECTAS", "FECHA DE EVALUACIÓN"];
+            let values = ["dni", "nota", 'attempts','views', 'correct_answers', 'failed_answers', 'last_time_evaluated_at'];
+
             vue.descargarExcelFromArray(
                 headers,
                 values,

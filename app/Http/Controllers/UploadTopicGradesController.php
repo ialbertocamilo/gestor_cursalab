@@ -46,14 +46,14 @@ class UploadTopicGradesController extends Controller
     public function upload(MassiveUploadTopicGradesRequest $request)
     {
         $data = $request->validated();
-
+//        dd($data);
         if (count($data['topics']) === 0) return $this->error('No se ha seleccionado ningún tema.');
 
         $import = new MassiveUploadTopicGrades($data);
         Excel::import($import, $data['file']);
 
         $info = $import->getNoProcesados();
-
-        return $this->success(compact('info'));
+        $msg = "Se subieron correctamente las notas.";
+        return $this->success(compact('info', 'msg'));
     }
 }

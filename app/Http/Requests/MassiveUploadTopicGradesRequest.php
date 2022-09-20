@@ -25,7 +25,9 @@ class MassiveUploadTopicGradesRequest extends FormRequest
     {
         return [
             'file' => 'required',
+            'course' => 'required',
             'topics' => 'required',
+            'evaluation_type' => 'required',
         ];
     }
 
