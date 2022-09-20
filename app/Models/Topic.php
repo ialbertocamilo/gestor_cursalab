@@ -109,7 +109,7 @@ class Topic extends BaseModel
         $question_type_code = $topic->evaluation_type->code === 'qualified'
             ? 'select-options'
             : 'written-answer';
-        info($question_type_code);
+//        info($question_type_code);
         $q = Question::whereRelation('type', 'code', $question_type_code)
             ->where('topic_id', $topic->id);
 
