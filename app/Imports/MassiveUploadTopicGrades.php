@@ -60,6 +60,7 @@ class MassiveUploadTopicGrades implements ToCollection
                 $this->pushNoProcesados($excelData[$i], 'Usuario no existe');
                 continue;
             }
+
             if (($this->course->assessable) && (count($this->topics) > 0 && $this->evaluation_type == 'assessable') && (empty($grade) || trim($grade) == "")) {
                 $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
                 continue;
@@ -80,7 +81,6 @@ class MassiveUploadTopicGrades implements ToCollection
             $assigned_courses = $user->getCurrentCourses();
 
             if (!in_array($this->course_id, $assigned_courses->pluck('id')->toArray())) {
-//                info($this->course_id, $assigned_courses->toArray());
                 $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
                 continue;
             }
@@ -91,13 +91,14 @@ class MassiveUploadTopicGrades implements ToCollection
                 : Topic::with('course')->where('course_id', $this->course_id)
                     ->where(function ($q) {
                         $q->where('assessable', INACTIVE); // NO evaluables
-                        $q->orWhere(function ($q2) {
+                        $q->orWhere(function ($q2) { // Evaluables calificados
                             $q2->where('assessable', ACTIVE)
-                                ->whereRelation('evaluation_type', 'code', 'qualified'); // Evaluables calificados
+                                ->whereRelation('evaluation_type', 'code', 'qualified');
                         });
                     })
                     ->get();
-
+//            info("TOPICS ID::");
+//            info($topics->pluck('id')->toArray());
             $this->uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData[$i]);
         }
     }
@@ -109,14 +110,17 @@ class MassiveUploadTopicGrades implements ToCollection
         $grade = $excelData[1];
 
         $topic_summaries = SummaryTopic::whereIn('topic_id', $this->topics)->where('user_id', $user->id)
-            ->select('attempts', 'views')
             ->get();
+//        info("SUMMARIES ID :: ");
+//        info($topic_summaries->pluck('id')->toArray());
 
         $a_topic_was_created = false;
 
         foreach ($topics as $topic) {
             $summary = $topic_summaries->where('topic_id', $topic->id)->first();
-            $summary ??= SummaryTopic::storeData($topic, $user);
+//            info("INFO SUMMARY :: ".$summary?->id);
+            if (!$summary)
+                $summary = SummaryTopic::storeData($topic, $user);
 
             $summary_data = [
                 'answers' => [],
@@ -130,14 +134,14 @@ class MassiveUploadTopicGrades implements ToCollection
                     $views = $excelData[3] ?: ($summary ? $summary->views : 1);
                     $correct_answers = $excelData[4] ?: ($summary ? $summary->correct_answers : 1);
                     $failed_answers = $excelData[5] ?: ($summary ? $summary->failed_answers : 1);
-                    $last_time_evaluated_at = $excelData[6] ?: ($summary ? $summary->last_time_evaluated_at : 1);
-                    $status = $this->getNewTopicStatusByGrade($grade, $min_grade);
+                    $last_time_evaluated_at = excelDateToDate($excelData[6]) ?: ($summary ? $summary->last_time_evaluated_at : 1);
+                    $status = $this->getNewSummaryQualifiedTopicStatus($grade, $min_grade);
 
                     $summary_data = array_merge($summary_data, [
                         'status_id' => $status->id,
                         'source_id' => $this->source->id,
 
-                        'passed' => $grade < $min_grade,
+                        'passed' => $grade > $min_grade,
                         'grade' => $grade,
 
                         'views' => $views,
@@ -152,14 +156,14 @@ class MassiveUploadTopicGrades implements ToCollection
                 }
 
             } elseif (!$topic->assessable) {
-                $status = $this->topic_states->where('code', 'revisado');
+                $status = $this->topic_states->where('code', 'revisado')->first();
+                $views = $excelData[3] ?: ($summary ? $summary->views : 1);
 
                 $summary_data = array_merge($summary_data, [
                     'status_id' => $status->id,
                     'source_id' => $this->source->id,
 
                     'views' => $views,
-                    'attempts' => $attempts,
                 ]);
                 $a_topic_was_created = true;
                 $this->storeSummaryTopic($topic, $user, $summary_data);
@@ -170,25 +174,28 @@ class MassiveUploadTopicGrades implements ToCollection
             SummaryCourse::getCurrentRowOrCreate($this->course, $user);
             SummaryCourse::updateUserData($this->course, $user);
 
-            SummaryUser::getCurrentRowOrCreate($user);
+            SummaryUser::getCurrentRowOrCreate($user, $user);
             SummaryUser::updateUserData($user);
         }
     }
 
     public function storeSummaryTopic($topic, $user, $data)
     {
-        SummaryTopic::updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'topic_id' => $topic->id,
-            ],
+//        info("TOPIC NAME :: " . $topic->name);
+//        info("USER ID :: " . $user->id);
+//        info("TOPIC ID :: " . $topic->id);
+//        info($data);
+        $summary = SummaryTopic::updateOrCreate(
+            ['user_id' => $user->id, 'topic_id' => $topic->id],
             $data
         );
+//        info($summary->id);
+//        info("==================================================================");
     }
 
-    public function getNewTopicStatusByGrade($grade, $min_grade)
+    public function getNewSummaryQualifiedTopicStatus($grade, $min_grade)
     {
-        $code = $grade < $min_grade ? 'aprobado' : 'desaprobado';
+        $code = $grade > $min_grade ? 'aprobado' : 'desaprobado';
 
         return $this->topic_states->where('code', $code)->first();
     }

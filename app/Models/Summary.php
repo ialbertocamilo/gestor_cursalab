@@ -27,7 +27,7 @@ class Summary extends BaseModel
 
         if ($row) {
 
-            if ( $model instanceof Topic ) {
+            if ($model instanceof Topic) {
 
                 $config_quiz = $user->subworspace->mod_evaluaciones;
 
@@ -75,17 +75,7 @@ class Summary extends BaseModel
 
     protected function getCurrentRowOrCreate($model, $user = null)
     {
-        $user = $user ?? auth()->user();
-
-        $query = self::where('user_id', $user->id);
-
-        if ($model instanceof Topic)
-            $query->where('topic_id', $model->id);
-
-        if ($model instanceof Course)
-            $query->where('course_id', $model->id);
-
-        $row = $query->first();
+        $row = self::getCurrentRow($model, $user);
 
         if (!$row) $row = $this->storeData($model, $user);
 
@@ -138,10 +128,9 @@ class Summary extends BaseModel
 
     protected function updateUsersDataByCourse($users, $course, $action)
     {
-        $course_rows =  SummaryCourse::where('course_id', $course->id)->get();
+        $course_rows = SummaryCourse::where('course_id', $course->id)->get();
 
-        foreach ($course_rows AS $row)
-        {
+        foreach ($course_rows as $row) {
             // SummaryUser::
 
         }

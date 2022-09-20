@@ -77,7 +77,6 @@
                                             v-model="select.topics"
                                             :items="arrays.topics"
                                             item-text="name"
-                                            :show-select-all="false"
                                             :count-show-values="3"
                                         />
                                     </v-col>
@@ -159,6 +158,7 @@ export default {
         },
         loadTopics() {
             let vue = this;
+            vue.select.topics = [];
 
             if (!vue.select.school || !vue.select.course) {
                 vue.arrays.courses = [];
@@ -186,7 +186,7 @@ export default {
 
             vue.$http.post(`${vue.base_url}/upload`, formData)
                 .then(({data}) => {
-                    console.log(data.data.info);
+                    // console.log(data.data.info);
                     const has_error_messages = data.data.info.length > 0;
 
                     if (!has_error_messages) {
