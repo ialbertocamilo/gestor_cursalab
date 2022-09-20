@@ -241,8 +241,10 @@ class TemaController extends Controller
         // Si se desactiva la última pregunta del tema, según su tipo de evaluación ($tipo_pregunta)
         // se inactivará el tema
         // TODO: agregar modal de validación en listado de preguntas
-        $has_active_questions = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', '1')->count() > 0;
-
+        $has_active_questions = $topic->questions()->whereRelation('type', 'code', $question_type_code)
+                ->where('active', '1')->count() > 0;
+//        info($has_active_questions);
+//        info($question_type_code);
         if (!$has_active_questions):
             $topic->active = 0;
             $topic->save();
