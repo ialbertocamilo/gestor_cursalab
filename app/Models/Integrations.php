@@ -28,7 +28,7 @@ class Integrations extends BaseModel
             ])->select('id','course_id','user_id','status_id','grade_average','advanced_percentage','passed','certification_issued_at');
         }])
         ->whereNotNull('subworkspace_id')->select('id','username','fullname','subworkspace_id')
-        ->paginate(10);
+        ->paginate(500);
         UserIntegrationResource::collection($users);
         $data = self::generateExternalApiPageData($users,'users');
         // $response_paginate
