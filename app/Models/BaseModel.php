@@ -193,5 +193,15 @@ class BaseModel extends Model implements Recordable
               ->pluck('name')
               ->all();
      }
-
+     public static function generateExternalApiPageData($data,$resource='data'){
+        return [
+            $resource=>$data->items(),
+            'current_page' => $data->currentPage(),
+            'last_page'=>$data->lastPage(),
+            'per_page'=>$data->count(),
+            'prev_page_url'=>$data->previousPageUrl(),
+            'nex_page_url'=>$data->nextPageUrl(),
+            'total'=>$data->total(),
+        ];
+    }
 }

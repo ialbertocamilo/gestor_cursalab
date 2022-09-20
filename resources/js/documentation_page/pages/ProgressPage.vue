@@ -8,8 +8,9 @@
                 Este proceso retorna el avance de los usuarios en la plataforma,
                 dentro de un rango de fechas.<br />
                 El avance corresponde a todos los cursos COMPLETADOS por los
-                usuarios, dentro del rango de fechas establecido.
+                usuarios.
             </p>
+            <!-- , dentro del rango de fechas establecido. -->
             <descriptionApi :options="api_description_options" />
         </v-card-text>
     </v-card>
@@ -23,24 +24,24 @@ export default {
         return {
             api_description_options: {
                 title: "User progress",
-                type: "POST",
-                route: "/integrations/user-progress",
+                type: "GET",
+                route: "/integrations/user-progress?page=1",
                 parameters_type: [
                     {
-                        title: "Parámetros (body)",
+                        title: "Parámetros (URL)",
                         parameters: [
-                            {
-                                name: "start_date",
-                                type: "Fecha (date) - Formato (YYYY-MM-DD)",
-                                description:
-                                    "Se indica la fecha inicial a consultar."
-                            },
-                            {
-                                name: "end_date",
-                                type: "Fecha (date) - Formato (YYYY-MM-DD)",
-                                description:
-                                    "Se indica la fecha final a consultar."
-                            },
+                            // {
+                            //     name: "start_date",
+                            //     type: "Fecha (date) - Formato (YYYY-MM-DD)",
+                            //     description:
+                            //         "Se indica la fecha inicial a consultar."
+                            // },
+                            // {
+                            //     name: "end_date",
+                            //     type: "Fecha (date) - Formato (YYYY-MM-DD)",
+                            //     description:
+                            //         "Se indica la fecha final a consultar."
+                            // },
                             {
                                 name: "page",
                                 type: "Número (int)",
@@ -109,42 +110,40 @@ export default {
                         {
                             type: "language-js",
                             code: `
-    "data":[
-        {
-            "workspace" : "Espacio de trabajo (Farmacias Peruanas, Real Plaza, Química Suiza, etc)",
-            "module" : "Módulo (empresa) al que pertecene el usuario (Mifarma, Inkafarma, etc.)",
-            "user_name" : "Valor único que identifica al usuario",
-            "name" : "Nombre completo del usuario",
-            "total_assigned" : "Cantidad total de cursos asignados",
-            "total_completed" : "Cantidad total de cursos completados",
-            "total_percentage" : "Porcentaje total de avance en la plataforma",
-            "completed_courses":[
+    "data":{
+
+            "users":[
                 {
-                    "school_code" : "Identificador de la Escuela",
-                    "school" : "Escuela a la que pertenece el curso",
-                    "course_code" : "Identificador del curso",
-                    "course" : "Nombre del Curso",
-                    "modality" : "Modalidad del curso (regular, extracurricular o libre)",
-                    "score" : "Nota promedio que el usuario tiene en el curso",
-                    "percentage" : "Porcentaje de avance del usuario en el curso",
-                    "result" : "El resultado del usuario en el curso (aprobado, desaprobado)",
-                    "date" : "Fecha de curso completado",
-                },
-                {
-                    "school_code" : "Identificador de la Escuela",
-                    "school" : "Escuela a la que pertenece el curso",
-                    "course_code" : "Identificador del curso",
-                    "course" : "Nombre del Curso",
-                    "modality" : "Modalidad del curso (regular, extracurricular o libre)",
-                    "score" : "Nota promedio que el usuario tiene en el curso",
-                    "percentage" : "Porcentaje de avance del usuario en el curso",
-                    "result" : "El resultado del usuario en el curso (aprobado, desaprobado)",
-                    "date" : "Fecha de curso completado",
-                },
+                    "workspace" : "Espacio de trabajo (Farmacias Peruanas, Real Plaza, Química Suiza, etc)",
+                    "module" : "Módulo (empresa) al que pertecene el usuario (Mifarma, Inkafarma, etc.)",
+                    "user_name" : "Valor único que identifica al usuario",
+                    "name" : "Nombre completo del usuario",
+                    "total_assigned" : "Cantidad total de cursos asignados",
+                    "total_completed" : "Cantidad total de cursos completados",
+                    "total_percentage" : "Porcentaje total de avance en la plataforma",
+                    "completed_courses":[
+                        {
+                            "school_code" : "Identificador de la Escuela",
+                            "school" : "Escuela a la que pertenece el curso",
+                            "course_code" : "Identificador del curso",
+                            "course" : "Nombre del Curso",
+                            "modality" : "Modalidad del curso (regular, extracurricular o libre)",
+                            "score" : "Nota promedio que el usuario tiene en el curso",
+                            "percentage" : "Porcentaje de avance del usuario en el curso",
+                            "result" : "El resultado del usuario en el curso (aprobado, desaprobado)",
+                            "date" : "Fecha de curso completado",
+                        }
+                    ]
+                }
             ]
-            
+            "current_page": "Página actual de la consulta",
+            "last_page": "Última página",
+            "per_page": "Items por página (500)",
+            "prev_page_url": "URL de la página anterior",
+            "nex_page_url": "URL de la página siguiente",
+            "total": "Total de items"
         }
-    ]`
+    `
                         }
                     ]
                 }

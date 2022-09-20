@@ -191,14 +191,14 @@ class UserMassive implements ToCollection{
             ['required'=>false,'header_name'=>'EMAIL','code'=>'email']
         ]);
     }
-    private function excelDateToDate($fecha, $rows = 0, $i = 0)
+    private function excelDateToDate($fecha)
     {
-        if(_validateDate($fecha,'Y-m-d') || _validateDate($fecha,'d-m-Y')){
+        if(_validateDate($fecha,'Y-m-d')){
             return $fecha;
         }
-        if(_validateDate($fecha,'Y/m/d') || _validateDate($fecha,'d/m/Y')){
+        if(_validateDate($fecha,'Y/m/d') || _validateDate($fecha,'d/m/Y') || _validateDate($fecha,'d-m-Y')){
             // return date("d/m/Y",$fecha);
-            return Carbon::parse($fecha)->format('d/m/Y');
+            return Carbon::parse($fecha)->format('Y-m-d');
         }
         $php_date =  $fecha - 25569;
         $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));

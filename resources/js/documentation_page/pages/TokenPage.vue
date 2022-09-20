@@ -89,7 +89,7 @@ axios(config).then(function (response) {
         "access_token": "Token para hacer la consulta.",
         "token_type": "Tipo de token.(Bearer)",
         "expires_in": "Tiempo de expiración.",
-        "expires_in_format": "Formato del tiempo de expiración (minutes,hours,days)"
+        "expires_in_format": "Formato del tiempo de expiración (Y-m-d H:m:s)"
     }
 }
 `

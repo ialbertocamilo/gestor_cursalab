@@ -16,44 +16,35 @@ class UserIntegrationResource extends JsonResource
     public function toArray($request)
     {
         $assigned_courses =  $this->getCurrentCourses();
-        $summary_user = $this->summary;
-        $summary_courses_user = 
-           ($summary_user)
-            ? $summary_courses_user = $this->summary_courses()
-                // ->with(['course:id,name,type_id','course.type:id,name','course.schools:id,name'])
-                ->with(['course:id,name,type_id','course'=>[
-                    'type:id,name','schools:id,name'
-                ]])
-
-                ->whereHas('course', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
-                ->whereRelation('status', 'code', 'aprobado')
-                ->select('id','course_id','grade_average','advanced_percentage','passed','certification_issued_at')->get()
-            : [];
-        $summary_courses_completed = [];
-        foreach ($summary_courses_user as $summary){
-            $schools = $summary->course->schools->map(function($school){
-                return [
-                    'school_code'=>$school->id,
-                    'school'=>$school->name
-                ];
-            });
-            $summary_courses_completed[] = [
+ 
+        $summary_courses_completed = collect();
+        foreach ($this->summary_courses as $summary){
+            $schools = [];
+            if($summary->course){
+                $schools = $summary->course->schools->map(function($school){
+                    return [
+                        'school_code'=>$school->id,
+                        'school'=>$school->name
+                    ];
+                });
+            }
+            $summary_courses_completed->push([
                 'schools'=>$schools,
                 "course_code" => $summary->course_id,
-                "course" => $summary->course->name,
-                "modality" => $summary->course->type->name,
+                "course" => isset($summary->course) ? $summary->course->name : '-',
+                "modality" => isset($summary->course->type) ? $summary->course->type->name : '',
                 "score" => $summary->grade_average,
                 "percentage" => $summary->advanced_percentage,
-                "result" => $summary->passed ? 'Aprobado'  : 'Desaprobado',
+                "result" => $summary->status->code,
                 "date" => $summary->certification_issued_at
-            ];
+            ]);
         }
         
-        $q_completed_courses = $summary_user ?
-            $summary_courses_user->count()
+        $q_completed_courses =$summary_courses_completed->count() > 0 ?
+            $summary_courses_completed->where('result','aprobado')->count()
             : 0;
         
-        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($q_completed_courses / $assigned_courses->count()) * 100) : 0;
+        $general_percentage = $assigned_courses->count() > 0 && $this->summary_courses ? round(($q_completed_courses / $assigned_courses->count()) * 100) : 0;
         $general_percentage = min($general_percentage, 100);
 
         

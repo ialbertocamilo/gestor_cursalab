@@ -89,11 +89,14 @@ code:
 `
 {
     "data": {
-        "criterions": {
-            "criterion_code": "Nombre del criterio",
+        "criterion": {
+            "id": "Identificador del criterio",
+            "code": "Código del criterio",
+            "name": "Nombre del criterio",
+            "data_type": "El tipo de formato que acepta los valores de este criterio - default(text), boolean, number, date",
+            "values": "Lista de valores que tiene el criterio",
+            "value_count": "Cantidad de valores que tiene el criterio",
             "length": "Longitud de caracteres que acepta los valores de este criterio",
-            "formats": "El tipo de formato que acepta los valores de este criterio."
-            "values": "Lista de valores que tiene el criterio"
         }
     }
 }`

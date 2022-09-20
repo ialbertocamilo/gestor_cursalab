@@ -21,7 +21,7 @@ export default {
             api_description_options:{
                 title:'Listar los criterios',
                 type:'GET',
-                route:'/integrations/criterions',
+                route:'/integrations/criteria',
                 parameters_type:[
                     {
                         title:'Parámetros (header)',
@@ -81,8 +81,9 @@ code:
     "criterions": [
         {
             "criterion_id":"Identificador del criterio",
-            "criterion_code": "Nombre del criterio",
-            "data_type": "Tipo del criterio (texto,fecha,número)",
+            "criterion_code": "Código del criterio (manejo interno)",
+            "criterion_name": "Nombre del criterio (manejo en la plataforma)",
+            "data_type": "Tipo del criterio - default(string), boolean, number, date",
         },
     ]
 }`

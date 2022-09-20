@@ -15,15 +15,26 @@ use App\Http\Resources\UserIntegrationResource;
 use App\Http\Resources\CourseIntegrationResource;
 use App\Http\Resources\CourseProgressIntegrationResource;
 
-class Integrations extends Model
+class Integrations extends BaseModel
 {
     protected function progressUser($request){
-        $users = User::with(['subworkspace:id,name,parent_id','subworkspace.parent:id,name'])
-                    ->whereNotNull('subworkspace_id')->select('id','username','fullname','subworkspace_id')
-                    ->paginate(500);
+        $users = User::with(['subworkspace:id,name,parent_id', 'subworkspace.parent:id,name', 'summary_courses'=>function($q){
+            $q->whereHas('status',function($q2){
+                $q2->whereIn('code',['aprobado','desaprobado']);
+            })->with([
+                'course:id,name',
+                'course.type:id,name',
+                'course.schools:id,name'
+            ])->select('id','course_id','user_id','status_id','grade_average','advanced_percentage','passed','certification_issued_at');
+        }])
+        ->whereNotNull('subworkspace_id')->select('id','username','fullname','subworkspace_id')
+        ->paginate(10);
         UserIntegrationResource::collection($users);
-        return  ['data'=>['users'=>$users],'code'=>200];
+        $data = self::generateExternalApiPageData($users,'users');
+        // $response_paginate
+        return  ['data'=>$data,'code'=>200];
     }
+    
     protected function getCourseProgress($request){
         $course = $request->course;
         $course->load('segments.values');
@@ -33,7 +44,9 @@ class Integrations extends Model
             $q->where('course_id',$course->id)->select('id','course_id','user_id','status_id','created_at');
         },'summary_courses.status:id,name'])->select('id','document','fullname')->paginate(500);
         CourseProgressIntegrationResource::collection($segmented_users);
-        return  ['data'=>['segmented_users'=>$segmented_users],'code'=>200];
+
+        $data = self::generateExternalApiPageData($segmented_users,'segmented_users');
+        return  ['data'=>['segmented_users'=>$data],'code'=>200];
 
     }
     protected function getCourses($request){
@@ -44,7 +57,8 @@ class Integrations extends Model
         }])
         ->paginate(100);
         CourseIntegrationResource::collection($courses);
-        return  ['data'=>['courses'=>$courses],'code'=>200];
+        $data = self::generateExternalApiPageData($courses,'courses');
+        return  ['data'=>['courses'=>$data],'code'=>200];
     }
     protected function updateCreateUsers($users,$workspace_id){
         $user_massive = new UserMassive();
@@ -80,7 +94,18 @@ class Integrations extends Model
         return  ['data'=>$data,'code'=>200];
     }
     protected function getCriteria(){
-        $criteria = Criterion::select('id as criterion_id','name','code as criterion_code')->where('active',1)->orderBy('position')->get();
+        $criteria = Criterion::with('field_type:id,code')->select('field_id','id','name','code')
+                    ->where('active',1)
+                    ->orderBy('position')
+                    ->get()->map(function($criterion){
+                        return [
+                            "criterion_id" => $criterion->id,
+                            "criterion_code" => $criterion->code,
+                            "criterion_name" => $criterion->name,
+                            "data_type" => $criterion->field_type->code
+                        ];
+                    });
+        
         return  ['data'=>['criteria'=>$criteria],'code'=>200];
     }
     protected function getWorkspaces(){
@@ -90,7 +115,7 @@ class Integrations extends Model
     protected function getValuesCriterion($criterion_id){
         $criterion = Criterion::where('id',$criterion_id)
         ->with('field_type:id,code')
-        ->select('id', 'name','required','field_id')
+        ->select('id', 'name','required','field_id','code')
         ->first();
         if(is_null($criterion)){
             return [
@@ -100,10 +125,14 @@ class Integrations extends Model
         }
         $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
         $criterion_values = CriterionValue::select('id as criterion_value_id',$colum_name.' as name')->where('criterion_id',$criterion->id)->get();
-        $response['count'] = count($criterion_values);
-        $response['criterion_values'] = $criterion_values;
-        $response['format_type'] = $criterion->field_type->code;
-        return  ['data'=>[$response],'code'=>200];
+        $response['id'] = $criterion->id;
+        $response['code'] = $criterion->code;
+        $response['name'] = $criterion->name;
+        $response['data_type'] = $criterion->field_type->code;
+        $response['values'] = $criterion_values;
+        $response['value_count '] = count($criterion_values);
+        $response['length'] = '255';
+        return  ['data'=>['criterion'=>$response],'code'=>200];
     }
     protected function authUser($request){
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password]) ){
