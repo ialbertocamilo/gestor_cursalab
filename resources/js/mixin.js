@@ -1,5 +1,5 @@
 const FileSaver = require("file-saver");
-
+import XLSX from "xlsx";
 import mime from "mime-types";
 import moment from "moment";
 moment.locale("es");
@@ -35,10 +35,25 @@ export default {
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'}
             ],
             mixin_extensiones: extensiones,
-            mixin_default_media_images: default_media_images
+            mixin_default_media_images: default_media_images,
+            abc: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "U", "V", "W", "X", "Y", "Z",],
         }
     },
     methods: {
+        descargarExcelFromArray(headers, values, array, filename, confirm_text,confirm=false) {
+            if ((confirm) || window.confirm(confirm_text)) {
+                let data = XLSX.utils.json_to_sheet(array, {
+                    header: values
+                });
+                headers.forEach((element, index) => {
+                    let indice = `${this.abc[index]}1`
+                    data[`${indice}`].v = element;
+                });
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, data, filename);
+                XLSX.writeFile(workbook, `${filename}.xlsx`);
+            }
+        },
         isValuesObjectEmpty(obj) {
             for (var key in obj) {
                 if (obj[key] !== null && obj[key] != "")
