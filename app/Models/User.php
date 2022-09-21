@@ -521,6 +521,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function setCoursesWithDirectSegmentation($user, &$all_courses)
     {
 //        dd($user->subworkspace);
+        $user->loadMissing('subworkspace.parent');
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
