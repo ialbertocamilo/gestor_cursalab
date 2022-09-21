@@ -23,14 +23,19 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-<!--                <DefaultActivityButton-->
-<!--                    :label="'Importar Evaluación'"-->
-<!--                    @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"-->
-<!--                />-->
-                <DefaultModalButton
-                    @click="openFormModal(modalOptions, null, 'create')"
-                    :label="'Pregunta'"/>
+
             </v-card-title>
+            <v-row>
+                <v-col cols="12 d-flex justify-content-end">
+                    <DefaultActivityButton
+                        :label="'Importar Evaluación'"
+                        @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
+                    />
+                    <DefaultModalButton
+                        @click="openFormModal(modalOptions, null, 'create')"
+                        :label="'Pregunta'"/>
+                </v-col>
+            </v-row>
         </v-card>
         <!--        FILTROS-->
         <v-card flat class="elevation-0 mb-4">
@@ -182,6 +187,7 @@ export default {
                 title: 'Importar Evaluación',
                 hideCancelBtn: true,
                 hideConfirmBtn: true,
+                topicUrl: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/search/${vue.tema_id}`,
             },
 
             delete_model: null

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Imports\ExamenImport;
+
 class Question extends BaseModel
 {
     protected $fillable = [
         'topic_id', 'type_id', 'pregunta',
-        'rptas_json', 'rpta_ok', 'active'
+        'rptas_json', 'rpta_ok', 'active',
+        'required', 'score'
     ];
 
     protected $casts = [
@@ -55,5 +58,50 @@ class Question extends BaseModel
 
             $question->rptas_json = $temp_questions->shuffle()->all();
         }
+    }
+
+    protected function import($data)
+    {
+        // Load question type from database
+
+        $selectQuestionType = Taxonomy::where('group', 'question')
+                                    ->where('type', 'type')
+                                    ->where('code', 'select-options')
+                                    ->first();
+
+        $writtenQuestionType = Taxonomy::where('group', 'question')
+                                ->where('type', 'type')
+                                ->where('code', 'written-answer')
+                                ->first();
+
+        try {
+
+            $model = new ExamenImport;
+            $model->topic_id = $data['topic_id'];
+            $model->selectQuestionTypeId = $selectQuestionType->id;
+            $model->writtenQuestionTypeId = $writtenQuestionType->id;
+            $model->isQualified = $data['isQualified'];
+            $model->import($data['archivo']);
+
+            if ($model->failures()->count()) {
+
+                return [
+                    'msg' => 'Se encontraron algunos errores.',
+                    'errors' => $model->failures()
+                ];
+            }
+
+        } catch (\Exception $e) {
+            report($e);
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
+
+        return [
+            'status' => 'success',
+            'message' => 'Registros ingresados correctamente.'
+        ];
     }
 }

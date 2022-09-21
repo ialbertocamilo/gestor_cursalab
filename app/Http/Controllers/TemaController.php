@@ -253,17 +253,24 @@ class TemaController extends Controller
         return $this->success(['msg' => 'Pregunta actualizada']);
     }
 
-    public function importPreguntas(School $school, Curso $course, Posteo $topic, TemaPreguntaImportRequest $request)
+    public function importPreguntas(
+        School $school, Course $course, Topic $topic, TemaPreguntaImportRequest $request
+    )
     {
         $data = $request->validated();
 
-        $data['posteo_id'] = $topic->id;
-        $data['tipo_ev'] = $topic->tipo_ev;
 
-        $result = Pregunta::import($data);
-        $topic->evaluable = 'si';
-        $topic->tipo_ev = 'calificada';
-        $topic->save();
+        // Load topic evaluation type from database type_evaluation_id
+
+        $evaluationType = Taxonomy::where('group', 'topic')
+                                  ->where('type', 'evaluation-type')
+                                  ->where('code', 'qualified')
+                                  ->first();
+
+        $data['topic_id'] = $topic->id;
+        $data['isQualified'] = $evaluationType->id === $topic->type_evaluation_id;
+
+        $result = Question::import($data);
 
         return $this->success($result);
     }

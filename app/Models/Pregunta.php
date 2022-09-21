@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pregunta extends Model
 {
-    protected $table = 'poll_questions';    
-    
+    protected $table = 'poll_questions';
+
     protected $fillable = [
     	'post_id', 'pregunta', 'rptas_json','ubicacion', 'estado', 'tipo_pregunta', 'created_at', 'updated_at', 'rpta_ok'
     ];
@@ -24,9 +24,9 @@ class Pregunta extends Model
 
             $model = (new ExamenImport);
 
-            $model->posteo_id = $data['posteo_id'];
+            $model->topic_id = $data['posteo_id'];
 
-            $model->tipo_ev = $data['tipo_ev'];
+            $model->type_id = $data['tipo_ev'];
             $model->import($data['excel']);
 
             if ($model->failures()->count())
@@ -44,34 +44,7 @@ class Pregunta extends Model
         return ['status' => 'success', 'message' => 'Registros ingresados correctamente.'];
     }
 
-    protected function import($data)
-    {
-        try {
 
-            $model = (new ExamenImport);
-
-            $model->posteo_id = $data['posteo_id'];
-
-            $model->tipo_ev = $data['tipo_ev'];
-            $model->import($data['archivo']);
-
-            if ($model->failures()->count())
-            {
-//                request()->session()->flash('excel-errors', $model->failures());
-
-                return [
-                    'msg' => 'Se encontraron algunos errores.',
-                    'errors' => $model->failures()
-                ];
-            }
-
-        } catch (\Exception $e) {
-
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
-
-        return ['status' => 'success', 'message' => 'Registros ingresados correctamente.'];
-    }
 
     /* AUDIT TAGS */
     public function generateTags(): array
