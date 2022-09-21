@@ -46,7 +46,7 @@ class Integrations extends BaseModel
         CourseProgressIntegrationResource::collection($segmented_users);
 
         $data = self::generateExternalApiPageData($segmented_users,'segmented_users');
-        return  ['data'=>['segmented_users'=>$data],'code'=>200];
+        return  ['data'=>$data,'code'=>200];
 
     }
     protected function getCourses($request){
@@ -58,7 +58,7 @@ class Integrations extends BaseModel
         ->paginate(100);
         CourseIntegrationResource::collection($courses);
         $data = self::generateExternalApiPageData($courses,'courses');
-        return  ['data'=>['courses'=>$data],'code'=>200];
+        return  ['data'=>$data,'code'=>200];
     }
     protected function updateCreateUsers($users,$workspace_id){
         $user_massive = new UserMassive();

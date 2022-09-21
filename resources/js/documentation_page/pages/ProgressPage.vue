@@ -135,7 +135,7 @@ export default {
                         }
                     ]
                 }
-            ]
+            ],
             "current_page": "Página actual de la consulta",
             "last_page": "Última página",
             "per_page": "Items por página (500)",
