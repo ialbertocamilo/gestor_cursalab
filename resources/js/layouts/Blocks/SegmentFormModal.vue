@@ -8,74 +8,86 @@
     >
         <template v-slot:content>
             <v-form ref="segmentForm" class="--mb-15">
-                <DefaultErrors :errors="errors" />
+                <DefaultErrors :errors="errors"/>
 
-                <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-end pr-3">
-                        <v-btn
-                            class="- add-button"
-                            color="primary"
-                            @click="addSegmentation()"
-                        >
-                            <v-icon class="" v-text="'mdi-plus'" />
-                            Segmento
-                        </v-btn>
-                    </v-col>
-                </v-row>
+                <v-tabs
+                    v-model="tabs"
+                    fixed-tabs
+                    slider-color="primary"
+                >
+                    <v-tab>
+                         Segmentación Directa
+                    </v-tab>
+                    <v-tab>
+                        Segmentación por Documento
+                    </v-tab>
+                </v-tabs>
 
-                <v-row justify="space-around">
-                    <v-col cols="10" class="d-flex justify-content-center">
-                        <!-- hide-delimiter-background -->
-                        <v-carousel
-                            height="100%"
-                            show-arrows-on-hover
-                            light
-                            v-model="steps"
-                            hide-delimiters
-                        >
-                            <v-carousel-item
-                                v-for="(row, i) in segments"
-                                :key="i"
-                            >
-                                <v-sheet class="group-sheet" height="100%">
-                                    <div class="text-h6 text-center">
-                                        Segmentación {{ i + 1 }} /
-                                        {{ segments.length }}
-                                    </div>
+                <v-tabs-items v-model="tabs">
 
-                                    <v-divider class="mx-12" />
+                    <v-tab-item>
 
-                                    <segment
-                                        :segments="segments"
-                                        :segment="row"
-                                        :criteria="criteria"
-                                        class="mx-5"
-                                        :options="options"
-                                        @borrar_segment="borrarBloque"
-                                    />
-                                    <!--  <v-row
-                                  class="fill-height"
-                                  align="center"
-                                  justify="center"
+                        <SegmentByDocument
+                            :segment="segment_by_document"
+                        />
+
+                    </v-tab-item>
+
+                    <v-tab-item>
+
+                        <v-row justify="space-around">
+                            <v-col cols="12" class="d-flex justify-content-end pr-3">
+                                <v-btn
+                                    class="- add-button"
+                                    color="primary"
+                                    @click="addSegmentation('direct-segmentation')"
                                 >
-                                  <div class="text-h2">
-                                    {{ slide }} Slide
-                                  </div>
-                                </v-row> -->
-                                </v-sheet>
-                            </v-carousel-item>
-                        </v-carousel>
-                    </v-col>
-                </v-row>
+                                    <v-icon class="" v-text="'mdi-plus'"/>
+                                    Segmento
+                                </v-btn>
+                            </v-col>
+                        </v-row>
 
-                <!-- <v-subheader class="mt-5"><strong>Datos adicionales</strong></v-subheader> -->
+                        <v-row justify="space-around">
+                            <v-col cols="10" class="d-flex justify-content-center">
+                                <!-- hide-delimiter-background -->
+                                <v-carousel
+                                    height="100%"
+                                    show-arrows-on-hover
+                                    light
+                                    v-model="steps"
+                                    hide-delimiters
+                                >
+                                    <v-carousel-item
+                                        v-for="(row, i) in segments"
+                                        :key="i"
+                                    >
+                                        <v-sheet class="group-sheet" height="100%">
+                                            <div class="text-h6 text-center">
+                                                Segmentación {{ i + 1 }} /
+                                                {{ segments.length }}
+                                            </div>
 
-                <!--                 <v-row align="center" align-content="center">
-                    <v-col cols="6" class="--d-flex --justify-content-start">
-                        <DefaultToggle v-model="resource.active" />
-                    </v-col>
-                </v-row>
- -->
+                                            <v-divider class="mx-12"/>
+
+                                            <segment
+                                                :segments="segments"
+                                                :segment="row"
+                                                :criteria="criteria"
+                                                class="mx-5"
+                                                :options="options"
+                                                @borrar_segment="borrarBloque"
+                                            />
+
+                                        </v-sheet>
+                                    </v-carousel-item>
+                                </v-carousel>
+                            </v-col>
+                        </v-row>
+
+                    </v-tab-item>
+                </v-tabs-items>
+
             </v-form>
         </template>
     </DefaultDialog>
@@ -94,10 +106,11 @@ const fields = [
 ];
 
 import Segment from "./Segment";
+import SegmentByDocument from "./SegmentByDocument";
 
 export default {
     components: {
-        Segment
+        Segment, SegmentByDocument
     },
     props: {
         options: {
@@ -110,6 +123,7 @@ export default {
     },
     data() {
         return {
+            tabs: null,
             steps: 0,
 
             errors: [],
@@ -120,6 +134,7 @@ export default {
             },
             // resource: {},
             segments: [],
+            segment_by_document: [],
             criteria: [],
 
             rules: {
@@ -139,15 +154,16 @@ export default {
             let vue = this;
             vue.$refs.segmentForm.resetValidation();
         },
-        getNewSegment() {
+        getNewSegment(type_code) {
             return {
                 id: `new-segment-${Date.now()}`,
+                type_code,
                 criteria_selected: []
             };
         },
-        async addSegmentation() {
+        async addSegmentation(type_code) {
             let vue = this;
-            vue.segments.push(this.getNewSegment());
+            vue.segments.push(this.getNewSegment(type_code));
 
             vue.steps = vue.segments.length - 1;
         },
@@ -182,12 +198,13 @@ export default {
                 let formData = JSON.stringify({
                     model_type: vue.model_type,
                     model_id: vue.resource.id,
-                    segments: vue.segments
+                    segments: vue.segments,
+                    segments_by_document: vue.segments_by_document,
                 });
 
                 vue.$http
                     .post(url, formData)
-                    .then(({ data }) => {
+                    .then(({data}) => {
                         vue.closeModal();
                         vue.showAlert(data.data.msg);
                         vue.$emit("onConfirm");
@@ -218,17 +235,15 @@ export default {
                 ? `${base}/${resource.id}/edit`
                 : `${base}/create`;
 
-            url =
-                url +
-                "?model_type=" +
-                vue.model_type +
-                "&model_id=" +
-                resource.id;
+            url = url + "?model_type=" + vue.model_type +
+                "&model_id=" + resource.id;
 
-            await vue.$http.get(url).then(({ data }) => {
+            await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
 
-                vue.segments = _data.segments;
+                vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
+                vue.segment_by_document = _data.segments.filter(segment => segment.type.code === 'segmentation-by-document');
+
                 if (vue.segments.length === 0) this.addSegmentation();
                 vue.criteria = _data.criteria;
             });

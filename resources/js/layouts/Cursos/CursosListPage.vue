@@ -25,7 +25,7 @@
                 <v-row>
                     <v-col cols="4">
                         <DefaultInput
-                            learable dense
+                            clearable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
