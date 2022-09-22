@@ -86,6 +86,7 @@ class RestAyudaController extends Controller
                 'telefono' => $phone,
                 'detalle' => $details
             );
+            $emails = ['rodrigo@cursalab.io', 'daniel@cursalab.io', 'jeancarlo@cursalab.io', 'deyvi@cursalab.io'];
             Mail::to($emails)->send(new SendEmailSupportLogin($data_email));
         }
         return response()->json(compact('response'));
