@@ -361,6 +361,8 @@ class Error extends Model
             '/vendor/popper.js/umd/popper.min.js.map',
             '/vendor/bootstrap/js/bootstrap.min.js.map',
             '/vendor/bootstrap/css/bootstrap.min.css.map',
+            '/js/vendor.js',
+            '/js/manifest.js',
         ];
 
         $files = [

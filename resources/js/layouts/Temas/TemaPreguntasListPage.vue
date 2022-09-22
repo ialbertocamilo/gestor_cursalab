@@ -48,6 +48,38 @@
                     </v-col>
 
                 </v-row>
+                <v-row>
+                    <div class="col-md-8">
+                        <div class="alert alert-info mx-2 mt-2" role="alert">
+                            - Cuando un tema es "Evaluable" y de tipo "Calificada" se deben agregar opciones a las preguntas. <br>
+                            - Cuando un tema es "Evaluable" y de tipo "Abierta" no se consideran las opciones, solo se muestran las preguntas para que los usuarios respondan con un texto. <br>
+                            - Al eliminar todas las preguntas el tema se convierte a un tema no evaluable.<br>
+                            <span v-if="evaluation_type == 'calificada'">
+                                - El total de puntos que se puede acumular en las preguntas obligatorias es de 20 puntos. <br>
+                                - El total de puntos solo considera las preguntas activas.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 pr-5 pt-2">
+                        <table class="table table-striped table-dark" v-if="evaluation_type">
+                          <tbody>
+                            <tr>
+                              <td>Obligatorio: </td>
+                              <td>{{ evaluation_data_sum_required }} puntos</td>
+                            </tr>
+                            <tr>
+                              <td>No Obligatorios: </td>
+                              <td>{{ evaluation_data_sum_not_required }} puntos</td>
+                            </tr>
+                            <tr>
+                              <td>Total: </td>
+                              <td>{{ evaluation_data_sum }} puntos</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                </v-row>
             </v-card-text>
 
             <DefaultTable
@@ -86,6 +118,7 @@
 </template>
 
 <script>
+// import TemaPreguntaFormModal from "./TemaPreguntaFormModalNew";
 import TemaPreguntaFormModal from "./TemaPreguntaFormModal";
 import TemaPreguntasImport from "./TemaPreguntasImport";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
@@ -102,7 +135,10 @@ export default {
         'tema_id',
         'tema_name',
         'evaluable',
-        'evaluation_type'
+        'evaluation_type',
+        'evaluation_data_sum',
+        'evaluation_data_sum_required',
+        'evaluation_data_sum_not_required',
     ],
     data() {
         let vue = this

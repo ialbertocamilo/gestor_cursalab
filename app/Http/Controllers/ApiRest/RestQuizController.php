@@ -128,7 +128,13 @@ class RestQuizController extends Controller
         $is_random = $topic->evaluation_type->code == 'qualified';
         $type_code = $topic->evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer';
 
-        $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
+        if ($type_code == 'written-answer') {
+
+            $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
+        } else {
+
+            $questions = Question::getQuestionsWithScoreForQuiz($topic, $limit, $is_random, $type_code);
+        }
 
         if (count($questions) == 0)
             return response()->json(['error' => true, 'data' => null], 200);
