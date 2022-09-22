@@ -37,9 +37,10 @@ class RestQuizController extends Controller
         if (!$row)
             return response()->json(['error' => true, 'msg' => 'La evaluación no existe.'], 200);
 
-        [$correct_answers, $failed_answers] = Topic::evaluateAnswers($request->respuestas, $topic);
+        [$correct_answers, $failed_answers, $correct_answers_score] = Topic::evaluateAnswers($request->respuestas, $topic);
 
-        $new_grade = SummaryTopic::calculateGrade($correct_answers, $failed_answers);
+        $new_grade = $correct_answers_score;
+        // $new_grade = SummaryTopic::calculateGrade($correct_answers, $failed_answers);
         $passed = SummaryTopic::hasPassed($new_grade);
 
         $data_ev = [
@@ -112,7 +113,12 @@ class RestQuizController extends Controller
     {
         $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
 
+        $is_qualified = $topic->evaluation_type->code == 'qualified';
+        $is_random = $is_qualified;
+        $type_code = $is_qualified ? 'select-options' : 'written-answer';
+
         if (!$topic) return response()->json(['data' => ['msg' => 'Not found'], 'error' => true], 200);
+        if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Not verified'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
 
@@ -125,12 +131,11 @@ class RestQuizController extends Controller
         $limit = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'preg_x_ev');
 
         // $limit = $config_quiz['preg_x_ev'] ?? 5;
-        $is_random = $topic->evaluation_type->code == 'qualified';
-        $type_code = $topic->evaluation_type->code == 'qualified' ? 'select-options' : 'written-answer';
 
         if ($type_code == 'written-answer') {
 
             $questions = Question::getQuestionsForQuiz($topic, $limit, $is_random, $type_code);
+
         } else {
 
             $questions = Question::getQuestionsWithScoreForQuiz($topic, $limit, $is_random, $type_code);

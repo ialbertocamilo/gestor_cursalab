@@ -181,8 +181,6 @@ class TemaController extends Controller
     {
         $data = Question::verifyEvaluation($topic);
 
-        // dd($data);
-
         return view('temas.preguntas_list', $data);
     }
 
