@@ -7,6 +7,7 @@ use App\Models\Criterion;
 use App\Models\Taxonomy;
 use App\Models\Segment;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
@@ -49,7 +50,19 @@ class SegmentController extends Controller
 
     public function store(Request $request)
     {
+//        dd($request->all());
         return Segment::storeRequestData($request);
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $data = $request->all();
+
+        $users = User::filterText($data['filter_text'])
+            ->select('id', 'name', 'surname', 'lastname', 'document')
+            ->limit(50)->get();
+
+        return $this->success(compact('users'));
     }
 
 }

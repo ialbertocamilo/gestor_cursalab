@@ -25,15 +25,7 @@
 
                 <v-tabs-items v-model="tabs">
 
-                    <v-tab-item>
-
-                        <SegmentByDocument
-                            :segment="segment_by_document"
-                        />
-
-                    </v-tab-item>
-
-                    <v-tab-item>
+                     <v-tab-item>
 
                         <v-row justify="space-around">
                             <v-col cols="12" class="d-flex justify-content-end pr-3">
@@ -84,6 +76,14 @@
                                 </v-carousel>
                             </v-col>
                         </v-row>
+
+                    </v-tab-item>
+
+                    <v-tab-item>
+
+                        <SegmentByDocument
+                            :segment="segment_by_document"
+                        />
 
                     </v-tab-item>
                 </v-tabs-items>

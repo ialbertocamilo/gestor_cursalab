@@ -4,10 +4,12 @@
             <v-row>
                 <v-col cols="10">
                     <DefaultInput
-                        v-model="filter"
                         clearable dense
-                        label="Buscar por nombre"
+                        v-model="search"
+                        placeholder="Buscar por nombre o documento"
                         append-icon="mdi-magnify"
+                        :loading="autocomplete_loading"
+                        class="col-11"
                     />
                 </v-col>
                 <v-col cols="2">
@@ -39,15 +41,45 @@
 
 <script>
 export default {
-    props:{
+    props: {
         segment: {
             required: true
         }
     },
     data() {
         return {
-            filter: null,
+            search: null,
+            autocomplete_loading: false,
+            file: null,
+            debounce: null,
+            filter_result: [],
         };
+    },
+    computed: {},
+    watch: {
+        search(filtro) {
+            let vue = this;
+
+            if (filtro === null) return;
+
+            if (filtro.length <= 3) return;
+
+            vue.autocomplete_loading = true;
+
+            clearTimeout(this.debounce);
+
+            this.debounce = setTimeout(() => {
+                let data = {filter_text: filtro};
+                const url = `/segments/search-users`;
+
+                vue.$http.post(url, data)
+                    .then(({data}) => {
+                        vue.filter_result = data.data.users;
+                        vue.autocomplete_loading = false;
+                    })
+
+            }, 1600);
+        },
     },
     methods: {}
 }

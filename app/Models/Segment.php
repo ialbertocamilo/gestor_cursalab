@@ -7,7 +7,7 @@ use DB;
 class Segment extends BaseModel
 {
     protected $fillable = [
-        'name', 'model_id', 'model_type', 'active'
+        'name', 'type_id', 'model_id', 'model_type', 'active'
     ];
 
     // public function courses()
@@ -144,13 +144,14 @@ class Segment extends BaseModel
             Segment::where('model_type', $request->model_type)->where('model_id', $request->model_id)
                 ->whereNotIn('id', $segments_id)->delete();
 
-            $segmentation_types = Taxonomy::getDataForSelect('segments', 'type');
+            $segmentation_types = Taxonomy::getDataForSelect('segment', 'type');
+//            info($segmentation_types->pluck('code')->toArray());
 
             foreach ($request->segments as $key => $segment_row) {
                 if (count($segment_row['criteria_selected']) == 0) continue;
 
                 $type = $segmentation_types->where('code', $segment_row['type_code'])->first();
-
+//                info($type?->code);
                 // TODO: Dividir el store según $type
                 $data = [
                     'type_id' => $type?->id,
@@ -199,6 +200,16 @@ class Segment extends BaseModel
         cache_clear_model(Course::class);
 
         return $this->success(['msg' => $message], $message);
+    }
+
+    public function storeDirectSegmentation()
+    {
+        
+    }
+
+    public function storeSegmentationByDocument()
+    {
+        
     }
 
 }
