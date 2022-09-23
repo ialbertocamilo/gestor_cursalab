@@ -181,6 +181,8 @@ class TemaController extends Controller
     {
         $data = Question::verifyEvaluation($topic);
 
+        // dd($data);
+
         return view('temas.preguntas_list', $data);
     }
 
@@ -225,7 +227,6 @@ class TemaController extends Controller
             ? 'select-options'
             : 'written-answer';
 
-
         $result = Question::checkScoreLeft($topic, $data['id'], $data);
 
         if ($result['status'])
@@ -248,8 +249,8 @@ class TemaController extends Controller
                 'rptas_json' => json_decode($data['nuevasRptas'], true),
                 'rpta_ok' => $data['rpta_ok'],
                 'active' => $data['active'],
-                'required' => $data['required'] ?? false,
-                'score' => $data['score'],
+                'required' => $data['required'] ?? NULL,
+                'score' => $data['score'] ?? NULL,
                 // 'position' => 'despues'
             ]
         );

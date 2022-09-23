@@ -52,7 +52,7 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
         $row = $row->toArray();
 
         // verificando el tipo de calificación
-        // variable para saber si no supera el limete máximo antes de agregar
+        // variable para saber si no supera el límite máximo antes de agregar
 
         if ($this->isQualified) {
 

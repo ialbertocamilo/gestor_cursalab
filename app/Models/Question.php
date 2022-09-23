@@ -9,11 +9,11 @@ class Question extends BaseModel
     protected $fillable = [
         'topic_id', 'type_id', 'pregunta',
         'rptas_json', 'rpta_ok', 'active', 'required', 'score',
-        'required', 'score'
     ];
 
     protected $casts = [
         'rptas_json' => 'array',
+        // 'score' => 'integer',
     ];
 
     public function type()
@@ -210,8 +210,10 @@ class Question extends BaseModel
 
         } else {
 
-            $min_missing_score = collect($missings)->pluck('value')->min();
-            $message = 'Se necesita ' . $min_missing_score . ' punto(s) para que la evaluación esté completa';
+            $score_missing = collect($missings)->pluck('value')->min();
+            $message = 'Se necesita ' . $score_missing . ' punto(s) para que la evaluación esté completa.';
+
+            $data = compact('sum', 'sum_required', 'sum_not_required', 'score_missing');
         }
 
         $topic->update(['evaluation_verified' => $verified]);

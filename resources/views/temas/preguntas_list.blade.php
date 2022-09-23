@@ -20,6 +20,8 @@
             curso_id="{{ request()->segment(4) }}" curso_name="{{ $curso->name ?? '' }}"
             tema_id="{{ request()->segment(6) }}" tema_name="{{ $tema->name ?? '' }}"
             evaluable="{{ $tema->type_evaluation_id }}"
+            status="{{ $status }}"
+            missing_score="{{ $data['score_missing'] ?? 0 }}"
             evaluation_type="{{ $evaluationTypeCode }}"
             evaluation_data_sum="{{ $data['sum'] ?? 0 }}"
             evaluation_data_sum_required="{{ $data['sum_required'] ?? 0 }}"
