@@ -218,7 +218,7 @@ export default {
         },
         resetSelects() {
             let vue = this;
-            // Selects independientes
+            vue.tabs = null;
         },
         async loadData(resource) {
             let vue = this;

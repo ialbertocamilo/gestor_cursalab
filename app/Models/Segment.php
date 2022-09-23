@@ -66,7 +66,7 @@ class Segment extends BaseModel
                 ->where('model_id', $model_id)
                 ->get();
 
-            foreach ($segments as $key => $segment) {
+            foreach ($segments as $segment) {
 
 //                $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
 //
@@ -204,12 +204,12 @@ class Segment extends BaseModel
 
     public function storeDirectSegmentation()
     {
-        
+
     }
 
     public function storeSegmentationByDocument()
     {
-        
+
     }
 
 }

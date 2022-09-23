@@ -177,6 +177,8 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
+        $data['workspace_id'] = get_current_workspace();
+
         User::storeRequest($data);
 
         return $this->success(['msg' => 'Usuario creado correctamente.']);
@@ -186,6 +188,8 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
+        $data['workspace'] = get_current_workspace()?->id;
+//        info($data);
         User::storeRequest($data, $user);
 
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);

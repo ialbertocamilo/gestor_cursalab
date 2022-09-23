@@ -22,6 +22,7 @@
         :single-line="singeLine"
         :suffix="suffix"
         :prefix="prefix"
+        :loading="loading"
 
     >
         <template v-slot:append v-if="appendIcon">
@@ -105,6 +106,10 @@ export default {
             default: null
         },
         numbersOnly: {
+            type: Boolean,
+            default: false,
+        },
+        loading: {
             type: Boolean,
             default: false,
         },

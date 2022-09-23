@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
+
 // use App\Http\Controllers\ZoomApi;
 
 class SegmentController extends Controller
@@ -58,9 +59,24 @@ class SegmentController extends Controller
     {
         $data = $request->all();
 
-        $users = User::filterText($data['filter_text'])
-            ->select('id', 'name', 'surname', 'lastname', 'document')
-            ->limit(50)->get();
+//        $users = User::query()
+//            ->filterText($data['filter_text'])
+//            ->select('id', 'name', 'surname', 'lastname', 'document')
+//            ->whereHas('criterion_values', function ($q) use ($data) {
+//                $q->where('value_text', 'like', "%{$data['filter_text']}%")
+//                    ->whereRelation('criterion', 'code', 'documento');
+//            })
+//            ->limit(50)->get();
+
+        $users = CriterionValue::query()
+            ->withWhereHas('users', function ($q) use ($data) {
+                $q->where('document', 'like', "%{$data['filter_text']}%")
+                    ->select('id', 'name', 'lastname', 'surname', 'document');
+            })
+            ->whereRelation('criterion', 'code', 'documento')
+            ->select('id', 'value_text')
+            ->limit(10)
+            ->get();
 
         return $this->success(compact('users'));
     }

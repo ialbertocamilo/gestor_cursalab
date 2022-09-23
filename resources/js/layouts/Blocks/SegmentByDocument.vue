@@ -57,19 +57,19 @@ export default {
     },
     computed: {},
     watch: {
-        search(filtro) {
+        search(filter_text) {
             let vue = this;
 
-            if (filtro === null) return;
+            if (filter_text === null) return;
 
-            if (filtro.length <= 3) return;
+            if (filter_text.length <= 3) return;
 
             vue.autocomplete_loading = true;
 
             clearTimeout(this.debounce);
 
             this.debounce = setTimeout(() => {
-                let data = {filter_text: filtro};
+                let data = {filter_text: filter_text};
                 const url = `/segments/search-users`;
 
                 vue.$http.post(url, data)

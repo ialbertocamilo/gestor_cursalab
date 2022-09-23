@@ -35,6 +35,11 @@ class CriterionValue extends BaseModel
         return $this->belongsToMany(Workspace::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
     protected function getListForSelect($criterion_code = null, $criterion_id = null)
     {
         $value_param = 'value_text';

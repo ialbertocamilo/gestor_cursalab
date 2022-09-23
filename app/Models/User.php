@@ -60,12 +60,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username','fullname', 'slug', 'alias','person_number','phone_number',
+        'name', 'lastname', 'surname', 'username', 'fullname', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
-        'external_id', 'fcm_token', 'token_firebase','secret_key'
+        'external_id', 'fcm_token', 'token_firebase', 'secret_key'
     ];
 
     protected $with = ['roles', 'abilities'];
@@ -300,6 +300,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
 
+            $document_value = $this->syncDocumentWithCriterionValues($data['document']);
+
+            $user->criterion_values()
+                ->sync([$document_value?->id]);
 
             $user->save();
             DB::commit();
@@ -311,6 +315,23 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
         }
+    }
+
+    public function syncDocumentWithCriterionValues($document, $workspace = null)
+    {
+        $document_criterion = Criterion::where('code', 'documento')->first();
+
+        $document_value = CriterionValue::firstOrCreate([
+            'value_text' => $document,
+            'criterion_id' => $document_criterion?->id
+        ]);
+
+        $workspace_id = $workspace->id ?? get_current_workspace()?->id;
+
+        if ($workspace_id)
+            $document_value->workspaces()->syncWithoutDetaching([$workspace_id]);
+
+        return $document_value;
     }
 
     protected function storeRequestFull($data = [], $user = null)
@@ -355,8 +376,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($request->q) {
             $query->filterText($request->q);
         }
-        if ($request->workspace_id){
-            $query->whereRelation('subworkspace','parent_id',$request->workspace_id);
+        if ($request->workspace_id) {
+            $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
         }
 
         if ($request->subworkspace_id)
@@ -534,7 +555,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'polls.questions',
             'topics.evaluation_type'
         ])
-            ->whereHas('topics', function ($q) {$q->where('active', ACTIVE);})
+            ->whereHas('topics', function ($q) {
+                $q->where('active', ACTIVE);
+            })
             ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
             ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
             ->where('active', ACTIVE)
