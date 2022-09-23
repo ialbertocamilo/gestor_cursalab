@@ -95,6 +95,11 @@ export default {
                             link:'/documentation-api/criterion-values',
                         },
                         {
+                            icon:'mdi-hexagon',
+                            title:'Workspaces',
+                            link:'/documentation-api/workspace',
+                        },
+                        {
                             icon:'mdi-account-convert',
                             title:'Alta de usuarios',
                             link:'/documentation-api/update-create-users',
@@ -113,6 +118,16 @@ export default {
                             icon:'mdi-chart-areaspline',
                             title:'Avance de usuarios',
                             link:'/documentation-api/progress',
+                        },
+                        {
+                            icon:'mdi-book',
+                            title:'Listado de cursos',
+                            link:'/documentation-api/courses',
+                        },
+                        {
+                            icon:'mdi-book-open-variant',
+                            title:'Progreso de un Curso',
+                            link:'/documentation-api/course-progress',
                         }
                   ]
               }
@@ -156,7 +171,6 @@ export default {
 /* Custom class */
 .grupo_title{
     font-size: 0.73em!important;
-    /* font-weight: bold!important; */
     white-space: normal;
 }
 .item_icon{

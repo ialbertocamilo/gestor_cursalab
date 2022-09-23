@@ -9,7 +9,7 @@
 					color="primary"
 					v-model="UsuariosActivos"
 					hide-details="false"
-					@click.native.stop="verifyCheck('UsuariosActivos')" 
+					@click.native.stop="verifyCheck('UsuariosActivos')"
 				/>
 				<div
 					:tooltip="tooltip_activos"
@@ -25,7 +25,7 @@
 					color="gray"
 					v-model="UsuariosInactivos"
 					hide-details="false"
-					@click.native.stop="verifyCheck('UsuariosInactivos')" 
+					@click.native.stop="verifyCheck('UsuariosInactivos')"
 				/>
 				<div
 					:tooltip="tooltip_inactivos"
@@ -43,7 +43,7 @@ export default {
 	name: "UsuariosFiltro",
 	props:{
 		title:{
-			default:'Usuarios :'
+			default:'Estado de usuarios'
 		},
 		tooltip_activos:{
 			default:'Usuario que puede entrar a la plataforma y ver sus cursos asignados.'

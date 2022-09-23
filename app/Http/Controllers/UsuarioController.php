@@ -652,12 +652,12 @@ class UsuarioController extends Controller
         } else {
 
             $query = SummaryTopic::query()
+                ->join('users', 'users.id', '=', 'summary_topics.user_id')
                 ->with('user')
                 ->where('summary_topics.topic_id', $topicId)
                 ->where('summary_topics.source_id')
-                ->whereHas('user', function($q) use ($subworkspaceId) {
-                    $q->subworkspace_id = $subworkspaceId;
-                });
+                ->where('users.subworkspace_id', $subworkspaceId)
+                ->select('summary_topics.*');
 
             // "Desaprobados" only
 

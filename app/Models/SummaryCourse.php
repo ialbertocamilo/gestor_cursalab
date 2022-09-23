@@ -148,7 +148,7 @@ class SummaryCourse extends Summary
     }
 
 
-    protected function updateUserData($course, $user = null)
+    protected function updateUserData($course, $user = null, $update_attempts = true)
     {
         $user = $user ?? auth()->user();
         $row_course = SummaryCourse::getCurrentRow($course, $user);
@@ -243,7 +243,8 @@ class SummaryCourse extends Summary
 
 //        info("UPDATE TO ". $status);
         $course_data['status_id'] = Taxonomy::getFirstData('course', 'user-status', $status)->id;
-        $course_data['attempts'] = $row_course->attempts + 1;
+        if ($update_attempts)
+            $course_data['attempts'] = $row_course->attempts + 1;
 
 //        info($row_course->status_id);
         $row_course->update($course_data);

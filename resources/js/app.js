@@ -144,6 +144,8 @@ Vue.component(
 Vue.component("multimedia-layout", require("./layouts/Multimedia/MultimediaListPage"));
 Vue.component("supervisores-layout", require("./layouts/Supervisores/SupervisoresListPage"));
 
+Vue.component("upload-topic-grades-layout", require("./layouts/Masivos/UploadTopicGrades.vue"));
+
 Vue.component("homeview", require("./layouts/General/DashboardView"));
 
 // Workspaces

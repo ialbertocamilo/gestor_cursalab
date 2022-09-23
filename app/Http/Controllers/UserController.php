@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminStoreRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserStoreRequest;
@@ -24,12 +25,13 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->has('q')) {
-            $question = $request->input('q');
-            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->where('name', 'like', '%' . $question . '%')->paginate();
-        } else {
-            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->paginate();
-        }
+        $q = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports');
+
+        if ($request->has('q'))
+           $q->filterText($request->q);
+
+        $users = $q->orderBy('name')->paginate();
+
         $super_user = auth()->user()->isAn('super-user');
         return view('users.index', compact('users', 'super_user'));
     }
@@ -71,10 +73,11 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(UserStoreRequest $request)
+    public function store(AdminStoreRequest $request)
     {
         //cambiar valor de name en el request
         $data = $request->all();
+//        dd($data);
 
         $employee = Taxonomy::getFirstData('user', 'type', 'employee');
         $data['type_id'] = $employee->id;
@@ -92,7 +95,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')
-            ->with('info', 'usero guardado con éxito');
+            ->with('info', 'Administrador guardado con éxito');
     }
 
     public function edit(User $user)
@@ -151,10 +154,11 @@ class UserController extends Controller
      * @param  \App\user  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(AdminStoreRequest $request, User $user)
     {
         // 1. Actualizar el usuario
         $data = $request->all();
+//        dd($data);
 
         if (!is_null($request->password)) {
             $data['password'] = $request->password;
@@ -176,7 +180,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')
-            ->with('info', 'Actualizado con éxito');
+            ->with('info', 'Administrador actualizado con éxito');
     }
 
     /**
@@ -189,6 +193,6 @@ class UserController extends Controller
     {
         $user->delete();
 
-        return back()->with('info', 'Eliminado Correctamente');
+        return back()->with('info', 'Administrador eliminado Correctamente');
     }
 }

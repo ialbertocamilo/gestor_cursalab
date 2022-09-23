@@ -1,197 +1,112 @@
 <template>
-	<v-main>
-		<!-- Resumen del reporte -->
-		<ResumenExpand titulo="Resumen del reporte">
-			<template v-slot:resumen>
-				Muestra el avance de los temas <b>no evaluables</b>. No tiene notas o intentos, ya que solo
-				se revisan.
-			</template>
-			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-			<list-item
-				titulo="Grupo sistema"
-				subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
-			/>
-			<list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
-			<list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-			<list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-			<list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
-			<list-item
-				titulo="Estado"
-				subtitulo="El estado indica si el usuario está habilitado para usar la plataforma (Activo: Si, Inactivo: No)"
-			/>
-			<list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
-			<list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
-			<list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
-			<list-item titulo="Tema" subtitulo="Tema dentro de cada curso" />
-			<list-item titulo="Resultado" subtitulo="Indica si el tema ha sido revisado" />
-			<list-item titulo="Cantidad de visitas por tema" subtitulo="Total de visitas por cada tema" />
-		</ResumenExpand>
-		<!-- Formulario del reporte -->
-		<form @submit.prevent="exportNotasTema" class="row formu">
-			<div class="col-lg-6 col-xl-4 mb-3">
-				<!-- Modulo -->
-				<b-form-text text-variant="muted">Módulo</b-form-text>
-				<select
-					v-model="modulo"
-					class="form-control"
-					@change="moduloChange"
-					:disabled="loadingGrupos || loadingCarreras"
-				>
-					<option value="">[Todos]</option>
-					<option v-for="(item, index) in Modulos" :key="index" :value="item.id">
-						{{ item.etapa }}
-					</option>
-				</select>
-			</div>
-			<!-- Escuela -->
-			<div class="col-lg-6 col-xl-4 mb-3">
-				<b-form-text text-variant="muted">Escuela</b-form-text>
-				<select
-					v-model="escuela"
-					class="form-control"
-					:disabled="!Escuelas[0]"
-					@change="escuelaChange"
-				>
-					<option value>- [Todos] -</option>
-					<option v-for="(item, index) in Escuelas" :key="index" :value="item.id">
-						{{ item.nombre }}
-					</option>
-				</select>
-			</div>
-			<!-- Curso -->
-			<div class="col-lg-6 col-xl-4 mb-3">
-				<b-form-text text-variant="muted">Curso</b-form-text>
-				<select v-model="curso" class="form-control" :disabled="!Cursos[0]" @change="cursoChange">
-					<option value>- [Todos] -</option>
-					<option v-for="(item, index) in Cursos" :key="index" :value="item.id">
-						{{ item.nombre }}
-					</option>
-				</select>
-			</div>
-			<!-- Tema -->
-			<div class="col-lg-6 col-xl-4 mb-3">
-				<b-form-text text-variant="muted">Tema</b-form-text>
-				<select v-model="tema" class="form-control" :disabled="!Temas[0]">
-					<option value>- Todos -</option>
-					<option v-for="(item, index) in Temas" :key="index" :value="item.id">
-						{{ item.nombre }}
-					</option>
-				</select>
-			</div>
-			<v-divider class="col-12 mb-0 p-0"></v-divider>
+    <v-main>
+        <!-- Resumen del reporte -->
+        <ResumenExpand titulo="Resumen del reporte">
+            <template v-slot:resumen>
+                Muestra el avance de los temas <b>no evaluables</b>. No tiene notas o intentos, ya que solo
+                se revisan.
+            </template>
+            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
+            <list-item
+                titulo="Grupo sistema"
+                subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
+            />
+            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
+            <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            <list-item
+                titulo="Estado"
+                subtitulo="El estado indica si el usuario está habilitado para usar la plataforma (Activo: Si, Inactivo: No)"
+            />
+            <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
+            <list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
+            <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
+            <list-item titulo="Tema" subtitulo="Tema dentro de cada curso" />
+            <list-item titulo="Resultado" subtitulo="Indica si el tema ha sido revisado" />
+            <list-item titulo="Cantidad de visitas por tema" subtitulo="Total de visitas por cada tema" />
+        </ResumenExpand>
+        <!-- Formulario del reporte -->
+        <form @submit.prevent="exportNotasTema" class="row formu">
+            <div class="col-lg-6 col-xl-4 mb-3">
+                <!-- Modulo -->
+                <b-form-text text-variant="muted">Módulo</b-form-text>
+                <select
+                    v-model="modulo"
+                    class="form-control"
+                >
+                    <option value="">[Todos]</option>
+                    <option v-for="(item, index) in modules"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <!-- Escuela -->
+            <div class="col-lg-6 col-xl-4 mb-3">
+                <b-form-text text-variant="muted">Escuela</b-form-text>
+                <select
+                    v-model="escuela"
+                    class="form-control"
+                    :disabled="!schools[0]"
+                    @change="escuelaChange"
+                >
+                    <option value>- [Todos] -</option>
+                    <option v-for="(item, index) in schools"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <!-- Curso -->
+            <div class="col-lg-6 col-xl-4 mb-3">
+                <b-form-text text-variant="muted">Curso</b-form-text>
+                <select v-model="curso" class="form-control"
+                        :disabled="!courses[0]" @change="cursoChange">
+                    <option value>- [Todos] -</option>
+                    <option v-for="(item, index) in courses"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <!-- Tema -->
+            <div class="col-lg-6 col-xl-4 mb-3">
+                <b-form-text text-variant="muted">Tema</b-form-text>
+                <select v-model="tema" class="form-control"
+                        :disabled="!topics[0]">
+                    <option value>- Todos -</option>
+                    <option v-for="(item, index) in topics"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
+            <v-divider class="col-12 mb-0 p-0"></v-divider>
+            <!-- Filtros secundarios -->
+            <div class="col-12 row justify-content-around">
+                <!-- Checkboxs -->
+                <div class="col-7">
+                    <EstadoFiltro ref="EstadoFiltroComponent" @emitir-cambio="" />
+                </div>
+                <!--          Fechas          -->
+                <div class="col-5">
+                    <FechaFiltro ref="FechasFiltros" />
+                </div>
+            </div>
 
-
-			<v-divider class="col-12 mb-0 p-0"></v-divider>
-			<!-- Filtros secundarios -->
-			<div class="col-12 row justify-content-around">
-				<!-- Checkboxs -->
-				<div class="col-6">
-					<EstadoFiltro ref="EstadoFiltroComponent" @emitir-cambio="cargarGrupos" />
-					<v-divider></v-divider>
-					<!--          Nuevos filtros         -->
-					<div class="col-lg-12 col-xl-12 mb-3">
-						<small class="form-text text-muted">Áreas {{ ` (${Grupos.length}) ` || "" }}</small>
-						<v-select
-							attach
-							solo
-							chips
-							clearable
-							multiple
-							hide-details="false"
-							v-model="grupo"
-							:menu-props="{ overflowY: true, maxHeight: '250' }"
-							:items="Grupos"
-							:label="modulo ? 'Selecciona uno o mas Áreas' : 'Selecciona un #Modulo'"
-							:loading="loadingGrupos"
-							:disabled="!Grupos[0]"
-							:background-color="!Grupos[0] ? 'grey lighten-3' : 'light-blue lighten-5'"
-						></v-select>
-					</div>
-					<v-divider></v-divider>
-					<CheckTemas />
-					<v-divider class="col-12 p-0 m-0"></v-divider>
-					<div class="col">
-						<small class="text-muted text-bold">Tipo de Escuelas</small>
-						<div class="d-flex align-center p-0 mr-auto mt-2">
-							<v-checkbox
-								label="Escuelas Libres"
-								color="primary"
-								class="my-0 mr-4"
-								v-model="cursos_libres"
-								hide-details="false"
-								:disabled="((modulo != '') && (escuela != ''))"
-							/>
-							<div
-								tooltip="Escuelas con cursos que no se cuentan en el progreso"
-								tooltip-position="top"
-							>
-								<v-icon class="info-icon">mdi-information-outline</v-icon>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!--          Fechas          -->
-				<div class="col-6 px-5">
-					<div class="max-w-900">
-						<div class="mb-5">
-							<small class="form-text text-muted text-bold">Fechas inicial :</small>
-							<div class="input-group">
-								<input
-									type="date"
-									autocomplete="off"
-									class="datepicker form-control"
-									v-model="start"
-									id="date-start"
-								/>
-								<b-form-datepicker
-									v-model="start"
-									button-only
-									button-variant="light"
-									locale="es-PE"
-									aria-controls="date-start"
-									today-button
-									label-today-button="Hoy"
-									reset-button
-									label-reset-button="Reiniciar"
-									selected-variant="danger"
-								></b-form-datepicker>
-							</div>
-						</div>
-						<div>
-							<small class="form-text text-muted text-bold">Fecha final :</small>
-							<div class="input-group">
-								<input
-									type="date"
-									autocomplete="off"
-									class="datepicker form-control"
-									v-model="end"
-									id="date-end"
-								/>
-								<b-form-datepicker
-									v-model="end"
-									button-only
-									button-variant="light"
-									locale="es-PE"
-									aria-controls="date-end"
-									today-button
-									label-today-button="Hoy"
-									reset-button
-									label-reset-button="Reiniciar"
-									selected-variant="danger"
-								></b-form-datepicker>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<v-divider class="col-12 mb-5 p-0"></v-divider>
-			<button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-				<i class="fas fa-download"></i>
-				<span>Descargar</span>
-			</button>
-		</form>
-	</v-main>
+            <v-divider class="col-12 mb-5 p-0"></v-divider>
+            <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                <i class="fas fa-download"></i>
+                <span>Descargar</span>
+            </button>
+        </form>
+    </v-main>
 </template>
 
 <script>
@@ -200,224 +115,164 @@ import CheckTemas from "./partials/CheckTemas.vue";
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
+import FechaFiltro from "./partials/FechaFiltro";
 export default {
-	components: { EstadoFiltro, ResumenExpand, ListItem, CheckTemas },
-	props: {
-		Modulos: Array,
-		API_FILTROS: "",
-		API_REPORTES: ""
-	},
-	data() {
-		return {
-			Escuelas: [],
-			Cursos: [],
-			Temas: [],
-			modulo: "",
-			escuela: "",
-			curso: "",
-			tema: "",
-			//
-			Grupos: [],
-			Carreras: [],
-			Ciclos: [],
-			grupo: [],
-			carrera: [],
-			ciclo: [],
-			loadingGrupos: false,
-			loadingCarreras: false,
-			loadingCiclos: false,
-			//
-			start: "",
-			end: "",
-			dateStart: true,
-			//
-			temasActivos: true,
-			temasInactivos: true,
-			//
-			cursos_libres:false,
-		};
-	},
-	methods: {
-		exportNotasTema() {
-			this.showLoader()
-			let UFC = this.$refs.EstadoFiltroComponent;
-			let params = {
-				cursos_libres : this.cursos_libres,
-				//
-				modulo: this.modulo,
-				escuela: this.escuela,
-				curso: this.curso,
-				tema: this.tema,
-				start: this.start,
-				end: this.end,
-				//
-				grupo: this.grupo,
-				carrera: this.carrera,
-				ciclo: this.ciclo,
-				//
-				temasActivos: this.temasActivos,
-				temasInactivos: this.temasInactivos,
-				UsuariosActivos: UFC.UsuariosActivos,
-				UsuariosInactivos: UFC.UsuariosInactivos
-			};
-			axios
-				.post(this.API_REPORTES + "temas_noevaluables", params)
-				.then((res) => {
-					if (!res.data.error) this.$emit("emitir-reporte", res);
-					else {
-						alert("Se ha encontrado el siguiente error : " + res.data.error);
-						this.hideLoader()
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-					console.log(error.message);
-					alert("Se ha encontrado el siguiente error : " + error);
-					this.hideLoader()
-				});
-		},
-		async moduloChange() {
-			this.escuela = "";
-			this.curso = "";
-			this.tema = "";
-			this.Escuelas = "";
-			this.Cursos = "";
-			this.Temas = "";
-			this.Grupos = [];
-			this.grupo = [];
-			//
-			if (!this.modulo) return false;
-			var res = await axios.post(this.API_FILTROS + "cambia_modulo_carga_escuela", {
-				mod: this.modulo
-			});
-			this.Escuelas = res.data;
-			this.cargarGrupos();
-			// this.cargarCarreras();
-			// this.cargarCiclos();
-		},
-		// Carga los cursos
-		async escuelaChange() {
-			this.curso = "";
-			this.tema = "";
-			this.Cursos = "";
-			this.Temas = "";
-			if (!this.escuela) return false;
-			this.cursos_libres =false;
-			var res = await axios.post(this.API_FILTROS + "cambia_escuela_carga_curso", {
-				esc: this.escuela,
-				mod: this.modulo
-			});
-			this.Cursos = res.data;
-		},
-		// Carga los temas
-		async cursoChange() {
-			this.tema = "";
-			this.Temas = "";
-			if (!this.curso) return false;
-			var res = await axios.post(this.API_FILTROS + "cambia_curso_carga_tema_noevaluable", {
-				cur: this.curso,
-				esc: this.escuela
-			});
-			console.log(res);
-			this.Temas = res.data;
-		},
-		/**
-		 *Filtros secundarios
-		 */
-		cargarGrupos() {
-			if(!this.modulo) return false;
-			this.Grupos=[];
-			this.loadingGrupos = true;
-			let params = {};
-			this.modulo ? (params.mod = this.modulo) : "";
-			let UFC = this.$refs.EstadoFiltroComponent;
-			params.UsuariosActivos = UFC.UsuariosActivos;
-			params.UsuariosInactivos = UFC.UsuariosInactivos;
-			axios.post(this.API_FILTROS + "cargar_grupos", { params }).then((res) => {
-				res.data.forEach((el) => {
-					let NewJSON = {};
-					NewJSON.text = el.valor;
-					NewJSON.value = el.id;
-					this.Grupos.push(NewJSON);
-				});
-				this.loadingGrupos = false;
-			});
-		},
-		async cargarCarreras() {
-			this.Carreras = [];
-			this.loadingCarreras = true;
-			let params = {};
-			this.modulo ? (params.mod = this.modulo) : "";
+    components: { EstadoFiltro, FechaFiltro, ResumenExpand, ListItem, CheckTemas },
+    props: {
+        workspaceId: 0,
+        modules: Array,
+        reportsBaseUrl: ''
+    },
+    data() {
+        return {
+            schools: [],
+            courses: [],
+            topics: [],
 
-			let res = await axios.get(this.API_FILTROS + "cargar_carreras", {
-				params
-			});
-			res.data.forEach((el) => {
-				let NewJSON = {};
-				NewJSON.text = el.titulo;
-				NewJSON.value = el.id;
-				this.Carreras.push(NewJSON);
-			});
-			this.loadingCarreras = false;
-		},
-		async carreraChange() {
-			this.ciclo = [];
-			this.Ciclos = [];
-			if (this.carrera.length == 0) return false;
-			this.loadingCiclos = true;
-			let JsonCarreras = this.carrera.map((val) => val).join(",");
-			axios
-				.post("cambia_carrera_carga_ciclo", {
-					carre: JsonCarreras
-				})
-				.then((res) => {
-					res.data.forEach((el) => {
-						let NewJSON = {};
-						NewJSON.text = el.nombre;
-						NewJSON.value = el.id;
-						this.Ciclos.push(NewJSON);
-					});
-					this.loadingCiclos = false;
-				})
-				.catch((err) => {
-					this.loadingCiclos = false;
-					console.log(err);
-				});
-		},
-		async cargarCiclos() {
-			this.Ciclos = [];
-			this.loadingCiclos = true;
-			let params = {};
-			this.modulo ? (params.mod = this.modulo) : "";
+            modulo: "",
+            escuela: "",
+            curso: "",
+            tema: "",
 
-			let JsonCarreras = this.carrera.map((val) => val).join(",");
-			let res = await axios.get(this.API_FILTROS + "cargar_ciclos", {
-				params
-			});
-			res.data.forEach((el) => {
-				let NewJSON = {};
-				NewJSON.text = el.titulo;
-				NewJSON.value = el.id;
-				this.Ciclos.push(NewJSON);
-			});
-			this.loadingCiclos = false;
-		}
-	},
-	computed: {
-		...mapState(["User"])
-	}
+            loadingGrupos: false,
+            loadingCarreras: false,
+            loadingCiclos: false,
+            //
+            start: "",
+            end: "",
+            dateStart: true,
+            //
+            temasActivos: true,
+            temasInactivos: true,
+            //
+            cursos_libres:false,
+        };
+    },
+    mounted() {
+        this.fetchFiltersData()
+    }
+    ,
+    methods: {
+        /**
+         *
+         * @returns {Promise<void>}
+         */
+        async fetchFiltersData () {
+
+            // Fetch schools
+
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}`
+            let responseSchools = await axios({
+                url: urlSchools,
+                method: 'get'
+            })
+
+            this.schools = responseSchools.data
+        },
+        async exportNotasTema() {
+            // show loading spinner
+
+            this.showLoader()
+
+            let userStatusFilter = this.$refs.EstadoFiltroComponent;
+            let topicStatusFilter = this.$refs.topicStatusComponent;
+            let fechaFiltro = this.$refs.FechasFiltros;
+
+            // Perform request to generate report
+
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: {
+                        workspaceId: this.workspaceId,
+                        modulos: this.modulo ? [this.modulo] : [],
+                        escuelas: this.escuela ? [this.escuela] : [],
+                        cursos: this.curso ? [this.curso] : [],
+                        temas: this.tema ? [this.tema] : [],
+
+                        UsuariosActivos: userStatusFilter.UsuariosActivos,
+                        UsuariosInactivos: userStatusFilter.UsuariosInactivos,
+
+                        start: fechaFiltro.start,
+                        end: fechaFiltro.end
+                        // temasActivos: topicStatusFilter.UsuariosActivos,
+                        // temasInactivos: topicStatusFilter.UsuariosInactivos
+                    }
+                })
+
+                // When there are no results notify user,
+                // download report otherwise
+
+                if (response.data.alert) {
+                    this.showAlert(response.data.alert, 'warning')
+                } else {
+                    // Emit event to parent component
+                    this.$emit('emitir-reporte', response)
+                }
+
+            } catch (ex) {
+                console.log(ex.message)
+            }
+
+            // Hide loading spinner
+
+            this.hideLoader()
+        },
+
+        /**
+         * Fetch courses
+         * @returns {Promise<boolean>}
+         */
+        async escuelaChange() {
+            this.curso = null;
+            this.tema = null;
+            this.courses = [];
+            this.topics = [];
+
+            if (!this.escuela) return false;
+
+            this.cursos_libres =false;
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
+            let res = await axios({
+                url,
+                method: 'get'
+            });
+            this.courses = res.data;
+        },
+        /**
+         * Fetch topics
+         * @returns {Promise<boolean>}
+         */
+        async cursoChange() {
+            this.tema = null;
+            this.topics = [];
+            if (!this.curso) return false;
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/topics/${this.curso}`
+            let res = await axios({
+                url,
+                method: 'get'
+            });
+            this.topics = res.data;
+        },
+    },
+    computed: {
+        ...mapState(["User"])
+    }
 };
 </script>
 
 <style scoped>
 .v-label {
-	display: contents !important;
+    display: contents !important;
 }
 ::-webkit-calendar-picker-indicator {
-	color: rgba(0, 0, 0, 0);
-	opacity: 0;
+    color: rgba(0, 0, 0, 0);
+    opacity: 0;
 }
 .max-w-900 {
-	max-width: 900px;
+    max-width: 900px;
 }
 </style>

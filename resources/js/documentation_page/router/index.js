@@ -10,6 +10,9 @@ import UserPage from  '../pages/UserPage.vue';
 import InactivatePage from  '../pages/InactivatePage.vue';
 import ActivatePage from  '../pages/ActivatePage.vue';
 import ProgressPage from  '../pages/ProgressPage.vue';
+import WorkspacePage from '../pages/WorkspacePage.vue'
+import CoursePage from '../pages/CoursePage.vue'
+import CourseDetailPage from '../pages/CourseDetailPage.vue'
 
 Vue.use(VueRouter);
 const routes = [
@@ -44,6 +47,11 @@ const routes = [
 		component:UserPage,
     },
 	{
+        path: "/documentation-api/workspace",
+		name: "WorkspacePage",
+		component:WorkspacePage,
+    },
+	{
         path: "/documentation-api/inactivate-users",
 		name: "inactivar_usuarios",
 		component:InactivatePage,
@@ -57,6 +65,16 @@ const routes = [
         path: "/documentation-api/progress",
 		name: "inactivar_usuarios",
 		component:ProgressPage,
+    },
+	{
+        path: "/documentation-api/courses",
+		name: "coursePage",
+		component:CoursePage,
+    },
+	{
+        path: "/documentation-api/course-progress",
+		name: "courseDetailPage",
+		component:CourseDetailPage,
     }
 	
 ]

@@ -145,6 +145,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasMany(SummaryTopic::class);
     }
 
+    public function scopeFilterText($q, $filter)
+    {
+        $q->where(function ($q) use ($filter) {
+            $q->whereRaw('document like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('name like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('email like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
+        });
+    }
+
     public function getFullnameAttribute()
     {
         // if($this->fullname){
@@ -342,12 +353,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query->with('subworkspace');
 
         if ($request->q) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', "%$request->q%");
-                $q->orWhere('lastname', 'like', "%$request->q%");
-                $q->orWhere('surname', 'like', "%$request->q%");
-                $q->orWhere('email', 'like', "%$request->q%");
-            });
+            $query->filterText($request->q);
+        }
+        if ($request->workspace_id){
+            $query->whereRelation('subworkspace','parent_id',$request->workspace_id);
         }
 
         if ($request->subworkspace_id)
@@ -512,6 +521,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function setCoursesWithDirectSegmentation($user, &$all_courses)
     {
 //        dd($user->subworkspace);
+        $user->loadMissing('subworkspace.parent');
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',

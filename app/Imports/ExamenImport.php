@@ -2,43 +2,47 @@
 
 namespace App\Imports;
 
-use App\Models\Pregunta;
-
-use Maatwebsite\Excel\Row;
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\OnEachRow;
-use Maatwebsite\Excel\Validators\Failure;
+use App\Models\Question;
 use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
-use Maatwebsite\Excel\Concerns\ToCollection;
-
-use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Row;
 
 class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure
 {
     use Importable, SkipsFailures, SkipsErrors;
 
-    public $posteo_id = NULL;
-    public $tipo_ev = NULL;
+    public int|null $topic_id = NULL;
+    public int|null $type_id = NULL;
 
-    //se usa para llevar la cuenta del los puntajes de las preguntas obligatorias
-    public $total_puntaje = 0;
-    //saber el tipo de evaluación
-    public $puntaje_max = 0;
+    // Sum of questions score
 
-    public $codes = [
+    private int $totalScore = 0;
+
+    // Max score per test
+
+    public int $maxScore = 20;
+
+    // Test is qualified or not
+
+    public bool $isQualified;
+
+    // Question types ids
+
+    public $selectQuestionTypeId;
+    public $writtenQuestionTypeId;
+
+    public array $codes = [
         1 => 'a', 2 => 'b', 3 => 'c', 4 => 'd', 5 => 'e',
         6 => 'f', 7 => 'g', 8 => 'h', 9 => 'i', 10 => 'j'
     ];
 
-    public $indexes = [
+    public array $indexes = [
         'a' => 1,  'b' => 2,  'c' => 3,  'd' => 4,  'e' => 5,
         'f' => 6,  'g' => 7,  'h' => 8,  'i' => 9,  'j' => 10
     ];
@@ -46,9 +50,12 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
     public function onRow(Row $row)
     {
         $row = $row->toArray();
-        //verificando el tipo de calificación
-        //variable para saber si no supera el limete máximo antes de agregar
-        if($this->tipo_ev=='calificada'){
+
+        // verificando el tipo de calificación
+        // variable para saber si no supera el limete máximo antes de agregar
+
+        if ($this->isQualified) {
+
             $respuestas = [];
             $rpta_ok = strtolower(trim($row['respuesta_correcta']));
             $n_rpta_ok = $this->indexes[$rpta_ok] ?? NULL;
@@ -61,35 +68,58 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
                     $respuestas[$position] = $row[$code];
                 }
             }
-            $pregunta = Pregunta::create([
-                'post_id' => $this->posteo_id,
-                'tipo_pregunta' => 'selecciona',
+
+            // Check if question is required
+
+            $obligatorio = trim(strtolower($row['obligatorio']));
+            $isRequired = ($obligatorio === 'sí' || $obligatorio === 'si');
+
+            // Accumulate score
+
+            if ($isRequired) {
+                $this->totalScore += $row['puntaje'] ?? 0;
+
+                if ($this->maxScore >= $this->totalScore) {
+                    $score = $row['puntaje'] ?? 0;
+                } else {
+                    $score = 0;
+                }
+
+            } else {
+                $score = 0;
+            }
+
+            Question::create([
+                'topic_id' => $this->topic_id,
+                'type_id' => $this->selectQuestionTypeId,
                 'pregunta' => $row['pregunta'],
-                'rptas_json' => json_encode($respuestas,JSON_UNESCAPED_UNICODE),
+                'rptas_json' => $respuestas,
                 'rpta_ok' => $this->indexes[$rpta_ok] ?? NULL,
-                'ubicacion' => 'despues',
-                'estado' => 1,
+                'active' => 1,
+                'required' => $isRequired,
+                'score' => $score
             ]);
-        }else{
-            $pregunta = Pregunta::create([
-                'post_id' => $this->posteo_id,
-                'tipo_pregunta' => 'texto',
+
+        } else {
+
+            Question::create([
+                'topic_id' => $this->topic_id,
+                'type_id' => $this->writtenQuestionTypeId,
                 'pregunta' => $row['pregunta'],
-                'rptas_json' => null,
-                'rpta_ok' => NULL,
-                'ubicacion' => 'despues',
-                'estado' => 1,
-                'obligatorio' => 0,
-                'puntaje' => null,
+                'rptas_json' => new \stdClass(),
+                'rpta_ok' => '',
+                'active' => 1,
+                'required' => 0,
+                'score' => null
             ]);
         }
     }
 
     public function  rules(): array
-    {
-        if($this->tipo_ev=='calificada'){
+    {return [];
+        if ($this->type_id == 'calificada') {
             return [
-                'pregunta' => "required|distinct|unique:preguntas,pregunta,NULL,id,tipo_pregunta,selecciona,post_id,{$this->posteo_id}|max:20000",
+                'pregunta' => "required|distinct|unique:questions,pregunta,NULL,id,type_id,selecciona,post_id,{$this->topic_id}|max:20000",
                 // 'pregunta' => ["required","distinct","unique:preguntas","pregunta","NULL","id","post_id","{$this->posteo_id}","max:20000"],
                 'respuesta_correcta' => 'required|in:A,B,C,D,E,F,G,H,I,J,a,b,c,d,e,f,g,h,i,j',
 
@@ -105,14 +135,14 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
                 'i' => 'nullable|required_if:respuesta_correcta,i,I|max:5000',
                 'j' => 'nullable|required_if:respuesta_correcta,j,J|max:5000',
             ];
-        }else{
+        } else {
             $callback = function($attribute,$value,$fail){
                 if(!empty($value)){
                     $fail('El campo '.$attribute.' debe ser vacío.');
                 }
             };
             return [
-                'pregunta' => "required|distinct|unique:preguntas,pregunta,NULL,id,tipo_pregunta,texto,post_id,{$this->posteo_id}|max:20000",
+                'pregunta' => "required|distinct|unique:preguntas,pregunta,NULL,id,tipo_pregunta,texto,post_id,{$this->topic_id}|max:20000",
                 'a' => [$callback],
                 'b' => [$callback],
                 'c' => [$callback],
