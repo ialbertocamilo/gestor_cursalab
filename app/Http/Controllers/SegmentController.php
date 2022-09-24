@@ -59,26 +59,51 @@ class SegmentController extends Controller
     {
         $data = $request->all();
 
-//        $users = User::query()
-//            ->filterText($data['filter_text'])
-//            ->select('id', 'name', 'surname', 'lastname', 'document')
-//            ->whereHas('criterion_values', function ($q) use ($data) {
-//                $q->where('value_text', 'like', "%{$data['filter_text']}%")
-//                    ->whereRelation('criterion', 'code', 'documento');
-//            })
-//            ->limit(50)->get();
-
-        $users = CriterionValue::query()
-            ->withWhereHas('users', function ($q) use ($data) {
-                $q->where('document', 'like', "%{$data['filter_text']}%")
-                    ->select('id', 'name', 'lastname', 'surname', 'document');
+        $users = User::query()
+            ->filterText($data['filter_text'])
+            ->select('id', 'name', 'surname', 'lastname', 'document')
+            ->whereHas('criterion_values', function ($q) use ($data) {
+                $q->where('value_text', 'like', "%{$data['filter_text']}%")
+                    ->whereRelation('criterion', 'code', 'documento');
             })
-            ->whereRelation('criterion', 'code', 'documento')
-            ->select('id', 'value_text')
-            ->limit(10)
-            ->get();
+            ->limit(50)->get();
+
+//        $users = CriterionValue::query()
+//            ->withWhereHas('users', function ($q) use ($data) {
+//                $q->where('document', 'like', "%{$data['filter_text']}%")
+//                    ->select('id', 'name', 'lastname', 'surname', 'document');
+//            })
+//            ->whereRelation('criterion', 'code', 'documento')
+//            ->select('id', 'value_text')
+//            ->limit(10)
+//            ->get();
 
         return $this->success(compact('users'));
+    }
+
+    public function syncUsersDocumentToCriterionValues()
+    {
+        $users = User::whereNotNull('document')
+            ->select('id', 'document')
+            ->get();
+
+        foreach ($users as $user) {
+            $document_criterion = Criterion::where('code', 'documento')->first();
+
+            $document_value = CriterionValue::whereRelation('criterion', 'code', 'documento')
+                ->where('value_text', $user->document)->first();
+
+            $criterion_value_data = [
+                'value_text' => $user->document,
+                'criterion_id' => $document_criterion?->id,
+                'active' => ACTIVE
+            ];
+
+            $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
+
+            $user->criterion_values()
+                ->syncWithoutDetaching([$document?->id]);
+        }
     }
 
 }

@@ -20,7 +20,19 @@
                 <v-col cols="12">
 
                     <div class="box-document-segmentation-results">
-
+                        <ul>
+                            <li v-for="user in filter_result"
+                                class="d-flex justify-content-between align-items-center">
+<!--                                <div>-->
+                                    {{ user.document }} - {{ user.fullname }}
+<!--                                </div>-->
+<!--                                <div>-->
+                                    <v-btn icon primary small :ripple="false">
+                                        <v-icon small v-text="'mdi-plus'"/>
+                                    </v-btn>
+<!--                                </div>-->
+                            </li>
+                        </ul>
                     </div>
                 </v-col>
             </v-row>
@@ -62,7 +74,7 @@ export default {
 
             if (filter_text === null) return;
 
-            if (filter_text.length <= 3) return;
+            if (filter_text.length <= 2) return;
 
             vue.autocomplete_loading = true;
 
@@ -91,15 +103,27 @@ export default {
 @import "resources/sass/variables";
 
 .box-document-segmentation-results {
+    padding: 10px 5px;
     min-height: 150px;
+    height: 100px;
     border: 1.5px solid $primary-default-color;
     border-radius: 10px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    li {
+        list-style: none;
+    }
 }
 
 .box-selected-segmentation-document {
+    padding: 10px 5px;
     min-height: 150px;
     border: 1.5px solid $primary-default-color;
     border-radius: 10px;
+
+    li {
+        list-style: none;
+    }
 }
 
 </style>

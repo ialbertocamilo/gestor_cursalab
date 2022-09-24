@@ -98,13 +98,14 @@ class CriterionValue extends BaseModel
 
             endif;
 
-            if ($data['workspace_id'])
+            if ($data['workspace_id'] ?? false)
                 $model->workspaces()->syncWithoutDetaching([$data['workspace_id']]);
 
             DB::commit();
 
+            return $model;
         } catch (\Exception $e) {
-//            info($e);
+            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());

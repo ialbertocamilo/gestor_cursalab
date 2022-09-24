@@ -281,6 +281,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         try {
 
             DB::beginTransaction();
+            $old_document = $user ? $user->document : null;
 
             if ($user) :
 
@@ -300,10 +301,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
 
-            $document_value = $this->syncDocumentWithCriterionValues($data['document']);
-
-            $user->criterion_values()
-                ->sync([$document_value?->id]);
+            if ($user->wasChanged('document') && ($data['document'] ?? false)):
+                $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
+            endif;
 
             $user->save();
             DB::commit();
@@ -317,21 +317,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function syncDocumentWithCriterionValues($document, $workspace = null)
+    public function syncDocumentCriterionValue($old_document, $new_document)
     {
         $document_criterion = Criterion::where('code', 'documento')->first();
 
-        $document_value = CriterionValue::firstOrCreate([
-            'value_text' => $document,
-            'criterion_id' => $document_criterion?->id
-        ]);
+        $document_value = CriterionValue::whereRelation('criterion', 'code', 'documento')
+            ->where('value_text', $old_document)->first();
 
-        $workspace_id = $workspace->id ?? get_current_workspace()?->id;
+        $criterion_value_data = [
+            'value_text' => $new_document,
+            'criterion_id' => $document_criterion?->id,
+            'active' => ACTIVE
+        ];
 
-        if ($workspace_id)
-            $document_value->workspaces()->syncWithoutDetaching([$workspace_id]);
-
-        return $document_value;
+        CriterionValue::storeRequest($criterion_value_data, $document_value);
     }
 
     protected function storeRequestFull($data = [], $user = null)
