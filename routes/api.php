@@ -72,6 +72,10 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::post('registra_ayuda', [RestAyudaController::class, 'registra_ayuda']);
 });
 
+Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
+    Route::post('registrar_soporte_login', [RestAyudaController::class, 'registra_ayuda_login']);
+    Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
+});
 //Route::controller(TestController::class)->group(function () {
 //
 //    Route::get('/test/users', 'users');

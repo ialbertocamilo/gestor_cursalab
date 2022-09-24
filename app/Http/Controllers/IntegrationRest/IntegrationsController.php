@@ -46,14 +46,14 @@ class IntegrationsController extends Controller
         }
     }
     public function progressUser(Request $request){
-        // try {
+        try {
             $response = Integrations::progressUser($request);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
-        // } catch (\Throwable $th) {
-        //     return response()->json(
-        //         ['message'=>'Server error.']
-        //     ,500);
-        // }
+        } catch (\Throwable $th) {
+            return response()->json(
+                ['message'=>'Server error.']
+            ,500);
+        }
     }
     public function getSecretKey(AuthRequest $request){
         try {
