@@ -259,7 +259,6 @@ class TemaController extends Controller
     {
         $data = $request->validated();
 
-
         // Load topic evaluation type from database type_evaluation_id
 
         $evaluationType = Taxonomy::where('group', 'topic')

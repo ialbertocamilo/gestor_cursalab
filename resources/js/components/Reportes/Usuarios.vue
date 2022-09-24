@@ -4,7 +4,7 @@
 
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                En este reporte se obtienen todos los usuarios matriculados en la plataforma.
+                En este reporte se obtiene la información base de todos los usuarios matriculados en la plataforma.
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item

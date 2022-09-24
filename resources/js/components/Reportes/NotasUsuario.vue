@@ -67,11 +67,12 @@
         </div>
         <!-- Tabla ~ Cursos-->
         <div v-if="Cursos">
-            <div class="text-h7 pl-3 mt-7 mb-5 text-secondary">Avance del usuario</div>
+            <div class="text-h7 pl-3 mt-7 mb-5 text-secondary">
+                Avance del usuario
+            </div>
             <v-list dense>
                 <v-subheader class="border text-body-2 align-center">
                     <v-row class="text-grey font-weight-bold" no-gutters>
-                        <v-col class="col-modalidad px-4"></v-col>
                         <v-col class="col-curso px-4">Curso</v-col>
                         <v-col class="col-nota_prom px-4">Nota</v-col>
                         <v-col class="col-visitas px-4">Visitas</v-col>
@@ -97,10 +98,17 @@
                             :class="'col-' + index"
                         >
                             <v-list-item>
-                                <v-list-item-title v-if="index != 'modalidad'" v-text="datoCurso" class="text-body-2 white-space-normal" />
+                                <v-list-item-title
+                                    v-if="index != 'modalidad'"
+                                    v-text="datoCurso"
+                                    class="text-body-2 white-space-normal" />
                                 <!-- MODALIDAD -->
-                                <v-list-item-title v-else class="text-body-2 white-space-normal">
-                                    <b-badge v-text="datoCurso.charAt(0).toUpperCase()" n v-b-tooltip.hover :title="obt_texto_tooltip(datoCurso)"></b-badge>
+                                <v-list-item-title
+                                    v-else
+                                    class="text-body-2 white-space-normal">
+                                    <b-badge v-text="datoCurso.charAt(0).toUpperCase()"
+                                             n v-b-tooltip.hover
+                                             :title="obt_texto_tooltip(datoCurso)"></b-badge>
                                 </v-list-item-title>
                             </v-list-item>
                         </v-list-item-content>
@@ -110,35 +118,9 @@
                             <v-row class="text-center text-weight-bold text-body-2 align-center" no-gutters>
                                 <v-col class="tema-col-tema">Tema</v-col>
                                 <v-col class="tema-col-nota">Nota</v-col>
-                                <v-col class="header-icon tema-col-respuestas">
-                                    <span
-                                        tooltip="Cantidad de respuestas correctas sobre el total de preguntas."
-                                        tooltip-position="top"
-                                    >
-                                        Score
-                                    </span>
-                                    <!-- <div
-                                        tooltip="Cantidad de respuestas correctas sobre el total de preguntas."
-                                        tooltip-position="top"
-                                    >
-                                        <v-icon color="primary">mdi-information-outline</v-icon>
-                                    </div> -->
-                                </v-col>
-                                <v-col class="header-icon tema-col-resultado">
-                                    <span
-                                        tooltip="Evaluable : Aprobado, Desaprobado   No Evaluable : Revisado o ' - '   Evaluación abierta : Realizado o ' - '"
-                                        tooltip-position="top"
-                                    >
-                                        Estado
-                                    </span>
-                                    <!-- <div
-                                        tooltip="Evaluable : Aprobado, Desaprobado   No Evaluable : Revisado o ' - '   Evaluación abierta : Realizado o ' - '"
-                                        tooltip-position="top"
-                                        class="text-left"
-                                    >
-                                        <v-icon color="primary">mdi-information-outline</v-icon>
-                                    </div> -->
-                                </v-col>
+                                <v-col class="tema-col-score">Score</v-col>
+                                <v-col class="tema-col-correctas">Correctas</v-col>
+                                <v-col class="tema-col-incorrectas">Incorrectas</v-col>
                                 <v-col class="tema-col-visitas">Visitas</v-col>
                                 <v-col class="tema-col-reinicios">Reinicios</v-col>
                                 <v-col class="tema-col-ultima_evaluacion">Últ. Eval</v-col>
@@ -180,13 +162,19 @@
                                     v-for="(prueba, index) in tema.prueba"
                                     :key="index"
                                 >
-                                    <v-list-item-title class="text-body-2 prueba-text">
-                                        <small>{{ prueba.pregunta.trim() }}</small>
+                                    <v-list-item-title
+                                        v-if="prueba.pregunta"
+                                        class="text-body-2 prueba-text">
+                                        <small v-html="prueba.pregunta.trim()"></small>
                                     </v-list-item-title>
-                                    <v-list-item-title class="text-body-2 prueba-text">
+                                    <v-list-item-title
+                                        v-if="prueba.respuesta_usuario"
+                                        class="text-body-2 prueba-text">
                                         <small>{{ prueba.respuesta_usuario.trim() }}</small>
                                     </v-list-item-title>
-                                    <v-list-item-title class="text-body-2 prueba-text">
+                                    <v-list-item-title
+                                        v-if="prueba.respuesta_ok"
+                                        class="text-body-2 prueba-text">
                                         <small>{{ prueba.respuesta_ok.trim() }}</small>
                                     </v-list-item-title>
                                 </v-list-item>
@@ -197,7 +185,11 @@
                 </v-list-group>
             </v-list>
         </div>
-        <v-alert v-if="Alert" dense text color="warning" width="80%" class="mx-3 py-5">
+        <v-alert v-if="Alert"
+                 dense text
+                 color="warning"
+                 width="80%"
+                 class="mx-3 py-5">
             {{ Alert }}
         </v-alert>
         <!-- Alert -->
@@ -330,13 +322,14 @@ export default {
     }
     // Temas
     .tema-col-tema {
-        flex: 0 0 40%;
-        max-width: 40%;
+        flex: 0 0 30%;
+        max-width: 30%;
     }
 
     .tema-col-nota,
-    .tema-col-respuestas,
-    .tema-col-resultado,
+    .tema-col-score,
+    .tema-col-correctas,
+    .tema-col-incorrectas,
     .tema-col-visitas,
     .tema-col-reinicios,
     .tema-col-ultima_evaluacion {

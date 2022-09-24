@@ -4,7 +4,7 @@
 
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el avance de los cursos desarrollados, hasta el momento, por los usuarios.
+                Descarga el avance de los cursos segmentados y desarrollados, hasta el momento, por los usuarios.
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
