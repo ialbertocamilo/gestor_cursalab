@@ -106,23 +106,23 @@ class IntegrationsController extends Controller
         }
     }
     public function inactivateUsers(StateUserRequest $request){
-        try{
+        // try{
             $response = Integrations::inactivateUsers($request->all());
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
-        } catch (\Throwable $th) {
-            return response()->json(
-                ['message'=>'Server error.']
-            ,500);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json(
+        //         ['message'=>'Server error.']
+        //     ,500);
+        // }
     }
     public function activateUsers(StateUserRequest $request){
-        try{
+        // try{
             $response = Integrations::activateUsers($request->all());
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
-        } catch (\Throwable $th) {
-            return response()->json(
-                ['message'=>'Server error.']
-            ,500);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json(
+        //         ['message'=>'Server error.']
+        //     ,500);
+        // }
     }
 }

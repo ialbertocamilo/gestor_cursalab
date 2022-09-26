@@ -11,7 +11,10 @@ class ChangeStateUserMassive implements ToCollection{
     public $q_change_status=0;
     public $q_errors = 0;
     public $errors = [];
+    // public $identifier = '';
+    public $identificator;// declare variable when set the instance of this class - The values ​​must be user attributes.
     public $state_user_massive; //declare variable when set the instance of this class 
+ 
     public function collection(Collection $rows) {
         // state_user_massive <- 1(active) or 0(inactive)
         //Delete header
@@ -20,27 +23,27 @@ class ChangeStateUserMassive implements ToCollection{
         $this->process_data($rows);
         $this->q_errors = count($this->errors);
     }
-    private function process_data($rows_dni_or_email){
-        foreach ($rows_dni_or_email as $dni_or_email) {
-            if(!is_null($dni_or_email)){
-                $this->search_user($dni_or_email);
+    private function process_data($rows){
+        foreach ($rows as $row) {
+            if(!is_null($row)){
+                $this->search_user($row,$this->identificator);
             }
         }
     }
-    private function search_user($dni_or_email){
-        $user = User::where(function($q) use ($dni_or_email){
-            $q->where('document',$dni_or_email)->orWhere('email',$dni_or_email);
-        })->select('id')->first();
+    private function search_user($row,$identificator){
+        $user = User::where(trim($identificator),$row)->select('id')->first();
         if($user){
-            $this->inactivar_usuario($user);
+            $user->updateStatusUser($this->state_user_massive);
         }else{
             //ERRORES
-            $this->errors[]= ['type'=>'Resource not found.','message'=>'Resource not found.','value'=>$dni_or_email];
+            $this->errors[]= ['type'=>'Resource not found.','message'=>'Resource not found.','value'=>$row];
         }
     }
     private function inactivar_usuario($user){
         $user->active = $this->state_user_massive;
         $user->save();
+        $termination_date = ($user->active) ? null : now();
+        $user->criterion_values()->sync(['termination_date'=>$termination_date]);
         $this->q_change_status++;
     }
     public function getStaticHeader(){
