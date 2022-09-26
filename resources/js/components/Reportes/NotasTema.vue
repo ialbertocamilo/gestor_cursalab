@@ -4,8 +4,7 @@
 
         <ResumenExpand>
             <template v-slot:resumen>
-                Descarga el progreso de los usuarios solo en los <b>temas evaluables y calificados</b>
-                desarrollados hasta el momento.
+                Descarga el progreso en los temas evaluables y calificados de los usuarios segmentados hasta el momento.
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
@@ -122,69 +121,76 @@
 
             <div class="col-12">
                 <small class="text-muted text-bold">Resultado del Tema :</small>
-                <div class="d-flex mt-2">
-                    <div class="col-3 p-0 mr-auto d-flex align-center">
-                        <v-checkbox
-                            class="my-0 mr-2"
-                            label="Completados"
-                            color="success"
-                            v-model="aprobados"
-                            hide-details="false"
-                        />
-                        <div
-                            tooltip="Resultados promedio de temas del curso iguales o superiores a la nota mínima aprobatoria asignada al curso."
-                            tooltip-position="top"
-                        >
-                            <v-icon class="info-icon">mdi-information-outline</v-icon>
-                        </div>
-                    </div>
-                    <div class="col-3 p-0 mr-auto d-flex align-center">
-                        <v-checkbox
-                            class="my-0 mr-2"
-                            label="Encuesta pendiente"
-                            color="primary"
-                            v-model="encuestaPendiente"
-                            hide-details="false"
-                        />
-                        <div
-                            tooltip="Estado luego de aprobar evaluación del curso pero con encuesta pendiente."
-                            tooltip-position="top"
-                        >
-                            <v-icon class="info-icon">mdi-information-outline</v-icon>
-                        </div>
-                    </div>
-                    <div class="col-3 p-0 mr-auto d-flex align-center">
-                        <v-checkbox
-                            class="my-0 mr-2"
-                            label="En desarrollo"
-                            color="red"
-                            v-model="desarrollo"
-                            hide-details="false"
-                        />
-                        <div
-                            tooltip="El colaborador aún no obtiene todas las calificaciones de los temas del curso aprobadas. Puede que las tenga desaprobadas pero con intentos restantes disponibles."
-                            tooltip-position="top"
-                        >
-                            <v-icon class="info-icon">mdi-information-outline</v-icon>
-                        </div>
-                    </div>
-                    <div class="col-3 p-0 mr-auto d-flex align-center">
-                        <v-checkbox
-                            class="my-0 mr-2"
-                            label="Desaprobados"
-                            color="warning"
-                            v-model="desaprobados"
-                            hide-details="false"
-                        />
-                        <div
-                            tooltip="Tras agotar todos los intentos de temas del curso y obtener resultados inferiores a la nota mínima aprobatoria asignada al tema, se considera desaprobación."
-                            tooltip-position="top"
-                        >
-                            <v-icon class="info-icon">mdi-information-outline</v-icon>
-                        </div>
-                    </div>
+            </div>
+            <div class="col-4 p-0 d-flex">
+                <v-checkbox
+                    class="my-0 mr-2"
+                    label="Revisados"
+                    color="success"
+                    v-model="revisados"
+                    hide-details="false"
+                />
+                <div
+
+                >
+                    <v-icon class="info-icon">mdi-information-outline</v-icon>
                 </div>
             </div>
+            <div class="col-4 p-0  d-flex">
+                <v-checkbox
+                    class="my-0 mr-2"
+                    label="Aprobados"
+                    color="success"
+                    v-model="aprobados"
+                    hide-details="false"
+                />
+                <div
+                    tooltip="Resultados promedio de temas del curso iguales o superiores a la nota mínima aprobatoria asignada al curso."
+                    tooltip-position="top"
+                >
+                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                </div>
+            </div>
+            <div class="col-4 p-0  d-flex">
+                <v-checkbox
+                    class="my-0 mr-2"
+                    label="Desaprobados"
+                    color="primary"
+                    v-model="desaprobados"
+                    hide-details="false"
+                />
+                <div
+                >
+                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                </div>
+            </div>
+            <div class="col-4 p-0 mt-3 mb-3 d-flex">
+                <v-checkbox
+                    class="my-0 mr-2"
+                    label="Realizados"
+                    color="red"
+                    v-model="realizados"
+                    hide-details="false"
+                />
+                <div
+                >
+                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                </div>
+            </div>
+            <div class="col-4 p-0 mt-3 mb-3 d-flex">
+                <v-checkbox
+                    class="my-0 mr-2"
+                    label="Por iniciar"
+                    color="warning"
+                    v-model="porIniciar"
+                    hide-details="false"
+                />
+                <div
+                >
+                    <v-icon class="info-icon">mdi-information-outline</v-icon>
+                </div>
+            </div>
+
             <v-divider class="col-12 p-0 m-0 mb-4"></v-divider>
 
             <button type="submit"
@@ -232,10 +238,11 @@ export default {
             tema: "",
 
             //
+            revisados: true,
             aprobados: true,
             desaprobados: true,
-            encuestaPendiente: true,
-            desarrollo: true
+            realizados: true,
+            porIniciar: true
         };
     },
     mounted() {
@@ -284,10 +291,11 @@ export default {
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
 
+                        revisados: this.revisados,
                         aprobados: this.aprobados,
                         desaprobados: this.desaprobados,
-                        desarrollo: this.desarrollo,
-                        encuestaPendiente : this.encuestaPendiente
+                        realizados : this.realizados,
+                        porIniciar: this.porIniciar
                     }
                 })
 

@@ -276,8 +276,13 @@ class Question extends BaseModel
 
         try {
 
+            // Calculate total score with the existing questions
+
+            $totalScore = Question::calculateTopicQuestionsScore($data['topic_id']);
+
             $model = new ExamenImport;
             $model->topic_id = $data['topic_id'];
+            $model->totalScore = $totalScore;
             $model->selectQuestionTypeId = $selectQuestionType->id;
             $model->writtenQuestionTypeId = $writtenQuestionType->id;
             $model->isQualified = $data['isQualified'];
@@ -303,5 +308,14 @@ class Question extends BaseModel
             'status' => 'success',
             'message' => 'Registros ingresados correctamente.'
         ];
+    }
+
+    /**
+     * Calculate topic's questions total score
+     */
+    public static function calculateTopicQuestionsScore($topicId) {
+
+        return Question::where('topic_id', $topicId)
+                ->sum('score');
     }
 }

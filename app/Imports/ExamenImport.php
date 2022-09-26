@@ -22,7 +22,7 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
 
     // Sum of questions score
 
-    private int $totalScore = 0;
+    public int $totalScore = 0;
 
     // Max score per test
 
@@ -83,6 +83,7 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
                     $score = $row['puntaje'] ?? 0;
                 } else {
                     $score = 0;
+                    $isRequired = false;
                 }
 
             } else {
@@ -116,11 +117,10 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
     }
 
     public function  rules(): array
-    {return [];
-        if ($this->type_id == 'calificada') {
+    {
+        if ($this->isQualified) {
             return [
-                'pregunta' => "required|distinct|unique:questions,pregunta,NULL,id,type_id,selecciona,post_id,{$this->topic_id}|max:20000",
-                // 'pregunta' => ["required","distinct","unique:preguntas","pregunta","NULL","id","post_id","{$this->posteo_id}","max:20000"],
+                'pregunta' => "required|unique:questions,pregunta,null,id,type_id,{$this->selectQuestionTypeId},topic_id,{$this->topic_id}|max:20000",
                 'respuesta_correcta' => 'required|in:A,B,C,D,E,F,G,H,I,J,a,b,c,d,e,f,g,h,i,j',
 
                 'a' => 'required|max:5000',
@@ -136,37 +136,33 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
                 'j' => 'nullable|required_if:respuesta_correcta,j,J|max:5000',
             ];
         } else {
-            $callback = function($attribute,$value,$fail){
-                if(!empty($value)){
+
+            $callback = function($attribute,$value,$fail) {
+                if (!empty($value)) {
                     $fail('El campo '.$attribute.' debe ser vacío.');
                 }
             };
+
             return [
-                'pregunta' => "required|distinct|unique:preguntas,pregunta,NULL,id,tipo_pregunta,texto,post_id,{$this->topic_id}|max:20000",
-                'a' => [$callback],
-                'b' => [$callback],
-                'c' => [$callback],
-                'd' => [$callback],
-                'e' => [$callback],
-                'f' => [$callback],
-                'g' => [$callback],
-                'h' => [$callback],
-                'i' => [$callback],
-                'j' => [$callback],
+                'pregunta' => "required|unique:questions,pregunta,null,id,type_id,{$this->writtenQuestionTypeId},topic_id,{$this->topic_id}|max:20000",
             ];
         }
     }
 
     public function customValidationAttributes()
     {
-        return ['respuesta_correcta' => 'respuesta correcta'];
+
+        return [
+            'pregunta' => 'PREGUNTA',
+            'respuesta_correcta' => 'RESPUESTA CORRECTA'
+        ];
     }
 
     public function customValidationMessages()
     {
         return [
             '*.required_if' => 'La opción ":attribute" es requerida si es marcada como respuesta correcta.',
-            '*.required' => 'La opción ":attribute" es necesaria en una evaluación calificada.',
+            '*.required' => 'La opción ":attribute" es necesaria.',
             '*.unique' => 'Esta pregunta ya ha sido asignada a la evaluación',
         ];
     }

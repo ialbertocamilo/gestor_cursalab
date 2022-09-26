@@ -275,7 +275,22 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return null;
     }
 
+    public function updateStatusUser($active=null,$terminatio_date=null){
+        $this->active = $active ? $active : !$this->active;
+        $this->save();
+        // $criterion = CriterionValue::where('value_text',$terminatio_date)->select('id','value_text')->first();
+        $criterion = Criterion::with('values')->where('code','termination_date')->select('id')->first();
+        if(!$criterion){
+            return $user;
+        }
+        if($terminatio_date){
+            $user_criterion = $this->criterion_values()->where('criterion_id',$criterion->id)->detach();
+        }else{
 
+        }
+        // $user_criterion = $this->criterion_values()->detach(['criterion_id'=>$criterion->id]);
+        // $this->criterion_values()->syncWithoutDetaching([1, 2, 3]);
+    }
     protected function storeRequest($data, $user = null)
     {
         try {

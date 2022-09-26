@@ -192,23 +192,22 @@ class Integrations extends BaseModel
         return $this->change_status_user($data,1,'quantity_activated');
     }
     private function change_status_user($data,$state_user_massive,$name_parameter){
-        $verify_parameters = $this->parameters_allow( ['users_document','users_email'],$data);
+        $verify_parameters = $this->parameters_allow( ['identificator','users'],$data);
         if($verify_parameters['code']!=200){
             return $verify_parameters;
         }
         $model_massive_state_user = new ChangeStateUserMassive();
         $static_headers = $model_massive_state_user->getStaticHeader();
-        $users_dni = isset($data['users_document']) ?  collect($data['users_document']) : collect(); 
-        $users_dni = $static_headers->merge($users_dni);
-        $users_email = isset($data['users_email']) ?  collect($data['users_email']) : collect(); 
-        $users_inactived = $users_dni->merge($users_email);
+        $users_process = isset($data['users']) ?  collect($data['users']) : collect(); 
+        $users_process = $static_headers->merge($users_process); 
         //Procesar data
         $model_massive_state_user->state_user_massive = $state_user_massive;
-        $model_massive_state_user->collection($users_inactived);
+        $model_massive_state_user->identificator = $data['identificator'];
+        $model_massive_state_user->collection($users_process);
         $data = [
             $name_parameter =>$model_massive_state_user->q_change_status,
             'amount_errors' => $model_massive_state_user->q_errors,
-            'processed_data' => $users_inactived->count(),
+            'processed_data' => $users_process->count(),
             'errors' =>  $model_massive_state_user->errors
         ];
         
