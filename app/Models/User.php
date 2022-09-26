@@ -275,21 +275,29 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return null;
     }
 
-    public function updateStatusUser($active=null,$terminatio_date=null){
-        $this->active = $active ? $active : !$this->active;
-        $this->save();
-        // $criterion = CriterionValue::where('value_text',$terminatio_date)->select('id','value_text')->first();
-        $criterion = Criterion::with('values')->where('code','termination_date')->select('id')->first();
+    public function updateStatusUser($active=null,$termination_date=null){
+        $user = $this;
+        $user->active = $active ? $active : !$user->active;
+        $user->save();
+        $criterion = Criterion::with('field_type:id,code','values')->where('code','termination_date')->select('id','field_id')->first();
         if(!$criterion){
-            return $user;
+            return true;
         }
-        if($terminatio_date){
-            $user_criterion = $this->criterion_values()->where('criterion_id',$criterion->id)->detach();
-        }else{
-
+        $user_criterion = $user->criterion_values()->where('criterion_id',$criterion->id)->detach();
+        if($termination_date && !$user->active){
+            $criterion_value =  CriterionValue::where('criterion_id',$criterion->id)->where('value_text',trim($termination_date))->select('id','value_text')->first();
+            $colum_name      =  CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
+            if(!$criterion_value){
+                $data_criterion_value[$colum_name] = $termination_date;
+                $data_criterion_value['value_text'] = $termination_date;
+                $data_criterion_value['criterion_id'] = $criterion->id;
+                $data_criterion_value['active'] = 1;
+                $data_criterion_value['workspace_id'] = $user->subworkspace?->parent?->id;
+                $criterion_value = CriterionValue::storeRequest($data_criterion_value);
+            }
+            $user_criterion = $user->criterion_values()->where('criterion_id',$criterion->id)->detach();
+            $user->criterion_values()->syncWithoutDetaching([$criterion_value->id]);
         }
-        // $user_criterion = $this->criterion_values()->detach(['criterion_id'=>$criterion->id]);
-        // $this->criterion_values()->syncWithoutDetaching([1, 2, 3]);
     }
     protected function storeRequest($data, $user = null)
     {

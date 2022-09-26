@@ -97,7 +97,7 @@ class CriterionValue extends BaseModel
                 $model->workspaces()->syncWithoutDetaching([$data['workspace_id']]);
 
             DB::commit();
-
+            return $model;
         } catch (\Exception $e) {
 //            info($e);
             DB::rollBack();
