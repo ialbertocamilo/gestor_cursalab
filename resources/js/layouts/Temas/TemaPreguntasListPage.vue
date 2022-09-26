@@ -100,7 +100,7 @@
                                 <div class="alert alert-success pa-1" role="alert" v-show="status == true">
                                   <h6>La evaluación es correcta.</h6>
                                 </div>
-                                <div class="alert alert-danger pa-1" role="alert" v-show="status == false && missing_score > 0">
+                                <div class="alert alert-danger pa-1" role="alert" v-show="status == false && missing_score != 0">
                                   <h6>Es necesario asignar {{ missing_score }} punto(s) más para completar la evaluación.</h6>
                                 </div>
                             <!-- </div> -->
@@ -260,7 +260,7 @@ export default {
     mounted() {
         let vue = this
 
-        if (vue.status == false && vue.missing_score > 0) {
+        if (vue.status == false && vue.missing_score != 0) {
 
             let msg = document.createElement("div");
             let pts = vue.missing_score;
