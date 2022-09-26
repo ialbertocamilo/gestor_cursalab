@@ -279,7 +279,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
         $user->active = $active ? $active : !$user->active;
         $user->save();
-        $criterion = Criterion::with('field_type:id,code','values')->where('code','termination_date')->select('id','field_id')->first();
+        $criterion = Criterion::with('field_type:id,code')->where('code','termination_date')->select('id','field_id')->first();
         if(!$criterion){
             return true;
         }
