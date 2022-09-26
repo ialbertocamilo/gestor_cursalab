@@ -83,6 +83,8 @@
 
                         <SegmentByDocument
                             :segment="segment_by_document"
+                            @addUser="addUser"
+                            @deleteUser="deleteUser"
                         />
 
                     </v-tab-item>
@@ -252,6 +254,25 @@ export default {
         },
         loadSelects() {
             let vue = this;
+        },
+        addUser(user){
+            let vue = this;
+
+            console.log(user);
+
+            const already_added = vue.segment_by_document.filter(el => el.document == user.document) > 0;
+            if (!already_added){
+                vue.segment_by_document.push({
+                    criterion_value_id: user.criterion_values[0].id,
+                    document: user.document,
+                    fullname: user.fullname,
+                })
+            }
+        },
+        deleteUser(user){
+            let vue = this;
+
+            console.log(user);
         }
     }
 };

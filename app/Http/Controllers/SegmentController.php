@@ -64,8 +64,9 @@ class SegmentController extends Controller
         $users = User::query()
             ->filterText($data['filter_text'])
             ->select('id', 'name', 'surname', 'lastname', 'document')
-            ->whereHas('criterion_values', function ($q) use ($data) {
-                $q->where('value_text', 'like', "%{$data['filter_text']}%")
+            ->withWhereHas('criterion_values', function ($q) use ($data) {
+                $q->select('id', 'value_text')
+                    ->where('value_text', 'like', "%{$data['filter_text']}%")
                     ->whereRelation('criterion', 'code', 'documento');
             })
             ->limit(50)->get();

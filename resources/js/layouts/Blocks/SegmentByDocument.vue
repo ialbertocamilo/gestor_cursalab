@@ -23,15 +23,14 @@
                         <ul>
                             <li v-for="user in filter_result"
                                 class="d-flex justify-content-between align-items-center">
-<!--                                <div>-->
-                                    {{ user.document }} - {{ user.fullname }}
-<!--                                </div>-->
-<!--                                <div>-->
-                                    <v-btn icon primary small :ripple="false"
-                                        @click="addUser()">
-                                        <v-icon small v-text="'mdi-plus'"/>
-                                    </v-btn>
-<!--                                </div>-->
+
+                                {{ user.document }} - {{ user.fullname }}
+
+                                <v-btn icon primary small :ripple="false"
+                                       @click="addUser(user)">
+                                    <v-icon small v-text="'mdi-plus'"/>
+                                </v-btn>
+
                             </li>
                         </ul>
                     </div>
@@ -42,7 +41,17 @@
 
                     <div class="box-selected-segmentation-document">
                         <ul>
-                            <li v-for="user in segment.criteria_selected"></li>
+                            <li v-for="user in segment"
+                                class="d-flex justify-content-between align-items-center">
+
+                                {{ user.document }} - {{ user.fullname }}
+
+                                <v-btn icon primary small :ripple="false"
+                                       @click="deleteUser(user)">
+                                    <v-icon small v-text="'mdi-minus'"/>
+                                </v-btn>
+
+                            </li>
                         </ul>
                     </div>
                 </v-col>
@@ -95,17 +104,19 @@ export default {
         },
     },
     methods: {
-        addUser(user){
+        addUser(user) {
             let vue = this;
 
-            const data = {
+            const data = {}
 
-            }
-
-            vue.emit("addUser", user);
+            vue.$emit("addUser", user);
         },
-        deleteUser(){
+        deleteUser(user) {
+            let vue = this;
 
+            const data = {}
+
+            vue.$emit("deleteUser", user);
         }
     }
 }
@@ -124,6 +135,7 @@ export default {
     border-radius: 10px;
     overflow-x: hidden;
     overflow-y: scroll;
+
     li {
         list-style: none;
     }
