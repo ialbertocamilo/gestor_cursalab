@@ -82,12 +82,12 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
                 if ($this->maxScore >= $this->totalScore) {
                     $score = $row['puntaje'] ?? 0;
                 } else {
-                    $score = 0;
+                    $score = $row['puntaje'] ?? 0;
                     $isRequired = false;
                 }
 
             } else {
-                $score = 0;
+                $score = $row['puntaje'] ?? 0;
             }
 
             Question::create([

@@ -199,6 +199,8 @@ export default {
                 respuestas: [],
                 rpta_ok: null,
                 active: true,
+                required: false,
+                score: 1,
                 nuevasRptas: "",
                 evaluation_type: ''
             },
