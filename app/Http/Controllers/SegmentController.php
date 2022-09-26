@@ -8,9 +8,11 @@ use App\Models\Taxonomy;
 use App\Models\Segment;
 
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
+use Illuminate\Support\Facades\DB;
 
 // use App\Http\Controllers\ZoomApi;
 
@@ -83,27 +85,44 @@ class SegmentController extends Controller
 
     public function syncUsersDocumentToCriterionValues()
     {
-        $users = User::whereNotNull('document')
-            ->select('id', 'document')
-            ->get();
+        $document_criterion = Criterion::firstOrCreate(
+            [
+                'code' => 'document',
+                'name' => "Documento",
+                'field_id' => Taxonomy::getFirstData('criterion', 'type', 'default')?->id,
+            ],
+            [
+                'position' => NULL,
+                'show_in_segmentation' => 1,
+                'active' => 1,
+            ]
+        );
 
-        foreach ($users as $user) {
-            $document_criterion = Criterion::where('code', 'documento')->first();
+        User::whereNotNull('document')->with('subworkspace.parent')
+            ->select('id', 'document', 'subworkspace_id')
+            ->chunkById(2000, function ($users_chunked) use ($document_criterion) {
 
-            $document_value = CriterionValue::whereRelation('criterion', 'code', 'documento')
-                ->where('value_text', $user->document)->first();
+                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
+                    ->whereIn('value_text', $users_chunked->pluck('document')->toArray())->get();
 
-            $criterion_value_data = [
-                'value_text' => $user->document,
-                'criterion_id' => $document_criterion?->id,
-                'active' => ACTIVE
-            ];
+                foreach ($users_chunked as $user) {
 
-            $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
+                    $document_value = $document_values->where('value_text', $user->document)->first();
 
-            $user->criterion_values()
-                ->syncWithoutDetaching([$document?->id]);
-        }
+                    $criterion_value_data = [
+                        'value_text' => $user->document,
+                        'criterion_id' => $document_criterion?->id,
+                        'workspace_id' => $user->subworkspace?->parent?->id,
+                        'active' => ACTIVE
+                    ];
+
+                    $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
+
+                    $user->criterion_values()->syncWithoutDetaching([$document?->id]);
+
+                }
+            });
+
     }
 
 }

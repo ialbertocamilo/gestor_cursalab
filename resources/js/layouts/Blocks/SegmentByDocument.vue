@@ -27,7 +27,8 @@
                                     {{ user.document }} - {{ user.fullname }}
 <!--                                </div>-->
 <!--                                <div>-->
-                                    <v-btn icon primary small :ripple="false">
+                                    <v-btn icon primary small :ripple="false"
+                                        @click="addUser()">
                                         <v-icon small v-text="'mdi-plus'"/>
                                     </v-btn>
 <!--                                </div>-->
@@ -93,7 +94,20 @@ export default {
             }, 1600);
         },
     },
-    methods: {}
+    methods: {
+        addUser(user){
+            let vue = this;
+
+            const data = {
+
+            }
+
+            vue.emit("addUser", user);
+        },
+        deleteUser(){
+
+        }
+    }
 }
 
 </script>
