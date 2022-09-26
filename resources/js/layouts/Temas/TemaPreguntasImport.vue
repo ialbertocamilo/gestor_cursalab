@@ -298,9 +298,11 @@ export default {
                             vue.errors = res.data.data.errors
 
                         vue.progress_upload = 'ok'
-                        if (res.data.info.data_no_procesada.length > 0) {
-                            vue.uploadErrors = true;
-                            vue.errores = res.data.info.data_no_procesada
+                        if (res.data.info) {
+                            if (res.data.info.data_no_procesada.length > 0) {
+                                vue.uploadErrors = true;
+                                vue.errores = res.data.info.data_no_procesada
+                            }
                         }
 
                     }, 1500)
