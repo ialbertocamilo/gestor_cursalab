@@ -28,6 +28,7 @@ class StateUserRequest extends FormRequest
             'identificator.required' => 'The field identificator is required.',
             'identificator.in' => 'the identifier field accept only these values: '.implode(',',$this->identificators).' .',
             'users.required' => 'The field users is required.',
+            'users.array' => 'The field must be an array.'
         ];
     }
     protected function failedValidation(Validator $validator)
