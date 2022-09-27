@@ -41,7 +41,7 @@
 
                     <div class="box-selected-segmentation-document">
                         <ul>
-                            <li v-for="user in segment"
+                            <li v-for="user in segment.criteria_selected"
                                 class="d-flex justify-content-between align-items-center">
 
                                 {{ user.document }} - {{ user.fullname }}
@@ -96,7 +96,10 @@ export default {
 
                 vue.$http.post(url, data)
                     .then(({data}) => {
-                        vue.filter_result = data.data.users;
+                        vue.filter_result = data.data;
+                        vue.autocomplete_loading = false;
+                    })
+                    .catch(err => {
                         vue.autocomplete_loading = false;
                     })
 
@@ -107,16 +110,31 @@ export default {
         addUser(user) {
             let vue = this;
 
-            const data = {}
-
             vue.$emit("addUser", user);
         },
         deleteUser(user) {
             let vue = this;
 
-            const data = {}
-
             vue.$emit("deleteUser", user);
+        },
+        addOrRemoveFromFilterResult(user, action = 'add') {
+            let vue = this;
+
+            const index = vue.filter_result.findIndex(el => el.document == user.document);
+
+            if (index !== -1) {
+
+                // if (action === 'add')
+                //     vue.filter_result.push(user);
+
+                if (action === 'remove')
+                    vue.filter_result.splice(index, 1);
+            }
+        },
+        resetFields(){
+            let vue = this;
+            vue.search = null;
+            vue.filter_result = [];
         }
     }
 }

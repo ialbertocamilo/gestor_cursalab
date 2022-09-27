@@ -16,7 +16,7 @@
                     slider-color="primary"
                 >
                     <v-tab>
-                         Segmentación Directa
+                        Segmentación Directa
                     </v-tab>
                     <v-tab>
                         Segmentación por Documento
@@ -25,7 +25,7 @@
 
                 <v-tabs-items v-model="tabs">
 
-                     <v-tab-item>
+                    <v-tab-item>
 
                         <v-row justify="space-around">
                             <v-col cols="12" class="d-flex justify-content-end pr-3">
@@ -82,6 +82,7 @@
                     <v-tab-item>
 
                         <SegmentByDocument
+                            ref="SegmentByDocument"
                             :segment="segment_by_document"
                             @addUser="addUser"
                             @deleteUser="deleteUser"
@@ -136,7 +137,7 @@ export default {
             },
             // resource: {},
             segments: [],
-            segment_by_document: [],
+            segment_by_document: null,
             criteria: [],
 
             rules: {
@@ -151,6 +152,8 @@ export default {
             vue.resetSelects();
             vue.resetValidation();
             vue.$emit("onCancel");
+
+            vue.$refs["SegmentByDocument"].resetFields();
         },
         resetValidation() {
             let vue = this;
@@ -171,7 +174,8 @@ export default {
         },
         borrarBloque(segment) {
             let vue = this;
-            if (vue.segments.length === 1) return;
+            // const isNewSegment = segment.id.search("new") !== -1;
+            // if (vue.segments.length === 1 && !isNewSegment) return;
 
             vue.segments = vue.segments.filter((obj, idx) => {
                 return obj.id != segment.id;
@@ -201,7 +205,7 @@ export default {
                     model_type: vue.model_type,
                     model_id: vue.resource.id,
                     segments: vue.segments,
-                    segments_by_document: vue.segments_by_document,
+                    segment_by_document: vue.segment_by_document
                 });
 
                 vue.$http
@@ -244,9 +248,14 @@ export default {
                 let _data = data.data;
 
                 vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
-                vue.segment_by_document = _data.segments.filter(segment => segment.type.code === 'segmentation-by-document');
+                vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
 
                 if (vue.segments.length === 0) this.addSegmentation();
+                if (vue.segment_by_document === undefined) {
+                    vue.segment_by_document = {
+                        criteria_selected: []
+                    };
+                }
                 vue.criteria = _data.criteria;
             });
 
@@ -255,24 +264,29 @@ export default {
         loadSelects() {
             let vue = this;
         },
-        addUser(user){
+        addUser(user) {
             let vue = this;
 
-            console.log(user);
+            const already_added = vue.segment_by_document.criteria_selected.filter(el => el.document == user.document).length > 0;
 
-            const already_added = vue.segment_by_document.filter(el => el.document == user.document) > 0;
-            if (!already_added){
-                vue.segment_by_document.push({
-                    criterion_value_id: user.criterion_values[0].id,
-                    document: user.document,
-                    fullname: user.fullname,
-                })
+            if (!already_added) {
+
+                vue.segment_by_document.criteria_selected.push(user)
+
+                vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user, 'remove');
             }
         },
-        deleteUser(user){
+        deleteUser(user) {
             let vue = this;
 
-            console.log(user);
+            const index = vue.segment_by_document.criteria_selected.findIndex(el => el.document == user.document);
+
+            if (index !== -1) {
+
+                vue.segment_by_document.criteria_selected.splice(index, 1);
+
+                // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
+            }
         }
     }
 };

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SegmentSearchUsersResource;
 use App\Models\CriterionValue;
 use App\Models\Criterion;
 use App\Models\Taxonomy;
@@ -53,7 +54,8 @@ class SegmentController extends Controller
 
     public function store(Request $request)
     {
-//        dd($request->all());
+//        info($request->all());
+
         return Segment::storeRequestData($request);
     }
 
@@ -67,21 +69,15 @@ class SegmentController extends Controller
             ->withWhereHas('criterion_values', function ($q) use ($data) {
                 $q->select('id', 'value_text')
                     ->where('value_text', 'like', "%{$data['filter_text']}%")
-                    ->whereRelation('criterion', 'code', 'documento');
+                    ->whereRelation('criterion', 'code', 'document');
             })
             ->limit(50)->get();
 
-//        $users = CriterionValue::query()
-//            ->withWhereHas('users', function ($q) use ($data) {
-//                $q->where('document', 'like', "%{$data['filter_text']}%")
-//                    ->select('id', 'name', 'lastname', 'surname', 'document');
-//            })
-//            ->whereRelation('criterion', 'code', 'documento')
-//            ->select('id', 'value_text')
-//            ->limit(10)
-//            ->get();
+        info($users->count());
 
-        return $this->success(compact('users'));
+        $users = SegmentSearchUsersResource::collection($users);
+
+        return $this->success($users);
     }
 
     public function syncUsersDocumentToCriterionValues()
@@ -99,9 +95,19 @@ class SegmentController extends Controller
             ]
         );
 
+        DB::table('criteria')
+            ->where('code', 'documento')
+            ->update(
+                ['code' => 'document']
+            );
+
+        $direct_segmentation = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+
+        Segment::update(['type_id' => $direct_segmentation?->id]);
+
         User::whereNotNull('document')->with('subworkspace.parent')
             ->select('id', 'document', 'subworkspace_id')
-            ->chunkById(2000, function ($users_chunked) use ($document_criterion) {
+            ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
 
                 $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
                     ->whereIn('value_text', $users_chunked->pluck('document')->toArray())->get();
