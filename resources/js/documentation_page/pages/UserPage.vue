@@ -226,8 +226,7 @@ code:
 `
 {
     "data": {
-        "inserted_users": "Cantidad de usuarios insertados.",
-        "updated_users": "Cantidad de usuarios actualizados.",
+        "insert_updated_users": "Cantidad de usuarios insertados/actualizados.",
         "amount_errors": "Cantidad de errores encontrados.",
         "processed_data": "Cantidad de data recibida.",
         "errors": "Listado de errores encontrados en la api." /[

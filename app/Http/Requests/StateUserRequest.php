@@ -14,18 +14,21 @@ class StateUserRequest extends FormRequest
         return true;
     }
 
+    private $identificators = ['document','username','email']; // The values ​​must be user attributes.
     public function rules()
     {
         return [
-            'users_document' => 'required_without:users_email|array',
-            'users_email' => 'required_without:users_document|array',
+            'identificator' => ['required',Rule::in($this->identificators)],
+            'users' => 'required:users|array',
         ];
     }
 
     public function messages(){
         return [
-            'users_document.required_without' => 'Es necesario el campo users_document.',
-            'users_email.required_without' => 'Es necesario el campo users_email.',
+            'identificator.required' => 'The field identificator is required.',
+            'identificator.in' => 'the identifier field accept only these values: '.implode(',',$this->identificators).' .',
+            'users.required' => 'The field users is required.',
+            'users.array' => 'The field must be an array.'
         ];
     }
     protected function failedValidation(Validator $validator)

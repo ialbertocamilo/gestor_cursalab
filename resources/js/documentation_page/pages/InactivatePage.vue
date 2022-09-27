@@ -31,7 +31,7 @@ export default {
                             {
                                 name:'identificator',
                                 type:'Texto (String)',
-                                description:'El tipo de identificador que usará para enviar la lista de usuarios (puedes ser "document" (dni, pasaporte), "user_name", "email").'
+                                description:'El tipo de identificador que usará para enviar la lista de usuarios (puedes ser "document" (dni, pasaporte), "username", "email").'
                             },
                             {
                                 name:'users',
