@@ -213,6 +213,7 @@ export default {
 
             if (!vue.select.school) return true;
             if (!vue.select.course) return true;
+            if (vue.select.evaluation_type && vue.select.topics.length === 0) return true;
             // if (vue.select.topics.length === 0) return true;
             return !vue.archivo;
         },
