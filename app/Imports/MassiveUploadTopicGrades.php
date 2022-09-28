@@ -36,8 +36,8 @@ class MassiveUploadTopicGrades implements ToCollection
         $this->course_id = $data['course'];
         $this->topics = $data['topics'] ?? [];
 
-        $this->topic_states = Taxonomy::getData('topic', 'user-status');
-        $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
+        $this->topic_states = [];
+        $this->source = [];
     }
 
     public function collection(Collection $excelData)
@@ -47,7 +47,8 @@ class MassiveUploadTopicGrades implements ToCollection
         $this->course = Course::find($this->course_id);
 
         $this->topic_states = Taxonomy::getData('topic', 'user-status');
-        $this->topic_states = Taxonomy::getData('topic', 'user-status');
+        $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
+
 
         for ($i = 1; $i < $count; $i++) {
             $document_user = $excelData[$i][0];
