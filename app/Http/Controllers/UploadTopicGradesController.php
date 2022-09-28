@@ -47,7 +47,7 @@ class UploadTopicGradesController extends Controller
     {
         $data = $request->validated();
 //        dd($data);
-        if (count($data['topics']) === 0) return $this->error('No se ha seleccionado ningún tema.');
+        if (count($data['topics'] ?? []) === 0) return $this->error('No se ha seleccionado ningún tema.');
 
         $import = new MassiveUploadTopicGrades($data);
         Excel::import($import, $data['file']);
