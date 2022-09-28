@@ -47,6 +47,8 @@ class MassiveUploadTopicGrades implements ToCollection
         $this->course = Course::find($this->course_id);
 
         $this->topic_states = Taxonomy::getData('topic', 'user-status');
+        info("topic_states");
+        info($this->topic_states->toArray());
         $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
 
 
