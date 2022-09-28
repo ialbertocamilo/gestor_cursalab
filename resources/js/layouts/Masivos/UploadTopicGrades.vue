@@ -196,10 +196,8 @@ export default {
                         return;
                     }
 
-                    let headers = ["DNI", "NOTA", "INTENTOS", "VISITAS", "#RESPUESTAS CORRECTAS",
-                        "#RESPUESTAS INCORRECTAS", "FECHA DE EVALUACIÓN", "Observación"];
-                    let values =["dni", "nota", 'attempts','views', 'correct_answers', 'failed_answers',
-                        'last_time_evaluated_at', "info"];
+                    let headers = ["DNI", "NOTA"];
+                    let values =["dni", "nota", "info"];
                     vue.descargarExcelFromArray(
                         headers,
                         values,
@@ -220,8 +218,8 @@ export default {
         },
         descargarPlantilla() {
             let vue = this;
-            let headers = ["DNI", "NOTA", "INTENTOS", "VISITAS", "#RESPUESTAS CORRECTAS",
-                "#RESPUESTAS INCORRECTAS", "FECHA DE EVALUACIÓN"];
+            let headers = ["DNI", "NOTA", "INTENTOS", "VISITAS", "NÚMERO RESPUESTAS CORRECTAS",
+                "NÚMERO RESPUESTAS INCORRECTAS", "FECHA DE EVALUACIÓN"];
             let values = ["dni", "nota", 'attempts','views', 'correct_answers', 'failed_answers', 'last_time_evaluated_at'];
 
             vue.descargarExcelFromArray(
