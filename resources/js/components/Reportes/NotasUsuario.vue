@@ -170,12 +170,12 @@
                                     <v-list-item-title
                                         v-if="prueba.respuesta_usuario"
                                         class="text-body-2 prueba-text">
-                                        <small>{{ prueba.respuesta_usuario.trim() }}</small>
+                                        <small v-html="prueba.respuesta_usuario.trim()"></small>
                                     </v-list-item-title>
                                     <v-list-item-title
                                         v-if="prueba.respuesta_ok"
                                         class="text-body-2 prueba-text">
-                                        <small>{{ prueba.respuesta_ok.trim() }}</small>
+                                        <small v-html="prueba.respuesta_ok.trim()"></small>
                                     </v-list-item-title>
                                 </v-list-item>
                             </v-list>
