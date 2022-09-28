@@ -34,10 +34,10 @@ class MassiveUploadTopicGrades implements ToCollection
     {
         $this->evaluation_type = $data['evaluation_type'];
         $this->course_id = $data['course'];
-        $this->topics = $data['topics'];
+        $this->topics = $data['topics'] ?? [];
 
-        $this->topic_states = Taxonomy::getData('topic', 'user-status');
-        $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
+        $this->topic_states = [];
+        $this->source = [];
     }
 
     public function collection(Collection $excelData)
@@ -46,8 +46,11 @@ class MassiveUploadTopicGrades implements ToCollection
         $count = count($excelData);
         $this->course = Course::find($this->course_id);
 
-        $this->topic_states = Taxonomy::getData('topic', 'user-status');
-        $this->topic_states = Taxonomy::getData('topic', 'user-status');
+        $this->topic_states = Taxonomy::getData('topic', 'user-status')->get();
+//        info("topic_states");
+//        info($this->topic_states->toArray());
+        $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
+
 
         for ($i = 1; $i < $count; $i++) {
             $document_user = $excelData[$i][0];
@@ -109,7 +112,7 @@ class MassiveUploadTopicGrades implements ToCollection
 
         $grade = $excelData[1];
 
-        $topic_summaries = SummaryTopic::whereIn('topic_id', $this->topics)->where('user_id', $user->id)
+        $topic_summaries = SummaryTopic::whereIn('topic_id', $topics->pluck('id')->toArray())->where('user_id', $user->id)
             ->get();
 //        info("SUMMARIES ID :: ");
 //        info($topic_summaries->pluck('id')->toArray());
