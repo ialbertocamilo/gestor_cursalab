@@ -111,7 +111,7 @@
 export default {
     data() {
         return {
-            base_url: '/masivos/importar-notas',
+            base_url: '/importar-notas',
             archivo: null,
             arrays: {
                 evaluation_types: [
