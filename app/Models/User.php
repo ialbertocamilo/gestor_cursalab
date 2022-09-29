@@ -302,18 +302,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->criterion_values()->syncWithoutDetaching([$criterion_value->id]);
         }
     }
-    protected function storeRequest($data, $user = null)
+    protected function storeRequest($data, $user = null,$update_password=true)
     {
         try {
 
             DB::beginTransaction();
 
             if ($user) :
-
+                if(!$update_password && isset($data['password'])){
+                    unset($data['password']);
+                }
                 $user->update($data);
-
             else :
-
                 $user = self::create($data);
 
             endif;

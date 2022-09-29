@@ -9,17 +9,17 @@
                 <v-card-text>
                     <ul>
                         <li class="mt-2">
-                            <b>Columnas del excel:</b>DNI
+                            <b>Columnas del excel:</b>DNI - Fecha de cese (opcional)
                         </li>
-						<li class="mt-2">
+						<!-- <li class="mt-2">
                             <b>Acción: </b>  No es necesario colocar una acción.
                         </li>
-                        <li class="mt-2">Los errores encontrados en la subida masiva los podrás arreglar desde el botón "Ver errores" 👇</li>
+                        <li class="mt-2">Los errores encontrados en la subida masiva los podrás arreglar desde el botón "Ver errores" 👇</li> -->
                     </ul>
                 </v-card-text>
-                <v-card-actions class="d-flex justify-center">
+                <!-- <v-card-actions class="d-flex justify-center">
 					<modalErrores :q_error="q_error" tipo="cesados"></modalErrores>
-				</v-card-actions>
+				</v-card-actions> -->
         </v-col>
         <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
             <v-row justify="center">
@@ -74,10 +74,9 @@
                 if(validar_data){
                     this.loading_guardar = true;
                     let data = new FormData();
-                    data.append("file_dsc_usu", this.archivo);
-                    axios.post('/masivo/cesar_usuarios',data).then((res)=>{
+                    data.append("file", this.archivo);
+                    axios.post('/masivos/inactive-users',data).then((res)=>{
                         this.loading_guardar = false;
-                        let info = res.data.info;
                         if(res.data.error){
                             this.$emit("update_q_error",{
                                     tipo:'cesados',
@@ -85,7 +84,13 @@
                                 }
                             );
                         }
-                        this.enviar_alerta(info);
+                        const data = res.data.data;
+                        const message = ` <ul>
+                            <li>${data.message}</li>
+                            <li>Cantidad de usuarios inactivados: ${data.datos_procesados || 0}</li>
+                            <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
+                        </ul>`
+                        this.enviar_alerta(message);
                     }).catch(err=>{
                         this.loading_guardar = false;
                     });
