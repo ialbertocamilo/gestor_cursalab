@@ -268,8 +268,9 @@ class TemaController extends Controller
         endif;
 
         $data = Question::verifyEvaluation($topic);
+        $data['msg'] = 'Pregunta actualizada. ' . ($data['message'] ?? '');
 
-        return $this->success(['msg' => 'Pregunta actualizada. ' . ($data['message'] ?? '')]);
+        return $this->success($data);
     }
 
     public function importPreguntas(
@@ -312,7 +313,8 @@ class TemaController extends Controller
         endif;
 
         $data = Question::verifyEvaluation($topic);
+        $data['msg'] = 'Eliminado correctamente. ' . ($data['message'] ?? '');
 
-        return $this->success(['msg' => 'Eliminado correctamente. ' . ($data['message'] ?? '')]);
+        return $this->success($data);
     }
 }

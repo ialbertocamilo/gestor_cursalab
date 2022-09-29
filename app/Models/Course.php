@@ -11,10 +11,11 @@ class Course extends BaseModel
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
         'assessable', 'freely_eligible', 'type_id',
         'position', 'scheduled_restarts', 'active',
-        'duration', 'investment'
+        'duration', 'investment', 'mod_evaluaciones',
     ];
 
     protected $casts = [
+        'mod_evaluaciones' => 'array',
         'scheduled_restarts' => 'array',
     ];
 

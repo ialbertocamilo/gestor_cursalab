@@ -59,15 +59,15 @@
                           <tbody>
                             <tr>
                               <td>Obligatorio: </td>
-                              <td>{{ evaluation_data_sum_required }} puntos</td>
+                              <td>{{ validation.evaluation_data_sum_required }} puntos</td>
                             </tr>
                             <tr>
                               <td>No Obligatorios: </td>
-                              <td>{{ evaluation_data_sum_not_required }} puntos</td>
+                              <td>{{ validation.evaluation_data_sum_not_required }} puntos</td>
                             </tr>
                             <tr>
                               <td>Total: </td>
-                              <td>{{ evaluation_data_sum }} puntos</td>
+                              <td>{{ validation.evaluation_data_sum }} puntos</td>
                             </tr>
                           </tbody>
                         </table>
@@ -97,11 +97,11 @@
                               @endif
                             </div> -->
                             <!-- <div class="col-md-6 offset-md-3 text-center"> -->
-                                <div class="alert alert-success pa-1" role="alert" v-show="status == true">
+                                <div class="alert alert-success pa-1" role="alert" v-show="validation.status == true">
                                   <h6>La evaluación es correcta.</h6>
                                 </div>
-                                <div class="alert alert-danger pa-1" role="alert" v-show="status == false && missing_score != 0">
-                                  <h6>Es necesario asignar {{ missing_score }} punto(s) más para completar la evaluación.</h6>
+                                <div class="alert alert-danger pa-1" role="alert" v-show="validation.status == false && validation.missing_score != 0">
+                                  <h6>Es necesario asignar {{ validation.missing_score }} punto(s) más para completar la evaluación.</h6>
                                 </div>
                             <!-- </div> -->
                           <!-- </div> -->
@@ -116,13 +116,13 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
-                @delete="deleteTemaPregunta($event)"
+                @delete="deleteTemaPregunta($event);"
             />
             <TemaPreguntaFormModal
                 width="60vw"
                 :ref="modalOptions.ref"
                 :options="modalOptions"
-                @onConfirm="refreshDefaultTable(dataTable, filters)"
+                @onConfirm="refreshDefaultTable(dataTable, filters); updateData($event);"
                 @onCancel="closeFormModal(modalOptions)"
                 :evaluable="evaluable"
                 :evaluation_type="evaluation_type"
@@ -131,7 +131,7 @@
                 width="50vw"
                 :ref="modalTemaPreguntasImport.ref"
                 :options="modalTemaPreguntasImport"
-                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters) "
+                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalTemaPreguntasImport);refreshDefaultTable(dataTable, filters) "
             />
             <DialogConfirm
@@ -174,6 +174,13 @@ export default {
     data() {
         let vue = this
         return {
+            validation: {
+                status: vue.status,
+                missing_score: vue.missing_score,
+                evaluation_data_sum: vue.evaluation_data_sum,
+                evaluation_data_sum_required: vue.evaluation_data_sum_required,
+                evaluation_data_sum_not_required: vue.evaluation_data_sum_not_required,
+            },
             breadcrumbs: [
                 {
                     title: 'Escuelas',
@@ -276,6 +283,18 @@ export default {
         // vue.getSelects();
     },
     methods: {
+        updateData(data){
+            console.log('updateData')
+            console.log(data)
+
+            let vue = this
+
+            vue.validation.status = data.status
+            vue.validation.missing_score = data.data.score_missing
+            vue.validation.evaluation_data_sum = data.data.sum
+            vue.validation.evaluation_data_sum_required = data.data.sum_required
+            vue.validation.evaluation_data_sum_not_required = data.data.sum_not_required
+        },
         getSelects() {
             // let vue = this
             // const url = `/escuelas/get-selects`
@@ -303,6 +322,8 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters)
                     vue.delete_model = null
                     vue.modalDeleteOptions.open = false
+
+                    // vue.updateData(data)
                 })
         }
     }

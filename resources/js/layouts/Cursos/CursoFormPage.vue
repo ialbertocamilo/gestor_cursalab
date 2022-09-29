@@ -119,6 +119,48 @@
                                 @onSelect="setFile($event, resource,'plantilla_diploma')"/>
                         </v-col>
                     </v-row>
+
+                    <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSection
+                            title="Evaluaciones"
+                        >
+                            <!-- tooltip="Tooltip" -->
+                            <template slot="content">
+                                <v-row justify="center">
+                                  <!--   <v-col cols="4">
+                                        <DefaultInput
+                                            label="Preguntas por evaluación"
+                                            v-model="resource.preg_x_ev"
+                                            :rules="rules.preg_x_ev"
+                                            show-required
+                                            dense
+                                        />
+                                    </v-col> -->
+                                    <v-col cols="6">
+                                        <DefaultInput
+                                            label="Nota mínima aprobatoria"
+                                            v-model="resource.nota_aprobatoria"
+                                            :rules="rules.nota_aprobatoria"
+                                            show-required
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultInput
+                                            label="Número de intentos"
+                                            v-model="resource.nro_intentos"
+                                            :rules="rules.nro_intentos"
+                                            show-required
+                                            dense
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
@@ -232,6 +274,8 @@ export default {
                 type_id: null,
                 duration: null,
                 investment: null,
+                nota_aprobatoria: null,
+                nro_intentos: null,
                 scheduled_restarts_activado: false,
                 scheduled_restarts_dias: null,
                 scheduled_restarts_horas: null,
@@ -244,6 +288,8 @@ export default {
                 lista_escuelas: this.getRules(['required']),
                 types: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
+                nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
+                nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
             },
             selects: {
                 requisito_id: [],
@@ -332,6 +378,7 @@ export default {
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validateForm', validateForm ? "1" : "0");
             vue.setJSONReinicioProgramado(formData)
+            vue.getJSONEvaluaciones(formData)
 
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
@@ -366,6 +413,17 @@ export default {
             }
             let json = JSON.stringify(data)
             formData.append('reinicios_programado', json)
+        },
+        getJSONEvaluaciones(formData) {
+            let vue = this
+
+            const data = {
+                // preg_x_ev: vue.resource.preg_x_ev,
+                nota_aprobatoria: vue.resource.nota_aprobatoria,
+                nro_intentos: vue.resource.nro_intentos,
+            }
+            let json = JSON.stringify(data)
+            formData.append('mod_evaluaciones', json)
         },
         async loadData() {
             let vue = this

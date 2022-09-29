@@ -244,7 +244,7 @@ export default {
                     .then(({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
-                        vue.$emit('onConfirm')
+                        vue.$emit('onConfirm', data.data)
                         vue.hideLoader()
                     })
                     .catch((error) => {
