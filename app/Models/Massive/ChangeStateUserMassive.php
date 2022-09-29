@@ -24,11 +24,13 @@ class ChangeStateUserMassive implements ToCollection{
         $this->q_errors = count($this->errors);
     }
     private function processData($rows){
-        foreach ($rows as $row) {
+        foreach ($rows->toArray() as $row) {
             if(!is_null($row)){
                 $user_identifier = is_array($row) ? $row[0] : $row;
                 $termination_date = is_array($row) ? $row[1] : null;
-                $this->changeStatusUser($user_identifier,$termination_date,$this->identificator);
+                if($user_identifier){
+                    $this->changeStatusUser($user_identifier,$termination_date,$this->identificator);
+                }
             }
         }
     }

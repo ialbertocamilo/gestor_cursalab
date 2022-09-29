@@ -45,58 +45,79 @@ use App\Imports\MigracionPerfilImport;
 
 use Illuminate\Support\Facades\Storage;
 use App\Imports\UsuariosFarmaHistorialImport;
+use App\Models\Massive\ChangeStateUserMassive;
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class MasivoController extends Controller
 {
 
-    public function index(Request $request){
-        $data = [];
-        $q_err_usu = DB::table('err_masivos')->where('type_masivo','usuarios')->count();
-        $q_err_cambio = DB::table('err_masivos')->where('type_masivo','ciclos_carreras')->count();
-        $q_err_desct_usu = DB::table('err_masivos')->where('type_masivo','cesados')->count();
-        $q_err_activ_usu = DB::table('err_masivos')->where('type_masivo','activos')->count();
-        $q_err_cur_tem_eva = DB::table('err_masivos')->where(function ($q) {
-            $q->where('type_masivo', 'cursos')->orWhere('type_masivo', 'temas')->orWhere('type_masivo', 'evaluaciones');
-        })->count();
-        $info_error = json_encode(compact(
-            'q_err_usu', 
-            'q_err_cambio', 
-            'q_err_activ_usu', 
-            'q_err_desct_usu', 
-            'q_err_cur_tem_eva' 
-        ));
-        return view('masivo.index')->with(compact('data','info_error'));
-    }
+    // public function index(Request $request){
+    //     $data = [];
+    //     $q_err_usu = DB::table('err_masivos')->where('type_masivo','usuarios')->count();
+    //     $q_err_cambio = DB::table('err_masivos')->where('type_masivo','ciclos_carreras')->count();
+    //     $q_err_desct_usu = DB::table('err_masivos')->where('type_masivo','cesados')->count();
+    //     $q_err_activ_usu = DB::table('err_masivos')->where('type_masivo','activos')->count();
+    //     $q_err_cur_tem_eva = DB::table('err_masivos')->where(function ($q) {
+    //         $q->where('type_masivo', 'cursos')->orWhere('type_masivo', 'temas')->orWhere('type_masivo', 'evaluaciones');
+    //     })->count();
+    //     $info_error = json_encode(compact(
+    //         'q_err_usu', 
+    //         'q_err_cambio', 
+    //         'q_err_activ_usu', 
+    //         'q_err_desct_usu', 
+    //         'q_err_cur_tem_eva' 
+    //     ));
+    //     return view('masivo.index')->with(compact('data','info_error'));
+    // }
     public function downloadTemplateUser(){
         return Excel::download(new UserMassiveTemplate, 'plantilla_usuarios.xlsx');
     }
     public function createUpdateUsers(Request $request){
+        $validator = $this->validateFile($request);
+        if (!$validator){
+            return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+        }
+        $import = new UserMassive();
+        Excel::import($import, $request->file('file'));
+        return $this->success(['message' => 'Usuarios creados correctamente.','datos_procesados'=>$import->processed_users,'errores'=>$import->errors]);
+    }
+    public function activeUsers(Request $request){
+        $validator = $this->validateFile($request);
+        if (!$validator){
+            return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+        }
+        $import = new ChangeStateUserMassive();
+        $import->identificator = 'document';
+        $import->state_user_massive = 1;
+        Excel::import($import, $request->file('file'));
+        return $this->success(['message' => 'Usuarios activados correctamente.','datos_procesados'=>$import->q_change_status,'errores'=>$import->errors]);
+    }
+    public function inactiveUsers(Request $request){
+        $validator = $this->validateFile($request);
+        if (!$validator){
+            return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+        }
+        $import = new ChangeStateUserMassive();
+        $import->identificator = 'document';
+        $import->state_user_massive = 0;
+        Excel::import($import, $request->file('file'));
+        return $this->success(['message' => 'Usuarios inactivados correctamente.','datos_procesados'=>$import->q_change_status,'errores'=>$import->errors]);
+    }
+    private function validateFile($request){
         $input = $request->all();
         $rules = array(
-            'file_usuarios'   => 'required',
+            'file'   => 'required',
         );
-
         $validator = \Validator::make($input, $rules);
-  
         if ($validator->fails()){
-            return response()->json(['info'=>'Archivo requerido.']);
+            return false;
         }
-        if ($request->hasFile("file_usuarios")){
-            // try {
-                $import = new UserMassive();
-                Excel::import($import, $request->file('file_usuarios'));
-                // $info = '';
-                // $info =$info.$import->get_qinsert().' nuevo(s) usuarios(s) <br>';
-                // $info =$info.$import->get_q_updates().' usuario(s) actualizados <br>';
-                // $info =$info.$import->get_q_errors().' error(es) detectado(s) <br>';
-                // $error= ($import->get_q_errors()>0) ? true : false;
-                // $q_error = $import->get_q_errors();
-                return $this->success(['msg' => 'Usuarios creados correctamente.','datos_procesados'=>$import->processed_users,'errores'=>$import->errors]);
+        if (!$request->hasFile("file")){
+            return false;
         }
-        return response()->json(['info'=>'Error']);
-    }
+        return true;
+    } 
     // public function index(Request $request){
     //     $data = [];
     //     $err_usu = DB::table('err_masivos')->where('type_masivo','usuarios')->count();
