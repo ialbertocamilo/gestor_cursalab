@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -45,6 +46,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     use CustomCRUD, CustomAudit, CustomMedia;
 
     use InteractsWithMedia;
+
+    use Notifiable;
 
     use Cachable;
 
@@ -659,5 +662,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $puntos_intentos = $attempts * 0.5;
 
         return $puntos_promedio + $puntos_cursos - $puntos_intentos;
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new UserResetPasswordNotification($token));
     }
 }

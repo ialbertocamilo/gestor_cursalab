@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
-use App\Http\Controllers\Test\TestController;
+use App\Http\Controllers\Auth\ForgotPasswordApiController;
+use App\Http\Controllers\Auth\ResetPasswordApiController;
 use App\Http\Controllers\FirebaseController;
 use Illuminate\Support\Facades\Route;
 
@@ -76,6 +77,10 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::post('registrar_soporte_login', [RestAyudaController::class, 'registra_ayuda_login']);
     Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
 });
+
+Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);
+Route::post('password/reset', [ResetPasswordApiController::class, 'reset']);
+
 //Route::controller(TestController::class)->group(function () {
 //
 //    Route::get('/test/users', 'users');
