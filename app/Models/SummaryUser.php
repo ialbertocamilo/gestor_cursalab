@@ -61,6 +61,7 @@ class SummaryUser extends Summary
         $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
 
         $user_data = [
+            'courses_assigned' => count($courses_id),
             'courses_completed' => $tot_com,
             'grade_average' => $grade_average,
             // 'cur_asignados' => $row_user->courses_assigned,
