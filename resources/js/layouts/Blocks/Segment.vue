@@ -7,7 +7,7 @@
                 </v-card-title>
                 <v-card-text class="py-5">
                     ¿Está seguro de eliminar este segmento de segmentación?
-                    <br />
+                    <br/>
                     Después de guardar, esta acción no podrá revertirse.
                 </v-card-text>
                 <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
@@ -35,19 +35,19 @@
             />
         </v-col>
 
-        <v-divider class="mx-3" />
+        <v-divider class="mx-3"/>
 
         <v-col cols="12" md="12" lg="12">
-			<span class="mb-2">Selecciona valores:</span>
+            <span class="mb-2">Selecciona valores:</span>
 
             <segment-values
                 v-for="(criterion, index) in segment.criteria_selected"
                 :key="index"
                 :criterion="criterion"
-                @agregarRangoItems="agregarRango($event)"
+                @addDateRange="addDateRange($event)"
             />
 
-            <v-divider class="" />
+            <v-divider class=""/>
 
             <v-col
                 cols="12"
@@ -71,6 +71,7 @@
 
 <script>
 import SegmentValues from "./SegmentValues";
+
 export default {
     components: {
         SegmentValues
@@ -121,10 +122,14 @@ export default {
         // vue.new_criteria = x
     },
     methods: {
-        agregarRango(data) {
+        addDateRange(data) {
             let vue = this;
-            let criterion = vue.segment.criteria.find(obj => obj.id == data.id);
-            criterion.rangos_seleccionados = data.rangos_seleccionados;
+            console.log("addDateRange", data)
+            let criterion = vue.segment.criteria_selected.find(criterion => criterion.code === data.criterion_code);
+
+            if (criterion){
+                criterion.values_selected = data.date_range_selected
+            }
         },
         async loadData(resource) {
             let vue = this;
@@ -137,7 +142,7 @@ export default {
             let base = `${vue.options.base_endpoint}`;
             let url = `${base}/create`;
 
-            await vue.$http.get(url).then(({ data }) => {
+            await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
 
                 // vue.segments = _data.segments

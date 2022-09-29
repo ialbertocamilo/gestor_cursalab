@@ -44,11 +44,14 @@ class Segment extends BaseModel
 
     protected function getCriteriaByWorkspace($workspace)
     {
-        return Criterion::select('id', 'name', 'position', 'code')->with(['values' => function ($q) use ($workspace) {
-            $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
-            // $q->select('id', 'value_text', 'position');
-            $q->whereIn('id', $values->pluck('id')->toArray());
-        }])
+        return Criterion::select('id', 'name', 'position', 'code', 'field_id')
+            ->with([
+                'field_type:id,name,code',
+                'values' => function ($q) use ($workspace) {
+                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
+                    // $q->select('id', 'value_text', 'position');
+                    $q->whereIn('id', $values->pluck('id')->toArray());
+                }])
             ->whereHas('workspaces', function ($q) use ($workspace) {
                 $q->where('workspace_id', $workspace->id);
             })
@@ -112,8 +115,10 @@ class Segment extends BaseModel
         $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
 
         foreach ($criteria_selected as $key => $criterion) {
+
             $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
 
+            //TODO: Set values by criterion->field_type->code
             $segment_values_selected = [];
 
             foreach ($grouped as $g) {
@@ -154,7 +159,6 @@ class Segment extends BaseModel
         }
 
 //        $criteria_selected = SegmentSearchUsersResource::collection($criteria_selected);
-
 //        return $criteria_selected;
         return $temp;
     }
@@ -165,7 +169,6 @@ class Segment extends BaseModel
 
 
             DB::beginTransaction();
-
 
 
             $this->storeDirectSegmentation($request);
@@ -218,20 +221,38 @@ class Segment extends BaseModel
             $values = [];
 
             foreach ($segment_row['criteria_selected'] ?? [] as $criterion) {
+                //TODO: Save by field_type.code
+                $values = match ($criterion->field_type?->code) {
+                    'default' => $this->prepareDefaultValues($criterion),
+                    'criterio-rango-de-fechas' => $this->prepareDateRangeValues($criterion),
+                    default => [],
+                };
 
-                foreach ($criterion['values_selected'] ?? [] as $value) {
-
-                    $values[] = [
-                        'id' => $value['segment_value_id'] ?? null,
-                        'criterion_value_id' => $value['id'],
-                        'criterion_id' => $criterion['id'],
-                        'type_id' => NULL,
-                    ];
-                }
             }
 
             $segment->values()->sync($values);
         }
+    }
+
+    public function prepareDefaultValues($criterion)
+    {
+        $temp = [];
+        foreach ($criterion['values_selected'] ?? [] as $value) {
+
+            $temp[] = [
+                'id' => $value['segment_value_id'] ?? null,
+                'criterion_value_id' => $value['id'],
+                'criterion_id' => $criterion['id'],
+                'type_id' => NULL,
+            ];
+        }
+
+        return $temp;
+    }
+
+    public function prepareDateRangeValues()
+    {
+
     }
 
     public function storeSegmentationByDocument($data)

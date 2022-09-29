@@ -15,6 +15,8 @@ use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Benchmark;
+
 // use App\Http\Controllers\ZoomApi;
 
 class SegmentController extends Controller
@@ -82,6 +84,27 @@ class SegmentController extends Controller
 
     public function syncUsersDocumentToCriterionValues()
     {
+
+        $direct_segmentation = Taxonomy::create([
+            'group' => 'segment',
+            'type' => 'type',
+            'code' => 'direct-segmentation',
+            'name' => 'Segmentación directa',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'segment',
+            'type' => 'type',
+            'code' => 'segmentation-by-document',
+            'name' => 'Segmentación por documento',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        Segment::update(['type_id' => $direct_segmentation?->id]);
+
         $document_criterion = Criterion::firstOrCreate(
             [
                 'code' => 'document',
@@ -130,6 +153,15 @@ class SegmentController extends Controller
                 }
             });
 
+    }
+
+
+    public function benchmark()
+    {
+        Benchmark::dd([
+            'Sceneario 1' => fn () => User::find(1),
+            'Sceneario 2' => fn () => User::all()->count(),
+        ]);
     }
 
 }
