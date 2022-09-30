@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(TaxonomySeederType::class);
 //         $this->call(TaxonomySeederCourseType::class);
 //         $this->call(TaxonomySeederSummarySource::class);
-         $this->call(TaxonomySeederSegmentType::class);
+         $this->call(TaxonomySeederCriterionType::class);
 
 
         // $this->call(BouncerSeeder::class);

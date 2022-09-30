@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\SegmentSearchUsersResource;
 use App\Models\CriterionValue;
 use App\Models\Criterion;
+use App\Models\SegmentValue;
 use App\Models\Taxonomy;
 use App\Models\Segment;
 
@@ -82,10 +83,33 @@ class SegmentController extends Controller
         return $this->success($users);
     }
 
+    public function syncSegmentValuesType()
+    {
+        $criterion_value_type = Taxonomy::firstOrCreate([
+            'group' => 'segment-value',
+            'type' => 'type',
+            'code' => 'criterion-value',
+            'name' => 'Valor de criterio',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        $date_range_type = Taxonomy::firstOrCreate([
+            'group' => 'segment-value',
+            'type' => 'type',
+            'code' => 'date-range',
+            'name' => 'Rango de fechas',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        SegmentValue::query()->update(['type_id' => $criterion_value_type?->id]);
+    }
+
     public function syncUsersDocumentToCriterionValues()
     {
 
-        $direct_segmentation = Taxonomy::create([
+        $direct_segmentation = Taxonomy::firstOrCreate([
             'group' => 'segment',
             'type' => 'type',
             'code' => 'direct-segmentation',
@@ -94,7 +118,7 @@ class SegmentController extends Controller
             'position' => 1,
         ]);
 
-        Taxonomy::create([
+        Taxonomy::firstOrCreate([
             'group' => 'segment',
             'type' => 'type',
             'code' => 'segmentation-by-document',
@@ -153,15 +177,6 @@ class SegmentController extends Controller
                 }
             });
 
-    }
-
-
-    public function benchmark()
-    {
-        Benchmark::dd([
-            'Sceneario 1' => fn () => User::find(1),
-            'Sceneario 2' => fn () => User::all()->count(),
-        ]);
     }
 
 }
