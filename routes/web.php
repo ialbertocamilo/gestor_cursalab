@@ -125,6 +125,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('aulas-virtuales')->middleware('checkrol:admin')->group(base_path('routes/cms/meetings.php'));
 
     Route::prefix('masivos')->middleware('checkrol:admin')->group(base_path('routes/cms/masivos.php'));
+    Route::prefix('importar-notas')->middleware('checkrol:admin')->group(base_path('routes/cms/importar-notas.php'));
 
     Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 });

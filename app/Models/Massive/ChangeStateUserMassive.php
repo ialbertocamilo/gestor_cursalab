@@ -20,31 +20,29 @@ class ChangeStateUserMassive implements ToCollection{
         //Delete header
         $rows->shift();
         // process dni or email <- change state user where dni or email 
-        $this->process_data($rows);
+        $this->processData($rows);
         $this->q_errors = count($this->errors);
     }
-    private function process_data($rows){
-        foreach ($rows as $row) {
+    private function processData($rows){
+        foreach ($rows->toArray() as $row) {
             if(!is_null($row)){
-                $this->search_user($row,$this->identificator);
+                $user_identifier = is_array($row) ? $row[0] : $row;
+                $termination_date = is_array($row) ? $row[1] : null;
+                if($user_identifier){
+                    $this->changeStatusUser($user_identifier,$termination_date,$this->identificator);
+                }
             }
         }
     }
-    private function search_user($row,$identificator){
-        $user = User::where(trim($identificator),$row)->select('id')->first();
+    private function changeStatusUser($user_identifier,$termination_date,$identificator){
+        $user = User::where(trim($identificator),$user_identifier)->first();
         if($user){
-            $user->updateStatusUser($this->state_user_massive);
+            $user->updateStatusUser($this->state_user_massive,$termination_date);
+            $this->q_change_status++;
         }else{
             //ERRORES
-            $this->errors[]= ['type'=>'Resource not found.','message'=>'Resource not found.','value'=>$row];
+            $this->errors[]= ['type'=>'Resource not found.','message'=>'Resource not found.','value'=>$user_identifier];
         }
-    }
-    private function inactivar_usuario($user){
-        $user->active = $this->state_user_massive;
-        $user->save();
-        $termination_date = ($user->active) ? null : now();
-        $user->criterion_values()->sync(['termination_date'=>$termination_date]);
-        $this->q_change_status++;
     }
     public function getStaticHeader(){
         return collect(['DNI']);

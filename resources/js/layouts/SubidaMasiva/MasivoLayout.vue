@@ -7,14 +7,18 @@
         </v-card>
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
+                <v-row>
+                    <v-col cols="12">
+                        <v-alert
+                            dense
+                            type="info"
+                            v-show="s_alert"
+                            v-html="msg_alert"
+                            >
+                        </v-alert>
+                    </v-col>
+                </v-row>
                 <v-row class="justify-content-start">
-                <v-alert
-                    dense
-                    type="info"
-                    v-show="s_alert"
-                    v-html="msg_alert"
-                    >
-                </v-alert>
                     <v-col cols="12" md="5" sm="5">
                         <DefaultSelect
                             class="ml-4"
@@ -32,15 +36,20 @@
                     </v-col>
                 </v-row>
                 <mUsuarios :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" :q_error="0" @update_q_error="onUpdate_q_error" />
+                <ActivarUsuarios :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" :q_error="0" />
+                <InactivarUsuarios :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" :q_error="0" />
             </v-card-text>
         </v-card>
     </section>
 </template>
 <script>
 import mUsuarios from "../../components/SubidaMasiva/usuarios/SubidaUsuarios.vue";
+import ActivarUsuarios from "../../components/SubidaMasiva/activar/ActivarUsuarios.vue";
+import InactivarUsuarios from "../../components/SubidaMasiva/desactivar/DesactivarUsuarios.vue"
+
 
 export default {
-  components:{ mUsuarios},
+  components:{ mUsuarios,ActivarUsuarios,InactivarUsuarios },
   data() {
     return {
       info_error:0,
@@ -52,17 +61,17 @@ export default {
       process_id : 1,
       list_massive_processes:[
           {id:1,nombre:'Creación/Actualización de usuarios',url_template:'/masivos/download-template-user'},
-        //   {id:2,nombre:'Desactivar(Cesar) usuarios',url_template:''},
-        //   {id:3,nombre:'Activar Usuarios',url_template:''},
+          {id:2,nombre:'Activar Usuarios',url_template:'/templates/Plantilla_activar_usuarios.xlsx'},
+          {id:3,nombre:'Desactivar(Cesar) usuarios',url_template:'/templates/Plantilla_cesar_usuarios.xlsx'},
         //   {id:4,nombre:'Actualización de usuarios',url_template:''},
         //   {id:5,nombre:'Subida de cursos',url_template:''},
       ],
     };
   },
   methods:{
-      show_alert_msg(mensaje){
+      show_alert_msg(message){
             this.s_alert=true;
-            this.msg_alert = mensaje;
+            this.msg_alert = message;
       },
       change_select(){
             let vue = this;

@@ -35,6 +35,11 @@ class CriterionValue extends BaseModel
         return $this->belongsToMany(Workspace::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
     protected function getListForSelect($criterion_code = null, $criterion_id = null)
     {
         $value_param = 'value_text';
@@ -93,11 +98,12 @@ class CriterionValue extends BaseModel
 
             endif;
 
-            if ($data['workspace_id'])
+            if ($data['workspace_id'] ?? false)
                 $model->workspaces()->syncWithoutDetaching([$data['workspace_id']]);
 
             DB::commit();
 
+            return $model;
         } catch (\Exception $e) {
 //            info($e);
             DB::rollBack();

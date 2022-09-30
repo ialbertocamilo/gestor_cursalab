@@ -17,6 +17,7 @@
 					locale="es-PE"
 					aria-controls="date-start"
 					today-button
+                    right
 					label-today-button="Hoy"
 					reset-button
 					label-reset-button="Reiniciar"
@@ -41,6 +42,7 @@
 					locale="es-PE"
 					aria-controls="date-start"
 					today-button
+                    right
 					label-today-button="Hoy"
 					reset-button
 					label-reset-button="Reiniciar"

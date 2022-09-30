@@ -19,10 +19,10 @@ class UserMassive implements ToCollection{
     public function collection(Collection $rows){
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
-        if(!is_null($this->current_workspace)){
+        if(is_null($this->current_workspace)){
             $this->current_workspace = get_current_workspace();
         }
-        $current_workspace = $this->current_workspace;
+        // $current_workspace = $this->current_workspace;
         $criteria = Criterion::query()
             ->with([
                 // 'values' => function ($q) use ($current_workspace) {
@@ -73,7 +73,7 @@ class UserMassive implements ToCollection{
             if(!$data_user['has_error']){
                 //Insert user and criteria
                 $user = User::where('document',$data_user['user']['document'])->first();
-                User::storeRequest($data_user['user'],$user);
+                User::storeRequest($data_user['user'],$user,false);
                 $this->processed_users ++;
             }else{
                 //set errors
@@ -89,7 +89,12 @@ class UserMassive implements ToCollection{
         $has_error = false;
         $errors_index = [];
         $user = [];
+        $email_index = null;
+        $username_index = null;
         foreach ($data_users as $key => $dt) {
+            ($dt['code']=='email') && $email_index = $dt['index'];
+            ($dt['code']=='username') && $username_index = $dt['index'];
+
             if(empty($dt['value_excel']) && $dt['required']){
                 $has_error = true;
                 $errors_index[] = [
@@ -101,6 +106,27 @@ class UserMassive implements ToCollection{
             $user[$dt['code']] = $dt['value_excel'];
             if($dt['code']=='active'){
                 $user[$dt['code']] = ($dt['value_excel'] == 'Active') ? 1 : 0;
+            }
+        }
+        //verify username and email fields are unique
+        $user_username_email =  User::where(function($q)use($user){
+            isset($user['username']) && $q->where('username',$user['username']);
+            isset($user['email']) && $q->where('email',$user['email']);
+        })->where('document','<>',$user['document'])->select('email','username')->first();
+        if($user_username_email ){
+            if( $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
+                $has_error = true;
+                $errors_index[] = [
+                    'index'=>$username_index,
+                    'message'=>'The field username must be unique.'
+                ];
+            }
+            if($user['email']!='' && !is_null($user_username_email->email) && strtolower($user_username_email->email) == strtolower($user['email'])){
+                $has_error = true;
+                $errors_index[] = [
+                    'index'=>$email_index,
+                    'message'=>'The field email must be unique.'
+                ];
             }
         }
         if(!$has_error){

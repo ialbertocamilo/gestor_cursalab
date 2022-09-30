@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->nullableMorphs('model');
 
+            $table->foreignId('type_id')->nullable()->constrained('taxonomies');
+
             $table->boolean('active')->nullable();
 
             $table->timestamps();

@@ -44,7 +44,7 @@ class enviar_notificaciones extends Command
     public function handle()
     {
         $this->info(" Inicio: " . now());
-        info(" Inicio: " . now());
+//        info(" Inicio: " . now());
 
         $notificaciones = PushNotification::whereIn('estado_envio', [1, 2])->get();
 //        info($notificaciones->count());
@@ -75,8 +75,8 @@ class enviar_notificaciones extends Command
             $not->save();
 
         }
+//        info(" Fin: " . now());
         $this->info(" Fin: " . now());
-        info(" Fin: " . now());
     }
 
     public function enviarNotificacion_a_usuarios_x_Chunk(PushNotification $notificacion, $usuarios)

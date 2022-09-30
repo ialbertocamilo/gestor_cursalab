@@ -72,10 +72,9 @@
                 if(validar_data){
                     this.loading_guardar = true;
                     let data = new FormData();
-                    data.append("file_usuarios", this.archivo);
+                    data.append("file", this.archivo);
                     // console.log(data);
                     axios.post('/masivos/create-update-users',data).then((res)=>{
-                        let info = res.data.info;
                         this.loading_guardar = false;
                         if(res.data.error){
                             // const tipo = 'usuarios';
@@ -86,7 +85,13 @@
                                 }
                             );
                         }
-                        this.enviar_alerta(info);
+                        const data = res.data.data;
+                        const message = ` <ul>
+                            <li>${data.message}</li>
+                            <li>Cantidad de usuarios creados/actualizados: ${data.datos_procesados || 0}</li>
+                            <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
+                        </ul>`
+                        this.enviar_alerta(message);
                     }).catch(err=>{
                         this.loading_guardar = false;
                     });
