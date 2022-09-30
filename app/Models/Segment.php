@@ -263,7 +263,7 @@ class Segment extends BaseModel
             ];
         }
 
-        info($values);
+//        info($values);
 
         $segment->values()->sync($values);
     }

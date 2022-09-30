@@ -73,7 +73,7 @@ class SegmentController extends Controller
             })
             ->limit(50)->get();
 
-        info($users->count());
+//        info($users->count());
 
         $users = SegmentSearchUsersResource::collection($users);
 
@@ -82,6 +82,26 @@ class SegmentController extends Controller
 
     public function syncUsersDocumentToCriterionValues()
     {
+        info(now()->format("Y-m-d H:i:s"));
+
+        Taxonomy::create([
+            'group' => 'segment',
+            'type' => 'type',
+            'code' => 'direct-segmentation',
+            'name' => 'Segmentación directa',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        Taxonomy::create([
+            'group' => 'segment',
+            'type' => 'type',
+            'code' => 'segmentation-by-document',
+            'name' => 'Segmentación por documento',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
         $document_criterion = Criterion::firstOrCreate(
             [
                 'code' => 'document',
@@ -103,7 +123,7 @@ class SegmentController extends Controller
 
         $direct_segmentation = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
 
-        Segment::update(['type_id' => $direct_segmentation?->id]);
+        Segment::whereIn('active', [ACTIVE, INACTIVE])->update(['type_id' => $direct_segmentation?->id]);
 
         User::whereNotNull('document')->with('subworkspace.parent')
             ->select('id', 'document', 'subworkspace_id')
@@ -130,6 +150,7 @@ class SegmentController extends Controller
                 }
             });
 
+        info(now()->format("Y-m-d H:i:s"));
     }
 
 }
