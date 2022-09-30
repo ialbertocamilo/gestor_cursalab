@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SegmentSearchUsersResource;
+use App\Imports\SegmentSearchByDocumentImport;
 use App\Models\CriterionValue;
 use App\Models\Criterion;
 use App\Models\Taxonomy;
@@ -14,6 +15,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 // use App\Http\Controllers\ZoomApi;
 
@@ -63,10 +66,25 @@ class SegmentController extends Controller
     {
         $data = $request->all();
 
+        $documents = null;
+        if ($request->has('data')) {
+            $import = new SegmentSearchByDocumentImport($data);
+            Excel::import($import, $data['file']);
+
+            $documents = $import->getProccesedData();
+        }
+
+        info($documents);
+
         $workspace = get_current_workspace();
 
         $users = User::query()
-            ->filterText($data['filter_text'])
+            ->when($data['filter_text'] ?? null, function ($q) use ($data) {
+                $q->filterText($data['filter_text']);
+            })
+            ->when($documents ?? null, function ($q) use ($documents) {
+                $q->whereIn('document', $documents);
+            })
             ->select('id', 'name', 'surname', 'lastname', 'document')
             ->withWhereHas('criterion_values', function ($q) use ($data) {
                 $q->select('id', 'value_text')
@@ -75,8 +93,6 @@ class SegmentController extends Controller
             })
             ->whereRelation('subworkspace', 'parent_id', $workspace?->id)
             ->limit(50)->get();
-
-//        info($users->count());
 
         $users = SegmentSearchUsersResource::collection($users);
 
