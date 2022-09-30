@@ -2,11 +2,13 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use App\Models\Curso;
 use App\Models\Posteo;
 use App\Models\Prueba;
 use App\Models\Visita;
 use App\Models\Abconfig;
+use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\UsuarioCurso;
 use Illuminate\Console\Command;
@@ -49,7 +51,27 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_estado_tema();
         // $this->restablecer_estado_tema_2();
         // $this->restablecer_matricula();
-        $this->restablecer_preguntas();
+        // $this->restablecer_preguntas();
+        $this->restoreCriterionValues();
+    }
+    public function restoreCriterionValues(){
+        $criteria = Criterion::with('values')->whereRelation('field_type','code','date')->get();
+        $bar = $this->output->createProgressBar($criteria->count());
+        $bar->start();
+        foreach ($criteria as $criterion) {
+            $bar_2 = $this->output->createProgressBar($criterion->values->count());
+            $bar_2->start();
+            foreach ($criterion->values as $value) {
+                $date_parse = Carbon::parse($value->value_text)->format('Y-m-d');
+                $value->value_text = $date_parse;
+                $value->value_date = $date_parse;
+                $value->save();
+                $bar_2->advance();
+            }
+            $bar_2->finish();
+            $bar->advance();
+        }
+        $bar->finish();
     }
     public function restablecer_preguntas(){
         // [{"preg_id":385,"sel":"1"},{"preg_id":381,"sel":"2"},{"preg_id":380,"sel":"1"},{"preg_id":379,"sel":"4"}] <-Antiguo
