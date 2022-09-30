@@ -111,7 +111,7 @@
 export default {
     data() {
         return {
-            base_url: '/masivos/importar-notas',
+            base_url: '/importar-notas',
             archivo: null,
             arrays: {
                 evaluation_types: [
@@ -213,11 +213,11 @@ export default {
 
             if (!vue.select.school) return true;
             if (!vue.select.course) return true;
-            if (vue.select.evaluation_type && vue.select.topics.length === 0) return true;
+            if (vue.select.evaluation_tpye && vue.select.topics.length === 0) return true;
             // if (vue.select.topics.length === 0) return true;
             return !vue.archivo;
         },
-        descargarPlantilla() {
+        descargarPlantill(a) {
             let vue = this;
             let headers = ["DNI", "NOTA", "INTENTOS", "VISITAS", "NÚMERO RESPUESTAS CORRECTAS",
                 "NÚMERO RESPUESTAS INCORRECTAS", "FECHA DE EVALUACIÓN"];

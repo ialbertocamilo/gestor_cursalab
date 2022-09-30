@@ -55,8 +55,7 @@ class UsuarioController extends Controller
         if (Auth::check()) {
 
             $user = Auth::user();
-            $session = $request->session()->all();
-            $workspace = $session['workspace'];
+            $workspace = session('workspace');
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
             $roles = AssignedRole::getUserAssignedRoles($user->id);
 
@@ -177,6 +176,8 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
+        $data['workspace_id'] = get_current_workspace();
+
         User::storeRequest($data);
 
         return $this->success(['msg' => 'Usuario creado correctamente.']);
@@ -186,6 +187,8 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
+        $data['workspace'] = get_current_workspace()?->id;
+//        info($data);
         User::storeRequest($data, $user);
 
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);

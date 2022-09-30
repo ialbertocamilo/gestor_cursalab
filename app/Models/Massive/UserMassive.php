@@ -114,14 +114,14 @@ class UserMassive implements ToCollection{
             isset($user['email']) && $q->where('email',$user['email']);
         })->where('document','<>',$user['document'])->select('email','username')->first();
         if($user_username_email ){
-            if(isset($user['username']) && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
+            if( $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$username_index,
                     'message'=>'The field username must be unique.'
                 ];
             }
-            if(isset($user['email']) && !is_null($user_username_email->email) && strtolower($user_username_email->email) == strtolower($user['email'])){
+            if($user['email']!='' && !is_null($user_username_email->email) && strtolower($user_username_email->email) == strtolower($user['email'])){
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$email_index,
