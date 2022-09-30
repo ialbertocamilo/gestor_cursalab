@@ -551,7 +551,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
-            'schools',
+            'schools' => function ($query) {
+                $query->where('active', ACTIVE);
+            },
             'topics' => [
                 'evaluation_type',
                 'requirements',
@@ -560,8 +562,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'polls.questions',
             'topics.evaluation_type'
         ])
-            ->whereHas('topics', function ($q) {$q->where('active', ACTIVE);})
-            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+//            ->whereHas('topics', function ($q) {
+//                $q->where('active', ACTIVE);
+//            })
+//            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+            ->whereRelation('schools', 'active', ACTIVE)
+            ->whereRelation('segments', 'active', ACTIVE)
+            ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
             ->where('active', ACTIVE)
             ->get();

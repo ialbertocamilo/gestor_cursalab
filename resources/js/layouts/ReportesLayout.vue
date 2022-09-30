@@ -67,12 +67,12 @@ TABS
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-book-outline</v-icon>
-                    <span class="pt-2">
-                        Evaluaciones abiertas
-                    </span>
-                </v-tab>
+<!--                <v-tab class="justify-content-start py-7">-->
+<!--                    <v-icon left>mdi-book-outline</v-icon>-->
+<!--                    <span class="pt-2">-->
+<!--                        Evaluaciones abiertas-->
+<!--                    </span>-->
+<!--                </v-tab>-->
 
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-restart</v-icon>
@@ -88,12 +88,12 @@ TABS
                     </span>
                 </v-tab>
 -->
-                <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-file-account-outline</v-icon>
-                    <span class="pt-2">
-                        Usuario Uploads
-                    </span>
-                </v-tab>
+<!--                <v-tab class="justify-content-start py-7">-->
+<!--                    <v-icon left>mdi-file-account-outline</v-icon>-->
+<!--                    <span class="pt-2">-->
+<!--                        Usuario Uploads-->
+<!--                    </span>-->
+<!--                </v-tab>-->
 <!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
@@ -234,17 +234,17 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <EvaAbiertas
-                                :workspaceId="workspaceId"
-                                :modules="modules"
-                                :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
+<!--                <v-tab-item>-->
+<!--                    <v-card flat>-->
+<!--                        <v-card-text>-->
+<!--                            <EvaAbiertas-->
+<!--                                :workspaceId="workspaceId"-->
+<!--                                :modules="modules"-->
+<!--                                :reportsBaseUrl="reportsBaseUrl"-->
+<!--                                @emitir-reporte="crearReporte"/>-->
+<!--                        </v-card-text>-->
+<!--                    </v-card>-->
+<!--                </v-tab-item>-->
 
                 <v-tab-item>
                     <v-card flat>
@@ -266,16 +266,16 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 -->
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <UsuarioUploads
-                                :workspaceId="workspaceId"
-                                :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
+<!--                <v-tab-item>-->
+<!--                    <v-card flat>-->
+<!--                        <v-card-text>-->
+<!--                            <UsuarioUploads-->
+<!--                                :workspaceId="workspaceId"-->
+<!--                                :reportsBaseUrl="reportsBaseUrl"-->
+<!--                                @emitir-reporte="crearReporte"/>-->
+<!--                        </v-card-text>-->
+<!--                    </v-card>-->
+<!--                </v-tab-item>-->
 <!--
                 <v-tab-item>
                     <v-card flat>
