@@ -161,8 +161,7 @@ export default {
             const url = `/segments/search-users`;
             vue.$http.post(url, formData)
                 .then(({data}) => {
-
-                    console.log({data});
+                    vue.filter_result = data.data;
 
                     vue.file = null;
 
