@@ -571,7 +571,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
-            'schools',
+            'schools' => function ($query) {
+                $query->where('active', ACTIVE);
+            },
             'topics' => [
                 'evaluation_type',
                 'requirements',

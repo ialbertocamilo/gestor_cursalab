@@ -5,11 +5,12 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Arr;
+use MailerSend\LaravelDriver\MailerSendTrait;
 
 class SendEmailSupportLogin extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, MailerSendTrait;
 
     protected $usuario;
 
@@ -30,7 +31,11 @@ class SendEmailSupportLogin extends Mailable
      */
     public function build()
     {
-        return $this->subject('Soporte Gestor')
-            ->view('emails.soporte_login', ['usuario' => $this->usuario]);
+        $to = Arr::get($this->to, '0.address');
+
+        return $this->view('emails.soporte_login', ['usuario' => $this->usuario])
+            ->text('emails.soporte_login', ['usuario' => $this->usuario])
+            ->subject('Support Login')
+            ->mailersend(null);
     }
 }

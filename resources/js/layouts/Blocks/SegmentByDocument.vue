@@ -2,7 +2,7 @@
     <v-row>
         <v-col cols="12">
             <v-row>
-                <v-col cols="10">
+                <v-col cols="8" class="d-flex justify-content-center flex-row">
                     <DefaultInput
                         clearable dense
                         v-model="search"
@@ -11,9 +11,28 @@
                         :loading="autocomplete_loading"
                         class="col-11"
                     />
+                    <v-file-input
+                        show-size
+                        label="Suba el archivo"
+                        v-model="file"
+                        color="#796aee"
+                        hide-details="auto"
+                        dense
+                        outlined
+                        hide-input
+                        prepend-icon="mdi-file-upload"
+                        @change="uploadExcel"
+                        class="justify-end"
+                    >
+                        <template v-slot:append-outer>
+                        </template>
+                    </v-file-input>
                 </v-col>
-                <v-col cols="2">
-
+                <v-col cols="4">
+                    <a class="pt-2"
+                       href="/templates/Plantilla-Segmentacion.xlsx"
+                       v-text="'Descargar plantilla'"
+                    />
                 </v-col>
             </v-row>
             <v-row>
@@ -131,7 +150,28 @@ export default {
                     vue.filter_result.splice(index, 1);
             }
         },
-        resetFields(){
+        uploadExcel() {
+            let vue = this;
+
+            let formData = new FormData();
+            formData.append("file", vue.file);
+
+            vue.showLoader();
+
+            const url = `/segments/search-users`;
+            vue.$http.post(url, formData)
+                .then(({data}) => {
+                    vue.filter_result = data.data;
+
+                    vue.file = null;
+
+                    vue.hideLoader();
+                })
+                .catch(error => {
+                    vue.hideLoader();
+                })
+        },
+        resetFields() {
             let vue = this;
             vue.search = null;
             vue.filter_result = [];
