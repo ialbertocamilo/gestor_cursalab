@@ -87,14 +87,14 @@ TABS
                         Versiones usadas
                     </span>
                 </v-tab>
--->
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-file-account-outline</v-icon>
                     <span class="pt-2">
                         Usuario Uploads
                     </span>
                 </v-tab>
-<!--
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -265,7 +265,7 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
--->
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -276,7 +276,7 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-<!--
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
