@@ -10,7 +10,8 @@ class SummaryUser extends Summary
     protected $table = 'summary_users';
 
     protected $fillable = [
-        'last_time_evaluated_at', 'courses_assigned', 'user_id', 'attempts', 'score', 'grade_average', 'courses_completed'
+        'last_time_evaluated_at', 'courses_assigned', 'user_id', 'attempts', 'score',
+        'grade_average', 'courses_completed', 'advanced_percentage'
     ];
 
     public function user()
@@ -27,6 +28,10 @@ class SummaryUser extends Summary
     {
         $user = $user ?? auth()->user();
         $courses_id = $user->getCurrentCourses()->pluck('id');
+        $count_courses_assigned = count($courses_id);
+//        info($courses_id);
+//        info("COUNT COURSES ASSIGNED :: ". $count_courses_assigned);
+
         $row_user = SummaryUser::getCurrentRow(null, $user);
 
         $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
@@ -44,7 +49,13 @@ class SummaryUser extends Summary
             ->whereIn('course_id', $courses_id)
             ->count();
 
-        $percent_general = ($row_user->courses_assigned > 0) ? (($passed / $row_user->courses_assigned) * 100) : 0;
+//        info("PASSED :: ".$passed);
+
+        $percent_general = ($count_courses_assigned > 0) ? (($passed / $count_courses_assigned) * 100) : 0;
+
+//        info("PERCENT GENERAL :: ". $percent_general);
+//        info("===========================");
+
         $percent_general = ($percent_general > 100) ? 100 : $percent_general; // maximo porcentaje = 100
         $percent_general = round($percent_general);
 
@@ -61,10 +72,9 @@ class SummaryUser extends Summary
         $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
 
         $user_data = [
-            'courses_assigned' => count($courses_id),
+            'courses_assigned' => $count_courses_assigned,
             'courses_completed' => $tot_com,
             'grade_average' => $grade_average,
-            // 'cur_asignados' => $row_user->courses_assigned,
             'attempts' => $attempts,
             'score' => $score,
             'last_time_evaluated_at' => now(),
