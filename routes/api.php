@@ -81,6 +81,10 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);
 Route::post('password/reset', [ResetPasswordApiController::class, 'reset']);
 
+Route::get('notifications', function () {
+    return response()->json(['showNewAppNotification' => env('SHOW_NEW_APP_NOTIFICATION')]);
+});
+
 //Route::controller(TestController::class)->group(function () {
 //
 //    Route::get('/test/users', 'users');
