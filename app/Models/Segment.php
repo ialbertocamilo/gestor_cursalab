@@ -64,7 +64,13 @@ class Segment extends BaseModel
 
             $segments = Segment::with([
                 'type:id,name,code',
-                'values' => ['type:id,name,code', 'criterion:id,name,code,position', 'criterion_value:id,value_text']
+                'values' => [
+                    'type:id,name,code',
+                    'criterion:id,name,code,field_id',
+                    'criterion' => [
+                        'field_type:id,name,code'
+                    ],
+                    'criterion_value:id,value_text']
             ])
                 ->where('model_type', $model_type)
                 ->where('model_id', $model_id)
@@ -72,7 +78,7 @@ class Segment extends BaseModel
                 ->get();
 
             foreach ($segments as $segment) {
-
+//                dd($segment->values->pluck('type'));
 //                $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
 //
 //                foreach ($criteria_selected as $key => $criterion) {
@@ -115,10 +121,10 @@ class Segment extends BaseModel
         $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
 
         foreach ($criteria_selected as $key => $criterion) {
+//            dd($criterion);
 
             $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
 
-            //TODO: Set values by criterion->field_type->code
             $segment_values_selected = [];
 
             foreach ($grouped as $g) {
@@ -284,7 +290,7 @@ class Segment extends BaseModel
             ];
         }
 
-        info($values);
+//        info($values);
 
         $segment->values()->sync($values);
     }
