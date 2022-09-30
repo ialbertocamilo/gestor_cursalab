@@ -390,7 +390,7 @@ export default {
                         permission: "reportes",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
+                            "admin",
                             "trainer-TEMPORAL_INACTIVO",
                             "reports-TEMPORAL_INACTIVO"
                         ]
