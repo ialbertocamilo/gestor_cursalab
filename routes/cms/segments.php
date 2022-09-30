@@ -15,6 +15,8 @@ Route::controller(SegmentController::class)->group(function() {
 	Route::get('/{block}/edit', 'edit');
 	Route::put('/{block}/update', 'update');
 
+    Route::post('/search-users','searchUsers');
+
 	Route::delete('/{block}/destroy', 'destroy');
 });
 
