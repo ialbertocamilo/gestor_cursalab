@@ -580,10 +580,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'polls.questions',
             'topics.evaluation_type'
         ])
-            ->whereHas('topics', function ($q) {
-                $q->where('active', ACTIVE);
-            })
-            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+//            ->whereHas('topics', function ($q) {
+//                $q->where('active', ACTIVE);
+//            })
+//            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+            ->whereRelation('schools', 'active', ACTIVE)
+            ->whereRelation('segments', 'active', ACTIVE)
+            ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
             ->where('active', ACTIVE)
             ->get();
