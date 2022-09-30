@@ -162,8 +162,11 @@ export default {
 .box-selected-segmentation-document {
     padding: 10px 5px;
     min-height: 150px;
+    height: 100px;
     border: 1.5px solid $primary-default-color;
     border-radius: 10px;
+    overflow-x: hidden;
+    overflow-y: scroll;
 
     li {
         list-style: none;

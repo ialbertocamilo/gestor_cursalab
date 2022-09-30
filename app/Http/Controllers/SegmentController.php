@@ -63,6 +63,8 @@ class SegmentController extends Controller
     {
         $data = $request->all();
 
+        $workspace = get_current_workspace();
+
         $users = User::query()
             ->filterText($data['filter_text'])
             ->select('id', 'name', 'surname', 'lastname', 'document')
@@ -71,6 +73,7 @@ class SegmentController extends Controller
                     ->where('value_text', 'like', "%{$data['filter_text']}%")
                     ->whereRelation('criterion', 'code', 'document');
             })
+            ->whereRelation('subworkspace', 'parent_id', $workspace?->id)
             ->limit(50)->get();
 
 //        info($users->count());
