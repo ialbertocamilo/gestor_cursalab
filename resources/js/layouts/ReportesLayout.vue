@@ -25,12 +25,12 @@ TABS
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
-                    <span class="pt-2">
-                        Avance de currícula
-                    </span>
-                </v-tab>
+<!--                <v-tab class="justify-content-start py-7">-->
+<!--                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>-->
+<!--                    <span class="pt-2">-->
+<!--                        Avance de currícula-->
+<!--                    </span>-->
+<!--                </v-tab>-->
 <!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-certificate</v-icon>
@@ -166,17 +166,17 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <AvanceCurricula
-                                :workspaceId="workspaceId"
-                                :modules="modules"
-                                :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
+<!--                <v-tab-item>-->
+<!--                    <v-card flat>-->
+<!--                        <v-card-text>-->
+<!--                            <AvanceCurricula-->
+<!--                                :workspaceId="workspaceId"-->
+<!--                                :modules="modules"-->
+<!--                                :reportsBaseUrl="reportsBaseUrl"-->
+<!--                                @emitir-reporte="crearReporte"/>-->
+<!--                        </v-card-text>-->
+<!--                    </v-card>-->
+<!--                </v-tab-item>-->
                 <!--
                 <v-tab-item>
                     <v-card flat>
