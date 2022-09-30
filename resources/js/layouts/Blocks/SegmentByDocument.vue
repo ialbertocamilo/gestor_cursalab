@@ -164,6 +164,8 @@ export default {
 
                     console.log({data});
 
+                    vue.file = null;
+
                     vue.hideLoader();
                 })
                 .catch(error => {
