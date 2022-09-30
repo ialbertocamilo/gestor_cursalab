@@ -82,7 +82,10 @@ Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLin
 Route::post('password/reset', [ResetPasswordApiController::class, 'reset']);
 
 Route::get('notifications', function () {
-    return response()->json(['showNewAppNotification' => env('SHOW_NEW_APP_NOTIFICATION')]);
+    return response()->json([
+        'showNewAppNotification' => env('SHOW_NEW_APP_NOTIFICATION'),
+        'showCloseNotificationButton' => env('SHOW_CLOSE_NOTIFICATION_BUTTON')
+    ]);
 });
 
 //Route::controller(TestController::class)->group(function () {
