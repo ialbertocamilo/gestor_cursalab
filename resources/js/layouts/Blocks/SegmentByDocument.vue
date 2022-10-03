@@ -6,7 +6,7 @@
                     <DefaultInput
                         clearable dense
                         v-model="search"
-                        placeholder="Buscar por nombre o documento"
+                        placeholder="Buscar por nombre, correo o documento"
                         append-icon="mdi-magnify"
                         :loading="autocomplete_loading"
                         class="col-11"
@@ -22,14 +22,14 @@
                         hide-input
                         prepend-icon="mdi-file-upload"
                         @change="uploadExcel"
-                        class="justify-end"
+                        class="justify-end upload-file-segment"
                     >
                         <template v-slot:append-outer>
                         </template>
                     </v-file-input>
                 </v-col>
                 <v-col cols="4">
-                    <a class="pt-2"
+                    <a class="pt-2 justify-end"
                        href="/templates/Plantilla-Segmentacion.xlsx"
                        v-text="'Descargar plantilla'"
                     />
@@ -54,6 +54,12 @@
                         </ul>
                     </div>
                 </v-col>
+            </v-row>
+            <v-row>
+                <v-col cols="12">
+                    <span>Usuarios agregados:</span>
+                </v-col>
+
             </v-row>
             <v-row>
                 <v-col cols="12">
@@ -184,6 +190,10 @@ export default {
 
 <style lang="scss">
 @import "resources/sass/variables";
+
+.upload-file-segment .v-input__prepend-outer{
+    margin-top: 0px !important;
+}
 
 .box-document-segmentation-results {
     padding: 10px 5px;
