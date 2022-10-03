@@ -80,6 +80,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
 
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);
 Route::post('password/reset', [ResetPasswordApiController::class, 'reset']);
+Route::post('cambiar-contrasenia', [ResetPasswordApiController::class, 'reset']);
 
 Route::get('notifications', function () {
     return response()->json([
