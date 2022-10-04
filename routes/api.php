@@ -83,10 +83,16 @@ Route::post('password/reset', [ResetPasswordApiController::class, 'reset']);
 
 Route::get('notifications', function () {
     return response()->json([
-        'showNewAppNotification' => env('SHOW_NEW_APP_NOTIFICATION'),
-        'showCloseNotificationButton' => env('SHOW_CLOSE_NOTIFICATION_BUTTON')
+        'showModalM1' => env('SHOW_MODAL_M1'),
+        'showCloseButtonM1' => env('SHOW_CLOSE_BUTTON_M1'),
+        'showModalM2' => env('SHOW_MODAL_M2'),
+        'showCloseButtonM2' => env('SHOW_CLOSE_BUTTON_M2'),
+        'showModalM3' => env('SHOW_MODAL_M3'),
+        'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
+        'showMessageM4' => env('SHOW_MESSAGE_M4')
     ]);
 });
+
 
 //Route::controller(TestController::class)->group(function () {
 //
