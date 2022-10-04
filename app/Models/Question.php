@@ -36,7 +36,7 @@ class Question extends BaseModel
 
         if ($random) $questions = $questions->shuffle();
 
-        $questions = $questions->take($limit);
+        if ($limit) $questions = $questions->take($limit);
 
         if ($random) $this->setRandomOptions($questions);
 
@@ -76,31 +76,7 @@ class Question extends BaseModel
 
             $preguntas = $questionsRequired->merge($res['data']);
 
-            info('getQuestionsWithScoreForQuiz preguntas');
-            info($preguntas);
-
             $this->setRandomOptions($preguntas);
-            
-            //DESORDENAR PREGUNTAS
-            // foreach ($preguntas as $pregunta) {
-
-            //     // //crear variable donde estara el array modificado
-            //     // $val_decodificado = [];
-
-            //     // foreach ($pregunta->rptas_json as $obj) {
-            //     //     //borrando la respuestas
-            //     //     $obj['correcta'] = null;
-            //     //     //agregadno al array
-            //     //     array_push($val_decodificado, $obj);
-            //     // }
-
-            //     $pregunta->rpta_ok = NULL;
-
-            //     $shuffled = collect($pregunta->rptas_json)->shuffle()->all();
-            //     // $shuffled = collect($val_decodificado)->shuffle()->all();
-
-            //     $pregunta->rptas_json = $shuffled;
-            // }
 
             return $preguntas;
 

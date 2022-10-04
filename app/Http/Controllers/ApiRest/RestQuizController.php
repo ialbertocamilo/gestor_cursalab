@@ -128,7 +128,8 @@ class RestQuizController extends Controller
         if ($row->isOutOfTimeForQuiz())
             return response()->json(['data' => ['msg' => 'Fuera de tiempo'], 'error' => true], 200);
 
-        $limit = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'preg_x_ev');
+        $limit = NULL;
+        // $limit = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'preg_x_ev');
 
         // $limit = $config_quiz['preg_x_ev'] ?? 5;
 
