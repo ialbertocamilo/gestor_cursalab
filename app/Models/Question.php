@@ -75,6 +75,9 @@ class Question extends BaseModel
             endwhile;
 
             $preguntas = $questionsRequired->merge($res['data']);
+
+            info('getQuestionsWithScoreForQuiz preguntas');
+            info($preguntas);
             
             //DESORDENAR PREGUNTAS
             foreach ($preguntas as $pregunta) {
