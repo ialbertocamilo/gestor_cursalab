@@ -82,17 +82,20 @@ class Question extends BaseModel
             //DESORDENAR PREGUNTAS
             foreach ($preguntas as $pregunta) {
 
-                //crear variable donde estara el array modificado
-                $val_decodificado = [];
+                // //crear variable donde estara el array modificado
+                // $val_decodificado = [];
 
-                foreach ($pregunta->rptas_json as $obj) {
-                    //borrando la respuestas
-                    $obj['correcta'] = null;
-                    //agregadno al array
-                    array_push($val_decodificado, $obj);
-                }
+                // foreach ($pregunta->rptas_json as $obj) {
+                //     //borrando la respuestas
+                //     $obj['correcta'] = null;
+                //     //agregadno al array
+                //     array_push($val_decodificado, $obj);
+                // }
 
-                $shuffled = collect($val_decodificado)->shuffle()->all();
+                $pregunta->rpta_ok = NULL;
+
+                $shuffled = collect($pregunta->rptas_json)->shuffle()->all();
+                // $shuffled = collect($val_decodificado)->shuffle()->all();
 
                 $pregunta->rptas_json = $shuffled;
             }
