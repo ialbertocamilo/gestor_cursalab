@@ -36,7 +36,7 @@ class Question extends BaseModel
 
         if ($random) $questions = $questions->shuffle();
 
-        $questions = $questions->take($limit);
+        if ($limit) $questions = $questions->take($limit);
 
         if ($random) $this->setRandomOptions($questions);
 
@@ -75,24 +75,8 @@ class Question extends BaseModel
             endwhile;
 
             $preguntas = $questionsRequired->merge($res['data']);
-            
-            //DESORDENAR PREGUNTAS
-            foreach ($preguntas as $pregunta) {
 
-                //crear variable donde estara el array modificado
-                $val_decodificado = [];
-
-                foreach ($pregunta->rptas_json as $obj) {
-                    //borrando la respuestas
-                    $obj['correcta'] = null;
-                    //agregadno al array
-                    array_push($val_decodificado, $obj);
-                }
-
-                $shuffled = collect($val_decodificado)->shuffle()->all();
-
-                $pregunta->rptas_json = $shuffled;
-            }
+            $this->setRandomOptions($preguntas);
 
             return $preguntas;
 
@@ -131,6 +115,8 @@ class Question extends BaseModel
             {
                 $temp_questions->push(['id' => $key, 'opc' => $value]);
             }
+
+            $question->rpta_ok = NULL;
 
             $question->rptas_json = $temp_questions->shuffle()->all();
         }
