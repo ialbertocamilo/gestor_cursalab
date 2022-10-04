@@ -120,7 +120,7 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
     {
         if ($this->isQualified) {
             return [
-                'pregunta' => "required|unique:questions,pregunta,null,id,type_id,{$this->selectQuestionTypeId},topic_id,{$this->topic_id}|max:20000",
+                'pregunta' => "required|unique:questions,pregunta,null,id,type_id,{$this->selectQuestionTypeId},topic_id,{$this->topic_id},deleted_at,NULL|max:20000",
                 'respuesta_correcta' => 'required|in:A,B,C,D,E,F,G,H,I,J,a,b,c,d,e,f,g,h,i,j',
 
                 'a' => 'required|max:5000',
@@ -144,7 +144,7 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
             };
 
             return [
-                'pregunta' => "required|unique:questions,pregunta,null,id,type_id,{$this->writtenQuestionTypeId},topic_id,{$this->topic_id}|max:20000",
+                'pregunta' => "required|unique:questions,pregunta,null,id,type_id,{$this->writtenQuestionTypeId},topic_id,{$this->topic_id},deleted_at,NULL|max:20000",
             ];
         }
     }

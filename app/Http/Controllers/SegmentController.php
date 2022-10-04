@@ -79,13 +79,18 @@ class SegmentController extends Controller
         $workspace = get_current_workspace();
 
         $users = User::query()
+            ->withWhereHas('criterion_values', function ($q) use ($data) {
+                $q->select('id', 'value_text')
+                    // ->where('value_text', 'like', "%{$data['filter_text']}%")
+                    ->whereRelation('criterion', 'code', 'document');
+            })
             ->when($data['filter_text'] ?? null, function ($q) use ($data) {
-                $q->filterText($data['filter_text'])
-                    ->withWhereHas('criterion_values', function ($q) use ($data) {
-                        $q->select('id', 'value_text')
-                            ->where('value_text', 'like', "%{$data['filter_text']}%")
-                            ->whereRelation('criterion', 'code', 'document');
-                    });
+                $q->filterText($data['filter_text']);
+                    // ->withWhereHas('criterion_values', function ($q) use ($data) {
+                    //     $q->select('id', 'value_text')
+                    //         // ->where('value_text', 'like', "%{$data['filter_text']}%")
+                    //         ->whereRelation('criterion', 'code', 'document');
+                    // });
             })
             ->when($documents ?? null, function ($q) use ($documents) {
                 $q->whereIn('document', $documents);
