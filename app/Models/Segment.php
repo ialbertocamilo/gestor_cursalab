@@ -70,7 +70,8 @@ class Segment extends BaseModel
                     'criterion' => [
                         'field_type:id,name,code'
                     ],
-                    'criterion_value:id,value_text']
+                    'criterion_value:id,value_text'
+                ]
             ])
                 ->where('model_type', $model_type)
                 ->where('model_id', $model_id)
@@ -78,28 +79,7 @@ class Segment extends BaseModel
                 ->get();
 
             foreach ($segments as $segment) {
-//                dd($segment->values->pluck('type'));
-//                $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
-//
-//                foreach ($criteria_selected as $key => $criterion) {
-//                    $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
-//
-//                    $segment_values_selected = [];
-//
-//                    foreach ($grouped as $g) {
-//                        $new = $g['criterion_value'];
-//                        $new['segment_value_id'] = $g['id'];
-//
-//                        $segment_values_selected[] = $new;
-//                    }
-//
-//                    $criteria_selected[$key]['values'] = $criteria->where('id', $criterion['id'])->first()->values ?? [];
-//                    $criteria_selected[$key]['values_selected'] = $segment_values_selected ?? [];
-//                }
 
-//                $segment->criteria_selected = $criteria_selected;
-
-                // TODO: dividir estructura de segmento según tipo
                 $segment->type_code = $segment->type?->code;
                 $segment->criteria_selected = match ($segment->type?->code) {
                     'direct-segmentation' => $this->setDataDirectSegmentation($criteria, $segment),
@@ -118,17 +98,35 @@ class Segment extends BaseModel
 
     public function setDataDirectSegmentation($criteria, Segment $segment)
     {
+        
         $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
 
         foreach ($criteria_selected as $key => $criterion) {
-//            dd($criterion);
 
             $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
 
             $segment_values_selected = [];
 
             foreach ($grouped as $g) {
-                $new = $g['criterion_value'];
+
+                $criterion_code = $g['criterion']['field_type']['code'];
+                
+                if ($criterion_code === 'date'):
+
+                    $starts_at = carbonFromFormat($g['starts_at'])->format('Y-m-d');
+                    $finishes_at = carbonFromFormat($g['finishes_at'])->format('Y-m-d');
+
+                    $new['date_range']  = [$starts_at, $finishes_at];
+                    $new['start_date']  = $starts_at;
+                    $new['end_date']  = $finishes_at;
+                    $new['name']  = "{$starts_at} - {$finishes_at}";
+                endif;
+
+                if($criterion_code === 'default'):
+                    $new = $g['criterion_value'];
+                    $new = $g['criterion_value'];
+                endif;
+
                 $new['segment_value_id'] = $g['id'];
 
                 $segment_values_selected[] = $new;
@@ -164,8 +162,6 @@ class Segment extends BaseModel
             ];
         }
 
-//        $criteria_selected = SegmentSearchUsersResource::collection($criteria_selected);
-//        return $criteria_selected;
         return $temp;
     }
 
@@ -227,13 +223,15 @@ class Segment extends BaseModel
             $values = [];
 
             foreach ($segment_row['criteria_selected'] ?? [] as $criterion) {
-                //TODO: Save by field_type.code
-                $values = match ($criterion->field_type?->code) {
+                
+                $temp_values = match ($criterion['field_type']['code']) {
                     'default' => $this->prepareDefaultValues($criterion),
-                    'criterio-rango-de-fechas' => $this->prepareDateRangeValues($criterion),
+                    'date' => $this->prepareDateRangeValues($criterion),
                     default => [],
                 };
 
+                $values = array_merge($values, $temp_values);
+                
             }
 
             $segment->values()->sync($values);
@@ -256,25 +254,52 @@ class Segment extends BaseModel
         return $temp;
     }
 
-    public function prepareDateRangeValues()
+    public function prepareDateRangeValues($criterion)
     {
+        $temp = [];
 
+        foreach ($criterion['values_selected'] ?? [] as $value) {
+
+            $start_date = $value['start_date'];
+            $end_date = $value['end_date'];
+     
+            $temp[] = [
+                'id' => $value['segment_value_id'] ?? null,
+                'criterion_id' => $criterion['id'],
+                'starts_at' => $start_date,
+                'finishes_at' => $end_date,
+                'type_id' => NULL,
+            ];
+        }
+
+        return $temp;
     }
 
     public function storeSegmentationByDocument($data)
     {
         $segmentation_by_document = Taxonomy::getFirstData('segment', 'type', 'segmentation-by-document');
 
+        if (count($data['segment_by_document']['criteria_selected']) === 0) {
+            $segment = self::where('active', ACTIVE)
+                ->where('model_id', $data['model_id'])
+                ->where('model_type', $data['model_type'])
+                ->where('type_id', $segmentation_by_document->id)
+                ->first();
+
+            if($segment){
+                $segment->values()->delete();
+                $segment->delete();
+            }
+            return;
+        }
+
+
         $segment = self::firstOrCreate(
             ['model_id' => $data['model_id'], 'model_type' => $data['model_type'], 'type_id' => $segmentation_by_document->id],
             ['name' => "Segmentación por documento", 'active' => ACTIVE]
         );
 
-        if (count($data['segment_by_document']['criteria_selected']) === 0) {
-            $segment->values()->delete();
-            $segment->delete();
-            return;
-        }
+        $segment->values()->delete();
 
         $document_criterion = Criterion::where('code', 'document')->first();
 
@@ -290,9 +315,65 @@ class Segment extends BaseModel
             ];
         }
 
-//        info($values);
-
         $segment->values()->sync($values);
     }
 
+    protected function validateSegmentByUser($user_criteria, $segment_criteria): bool
+    {
+        $segment_valid = false;
+
+        foreach ($segment_criteria as $criterion_id => $segment_values) {
+            info($segment_values->toArray());
+
+            $user_has_criterion_id = $user_criteria[$criterion_id] ?? false;
+
+            if (!$user_has_criterion_id):
+                $segment_valid = false;
+                break;
+            endif;
+
+            $user_criterion_value_id_by_criterion = $user_criteria[$criterion_id]->pluck('id');
+            
+            // $criterion_code = $user_criteria[$criterion_id]->criterion?->field_type?->code;
+
+            
+            // info($user_criteria[$criterion_id]);
+            // info($user_criterion_value_id_by_criterion);
+            // info("--");
+            // info($criterion_code);
+            
+            // $segment_valid = $this->validateValueSegmentCriteriaByUser($criterion_code, $segment_values, $user_criterion_value_id_by_criterion);
+
+            // $segment_valid = $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+
+            if (!$segment_valid):
+                // $segment_valid = false;
+                break;
+            endif;
+        }
+
+        return $segment_valid;
+    }
+
+    private function validateValueSegmentCriteriaByUser($criterion_code, $segment_values, $user_criterion_value_id_by_criterion){
+        return match ($criterion_code) {
+            'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
+            'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
+            default => false,
+        };
+    }
+
+    private function validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion)
+    {
+        return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+    }
+
+    private function validateDateTypeCriteria($segment_values, $user_criterion_value_id_by_criterion)
+    {
+        info("validar rangos de fecha");
+        info("segment_values");
+        info($segment_values->toArray());
+
+        return false;
+    }   
 }

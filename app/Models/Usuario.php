@@ -294,9 +294,13 @@ class Usuario extends Model
 
         // Load users who met specific criterion values (in this case careers)
 
-        $users = User::join('criterion_value_user as crit_val_us', 'users.id', '=', 'crit_val_us.user_id')
-                     ->whereIn('crit_val_us.criterion_value_id', $criterionValues);
+        // $users = User::join('criterion_value_user as crit_val_us', 'users.id', '=', 'crit_val_us.user_id')
+        //              ->whereIn('crit_val_us.criterion_value_id', $criterionValues);
 
+        $users = User::whereHas('subworkspace', function($q){
+            $q->where('active', ACTIVE);
+        })->toSql();
+        
 
         if ($idsOnly) {
             return $users->pluck('id')->toArray();

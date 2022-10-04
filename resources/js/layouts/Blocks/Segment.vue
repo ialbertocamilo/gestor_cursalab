@@ -86,26 +86,6 @@ export default {
             dialog_guardar: false
         };
     },
-    computed: {
-        // addDissabledChild() {
-        // 	let vue = this;
-        // 	let map = vue.segment.criteria_selected.map((obj) => obj.id);
-        // 	let filter = vue.segment.criteria.filter((tc) => map.includes(tc.id));
-        // 	filter.forEach((tc) => {
-        // 		tc.disabled_child = true;
-        // 	});
-        // },
-        // detalleOrderByCountCriterios() {
-        // 	let vue = this;
-        // 	return vue.segment.criteria_selected.sort(function (a, b) {
-        // 		var keyA = a.criterios_count,
-        // 			keyB = b.criterios_count;
-        // 		if (keyA < keyB) return -1;
-        // 		if (keyA > keyB) return 1;
-        // 		return 0;
-        // 	});
-        // },
-    },
     mounted() {
         let vue = this;
         vue.segment.loading = true;
@@ -114,21 +94,20 @@ export default {
         }, 1200);
 
         vue.loadData();
-
-        // let x = Object.assign({}, vue.criteria)
-
-        // console.log('vue.criteria mounted')
-        // console.log(vue.criteria)
-        // vue.new_criteria = x
     },
     methods: {
         addDateRange(data) {
             let vue = this;
-            console.log("addDateRange", data)
+            // console.log("addDateRange", data)
             let criterion = vue.segment.criteria_selected.find(criterion => criterion.code === data.criterion_code);
 
             if (criterion){
-                criterion.values_selected = data.date_range_selected
+                const hasValuesSelected = criterion.hasOwnProperty('values_selected');
+                if(!hasValuesSelected) 
+                    criterion = Object.assign(criterion, {values_selected: []});
+                // criterion.values_selected = data.date_range_selected;
+                console.log(`CRITERION`, criterion);
+                criterion.values_selected.push(data.new_date_range);
             }
         },
         async loadData(resource) {

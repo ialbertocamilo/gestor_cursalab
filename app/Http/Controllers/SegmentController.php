@@ -57,7 +57,7 @@ class SegmentController extends Controller
 
     public function store(Request $request)
     {
-//        info($request->all());
+        // return ($request->all());
 
         return Segment::storeRequestData($request);
     }

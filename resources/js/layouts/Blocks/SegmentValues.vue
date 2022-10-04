@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'date-range'">
+        <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'date'">
 
             <v-col cols="12" md="3" lg="3" class="p-0 vertical-align">
                 <date-picker
@@ -28,11 +28,12 @@
                     :menu-props="{ top: true, offsetY: true }"
                     return-object
                     multiple
+                    :show-select-all="false"
                     chips
-                    :items="date_range_selected"
-                    v-model="date_range_selected"
+                    :items="criterion.values_selected"
+                    v-model="criterion.values_selected"
                     item-text="name"
-                    item-value="curricula_criterion_id"
+                    item-value="segment_value_id"
                 >
                     <template v-slot:selection="{ item, index }">
                         <v-chip
@@ -93,28 +94,32 @@ export default {
             date_range_selected: []
         };
     },
-    mounted() {
-        let vue = this;
-    },
-    watch: {},
     methods: {
-        eliminarRangoFecha(index) {
+        cleanSelectedDates(){
             let vue = this;
-            vue.criterion.rangos_seleccionados.splice(index, 1);
+            vue.value1 = [null, null];
         },
         agregarRango() {
             let vue = this;
 
-            vue.date_range_selected.push({
+            const newDateRange = {
+                id: `new-date-range-${Date.now()}`,
                 name: `${vue.value1[0]} - ${vue.value1[1]}`,
                 date_range: vue.value,
                 start_date: vue.value1[0],
                 end_date: vue.value1[1],
-            });
+            };
+            
+            vue.date_range_selected.push(newDateRange);
+
             let data = {
                 date_range_selected: vue.date_range_selected,
+                new_date_range: newDateRange,
                 criterion_code: vue.criterion.code,
             };
+
+            vue.cleanSelectedDates();
+            
             vue.$emit("addDateRange", data);
         },
 
@@ -139,10 +144,6 @@ export default {
 .mx-calendar-content .cell.hover-in-range {
     color: #fff !important;
     background-color: #aba2f1 !important;
-}
-
-.mx-datepicker-main {
-    /* left: calc(100% - 850px) !important; */
 }
 
 .label-fecha {
