@@ -75,8 +75,8 @@ class UserResetPasswordNotification extends Notification
      */
     protected function buildMailMessage($url)
     {
-       $url = preg_replace("/.*\/password\/reset\/(.*)/", '/password/reset/$1', $url);
-       $url = rtrim(env('RESET_PASSWORD_BASE_URL'), '/') . '/' . ltrim($url, '/');
+       $url = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url);
+       $url = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim($url, '/');
 
        return (new MailMessage)
             ->subject(Lang::get('Resetear contraseña'))
@@ -85,7 +85,7 @@ class UserResetPasswordNotification extends Notification
             ->line(Lang::get('Estás recibiendo este email, porque hemos recibido una solicitud de reseteo de contraseña para tu cuenta.'))
             ->action(Lang::get('Resetear contraseña'), $url)
             ->line(Lang::get('El enlace para resetear la contraseña expirará en :count minutos.', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]))
-            ->line(Lang::get('Si tu no solicitaste el reseteo de contraseña, no necesitas realizar ninguna acción.'));
+            ->line(Lang::get('Si no solicitaste el reseteo de contraseña, no es necesario realizar ninguna acción.'));
     }
 
     /**
