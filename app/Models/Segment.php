@@ -361,14 +361,12 @@ class Segment extends BaseModel
 
         foreach ($segment_values as $date_range) {
 
-            $starts_at = $date_range['starts_at'];
-            $finishes_at = $date_range['finishes_at'];
+            $starts_at = carbonFromFormat($date_range['starts_at']);
+            $finishes_at = carbonFromFormat($date_range['finishes_at']);
 
-            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date, "Y-m-d")->format("Y-m-d");
-            $collect = collect()->push(['date_value' => $user_date_criterion_value]);
-            info($user_date_criterion_value);
+            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date. " 00:00:00");
 
-            $hasAValidDateRange = $collect->whereBetween('date_value', [$starts_at, $finishes_at])->count() > 0;
+            $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
 
             if ($hasAValidDateRange) break;
         }
