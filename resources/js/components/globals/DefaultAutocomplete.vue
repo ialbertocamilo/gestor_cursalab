@@ -37,7 +37,7 @@
         </template>
         <template v-slot:selection="{ item, index }" v-if="multiple">
             <div class="pt-1"></div>
-            <v-chip smal v-if="index < countShowValues">
+            <v-chip small v-if="index < countShowValues">
                 <span>{{ item[itemText] }}</span>
             </v-chip>
             <span
