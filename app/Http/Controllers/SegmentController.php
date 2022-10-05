@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SegmentSearchUsersResource;
-use App\Imports\SegmentSearchByDocumentImport;
 use App\Models\CriterionValue;
 use App\Models\Criterion;
+use App\Models\SegmentValue;
 use App\Models\Taxonomy;
 use App\Models\Segment;
 
@@ -15,8 +15,6 @@ use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-
 
 // use App\Http\Controllers\ZoomApi;
 
@@ -57,7 +55,7 @@ class SegmentController extends Controller
 
     public function store(Request $request)
     {
-//        info($request->all());
+        // return ($request->all());
 
         return Segment::storeRequestData($request);
     }
@@ -104,11 +102,33 @@ class SegmentController extends Controller
         return $this->success($users);
     }
 
+    public function syncSegmentValuesType()
+    {
+        $criterion_value_type = Taxonomy::firstOrCreate([
+            'group' => 'segment-value',
+            'type' => 'type',
+            'code' => 'criterion-value',
+            'name' => 'Valor de criterio',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+
+        $date_range_type = Taxonomy::firstOrCreate([
+            'group' => 'segment-value',
+            'type' => 'type',
+            'code' => 'date-range',
+            'name' => 'Rango de fechas',
+            'active' => ACTIVE,
+            'position' => 2,
+        ]);
+
+        SegmentValue::query()->update(['type_id' => $criterion_value_type?->id]);
+    }
+
     public function syncUsersDocumentToCriterionValues()
     {
-        info(now()->format("Y-m-d H:i:s"));
 
-        Taxonomy::create([
+        $direct_segmentation = Taxonomy::firstOrCreate([
             'group' => 'segment',
             'type' => 'type',
             'code' => 'direct-segmentation',
@@ -117,7 +137,7 @@ class SegmentController extends Controller
             'position' => 1,
         ]);
 
-        Taxonomy::create([
+        Taxonomy::firstOrCreate([
             'group' => 'segment',
             'type' => 'type',
             'code' => 'segmentation-by-document',
@@ -125,6 +145,8 @@ class SegmentController extends Controller
             'active' => ACTIVE,
             'position' => 1,
         ]);
+
+        Segment::update(['type_id' => $direct_segmentation?->id]);
 
         $document_criterion = Criterion::firstOrCreate(
             [

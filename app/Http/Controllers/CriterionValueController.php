@@ -53,6 +53,7 @@ class CriterionValueController extends Controller
 
         $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
         $data[$colum_name] = $data['name'];
+        // $data['value_text'] = $data['name'];
 
         CriterionValue::storeRequest($data);
 
