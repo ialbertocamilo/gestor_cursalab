@@ -224,6 +224,7 @@ export default {
     methods: {
         closeModal() {
             let vue = this;
+            vue.errors = []
             vue.resetSelects()
             vue.resetValidation()
             vue.$emit('onCancel')

@@ -29,6 +29,7 @@ class RestCourseController extends Controller
         $poll = $course->polls()->with([
             'questions' => function ($q) {
                 $q->with('type:id,code')
+                    ->where('active', ACTIVE)
                     ->select('id', 'poll_id', 'titulo', 'type_id', 'opciones');
             }
         ])
