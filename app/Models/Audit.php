@@ -58,7 +58,7 @@ class Audit extends Ledger
     {
         if ($this->isBasicEvent() )
             return array_diff($this->modified, $this->excluded_fields);
-        
+
         // info($this->pivot);
 
         return $this->pivot['properties'] ?? [];
@@ -85,11 +85,10 @@ class Audit extends Ledger
     {
         $total = $modified = [];
 
-        if ( $this->isBasicEvent() )
-        {
+        if ( $this->isBasicEvent() ) {
             // obtener modelo
             $model = $this->extract();
-            
+
             // traer relaciones
             $model->loadDefaultRelationships();
 
@@ -111,7 +110,7 @@ class Audit extends Ledger
 
         return compact('total', 'modified');
     }
-    
+
 
     public function prepareData($model): array
     {
@@ -128,7 +127,7 @@ class Audit extends Ledger
         {
             // info($key);
             $data[$key] = [
-                'key' => $key, 
+                'key' => $key,
                 'label' => $this->getLabelName($key),
                 'value' => $this->getValueName($item, $key, $array, $relationships),
                 // 'modified' => null,
@@ -204,37 +203,48 @@ class Audit extends Ledger
     {
         $query = self::with('user', 'model', 'action_name', 'event_name');
 
-        if ($request->filters)
-        {
-            foreach($request->filters AS $key => $filter)
-            {
-                if ($key == 'model')
-                    $query->whereHas('model', function($q) use ($filter){
-                        $q->whereIn('id', $filter);
-                    });
-                    // $query->whereRelation('model', 'id', $filter);
+        // Event filter
 
-                if ($key == 'action')
-                    $query->whereRelation('event_name', 'id', $filter);
+        if ($request->events) {
+            $query->whereIn('event', $request->events);
+        }
 
-                if ($key == 'user')
-                    $query->where('user_id', $filter);
+        // Dates filter
 
-                if ($key == 'starts_at')
-                    $query->whereDate('created_at', '>=', $filter);
+        if ($request->date_range) {
 
-                if ($key == 'ends_at')
-                    $query->whereDate('created_at', '<=', $filter);
+            if (isset($request->date_range[1])) {
+                $starDate = $request->date_range[0] . ' 00:00';
+                $endDate = $request->date_range[1] . ' 23:59';
+                $query->whereBetween('created_at', [$starDate, $endDate]);
+            } else {
+                $query->whereDate('created_at', '=', $request->date_range[0]);
             }
         }
 
-        // if ($request->q)
-        //     $query->where('title', 'like', "%$request->q%");
+        // Search field filter
+
+        if ($request->us_search) {
+
+            // Get users ids which names matches search
+            // get_current_workspace()->id
+            $usersIds = User::where('users.name', 'like', "%$request->us_search%")
+                            ->pluck('id');
+            $query->whereIn('user_id', $usersIds->toArray());
+        }
+
+        // Models filter
+
+        if ($request->models) {
+
+            $query->where('recordable_type', $request->models);
+        }
 
         $field = $request->sortBy ?? 'created_at';
-        $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
-        
-        $query->orderBy($field, $sort)->orderBy('id', $sort);
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $query->orderBy($field, $sort)
+              ->orderBy('id', $sort);
 
         return $query->paginate($request->rowsPerPage);
 
