@@ -56,6 +56,10 @@ class RestAyudaController extends Controller
             'detail' => $details,
             'workspace_id' => $workspace_id,
             'name' => $name,
+            'reason' => 'Soporte Login',
+            'status' => 'pendiente',
+            'created_at' => now(),
+            'updated_at' => now()
         );
 
         if (is_null($name) || is_null($workspace_id) || is_null($dni) || is_null($phone)) {
@@ -86,7 +90,7 @@ class RestAyudaController extends Controller
                 'telefono' => $phone,
                 'detalle' => $details
             );
-            $emails = ['daniel@cursalab.io', 'rodrigo@cursalab.io'];
+            $emails = ['daniel@cursalab.io'];
             foreach ($emails as $email_to) {
                 Mail::to($email_to)->send(new SendEmailSupportLogin($data_email));
             }
