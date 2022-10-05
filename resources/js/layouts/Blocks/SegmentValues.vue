@@ -10,7 +10,7 @@
                     v-model="value1"
                     type="date"
                     range
-                    placeholder="Seleccione el rango de fechas"
+                    :placeholder="criterion.name"
                     :lang="lang"
                     @confirm="agregarRango()"
                     style="width: 100% !important"
@@ -25,7 +25,9 @@
                     outlined
                     color="#796aee"
                     hide-details="auto"
+                    :label="criterion.name"
                     :menu-props="{ top: true, offsetY: true }"
+
                     return-object
                     multiple
                     :show-select-all="false"
@@ -109,7 +111,7 @@ export default {
                 start_date: vue.value1[0],
                 end_date: vue.value1[1],
             };
-            
+
             vue.date_range_selected.push(newDateRange);
 
             let data = {
@@ -119,7 +121,7 @@ export default {
             };
 
             vue.cleanSelectedDates();
-            
+
             vue.$emit("addDateRange", data);
         },
 

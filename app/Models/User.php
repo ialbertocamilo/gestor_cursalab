@@ -540,7 +540,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses)
     {
-//        dd($user->subworkspace);
         $user->loadMissing('subworkspace.parent');
 
         $course_segmentations = Course::with([
@@ -563,14 +562,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('active', ACTIVE)
             ->get();
 
-        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+//        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+        $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
 
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
-                
+
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
-                $valid_segment = Segment::validateSegmentByUser($user_criteria, $course_segment_criteria);
+
+                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
 
                 if ($valid_segment) :
                     $all_courses[] = $course;

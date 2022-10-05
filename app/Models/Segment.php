@@ -98,7 +98,7 @@ class Segment extends BaseModel
 
     public function setDataDirectSegmentation($criteria, Segment $segment)
     {
-        
+
         $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
 
         foreach ($criteria_selected as $key => $criterion) {
@@ -110,19 +110,19 @@ class Segment extends BaseModel
             foreach ($grouped as $g) {
 
                 $criterion_code = $g['criterion']['field_type']['code'];
-                
+
                 if ($criterion_code === 'date'):
 
                     $starts_at = carbonFromFormat($g['starts_at'])->format('Y-m-d');
                     $finishes_at = carbonFromFormat($g['finishes_at'])->format('Y-m-d');
 
-                    $new['date_range']  = [$starts_at, $finishes_at];
-                    $new['start_date']  = $starts_at;
-                    $new['end_date']  = $finishes_at;
-                    $new['name']  = "{$starts_at} - {$finishes_at}";
+                    $new['date_range'] = [$starts_at, $finishes_at];
+                    $new['start_date'] = $starts_at;
+                    $new['end_date'] = $finishes_at;
+                    $new['name'] = "{$starts_at} - {$finishes_at}";
                 endif;
 
-                if($criterion_code === 'default'):
+                if ($criterion_code === 'default'):
                     $new = $g['criterion_value'];
                     $new = $g['criterion_value'];
                 endif;
@@ -223,7 +223,7 @@ class Segment extends BaseModel
             $values = [];
 
             foreach ($segment_row['criteria_selected'] ?? [] as $criterion) {
-                
+
                 $temp_values = match ($criterion['field_type']['code']) {
                     'default' => $this->prepareDefaultValues($criterion),
                     'date' => $this->prepareDateRangeValues($criterion),
@@ -231,7 +231,7 @@ class Segment extends BaseModel
                 };
 
                 $values = array_merge($values, $temp_values);
-                
+
             }
 
             $segment->values()->sync($values);
@@ -262,7 +262,7 @@ class Segment extends BaseModel
 
             $start_date = $value['start_date'];
             $end_date = $value['end_date'];
-     
+
             $temp[] = [
                 'id' => $value['segment_value_id'] ?? null,
                 'criterion_id' => $criterion['id'],
@@ -286,7 +286,7 @@ class Segment extends BaseModel
                 ->where('type_id', $segmentation_by_document->id)
                 ->first();
 
-            if($segment){
+            if ($segment) {
                 $segment->values()->delete();
                 $segment->delete();
             }
@@ -318,12 +318,11 @@ class Segment extends BaseModel
         $segment->values()->sync($values);
     }
 
-    protected function validateSegmentByUser($user_criteria, $segment_criteria): bool
+    protected function validateSegmentByUserCriteria($user_criteria, $segment_criteria): bool
     {
         $segment_valid = false;
 
         foreach ($segment_criteria as $criterion_id => $segment_values) {
-            info($segment_values->toArray());
 
             $user_has_criterion_id = $user_criteria[$criterion_id] ?? false;
 
@@ -332,33 +331,22 @@ class Segment extends BaseModel
                 break;
             endif;
 
-            $user_criterion_value_id_by_criterion = $user_criteria[$criterion_id]->pluck('id');
-            
-            // $criterion_code = $user_criteria[$criterion_id]->criterion?->field_type?->code;
+            $segment_valid = $this->validateValueSegmentCriteriaByUser($segment_values, $user_criteria[$criterion_id]);
 
-            
-            // info($user_criteria[$criterion_id]);
-            // info($user_criterion_value_id_by_criterion);
-            // info("--");
-            // info($criterion_code);
-            
-            // $segment_valid = $this->validateValueSegmentCriteriaByUser($criterion_code, $segment_values, $user_criterion_value_id_by_criterion);
-
-            // $segment_valid = $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
-
-            if (!$segment_valid):
-                // $segment_valid = false;
-                break;
-            endif;
+            if (!$segment_valid) break;
         }
 
         return $segment_valid;
     }
 
-    private function validateValueSegmentCriteriaByUser($criterion_code, $segment_values, $user_criterion_value_id_by_criterion){
+    private function validateValueSegmentCriteriaByUser($segment_values, $user_criterion_value_by_criterion)
+    {
+        $criterion_code = $user_criterion_value_by_criterion->first()?->criterion?->field_type?->code;
+        $user_criterion_value_id_by_criterion = $user_criterion_value_by_criterion->pluck('id');
+
         return match ($criterion_code) {
             'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
-            'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
+            'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion),
             default => false,
         };
     }
@@ -368,12 +356,23 @@ class Segment extends BaseModel
         return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
     }
 
-    private function validateDateTypeCriteria($segment_values, $user_criterion_value_id_by_criterion)
+    private function validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion)
     {
-        info("validar rangos de fecha");
-        info("segment_values");
-        info($segment_values->toArray());
+        $hasAValidDateRange = false;
 
-        return false;
-    }   
+        foreach ($segment_values as $date_range) {
+
+            $starts_at = $date_range['starts_at'];
+            $finishes_at = $date_range['finishes_at'];
+
+            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date, "Y-m-d");
+            $collect = collect()->push(['date_value' => $user_date_criterion_value]);
+
+            $hasAValidDateRange = $collect->whereBetween('date_value', [$starts_at, $finishes_at])->count() > 0;
+
+            if ($hasAValidDateRange) break;
+        }
+
+        return $hasAValidDateRange;
+    }
 }

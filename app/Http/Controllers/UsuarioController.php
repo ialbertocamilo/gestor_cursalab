@@ -529,9 +529,15 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
-        $user->setCurrentCourses();
+        $courses = $user->getCurrentCourses();
 
-        return $this->success(compact('user'));
+        return $this->success([
+            'user' => [
+                'id' => $user->id,
+                'fullname' => $user->fullname,
+                'schools' => Course::getDataToCoursesViewAppByUser($user, $courses)
+            ]
+        ]);
     }
 
     public function status($usuario_id)
@@ -583,7 +589,7 @@ class UsuarioController extends Controller
             $q->where('workspace_id', $workspace->id);
         })->get();
 
-        return response()->json(compact( 'schools', 'modules'), 200);
+        return response()->json(compact('schools', 'modules'), 200);
     }
 
     public function buscarCursosxEscuela($school_id)
