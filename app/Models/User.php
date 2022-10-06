@@ -68,7 +68,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
-        'external_id', 'fcm_token', 'token_firebase', 'secret_key'
+        'external_id', 'fcm_token', 'token_firebase', 'secret_key',
+        
+        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at',
     ];
 
     protected $with = ['roles', 'abilities'];

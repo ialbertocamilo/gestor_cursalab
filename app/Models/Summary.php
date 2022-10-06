@@ -135,4 +135,26 @@ class Summary extends BaseModel
 
         }
     }
+
+    protected function setSummaryUpdates($users, $courses = null)
+    {
+        $user_ids = $user->pluck('id');
+
+        $data = [
+            'summary_user_update' => true,
+            'required_update_at' => now(),
+        ];
+
+        if ($courses) {
+
+            $course_ids = $courses->implode('id', ',');
+
+            $data['summary_course_update'] = true;
+            $data['summary_course_data'] = DB::raw("CONCAT(summary_course_data, ',', {$course_ids})");
+        }
+
+        User::whereIn('id', $user_ids)
+            ->update($data);
+    }
+
 }
