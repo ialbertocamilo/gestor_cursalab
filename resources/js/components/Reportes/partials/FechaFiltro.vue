@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div class="mb-3">
-			<small class="text-muted text-bold">Fecha inicial</small>
+			<small class="text-muted">Fecha inicial</small>
 			<div class="input-group">
 				<input
 					type="date"
@@ -17,6 +17,7 @@
 					locale="es-PE"
 					aria-controls="date-start"
 					today-button
+                    right
 					label-today-button="Hoy"
 					reset-button
 					label-reset-button="Reiniciar"
@@ -25,7 +26,7 @@
 			</div>
 		</div>
 		<div class="mb-3">
-			<small class="text-muted text-bold">Fecha final :</small>
+			<small class="text-muted">Fecha final</small>
 			<div class="input-group">
 				<input
 					type="date"
@@ -41,6 +42,7 @@
 					locale="es-PE"
 					aria-controls="date-start"
 					today-button
+                    right
 					label-today-button="Hoy"
 					reset-button
 					label-reset-button="Reiniciar"

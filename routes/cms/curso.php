@@ -4,7 +4,7 @@ use App\Http\Controllers\CursosController;
 
 Route::controller(CursosController::class)->group(function () {
 
-    Route::view('/', 'cursos.list')->name('curso.list');
+    Route::view('/', 'cursos.segmentation-list')->name('curso.list');
     Route::get('/search', 'search')->name('curso.search');
 
     Route::view('/create', 'cursos.create_edit')->name('curso.createCurso');

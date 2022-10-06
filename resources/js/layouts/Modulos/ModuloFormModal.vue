@@ -111,7 +111,7 @@
                             <!-- tooltip="Tooltip" -->
                             <template slot="content">
                                 <v-row justify="center">
-                                    <v-col cols="4">
+                                  <!--   <v-col cols="4">
                                         <DefaultInput
                                             label="Preguntas por evaluación"
                                             v-model="resource.preg_x_ev"
@@ -119,17 +119,17 @@
                                             show-required
                                             dense
                                         />
-                                    </v-col>
-                                    <v-col cols="4">
+                                    </v-col> -->
+                                    <v-col cols="6">
                                         <DefaultInput
-                                            label="Nota aprobatoria"
+                                            label="Nota mínima aprobatoria"
                                             v-model="resource.nota_aprobatoria"
                                             :rules="rules.nota_aprobatoria"
                                             show-required
                                             dense
                                         />
                                     </v-col>
-                                    <v-col cols="4">
+                                    <v-col cols="6">
                                         <DefaultInput
                                             label="Número de intentos"
                                             v-model="resource.nro_intentos"
@@ -290,7 +290,7 @@ export default {
                 reinicio_automatico_horas: null,
                 reinicio_automatico_minutos: 1,
                 main_menu: null,
-                preg_x_ev: null,
+                // preg_x_ev: null,
                 nota_aprobatoria: null,
                 nro_intentos: null,
             },
@@ -298,7 +298,7 @@ export default {
                 name: this.getRules(['required']),
                 plantilla_diploma: this.getRules(['required']),
                 codigo_matricula: this.getRules(['required']),
-                preg_x_ev: this.getRules(['required', 'number', 'min_value:1']),
+                // preg_x_ev: this.getRules(['required', 'number', 'min_value:1']),
                 nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
                 nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
             },
@@ -389,7 +389,7 @@ export default {
             let vue = this
 
             const data = {
-                preg_x_ev: vue.resource.preg_x_ev,
+                // preg_x_ev: vue.resource.preg_x_ev,
                 nota_aprobatoria: vue.resource.nota_aprobatoria,
                 nro_intentos: vue.resource.nro_intentos,
             }

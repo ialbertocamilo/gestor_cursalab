@@ -177,6 +177,15 @@ class TemaController extends Controller
     }
 
     // ========================================== EVALUACIONES TEMAS ===================================================
+    public function preguntas_list(School $school, Course $course, Topic $topic, Request $request)
+    {
+        $data = Question::verifyEvaluation($topic);
+
+        // dd($data);
+
+        return view('temas.preguntas_list', $data);
+    }
+
     public function search_preguntas(School $school, Course $course, Topic $topic, Request $request)
     {
         $request->merge(['tema_id' => $topic->id]);
@@ -218,6 +227,12 @@ class TemaController extends Controller
             ? 'select-options'
             : 'written-answer';
 
+        $result = Question::checkScoreLeft($topic, $data['id'], $data);
+
+        if ($result['status'])
+            return $this->error($result['message'], 422, ['errors' => [$result['message']]]);
+
+
         // info('nuevasRptas');
         // info($data['nuevasRptas']);
         // info(json_decode($data['nuevasRptas'], true));
@@ -234,6 +249,8 @@ class TemaController extends Controller
                 'rptas_json' => json_decode($data['nuevasRptas'], true),
                 'rpta_ok' => $data['rpta_ok'],
                 'active' => $data['active'],
+                'required' => $data['required'] ?? NULL,
+                'score' => $data['score'] ?? NULL,
                 // 'position' => 'despues'
             ]
         );
@@ -241,27 +258,38 @@ class TemaController extends Controller
         // Si se desactiva la última pregunta del tema, según su tipo de evaluación ($tipo_pregunta)
         // se inactivará el tema
         // TODO: agregar modal de validación en listado de preguntas
-        $has_active_questions = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', '1')->count() > 0;
-
+        $has_active_questions = $topic->questions()->whereRelation('type', 'code', $question_type_code)
+                ->where('active', '1')->count() > 0;
+//        info($has_active_questions);
+//        info($question_type_code);
         if (!$has_active_questions):
             $topic->active = 0;
             $topic->save();
         endif;
 
-        return $this->success(['msg' => 'Pregunta actualizada']);
+        $data = Question::verifyEvaluation($topic);
+        $data['msg'] = 'Pregunta actualizada. ' . ($data['message'] ?? '');
+
+        return $this->success($data);
     }
 
-    public function importPreguntas(School $school, Curso $course, Posteo $topic, TemaPreguntaImportRequest $request)
+    public function importPreguntas(
+        School $school, Course $course, Topic $topic, TemaPreguntaImportRequest $request
+    )
     {
         $data = $request->validated();
 
-        $data['posteo_id'] = $topic->id;
-        $data['tipo_ev'] = $topic->tipo_ev;
+        // Load topic evaluation type from database type_evaluation_id
 
-        $result = Pregunta::import($data);
-        $topic->evaluable = 'si';
-        $topic->tipo_ev = 'calificada';
-        $topic->save();
+        $evaluationType = Taxonomy::where('group', 'topic')
+                                  ->where('type', 'evaluation-type')
+                                  ->where('code', 'qualified')
+                                  ->first();
+
+        $data['topic_id'] = $topic->id;
+        $data['isQualified'] = $evaluationType->id === $topic->type_evaluation_id;
+
+        $result = Question::import($data);
 
         return $this->success($result);
     }
@@ -284,6 +312,9 @@ class TemaController extends Controller
             $topic->save();
         endif;
 
-        return $this->success(['msg' => 'Eliminado correctamente.']);
+        $data = Question::verifyEvaluation($topic);
+        $data['msg'] = 'Eliminado correctamente. ' . ($data['message'] ?? '');
+
+        return $this->success($data);
     }
 }

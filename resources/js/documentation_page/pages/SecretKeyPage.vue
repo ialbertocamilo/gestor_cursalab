@@ -30,7 +30,7 @@ export default {
             api_description_options:{
                 title:'Obtener Clave Secreta',
                 type:'POST',
-                route:'/integrations/secret_key',
+                route:'/integrations/secret-key',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -63,7 +63,7 @@ const axios = require('axios');
 const data = JSON.stringify({"email":"admin@admin.com","password":"4239872439"});
 const config = {
     method: 'post',
-    url: base_url+'/integrations/secret_key',
+    url: base_url+'/integrations/secret-key',
     headers: { 
         'Content-Type': 'application/json'
     },

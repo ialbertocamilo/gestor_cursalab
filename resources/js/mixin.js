@@ -1,5 +1,5 @@
 const FileSaver = require("file-saver");
-
+import XLSX from "xlsx";
 import mime from "mime-types";
 import moment from "moment";
 moment.locale("es");
@@ -10,7 +10,8 @@ const extensiones = {
     audio: ["mp3","mpga"],
     pdf: ["pdf"],
     excel: ["xls", 'xlsx', 'csv'],
-    scorm: ["zip", "scorm"]
+    scorm: ["zip", "scorm"],
+    rise: ["zip", "rise"],
 };
 const default_media_images = {
     video: "images/default-video-img_285_360.png",
@@ -32,13 +33,30 @@ export default {
                 {label: 'Audio', icon: 'mdi mdi-headset', type: 'audio'},
                 {label: 'PDF', icon: 'mdi mdi-file-pdf-box', type: 'pdf'},
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
-                {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'}
+                {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
+                {label: 'Genially', icon: 'mdi mdi-google-circles', type: 'genially'},
+                {label: 'Rise', icon: 'mdi mdi-archive', type: 'rise'},
             ],
             mixin_extensiones: extensiones,
-            mixin_default_media_images: default_media_images
+            mixin_default_media_images: default_media_images,
+            abc: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "U", "V", "W", "X", "Y", "Z",],
         }
     },
     methods: {
+        descargarExcelFromArray(headers, values, array, filename, confirm_text,confirm=false) {
+            if ((confirm) || window.confirm(confirm_text)) {
+                let data = XLSX.utils.json_to_sheet(array, {
+                    header: values
+                });
+                headers.forEach((element, index) => {
+                    let indice = `${this.abc[index]}1`
+                    data[`${indice}`].v = element;
+                });
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, data, filename);
+                XLSX.writeFile(workbook, `${filename}.xlsx`);
+            }
+        },
         isValuesObjectEmpty(obj) {
             for (var key in obj) {
                 if (obj[key] !== null && obj[key] != "")
@@ -150,6 +168,20 @@ export default {
             }
 
             return bucketBaseUrl;
+        }
+        ,
+        getReportsBaseUrl() {
+            // Get base URL from head meta
+
+            let metaEl = document.querySelector('meta[name=REPORTS_BASE_URL]')
+            let reportsBaseUrl = metaEl.getAttribute('content')
+
+            // Remove trailing slash and generate URL
+
+            reportsBaseUrl = reportsBaseUrl
+                                .replace(/\/+$/, '')
+
+            return reportsBaseUrl
         }
         ,
         infoMedia(item) {

@@ -28,6 +28,8 @@ class TemaPreguntaStoreRequest extends FormRequest
             'pregunta' => 'required',
             'nuevasRptas' => 'required',
             'rpta_ok' => 'required',
+            'score' => 'nullable',
+            'required' => 'nullable',
             'active' => 'required',
         ];
     }
@@ -41,6 +43,9 @@ class TemaPreguntaStoreRequest extends FormRequest
             $data['rpta_ok'] = 0;
             $data['rptas_json'] = '{}';
         }
+
+        if ( ! $this->has('required') )
+            $data['required'] = false;
 
 
         return $this->merge($data)->all();

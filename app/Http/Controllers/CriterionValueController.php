@@ -23,6 +23,19 @@ class CriterionValueController extends Controller
         return $this->success($criteria);
     }
 
+    public function searchWk(Request $request, Criterion $criterion)
+    {
+        $request->merge(['criterion_id' => $criterion->id]);
+        // $current_workspace_id = get_current_workspace();
+        // $request->merge(['workspace_id' => $current_workspace_id?->id]);
+
+        $criteria = CriterionValue::search($request);
+
+        CriterionValueResource::collection($criteria);
+
+        return $this->success($criteria);
+    }
+
     public function getFormSelects(Criterion $criterion, $compactResponse = false)
     {
         $data_type = $criterion->field_type->code;
@@ -40,6 +53,7 @@ class CriterionValueController extends Controller
 
         $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
         $data[$colum_name] = $data['name'];
+        // $data['value_text'] = $data['name'];
 
         CriterionValue::storeRequest($data);
 

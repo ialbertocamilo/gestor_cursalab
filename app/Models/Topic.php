@@ -8,7 +8,7 @@ class Topic extends BaseModel
 {
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen',
-        'position', 'visits_count', 'assessable',
+        'position', 'visits_count', 'assessable', 'evaluation_verified',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
         'active'
     ];
@@ -109,7 +109,7 @@ class Topic extends BaseModel
         $question_type_code = $topic->evaluation_type->code === 'qualified'
             ? 'select-options'
             : 'written-answer';
-        info($question_type_code);
+//        info($question_type_code);
         $q = Question::whereRelation('type', 'code', $question_type_code)
             ->where('topic_id', $topic->id);
 
@@ -442,7 +442,8 @@ class Topic extends BaseModel
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
-                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link']) ? get_media_url($media->value) : null;
+                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                        ? route('media.download.media_topic', [$media->id]) : null;
                 }
 
                 $topics_data[] = [
@@ -554,21 +555,27 @@ class Topic extends BaseModel
     {
         $questions = Question::select('id', 'rpta_ok')->where('topic_id', $topic->id)->get();
 
-        $correct_answers = $failed_answers = 0;
+        $correct_answers = $failed_answers = $correct_answers_score = 0;
 
-        foreach ($respuestas as $respuesta) {
+        foreach ($respuestas as $key => $respuesta) {
 
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
             if ($question->rpta_ok == $respuesta['opc']) {
+
                 $correct_answers++;
+
+                $respuestas[$key]['score'] = $question->score;
+
+                $correct_answers_score += $question->score;
+
                 continue;
             }
 
             $failed_answers++;
         }
 
-        return [$correct_answers, $failed_answers];
+        return [$correct_answers, $failed_answers, $correct_answers_score];
     }
 
     protected function getTopicProgressByUser($user, Topic $topic)

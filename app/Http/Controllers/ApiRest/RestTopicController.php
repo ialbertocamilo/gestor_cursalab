@@ -39,6 +39,7 @@ class RestTopicController extends Controller
 
         $reviewed_topic_taxonomy = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
         $summary_topic->status_id = $reviewed_topic_taxonomy?->id;
+        $summary_topic->last_time_evaluated_at = now();
         $summary_topic->save();
 
         SummaryCourse::updateUserData($topic->course, $user);

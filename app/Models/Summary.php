@@ -27,7 +27,7 @@ class Summary extends BaseModel
 
         if ($row) {
 
-            if ( $model instanceof Topic ) {
+            if ($model instanceof Topic) {
 
                 $config_quiz = $user->subworspace->mod_evaluaciones;
 
@@ -71,6 +71,15 @@ class Summary extends BaseModel
             $query->where('course_id', $model->id);
 
         return $query->first();
+    }
+
+    protected function getCurrentRowOrCreate($model, $user = null)
+    {
+        $row = self::getCurrentRow($model, $user);
+
+        if (!$row) $row = $this->storeData($model, $user);
+
+        return $row;
     }
 
     protected function storeData($model, $user = null)
@@ -119,12 +128,11 @@ class Summary extends BaseModel
 
     protected function updateUsersDataByCourse($users, $course, $action)
     {
-        $course_rows =  SummaryCourse::where('course_id', $course->id)->get();
+        $course_rows = SummaryCourse::where('course_id', $course->id)->get();
 
-        foreach ($course_rows AS $row)
-        {
+        foreach ($course_rows as $row) {
             // SummaryUser::
-            
+
         }
     }
 }

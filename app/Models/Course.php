@@ -11,10 +11,11 @@ class Course extends BaseModel
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
         'assessable', 'freely_eligible', 'type_id',
         'position', 'scheduled_restarts', 'active',
-        'duration', 'investment'
+        'duration', 'investment', 'mod_evaluaciones',
     ];
 
     protected $casts = [
+        'mod_evaluaciones' => 'array',
         'scheduled_restarts' => 'array',
     ];
 
@@ -435,14 +436,14 @@ class Course extends BaseModel
         $available_course = true;
         $poll_id = null;
         $available_poll = false;
-        $enabled_poll = true;
+        $enabled_poll = false;
         $solved_poll = false;
         $assigned_topics = 0;
         $completed_topics = 0;
 
         $requirement_course = $course->requirements->first();
-//        info("requirement_course");
-//        info($requirement_course);
+        // info("requirement_course");
+        // info($requirement_course);
         if ($requirement_course) {
             $summary_requirement_course = SummaryCourse::with('course')
                 ->where('user_id', $user->id)
@@ -451,13 +452,12 @@ class Course extends BaseModel
                 ->first();
 //            info("requirement_course");
 //            info($summary_requirement_course);
-//
             if (!$summary_requirement_course) {
                 $available_course = false;
                 $status = 'bloqueado';
             }
         }
-
+        // info($available_course);
         if ($available_course) {
             $poll = $course->polls->first();
             if ($poll) {
@@ -469,7 +469,6 @@ class Course extends BaseModel
                     ->where('user_id', $user->id)->count();
 
 //                info($poll_questions_answers);
-
                 if ($poll_questions_answers) $solved_poll = true;
             }
 
@@ -486,13 +485,16 @@ class Course extends BaseModel
                     $status = 'enc_pend';
                 elseif ($summary_course->status?->code == 'desaprobado') :
                     $status = 'desaprobado';
+                    $enabled_poll = true;
                 else :
                     $status = 'continuar';
-                    $enabled_poll = false;
                     $resolved_topics = $completed_topics + $summary_course->failed;
                     if ($summary_course->assigned <= $resolved_topics)
-                        $available_poll = true;
+                        $enabled_poll = true;
                 endif;
+
+                if ($course_progress_percentage == 100)
+                    $enabled_poll = true;
             }
         }
 
@@ -536,7 +538,28 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
+    public function usersSegmented($course_segments,$type='get_records'){
+        $users = DB::table('criterion_value_user');
+        $users_id_course = [];
+        foreach ($course_segments as $segment) {
+            $criteria = $segment->values->groupBy('criterion_id');
 
+            foreach ($criteria as $criterion_values) {
+                $criterion_values = $criterion_values->pluck('criterion_value_id');
+                $users->orWhere(function($q) use($criterion_values){
+                    $q->whereIn('criterion_value_id',$criterion_values);
+                });
+            }
+            $users_id = $users->groupBy('user_id')->select('user_id',DB::raw('count(user_id) as count_group_user_id'))
+            ->having('count_group_user_id','=',count($criteria))->pluck('user_id')->toArray();
+            $users_id_course = array_merge($users_id_course,$users_id);
+        }
+        if($type=='users_id'){
+            return $users_id_course;
+        }
+        $users_have_course = User::where('active',1)->whereIn('id',$users_id_course)->select('id');
+        return ($type=='get_records') ? $users_have_course->get() : $users_have_course->count();
+    }
     public function getUsersBySegmentation()
     {
         $this->load('segments.values');

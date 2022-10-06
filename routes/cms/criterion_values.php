@@ -10,6 +10,7 @@ Route::controller(CriterionValueController::class)->group(function() {
 	// ->middleware('permission:criterio.list');
 
 	Route::get('/search', 'search');
+	Route::get('/search-wk', 'searchWk');
 //	Route::get('/get-list-selects', 'getListSelects');
 	Route::get('/form-selects', 'getFormSelects');
 

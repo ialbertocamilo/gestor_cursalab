@@ -35,10 +35,11 @@ class AdminStoreRequest extends FormRequest
             'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
             'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
-            'workspacessel' => 'required',
+            'username' => 'nullable',
+            'phone_number' => 'nullable',
+            'person_number' => 'nullable',
 
-            'criterion_list_final' => 'nullable',
-            'criterion_list' => 'nullable',
+            'workspacessel' => 'required'
         ];
 
         return $rules;
@@ -56,10 +57,10 @@ class AdminStoreRequest extends FormRequest
         return [
             'name.required' => 'El dato "nombre" es requerido',
             'password.required' => 'El dato "contraseña" es requerido',
+            'workspacessel.required' => 'Debe seleccionar al menos un rol',
             'email.required' => 'El dato "correo" es requerido',
             'email.email' => 'El dato "correo " debe tener formato abc@ejemplo.com',
-            'email.unique' => 'Este correo ya ha sido regitrado: intente con otro',
-            'workspacessel.required' => 'Debe seleccionar al menos un rol'
+            'email.unique' => 'Este correo ya ha sido regitrado: intente con otro'
         ];
     }
 }

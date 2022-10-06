@@ -7,8 +7,11 @@ class Ticket extends BaseModel
 
     protected $fillable = [
         'user_id',
+        'workspace_id',
         'reason',
         'detail',
+        'dni',
+        'name',
         'contact',
         'info_support',
         'msg_to_user',
@@ -30,6 +33,11 @@ class Ticket extends BaseModel
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class, 'workspace_id');
+    }
+
     /*
 
         Methods
@@ -39,21 +47,21 @@ class Ticket extends BaseModel
 
     protected function search($request)
     {
-        $query = self::with('user');
+        $query = self::with(['workspace', 'user']);
 
         if ($request->q || $request->modulo) {
 
             $subworkspaceId = Workspace::getWorkspaceIdFromModule($request->modulo);
 
-            $query->where(function($qu) use ($request, $subworkspaceId){
+            $query->where(function ($qu) use ($request, $subworkspaceId) {
 
-                $qu->whereHas('user', function($q) use ($request, $subworkspaceId) {
+                $qu->whereHas('user', function ($q) use ($request, $subworkspaceId) {
 
                     if ($request->q) {
                         $q->where('name', 'like', "%$request->q%");
 
-//                        if (strlen($request->q) > 4)
-//                            $q->orWhere('dni', 'like', "%$request->q%");
+                        //                        if (strlen($request->q) > 4)
+                        //                            $q->orWhere('dni', 'like', "%$request->q%");
                     }
 
                     if ($request->modulo)

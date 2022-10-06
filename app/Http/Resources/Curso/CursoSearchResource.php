@@ -22,11 +22,18 @@ class CursoSearchResource extends JsonResource
             $route_edit = route('cursos.editCurso', [$request->school_id, $this->id]);
             $route_topics = route('temas.list', [$request->school_id, $this->id]);
         }
+
+        $schools = $this->schools->pluck('name')->toArray();
+
+        info($schools);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'nombre' => $this->name,
+            'schools' => implode(',', $schools),
             'image' => FileService::generateUrl($this->imagen),
+            // 'medium_image' => FileService::generateUrl($this->imagen),
             'temas_count' => $this->topics_count,
             'encuesta_count' => $this->polls_count,
             'segments_count' => $this->segments_count,

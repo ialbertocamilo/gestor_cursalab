@@ -163,11 +163,14 @@
     </default-dialog>
 </template>
 <script>
+
 import DefaultErrorsImport from "../../components/globals/DefaultErrorsImport";
-const fields = ['nombre'];
-const file_fields = [];
 import dropzone from "../../components/SubidaMasiva/dropzone";
 import XLSX from "xlsx";
+
+const fields = ['nombre'];
+const file_fields = [];
+
 export default {
     components: {
         dropzone,
@@ -196,8 +199,9 @@ export default {
             },
             stepsLabel:['Descargar Plantilla','Subir Plantilla','Verificación'],
             modelStepper:1,
-            urlPlantilla:'/templates/Plantilla-Examen-Calificada.xlsx',
-            urlSubida:this.options.base_endpoint,
+            urlPlantillaCalificada: '/templates/Plantilla-Examen-Calificada.xlsx',
+            urlPlantillaAbierta: '/templates/Plantilla-Examen-Abierta.xlsx',
+            urlSubida: this.options.base_endpoint,
             archivo: null,
             progress_upload: null,
             errores: [],
@@ -251,37 +255,31 @@ export default {
         },
         resetSelects() {
         },
-        async loadData(resource) {
-            let vue = this
-            vue.errors = []
-
-            vue.$nextTick(() => {
-                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-            })
-
-            if (resource && resource.id)
-            {
-                let base = `${vue.options.base_endpoint}`
-                let url = resource ? `${base}/${resource.id}/edit` : `${base}/create`;
-
-                await vue.$http.get(url).then(({data}) => {
-
-                    // vue.selects.modules = data.data.modules
-
-                    if (resource) {
-                        vue.resource = data.data.cargo
-                    }
-                })
-            }
+        async loadData() {
 
 
-            return 0;
         },
         loadSelects() {
             let vue = this
         },
         download_plantilla(){
-            location.href = this.urlPlantilla
+
+            // Check topic evaluation type
+
+            let vue = this
+            let url = this.options.topicUrl
+
+            vue.$http.get(url)
+                .then(({data}) => {
+
+                    if (!data.data.tema.evaluation_type) return;
+
+                    if (data.data.tema.evaluation_type.code === 'qualified') {
+                        location.href = this.urlPlantillaCalificada
+                    } else {
+                        location.href = this.urlPlantillaAbierta
+                    }
+                })
         },
         async subirArchivo() {
             let vue = this
@@ -300,9 +298,11 @@ export default {
                             vue.errors = res.data.data.errors
 
                         vue.progress_upload = 'ok'
-                        if (res.data.info.data_no_procesada.length > 0) {
-                            vue.uploadErrors = true;
-                            vue.errores = res.data.info.data_no_procesada
+                        if (res.data.info) {
+                            if (res.data.info.data_no_procesada.length > 0) {
+                                vue.uploadErrors = true;
+                                vue.errores = res.data.info.data_no_procesada
+                            }
                         }
 
                     }, 1500)

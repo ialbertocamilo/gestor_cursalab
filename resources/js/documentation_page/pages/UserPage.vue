@@ -21,7 +21,7 @@ export default {
             api_description_options:{
                 title:'Crear o actualizar usuarios',
                 type:'POST',
-                route:'/integrations/update_create_users',
+                route:'/integrations/update-create-users',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -36,67 +36,70 @@ export default {
                                         Dinámicos: "criterions"<br>
                                         Ejemplo:<br>
 <pre class='language-js line-numbers'><code>
-    "users": [
-        {
-            "active": boolean,
-            "document": text,
-            "person_number": text,
-            "fullname": text,
-            "name": text,
-            "lastname": text,
-            "user_name": text,
-            "phone_number": number,
-            "email_address": text,
-            "criterions": {
-                module
-                "user_action_id":text,
-                "document_type_id":text,
-                "business_unit_id":text,
-                "business_unit_name":text,
-                "gender":text,
-                "position_name":text,
-                "position_code":text,
-                "date_start":text,
-                "termination_date":date,
-                "seniority_date":date,
-                "birthday_date":date,
-                "phone_type_id":text,
-                "aplica_a_bono":text,
-                "tipo_de_bono":text,
-                "grupo_ocupacional":text,
-                "location_code":text,
-                "location_name":text,
-                "department_name":text,
-                "department_code":text,
-                "modalidad_de_trabajo":text,
-                "department_name_nivel_1":text,
-                "department_name_nivel_2":text,
-                "department_name_nivel_3":text,
-                "department_name_nivel_4":text,
-                "department_name_nivel_5":text,
-                "department_name_nivel_6":text,
-                "email_type":text,
-                "national_identifier_number_manager":text,
-                "nombre_de_jefe":text,
-                "posicion_jefe":text,
-                "clasificacion_de_evd":text,
-                "gor_gerente_de_área":text,
-                "botica":text,
-                "grupo":text,
-                "zonal":text,
-                "correo_zonal":text,
-                "tipo_de_publico":text,
-                "division":text,
-                "area":text,
-                "region":text,
-                "region_de_tienda":text,
-                "correo_jefe":text,
-                "grupos_de_supervision_supply":text,
-                "gerente_de_area_o_mall":text,
+    {
+        "workspace_id":"Identificador del workspace",
+        "users": [
+            {
+                "active": boolean,
+                "document": text,
+                "person_number": text,
+                "fullname": text,
+                "name": text,
+                "lastname": text,
+                "user_name": text,
+                "phone_number": number,
+                "email_address": text,
+                "criterions": {
+                    "module":text,
+                    "user_action_id":text,
+                    "document_type_id":text,
+                    "business_unit_id":text,
+                    "business_unit_name":text,
+                    "gender":text,
+                    "position_name":text,
+                    "position_code":text,
+                    "date_start":text,
+                    "termination_date":date,
+                    "seniority_date":date,
+                    "birthday_date":date,
+                    "phone_type_id":text,
+                    "aplica_a_bono":text,
+                    "tipo_de_bono":text,
+                    "grupo_ocupacional":text,
+                    "location_code":text,
+                    "location_name":text,
+                    "department_name":text,
+                    "department_code":text,
+                    "modalidad_de_trabajo":text,
+                    "department_name_nivel_1":text,
+                    "department_name_nivel_2":text,
+                    "department_name_nivel_3":text,
+                    "department_name_nivel_4":text,
+                    "department_name_nivel_5":text,
+                    "department_name_nivel_6":text,
+                    "email_type":text,
+                    "national_identifier_number_manager":text,
+                    "nombre_de_jefe":text,
+                    "posicion_jefe":text,
+                    "clasificacion_de_evd":text,
+                    "gor_gerente_de_área":text,
+                    "botica":text,
+                    "grupo":text,
+                    "zonal":text,
+                    "correo_zonal":text,
+                    "tipo_de_publico":text,
+                    "division":text,
+                    "area":text,
+                    "region":text,
+                    "region_de_tienda":text,
+                    "correo_jefe":text,
+                    "grupos_de_supervision_supply":text,
+                    "gerente_de_area_o_mall":text,
+                }
+                
             }
-            
-        }
-    ]
+        ]
+    }
 </code></pre>
                                     </ul>                                `
                             }
@@ -150,7 +153,7 @@ let data = JSON.stringify({
             "phone_number": number,
             "email_address": text,
             "criterions": {
-                module
+                "module":text,
                 "user_action_id":text,
                 "document_type_id":text,
                 "business_unit_id":text,
@@ -203,7 +206,7 @@ let data = JSON.stringify({
 );
 var config = {
     method: 'post',
-    url: base_url+'/integrations/update_create_users',
+    url: base_url+'/integrations/update-create-users',
     headers: { 
         'secretKey': 'f*hdj[!GbdZQ4{#zKlot', 
         'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ...', 
@@ -223,8 +226,7 @@ code:
 `
 {
     "data": {
-        "inserted_users": "Cantidad de usuarios insertados.",
-        "updated_users": "Cantidad de usuarios actualizados.",
+        "insert_updated_users": "Cantidad de usuarios insertados/actualizados.",
         "amount_errors": "Cantidad de errores encontrados.",
         "processed_data": "Cantidad de data recibida.",
         "errors": "Listado de errores encontrados en la api." /[

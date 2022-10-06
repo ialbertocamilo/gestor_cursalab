@@ -229,6 +229,25 @@ function cache_clear_model($model)
     \Artisan::call('modelCache:clear', array('--model' => $model));
 }
 
-function get_media_url($path = ''){
+function get_media_url($path = '')
+{
     return FileService::generateUrl($path);
+}
+
+function excelDateToDate($fecha)
+{
+    try {
+        if (_validateDate($fecha, 'Y-m-d')) {
+            return $fecha;
+        }
+        if (_validateDate($fecha, 'Y/m/d') || _validateDate($fecha, 'd/m/Y') || _validateDate($fecha, 'd-m-Y')) {
+            // return date("d/m/Y",$fecha);
+            return Carbon::parse($fecha)->format('Y-m-d');
+        }
+        $php_date = $fecha - 25569;
+        $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));
+        return $date;
+    } catch (\Exception $e) {
+        return null;
+    }
 }

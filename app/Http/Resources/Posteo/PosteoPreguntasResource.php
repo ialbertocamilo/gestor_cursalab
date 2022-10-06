@@ -19,6 +19,8 @@ class PosteoPreguntasResource extends JsonResource
             'custom_tema_preguntas_pregunta' => clean_html($this->pregunta),
             'active' => (bool)$this->active,
             'tipo_pregunta' => $this->type->name,
+            'required' => $this->required ? 'Sí' : 'No',
+            'score' => $this->score ?? '-',
         ];
     }
 }

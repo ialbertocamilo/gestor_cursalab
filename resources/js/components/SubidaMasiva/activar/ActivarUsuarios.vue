@@ -11,15 +11,15 @@
                         <li class="mt-2">
                             <b>Columnas del excel:</b>DNI
                         </li>
-						<li class="mt-2">
+						<!-- <li class="mt-2">
                             <b>Acción: </b>  No es necesario colocar una acción.
-                        </li>
-                        <li class="mt-2">Los errores encontrados en la subida masiva los podrás arreglar desde el botón "Ver errores" 👇</li>
+                        </li> -->
+                        <!-- <li class="mt-2">Los errores encontrados en la subida masiva los podrás arreglar desde el botón "Ver errores" 👇</li> -->
                     </ul>
                 </v-card-text>
-                <v-card-actions class="d-flex justify-center">
+                <!-- <v-card-actions class="d-flex justify-center">
 					<modalErrores :q_error="q_error" tipo="activos"></modalErrores>
-				</v-card-actions>
+				</v-card-actions> -->
         </v-col>
         <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
             <v-row justify="center">
@@ -74,10 +74,9 @@
                 if(validar_data){
                     this.loading_guardar = true;
                     let data = new FormData();
-                    data.append("file_act_usu", this.archivo);
-                    axios.post('/masivo/recuperar_data_cesados',data).then((res)=>{
+                    data.append("file", this.archivo);
+                    axios.post('/masivos/active-users',data).then((res)=>{
                         this.loading_guardar = false;
-                        let info = res.data.info;
                         if(res.data.error){
                             this.$emit("update_q_error",{
                                     tipo:'activos',
@@ -85,7 +84,13 @@
                                 }
                             );
                         }
-                        this.enviar_alerta(info);
+                        const data = res.data.data;
+                        const message = ` <ul>
+                            <li>${data.message}</li>
+                            <li>Cantidad de usuarios activados: ${data.datos_procesados || 0}</li>
+                            <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
+                        </ul>`
+                        this.enviar_alerta(message);
                     }).catch(err=>{
                         this.loading_guardar = false;
                     });

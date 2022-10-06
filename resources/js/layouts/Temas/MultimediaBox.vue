@@ -52,7 +52,7 @@ export default {
             let vue = this
             const type = vue.data.type
 
-            if (['youtube', 'vimeo'].includes(type)) {
+            if (['youtube', 'vimeo','genially'].includes(type)) {
                 vue.modalMultimediaTextOptions.title = vue.data.label
                 vue.modalMultimediaTextOptions.open = true
             } else if (type === 'link') {

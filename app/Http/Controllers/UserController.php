@@ -25,12 +25,13 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->has('q')) {
-            $question = $request->input('q');
-            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->filterText($question)->paginate();
-        } else {
-            $users = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports')->paginate();
-        }
+        $q = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports');
+
+        if ($request->has('q'))
+           $q->filterText($request->q);
+
+        $users = $q->orderBy('name')->paginate();
+
         $super_user = auth()->user()->isAn('super-user');
         return view('users.index', compact('users', 'super_user'));
     }
@@ -76,8 +77,9 @@ class UserController extends Controller
     {
         //cambiar valor de name en el request
         $data = $request->all();
+//        dd($data);
 
-        $employee = Taxonomy::getFirstData('user', 'type', 'client');
+        $employee = Taxonomy::getFirstData('user', 'type', 'employee');
         $data['type_id'] = $employee->id;
 
         $user = User::create($data);
@@ -93,7 +95,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')
-            ->with('info', 'usero guardado con éxito');
+            ->with('info', 'Administrador guardado con éxito');
     }
 
     public function edit(User $user)
@@ -156,6 +158,7 @@ class UserController extends Controller
     {
         // 1. Actualizar el usuario
         $data = $request->all();
+//        dd($data);
 
         if (!is_null($request->password)) {
             $data['password'] = $request->password;
@@ -177,7 +180,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')
-            ->with('info', 'Actualizado con éxito');
+            ->with('info', 'Administrador actualizado con éxito');
     }
 
     /**
@@ -190,6 +193,6 @@ class UserController extends Controller
     {
         $user->delete();
 
-        return back()->with('info', 'Eliminado Correctamente');
+        return back()->with('info', 'Administrador eliminado Correctamente');
     }
 }

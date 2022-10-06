@@ -4,8 +4,8 @@ namespace App\Models;
 
 // use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -47,6 +47,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     use InteractsWithMedia;
 
+    use Notifiable;
+
     use Cachable;
 
     use Cachable {
@@ -66,7 +68,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
-        'external_id', 'fcm_token', 'token_firebase',
+        'external_id', 'fcm_token', 'token_firebase', 'secret_key'
     ];
 
     protected $with = ['roles', 'abilities'];
@@ -175,9 +177,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $q->where(function ($q) use ($filter) {
             $q->whereRaw('document like ?', ["%{$filter}%"]);
             $q->orWhereRaw('name like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('email like ?', ["%{$filter}%"]);
             $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
             $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
-            $q->orWhereRaw('email like ?', ["%{$filter}%"]);
         });
     }
 
@@ -300,19 +302,43 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return null;
     }
 
-
-    protected function storeRequest($data, $user = null)
+    public function updateStatusUser($active=null,$termination_date=null){
+        $user = $this;
+        $user->active = $active ? $active : !$user->active;
+        $user->save();
+        $criterion = Criterion::with('field_type:id,code')->where('code','termination_date')->select('id','field_id')->first();
+        if(!$criterion){
+            return true;
+        }
+        $user_criterion = $user->criterion_values()->where('criterion_id',$criterion->id)->detach();
+        if($termination_date && !$user->active){
+            $criterion_value =  CriterionValue::where('criterion_id',$criterion->id)->where('value_text',trim($termination_date))->select('id','value_text')->first();
+            $colum_name      =  CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
+            if(!$criterion_value){
+                $data_criterion_value[$colum_name] = $termination_date;
+                $data_criterion_value['value_text'] = $termination_date;
+                $data_criterion_value['criterion_id'] = $criterion->id;
+                $data_criterion_value['active'] = 1;
+                $data_criterion_value['workspace_id'] = $user->subworkspace?->parent?->id;
+                $criterion_value = CriterionValue::storeRequest($data_criterion_value);
+            }
+            $user_criterion = $user->criterion_values()->where('criterion_id',$criterion->id)->detach();
+            $user->criterion_values()->syncWithoutDetaching([$criterion_value->id]);
+        }
+    }
+    protected function storeRequest($data, $user = null,$update_password=true)
     {
         try {
 
             DB::beginTransaction();
+            $old_document = $user ? $user->document : null;
 
             if ($user) :
-
+                if(!$update_password && isset($data['password'])){
+                    unset($data['password']);
+                }
                 $user->update($data);
-
             else :
-
                 $user = self::create($data);
 
             endif;
@@ -325,6 +351,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
 
+            if ($user->wasChanged('document') && ($data['document'] ?? false)):
+                $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
+            endif;
 
             $user->save();
             DB::commit();
@@ -336,6 +365,22 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
         }
+    }
+
+    public function syncDocumentCriterionValue($old_document, $new_document)
+    {
+        $document_criterion = Criterion::where('code', 'documento')->first();
+
+        $document_value = CriterionValue::whereRelation('criterion', 'code', 'documento')
+            ->where('value_text', $old_document)->first();
+
+        $criterion_value_data = [
+            'value_text' => $new_document,
+            'criterion_id' => $document_criterion?->id,
+            'active' => ACTIVE
+        ];
+
+        CriterionValue::storeRequest($criterion_value_data, $document_value);
     }
 
     protected function storeRequestFull($data = [], $user = null)
@@ -377,8 +422,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query = self::query();
         $query->with('subworkspace');
 
-        if ($request->q)
+        if ($request->q) {
             $query->filterText($request->q);
+        }
+        if ($request->workspace_id) {
+            $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
+        }
 
         if ($request->subworkspace_id)
             $query->where('subworkspace_id', $request->subworkspace_id);
@@ -393,11 +442,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->rowsPerPage);
-    }
-
-    protected function searchSupervisors()
-    {
-
     }
 
     public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true)
@@ -546,11 +590,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses)
     {
-//        dd($user->subworkspace);
+        $user->loadMissing('subworkspace.parent');
+
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
-            'schools',
+            'schools' => function ($query) {
+                $query->where('active', ACTIVE);
+            },
             'topics' => [
                 'evaluation_type',
                 'requirements',
@@ -559,21 +606,27 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'polls.questions',
             'topics.evaluation_type'
         ])
-            ->whereHas('topics', function ($q) {
-                $q->where('active', ACTIVE);
-            })
-            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+//            ->whereHas('topics', function ($q) {
+//                $q->where('active', ACTIVE);
+//            })
+//            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+            ->whereRelation('schools', 'active', ACTIVE)
+            ->whereRelation('segments', 'active', ACTIVE)
+            ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
             ->where('active', ACTIVE)
             ->get();
 
-        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+//        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+        $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
 
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
+
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
-                $valid_segment = $this->validateSegmentByUser($user_criteria, $course_segment_criteria);
+
+                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
 
                 if ($valid_segment) :
                     $all_courses[] = $course;
@@ -582,30 +635,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
 
         }
-    }
-
-    public function validateSegmentByUser(Collection $user_criteria, Collection $segment_criteria): bool
-    {
-        $segment_valid = false;
-
-        foreach ($segment_criteria as $criterion_id => $segment_values) {
-            $user_has_criterion_id = $user_criteria[$criterion_id] ?? false;
-
-            if (!$user_has_criterion_id):
-                $segment_valid = false;
-                break;
-            endif;
-
-            $user_criterion_value_id_by_criterion = $user_criteria[$criterion_id]->pluck('id');
-            $segment_valid = $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
-
-            if (!$segment_valid):
-                $segment_valid = false;
-                break;
-            endif;
-        }
-
-        return $segment_valid;
     }
 
     public function updateLastUserLogin()
@@ -663,5 +692,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $puntos_intentos = $attempts * 0.5;
 
         return $puntos_promedio + $puntos_cursos - $puntos_intentos;
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new UserResetPasswordNotification($token));
     }
 }

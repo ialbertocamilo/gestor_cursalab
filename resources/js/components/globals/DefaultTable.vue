@@ -132,6 +132,29 @@
                     </v-img>
                 </div>
             </template>
+            <template v-slot:item.medium_image="{ item, header }">
+                <div class="d-flex justify-center flex-row my-2"
+                     v-if="item.image">
+                    <v-img
+                        max-height="120"
+                        max-width="120"
+                        :src="item.image"
+                    >
+                        <template v-slot:placeholder>
+                            <v-row
+                                class="fill-height ma-0"
+                                align="center"
+                                justify="center"
+                            >
+                                <v-progress-circular
+                                    indeterminate
+                                    color="grey lighten-5"
+                                ></v-progress-circular>
+                            </v-row>
+                        </template>
+                    </v-img>
+                </div>
+            </template>
             <template v-slot:item.actions="{ item, header }">
                 <div class="default-table-actions d-flex justify-center flex-row my-2"
                      v-if="dataTable.actions && dataTable.actions.length > 0">

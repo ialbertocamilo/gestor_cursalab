@@ -438,7 +438,7 @@ export default {
                         subpaths: ["notificaciones_push"],
                         selected: false,
                         permission: "notificaciones",
-                        role: ["super-user", "admin-TEMPORAL_INACTIVO"]
+                        role: ["super-user", "admin"]
                     },
                     {
                         title: "Reinicio de usuarios",
@@ -457,6 +457,24 @@ export default {
                         selected: false,
                         permission: "proceso_masivo",
                         role: ["super-user", "admin-TEMPORAL_INACTIVO"]
+                    },
+                    {
+                        title: "Subida de notas",
+                        icon: "fas fa-share-square",
+                        path: "/importar-notas",
+                        subpaths: ["importar-notas"],
+                        selected: false,
+                        permission: "proceso_masivo_notas",
+                        role: ["super-user", "admin"]
+                    },
+                    {
+                        title: "Documentación API",
+                        icon: "fas fa-file",
+                        path: "/documentation-api",
+                        subpaths: ["documentation-api"],
+                        selected: false,
+                        permission: "documentation_api",
+                        role: ["super-user", "admin"]
                     }
                 ]
             },

@@ -56,8 +56,7 @@ class UsuarioController extends Controller
         if (Auth::check()) {
 
             $user = Auth::user();
-            $session = $request->session()->all();
-            $workspace = $session['workspace'];
+            $workspace = session('workspace');
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
             $roles = AssignedRole::getUserAssignedRoles($user->id);
 
@@ -177,7 +176,8 @@ class UsuarioController extends Controller
     public function store(UserStoreRequest $request)
     {
         $data = $request->validated();
-        $data['type_id'] = Taxonomy::getFirstData('user', 'type', 'employee')->id;
+
+        $data['workspace_id'] = get_current_workspace();
 
         User::storeRequest($data);
 
@@ -188,6 +188,8 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
+        $data['workspace'] = get_current_workspace()?->id;
+//        info($data);
         User::storeRequest($data, $user);
 
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);
@@ -527,9 +529,15 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
-        $user->setCurrentCourses();
+        $courses = $user->getCurrentCourses();
 
-        return $this->success(compact('user'));
+        return $this->success([
+            'user' => [
+                'id' => $user->id,
+                'fullname' => $user->fullname,
+                'schools' => Course::getDataToCoursesViewAppByUser($user, $courses)
+            ]
+        ]);
     }
 
     public function status($usuario_id)
@@ -654,12 +662,12 @@ class UsuarioController extends Controller
         } else {
 
             $query = SummaryTopic::query()
+                ->join('users', 'users.id', '=', 'summary_topics.user_id')
                 ->with('user')
                 ->where('summary_topics.topic_id', $topicId)
                 ->where('summary_topics.source_id')
-                ->whereHas('user', function ($q) use ($subworkspaceId) {
-                    $q->subworkspace_id = $subworkspaceId;
-                });
+                ->where('users.subworkspace_id', $subworkspaceId)
+                ->select('summary_topics.*');
 
             // "Desaprobados" only
 

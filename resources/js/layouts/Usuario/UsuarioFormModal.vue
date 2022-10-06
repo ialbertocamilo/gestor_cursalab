@@ -74,6 +74,30 @@
                     </v-col>
                 </v-row>
 
+                <v-row justify="space-around">
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.username"
+                            label="Nombre de usuario"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.phone_number"
+                            label="Número de teléfono"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.person_number"
+                            label="Número de colaborador"
+                        />
+                    </v-col>
+                </v-row>
+
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                            @click="sections.showCriteria = !sections.showCriteria"
@@ -131,6 +155,9 @@ export default {
                 surname: '',
                 email: '',
                 document: '',
+                username: '',
+                person_number: '',
+                phone_number: '',
 
                 criterion_list: {},
                 criterion_list_final: {},
@@ -141,7 +168,7 @@ export default {
                 name: this.getRules(['required', 'max:100', 'text']),
                 lastname: this.getRules(['required', 'max:100', 'text']),
                 surname: this.getRules(['required', 'max:100', 'text']),
-                document: this.getRules(['required', 'number', 'min:8']),
+                document: this.getRules(['required', 'min:8']),
                 password: this.getRules(['required', 'min:8']),
                 email: this.getRules(['required', 'min:8']),
                 password_not_required: this.getRules([]),

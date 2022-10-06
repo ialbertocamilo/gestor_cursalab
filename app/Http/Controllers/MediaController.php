@@ -10,8 +10,10 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Services\FileService;
 
@@ -51,8 +53,8 @@ class MediaController extends Controller
 
 
         $multimedia->file = $multimedia->ext === 'scorm'
-                             ? $multimedia->file
-                             : FileService::generateUrl($multimedia->file);
+            ? $multimedia->file
+            : FileService::generateUrl($multimedia->file);
         $multimedia->preview = $multimedia->getPreview();
         $multimedia->type = $type;
         $multimedia->created = $multimedia->created_at->format('d/m/Y');
@@ -101,14 +103,14 @@ class MediaController extends Controller
 
             $question = $request->input('q');
             $medias = Media::whereIn('ext', $exts)
-                            ->where('title', 'like', '%' . $question . '%')
-                            ->orderBy('created_at', 'DESC')
-                            ->paginate(18);
+                ->where('title', 'like', '%' . $question . '%')
+                ->orderBy('created_at', 'DESC')
+                ->paginate(18);
         } else {
 
             $medias = Media::whereIn('ext', $exts)
-                            ->orderBy('created_at', 'DESC')
-                            ->paginate(18);
+                ->orderBy('created_at', 'DESC')
+                ->paginate(18);
         }
 
         return $medias;
@@ -195,7 +197,7 @@ class MediaController extends Controller
 
         // Deletes file from database
 
-         $media->delete();
+        $media->delete();
 
 
         return $this->success([
@@ -230,6 +232,42 @@ class MediaController extends Controller
     public function downloadExternalFile(Media $media): StreamedResponse
     {
         return $media->streamDownloadFile();
+    }
+
+    /**
+     * Process request to download media topic file
+     *
+     * @param Media $media
+     * @return StreamedResponse
+     */
+    public function downloadMediaTopicExternalFile($media_topic_id): StreamedResponse
+    {
+        $media_topic = DB::table('media_topics')->where('id', $media_topic_id)->first();
+
+        if (!$media_topic) abort(404);
+
+        $filename = Str::after($media_topic->value, '/');
+        // $stream = Storage::readStream($this->file);
+
+        $response = response()->streamDownload(function () use($media_topic){
+
+//            $path = Storage::url($media_topic->value);
+            $path = get_media_url($media_topic->value);
+
+            if ($stream = fopen($path, 'r')) {
+
+                while (!feof($stream)) {
+                    echo fread($stream, 1024);
+                    flush();
+                }
+
+                fclose($stream);
+            }
+        }, $filename);
+
+        if (ob_get_level()) ob_end_clean();
+
+        return $response;
     }
 
     // todo: remove this method since it is not used anywhere

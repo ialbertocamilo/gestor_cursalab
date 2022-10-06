@@ -23,7 +23,7 @@ export default {
             api_description_options:{
                 title:'Generar un nuevo token',
                 type:'POST',
-                route:'/integrations/auth_user',
+                route:'/integrations/auth-user',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -66,7 +66,7 @@ const axios = require('axios');
 const data = JSON.stringify({"email":"admin@admin.com","password":"4239872439"});
 const config = {
     method: 'post',
-    url: base_url+'/integrations/auth_user',
+    url: base_url+'/integrations/auth-user',
     headers: { 
         'secretKey': '982alsdh$%as', 
         'Content-Type': 'application/json'
@@ -89,7 +89,7 @@ axios(config).then(function (response) {
         "access_token": "Token para hacer la consulta.",
         "token_type": "Tipo de token.(Bearer)",
         "expires_in": "Tiempo de expiración.",
-        "expires_in_format": "Formato del tiempo de expiración (minutes,hours,days)"
+        "expires_in_format": "Formato del tiempo de expiración (Y-m-d H:m:s)"
     }
 }
 `
