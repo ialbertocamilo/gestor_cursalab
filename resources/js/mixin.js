@@ -10,7 +10,8 @@ const extensiones = {
     audio: ["mp3","mpga"],
     pdf: ["pdf"],
     excel: ["xls", 'xlsx', 'csv'],
-    scorm: ["zip", "scorm"]
+    scorm: ["zip", "scorm"],
+    rise: ["zip", "rise"],
 };
 const default_media_images = {
     video: "images/default-video-img_285_360.png",
