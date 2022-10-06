@@ -7,7 +7,7 @@ use DB;
 class Segment extends BaseModel
 {
     protected $fillable = [
-        'name', 'model_id', 'model_type', 'active'
+        'name', 'model_id', 'model_type', 'active', 'type_id'
     ];
 
     // public function courses()

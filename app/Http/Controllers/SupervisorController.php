@@ -37,8 +37,11 @@ class SupervisorController extends Controller
 
     public function searchUsuarios(Request $request)
     {
+        $workspace = get_current_workspace();
+
         $users = User::filterText($request->filtro)
             ->select('id', 'document', 'name', 'lastname', 'surname')
+            ->whereRelation('subworkspace', 'parent_id', $workspace->id)
             ->onlyAppUser()
             ->limit(40)
             ->get();

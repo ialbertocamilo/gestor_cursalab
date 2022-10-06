@@ -63,7 +63,6 @@ class UserRelationship extends BaseModel
         $q->orderBy($field, $sort);
 
         return $q->paginate($request->paginate);
-
     }
 
     protected function createRelation($relation_type, $user, $model_type, $model_id)
@@ -88,7 +87,7 @@ class UserRelationship extends BaseModel
             $supervisor->supervised_users
             : $supervisor->supervised_segments;
 
-        info($data);
+//        info($data);
         $temp = [];
         foreach ($data as $row) {
             $model = $type === 'dni' ?
@@ -114,12 +113,12 @@ class UserRelationship extends BaseModel
         $relation_type = Taxonomy::getFirstData('user', 'action', 'supervise');
 
         foreach ($users as $user) {
-            // Create segment and segment_values
-            $segment = Segment::create([
+            $segment = Segment::firstOrCreate([
                 'name' => "Segmentación de supervisor",
                 'model_type' => User::class,
                 'model_id' => $user->id,
                 'active' => ACTIVE,
+                'type_id' => $relation_type?->id
             ]);
 
             $subworkspace = $user->subworkspace;
@@ -146,28 +145,41 @@ class UserRelationship extends BaseModel
 
         $type = $request['type'];
         $supervisor = User::find($request['supervisor']);
-        self::where('user_id', $supervisor->id)->whereRelation('type', 'code', 'supervise')
-            ->where('model_type', $type == 'dni' ? User::class : Segment::class)
-            ->delete();
+
+//        self::where('user_id', $supervisor->id)->whereRelation('type', 'code', 'supervise')
+//            ->where('model_type', $type == 'dni' ? User::class : Segment::class)
+//            ->delete();
+
         $data_supervisor = [];
 
         switch ($type) {
             case 'dni':
+                self::where('user_id', $supervisor->id)->whereRelation('type', 'code', 'supervise')
+                    ->where('model_type', User::class)
+                    ->delete();
                 $resources = User::whereIn('document', collect($request['resources'])->pluck('document'))->select('id')->get();
                 foreach ($resources as $user)
                     self::createRelation($relation_type, $supervisor, User::class, $user->id);
 
                 break;
             case 'criterios':
-                $resources = CriterionValue::whereIn('id', $request['resources'])->select('id')->get();
+                $resources = CriterionValue::query()
+                    ->whereIn('id', $request['resources'])
+                    ->select('id', 'criterion_id')
+                    ->get();
                 $segment = Segment::firstOrCreate([
-                        'user_id' => auth()->user()->id,
-                        'relation_type_id' => $supervise_type->id,
-                        'model_type' => Segment::class
+                    'name' => "Segmentación de supervisor",
+                    'model_id' => $supervisor->id,
+                    'type_id' => $supervise_type->id,
+                    'model_type' => User::class,
+                    'active' => ACTIVE
                 ]);
 
                 foreach ($resources as $resource) {
+                    $segment_value = $segment->values->where('criterion_value_id', $resource->id)->first();
+
                     $data_supervisor[] = [
+                        'id' => $segment_value->id ?? null,
                         'criterion_value_id' => $resource->id,
                         'criterion_id' => $resource->criterion_id,
                         'type_id' => null
