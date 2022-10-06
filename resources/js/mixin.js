@@ -32,7 +32,9 @@ export default {
                 {label: 'Audio', icon: 'mdi mdi-headset', type: 'audio'},
                 {label: 'PDF', icon: 'mdi mdi-file-pdf-box', type: 'pdf'},
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
-                {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'}
+                {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
+                {label: 'Genially', icon: 'mdi mdi-google-circles', type: 'genially'},
+                {label: 'Rise', icon: 'mdi mdi-archive', type: 'rise'},
             ],
             mixin_extensiones: extensiones,
             mixin_default_media_images: default_media_images,
