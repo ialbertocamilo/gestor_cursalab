@@ -8,7 +8,7 @@ use DB;
 class Segment extends BaseModel
 {
     protected $fillable = [
-        'name', 'model_id', 'model_type', 'active', 'type_id'
+        'name', 'model_id', 'model_type', 'active', 'type_id', 'code_id'
     ];
 
     // public function courses()
@@ -34,6 +34,11 @@ class Segment extends BaseModel
     public function type()
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
+    public function code()
+    {
+        return $this->belongsTo(Taxonomy::class, 'code_id');
     }
 
     public function values()
@@ -203,12 +208,15 @@ class Segment extends BaseModel
             ->whereNotIn('id', $segments_id)->delete();
 
         $direct_segmentation = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+        $code_segmentation = Taxonomy::getFirstData('segment', 'code', $data->code);
+
 
         foreach ($data->segments as $key => $segment_row) {
             if (count($segment_row['criteria_selected']) == 0) continue;
 
             $data = [
                 'type_id' => $direct_segmentation->id,
+                'code_id' => $code_segmentation?->id,
                 'model_type' => $data->model_type,
                 'model_id' => $data->model_id,
                 'name' => 'Nuevo segmento',
@@ -277,6 +285,7 @@ class Segment extends BaseModel
     public function storeSegmentationByDocument($data)
     {
         $segmentation_by_document = Taxonomy::getFirstData('segment', 'type', 'segmentation-by-document');
+        $code_segmentation = Taxonomy::getFirstData('segment', 'code', $data['code']);
 
         if (count($data['segment_by_document']['criteria_selected']) === 0) {
             $segment = self::where('active', ACTIVE)
@@ -294,7 +303,12 @@ class Segment extends BaseModel
 
 
         $segment = self::firstOrCreate(
-            ['model_id' => $data['model_id'], 'model_type' => $data['model_type'], 'type_id' => $segmentation_by_document->id],
+            [
+                'model_id' => $data['model_id'],
+                'model_type' => $data['model_type'],
+                'type_id' => $segmentation_by_document->id,
+                'code_id' => $code_segmentation?->id,
+            ],
             ['name' => "Segmentación por documento", 'active' => ACTIVE]
         );
 
@@ -364,7 +378,7 @@ class Segment extends BaseModel
             $starts_at = carbonFromFormat($date_range['starts_at']);
             $finishes_at = carbonFromFormat($date_range['finishes_at']);
 
-            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date. " 00:00:00");
+            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date . " 00:00:00");
 
             $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
 

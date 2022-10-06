@@ -57,6 +57,8 @@ class SegmentController extends Controller
     {
         // return ($request->all());
 
+
+
         return Segment::storeRequestData($request);
     }
 

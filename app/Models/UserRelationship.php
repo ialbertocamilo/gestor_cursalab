@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\DB;
 
 class UserRelationship extends BaseModel
 {
+
+    const  SUPERVISOR_DIRECT_SEGMENTATION_NAME = 'Segmentación directa de supervisor';
+    const  SEGMENTATION_NAME_BY_SUPERVISORS_DOCUMENT = 'Segmentación directa de supervisor';
+
     protected $table = 'user_relationships';
 
     protected $fillable = [
@@ -27,43 +31,43 @@ class UserRelationship extends BaseModel
         return $this->belongsTo(CriterionValue::class, 'criterion_value_id');
     }
 
-    protected function search($request)
-    {
-        $q = User::query();
-//        $q = self::query();
-
-        if ($request->code):
-            $q->whereRelation('relationships.type', 'code', $request->code);
-            if ($request->code === 'supervise'):
-//                $q->withCount(['supervised_users', 'supervise_segments']);
-                $q->withCount([
-                    'relationships as users_count' => function ($q_relationships) {
-                        $q_relationships->whereRelation('type', 'code', 'supervise')
-                            ->where('model_type', User::class);
-                    },
-                    'relationships as segments_count' => function ($q_relationships) {
-                        $q_relationships->whereRelation('type', 'code', 'supervise')
-                            ->where('model_type', Segment::class);
-                    },
-                ]);
-            endif;
-        endif;
-
-        $q->withWhereHas('subworkspace', function ($query) use ($request) {
-            if ($request->subworkspace)
-                $query->whereIn('id', $request->subworkspace);
-            else
-                $query->whereRelation('parent', 'id', $request->workspace);
-        });
-
-
-        $field = $request->sortBy ?? 'created_at';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
-        $q->orderBy($field, $sort);
-
-        return $q->paginate($request->paginate);
-    }
+//    protected function search($request)
+//    {
+//        $q = User::query();
+////        $q = self::query();
+//
+//        if ($request->code):
+//            $q->whereRelation('relationships.type', 'code', $request->code);
+//            if ($request->code === 'supervise'):
+////                $q->withCount(['supervised_users', 'supervise_segments']);
+//                $q->withCount([
+//                    'relationships as users_count' => function ($q_relationships) {
+//                        $q_relationships->whereRelation('type', 'code', 'supervise')
+//                            ->where('model_type', User::class);
+//                    },
+//                    'relationships as segments_count' => function ($q_relationships) {
+//                        $q_relationships->whereRelation('type', 'code', 'supervise')
+//                            ->where('model_type', Segment::class);
+//                    },
+//                ]);
+//            endif;
+//        endif;
+//
+//        $q->withWhereHas('subworkspace', function ($query) use ($request) {
+//            if ($request->subworkspace)
+//                $query->whereIn('id', $request->subworkspace);
+//            else
+//                $query->whereRelation('parent', 'id', $request->workspace);
+//        });
+//
+//
+//        $field = $request->sortBy ?? 'created_at';
+//        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+//
+//        $q->orderBy($field, $sort);
+//
+//        return $q->paginate($request->paginate);
+//    }
 
     protected function createRelation($relation_type, $user, $model_type, $model_id)
     {
@@ -110,15 +114,17 @@ class UserRelationship extends BaseModel
 
     protected function setUsersAsSupervisor($users)
     {
-        $relation_type = Taxonomy::getFirstData('user', 'action', 'supervise');
+        $direct_segmentation_type = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+        $supervise_code_segment = Taxonomy::getFirstData('segment', 'code', 'user-supervise');
 
         foreach ($users as $user) {
             $segment = Segment::firstOrCreate([
-                'name' => "Segmentación de supervisor",
+                'name' => self::SUPERVISOR_DIRECT_SEGMENTATION_NAME,
                 'model_type' => User::class,
                 'model_id' => $user->id,
                 'active' => ACTIVE,
-                'type_id' => $relation_type?->id
+                'type_id' => $direct_segmentation_type?->id,
+                'code_id' => $supervise_code_segment?->id
             ]);
 
             $subworkspace = $user->subworkspace;
@@ -132,10 +138,7 @@ class UserRelationship extends BaseModel
             ];
 
             $segment->values()->sync($values);
-
-            self::createRelation($relation_type, $user, Segment::class, $segment->id);
         }
-
     }
 
     protected function setDataSupervisor($request)
@@ -168,7 +171,7 @@ class UserRelationship extends BaseModel
                     ->select('id', 'criterion_id')
                     ->get();
                 $segment = Segment::firstOrCreate([
-                    'name' => "Segmentación de supervisor",
+                    'name' => self::SUPERVISOR_DIRECT_SEGMENTATION_NAME,
                     'model_id' => $supervisor->id,
                     'type_id' => $supervise_type->id,
                     'model_type' => User::class,

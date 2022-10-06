@@ -22,7 +22,6 @@ class SupervisorResource extends JsonResource
 //            'apellidos' => $user_relationship->apellido_paterno . ' ' . $user_relationship->apellido_materno,
             'dni' => $supervisor->document,
             'modulo' => $supervisor->subworkspace->name,
-            'users_count' => $supervisor->users_count,
             'segments_count' => $supervisor->segments_count,
             'active' => 1
         ];

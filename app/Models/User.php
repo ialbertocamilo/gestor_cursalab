@@ -153,18 +153,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasMany(UserRelationship::class, 'user_id');
     }
 
-    public function supervised_users()
+    public function segments()
     {
-        return $this->relationships()
-            ->whereRelation('type', 'code', 'supervise')
-            ->where('model_type', User::class);
-    }
-
-    public function supervised_segments()
-    {
-        return $this->relationships()
-            ->whereRelation('type', 'code', 'supervise')
-            ->where('model_type', Segment::class);
+        return $this->morphMany(Segment::class, 'model');
     }
 
     public function scopeOnlyAppUser($q)
@@ -302,19 +293,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return null;
     }
 
-    public function updateStatusUser($active=null,$termination_date=null){
+    public function updateStatusUser($active = null, $termination_date = null)
+    {
         $user = $this;
         $user->active = $active ? $active : !$user->active;
         $user->save();
-        $criterion = Criterion::with('field_type:id,code')->where('code','termination_date')->select('id','field_id')->first();
-        if(!$criterion){
+        $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
+        if (!$criterion) {
             return true;
         }
-        $user_criterion = $user->criterion_values()->where('criterion_id',$criterion->id)->detach();
-        if($termination_date && !$user->active){
-            $criterion_value =  CriterionValue::where('criterion_id',$criterion->id)->where('value_text',trim($termination_date))->select('id','value_text')->first();
-            $colum_name      =  CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
-            if(!$criterion_value){
+        $user_criterion = $user->criterion_values()->where('criterion_id', $criterion->id)->detach();
+        if ($termination_date && !$user->active) {
+            $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where('value_text', trim($termination_date))->select('id', 'value_text')->first();
+            $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
+            if (!$criterion_value) {
                 $data_criterion_value[$colum_name] = $termination_date;
                 $data_criterion_value['value_text'] = $termination_date;
                 $data_criterion_value['criterion_id'] = $criterion->id;
@@ -322,11 +314,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $data_criterion_value['workspace_id'] = $user->subworkspace?->parent?->id;
                 $criterion_value = CriterionValue::storeRequest($data_criterion_value);
             }
-            $user_criterion = $user->criterion_values()->where('criterion_id',$criterion->id)->detach();
+            $user_criterion = $user->criterion_values()->where('criterion_id', $criterion->id)->detach();
             $user->criterion_values()->syncWithoutDetaching([$criterion_value->id]);
         }
     }
-    protected function storeRequest($data, $user = null,$update_password=true)
+
+    protected function storeRequest($data, $user = null, $update_password = true)
     {
         try {
 
@@ -334,7 +327,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $old_document = $user ? $user->document : null;
 
             if ($user) :
-                if(!$update_password && isset($data['password'])){
+                if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
                 $user->update($data);

@@ -213,29 +213,30 @@ export default {
             vue.showLoader();
             axios.post(vue.apiUploadPlantilla, data)
                 .then((res) => {
-                    for (const dni in res.data.info.ok) {
-                        if (Object.hasOwnProperty.call(res.data.info.ok, dni)) {
-                            const validar = vue.usuarios_ok.filter((usuario) => usuario.dni == dni);
-                            if (validar.length == 0) {
-                                vue.usuarios_ok.push({dni: dni, nombre: res.data.info.ok[dni]});
+                    for (const document in res.data.info.ok) {
+                        if (Object.hasOwnProperty.call(res.data.info.ok, document)) {
+                            const validar = vue.usuarios_ok.filter((usuario) => usuario.document == document);
+                            if (validar.length === 0) {
+                                vue.usuarios_ok.push({document, fullname: res.data.info.ok[document]});
                             }
                         }
                     }
-                    for (const dni in res.data.info.error) {
-                        if (Object.hasOwnProperty.call(res.data.info.ok, dni)) {
-                            const validar = vue.usuarios_error.filter((usuario_dni) => usuario_dni == dni);
-                            if (validar.length == 0) {
-                                vue.usuarios_error.push(dni);
+                    for (const document in res.data.info.error) {
+                        if (Object.hasOwnProperty.call(res.data.info.ok, document)) {
+                            const validar = vue.usuarios_error.filter((usuario_document) => usuario_document == document);
+                            if (validar.length === 0) {
+                                vue.usuarios_error.push(document);
                             }
                         }
                     }
 
                     vue.usuarios_error = res.data.info.error;
                     vue.file = null;
-                    vue.search_usuarios_ok;
+                    vue.search_usuarios_ok();
                     vue.hideLoader();
                 })
                 .catch((err) => {
+                    vue.hideLoader();
                     console.log(err);
                 });
         },

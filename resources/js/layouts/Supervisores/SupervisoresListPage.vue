@@ -50,8 +50,22 @@
                 :filters="filters"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar supervisor')"
                 @asignarUsuarios="openFormModal(modalOptionsAsignarUsuarios, $event, null, 'Asignar usuarios al Supervisor')"
-                @asignarCriterios="openFormModal(modalOptionsAsignarCriterios, $event, null, 'Asignar criterios al Supervisor')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Supervisor - ${$event.nombre}`)"
             />
+
+            <SegmentFormModal
+                :options="modalFormSegmentationOptions"
+                width="55vw"
+                model_type="App\Models\User"
+                :model_id="null"
+                :code="'user-supervise'"
+                :tabs_title="''"
+                limit-one
+                :ref="modalFormSegmentationOptions.ref"
+                @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+            />
+
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
@@ -72,38 +86,40 @@
                 @onConfirm="changeLabelModal"
                 @onCancel="changeLabelModal"
             />
-            <AsignarUsuariosASupervisorModal
-                width="60vw"
-                :ref="modalOptionsAsignarUsuarios.ref"
-                :options="modalOptionsAsignarUsuarios"
-                @onConfirm="closeFormModal(modalOptionsAsignarUsuarios, dataTable, filters)"
-                @onCancel="closeFormModal(modalOptionsAsignarUsuarios)"
-            />
-            <AsignarCriteriosASupervisorModal
-                width="40vw"
-                :ref="modalOptionsAsignarCriterios.ref"
-                :options="modalOptionsAsignarCriterios"
-                @onConfirm="closeFormModal(modalOptionsAsignarCriterios, dataTable, filters)"
-                @onCancel="closeFormModal(modalOptionsAsignarCriterios)"
-            />
+<!--            <AsignarUsuariosASupervisorModal-->
+<!--                width="60vw"-->
+<!--                :ref="modalOptionsAsignarUsuarios.ref"-->
+<!--                :options="modalOptionsAsignarUsuarios"-->
+<!--                @onConfirm="closeFormModal(modalOptionsAsignarUsuarios, dataTable, filters)"-->
+<!--                @onCancel="closeFormModal(modalOptionsAsignarUsuarios)"-->
+<!--            />-->
+<!--            <AsignarCriteriosASupervisorModal-->
+<!--                width="40vw"-->
+<!--                :ref="modalOptionsAsignarCriterios.ref"-->
+<!--                :options="modalOptionsAsignarCriterios"-->
+<!--                @onConfirm="closeFormModal(modalOptionsAsignarCriterios, dataTable, filters)"-->
+<!--                @onCancel="closeFormModal(modalOptionsAsignarCriterios)"-->
+<!--            />-->
 
         </v-card>
     </section>
 </template>
 <script>
 import CreateSupervisorModal from "./CreateSupervisorModal";
-import AsignarUsuariosASupervisorModal from "./AsignarUsuariosASupervisorModal";
+// import AsignarUsuariosASupervisorModal from "./AsignarUsuariosASupervisorModal";
+// import AsignarCriteriosASupervisorModal from "./AsignarCriteriosASupervisorModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
-import AsignarCriteriosASupervisorModal from "./AsignarCriteriosASupervisorModal";
 import CriterioGlobalesModal from './CriterioGlobalesModal';
+import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
     components: {
         CreateSupervisorModal,
         DefaultDeleteModal,
-        AsignarUsuariosASupervisorModal,
-        AsignarCriteriosASupervisorModal,
-        CriterioGlobalesModal
+        // AsignarUsuariosASupervisorModal,
+        // AsignarCriteriosASupervisorModal,
+        CriterioGlobalesModal,
+        SegmentFormModal
     },
     data() {
         return {
@@ -122,19 +138,26 @@ export default {
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
+                    // {
+                    //     text: "Criterios",
+                    //     icon: 'fas fa-th-large',
+                    //     type: 'action',
+                    //     method_name: 'asignarCriterios',
+                    //     count: 'segments_count'
+                    // },
+                    // {
+                    //     text: "Usuarios",
+                    //     icon: 'fas fa-user',
+                    //     type: 'action',
+                    //     method_name: 'asignarUsuarios',
+                    //     count: 'users_count'
+                    // },
                     {
-                        text: "Criterios",
-                        icon: 'fas fa-th-large',
+                        text: "Segmentación",
+                        icon: 'fa fa-square',
                         type: 'action',
-                        method_name: 'asignarCriterios',
-                        count: 'segments_count'
-                    },
-                    {
-                        text: "Usuarios",
-                        icon: 'fas fa-user',
-                        type: 'action',
-                        method_name: 'asignarUsuarios',
-                        count: 'users_count'
+                        count: 'segments_count',
+                        method_name: 'segmentation'
                     },
                     {
                         text: "Eliminar",
@@ -145,6 +168,14 @@ export default {
                 ],
                 more_actions: []
             },
+            modalFormSegmentationOptions: {
+                ref: 'SegmentFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: '/segments',
+                confirmLabel: 'Guardar',
+                resource: 'segmentación',
+            },
             modalOptionsSupervisores: {
                 ref: 'CreateSupervisorModal',
                 open: false,
@@ -153,22 +184,22 @@ export default {
                 confirmLabel: 'Guardar',
                 showCloseIcon: true
             },
-            modalOptionsAsignarUsuarios: {
-                ref: 'AsignarUsuarios',
-                open: false,
-                base_endpoint: '/supervisores',
-                title: 'Asignar Usuarios',
-                confirmLabel: 'Guardar',
-                showCloseIcon: true
-            },
-            modalOptionsAsignarCriterios: {
-                ref: 'AsignarCriterios',
-                open: false,
-                base_endpoint: '/supervisores',
-                title: 'Asignar criterios',
-                confirmLabel: 'Guardar',
-                showCloseIcon: true
-            },
+            // modalOptionsAsignarUsuarios: {
+            //     ref: 'AsignarUsuarios',
+            //     open: false,
+            //     base_endpoint: '/supervisores',
+            //     title: 'Asignar Usuarios',
+            //     confirmLabel: 'Guardar',
+            //     showCloseIcon: true
+            // },
+            // modalOptionsAsignarCriterios: {
+            //     ref: 'AsignarCriterios',
+            //     open: false,
+            //     base_endpoint: '/supervisores',
+            //     title: 'Asignar criterios',
+            //     confirmLabel: 'Guardar',
+            //     showCloseIcon: true
+            // },
             modalDeleteOptions: {
                 ref: 'SupervisorDeleteModal',
                 open: false,

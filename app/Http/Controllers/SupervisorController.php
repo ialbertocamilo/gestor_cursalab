@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Criterion;
 use App\Models\Supervisor;
+use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\UserRelationship;
 use App\Models\Workspace;
@@ -18,7 +19,29 @@ class SupervisorController extends Controller
         $request->mergeIfMissing(['workspace' => $workspace?->id]);
         $request->mergeIfMissing(['code' => 'supervise']);
 
-        $data = UserRelationship::search($request);
+//        $data = UserRelationship::search($request);
+
+        $data = User::query()
+            ->whereHas('segments')
+            ->withCount([
+                'segments' => function ($q) {
+                    $q->
+                        whereRelation('code', 'code', 'user-supervise');
+                },
+            ])
+            ->whereRelation('segments.code', 'code', 'user-supervise');
+
+        $data->withWhereHas('subworkspace', function ($query) use ($request) {
+            if ($request->subworkspace)
+                $query->whereIn('id', $request->subworkspace);
+            else
+                $query->where('parent_id', $request->workspace);
+        });
+
+        $field = $request->sortBy ?? 'created_at';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $data = $data->orderBy($field, $sort)->paginate($request->paginate);
 
         SupervisorResource::collection($data);
         return $this->success($data);
@@ -111,4 +134,17 @@ class SupervisorController extends Controller
         $data = Supervisor::searchSupervisores($request);
         return $this->success($data);
     }
+
+    public function initData()
+    {
+        Taxonomy::create([
+            'group' => 'segment',
+            'type' => 'code',
+            'code' => 'user-supervise',
+            'name' => 'Supervisión de usuarios',
+            'active' => ACTIVE,
+            'position' => 1,
+        ]);
+    }
+
 }
