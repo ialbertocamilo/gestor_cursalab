@@ -14,7 +14,7 @@
                 <v-btn
                     v-show="options.showCloseIcon"
                     icon :ripple="false" color="white"
-                       @click="closeModal">
+                       @click="closeModalFromIcon">
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </v-card-title>
@@ -60,11 +60,19 @@ export default {
             type: Boolean,
             default: true
         },
+        eventCloseModalFromIcon:{
+            type:String,
+            default:'onCancel'
+        }
     },
     methods: {
         closeModal() {
             let vue = this
             vue.$emit('onCancel')
+        },
+        closeModalFromIcon(){
+            let vue = this;
+            vue.$emit(vue.eventCloseModalFromIcon)
         },
         closeModalOutside() {
             let vue = this
@@ -78,3 +86,8 @@ export default {
     }
 }
 </script>
+<style>
+.notificationCenter{
+    z-index: 300 !important;
+}
+</style>
