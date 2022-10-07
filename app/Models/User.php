@@ -695,4 +695,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $this->notify(new UserResetPasswordNotification($token));
     }
+
+    #test functions
+    public function criterion_user() {
+        return $this->hasMany(CriterionValueUser::class);
+
+    }
 }

@@ -22,6 +22,22 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class MeetingController extends Controller
 {
+    #test functions
+    public function testFunction($compactResponse = true) {
+
+        $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
+        $user_types = Taxonomy::getSelectData('meeting', 'user');
+        $types = Taxonomy::getSelectData('meeting', 'type');
+        $hosts = Usuario::_test_getCurrentHosts();
+
+        $response = compact('types', 'hosts', 'user_types', 'default_meeting_type');
+
+        return $compactResponse ? $response['hosts'] : $this->success($response);
+        // return $this->success(['data' => 'I am in CLASS: '.__class__.' and FUNC:'.__function__ ]);
+    }
+
+    #test functions
+
     public function search(Request $request)
     {
         $meetings = Meeting::search($request);
@@ -65,6 +81,7 @@ class MeetingController extends Controller
         $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
         $user_types = Taxonomy::getSelectData('meeting', 'user');
         $types = Taxonomy::getSelectData('meeting', 'type');
+
         $hosts = Usuario::getCurrentHosts();
 
         $response = compact(

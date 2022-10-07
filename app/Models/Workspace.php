@@ -37,6 +37,11 @@ class Workspace extends BaseModel
         'reinicios_programado' => 'array',
     ];
 
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
+    }
+
     public function users()
     {
         return $this->hasMany(User::class, 'subworkspace_id');
@@ -357,5 +362,10 @@ class Workspace extends BaseModel
         }
 
         return $data;
+    }
+
+    #test functions
+    public function criterion_workspace() {
+        return $this->hasMany(CriterionValueWorkspace::class);
     }
 }

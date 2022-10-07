@@ -41,4 +41,6 @@ Route::controller(MeetingController::class)->group(function() {
     Route::get('/{meeting}/export-report', 'exportMeetingReport');
     Route::get('/export-general-report', 'exportGeneralMeetingsReport');
 
+    # initial test function
+    Route::get('/test', 'testFunction');
 });
