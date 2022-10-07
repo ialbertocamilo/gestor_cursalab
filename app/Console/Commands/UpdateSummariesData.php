@@ -4,6 +4,11 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+use App\Models\SummaryCourse;
+use App\Models\SummaryUser;
+use App\Models\Course;
+use App\Models\User;
+
 class UpdateSummariesData extends Command
 {
     /**
@@ -38,5 +43,35 @@ class UpdateSummariesData extends Command
     public function handle()
     {
         $users = User::whereNotNull('summary_user_update')->orWhereNotNull('summary_course_update')->get();
+
+        foreach ($users as $key => $user) {
+
+            $user = User::find($user->id);
+
+            if ($user->summary_course_update) {
+
+                $course_ids = explode(',', $user->summary_course_data);
+
+                $courses = Course::whereIn('id', $course_ids)->get();
+
+                foreach ($courses as $course) {
+                    SummaryCourse::updateUserData($course, $user, false);
+                }
+            } 
+
+            if ($user->summary_user_update) {
+
+                SummaryUser::updateUserData($user);
+            }
+
+            $user->update([
+                'summary_user_update' => NULL,
+                'summary_course_update' => NULL,
+                'summary_course_data' => NULL,
+                // 'required_update_at' => NULL,
+                'last_summary_updated_at' => now(),
+            ]);
+        }
+
     }
 }

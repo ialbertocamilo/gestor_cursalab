@@ -153,8 +153,7 @@ class Summary extends BaseModel
             $data['summary_course_data'] = DB::raw("CONCAT(summary_course_data, ',', {$course_ids})");
         }
 
-        User::whereIn('id', $user_ids)
-            ->update($data);
+        User::whereIn('id', $user_ids)->update($data);
     }
 
 }
