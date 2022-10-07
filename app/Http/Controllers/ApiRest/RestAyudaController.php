@@ -90,7 +90,7 @@ class RestAyudaController extends Controller
                 'telefono' => $phone,
                 'detalle' => $details
             );
-            $emails = ['daniel@cursalab.io'];
+            $emails = ['daniel@cursalab.io', 'kevin@cursalab.io', 'rodrigo@cursalab.io'];
             foreach ($emails as $email_to) {
                 Mail::to($email_to)->send(new SendEmailSupportLogin($data_email));
             }
