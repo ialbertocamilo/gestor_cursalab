@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SegmentSearchUsersResource;
+use App\Imports\SegmentSearchByDocumentImport;
 use App\Models\CriterionValue;
 use App\Models\Criterion;
 use App\Models\SegmentValue;
