@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 // use App\Http\Controllers\ZoomApi;
 
