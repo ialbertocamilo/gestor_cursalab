@@ -22,7 +22,7 @@
                 <v-stepper-content step="1">
                     <AsignacionXDni
                         description='Elige a los supervisores.'
-                        apiSearchUser="/supervisores/search-supervisores"
+                        apiSearchUser="/supervisores/search-usuarios"
                         apiUploadPlantilla="/supervisores/subir-excel-usuarios"
                         :showSubidaMasiva="false"
                         ref="AsignacionCriteriosGlobales"
@@ -35,15 +35,15 @@
                         Relaciona los supervisores y usuarios mediante criterios
                     </v-row>
                     <v-row>
-                        <div class="container-autocomplete">
+                        <v-col cols="12">
                             <DefaultAutocomplete
-                                :items="select.tipo_criterios" 
-                                v-model="tipo_criterios" 
+                                :items="select.tipo_criterios"
+                                v-model="tipo_criterios"
                                 placeholder="Tipo de criterios"
                                 multiple
                                 :count-show-values="7"
                             />
-                        </div>
+                        </v-col>
                     </v-row>
                     <v-row justify="space-around">
                         <img src="/img/segmentacion.jpg" width="350" class="my-7">
@@ -83,10 +83,10 @@ export default {
             switch (from) {
                 case 'cancel':
                      if(vue.step==1){
-                        vue.step = 2;         
+                        vue.step = 2;
                         vue.$emit('onCancel',vue.step);
                     }else{
-                        vue.step = 1;           
+                        vue.step = 1;
                         vue.$emit('onCancel',vue.step);
                     }
                 break;
@@ -100,7 +100,7 @@ export default {
                             });
                             break;
                         }
-                        vue.step = 2;          
+                        vue.step = 2;
                         vue.$emit('onConfirm',vue.step);
                     }else{
                         if(vue.tipo_criterios.length==0){
@@ -116,13 +116,18 @@ export default {
                             'tipo_criterios':vue.tipo_criterios
                         };
                         vue.showLoader();
-                        await axios.post('supervisores/set-criterio-globales-supervisor',data).then(()=>{
+                        await axios.post('supervisores/set-criterio-globales-supervisor',data)
+                            .then(({data})=>{
+                                const _data = data.data.data;
                                 vue.hideLoader();
-                                vue.$notification.success('Se ha asignado los criterios a los supervisores correctamente.', {
-                                    timer: 15,
-                                    showLeftIcn: false,
-                                    showCloseIcn: true,
-                                });
+
+                                const msg1 = 'Se ha asignado los criterios a los supervisores correctamente.';
+                                vue.showAlert(msg1);
+
+                                if (_data.errors.length > 0){
+                                    const msg2 = `(${_data.errors.length}) usuarios no tienen ninguno de los criterios seleccionados`;
+                                    vue.showAlert(msg2, 'warning');
+                                }
 
                                 vue.resetSelects();
                                 vue.$emit('onConfirm',3)
@@ -133,7 +138,7 @@ export default {
                     }
                 break;
             }
-            
+
         },
         confirmModal() {
             let vue = this;

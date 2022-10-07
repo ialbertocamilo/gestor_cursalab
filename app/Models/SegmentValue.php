@@ -10,6 +10,11 @@ class SegmentValue extends BaseModel
         'criterion_id', 'criterion_value_id', 'type_id', 'starts_at', 'finishes_at'
     ];
 
+    public function segment()
+    {
+        return $this->belongsTo(Segment::class);
+    }
+
     // public function courses()
     // {
     //     return $this->belongsToMany(Course::class, 'segment_course');

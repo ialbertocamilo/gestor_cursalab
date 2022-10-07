@@ -1,10 +1,10 @@
 <template>
     <div>
         <v-row>
-            <v-col cols="12" class="p-0">
-                <p class="text-h7" v-text="description"></p>
+            <v-col cols="12">
+                <p class="text-h7 mb-0" v-text="description"></p>
             </v-col>
-            <v-col class="pl-0 d-flex justify-content-between" cols="12" md="6" lg="6">
+            <v-col class="d-flex justify-content-between" cols="12" md="6" lg="6">
                 <DefaultInput
                     clearable dense
                     v-model="search"
