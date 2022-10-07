@@ -85,7 +85,7 @@ class Question extends BaseModel
 
             $this->setRandomOptions($preguntas);
 
-            return $preguntas;
+            return $preguntas->shuffle();
 
         } 
 
