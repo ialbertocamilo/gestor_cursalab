@@ -153,7 +153,7 @@ export default {
         },
         borrarBloque(segment) {
             let vue = this;
-            if (vue.segments.length === 1) return;
+            // if (vue.segments.length === 1) return;
 
             vue.segments = vue.segments.filter((obj, idx) => {
                 return obj.id != segment.id;
