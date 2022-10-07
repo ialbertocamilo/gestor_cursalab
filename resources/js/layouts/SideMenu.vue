@@ -221,17 +221,17 @@ export default {
                         selected: false,
                         permission: "criterios",
                         role: ["super-user", "config", "admin"]
-                    }
-                    // {
-                    //     title:"Supervisores",
-                    //     icon:"fas fa-sitemap",
-                    //     // path:"/reportes-supervisores/index",
-                    //     path:"/supervisores",
-                    //     subpaths:["reportes-supervisores"],
-                    //     selected:false,
-                    //     permission:"supervisores",
-                    //     role:["super-user","admin"]
-                    // },
+                    },
+                    {
+                        title:"Supervisores",
+                        icon:"fas fa-sitemap",
+                        // path:"/reportes-supervisores/index",
+                        path:"/supervisores",
+                        subpaths:["reportes-supervisores"],
+                        selected:false,
+                        permission:"supervisores",
+                        role:["super-user","admin"]
+                    },
                 ]
             },
             {

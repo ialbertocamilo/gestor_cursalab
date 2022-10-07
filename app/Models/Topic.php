@@ -562,12 +562,12 @@ class Topic extends BaseModel
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
             if ($question->rpta_ok == $respuesta['opc']) {
-                
+
                 $correct_answers++;
 
                 $respuestas[$key]['score'] = $question->score;
 
-                $correct_answers_score += $question->score; 
+                $correct_answers_score += $question->score;
 
                 continue;
             }

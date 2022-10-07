@@ -1,8 +1,8 @@
 @extends('layouts.appback')
 
 @section('content')
+    @include('layouts.user-header')
     <v-app>
-        @include('layouts.user-header')
         <supervisores-layout/>
     </v-app>
 @endsection

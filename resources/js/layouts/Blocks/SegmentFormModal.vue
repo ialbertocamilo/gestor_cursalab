@@ -16,10 +16,10 @@
                     slider-color="primary"
                 >
                     <v-tab>
-                        Segmentación Directa
+                        {{ tabs_title }} Directa
                     </v-tab>
                     <v-tab>
-                        Segmentación por Documento
+                        {{ tabs_title }} por Documento
                     </v-tab>
                 </v-tabs>
 
@@ -27,7 +27,7 @@
 
                     <v-tab-item>
 
-                        <v-row justify="space-around">
+                        <v-row justify="space-around" v-if="!limitOne">
                             <v-col cols="12" class="d-flex justify-content-end pr-3">
                                 <v-btn
                                     class="- add-button"
@@ -55,8 +55,8 @@
                                         :key="i"
                                     >
                                         <v-sheet class="group-sheet" height="100%">
-                                            <div class="text-h6 text-center">
-                                                Segmentación {{ i + 1 }} /
+                                            <div class="text-h6 text-center"  v-if="!limitOne">
+                                                {{ tabs_title }} {{ i + 1 }} /
                                                 {{ segments.length }}
                                             </div>
 
@@ -122,7 +122,19 @@ export default {
         },
         width: String,
         model_type: String,
-        model_id: Number
+        model_id: Number,
+        code: {
+            type: String,
+            default: null
+        },
+        tabs_title:{
+            type: String,
+            default: 'Segmentación'
+        },
+        limitOne: {
+            type:Boolean,
+            default:false
+        }
     },
     data() {
         return {
@@ -204,6 +216,7 @@ export default {
                 let formData = JSON.stringify({
                     model_type: vue.model_type,
                     model_id: vue.resource.id,
+                    code: vue.code,
                     segments: vue.segments,
                     segment_by_document: vue.segment_by_document
                 });

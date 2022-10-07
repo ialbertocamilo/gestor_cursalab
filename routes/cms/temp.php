@@ -678,18 +678,18 @@ Route::prefix('/dashboard')->controller(DashboardController::class)->group(funct
 });
 
 // Reportes para Supervisores
-Route::prefix('/reportes-supervisores')->controller(ReportesSupervisoresController::class)->group(function () {
-
-    Route::view('/index', 'reportes_supervisores.index')->name('reportes_supervisores.index');
-    // ->middleware('permission:reportes_supervisores.index');;
-    Route::get('/search', 'search');
-    Route::get('/get-list-selects', 'getListSelects');
-    Route::get('/get-area-modulo/{modulo}/{tipo}', 'getCriterioxModulo');
-    Route::post('/get-usuarios', 'getUsuarios');
-    Route::post('/store-supervisor', 'storeSupervisor');
-    Route::post('/delete-supervisor', 'deleteSupervisor');
-    Route::post('/import', 'importSupervisores');
-});
+//Route::prefix('/reportes-supervisores')->controller(ReportesSupervisoresController::class)->group(function () {
+//
+//    Route::view('/index', 'reportes_supervisores.index')->name('reportes_supervisores.index');
+//    // ->middleware('permission:reportes_supervisores.index');;
+//    Route::get('/search', 'search');
+//    Route::get('/get-list-selects', 'getListSelects');
+//    Route::get('/get-area-modulo/{modulo}/{tipo}', 'getCriterioxModulo');
+//    Route::post('/get-usuarios', 'getUsuarios');
+//    Route::post('/store-supervisor', 'storeSupervisor');
+//    Route::post('/delete-supervisor', 'deleteSupervisor');
+//    Route::post('/import', 'importSupervisores');
+//});
 
 // MIGRAR AVANCE
 Route::prefix('/migrar_avance')->controller(MigrarAvanceController::class)->group(function () {
