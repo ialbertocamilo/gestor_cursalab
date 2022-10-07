@@ -456,7 +456,7 @@ export default {
                         subpaths: ["masivos"],
                         selected: false,
                         permission: "proceso_masivo",
-                        role: ["super-user", "admin-TEMPORAL_INACTIVO"]
+                        role: ["super-user", "admin"]
                     },
                     {
                         title: "Subida de notas",
