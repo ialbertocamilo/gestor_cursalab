@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SegmentSearchUsersResource;
+use App\Imports\SegmentSearchByDocumentImport;
 use App\Models\CriterionValue;
 use App\Models\Criterion;
 use App\Models\SegmentValue;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
 use App\Http\Resources\SegmentResource;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 // use App\Http\Controllers\ZoomApi;
 
