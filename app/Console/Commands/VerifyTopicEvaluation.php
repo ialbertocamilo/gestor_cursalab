@@ -40,7 +40,12 @@ class VerifyTopicEvaluation extends Command
      */
     public function handle()
     {
-        $topics = Topic::with('course')->whereHas('questions')->get();
+        $topics = Topic::with(['course' => ['schools', 'workspaces'], 'evaluation_type'])
+                    ->withCount('questions')
+                    ->whereHas('course')
+                    ->whereHas('questions')
+                    ->where('assessable', 1)
+                    ->get();
 
         $total = $topics->count();
 
@@ -60,9 +65,24 @@ class VerifyTopicEvaluation extends Command
                 
                 $not_verified++;
 
+                $workspace = $topic->course->workspaces->first();
+
+                $school = $topic->course->schools->first();
+
+                info('Workspace: ' . $workspace->name ?? 'UNDEFINED');
+                info('Escuela: ' . $school->name ?? 'UNDEFINED');
+                // info('Escuela estado: ' . ($school->active ? 'Activo' : 'Inactivo'));
                 info('Curso: ' . $topic->course->name ?? 'UNDEFINED');
+                // info('Curso estado: ' . ($topic->course->active ? 'Activo' : 'Inactivo'));
                 info('Tema: ' . $topic->name ?? 'UNDEFINED');
-                info('----------------------');
+                info('# Preguntas: ' . $topic->questions_count ?? 'UNDEFINED');
+
+
+
+                $url = url("/escuelas/{$school->id}/cursos/{$topic->course->id}/temas/{$topic->id}/preguntas");
+
+                info($url);
+                info('-----------------------------------------------------');
 
             } else {
 
