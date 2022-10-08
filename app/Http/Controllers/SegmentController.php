@@ -150,7 +150,7 @@ class SegmentController extends Controller
             'position' => 1,
         ]);
 
-        Segment::update(['type_id' => $direct_segmentation?->id]);
+        Segment::query()->update(['type_id' => $direct_segmentation?->id]);
 
         $document_criterion = Criterion::firstOrCreate(
             [
