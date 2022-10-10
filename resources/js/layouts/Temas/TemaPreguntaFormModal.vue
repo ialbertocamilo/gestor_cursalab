@@ -263,7 +263,11 @@ export default {
             let cadena = "{";
             if (vue.resource.respuestas.length > 0) {
                 vue.resource.respuestas.forEach((element) => {
-                    cadena += '"' + element.id + '":"' + element.opc.replaceAll('"', "'").replace(/(?:\r\n|\r|\n)/g, '<br>') + '",';
+                    if (isNaN(element.opc)) {
+                        cadena += '"' + element.id + '":"' + element.opc.replaceAll('"', "'").replace(/(?:\r\n|\r|\n)/g, '<br>') + '",';
+                    } else {
+                        cadena += '"' + element.id + '":"' + element.opc + '",';
+                    }
                 });
                 cadena = cadena.substring(0, cadena.length - 1);
             }
