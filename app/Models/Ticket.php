@@ -47,7 +47,7 @@ class Ticket extends BaseModel
 
     protected function search($request)
     {
-        $query = self::with('user');
+        $query = self::with(['workspace', 'user']);
 
         if ($request->q || $request->modulo) {
 

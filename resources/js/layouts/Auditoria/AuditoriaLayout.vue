@@ -10,26 +10,26 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
-                    <v-col cols="12" md="4" lg="4">
-                        <DefaultSelect
-                            clearable dense
-                                        item-text="name"
-                                       :items="selects.search_in"
-                                       v-model="filters.search_in"
-                                       label="Buscar en"
-                                       @onChange="getSelects"
-                        />
-                    </v-col>
+<!--                    <v-col cols="12" md="4" lg="4">-->
+<!--                        <DefaultSelect-->
+<!--                            clearable dense-->
+<!--                                        item-text="name"-->
+<!--                                       :items="selects.search_in"-->
+<!--                                       v-model="filters.search_in"-->
+<!--                                       label="Buscar en"-->
+<!--                                       @onChange="getSelects"-->
+<!--                        />-->
+<!--                    </v-col>-->
                     <v-col cols="12" md="4" lg="4">
 
                         <DefaultSelect
                             dense multiple clearable
-                                        item-value="code"
-                                        label="Sección"
-                                        :show-select-all="false"
-                                        v-model="filters.resources"
-                                        :items="selects.resources"
-                                        :disabled="!filters.search_in"
+                            itemText="name"
+                            itemValue="path"
+                            label="Sección"
+                            :multiple="false"
+                            v-model="filters.models"
+                            :items="selects.models"
                         />
                     </v-col>
                     <v-col cols="12" md="4" lg="4">
@@ -61,7 +61,6 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.us_search"
-                            :disabled="!filters.search_in"
                             label="Buscar por nombre de usuario..."
                             append-icon="mdi-magnify"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
@@ -82,17 +81,23 @@
                         <v-btn color="primary" class="white--text float-right" elevation="0" @click="refreshDefaultTable(dataTable, filters, 1)">
                             Buscar
                         </v-btn>
-                        <v-btn color="primary" class="white--text float-right" elevation="0" @click="getExcel">
-                            <v-icon>mdi-file-excel</v-icon>
-                        </v-btn>
                     </v-col>
 
                 </v-row>
             </v-card-text>
             <DefaultTable
                 :ref="dataTable.ref"
-                          :data-table="dataTable"
-                          @seeData="seeData"/>
+                :data-table="dataTable"
+                @showdetails="openFormModal(detailsModalOptions, $event, 'status', 'Detalles')"
+                />
+
+            <AuditoriaDetailsModal
+                width="50vw"
+                :ref="detailsModalOptions.ref"
+                :options="detailsModalOptions"
+                @onConfirm="closeFormModal(detailsModalOptions, dataTable, filters)"
+                @onCancel="closeFormModal(detailsModalOptions)"
+            />
         </v-card>
 
     <!--     <v-container>
@@ -105,10 +110,11 @@
 <script>
 import DatePicker from "vue2-datepicker";
 import "vue2-datepicker/index.css";
+import AuditoriaDetailsModal from "./AuditoriaDetailsModal";
 
 const FileSaver = require("file-saver");
 export default {
-    components: {DatePicker},
+    components: {AuditoriaDetailsModal, DatePicker},
     data() {
         return {
             modalDateOptions: {
@@ -120,24 +126,26 @@ export default {
             },
             dataTable: {
                 ref: 'AuditoriaTable',
-                endpoint: 'auditoria/search',
+                endpoint: '/auditoria/search',
                 headers: [
                     {text: "Usuario", value: "user", align: 'center', sortable: false},
                     {text: "Acción", value: "event", align: 'center', sortable: false},
-                    {text: "Sección", value: "resource", align: 'center', sortable: false},
-                    {text: "Registro", value: "model", align: 'center', sortable: false},
+                    {text: "Sección", value: "model", align: 'center', sortable: false},
+                    {text: "Registro", value: "name", align: 'center', sortable: false},
                     {text: '# Modificados', align: 'center', value: 'modified_fields_count', sortable: false},
                     {text: "Fecha", value: "created_at", align: 'center', sortable: true},
                     {text: "Acciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
-                        text: 'Datos',
+                        text: 'Detalles',
                         icon: 'mdi mdi-file-document-multiple',
-                        type: 'route',
-                        route: 'show',
-                        route_type: 'external',
-                        show_condition: 'show'
+                        type: 'action',
+                        method_name: 'showdetails',
+
+                        // route: 'show',
+                        // route_type: 'external',
+                        // show_condition: 'show'
                         // method_name: 'seeData',
                     },
                 ],
@@ -145,8 +153,8 @@ export default {
             audits: [],
             loading: true,
             date_range_modal: false,
-  
             auditoria: [],
+            activeAudit: null,
             page: 1,
             pageCount: 0,
             itemsPerPage: 20,
@@ -161,34 +169,38 @@ export default {
                     {id: 'updated', name: 'Se actualizó'},
                     {id: 'deleted', name: 'Se eliminó'},
                 ],
-                resources: [],
+                models: [],
             },
             filters: {
                 events: [],
-                resources: [],
+                models: [],
                 search_in: null,
                 from: null,
                 to: null,
                 us_search: "",
                 date_range: [],
             },
+            detailsModalOptions: {
+                ref: 'AuditoriaDetailsModal',
+                open: false,
+                resource: 'Audit',
+            },
         };
     },
     mounted() {
-        // this.getData();
+        this.getSelects();
     },
     methods: {
         getSelects() {
             let vue = this
-            let url = `/auditoria/get-selects?search_in=${vue.filters.search_in}`
-            vue.filters.resources = []
+            let url = `/auditoria/selects`
+            vue.filters.models = []
 
-            if (vue.filters.search_in) {
-                axios.get(url)
-                    .then(({data}) => {
-                        vue.selects.resources = data.data.resources
-                    })
-            }
+            axios.get(url)
+                .then(({data}) => {
+
+                    vue.selects.models = data.data.models
+                })
         },
         filter() {
             let vue = this;
@@ -214,10 +226,15 @@ export default {
                 })
 
         },
-        seeData(row) {
-            let vue = this
-            vue.consoleObjectTable(row, 'ROW DATA')
-        },
+        // seeData(row) {
+        //     let vue = this
+        //     vue.detailsModalOptions.activeAudit = row;
+        //     vue.openFormModal(
+        //         vue.detailsModalOptions, row, 'status', 'Detalles'
+        //     )
+        //     //console.log(row)
+        //     //vue.consoleObjectTable(row, 'ROW DATA')
+        // },
         getExcel() {
             let vue = this;
             let url = `/log/export?log=0`

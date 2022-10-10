@@ -38,4 +38,4 @@ yarn-error.log
 .env
 .env.remoto
 
-/public/fonts/vendor/@mdi
+/public/fonts/vendor/@mdi/*

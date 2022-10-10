@@ -9,6 +9,8 @@
 
     $taxonomy = \App\Models\Taxonomy::find($tema->type_evaluation_id);
     $evaluationTypeCode = $taxonomy->code ?? '';
+
+    // dd($data);
     @endphp
     <v-app>
         @include('layouts.user-header')
@@ -18,6 +20,14 @@
             curso_id="{{ request()->segment(4) }}" curso_name="{{ $curso->name ?? '' }}"
             tema_id="{{ request()->segment(6) }}" tema_name="{{ $tema->name ?? '' }}"
             evaluable="{{ $tema->type_evaluation_id }}"
-            evaluation_type="{{ $evaluationTypeCode }}"></tema-preguntas-layout>
+            status="{{ $status }}"
+            missing_score="{{ $data['score_missing'] ?? 0 }}"
+            evaluation_type="{{ $evaluationTypeCode }}"
+            evaluation_data_sum="{{ $data['sum'] ?? 0 }}"
+            evaluation_data_sum_required="{{ $data['sum_required'] ?? 0 }}"
+            evaluation_data_sum_not_required="{{ $data['sum_not_required'] ?? 0 }}"
+
+            >
+        </tema-preguntas-layout>
     </v-app>
 @endsection

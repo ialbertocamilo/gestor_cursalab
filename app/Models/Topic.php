@@ -8,7 +8,7 @@ class Topic extends BaseModel
 {
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen',
-        'position', 'visits_count', 'assessable',
+        'position', 'visits_count', 'assessable', 'evaluation_verified',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
         'active'
     ];
@@ -553,23 +553,29 @@ class Topic extends BaseModel
 
     protected function evaluateAnswers($respuestas, $topic)
     {
-        $questions = Question::select('id', 'rpta_ok')->where('topic_id', $topic->id)->get();
+        $questions = Question::select('id', 'rpta_ok', 'score')->where('topic_id', $topic->id)->get();
 
-        $correct_answers = $failed_answers = 0;
+        $correct_answers = $failed_answers = $correct_answers_score = 0;
 
-        foreach ($respuestas as $respuesta) {
+        foreach ($respuestas as $key => $respuesta) {
 
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
             if ($question->rpta_ok == $respuesta['opc']) {
+
                 $correct_answers++;
+
+                $respuestas[$key]['score'] = $question->score;
+
+                $correct_answers_score += $question->score;
+
                 continue;
             }
 
             $failed_answers++;
         }
 
-        return [$correct_answers, $failed_answers];
+        return [$correct_answers, $failed_answers, $correct_answers_score];
     }
 
     protected function getTopicProgressByUser($user, Topic $topic)

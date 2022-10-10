@@ -1,74 +1,46 @@
 <template>
     <section class="section-list ">
-        <!--        <DefaultFilter v-model="open_advanced_filter"-->
-        <!--                       @filter="advanced_filter(dataTable, filters, 1)"-->
-        <!--        >-->
-        <!--            <template v-slot:content>-->
-        <!--                <v-row justify="center">-->
-
-        <!--                    &lt;!&ndash;                    <v-col cols="12">&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                        <DefaultAutocomplete&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                            clearable&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                            placeholder="Seleccione una Carrera"&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                            label="Carrera"&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                            :items="selects.carreras"&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                            v-model="filters.carrera"&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                        />&ndash;&gt;-->
-        <!--                    &lt;!&ndash;                    </v-col>&ndash;&gt;-->
-        <!--                </v-row>-->
-        <!--            </template>-->
-        <!--        </DefaultFilter>-->
         <v-card flat class="elevation-0 mb-4">
-            <!--            Título con breadcumb-->
-            <!--            TODO: Add breadcumb-->
             <v-card-title>
                 Supervisores
                 <v-spacer/>
-                <DefaultActivityButton
-                    :label="'Subida Masiva'"
-                    @click="openFormModal(modalSupervisorCargaMasiva,null,null,modalSupervisorCargaMasiva.title)"
-                />
                 <DefaultModalButton
-                    @click="openFormModal(modalOptions, null, 'create', 'Asignar a supervisor')"
-                    :label="'Asignar Supervisor'"/>
+                    :label="'Criterios Globales'"
+                    :showIcon="false"
+                    @click="openFormModal(modalOptionsSCriteriosGlobales,null, null, 'Criterios Globales')"/>
+                <DefaultModalButton
+                    :label="'Supervisores'"
+                    :showIcon="false"
+                    @click="openFormModal(modalOptionsSupervisores,null, null, '+ Supervisores')"/>
             </v-card-title>
         </v-card>
-        <!--        FILTROS-->
+
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
-                    <v-col cols="3">
-                        <DefaultSelect
-                            clearable dense
-                            :items="selects.modules"
-                            v-model="filters.module"
-                            label="Módulos"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1); getAreas()"
-                            @onClickClear="refreshDefaultTable(dataTable, filters, 1);"
-                        />
-                    </v-col>
-                    <v-col cols="3">
-                        <DefaultSelect
-                            clearable dense
-                            multiple
-                            :items="selects.areas"
-                            v-model="filters.areas"
-                            label="Áreas asignadas"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
-                            @onClickClear="refreshDefaultTable(dataTable, filters, 1);"
-                        />
-                    </v-col>
-                    <v-col cols="3">
+                    <v-col cols="4">
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar por nombre..."
-                            @onEnter="refreshDefaultTable(dataTable, filters)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            placeholder="Buscar"
                             append-icon="mdi-magnify"
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
 
+                    <v-col cols="4">
+                        <DefaultAutocomplete
+                            clearable dense
+                            :items="modulos"
+                            v-model="filters.subworkspace"
+                            placeholder="Módulo"
+                            multiple
+                            :count-show-values="1"
+                            item-text="name"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
 
@@ -76,142 +48,212 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @delete="deleteSupervisor($event)"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar supervisor')"
+                @asignarUsuarios="openFormModal(modalOptionsAsignarUsuarios, $event, null, 'Asignar usuarios al Supervisor')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Supervisor - ${$event.nombre}`)"
             />
-            <SupervisorFormModal
+
+            <SegmentFormModal
+                :options="modalFormSegmentationOptions"
+                width="55vw"
+                model_type="App\Models\User"
+                :model_id="null"
+                :code="'user-supervise'"
+                :tabs_title="''"
+                limit-one
+                :ref="modalFormSegmentationOptions.ref"
+                @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+            />
+
+            <DefaultDeleteModal
+                :options="modalDeleteOptions"
+                :ref="modalDeleteOptions.ref"
+                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalDeleteOptions)"
+            />
+            <CreateSupervisorModal
                 width="60vw"
-                :ref="modalOptions.ref"
-                :options="modalOptions"
-                @onConfirm="refreshDefaultTable(dataTable, filters)"
-                @onCancel="closeFormModal(modalOptions);refreshDefaultTable(dataTable, filters) "
+                :ref="modalOptionsSupervisores.ref"
+                :options="modalOptionsSupervisores"
+                @onConfirm="closeFormModal(modalOptionsSupervisores, dataTable, filters)"
+                @onCancel="closeFormModal(modalOptionsSupervisores)"
             />
-            <SupervisorCargaMasivaModal
-                width="50vw"
-                :ref="modalSupervisorCargaMasiva.ref"
-                :options="modalSupervisorCargaMasiva"
-                @onConfirm="closeFormModal(modalSupervisorCargaMasiva, dataTable, filters);refreshDefaultTable(dataTable, filters) "
-                @onCancel="closeFormModal(modalSupervisorCargaMasiva);refreshDefaultTable(dataTable, filters) "
+            <CriterioGlobalesModal
+                width="60vw"
+                :ref="modalOptionsSCriteriosGlobales.ref"
+                :options="modalOptionsSCriteriosGlobales"
+                @onConfirm="changeLabelModal"
+                @onCancel="changeLabelModal"
             />
-            <DialogConfirm
-                v-model="modalDeleteOptions.open"
-                width="450px"
-                title="Eliminar Supervisor"
-                subtitle="¿Está seguro de remover al supervisor?"
-                @onConfirm="confirmDeleteSupervisor"
-                @onCancel="modalDeleteOptions.open = false"
-            />
+<!--            <AsignarUsuariosASupervisorModal-->
+<!--                width="60vw"-->
+<!--                :ref="modalOptionsAsignarUsuarios.ref"-->
+<!--                :options="modalOptionsAsignarUsuarios"-->
+<!--                @onConfirm="closeFormModal(modalOptionsAsignarUsuarios, dataTable, filters)"-->
+<!--                @onCancel="closeFormModal(modalOptionsAsignarUsuarios)"-->
+<!--            />-->
+<!--            <AsignarCriteriosASupervisorModal-->
+<!--                width="40vw"-->
+<!--                :ref="modalOptionsAsignarCriterios.ref"-->
+<!--                :options="modalOptionsAsignarCriterios"-->
+<!--                @onConfirm="closeFormModal(modalOptionsAsignarCriterios, dataTable, filters)"-->
+<!--                @onCancel="closeFormModal(modalOptionsAsignarCriterios)"-->
+<!--            />-->
+
         </v-card>
     </section>
 </template>
-
 <script>
-import SupervisorFormModal from "./SupervisorFormModal";
-import SupervisorCargaMasivaModal from "../../components/Supervisores/SupervisorCargaMasivaModal";
-import DialogConfirm from "../../components/basicos/DialogConfirm";
+import CreateSupervisorModal from "./CreateSupervisorModal";
+// import AsignarUsuariosASupervisorModal from "./AsignarUsuariosASupervisorModal";
+// import AsignarCriteriosASupervisorModal from "./AsignarCriteriosASupervisorModal";
+import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import CriterioGlobalesModal from './CriterioGlobalesModal';
+import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
-    components: {SupervisorFormModal, SupervisorCargaMasivaModal, DialogConfirm},
+    components: {
+        CreateSupervisorModal,
+        DefaultDeleteModal,
+        // AsignarUsuariosASupervisorModal,
+        // AsignarCriteriosASupervisorModal,
+        CriterioGlobalesModal,
+        SegmentFormModal
+    },
     data() {
         return {
+            filters: {
+                q: '',
+                subworkspace: []
+            },
             dataTable: {
-                endpoint: `/supervisores/search`,
-                ref: 'supervisoresTable',
+                endpoint: '/supervisores/search',
+                ref: 'SupervisorTable',
                 headers: [
                     {text: "Módulo", value: "modulo", align: 'start', sortable: false},
-                    {text: "Área asignada", value: "area", align: 'start', sortable: false},
-                    {text: "Supervisor", value: "nombre", align: 'start', sortable: false},
+                    {text: "Nombre y Apellidos", value: "fullname", align: 'start', sortable: false},
+                    // {text: "Apellidos", value: "apellidos", align: 'start', sortable: false},
+                    {text: "Documento", value: "dni", align: 'start', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
+                    // {
+                    //     text: "Criterios",
+                    //     icon: 'fas fa-th-large',
+                    //     type: 'action',
+                    //     method_name: 'asignarCriterios',
+                    //     count: 'segments_count'
+                    // },
+                    // {
+                    //     text: "Usuarios",
+                    //     icon: 'fas fa-user',
+                    //     type: 'action',
+                    //     method_name: 'asignarUsuarios',
+                    //     count: 'users_count'
+                    // },
+                    {
+                        text: "Segmentación",
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'segments_count',
+                        method_name: 'segmentation'
+                    },
                     {
                         text: "Eliminar",
-                        icon: 'far fa-trash-alt',
+                        icon: 'fas fa-trash-alt',
                         type: 'action',
                         method_name: 'delete'
                     },
                 ],
+                more_actions: []
             },
-            modalOptions: {
-                ref: 'SupervisorFormModal',
+            modalFormSegmentationOptions: {
+                ref: 'SegmentFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: '/segments',
+                confirmLabel: 'Guardar',
+                resource: 'segmentación',
+            },
+            modalOptionsSupervisores: {
+                ref: 'CreateSupervisorModal',
                 open: false,
                 base_endpoint: '/supervisores',
-                resource: 'Supervisor',
+                title: 'Registrar por enlace',
                 confirmLabel: 'Guardar',
+                showCloseIcon: true
             },
-            modalSupervisorCargaMasiva: {
-                ref: 'SupervisorCargaMasivaModal',
-                open: false,
-                base_endpoint: '/supervisores',
-                resource: '',
-                confirmLabel: 'Guardar',
-                title: 'Subida Masiva de Supervisores',
-                hideCancelBtn: true,
-                hideConfirmBtn: true,
-            },
+            // modalOptionsAsignarUsuarios: {
+            //     ref: 'AsignarUsuarios',
+            //     open: false,
+            //     base_endpoint: '/supervisores',
+            //     title: 'Asignar Usuarios',
+            //     confirmLabel: 'Guardar',
+            //     showCloseIcon: true
+            // },
+            // modalOptionsAsignarCriterios: {
+            //     ref: 'AsignarCriterios',
+            //     open: false,
+            //     base_endpoint: '/supervisores',
+            //     title: 'Asignar criterios',
+            //     confirmLabel: 'Guardar',
+            //     showCloseIcon: true
+            // },
             modalDeleteOptions: {
+                ref: 'SupervisorDeleteModal',
                 open: false,
+                base_endpoint: '/supervisores',
+                contentText: '¿Desea eliminar este registro?',
+                endpoint: '',
+                showCloseIcon: true
             },
-            del_usuario: null,
-            filters: {
-                q: null,
-                module: null,
-                areas: [],
+            modalOptionsSCriteriosGlobales: {
+                ref: 'AsignarCriteriosGlobalesModal',
+                open: false,
+                hideCancelBtn: true,
+                base_endpoint: '/supervisores',
+                title: 'Criterios Globales',
+                confirmLabel: 'Siguiente',
+                cancelLabel: 'Atras',
+                showCloseIcon: true,
+                loading: true
             },
-            selects: {
-                modules: [],
-                areas: [],
-            },
+            modulos: []
         }
     },
     mounted() {
-        let vue = this
-        vue.getSelects()
+        this.getInitalData();
     },
     methods: {
-        getSelects() {
-            let vue = this
-            const url = `/supervisores/get-list-selects`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.modules = data.data
-                    // vue.selects.carreras = data.data.carreras
-                })
+        async getInitalData() {
+            let vue = this;
+            await axios.get('/supervisores/modulos').then(({data}) => {
+                vue.modulos = data.data.modulos;
+            })
         },
-        getAreas() {
-            let vue = this
-            vue.filters.areas = []
-            vue.selects.areas = []
-            if (!vue.filters.module) return false
-            let url = `/supervisores/get-areas/${vue.filters.module}?type=only_selected`
-
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.areas = data.data
-                })
-
-        },
-        deleteSupervisor(usuario) {
-            let vue = this
-            vue.del_usuario = usuario
-            vue.modalDeleteOptions.open = true
-        },
-        confirmDeleteSupervisor() {
-            let vue = this
-            let url = `/supervisores/delete-supervisor`
-            const data = {
-                usuario_id: vue.del_usuario.usuario_id,
-                criterio_id: vue.del_usuario.area_id,
+        changeLabelModal(step) {
+            let vue = this;
+            console.log(step);
+            switch (step) {
+                case 1:
+                    vue.modalOptionsSCriteriosGlobales.hideCancelBtn = true;
+                    vue.modalOptionsSCriteriosGlobales.confirmLabel = 'Siguiente';
+                    break;
+                case 2:
+                    vue.modalOptionsSCriteriosGlobales.hideCancelBtn = false;
+                    vue.modalOptionsSCriteriosGlobales.confirmLabel = 'Guardar';
+                    break;
+                case 3:
+                    vue.modalOptionsSCriteriosGlobales.hideCancelBtn = true;
+                    vue.modalOptionsSCriteriosGlobales.confirmLabel = 'Siguiente';
+                    vue.closeFormModal(vue.modalOptionsSCriteriosGlobales, vue.dataTable, vue.filters);
+                    break;
+                default:
+                    vue.closeFormModal(vue.modalOptionsSCriteriosGlobales, vue.dataTable, vue.filters);
+                    break;
             }
-
-            vue.$http.post(url, data)
-                .then(({data}) => {
-                    vue.showAlert(data.data.msg)
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters)
-                    vue.del_usuario = null
-                    vue.modalDeleteOptions.open = false
-                })
         }
-
     }
 }
 </script>

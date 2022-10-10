@@ -72,7 +72,7 @@ class Error extends Model
         $notifier = $user->name;
 
         if ($platform_code == 'app')
-            $notifier = $user->nombre . ' (' . $user->dni . ')';
+            $notifier = $user->name . ' (' . $user->dni . ')';
 
         return $notifier;
     }
@@ -361,6 +361,8 @@ class Error extends Model
             '/vendor/popper.js/umd/popper.min.js.map',
             '/vendor/bootstrap/js/bootstrap.min.js.map',
             '/vendor/bootstrap/css/bootstrap.min.css.map',
+            '/js/vendor.js',
+            '/js/manifest.js',
         ];
 
         $files = [

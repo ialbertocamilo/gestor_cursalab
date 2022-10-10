@@ -23,10 +23,7 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-
-            </v-card-title>
-            <v-row>
-                <v-col cols="12 d-flex justify-content-end">
+                <div class="ddd-flex justify-content-end">
                     <DefaultActivityButton
                         :label="'Importar Evaluación'"
                         @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
@@ -34,12 +31,49 @@
                     <DefaultModalButton
                         @click="openFormModal(modalOptions, null, 'create')"
                         :label="'Pregunta'"/>
-                </v-col>
-            </v-row>
+                </div>
+
+            </v-card-title>
+  <!--           <v-row>
+            </v-row> -->
         </v-card>
         <!--        FILTROS-->
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
+                
+                <v-row>
+                    <div class="col-md-8">
+                        <div class="alert alert-info -mx-2 -mt-2" style="background-color: #5458ea; color: white;" role="alert">
+                            - Cuando un tema es "Evaluable" y de tipo "Calificada" se deben agregar opciones a las preguntas. <br>
+                            - Cuando un tema es "Evaluable" y de tipo "Abierta" no se consideran las opciones, solo se muestran las preguntas para que los usuarios respondan con un texto. <br>
+                            - Al eliminar todas las preguntas el tema se convierte a un tema no evaluable.<br>
+                            <span v-if="evaluation_type == 'qualified'">
+                                - El total de puntos que se puede acumular en las preguntas obligatorias es de 20 puntos. <br>
+                                - El total de puntos solo considera las preguntas activas.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 ">
+                        <table class="table table-striped mt-3" style="background-color: #5458ea; color: white;" v-if="evaluation_type == 'qualified'">
+                          <tbody>
+                            <tr>
+                              <td>Obligatorio: </td>
+                              <td>{{ validation.evaluation_data_sum_required }} puntos</td>
+                            </tr>
+                            <tr>
+                              <td>No Obligatorios: </td>
+                              <td>{{ validation.evaluation_data_sum_not_required }} puntos</td>
+                            </tr>
+                            <tr>
+                              <td>Total: </td>
+                              <td>{{ validation.evaluation_data_sum }} puntos</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                </v-row>
+
                 <v-row>
                     <v-col cols="4">
                         <DefaultInput
@@ -52,7 +86,29 @@
                         />
                     </v-col>
 
+                     <v-col cols="8" v-if="evaluation_type == 'qualified'" class="text-center">
+                          <!-- <div class="card-title --row --mb-2 " style="display:flex;justify-content:space-between;align-items:center;"> -->
+                            <!-- <h5 class="col-md-6" style="text-align: left">Sistema de Evaluación: Base 20</h5> -->
+                        <!--     <div class="mr-3" v-show="status == false && missing_score <= 0">
+                              @if($posteo->ev_verificada)
+                                <button class="btn btn-primary disabled">Evaluación validada</button>
+                              @else
+                                <button class="btn btn-primary" id="verificar_eva">Pendiente de validar</button>
+                              @endif
+                            </div> -->
+                            <!-- <div class="col-md-6 offset-md-3 text-center"> -->
+                                <div class="alert alert-success pa-1" role="alert" v-show="validation.status == true">
+                                  <h6>La evaluación es correcta.</h6>
+                                </div>
+                                <div class="alert alert-danger pa-1" role="alert" v-show="validation.status == false && validation.missing_score != 0">
+                                  <h6>Es necesario asignar {{ validation.missing_score }} punto(s) más para completar la evaluación.</h6>
+                                </div>
+                            <!-- </div> -->
+                          <!-- </div> -->
+                    </v-col>
+
                 </v-row>
+               
             </v-card-text>
 
             <DefaultTable
@@ -60,13 +116,13 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
-                @delete="deleteTemaPregunta($event)"
+                @delete="deleteTemaPregunta($event);"
             />
             <TemaPreguntaFormModal
                 width="60vw"
                 :ref="modalOptions.ref"
                 :options="modalOptions"
-                @onConfirm="refreshDefaultTable(dataTable, filters)"
+                @onConfirm="refreshDefaultTable(dataTable, filters); updateData($event);"
                 @onCancel="closeFormModal(modalOptions)"
                 :evaluable="evaluable"
                 :evaluation_type="evaluation_type"
@@ -75,7 +131,7 @@
                 width="50vw"
                 :ref="modalTemaPreguntasImport.ref"
                 :options="modalTemaPreguntasImport"
-                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters) "
+                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalTemaPreguntasImport);refreshDefaultTable(dataTable, filters) "
             />
             <DialogConfirm
@@ -91,6 +147,7 @@
 </template>
 
 <script>
+// import TemaPreguntaFormModal from "./TemaPreguntaFormModalNew";
 import TemaPreguntaFormModal from "./TemaPreguntaFormModal";
 import TemaPreguntasImport from "./TemaPreguntasImport";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
@@ -106,12 +163,24 @@ export default {
         'curso_name',
         'tema_id',
         'tema_name',
+        'status',
+        'missing_score',
         'evaluable',
-        'evaluation_type'
+        'evaluation_type',
+        'evaluation_data_sum',
+        'evaluation_data_sum_required',
+        'evaluation_data_sum_not_required',
     ],
     data() {
         let vue = this
         return {
+            validation: {
+                status: vue.status,
+                missing_score: vue.missing_score,
+                evaluation_data_sum: vue.evaluation_data_sum,
+                evaluation_data_sum_required: vue.evaluation_data_sum_required,
+                evaluation_data_sum_not_required: vue.evaluation_data_sum_not_required,
+            },
             breadcrumbs: [
                 {
                     title: 'Escuelas',
@@ -139,6 +208,8 @@ export default {
                 headers: [
                     {text: "Pregunta", value: "custom_tema_preguntas_pregunta", align: 'start', sortable: false},
                     {text: "Tipo", value: "tipo_pregunta", align: 'center', sortable: false},
+                    {text: "Obligatorio", value: "required", align: 'center', sortable: false},
+                    {text: "Puntaje", value: "score", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -195,9 +266,35 @@ export default {
     },
     mounted() {
         let vue = this
+
+        if (vue.status == false && vue.missing_score != 0) {
+
+            let msg = document.createElement("div");
+            let pts = vue.missing_score;
+            msg.innerHTML=`<ul class="mx-2"><li class="text-justify mt-2">Es necesario agregar ${pts} punto(s) para que esta evaluación se encuentre disponible en la aplicación.</li></ul>
+            `;
+            swal({
+              title:'Información',
+              icon:'info',
+              content: msg,
+            })
+        }
+
         // vue.getSelects();
     },
     methods: {
+        updateData(data){
+            console.log('updateData')
+            console.log(data)
+
+            let vue = this
+
+            vue.validation.status = data.status
+            vue.validation.missing_score = data.data.score_missing
+            vue.validation.evaluation_data_sum = data.data.sum
+            vue.validation.evaluation_data_sum_required = data.data.sum_required
+            vue.validation.evaluation_data_sum_not_required = data.data.sum_not_required
+        },
         getSelects() {
             // let vue = this
             // const url = `/escuelas/get-selects`
@@ -225,6 +322,8 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters)
                     vue.delete_model = null
                     vue.modalDeleteOptions.open = false
+
+                    // vue.updateData(data)
                 })
         }
     }

@@ -24,11 +24,16 @@ class AuditController extends Controller
         return $this->success($audits);
     }
 
-    public function getFormData()
+    public function loadDataForSelects()
     {
-        $data['users'] = User::getDataWithMediaForSelect('avatar', ['id', 'name', 'lastname', 'surname'], [], 'default_user.png');
-        $data['models'] = Taxonomy::getSelectData('system', 'model');
         $data['actions'] = Taxonomy::getSelectData('system', 'event');
+        $data['models'] = Taxonomy::where('type', 'model')
+            ->where('group', 'system')
+            ->where('active', 1)
+            ->whereNotNull('path')
+            ->orderBy('name', 'ASC')
+            ->select(['name', 'path'])
+            ->get();
 
         return $this->success($data);
     }
@@ -37,14 +42,13 @@ class AuditController extends Controller
     {
         $audit->load('user', 'model', 'action_name', 'event_name');
 
-        if ( $audit->isBasicEvent() )
-        {
+        if ($audit->isBasicEvent()) {
             $model = $audit->extract();
             $model->loadDefaultRelationships();
         }
 
         $audit = new AuditResource($audit);
-        
+
         return $this->success($audit);
     }
 
@@ -67,7 +71,8 @@ class AuditController extends Controller
 
         $model = $path::findOrFail($id);
 
-        $audits = $model->ledgers()->latest('id')
+        $audits = $model->ledgers()
+                        ->latest('id')
                         ->with('user', 'model', 'action_name', 'event_name')
                         ->paginate(12);
 
@@ -99,7 +104,7 @@ class AuditController extends Controller
             foreach ($audits as $key => $audit)
             {
                 $data[$date]['actions'][] = new AuditActivityResource($audit);
-            }     
+            }
         }
 
         return $this->success($data);

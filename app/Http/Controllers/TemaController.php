@@ -177,6 +177,15 @@ class TemaController extends Controller
     }
 
     // ========================================== EVALUACIONES TEMAS ===================================================
+    public function preguntas_list(School $school, Course $course, Topic $topic, Request $request)
+    {
+        $data = Question::verifyEvaluation($topic);
+
+        // dd($data);
+
+        return view('temas.preguntas_list', $data);
+    }
+
     public function search_preguntas(School $school, Course $course, Topic $topic, Request $request)
     {
         $request->merge(['tema_id' => $topic->id]);
@@ -218,6 +227,12 @@ class TemaController extends Controller
             ? 'select-options'
             : 'written-answer';
 
+        $result = Question::checkScoreLeft($topic, $data['id'], $data);
+
+        if ($result['status'])
+            return $this->error($result['message'], 422, ['errors' => [$result['message']]]);
+
+
         // info('nuevasRptas');
         // info($data['nuevasRptas']);
         // info(json_decode($data['nuevasRptas'], true));
@@ -234,6 +249,8 @@ class TemaController extends Controller
                 'rptas_json' => json_decode($data['nuevasRptas'], true),
                 'rpta_ok' => $data['rpta_ok'],
                 'active' => $data['active'],
+                'required' => $data['required'] ?? NULL,
+                'score' => $data['score'] ?? NULL,
                 // 'position' => 'despues'
             ]
         );
@@ -250,7 +267,10 @@ class TemaController extends Controller
             $topic->save();
         endif;
 
-        return $this->success(['msg' => 'Pregunta actualizada']);
+        $data = Question::verifyEvaluation($topic);
+        $data['msg'] = 'Pregunta actualizada. ' . ($data['message'] ?? '');
+
+        return $this->success($data);
     }
 
     public function importPreguntas(
@@ -292,6 +312,9 @@ class TemaController extends Controller
             $topic->save();
         endif;
 
-        return $this->success(['msg' => 'Eliminado correctamente.']);
+        $data = Question::verifyEvaluation($topic);
+        $data['msg'] = 'Eliminado correctamente. ' . ($data['message'] ?? '');
+
+        return $this->success($data);
     }
 }

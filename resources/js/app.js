@@ -102,6 +102,7 @@ Vue.component("modulo-layout", require("./layouts/Modulos/ModuloListPage"));
 Vue.component("escuela-layout", require("./layouts/Escuelas/EscuelaListPage"));
 Vue.component("escuela-form-page", require("./layouts/Escuelas/EscuelaFormPage"));
 Vue.component("curso-layout", require("./layouts/Cursos/CursosListPage"));
+Vue.component("segmentation-layout", require("./layouts/Cursos/SegmentationListPage"));
 Vue.component("curso-form-page", require("./layouts/Cursos/CursoFormPage"));
 Vue.component("tema-layout", require("./layouts/Temas/TemaListPage"));
 Vue.component("tema-preguntas-layout", require("./layouts/Temas/TemaPreguntasListPage"));

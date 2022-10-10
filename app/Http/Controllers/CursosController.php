@@ -59,8 +59,8 @@ class CursosController extends Controller
         $req_cursos = $query->get();
 
         $escuelas = School::all()->map(function ($school, $key) {
-            $suffix = !$school->active ? "[D]" : "";
-            $school->name = $school->name . " {$suffix}";
+            $suffix = !$school->active ? " [Inactivo]" : "";
+            $school->name = $school->name . "{$suffix}";
             return $school;
         });
 

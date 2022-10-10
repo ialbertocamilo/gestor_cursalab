@@ -10,6 +10,20 @@
             <v-form ref="TemaPreguntaForm">
                 <DefaultErrors :errors="errors"/>
 
+                <v-alert
+                    border="left"
+                    dense
+                    transition="fade-transition"
+                    :type="alert_frontend.tipo_alert"
+                    text
+                    v-model="alert_frontend.alert"
+                    close-text="Cerrar alerta"
+                    class="mx-8 text-left"
+                    style="position: fixed;width: 50%;z-index: 27;"
+                >
+                    {{ alert_frontend.message_alert }}
+                </v-alert>
+
                 <v-row justify="space-around" class="mt-3">
                     <v-col cols="12">
                         <!--                        <DefaultRichText-->
@@ -121,7 +135,24 @@
                             </tbody>
                         </table>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="4">
+                        <DefaultInput
+                                dense
+                                type="number"
+                                label="Puntaje"
+                                placeholder="Ingrese un puntaje"
+                                :min="1" :max="20"
+                                v-model="resource.score"
+                                class="mt-2"
+                            />
+                        
+                    </v-col>
+                    <v-col cols="4">
+                        <div class="row ml-0">
+                            <DefaultToggle v-model="resource.required" active-label="Obligatorio" inactive-label="No obligatorio"/>
+                        </div>
+                    </v-col>
+                    <v-col cols="4">
                         <DefaultToggle v-model="resource.active"/>
                     </v-col>
                 </v-row>
@@ -149,6 +180,10 @@ export default {
             required: true
         },
         width: String,
+        base_score: {
+            type: Number,
+            default: 20,
+        },
         evaluable: String,
         evaluation_type: {
             type: String,
@@ -164,6 +199,8 @@ export default {
                 respuestas: [],
                 rpta_ok: null,
                 active: true,
+                required: false,
+                score: 1,
                 nuevasRptas: "",
                 evaluation_type: ''
             },
@@ -175,13 +212,19 @@ export default {
                 pregunta: false,
             },
             tempAnswer: null,
-            text_validaciones: validaciones
+            text_validaciones: validaciones,
+            alert_frontend: {
+                tipo_alert: "info",
+                message_alert: "",
+                alert: false,
+            },
         }
     }
     ,
     methods: {
         closeModal() {
             let vue = this;
+            vue.errors = []
             vue.resetSelects()
             vue.resetValidation()
             vue.$emit('onCancel')
@@ -202,7 +245,7 @@ export default {
                     .then(({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
-                        vue.$emit('onConfirm')
+                        vue.$emit('onConfirm', data.data)
                         vue.hideLoader()
                     })
                     .catch((error) => {
@@ -265,6 +308,13 @@ export default {
                     // console.log('validacion cant preguntas')
                     return false
                 }
+            }
+
+            if(vue.resource.score < 0  || (parseInt(vue.resource.score) > parseInt(vue.base_score)) ){
+                let message = "El puntaje debe ser mayor o igual a 1, o menor o igual a " + parseInt(vue.base_score)
+                vue.errors = [message]
+                // vue.show_alert_frontend("warning", "El puntaje debe ser mayor o igual a 1, o menor o igual a "+(parseInt(vue.base_score)));
+                return false;
             }
 
 
@@ -333,6 +383,16 @@ export default {
             };
             vue.tempAnswer = "";
             vue.resource.respuestas.push(newAnswer);
+        },
+
+        show_alert_frontend(tipo, message) {
+            let vue = this;
+            vue.alert_frontend.tipo_alert = tipo;
+            vue.alert_frontend.message_alert = message;
+            vue.alert_frontend.alert = true;
+            setTimeout(() => {
+                vue.alert_frontend.alert = false;
+            }, 10000);
         },
     }
 }
