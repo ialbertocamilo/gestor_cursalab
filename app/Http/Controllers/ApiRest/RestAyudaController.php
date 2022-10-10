@@ -100,7 +100,8 @@ class RestAyudaController extends Controller
 
     public function listar_empresas()
     {
-        $workspaces = Workspace::get(['id', 'name', 'slug']);
+        $workspaces = Workspace::whereNull('parent_id')->get(['id', 'name', 'slug']);
+
         return response()->json(compact('workspaces'));
     }
 
