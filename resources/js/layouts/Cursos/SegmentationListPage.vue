@@ -33,6 +33,17 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
+                    <v-col cols="4">
+                        <DefaultAutocomplete
+                                dense
+                                label="Escuelas"
+                                v-model="filters.schools"
+                                :items="selects.schools"
+                                item-text="name"
+                                item-value="id"
+                                multiple
+                            />
+                    </v-col>
 
                 </v-row>
             </v-card-text>
@@ -200,11 +211,12 @@ export default {
                 ]
             },
             selects: {
-                modules: []
+                modules: [],
+                schools: [],
             },
             filters: {
                 q: '',
-                // module: null,
+                schools: [],
                 // category: null
             },
 
@@ -271,8 +283,8 @@ export default {
     mounted() {
         let vue = this
 
-        vue.filters.module = vue.modulo_id
-        vue.filters.category = vue.escuela_id
+        // vue.filters.module = vue.modulo_id
+        vue.filters.schools = vue.schools
     },
     methods: {
         getSelects() {
@@ -280,8 +292,8 @@ export default {
             const url = `/escuelas/get-selects`
             vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.modules = data.data.modules
-                    vue.modalOptions.selects.modules = data.data.modules
+                    vue.selects.school = data.data.school
+                    vue.modalOptions.selects.school = data.data.school
                 })
         },
         activity() {

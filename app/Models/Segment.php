@@ -53,9 +53,15 @@ class Segment extends BaseModel
             ->with([
                 'field_type:id,name,code',
                 'values' => function ($q) use ($workspace) {
-                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
-                    // $q->select('id', 'value_text', 'position');
-                    $q->whereIn('id', $values->pluck('id')->toArray());
+
+                    $q->whereRelation('workspaces', 'id', $workspace->id);
+                        // ->whereRelation('criterion.field_type', 'code', '<>', 'date');
+                    
+                    // $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
+                    // $q->whereIn('id', $values->pluck('id')->toArray());
+
+                    // // $q->select('id', 'value_text', 'position');
+                    // $q->whereNotIn('type_id', $type_date_id);
                 }])
             ->whereHas('workspaces', function ($q) use ($workspace) {
                 $q->where('workspace_id', $workspace->id);
