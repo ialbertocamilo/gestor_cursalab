@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SummaryCourse extends Summary
 {
@@ -253,5 +254,40 @@ class SummaryCourse extends Summary
         // info($row_course);
 
         return $row_course;
+    }
+
+    /**
+     * Calculate totals from summary coourse statuses
+     * @param $workspaceId
+     * @return array
+     */
+    public static function calculateWorkspaceCoursesTotals($workspaceId): array
+    {
+        $aprobado = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+        $desarrollo = Taxonomy::getFirstData('course', 'user-status', 'desarrollo');
+        $desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+        $encuestaPend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
+
+        return DB::select(DB::raw('
+            select
+                sum(if(sc.status_id = :aprobadoId, 1, 0)) aprobados,
+                sum(if(sc.status_id = :desarrolloId, 1, 0)) desarrollados,
+                sum(if(sc.status_id = :desaprobadoId, 1, 0)) desaprobados,
+                sum(if(sc.status_id = :encuestaPendId, 1, 0)) encuestaPend
+            from
+                users u
+                    inner join summary_courses sc on sc.user_id = u.id
+                    inner join workspaces w on w.id = u.subworkspace_id
+            where
+                sc.deleted_at is null and
+                w.parent_id = :workspaceId and
+                u.active = 1
+        '), [
+            'workspaceId' => $workspaceId,
+            'aprobadoId' => $aprobado->id,
+            'desarrolloId' => $desarrollo->id,
+            'desaprobadoId' => $desaprobado->id,
+            'encuestaPendId' => $encuestaPend->id
+        ]);
     }
 }

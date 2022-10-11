@@ -691,4 +691,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $this->notify(new UserResetPasswordNotification($token));
     }
+
+    public static function countActiveUsersInWorkspace($workspaceId) {
+
+        return self::join('workspaces', 'users.subworkspace_id', '=', 'workspaces.id')
+                   ->where('workspaces.parent_id', $workspaceId)
+                   ->where('users.active', 1)
+                   ->count();
+    }
 }
