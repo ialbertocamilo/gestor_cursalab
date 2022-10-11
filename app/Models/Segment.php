@@ -337,6 +337,7 @@ class Segment extends BaseModel
     }
 
     protected function validateSegmentByUserCriteria($user_criteria, $segment_criteria): bool
+//    protected function validateSegmentByUserCriteria($user_criteria, $segment_criteria, $workspace_criteria): bool
     {
         $segment_valid = false;
 
@@ -349,7 +350,9 @@ class Segment extends BaseModel
                 break;
             endif;
 
+//            $criterion = $workspace_criteria->where('id', $criterion_id)->first();
             $segment_valid = $this->validateValueSegmentCriteriaByUser($segment_values, $user_criteria[$criterion_id]);
+//            $segment_valid = $this->validateValueSegmentCriteriaByUser($segment_values, $user_criteria[$criterion_id], $criterion);
 
             if (!$segment_valid) break;
         }
@@ -358,20 +361,29 @@ class Segment extends BaseModel
     }
 
     private function validateValueSegmentCriteriaByUser($segment_values, $user_criterion_value_by_criterion)
+//    private function validateValueSegmentCriteriaByUser($segment_values, $user_criterion_value_by_criterion, $criterion)
     {
-        $criterion_code = $user_criterion_value_by_criterion->first()?->criterion?->field_type?->code;
+        $criterion_field_type_code = $user_criterion_value_by_criterion->first()?->criterion?->field_type?->code;
+//        $criterion_field_type_code = $criterion->field_type?->code;
         $user_criterion_value_id_by_criterion = $user_criterion_value_by_criterion->pluck('id');
 
-        return match ($criterion_code) {
+        return match ($criterion_field_type_code) {
             'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
+//            'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion, $criterion),
             'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion),
             default => false,
         };
     }
 
     private function validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion)
+//    private function validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion, $criterion)
     {
         return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+//        return match ($criterion->multiple) {
+//            1 => null,
+//            0 => $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0,
+//            default => false
+//        };
     }
 
     private function validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion)
