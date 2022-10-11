@@ -45,7 +45,7 @@ class UserMassive implements ToCollection{
         $this->process_user($rows,$headers,$criteria);
     }
     private function process_user($users,$headers,$criteria){
-        
+
         foreach ($users as $user) {
             $data_users = collect();
             $data_criteria = collect();
@@ -146,7 +146,7 @@ class UserMassive implements ToCollection{
                 // if($criterion->code=='module'){
                 //     $colum_name = 'external_value';
                 // }
-                $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
+                $criterion_value = CriterionValue::disableCache()->where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
                 if(!$criterion_value){
                     // $has_error = true;
                     // $errors_index[] = $dc['index'];
