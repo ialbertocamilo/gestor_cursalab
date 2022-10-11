@@ -65,7 +65,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $fillable = [
         'name', 'lastname', 'surname', 'username', 'fullname', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
-        'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
+        'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key'
