@@ -35,6 +35,11 @@ class CriterionValue extends BaseModel
         return $this->belongsToMany(Workspace::class);
     }
 
+    public function subworkspace()
+    {
+        return $this->hasOne(Workspace::class);
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class);

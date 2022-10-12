@@ -72,11 +72,13 @@ class Announcement extends BaseModel
         if ($data->q)
             $query->where('nombre', 'like', "%$data->q%");
 
-        if ($data->module) {
-            $query->whereHas('criterionValues', function ($q) use ($data) {
-                return $q->where('criterion_value_id', $data->module);
-            });
-        }
+
+        $modules = $data->module ? [$data->module]
+            : Workspace::where('parent_id', $data['workspace_id'])->pluck('criterion_value_id');
+
+        $query->whereHas('criterionValues', function ($q) use ($modules) {
+            return $q->whereIn('criterion_value_id', $modules);
+        });
 
         // Set sorting values
 
@@ -109,8 +111,8 @@ class Announcement extends BaseModel
         }
 
         return ($publishDate === 'Indefinido' && $endDate === 'Indefinido')
-                ? 'Indefinido'
-                : "$publishDate - $endDate";
+            ? 'Indefinido'
+            : "$publishDate - $endDate";
     }
 
     protected function getPublisheds($subworkspace_value_id = NULL)
@@ -122,11 +124,11 @@ class Announcement extends BaseModel
             ->where('active', ACTIVE)
             ->where(function ($query) {
 
-                $query->where(function($q){
+                $query->where(function ($q) {
                     $q->whereNull('publish_date');
                     $q->orWhereDate('publish_date', '<=', date('Y-m-d'));
                 });
-                $query->where(function($q){
+                $query->where(function ($q) {
                     $q->whereNull('end_date');
                     $q->orWhereDate('end_date', '>=', date('Y-m-d'));
                 });
@@ -138,8 +140,8 @@ class Announcement extends BaseModel
 
     // Save list of modules
 
-    public static function saveModules($announcementId, $modulesId) {
-
+    public static function saveModules($announcementId, $modulesId)
+    {
 
 
     }

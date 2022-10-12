@@ -274,14 +274,33 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function isSupervisor(): bool
     {
-        $supervise_action = Taxonomy::getFirstData('user', 'action', 'supervise');
-        $is_supervisor = DB::table('user_relationships')
-            ->where('user_id', $this->id)
-            ->where('model_type', User::class)
-            ->where('relation_type_id', $supervise_action->id)
-            ->get();
+        $userWithSupervisorSegment = User::loadSupervisorWithSegment($this->id);
+        return $userWithSupervisorSegment['segment'] !== null;
+    }
 
-        return count($is_supervisor) > 0;
+    /**
+     * Load supervisor user and its segment
+     * @param $userId
+     * @return array
+     */
+    public static function loadSupervisorWithSegment($userId): array
+    {
+        $supervisorTaxonomy = Taxonomy::where('type', 'code')
+            ->where('group', 'segment')
+            ->where('code', 'user-supervise')
+            ->where('active', 1)
+            ->first();
+
+        $supervisorSegment = Segment::where('model_type', 'App\Models\User')
+            ->where('model_id', $userId)
+            ->where('code_id', $supervisorTaxonomy->id)
+            ->where('active', 1)
+            ->first();
+
+        return [
+            'user' => User::find($userId),
+            'segment' => $supervisorSegment
+        ];
     }
 
     public function getTrainingRole()
