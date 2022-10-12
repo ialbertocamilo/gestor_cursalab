@@ -283,6 +283,8 @@ export default {
     mounted() {
         let vue = this
 
+        vue.getSelects()
+
         // vue.filters.module = vue.modulo_id
         vue.filters.schools = vue.schools
     },
@@ -293,7 +295,7 @@ export default {
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.school = data.data.school
-                    vue.modalOptions.selects.school = data.data.school
+                    // vue.modalOptions.selects.school = data.data.school
                 })
         },
         activity() {
