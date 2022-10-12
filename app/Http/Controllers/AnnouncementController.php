@@ -21,6 +21,10 @@ class AnnouncementController extends Controller
      */
     public function search(Request $request)
     {
+        $workspace = get_current_workspace();
+
+        $request->mergeIfMissing(['workspace_id' => $workspace->id]);
+
         $anuncios = Announcement::search($request);
 
         AnnouncementResource::collection($anuncios);
