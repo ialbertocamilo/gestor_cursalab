@@ -604,6 +604,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user->loadMissing('subworkspace.parent');
 
+        $workspace_id = $user->subworkspace->parent->id;
+
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
@@ -625,12 +627,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
-            ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
+            ->whereRelation('workspaces', 'id', $workspace_id)
             ->where('active', ACTIVE)
             ->get();
 
 //        $user_criteria = $user->criterion_values->groupBy('criterion_id');
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+
+
+//        $workspace_criteria = Criterion::whereRelation('workspaces', 'id', $workspace_id)->get();
 
         foreach ($course_segmentations as $course) {
 
@@ -639,6 +644,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
                 $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+//                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
                 if ($valid_segment) :
                     $all_courses[] = $course;
@@ -711,11 +717,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $this->notify(new UserResetPasswordNotification($token));
     }
 
-    public static function countActiveUsersInWorkspace($workspaceId) {
+    public static function countActiveUsersInWorkspace($workspaceId)
+    {
 
         return self::join('workspaces', 'users.subworkspace_id', '=', 'workspaces.id')
-                   ->where('workspaces.parent_id', $workspaceId)
-                   ->where('users.active', 1)
-                   ->count();
+            ->where('workspaces.parent_id', $workspaceId)
+            ->where('users.active', 1)
+            ->count();
     }
 }

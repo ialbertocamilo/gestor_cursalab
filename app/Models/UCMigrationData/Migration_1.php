@@ -121,6 +121,13 @@ class Migration_1 extends Model
                 'type_id' => $type_client->id,
                 'config_id' => $user->config_id,
 
+
+                // TODO: Aad fields ?
+//                'person_number' => ???,
+//                'phone_number' => ???,
+                // TODO: Aad fields ?
+
+
                 'password' => bcrypt($user->dni),
 
                 'active' => $user->estado,
