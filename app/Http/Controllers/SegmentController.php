@@ -117,14 +117,14 @@ class SegmentController extends Controller
             'position' => 1,
         ]);
 
-        $date_range_type = Taxonomy::firstOrCreate([
-            'group' => 'segment-value',
-            'type' => 'type',
-            'code' => 'date-range',
-            'name' => 'Rango de fechas',
-            'active' => ACTIVE,
-            'position' => 2,
-        ]);
+//        $date_range_type = Taxonomy::firstOrCreate([
+//            'group' => 'segment-value',
+//            'type' => 'type',
+//            'code' => 'date-range',
+//            'name' => 'Rango de fechas',
+//            'active' => ACTIVE,
+//            'position' => 2,
+//        ]);
 
         SegmentValue::query()->update(['type_id' => $criterion_value_type?->id]);
     }
