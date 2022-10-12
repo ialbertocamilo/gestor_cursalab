@@ -23,18 +23,18 @@ class RestReportesSupervisores extends Controller
      */
     public function init(ReporteSupervisorSearchRequest $request): JsonResponse
     {
-        $supervisorWithSegment = $this->loadSupervisorWithSegment();
-
-        // Get user workspace id
-
         $user = auth('api')->user();
-        $subworkspace = Workspace::where('id', $user->subworkspace_id)->first();
-        $workspaceId = $subworkspace->parent_id;
+        $supervisorWithSegment = User::loadSupervisorWithSegment($user->id);
 
         // If supervisor segment does not exist,
         // stop method execution
 
         if (!$supervisorWithSegment['segment']) return response()->json([]);
+
+        // Get user workspace id
+
+        $subworkspace = Workspace::where('id', $user->subworkspace_id)->first();
+        $workspaceId = $subworkspace->parent_id;
 
         // Generate list of courses statuses
 
@@ -68,34 +68,5 @@ class RestReportesSupervisores extends Controller
         ];
 
         return response()->json($response);
-    }
-
-    /**
-     * Load supervisor user and its segment
-     * @return array
-     */
-    private function loadSupervisorWithSegment(): array
-    {
-//        $userId = 16;
-//        $user = User::find($userId);
-
-        $user = auth('api')->user();
-
-        $supervisorTaxonomy = Taxonomy::where('type', 'code')
-            ->where('group', 'segment')
-            ->where('code', 'user-supervise')
-            ->where('active', 1)
-            ->first();
-
-        $supervisorSegment = Segment::where('model_type', 'App\Models\User')
-            ->where('model_id', $user->id)
-            ->where('code_id', $supervisorTaxonomy->id)
-            ->where('active', 1)
-            ->first();
-
-        return [
-            'user' => $user,
-            'segment' => $supervisorSegment
-        ];
     }
 }
