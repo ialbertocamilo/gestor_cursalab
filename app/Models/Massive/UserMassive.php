@@ -105,7 +105,7 @@ class UserMassive implements ToCollection{
             }
             $user[$dt['code']] = $dt['value_excel'];
             if($dt['code']=='active'){
-                $user[$dt['code']] = ($dt['value_excel'] == 'Active') ? 1 : 0;
+                $user[$dt['code']] = (strtolower($dt['value_excel']) == strtolower('Active')) ? 1 : 0;
             }
         }
         //verify username and email fields are unique
