@@ -205,6 +205,7 @@ export default {
             file: null,
             modalScheduledMeetings: {
                 open: false,
+                header:{ logo: null, title: null },
                 meetings: []
             },
             msgAttendantsAdded: null,
