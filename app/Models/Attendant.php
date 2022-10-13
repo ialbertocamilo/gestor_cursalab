@@ -357,15 +357,14 @@ class Attendant extends BaseModel
 
         $currDocuments = $filters['usuarios_dni'] ?? null;
         $currIndexes = $filters['usuarios_id'] ?? null;
-
-        $currMeetingId = $filters['meeting_id'] ?? null;
+        // $currMeetingId = $filters['meeting_id'] ?? null;
 
         # === columnas a visualizar ===
         $visibleColumns = ['id', 'name', 'email', 'subworkspace_id', 'document'];
 
         $query = Usuario::with(['config:id,name,logo',
                                 'invitations.meeting' => function ($q)
-                                                         use ($filters, $currMeetingId) {
+                                                         use ($filters) {
                                     $q->betweenScheduleDates($filters);
                                     $q->ofReservedStatus();
                                     $q->excludeMeeting($filters['meeting_id'] ?? null);
