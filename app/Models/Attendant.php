@@ -364,7 +364,8 @@ class Attendant extends BaseModel
         $visibleColumns = ['id', 'name', 'email', 'subworkspace_id', 'document'];
 
         $query = Usuario::with(['config:id,name,logo',
-                                'invitations.meeting' => function ($q) use ($filters) {
+                                'invitations.meeting' => function ($q)
+                                                         use ($filters, $currMeetingId) {
                                     $q->betweenScheduleDates($filters);
                                     $q->ofReservedStatus();
                                     $q->excludeMeeting($currMeetingId);
