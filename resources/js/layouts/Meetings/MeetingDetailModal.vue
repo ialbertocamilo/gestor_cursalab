@@ -95,20 +95,12 @@
 
                                 <v-row justify="center" align="center">
                                     <v-col cols="10" class="text-center">
-                                        <!-- <a v-if="resource.status.code == 'finished' && resource.download_ready" -->
-                                        <a
+                                        <a v-if="resource.status.code == 'finished' && resource.download_ready"
                                            href="javascript:;"
-                                           download @click="downloadReport" class="no-hover-link mr-5"
-                                           title="Descargar reporte">
-                                            <v-icon color="primary" small>mdi-download</v-icon>
-                                            Descargar reporte
-                                        </a>
-
-                                        <a v-if="resource.status.code == 'finished' && !resource.download_ready"
-                                           href="javascript:;"
+                                           @click="downloadReport"
                                            class="grey--text text--darken--2 no-hover-link mr-5"
                                            title="Descarga disponible en 10 minutos aprox.">
-                                            <v-icon color="grey-darken-2" small>mdi-download</v-icon>
+                                            <v-icon color="grey-darken-2" small >mdi-download</v-icon>
                                             Descargar reporte
                                         </a>
 

@@ -57,8 +57,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
 
     Route::prefix('announcements')->group(base_path('routes/app/announcements.php'));
 
-
-
+    Route::prefix('meetings')->group(base_path('routes/app/meetings.php'));
 
     Route::prefix('progreso')->group(base_path('routes/app/progreso.php'));
     Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
@@ -93,7 +92,6 @@ Route::get('notifications', function () {
     ]);
 });
 
-Route::prefix('meetings')->group(base_path('routes/app/meetings.php'));
 
 
 //Route::controller(TestController::class)->group(function () {

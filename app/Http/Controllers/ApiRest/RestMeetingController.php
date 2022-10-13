@@ -28,10 +28,10 @@ class RestMeetingController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware('auth.jwt', ['except' => [
-        //     'zoomWebhookEndMeeting','finishMeeting'
-        // ]]);
-        // return auth()->shouldUse('api');
+        $this->middleware('auth.jwt', ['except' => [
+            'zoomWebhookEndMeeting','finishMeeting'
+        ]]);
+        return auth()->shouldUse('api');
     }
 
     public function listUserMeetings(Request $request)
@@ -167,12 +167,12 @@ class RestMeetingController extends Controller
 
     public function getFormData(Request $request)
     {
-        $modulos = Abconfig::select('id', 'etapa as nombre')->get();
+        $modulos = Workspace::loadSubWorkspaces(['id','name as nombre']);
         $user_types = Taxonomy::getData('meeting', 'user')->pluck('code', 'id');
 
         $params = ['config_id' => $request->config_id ?? auth()->user()->config_id];
 
-        $grupos = Criterio::getGruposForSelect($params);
+        $grupos = [];
 
         return $this->success(compact('grupos', 'modulos', 'user_types'));
     }
@@ -193,7 +193,7 @@ class RestMeetingController extends Controller
 
     public function edit(Meeting $meeting)
     {
-        $meeting->load('type', 'host.config:id,etapa,logo', 'status');
+        $meeting->load('type', 'host.config:id,name,logo', 'status');
 
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
 
