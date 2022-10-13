@@ -26,13 +26,13 @@ use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
 
 class RestMeetingController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth.jwt', ['except' => [
-            'zoomWebhookEndMeeting','finishMeeting'
-        ]]);
-        return auth()->shouldUse('api');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth.jwt', ['except' => [
+    //         'zoomWebhookEndMeeting','finishMeeting'
+    //     ]]);
+    //     return auth()->shouldUse('api');
+    // }
 
     public function listUserMeetings(Request $request)
     {
