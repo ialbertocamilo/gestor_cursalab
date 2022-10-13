@@ -809,7 +809,7 @@ class Meeting extends BaseModel
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
 
         $top_attendants = $this->attendants()
-            ->with('usuario:id,nombre,dni')
+            ->with('usuario:id,name,document')
             ->select('total_duration', 'usuario_id')
             ->orderBy('total_duration', 'DESC')
             ->whereNotNull('total_duration')
@@ -820,7 +820,7 @@ class Meeting extends BaseModel
 
         foreach ($top_attendants as $top_attendant) {
 //            $data['labels'][] = "Top {$i}";
-            $data['labels'][] = $top_attendant->usuario->dni;
+            $data['labels'][] = $top_attendant->usuario->document;
             $data['values'][] = $top_attendant->total_duration;
             $i++;
         }

@@ -254,8 +254,8 @@ class ZoomService extends MeetingService
             $participantsGrouppedByIdentifier = $only_in_meeting->groupBy('registrant_id');
             $participantsGrouppedByIpAddress = $only_in_meeting->groupBy('ip_address');
 
-            $attendantsByIdentifier = Attendant::with('usuario:id,nombre,dni')->where('meeting_id', $meeting->id)->whereIn('identifier', $id_registrants)->get();
-            $attendantsByIpAddress = Attendant::with('usuario:id,nombre,dni')->where('meeting_id', $meeting->id)->whereIn('ip', $ip_registrants)->get();
+            $attendantsByIdentifier = Attendant::with('usuario:id,name,document')->where('meeting_id', $meeting->id)->whereIn('identifier', $id_registrants)->get();
+            $attendantsByIpAddress = Attendant::with('usuario:id,name,document')->where('meeting_id', $meeting->id)->whereIn('ip', $ip_registrants)->get();
 
             $unknownParticipants = Arr::pull($participantsGrouppedByIdentifier, '');
             $extra_participants = $unknownParticipants->groupBy('ip_address');
