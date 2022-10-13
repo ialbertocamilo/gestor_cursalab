@@ -21,6 +21,12 @@ class Migration_1 extends Model
 {
     const CHUNK_LENGTH = 5000;
 
+    const MODULOS_EQUIVALENCIA = [
+        4 => '26', // Mifarma
+        5 => '27', // Inkafarma,
+        // Capacitacion FP
+    ];
+
     protected function connect()
     {
         $db_uc_data = config('database.connections.mysql_uc');
@@ -44,11 +50,11 @@ class Migration_1 extends Model
         ];
 
         $this->setUsersData($client_LMS_data, $db);
-        $this->setModulosData($client_LMS_data, $db);
-        $this->setCarrerasData($client_LMS_data, $db);
-        $this->setCiclosData($client_LMS_data, $db);
-        $this->setGruposData($client_LMS_data, $db);
-        $this->setBoticasData($client_LMS_data, $db);
+//        $this->setModulosData($client_LMS_data, $db);
+//        $this->setCarrerasData($client_LMS_data, $db);
+//        $this->setCiclosData($client_LMS_data, $db);
+//        $this->setGruposData($client_LMS_data, $db);
+//        $this->setBoticasData($client_LMS_data, $db);
 
 //        $this->setSchoolsData($client_LMS_data, $db);
 //        $this->setCoursesData($client_LMS_data, $db);
@@ -58,19 +64,19 @@ class Migration_1 extends Model
 
     public function insertMigrationData_1($data)
     {
-        $this->insertModulosData($data);
+//        $this->insertModulosData($data);
 
         $this->insertUsersData($data);
 
-        $this->insertCarrerasData($data);
-        $this->insertCiclosData($data);
-
-        $this->insertGruposData($data);
-        $this->insertBoticasData($data);
-
-        $this->insertCriterionUserData($data);
-
-        $this->insertSegmentacionCarrerasCiclosData();
+//        $this->insertCarrerasData($data);
+//        $this->insertCiclosData($data);
+//
+//        $this->insertGruposData($data);
+//        $this->insertBoticasData($data);
+//
+//        $this->insertCriterionUserData($data);
+//
+//        $this->insertSegmentacionCarrerasCiclosData();
 
 //        $this->insertSchoolData($data);
 //        $this->insertCourseData($data);
@@ -78,13 +84,15 @@ class Migration_1 extends Model
 
     public function setUsersData(&$result, $db)
     {
-        $uc = [
-            'name' => "Universidad Corporativa",
-            'active' => ACTIVE
-        ];
-        $uc_workspace = Workspace::create($uc);
+//        $uc = [
+//            'name' => "Universidad Corporativa",
+//            'active' => ACTIVE
+//        ];
+//        $uc_workspace = Workspace::create($uc);
 
-//        $users = User::select('document', 'email')->get();
+        $uc_workspace = Workspace::where('slug', 'farmacias-peruanas')->first();
+
+        $user_db = User::select('document', 'email')->get();
 
         $temp['users'] = $db->getTable('usuarios')
             ->select(
@@ -103,12 +111,21 @@ class Migration_1 extends Model
 //            ->whereNotIn('dni', $users->pluck('document'))
 //            ->whereNotIn('email', $users->pluck('email'))
             ->get();
+//            ->count();
 
 //        return $temp['users'];
 
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');
 
         foreach ($temp['users'] as $user) {
+
+            $dni_exists = $user->dni && $user_db->where('document', $user->dni)->first();
+            $email_exists = $user->email && $user_db->where('document', $user->email)->first();
+
+            if ($dni_exists || $email_exists) continue;
+
+//            info("Usuario a agregar {$user->dni}");
+//            print_r("Usuario a agregar {$user->dni}\n");
             $result['usuario_relations'][] = [
                 'usuario_id' => $user->id,
                 'config_id' => $user->config_id,
@@ -143,7 +160,7 @@ class Migration_1 extends Model
             ];
         }
 
-//        $result['users'] = array_chunk($result['users'], self::CHUNK_LENGTH, true);
+        $result['users'] = array_chunk($result['users'], self::CHUNK_LENGTH, true);
     }
 
     public function setModulosData(&$result, $db)
@@ -153,9 +170,16 @@ class Migration_1 extends Model
             'code' => 'module'
         ]);
 
+        $modules = Workspace::whereNotNull('parent_id')->get();
+
         $temp['modulos'] = $db->getTable('ab_config')->get();
 
         foreach ($temp['modulos'] as $modulo) {
+
+            $module_exists = $modules->where('name', 'like', "%{$modulo->etapa}%")->first();
+
+            if ($module_exists) continue;
+
             $result['modulo_subworkspace'][] = [
                 'external_id' => $modulo->id,
                 'name' => $modulo->etapa,
@@ -427,16 +451,23 @@ class Migration_1 extends Model
 
     public function insertUsersData($data)
     {
-//        $this->insertChunkedData('users', $data['users']);
+//        info("DATA USERS");
+//        print_r($data['users']);
+//        info("============================");
+        $this->insertChunkedData('users', $data['users']);
         $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
 
         $user_temp = [];
         foreach ($data['users'] as $user) {
-            $module_value = $modules_values->where('external_id', $user['config_id'])->first();
+//            info("Usuario a agregar {$user['document']}");
+//            $module_value = $modules_values->where('external_id', $user['config_id'])->first();
+            $module_value = self::MODULOS_EQUIVALENCIA[$user['config_id']] ?? false;
             unset($user['config_id']);
 
-            if ($module_value)
-                $user_temp[] = array_merge($user, ['subworkspace_id' => $module_value->id,]);
+            if ($module_value) {
+                $user_temp[] = array_merge($user, ['subworkspace_id' => $module_value,]);
+//                $user_temp[] = array_merge($user, ['subworkspace_id' => $module_value->id,]);
+            }
         }
 
         $this->makeChunkAndInsert($user_temp, 'users');
