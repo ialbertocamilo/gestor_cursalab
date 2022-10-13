@@ -128,10 +128,10 @@ class Migration_1 extends Model
                 'config_id' => $user->config_id,
 
 
-                // TODO: Aad fields ?
+                // TODO: Add fields ?
 //                'person_number' => ???,
 //                'phone_number' => ???,
-                // TODO: Aad fields ?
+                // TODO: Add fields ?
 
 
                 'password' => bcrypt($user->dni),
