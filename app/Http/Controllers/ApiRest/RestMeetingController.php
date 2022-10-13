@@ -227,7 +227,9 @@ class RestMeetingController extends Controller
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
         $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
 
-        $request->merge(['cohost' => $cohost, 'normal' => $normal]);
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
 
         $attendants = Attendant::searchAttendants($data);
 
@@ -245,7 +247,9 @@ class RestMeetingController extends Controller
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
         $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
 
-        $request->merge(['cohost' => $cohost, 'normal' => $normal]);
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
 
         $attendants = Attendant::searchAttendants($data);
 
