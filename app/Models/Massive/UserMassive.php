@@ -141,12 +141,26 @@ class UserMassive implements ToCollection{
                 $code_criterion = $criterion->field_type->code;
                 if(isset($code_criterion) && $code_criterion =='date'){
                     $dc['value_excel'] =  $this->excelDateToDate($dc['value_excel']);
+                    if($dc['value_excel']=='invalid date'){
+                        $has_error = true;
+                        $errors_index[] = [
+                            'index'=>$dc['index'],
+                            'message'=>'The field '.$dc['criterion_code']. ' is invalid date.'
+                        ];
+                    }
                 }
                 $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
                 // if($criterion->code=='module'){
-                //     $colum_name = 'external_value';
-                // }
-                $criterion_value = CriterionValue::disableCache()->where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
+                    //     $colum_name = 'external_value';
+                    // }
+                $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
+                if($dc['criterion_code']=='module' && !$criterion_value){
+                    $has_error = true;
+                    $errors_index[] = [
+                        'index'=>$dc['index'],
+                        'message'=>'The field '.$dc['criterion_code']. ' not exist.'
+                    ];
+                }
                 if(!$criterion_value){
                     // $has_error = true;
                     // $errors_index[] = $dc['index'];
@@ -219,15 +233,19 @@ class UserMassive implements ToCollection{
     }
     private function excelDateToDate($fecha)
     {
-        if(_validateDate($fecha,'Y-m-d')){
-            return $fecha;
+        try {
+            if(_validateDate($fecha,'Y-m-d')){
+                return $fecha;
+            }
+            if(_validateDate($fecha,'Y/m/d') || _validateDate($fecha,'d/m/Y') || _validateDate($fecha,'d-m-Y')){
+                // return date("d/m/Y",$fecha);
+                return Carbon::parse($fecha)->format('Y-m-d');
+            }
+            $php_date =  $fecha - 25569;
+            $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));
+            return $date;
+        } catch (\Throwable $th) {
+            return 'invalid date';
         }
-        if(_validateDate($fecha,'Y/m/d') || _validateDate($fecha,'d/m/Y') || _validateDate($fecha,'d-m-Y')){
-            // return date("d/m/Y",$fecha);
-            return Carbon::parse($fecha)->format('Y-m-d');
-        }
-        $php_date =  $fecha - 25569;
-        $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));
-        return $date;
     }
 }
