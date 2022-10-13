@@ -43,7 +43,9 @@ class RestMeetingController extends Controller
         $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
         $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
 
-        $request->merge(['usuario_id' => auth()->user()->id]);
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['usuario_id' => auth()->user()->id, 'workspace_id' => $subworkspace->parent_id]);
 
         if ($request->code) {
             if ($request->code == 'today')
