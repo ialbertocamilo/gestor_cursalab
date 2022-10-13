@@ -8,6 +8,7 @@ use App\Http\Requests\MeetingAppRequest;
 
 use App\Models\Attendant;
 use App\Models\Abconfig;
+use App\Models\Workspace;
 use App\Models\Criterio;
 use App\Models\Taxonomy;
 use App\Models\Meeting;
