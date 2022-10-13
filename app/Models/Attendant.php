@@ -347,7 +347,6 @@ class Attendant extends BaseModel
         return MeetingShowAttendantsMeetingResource::collection($attendants);
     }
 
-
     # test functions
     protected function searchAttendants($filters)
     {
@@ -355,18 +354,21 @@ class Attendant extends BaseModel
         $currSubworkspaces = $filters['config_id'] ?? null;
         $excludeHostId = $filters['exclude_host_id'] ?? null;
         $term = $filters['q'] ?? null;
+
         $currDocuments = $filters['usuarios_dni'] ?? null;
         $currIndexes = $filters['usuarios_id'] ?? null;
 
+        $currMeetingId = $filters['meeting_id'] ?? null;
+
         # === columnas a visualizar ===
-        $visibleColumns = ['id', 'name', 'email', 'subworkspace_id as config_id', 'document'];
+        $visibleColumns = ['id', 'name', 'email', 'subworkspace_id', 'document'];
 
         $query = Usuario::with(['config:id,name,logo',
-            'invitations.meeting' => function ($q) use ($filters) {
-                $q->betweenScheduleDates($filters);
-                $q->ofReservedStatus();
-                $q->excludeMeeting($filters['meeting_id'] ?? null);
-            }]);
+                                'invitations.meeting' => function ($q) use ($filters) {
+                                    $q->betweenScheduleDates($filters);
+                                    $q->ofReservedStatus();
+                                    $q->excludeMeeting($currMeetingId);
+                                }]);
 
         $query->select($visibleColumns)->where('active', ACTIVE);
 
