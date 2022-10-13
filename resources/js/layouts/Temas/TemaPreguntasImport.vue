@@ -309,6 +309,9 @@ export default {
 
                     vue.archivo = null;
                     vue.$refs.dropzone.limpiarArchivo()
+                    setTimeout( () => {
+                        location.reload();
+                    }, 1000)
                 })
                 .catch((err) => {
                     vue.progress_upload = 'error'
