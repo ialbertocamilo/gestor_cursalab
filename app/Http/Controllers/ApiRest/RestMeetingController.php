@@ -88,21 +88,26 @@ class RestMeetingController extends Controller
         $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
         $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
 
+        $subworkspace = auth()->user()->subworkspace;
+
         $filters_today = new Request([
             'usuario_id' => auth()->user()->id,
             'statuses' => [$scheduled->id, $started->id],
             'date' => Carbon::today(),
+            'workspace_id' => $subworkspace->parent_id,
         ]);
 
         $filters_scheduled = new Request([
             'usuario_id' => auth()->user()->id,
             'statuses' => [$scheduled->id],
             'date_start' => Carbon::tomorrow(),
+            'workspace_id' => $subworkspace->parent_id,
         ]);
 
         $filters_finished = new Request([
             'usuario_id' => auth()->user()->id,
             'statuses' => [$finished->id, $overdue->id, $cancelled->id],
+            'workspace_id' => $subworkspace->parent_id,
         ]);
 
         $data = [
