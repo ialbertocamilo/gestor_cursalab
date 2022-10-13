@@ -80,7 +80,7 @@ class RestMeetingController extends Controller
         return $this->successApp($result);
     }
 
-    public function getData()
+    public function getData(Request $request)
     {
         $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
         $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
@@ -90,24 +90,23 @@ class RestMeetingController extends Controller
 
         $subworkspace = auth()->user()->subworkspace;
 
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+
         $filters_today = new Request([
             'usuario_id' => auth()->user()->id,
             'statuses' => [$scheduled->id, $started->id],
             'date' => Carbon::today(),
-            'workspace_id' => $subworkspace->parent_id,
         ]);
 
         $filters_scheduled = new Request([
             'usuario_id' => auth()->user()->id,
             'statuses' => [$scheduled->id],
             'date_start' => Carbon::tomorrow(),
-            'workspace_id' => $subworkspace->parent_id,
         ]);
 
         $filters_finished = new Request([
             'usuario_id' => auth()->user()->id,
             'statuses' => [$finished->id, $overdue->id, $cancelled->id],
-            'workspace_id' => $subworkspace->parent_id,
         ]);
 
         $data = [
