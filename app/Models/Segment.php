@@ -60,7 +60,6 @@ class Segment extends BaseModel
                     $q
                         ->select('id', 'criterion_id', 'value_boolean', 'value_date', 'value_text')
                         ->whereRelation('workspaces', 'id', $workspace->id);
-//                    ->whereRelation('criterion.field_type', 'code', '<>', 'date');
 //                        ->whereRelation('type', 'code', '<>', 'date');
                 }])
             ->whereHas('workspaces', function ($q) use ($workspace) {
@@ -338,7 +337,6 @@ class Segment extends BaseModel
     }
 
     protected function validateSegmentByUserCriteria($user_criteria, $segment_criteria): bool
-//    protected function validateSegmentByUserCriteria($user_criteria, $segment_criteria, $workspace_criteria): bool
     {
         $segment_valid = false;
 
@@ -351,9 +349,7 @@ class Segment extends BaseModel
                 break;
             endif;
 
-//            $criterion = $workspace_criteria->where('id', $criterion_id)->first();
             $segment_valid = $this->validateValueSegmentCriteriaByUser($segment_values, $user_criteria[$criterion_id]);
-//            $segment_valid = $this->validateValueSegmentCriteriaByUser($segment_values, $user_criteria[$criterion_id], $criterion);
 
             if (!$segment_valid) break;
         }
@@ -362,29 +358,20 @@ class Segment extends BaseModel
     }
 
     private function validateValueSegmentCriteriaByUser($segment_values, $user_criterion_value_by_criterion)
-//    private function validateValueSegmentCriteriaByUser($segment_values, $user_criterion_value_by_criterion, $criterion)
     {
-        $criterion_field_type_code = $user_criterion_value_by_criterion->first()?->criterion?->field_type?->code;
-//        $criterion_field_type_code = $criterion->field_type?->code;
+        $criterion_code = $user_criterion_value_by_criterion->first()?->criterion?->field_type?->code;
         $user_criterion_value_id_by_criterion = $user_criterion_value_by_criterion->pluck('id');
 
-        return match ($criterion_field_type_code) {
+        return match ($criterion_code) {
             'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
-//            'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion, $criterion),
             'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion),
             default => false,
         };
     }
 
     private function validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion)
-//    private function validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion, $criterion)
     {
         return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
-//        return match ($criterion->multiple) {
-//            1 => null,
-//            0 => $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0,
-//            default => false
-//        };
     }
 
     private function validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion)
@@ -393,10 +380,12 @@ class Segment extends BaseModel
 
         foreach ($segment_values as $date_range) {
 
+            if (!$date_range['starts_at'] && !$date_range['finishes_at']) continue;
+
             $starts_at = carbonFromFormat($date_range['starts_at']);
             $finishes_at = carbonFromFormat($date_range['finishes_at']);
 
-            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date . " 00:00:00");
+            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date, "Y-m-d");
 
             $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
 

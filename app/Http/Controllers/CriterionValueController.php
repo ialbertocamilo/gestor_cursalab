@@ -80,7 +80,6 @@ class CriterionValueController extends Controller
         $data[$colum_name] = $data['name'];
         $data['value_text'] = $data['name'];
 
-
         CriterionValue::storeRequest($data, $criterion_value);
 
         return $this->success(['msg' => 'Valor actualizado correctamente.']);
