@@ -381,6 +381,14 @@ class Workspace extends BaseModel
                         ->get();
     }
 
+    protected function loadSubWorkspacesSiblings($subworkspace, $attributes)
+    {
+        return Workspace::select($attributes)
+                        ->where('active', ACTIVE)
+                        ->where('parent_id', $subworkspace->parent_id)
+                        ->get();
+    }
+
     public function criterion_workspace()
     {
         return $this->hasMany(CriterionValueWorkspace::class);

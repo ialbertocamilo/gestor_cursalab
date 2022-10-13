@@ -168,7 +168,9 @@ class RestMeetingController extends Controller
 
     public function getFormData(Request $request)
     {
-        $modulos = Workspace::loadSubWorkspaces(['id','name as nombre']);
+        $subworkspace = auth()->user()->subworkspace;
+        // $modulos = Workspace::loadSubWorkspaces(['id','name as nombre']);
+        $modulos = Workspace::loadSubWorkspacesSiblings($subworkspace, ['id','name as nombre']);
         $user_types = Taxonomy::getData('meeting', 'user')->pluck('code', 'id');
 
         $params = ['config_id' => $request->config_id ?? auth()->user()->config_id];
