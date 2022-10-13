@@ -98,7 +98,7 @@
                                         <a v-if="resource.status.code == 'finished' && resource.download_ready"
                                            href="javascript:;"
                                            @click="downloadReport"
-                                           class="grey--text text--darken--2 no-hover-link mr-5"
+                                           class="no-hover-link mr-5"
                                            title="Descarga disponible en 10 minutos aprox.">
                                             <v-icon color="grey-darken-2" small >mdi-download</v-icon>
                                             Descargar reporte
