@@ -39,7 +39,7 @@
             <td align="center">{{ $attendant->type->name }}</td>
             <td align="center">{{ $attendant->usuario->document }}</td>
 
-            <td>{{ $attendant->usuario->name }}</td>
+            <td>{{ $attendant->usuario->fullname   }}</td>
             {{--                <td>{{ $attendant->usuario->apellido_paterno }}</td>--}}
             {{--                <td>{{ $attendant->usuario->apellido_materno }}</td>--}}
 
