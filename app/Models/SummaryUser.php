@@ -69,7 +69,8 @@ class SummaryUser extends Summary
         $attempts = (isset($intentos_x_curso)) ? $intentos_x_curso->intentos : 0;
         $score = User::calculate_rank($passed, $grade_average, $attempts);
 
-        $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
+//        $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
+        $tot_com = ($passed > $count_courses_assigned) ? $count_courses_assigned : $passed;
 
         $user_data = [
             'courses_assigned' => $count_courses_assigned,

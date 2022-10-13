@@ -21,6 +21,10 @@ class AnnouncementController extends Controller
      */
     public function search(Request $request)
     {
+        $workspace = get_current_workspace();
+
+        $request->mergeIfMissing(['workspace_id' => $workspace->id]);
+
         $anuncios = Announcement::search($request);
 
         AnnouncementResource::collection($anuncios);
@@ -104,7 +108,7 @@ class AnnouncementController extends Controller
     public function edit(Announcement $announcement)
     {
         $announcement['module_ids'] = $announcement->criterionValues()
-                                                   ->pluck('criterion_value_id');
+            ->pluck('criterion_value_id');
         $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
 

@@ -120,46 +120,37 @@
                         </v-col>
                     </v-row>
 
-                    <v-row justify="space-around" class="menuable">
-                    <v-col cols="12">
-                        <DefaultModalSection
-                            title="Evaluaciones"
-                        >
-                            <!-- tooltip="Tooltip" -->
-                            <template slot="content">
-                                <v-row justify="center">
-                                  <!--   <v-col cols="4">
-                                        <DefaultInput
-                                            label="Preguntas por evaluación"
-                                            v-model="resource.preg_x_ev"
-                                            :rules="rules.preg_x_ev"
-                                            show-required
-                                            dense
-                                        />
-                                    </v-col> -->
-                                    <v-col cols="6">
-                                        <DefaultInput
-                                            label="Nota mínima aprobatoria"
-                                            v-model="resource.nota_aprobatoria"
-                                            :rules="rules.nota_aprobatoria"
-                                            show-required
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <DefaultInput
-                                            label="Número de intentos"
-                                            v-model="resource.nro_intentos"
-                                            :rules="rules.nro_intentos"
-                                            show-required
-                                            dense
-                                        />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row>
+                    <!-- <v-row justify="space-around" class="menuable">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Evaluaciones"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+                                     
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                label="Nota mínima aprobatoria"
+                                                v-model="resource.nota_aprobatoria"
+                                                :rules="rules.nota_aprobatoria"
+                                                show-required
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                label="Número de intentos"
+                                                v-model="resource.nro_intentos"
+                                                :rules="rules.nro_intentos"
+                                                show-required
+                                                dense
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row> -->
 
                     <v-row justify="space-around">
                         <v-col cols="12">
@@ -288,8 +279,8 @@ export default {
                 lista_escuelas: this.getRules(['required']),
                 types: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
-                nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
-                nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
+                // nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
+                // nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
             },
             selects: {
                 requisito_id: [],

@@ -553,7 +553,7 @@ class Topic extends BaseModel
 
     protected function evaluateAnswers($respuestas, $topic)
     {
-        $questions = Question::select('id', 'rpta_ok')->where('topic_id', $topic->id)->get();
+        $questions = Question::select('id', 'rpta_ok', 'score')->where('topic_id', $topic->id)->get();
 
         $correct_answers = $failed_answers = $correct_answers_score = 0;
 

@@ -122,23 +122,69 @@ class Supervisor extends User
             ->get();
     }
 
-    static function setCriterioGlobalesSupervisor($request)
+    static function setCriterioGlobalesSupervisor($users_id, $criteria)
     {
-        $usuarios_supervisor = Usuario::whereIn('dni', collect($request['supervisores'])->pluck('dni'))->select('id')->get();
-        self::whereIn('usuario_id', $usuarios_supervisor->pluck('id'))->where('type', 'criterios')->delete();
-        $insertar_data = collect();
-        foreach ($usuarios_supervisor as $us) {
-            foreach ($request['tipo_criterios'] as $tc) {
-                $insertar_data->push([
-                    'usuario_id' => $us->id,
-                    'type' => 'criterios',
-                    'resource_id' => $tc
-                ]);
+        $users = User::query()
+            ->with([
+                'criterion_values' => function ($q) use ($criteria) {
+                    $q->whereIn('criterion_id', $criteria);
+                }
+            ])
+            ->whereIn('id', $users_id)
+            ->select('id', 'name', 'lastname', 'surname', 'document')
+            ->get();
+
+        SegmentValue::whereHas('segment', function ($q) use ($users) {
+            $q->where('model_type', User::class)
+                ->whereIn('model_id', $users->pluck('id')->toArray())
+                ->whereRelation('type', 'code', 'direct-segmentation')
+                ->whereRelation('code', 'code', 'user-supervise');
+        })
+            ->delete();
+        Segment::where('model_type', User::class)
+            ->whereIn('model_id', $users->pluck('id')->toArray())
+            ->whereRelation('type', 'code', 'direct-segmentation')
+            ->whereRelation('code', 'code', 'user-supervise')
+            ->delete();
+
+        $direct_segmentation_type = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+        $supervise_code_segment = Taxonomy::getFirstData('segment', 'code', 'user-supervise');
+        $errors = [];
+        $ok = [];
+
+        foreach ($users as $user) {
+            $segment = Segment::firstOrCreate([
+                'name' => UserRelationship::SUPERVISOR_DIRECT_SEGMENTATION_NAME,
+                'model_type' => User::class,
+                'model_id' => $user->id,
+                'active' => ACTIVE,
+                'type_id' => $direct_segmentation_type?->id,
+                'code_id' => $supervise_code_segment?->id
+            ]);
+
+            $values = [];
+
+            foreach ($criteria as $criterion) {
+                $user_criterion_value = $user->criterion_values
+                    ->where('criterion_id', $criterion)->first();
+
+                if ($user_criterion_value)
+                    $values[] = [
+                        'criterion_value_id' => $user_criterion_value->id,
+                        'criterion_id' => $criterion,
+                        'type_id' => null,
+                    ];
             }
+
+            if (count($values) === 0):
+                $errors[] = $user;
+            else:
+                $ok[] = $user;
+                $segment->values()->sync($values);
+            endif;
         }
-        if ($insertar_data->count() > 0) {
-            Supervisor::insert($insertar_data->toArray());
-        }
+
+        return compact('ok', 'errors');
     }
 
     static function setDataSupervisor($request)

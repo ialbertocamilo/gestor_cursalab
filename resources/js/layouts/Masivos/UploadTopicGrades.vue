@@ -217,7 +217,7 @@ export default {
             // if (vue.select.topics.length === 0) return true;
             return !vue.archivo;
         },
-        descargarPlantill(a) {
+        descargarPlantilla() {
             let vue = this;
             let headers = ["DNI", "NOTA", "INTENTOS", "VISITAS", "NÚMERO RESPUESTAS CORRECTAS",
                 "NÚMERO RESPUESTAS INCORRECTAS", "FECHA DE EVALUACIÓN"];

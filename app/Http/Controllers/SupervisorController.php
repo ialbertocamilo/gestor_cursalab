@@ -118,15 +118,28 @@ class SupervisorController extends Controller
 
     public function tipoCriterios()
     {
-        $data = Criterion::select('name as nombre', 'id')->get();
+        $workspace = get_current_workspace();
+
+        $data = Criterion::query()
+            ->whereHas('workspaces', function($q) use($workspace){
+                $q->where('id', $workspace->id);
+            })
+            ->select('name as nombre', 'id')->get();
+
         return $this->success($data);
     }
 
-
     public function setCriterioGlobalesSupervisor(Request $request)
     {
-        $data = Supervisor::setCriterioGlobalesSupervisor($request);
-        return $this->success([]);
+//        return $request->all();
+        $data = $request->all();
+        $users_id = array_column($data['supervisores'], 'id');
+        $criteria = $data['tipo_criterios'];
+
+//        dd($users_id, $criteria);
+        $data = Supervisor::setCriterioGlobalesSupervisor($users_id, $criteria);
+
+        return $this->success(compact('data'));
     }
 
     public function searchSupervisores(Request $request)

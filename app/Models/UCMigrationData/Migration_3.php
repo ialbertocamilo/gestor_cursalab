@@ -77,6 +77,8 @@ class Migration_3 extends Model
 
             $data[] = [
                 'external_id' => $encuesta->id,
+                // TODO: add workspace_id field
+                // 'workspace_id' => ????,
                 'type_id' => $type->id ?? NULL,
                 'anonima' => $encuesta->anonima,
                 'titulo' => $encuesta->titulo,

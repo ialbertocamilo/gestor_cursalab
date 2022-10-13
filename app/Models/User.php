@@ -65,7 +65,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $fillable = [
         'name', 'lastname', 'surname', 'username', 'fullname', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
-        'type_id', 'workspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
+        'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key'
@@ -126,6 +126,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function criterion_values()
     {
         return $this->belongsToMany(CriterionValue::class);
+    }
+  
+    public function criterion_user() 
+    {
+        return $this->hasMany(CriterionValueUser::class);
     }
 
     public function subworkspace()
@@ -274,14 +279,33 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function isSupervisor(): bool
     {
-        $supervise_action = Taxonomy::getFirstData('user', 'action', 'supervise');
-        $is_supervisor = DB::table('user_relationships')
-            ->where('user_id', $this->id)
-            ->where('model_type', User::class)
-            ->where('relation_type_id', $supervise_action->id)
-            ->get();
+        $userWithSupervisorSegment = User::loadSupervisorWithSegment($this->id);
+        return $userWithSupervisorSegment['segment'] !== null;
+    }
 
-        return count($is_supervisor) > 0;
+    /**
+     * Load supervisor user and its segment
+     * @param $userId
+     * @return array
+     */
+    public static function loadSupervisorWithSegment($userId): array
+    {
+        $supervisorTaxonomy = Taxonomy::where('type', 'code')
+            ->where('group', 'segment')
+            ->where('code', 'user-supervise')
+            ->where('active', 1)
+            ->first();
+
+        $supervisorSegment = Segment::where('model_type', 'App\Models\User')
+            ->where('model_id', $userId)
+            ->where('code_id', $supervisorTaxonomy->id)
+            ->where('active', 1)
+            ->first();
+
+        return [
+            'user' => User::find($userId),
+            'segment' => $supervisorSegment
+        ];
     }
 
     public function getTrainingRole()
@@ -585,6 +609,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user->loadMissing('subworkspace.parent');
 
+        $workspace_id = $user->subworkspace->parent->id;
+
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
             'requirements',
@@ -606,12 +632,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
-            ->whereRelation('workspaces', 'id', $user->subworkspace->parent->id)
+            ->whereRelation('workspaces', 'id', $workspace_id)
             ->where('active', ACTIVE)
             ->get();
 
 //        $user_criteria = $user->criterion_values->groupBy('criterion_id');
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+
+
+//        $workspace_criteria = Criterion::whereRelation('workspaces', 'id', $workspace_id)->get();
 
         foreach ($course_segmentations as $course) {
 
@@ -620,6 +649,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
                 $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+//                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
                 if ($valid_segment) :
                     $all_courses[] = $course;
@@ -692,9 +722,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $this->notify(new UserResetPasswordNotification($token));
     }
 
-    #test functions
-    public function criterion_user() {
-        return $this->hasMany(CriterionValueUser::class);
+    public static function countActiveUsersInWorkspace($workspaceId)
+    {
 
+        return self::join('workspaces', 'users.subworkspace_id', '=', 'workspaces.id')
+            ->where('workspaces.parent_id', $workspaceId)
+            ->where('users.active', 1)
+            ->count();
     }
 }

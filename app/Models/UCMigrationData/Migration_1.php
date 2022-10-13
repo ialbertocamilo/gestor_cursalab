@@ -84,6 +84,8 @@ class Migration_1 extends Model
         ];
         $uc_workspace = Workspace::create($uc);
 
+//        $users = User::select('document', 'email')->get();
+
         $temp['users'] = $db->getTable('usuarios')
             ->select(
                 'id',
@@ -98,7 +100,11 @@ class Migration_1 extends Model
                 'updated_at'
             )
             ->limit(100)
+//            ->whereNotIn('dni', $users->pluck('document'))
+//            ->whereNotIn('email', $users->pluck('email'))
             ->get();
+
+//        return $temp['users'];
 
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');
 
@@ -120,6 +126,13 @@ class Migration_1 extends Model
 
                 'type_id' => $type_client->id,
                 'config_id' => $user->config_id,
+
+
+                // TODO: Add fields ?
+//                'person_number' => ???,
+//                'phone_number' => ???,
+                // TODO: Add fields ?
+
 
                 'password' => bcrypt($user->dni),
 

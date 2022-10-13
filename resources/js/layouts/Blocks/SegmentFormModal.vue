@@ -224,9 +224,9 @@ export default {
                 vue.$http
                     .post(url, formData)
                     .then(({data}) => {
+                        vue.$emit("onConfirm");
                         vue.closeModal();
                         vue.showAlert(data.data.msg);
-                        vue.$emit("onConfirm");
                     })
                     .catch(error => {
                         if (error && error.errors) vue.errors = error.errors;
