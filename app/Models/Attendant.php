@@ -356,10 +356,19 @@ class Attendant extends BaseModel
         $excludeHostId = $filters['exclude_host_id'] ?? null;
         $term = $filters['q'] ?? null;
         $currDocuments = $filters['usuarios_dni'] ?? null;
+        $currIndexes = $filters['usuarios_id'] ?? null;
 
         # === columnas a visualizar ===
-        $visibleColumns = ['id', 'name as nombre', 'email', 'subworkspace_id', 'document'];
-        $query = User::select($visibleColumns)->where('active', ACTIVE);
+        $visibleColumns = ['id', 'name', 'email', 'subworkspace_id as config_id', 'document'];
+
+        $query = Usuario::with(['config:id,name,logo',
+            'invitations.meeting' => function ($q) use ($filters) {
+                $q->betweenScheduleDates($filters);
+                $q->ofReservedStatus();
+                $q->excludeMeeting($filters['meeting_id'] ?? null);
+            }]);
+
+        $query->select($visibleColumns)->where('active', ACTIVE);
 
         # === usuarios por todos o un workspace ===
         if ($currSubworkspaces) $query->where('subworkspace_id', $currSubworkspaces);
@@ -378,6 +387,8 @@ class Attendant extends BaseModel
             $q->where(function ($q_where) use ($term) {
                 $q_where->where('users.email', 'like', "{$term}%");
                 $q_where->orWhere('users.name', 'like', "{$term}%");
+                $q_where->orWhere('users.lastname', 'like', "{$term}%");
+                $q_where->orWhere('users.surname', 'like', "{$term}%");
                 $q_where->orWhere('users.document', 'like', "{$term}%");
             });
         });
@@ -387,8 +398,14 @@ class Attendant extends BaseModel
             $q->whereIn('users.document', $currDocuments);
         });
 
+        # === filtro de usuarios por ids - excel ===
+        $query->when($currIndexes, function ($q) use ($currIndexes){
+            $q->whereIn('users.id', $currIndexes);
+        });
+
         // $query->simplePaginate(5);
-        return $query->get();
+        return $query->orderBy('subworkspace_id')
+                     ->orderBy('name')->get();
     }
     # test functions
 
