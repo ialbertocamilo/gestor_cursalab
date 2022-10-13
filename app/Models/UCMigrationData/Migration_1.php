@@ -84,7 +84,7 @@ class Migration_1 extends Model
         ];
         $uc_workspace = Workspace::create($uc);
 
-        $users = User::select('document', 'email')->get();
+//        $users = User::select('document', 'email')->get();
 
         $temp['users'] = $db->getTable('usuarios')
             ->select(
