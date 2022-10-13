@@ -147,6 +147,7 @@ class UserMassive implements ToCollection{
                             'index'=>$dc['index'],
                             'message'=>'The field '.$dc['criterion_code']. ' is invalid date.'
                         ];
+                        continue;
                     }
                 }
                 $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
@@ -160,6 +161,7 @@ class UserMassive implements ToCollection{
                         'index'=>$dc['index'],
                         'message'=>'The field '.$dc['criterion_code']. ' not exist.'
                     ];
+                    continue;
                 }
                 if(!$criterion_value){
                     // $has_error = true;
