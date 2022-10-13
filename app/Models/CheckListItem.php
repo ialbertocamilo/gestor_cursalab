@@ -6,19 +6,18 @@ namespace App\Models;
 class CheckListItem extends BaseModel
 {
     const TIPO_ITEM = [
-        'entrenador_usuario', // Actividad que evalúa el entrenador a un usuario
-        'usuario_entrenador' // Actividad de feedback por parte del usuario al entrenador en cada checklist
+        'trainer_user', // Actividad que evalúa el entrenador a un usuario
+        'user_trainer' // Actividad de feedback por parte del usuario al entrenador en cada checklist
     ];
 
     protected $table = 'checklist_items';
 
     protected $fillable = [
         'checklist_id',
-        'actividad',
-        'tipo',
-        'estado',
-        'is_default',
-        'posicion'
+        'activity',
+        'type_id',
+        'active',
+        'position'
     ];
 
     protected $hidden = [
@@ -35,7 +34,12 @@ class CheckListItem extends BaseModel
         $response['error'] = false;
         $actividad  = CheckListItem::updateOrCreate(
             ['id' => $data['id']],
-            ['actividad' => $data['actividad'], 'estado' => $data['estado'], 'tipo' => $data['tipo'], 'checklist_id' => $data['checklist_id']]
+            [
+                'activity' => $data['activity'],
+                'active' => $data['active'],
+                'type_id' => $data['type_id'],
+                'checklist_id' => $data['checklist_id']
+            ]
         );
         $response['actividad'] = $actividad;
         $response['msg']       = 'Actividad guardada';
@@ -50,7 +54,10 @@ class CheckListItem extends BaseModel
         return $q->where('estado', $estado);
     }
 
+    public function scopeActive($q, $active)
+    {
+        return $q->where('active', $active);
+    }
+
     /*=================================================================================================================================== */
-
-
 }

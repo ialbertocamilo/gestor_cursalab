@@ -89,6 +89,11 @@ class Course extends BaseModel
         return $q->where('active', $active);
     }
 
+    public function scopeFiltroName($q, $filtro)
+    {
+        return $q->where('name', 'like', "%$filtro%");
+    }
+
     public function summaryByUser($user_id, array $withRelations = null)
     {
         return $this->summaries()
@@ -147,7 +152,7 @@ class Course extends BaseModel
                     ['requirement_type' => Course::class, 'requirement_id' => $data['requisito_id']]
                 );
 
-            else:
+            else :
 
                 $course->requirements()->delete();
 
@@ -166,7 +171,6 @@ class Course extends BaseModel
             // $course->save();
 
             DB::commit();
-
         } catch (\Exception $e) {
             info($e);
             DB::rollBack();
@@ -295,7 +299,7 @@ class Course extends BaseModel
             'list' => $validations->toArray(),
             'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
             'show_confirm' => $show_confirm,
-//            'show_confirm' => true,
+            //            'show_confirm' => true,
             'type' => 'validations-before-update'
         ];
     }
@@ -450,8 +454,8 @@ class Course extends BaseModel
                 ->where('course_id', $requirement_course->id)
                 ->whereRelation('status', 'code', '=', 'aprobado')
                 ->first();
-//            info("requirement_course");
-//            info($summary_requirement_course);
+            //            info("requirement_course");
+            //            info($summary_requirement_course);
             if (!$summary_requirement_course) {
                 $available_course = false;
                 $status = 'bloqueado';
@@ -468,7 +472,7 @@ class Course extends BaseModel
                     ->where('course_id', $course->id)
                     ->where('user_id', $user->id)->count();
 
-//                info($poll_questions_answers);
+                //                info($poll_questions_answers);
                 if ($poll_questions_answers) $solved_poll = true;
             }
 
@@ -538,7 +542,8 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
-    public function usersSegmented($course_segments,$type='get_records'){
+    public function usersSegmented($course_segments, $type = 'get_records')
+    {
         $users = DB::table('criterion_value_user');
         $users_id_course = [];
         foreach ($course_segments as $segment) {
@@ -546,32 +551,32 @@ class Course extends BaseModel
 
             foreach ($criteria as $criterion_values) {
                 $criterion_values = $criterion_values->pluck('criterion_value_id');
-                $users->orWhere(function($q) use($criterion_values){
-                    $q->whereIn('criterion_value_id',$criterion_values);
+                $users->orWhere(function ($q) use ($criterion_values) {
+                    $q->whereIn('criterion_value_id', $criterion_values);
                 });
             }
-            $users_id = $users->groupBy('user_id')->select('user_id',DB::raw('count(user_id) as count_group_user_id'))
-            ->having('count_group_user_id','=',count($criteria))->pluck('user_id')->toArray();
-            $users_id_course = array_merge($users_id_course,$users_id);
+            $users_id = $users->groupBy('user_id')->select('user_id', DB::raw('count(user_id) as count_group_user_id'))
+                ->having('count_group_user_id', '=', count($criteria))->pluck('user_id')->toArray();
+            $users_id_course = array_merge($users_id_course, $users_id);
         }
-        if($type=='users_id'){
+        if ($type == 'users_id') {
             return $users_id_course;
         }
-        if($type=='users_full') {
-            return User::where('active',1)
-                       ->whereIn('id', $users_id_course)
-                       ->get();
-                       // ->simplePaginate(5);
+        if ($type == 'users_full') {
+            return User::where('active', 1)
+                ->whereIn('id', $users_id_course)
+                ->get();
+            // ->simplePaginate(5);
         }
 
-        $users_have_course = User::where('active',1)->whereIn('id',$users_id_course)->select('id');
-        return ($type=='get_records') ? $users_have_course->get() : $users_have_course->count();
+        $users_have_course = User::where('active', 1)->whereIn('id', $users_id_course)->select('id');
+        return ($type == 'get_records') ? $users_have_course->get() : $users_have_course->count();
     }
     public function getUsersBySegmentation()
     {
         $this->load('segments.values');
 
-        if ( !$this->hasBeenSegmented() ) return [];
+        if (!$this->hasBeenSegmented()) return [];
 
         $users = collect();
 
@@ -579,24 +584,23 @@ class Course extends BaseModel
 
             $result = User::whereHas('criterion_values', function ($q) use ($segment) {
 
-                        $grouped = $segments->values->groupBy('criterion_id');
+                $grouped = $segments->values->groupBy('criterion_id');
 
-                        foreach ($grouped as $key => $values) {
+                foreach ($grouped as $key => $values) {
 
-                            $ids = $values->pluck('criterion_value_id');
+                    $ids = $values->pluck('criterion_value_id');
 
-                            $q->whereIn('id', $ids);
-                        }
-                    })
-                    ->when($users, function($q) use ($users) {
-                        $q->whereNotIn('id', $users->pluck('id'));
-                    })
-                    ->get();
+                    $q->whereIn('id', $ids);
+                }
+            })
+                ->when($users, function ($q) use ($users) {
+                    $q->whereNotIn('id', $users->pluck('id'));
+                })
+                ->get();
 
             $users = $users->merge($result);
         }
 
         return $users;
     }
-
 }
