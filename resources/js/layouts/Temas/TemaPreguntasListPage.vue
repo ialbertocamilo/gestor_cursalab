@@ -40,7 +40,7 @@
         <!--        FILTROS-->
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
-                
+
                 <v-row>
                     <div class="col-md-8">
                         <div class="alert alert-info -mx-2 -mt-2" style="background-color: #5458ea; color: white;" role="alert">
@@ -108,7 +108,7 @@
                     </v-col>
 
                 </v-row>
-               
+
             </v-card-text>
 
             <DefaultTable
@@ -131,7 +131,7 @@
                 width="50vw"
                 :ref="modalTemaPreguntasImport.ref"
                 :options="modalTemaPreguntasImport"
-                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters)"
+                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters); reloadPage()"
                 @onCancel="closeFormModal(modalTemaPreguntasImport);refreshDefaultTable(dataTable, filters) "
             />
             <DialogConfirm
@@ -283,6 +283,11 @@ export default {
         // vue.getSelects();
     },
     methods: {
+        reloadPage(){
+            setTimeout( () => {
+                    location.reload();
+            }, 1000)
+        },
         updateData(data){
             console.log('updateData')
             console.log(data)
