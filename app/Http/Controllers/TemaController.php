@@ -296,6 +296,9 @@ class TemaController extends Controller
 
     public function deletePregunta(School $school, Course $course, Topic $topic, Question $pregunta)
     {
+        $question_type_code = $topic->evaluation_type->code === 'qualified'
+            ? 'select-options'
+            : 'written-answer';
         $pregunta->delete();
 
         //        $tema_evaluable = Posteo::where('curso_id', $curso->id)->where('evaluable', 'si')->first();
@@ -305,7 +308,8 @@ class TemaController extends Controller
         // Si se elimina la última pregunta del tema, según su tipo de evaluación ($tipo_pregunta)
         // se inactivará el tema
         // TODO: agregar modal de validación en listado de preguntas
-        $has_active_questions = $topic->questions->where('type_id', $topic->type_evaluation_id)->where('active', ACTIVE)->count() === 0;
+        $has_active_questions = $topic->questions()->whereRelation('type', 'code', $question_type_code)
+                ->where('active', '1')->count() > 0;
 
         if (!$has_active_questions) :
             $topic->active = 0;
