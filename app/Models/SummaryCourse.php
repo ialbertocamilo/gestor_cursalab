@@ -257,37 +257,75 @@ class SummaryCourse extends Summary
     }
 
     /**
-     * Calculate totals from summary coourse statuses
+     * Calculate totals from summary coourse statuses,
+     * including only users from supervisor
+     *
+     * @param $supervisorId
      * @param $workspaceId
      * @return array
      */
-    public static function calculateWorkspaceCoursesTotals($workspaceId): array
+    public static function calculateSupervisorCoursesTotals($supervisorId, $workspaceId): array
     {
+        $criterionValuesIds = Segment::loadSupervisorSegmentCriterionValuesIds($supervisorId);
+
+        if (count($criterionValuesIds) === 0) return [];
+
+        // Courses statuses from database
+
         $aprobado = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
         $desarrollo = Taxonomy::getFirstData('course', 'user-status', 'desarrollo');
         $desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
         $encuestaPend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
 
-        return DB::select(DB::raw('
+        // Load users ids which matches criterion values
+        $_criterionValuesIds = implode(',', $criterionValuesIds);
+        $usersIds = DB::select(DB::raw("
+            select
+                u.id
+            from users u
+                inner join criterion_value_user cvu on u.id = cvu.user_id
+                inner join workspaces w on u.subworkspace_id = w.id
+            where
+                w.parent_id = :workspaceId and
+                cvu.criterion_value_id in ($_criterionValuesIds)
+            group by u.id
+            having count(cvu.criterion_value_id) = :criterionCount
+        "), [
+            'workspaceId' => $workspaceId,
+            'criterionCount' => count($criterionValuesIds)
+        ]);
+        $usersIds = collect($usersIds)->pluck('id')->toArray();
+
+        // Calculate courses totals
+
+        $courseTotals = [];
+        if (count($usersIds)) {
+            $_usersIds = implode(',', $usersIds);
+            $courseTotals = DB::select(DB::raw("
             select
                 sum(if(sc.status_id = :aprobadoId, 1, 0)) aprobados,
                 sum(if(sc.status_id = :desarrolloId, 1, 0)) desarrollados,
                 sum(if(sc.status_id = :desaprobadoId, 1, 0)) desaprobados,
                 sum(if(sc.status_id = :encuestaPendId, 1, 0)) encuestaPend
+
             from
                 users u
                     inner join summary_courses sc on sc.user_id = u.id
-                    inner join workspaces w on w.id = u.subworkspace_id
             where
                 sc.deleted_at is null and
-                w.parent_id = :workspaceId and
-                u.active = 1
-        '), [
-            'workspaceId' => $workspaceId,
-            'aprobadoId' => $aprobado->id,
-            'desarrolloId' => $desarrollo->id,
-            'desaprobadoId' => $desaprobado->id,
-            'encuestaPendId' => $encuestaPend->id
-        ]);
+                u.active = 1 and
+                u.id in ($_usersIds)
+        "), [
+                'aprobadoId' => $aprobado->id,
+                'desarrolloId' => $desarrollo->id,
+                'desaprobadoId' => $desaprobado->id,
+                'encuestaPendId' => $encuestaPend->id
+            ]);
+        }
+
+        return [
+            'courses' => $courseTotals,
+            'users' => count($usersIds)
+        ];
     }
 }

@@ -48,7 +48,9 @@ class RestReportesSupervisores extends Controller
 
         // Calculates totals
 
-        $coursesTotals = SummaryCourse::calculateWorkspaceCoursesTotals($workspaceId);
+        $totals = SummaryCourse::calculateSupervisorCoursesTotals(
+            $user->id, $workspaceId
+        );
 
         $response = [
             'supervisorId' => $supervisorWithSegment['user']->id,
@@ -60,11 +62,11 @@ class RestReportesSupervisores extends Controller
 
             'estados' => $courseStatuses,
 
-            'usuarios_activos' => User::countActiveUsersInWorkspace($workspaceId),
-            'aprobados' => (int)$coursesTotals[0]->aprobados,
-            'desaprobados' => (int)$coursesTotals[0]->desarrollados,
-            'desarrollo' => (int)$coursesTotals[0]->desaprobados,
-            'encuesta_pendiente' => (int)$coursesTotals[0]->encuestaPend
+            'usuarios_activos' => $totals['users'],
+            'aprobados' => $totals ? (int)$totals['courses'][0]->aprobados : 0,
+            'desaprobados' => $totals ? (int)$totals['courses'][0]->desarrollados : 0,
+            'desarrollo' => $totals ? (int)$totals['courses'][0]->desaprobados : 0,
+            'encuesta_pendiente' => $totals ? (int)$totals['courses'][0]->encuestaPend : 0
         ];
 
         return response()->json($response);

@@ -393,4 +393,34 @@ class Segment extends BaseModel
 
         return $hasAValidDateRange;
     }
+
+    /**
+     * Extract criterion value ids from segment
+     * values related to a supervisor
+     *
+     * @param int $supervisorId
+     * @return array|void
+     */
+    public static function loadSupervisorSegmentCriterionValuesIds(int $supervisorId)
+    {
+        // Load taxonomy for supervisors
+
+        $supervisorTaxonomy = Taxonomy::query()
+            ->where('group', 'segment')
+            ->where('code', 'user-supervise')
+            ->where('type', 'code')
+            ->where('active', 1)
+            ->first();
+
+        // Load criteria values ids
+
+        return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
+            ->where('segments.model_id', $supervisorId)
+            ->where('segments.code_id', $supervisorTaxonomy->id)
+            ->where('segments.active', 1)
+            ->select('segments_values.*')
+            ->get()
+            ->pluck('criterion_value_id')
+            ->toArray();
+    }
 }
