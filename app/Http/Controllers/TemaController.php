@@ -290,6 +290,7 @@ class TemaController extends Controller
         $data['isQualified'] = $evaluationType->id === $topic->type_evaluation_id;
 
         $result = Question::import($data);
+        $data = Question::verifyEvaluation($topic);
 
         return $this->success($result);
     }
