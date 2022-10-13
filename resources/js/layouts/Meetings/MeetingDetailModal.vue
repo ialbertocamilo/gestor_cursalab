@@ -95,7 +95,8 @@
 
                                 <v-row justify="center" align="center">
                                     <v-col cols="10" class="text-center">
-                                        <a v-if="resource.status.code == 'finished' && resource.download_ready"
+                                        <!-- <a v-if="resource.status.code == 'finished' && resource.download_ready" -->
+                                        <a
                                            href="javascript:;"
                                            download @click="downloadReport" class="no-hover-link mr-5"
                                            title="Descargar reporte">

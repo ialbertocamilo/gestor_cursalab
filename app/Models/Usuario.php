@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use App\Models\CriterionValueWorkspace;
+use App\Models\Course;
+use App\Models\Segment;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\UserResetPasswordNotification;
@@ -46,9 +48,10 @@ class Usuario extends Model
     /**
      * obtener area asosiado a este usuaio
      */
+
     public function config()
     {
-        return $this->belongsTo(Abconfig::class, 'config_id');
+        return $this->belongsTo(Workspace::class, 'subworkspace_id');
     }
 
     public function modulo()
@@ -290,52 +293,64 @@ class Usuario extends Model
      * @param bool $idsOnly When true load users ids only
      * @return mixed
      */
-    protected function getCurrentHosts($idsOnly = false): mixed
+
+    /*protected function getCurrentHosts($idsOnly = false): mixed
     {
         // todo: criterion values should come from workspace configuration
         $criterionValues = [6, 17]; // ids from "Monitor de Ventas"
-
         // Load users who met specific criterion values (in this case careers)
-
-        // $users = User::join('criterion_value_user as crit_val_us', 'users.id', '=', 'crit_val_us.user_id')
-        //              ->whereIn('crit_val_us.criterion_value_id', $criterionValues);
-
-        $users = User::whereHas('subworkspace', function($q){
-            $q->where('active', ACTIVE);
-        })->toSql();
-        
-
+        $users = User::join('criterion_value_user as crit_val_us', 'users.id', '=', 'crit_val_us.user_id')
+                     ->whereIn('crit_val_us.criterion_value_id', $criterionValues);
+        // $users = User::whereHas('subworkspace', function($q){
+        //     $q->where('active', ACTIVE);
+        // })->toSql();
         if ($idsOnly) {
             return $users->pluck('id')->toArray();
         } else {
             return $users->get();
         }
-    }
+    }*/
 
     protected function getCurrentHostsIds() {
 
         return $this->getCurrentHosts(true);
     }
 
-
     # test functions
-    protected function _test_getCurrentHosts()
+    protected function getCurrentHosts($indexOnly = false)
     {
-        $criterionValues = [6, 17]; //query
+        $workSpaceIndex = get_current_workspace_indexes('id');
 
-        //current criterion values
-        [ 'id' => $workSpaceIndex,
-          'sub_ids' => $subWorkSpaceIndexes ] = $this->_test_get_current_workspace_indexes();
+        # ==== criterios según segmentación (segmentacion directa). ====
+        $currSegment = Workspace::find($workSpaceIndex)->segments;
 
-        # ==== Los match con contriterions
-        $currentCriterion = Workspace::find($workSpaceIndex)->segments;
-        // $currentCriterion = Segment::find($segmentIndex)->values;
+        # ==== usuarios bajo criterio ====
+        $course = new Course;
+        $currUsers = $course->usersSegmented($currSegment, 'users_full');
+
+        return $indexOnly ? $currUsers->pluck('id')->toArray() : $currUsers;
+    }
+    # test functions
+}
 
 
-        // $currentCriterion = Workspace::find($workSpaceIndex)->criterion_workspace;
+/*
+    $currCriterionValues = Segment::find($currSegment->id)->values->pluck('criterion_value_id');
 
-        # ==== Los [criterionValues] debe cumplir con [ambos]
-/*      $currentUsers = User::whereIn('subworkspace_id', $subWorkSpaceIndexes)
+    # ==== usuarios con subworkspace y criterios ====
+    $currUsers = User::whereIn('subworkspace_id', $subWorkSpaceIndexes)
+                     ->where('active', ACTIVE)
+                     ->whereHas('criterion_user', function ($query) use ($currCriterionValues) {
+                        $query->whereIn('criterion_value_id', $currCriterionValues);
+                     });
+
+    # ==== usuario objecto o solo ids ====
+    // $currUsers = $indexOnly ? $currUsers->get()->pluck('id') :
+    //                           $currUsers->simplePaginate(5);
+
+    // $currentCriterion = Workspace::find($workSpaceIndex)->criterion_workspace;
+    # ==== Los [criterionValues] debe cumplir con [ambos]
+    $currentUsers = User::whereIn('subworkspace_id', $subWorkSpaceIndexes)
                             ->whereHas('criterion_user', function ($query) {
                                 // $query->whereIn('criterion_value_id', [22, 27]);
                                 $query->where('criterion_value_user.criterion_value_id', 22)
@@ -344,19 +359,13 @@ class Usuario extends Model
                                       ->where('suple.criterion_value_id', 27);
                             })->get();
 
-        $currentUsers = User::whereIn('subworkspace_id', $subWorkSpaceIndexes)
+    $currentUsers = User::whereIn('subworkspace_id', $subWorkSpaceIndexes)
                             ->whereRelation('criterion_user',
                                             'criterion_value_id', '=', 27)
                             ->whereRelation('criterion_user',
                                             'criterion_value_id', '=', 22)->get();
-*/
 
 
-        # ==== Los [criterionValues] debe cumplir [solo con uno] ====
-        $currentUsers = User::whereIn('subworkspace_id', $subWorkSpaceIndexes)
-                             ->whereHas('criterion_user', function ($query) {
-                                $query->whereIn('criterion_value_id', [22, 27]);
-                            })->get();
 
         // $currentUsers = User::whereIn('subworkspace_id', $subWorkSpaceIndexes)
         //                     ->whereRelation('criterion_user',
@@ -379,26 +388,7 @@ class Usuario extends Model
 
         // $response  = Workspace::whereRelation('criterion_workspace', 'criterion_value_id', 1)->get();
 
-
-        // return [ 'currentCriterion' => $currentCriterion,
-        return [ 'currentCriterion' => $currentCriterion ];
-
-        /*  $workspace = Workspace::find($workSpaceIndex);
-        $workspace->criterion_workspace;
-        return [ 'criterion_workspace' => $workspace ]; */
-    }
-
-    public function _test_get_current_workspace_indexes(string $key = NULL)
-    {
-        $currWorkspace = get_current_workspace();
-
-        $currWorkspaceIndex = $currWorkspace->id;
-        $currSubworkspacesIndexes = $currWorkspace->subworkspaces->pluck('id');
-
-        $dynamicKeys = ['id' => $currWorkspaceIndex,
-                        'sub_ids' => $currSubworkspacesIndexes ];
-        $stateKey = $dynamicKeys[$key] ?? true;
-
-        return is_bool($stateKey) ? $dynamicKeys : $stateKey;
-    }
-}
+    $currUsers->where('name','like',"{$name}%")
+                                                  ->orWhere('document','like',"{$document}%")
+                                                  ->simplePaginate(5)
+*/

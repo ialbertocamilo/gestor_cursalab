@@ -95,7 +95,7 @@ class Attendant extends BaseModel
      * @param $filters
      * @return array|Builder[]|Collection|HigherOrderWhenProxy[]
      */
-    protected function searchAttendants($filters)
+/*    protected function searchAttendants($filters)
     {
         // Log data
 
@@ -130,10 +130,6 @@ class Attendant extends BaseModel
 
         // Filter by group ids
 
-//        $query->when($filters['grupos_id'] ?? null, function ($q) use ($filters) {
-//            $q->whereIn('cvu.criterion_value_id', $filters['grupos_id']);
-//        });
-
         // Exclude host user id
 
         $query->when($filters['exclude_host_id'] ?? null, function ($q) use ($filters) {
@@ -156,7 +152,7 @@ class Attendant extends BaseModel
         // Load attendats
 
         return $query->get();
-    }
+    }*/
 
     protected function filterEmptyMeetingInvitations(&$attendants)
     {
@@ -277,7 +273,6 @@ class Attendant extends BaseModel
         $meeting, $datesHaveChanged
     )
     {
-
         switch ($meeting->account->service->code) {
 
             case 'zoom':
@@ -288,7 +283,6 @@ class Attendant extends BaseModel
                 $q_attendants->whereNull('link');
 //                }
                 $attendants = $q_attendants->get();
-
 //                info("USUARIOS A ACTUALIZAR PERSONAL LINK");
 //                info($attendants->pluck('id'));
 //                info($attendants->pluck('usuario.dni'));
@@ -296,6 +290,7 @@ class Attendant extends BaseModel
                 $result = ZoomService::prepareBatchAttendantsData(
                     $meeting, $attendants
                 );
+                // dd($result);
 
                 foreach ($result as $attendant_id => $attendant_data) {
                     Attendant::where('id', $attendant_id)
@@ -351,4 +346,50 @@ class Attendant extends BaseModel
 
         return MeetingShowAttendantsMeetingResource::collection($attendants);
     }
+
+
+    # test functions
+    protected function searchAttendants($filters)
+    {
+        # === datos para filtrar ===
+        $currSubworkspaces = $filters['config_id'] ?? null;
+        $excludeHostId = $filters['exclude_host_id'] ?? null;
+        $term = $filters['q'] ?? null;
+        $currDocuments = $filters['usuarios_dni'] ?? null;
+
+        # === columnas a visualizar ===
+        $visibleColumns = ['id', 'name as nombre', 'email', 'subworkspace_id', 'document'];
+        $query = User::select($visibleColumns)->where('active', ACTIVE);
+
+        # === usuarios por todos o un workspace ===
+        if ($currSubworkspaces) $query->where('subworkspace_id', $currSubworkspaces);
+        else {
+            $currSubworkspacesIndexes = get_current_workspace_indexes('ids');
+            $query->whereIn('subworkspace_id', $currSubworkspacesIndexes);
+        }
+
+        # === excluir al anfitrion ===
+        $query->when($excludeHostId, function ($q) use ($excludeHostId) {
+            $q->where('users.id', '<>', $excludeHostId);
+        });
+
+        # === por parametro de busqueda (email, name, document) ===
+        $query->when($term, function ($q) use ($term){
+            $q->where(function ($q_where) use ($term) {
+                $q_where->where('users.email', 'like', "{$term}%");
+                $q_where->orWhere('users.name', 'like', "{$term}%");
+                $q_where->orWhere('users.document', 'like', "{$term}%");
+            });
+        });
+
+        # === filtro de usuarios por nrodocumeto - excel ===
+        $query->when($currDocuments, function ($q) use ($currDocuments){
+            $q->whereIn('users.document', $currDocuments);
+        });
+
+        // $query->simplePaginate(5);
+        return $query->get();
+    }
+    # test functions
+
 }

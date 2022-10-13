@@ -370,7 +370,18 @@ class Workspace extends BaseModel
     }
 
     #test functions
-    public function criterion_workspace() {
+    public static function loadSubWorkspaces($attributes)
+    {
+        $workspaceId = get_current_workspace_indexes('id');
+
+        return Workspace::select($attributes)
+                        ->where('active', ACTIVE)
+                        ->where('parent_id', $workspaceId)
+                        ->get();
+    }
+
+    public function criterion_workspace()
+    {
         return $this->hasMany(CriterionValueWorkspace::class);
     }
 }

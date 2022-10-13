@@ -21,7 +21,7 @@ class MeetingResource extends JsonResource
             'custom_meeting_name' => $this->name,
 //            'type' => "[{$this->account->service->name}] {$this->type->name} ". // DEV
             'type' => $this->type->name,
-            'host' => $this->host->nombre ?? 'No definido',
+            'host' => $this->host->name ?? 'No definido',
             // 'duration' => $this->duration . ' min.',
             'status' => [
                 'text' => $this->status->name,

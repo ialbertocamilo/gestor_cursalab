@@ -13,41 +13,28 @@
             <DefaultErrors :errors="errors"/>
 
             <v-row>
-                <v-col cols="6">
+                <v-col cols="5">
                     <DefaultSelect
-                        label="Módulos"
+                        label="Módulo"
                         placeholder="Selecione un módulo"
                         :items="selects.modules"
+                        clearable
                         v-model="config_id"
-                        @onChange="getGrupos"
                     />
+                    <!-- @onChange="getGrupos" -->
                 </v-col>
                 <v-col cols="6">
-                    <DefaultAutocomplete
-                        label="Grupos"
-                        placeholder="Selecionar grupos"
-                        multiple
-                        :items="selects.groups"
-                        v-model="groups"
-                        @onChange="searchAttendants"
-                    />
-                </v-col>
-
-            </v-row>
-            <v-row>
-                <v-col cols="6">
-
-                    <DefaultInput
+                  <DefaultInput
                         v-model="q"
                         label="Buscar asistentes"
                         placeholder="Buscar por nombre, DNI o correo electrónico"
                         append-icon="mdi-magnify"
                         @onEnter="searchAttendants"
                         @clickAppendIcon="searchAttendants"
-                    />
+                  />
                 </v-col>
-                <v-col cols="6" class="d-flex">
-                    <v-file-input
+                <v-col cols="1" class="d-flex align-items-center">
+                  <v-file-input
                         class="input-file-meeting-search-attendants"
                         v-model="file"
                         background-color="primary"
@@ -59,9 +46,19 @@
                         prepend-icon="mdi-file-upload"
                         @change="uploadExcel"
                         title="Subir excel de usuarios"
-                    />
-
+                  />
                 </v-col>
+
+            <!-- <v-col cols="6">
+                    <DefaultAutocomplete
+                        label="Grupos"
+                        placeholder="Selecionar grupos"
+                        multiple
+                        :items="selects.groups"
+                        v-model="groups"
+                        @onChange="searchAttendants"
+                    />
+                </v-col> -->
             </v-row>
             <DefaultDivider class="mx-3"/>
             <v-row>
@@ -273,8 +270,8 @@ export default {
 
                     vue.config_id = vue.host_config_id
 
-                    if (vue.config_id)
-                        vue.getGrupos()
+                    // if (vue.config_id)
+                        // vue.getGrupos()
                 })
         },
         getGrupos() {
@@ -351,8 +348,11 @@ export default {
                 const url = `${vue.options.base_endpoint}/upload-attendants`
                 vue.$http.post(url, formData)
                     .then(({data}) => {
+                        console.log('upload_excel', data);
+
+                        let _data = data.data
                         vue.file = null
-                        vue.results = vue.parseResponseAttendants(data.data.attendants, true)
+                        vue.results = vue.parseResponseAttendants(_data.attendants, true)
 
                         vue.hideLoader()
                         vue.disable_add_btn = false
