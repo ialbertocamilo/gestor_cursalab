@@ -363,7 +363,7 @@ class Segment extends BaseModel
 
         return match ($criterion_code) {
             'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
-//            'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion),
+            'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion),
             default => false,
         };
     }
@@ -381,10 +381,10 @@ class Segment extends BaseModel
 
             if (!$date_range['starts_at'] && !$date_range['finishes_at']) continue;
 
-            $starts_at = carbonFromFormat($date_range['starts_at'])->format("Y-m-d");
-            $finishes_at = carbonFromFormat($date_range['finishes_at'])->format("Y-m-d");
+            $starts_at = carbonFromFormat($date_range['starts_at']);
+            $finishes_at = carbonFromFormat($date_range['finishes_at']);
 
-            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date);
+            $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date, "Y-m-d");
 
             $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
 
