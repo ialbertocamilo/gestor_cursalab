@@ -6,7 +6,7 @@ use App\Models\CheckList;
 use App\Models\CheckListItem;
 use App\Models\Usuario;
 use App\Models\EntrenadorUsuario;
-
+use App\Models\Taxonomy;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
@@ -36,27 +36,35 @@ class ChecklistImport implements ToCollection
                 if ($index >= 3) $tempActividades->push($actividad);
             }
             // Crear CHECKLIST
-            $checklist = CheckList::create(['titulo' => $titulo, 'descripcion' => $descripcion, 'estado' => 1]);
+            $checklist = CheckList::create(['title' => $titulo, 'description' => $descripcion, 'active' => 1]);
             foreach ($tempActividades->all() as $index => $actividad) {
-                if (!is_null($actividad) && !empty($actividad)){
+                if (!is_null($actividad) && !empty($actividad)) {
+                    $type = Taxonomy::where('group', 'checklist')
+                        ->where('type', 'type')
+                        ->where('code', 'trainer_user')
+                        ->first();
                     CheckListItem::create([
                         'checklist_id' => $checklist->id,
-                        'actividad' => $actividad,
-                        'tipo' => 'entrenador_usuario',
-                        'estado' => 1
+                        'activity' => $actividad,
+                        'type_id' => !is_null($type) ? $type->id : null,
+                        'active' => 1
                     ]);
                 }
             }
-            if ($actividad_feedback){
+            if ($actividad_feedback) {
+                $type = Taxonomy::where('group', 'checklist')
+                    ->where('type', 'type')
+                    ->where('code', 'user_trainer')
+                    ->first();
                 CheckListItem::create([
                     'checklist_id' => $checklist->id,
-                    'actividad' => '¿El entrenador te acompañó, dio soporte y feedback durante el proceso de inducción? Responde en base a los procesos revisados.',
-                    'tipo' => 'usuario_entrenador',
-                    'estado' => 1
+                    'activity' => '¿El entrenador te acompañó, dio soporte y feedback durante el proceso de inducción? Responde en base a los procesos revisados.',
+                    'type_id' => !is_null($type) ? $type->id : null,
+                    'active' => 1
                 ]);
             }
         }
-//
+        //
         $this->msg = 'Excel procesado.';
         $this->data_no_procesada = $data_no_procesada;
         $this->data_ok = $data_ok;

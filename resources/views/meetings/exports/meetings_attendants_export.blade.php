@@ -35,11 +35,11 @@
     @foreach($attendants as $key => $attendant)
         <tr>
             <td align="center">{{ $attendant->meeting->name }}</td>
-            <td align="center">{{ $attendant->usuario->config->etapa }}</td>
+            <td align="center">{{ $attendant->usuario->config->name }}</td>
             <td align="center">{{ $attendant->type->name }}</td>
-            <td align="center">{{ $attendant->usuario->dni }}</td>
+            <td align="center">{{ $attendant->usuario->document }}</td>
 
-            <td>{{ $attendant->usuario->nombre }}</td>
+            <td>{{ $attendant->usuario->fullname   }}</td>
             {{--                <td>{{ $attendant->usuario->apellido_paterno }}</td>--}}
             {{--                <td>{{ $attendant->usuario->apellido_materno }}</td>--}}
 

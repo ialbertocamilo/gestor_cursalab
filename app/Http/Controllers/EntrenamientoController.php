@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AsignarEntrenadorImport;
 use App\Imports\ChecklistImport;
-
+use App\Models\Course;
+use App\Models\Taxonomy;
+use App\Models\User;
 use Illuminate\Support\Str;
 use function foo\func;
 
@@ -27,31 +29,32 @@ class EntrenamientoController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.verify', ['except' => [
-            // Funciones Test
-            'dataPruebaEntrenadores',
-            'dataPruebaChecklist',
-            // Funciones Servicios para el gestor
-            // Entrenadores
-            'search',
-            'searchChecklist',
+        $this->middleware('jwt.verify', [
+            'except' => [
+                // Funciones Test
+                'dataPruebaEntrenadores',
+                'dataPruebaChecklist',
+                // Funciones Servicios para el gestor
+                // Entrenadores
+                'search',
+                'searchChecklist',
 
-            'asignar',
-            'asignarMasivo',
-            'listarEntrenadores',
-            'cambiarEstadoEntrenadorAlumno',
-            'buscarAlumno',
-            'eliminarRelacionEntrenadorAlumno',
-            // Alumnos
-            'buscarAlumnoGestor',
-            //Checklist
-            'listarChecklist',
-            'guardarChecklist',
-            'guardarActividadByID',
-            'eliminarActividadByID',
-            'importChecklist',
-            'buscarCurso'
-        ]
+                'asignar',
+                'asignarMasivo',
+                'listarEntrenadores',
+                'cambiarEstadoEntrenadorAlumno',
+                'buscarAlumno',
+                'eliminarRelacionEntrenadorAlumno',
+                // Alumnos
+                'buscarAlumnoGestor',
+                //Checklist
+                'listarChecklist',
+                'guardarChecklist',
+                'guardarActividadByID',
+                'eliminarActividadByID',
+                'importChecklist',
+                'buscarCurso'
+            ]
         ]);
     }
 
@@ -92,7 +95,6 @@ class EntrenamientoController extends Controller
 
         $entrenadores = EntrenadorUsuario::all();
         return response()->json($entrenadores, 200);
-
     }
 
     public function dataPruebaChecklist(Request $request)
@@ -114,7 +116,7 @@ class EntrenamientoController extends Controller
             for ($j = 0; $j < $cant_checklist_items; $j++) {
                 $checklist_item = new CheckListItem();
                 $checklist_item->actividad = 'Actividad Checklist ' . ($j + 1);
-                $checklist_item->tipo = $i == 0 ? 'usuario_entrenador' : 'entrenador_usuario';
+                $checklist_item->tipo = $i == 0 ? 'user_trainer' : 'trainer_user';
                 $checklist_item->estado = rand(0, 1);
                 $checklist_item->checklist_id = $checklist->id;
                 $checklist_item->save();
@@ -123,7 +125,8 @@ class EntrenamientoController extends Controller
             $checklist->cursos()->sync($id_cursos_random->all());
         }
 
-        $checklist = CheckList::with(['checklist_actividades',
+        $checklist = CheckList::with([
+            'checklist_actividades',
             'cursos' => function ($q) {
                 $q->select('*');
             }
@@ -161,9 +164,9 @@ class EntrenamientoController extends Controller
         $data = $request->all();
         foreach ($data['alumnos'] as $key => $alumno) {
             $temp = [
-                'entrenador_id' => $data['entrenador_id'],
-                'usuario_id' => $alumno['id'],
-                'estado' => 1
+                'trainer_id' => $data['entrenador_id'],
+                'user_id' => $alumno['id'],
+                'active' => 1
             ];
             EntrenadorUsuario::asignar($temp);
         }
@@ -208,7 +211,7 @@ class EntrenamientoController extends Controller
                 $registro->estado = $estado;
                 $registro->save();
                 //TODO:
-//                if ()
+                //                if ()
 
                 return response()->json(['error' => false, 'msg' => 'Relación entrenador-alumno actualizada.'], 200);
             }
@@ -219,17 +222,19 @@ class EntrenamientoController extends Controller
 
     public function buscarAlumno(Request $request)
     {
+        $workspace = get_current_workspace();
         $entrenador_id = $request->entrenador_id;
         $config_id = $request->config_id;
         $filtro = $request->filtro;
-        $alumnos_existentes_ids = EntrenadorUsuario::where('entrenador_id', $entrenador_id)->pluck('usuario_id');
-        $alumnos = Usuario::where(function ($query) use ($filtro) {
-            $query->where('nombre', 'like', "%$filtro%");
-            $query->orWhere('dni', 'like', "%$filtro%");
+        $alumnos_existentes_ids = EntrenadorUsuario::where('trainer_id', $entrenador_id)->pluck('user_id');
+        $alumnos = User::where(function ($query) use ($filtro) {
+            $query->where('users.name', 'like', "%$filtro%");
+            $query->orWhere('users.document', 'like', "%$filtro%");
         })
-            ->where('config_id', $config_id)
-            ->whereNotIn('id', $alumnos_existentes_ids->all())
-            ->select('id', 'dni', 'nombre', DB::raw("CONCAT(dni, ' - ', nombre, ' - ', botica) as text"))
+            ->leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->where('w.parent_id', $workspace->id)
+            ->whereNotIn('users.id', $alumnos_existentes_ids->all())
+            ->select('users.id', 'users.document', 'users.name', DB::raw("CONCAT(users.document, ' - ', users.name, ' - ', w.name) as text"))
             ->get();
 
         return response()->json(['error' => false, 'alumnos' => $alumnos], 200);
@@ -265,21 +270,33 @@ class EntrenamientoController extends Controller
         $data = $request->all();
         $checklist = CheckList::updateOrCreate(
             ['id' => $data['id']],
-            ['titulo' => $data['titulo'], 'descripcion' => $data['descripcion'], 'estado' => $data['estado']]
+            [
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'active' => $data['active']
+            ]
         );
 
         foreach ($data['checklist_actividades'] as $key => $checklist_actividad) {
-           ($checklist_actividad['tipo'] == 'usuario_entrenador') && $checklist_actividad['is_default'] =null;
+            // ($checklist_actividad['tipo'] == 'user_trainer') && $checklist_actividad['is_default'] != null;
+            $type = Taxonomy::where('group', 'checklist')
+                ->where('type', 'type')
+                ->where('code', $checklist_actividad['type_name'])
+                ->first();
             CheckListItem::updateOrCreate(
                 ['id' => $checklist_actividad['id']],
-                ['actividad' => $checklist_actividad['actividad'], 'tipo' => $checklist_actividad['tipo'],
-                    'estado' => $checklist_actividad['estado'], 'checklist_id' => $checklist->id, 'posicion' => $key + 1,
-                    'is_default'=>$checklist_actividad['is_default']
+                [
+                    'activity' => $checklist_actividad['activity'],
+                    'type_id' => !is_null($type) ? $type->id : null,
+                    'active' => $checklist_actividad['active'],
+                    'checklist_id' => $checklist->id,
+                    'position' => $key + 1,
+                    // 'is_default' => $checklist_actividad['is_default']
                 ]
             );
         }
-        $cursos = collect($data['cursos']);
-        $checklist->cursos()->sync($cursos->pluck('id'));
+        $cursos = collect($data['courses']);
+        $checklist->courses()->sync($cursos->pluck('id'));
 
         // return response()->json(['error' => false, 'checklist' => $checklist, 'msg' => 'Checklist creado.'], 200);
         return $this->success($checklist);
@@ -323,25 +340,22 @@ class EntrenamientoController extends Controller
 
     public function buscarCurso(Request $request)
     {
+        $workspace = get_current_workspace();
+
         $filtro = $request->filtro;
-        $cursos_filtered = Curso::with('curricula.carrera')->filtroNombre($filtro)->orderBy('config_id')->estado(1)->get();
+        $cursos_filtered = Course::whereRelation('workspaces', 'id', $workspace->id)->filtroName($filtro)->where('active', 1)->get();
         $cursos = collect();
         foreach ($cursos_filtered as $curso) {
             $tempCarreras = collect();
-            $curso->curricula->each(function ($item, $key) use ($tempCarreras) {
-                if ($item->carrera)
-                {
-                    if (!in_array($item->carrera->nombre, $tempCarreras->values()->all()))
-                        $tempCarreras->push($item->carrera->nombre);
-                }
-            });
+            $workspace = !is_null($curso->workspaces) && count($curso->workspaces) ? $curso->workspaces[0]->name : '';
+            $school = !is_null($curso->schools) && count($curso->schools) ? $curso->schools[0]->name : '';
             $temp = [
                 'id' => $curso->id,
-                'modulo' => $curso->config->codigo_matricula,
-                'curso' => $curso->nombre,
-                'escuela' => $curso->categoria->nombre,
-                'nombre' => $curso->config->codigo_matricula . ' - ' . $curso->categoria->nombre . ' - ' . $curso->nombre,
-                'carreras' => implode(', ', $tempCarreras->values()->all())
+                'modulo' => $workspace,
+                'curso' => $curso->name,
+                'escuela' => $school,
+                'nombre' => $workspace . ' - ' . $school . ' - ' . $curso->name,
+                'carreras' => ''
             ];
             $cursos->push($temp);
         }
@@ -352,14 +366,15 @@ class EntrenamientoController extends Controller
     // ALUMNOS
     public function buscarAlumnoGestor($dni)
     {
-        $usuario = Usuario::dni($dni)->first();
+        $usuario = User::where('document', $dni)->first();
         if (!$usuario) {
             return response()->json([
                 'error' => true,
                 'msg' => 'Alumno no encontrado.'
             ], 200);
         }
-        if ($usuario->rol_entrenamiento !== Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO) {
+        $is_student = EntrenadorUsuario::alumno($usuario->id)->first();
+        if (is_null($is_student)) {
             return response()->json([
                 'error' => true,
                 'msg' => 'El usuario no es un alumno.'
@@ -367,29 +382,31 @@ class EntrenamientoController extends Controller
         }
 
         // Entrenador activo
-        $entrenadorActivo = EntrenadorUsuario::where('usuario_id', $usuario->id)->estado(1)->first();
-        if ($entrenadorActivo) {
-            $entrenador = Usuario::find($entrenadorActivo->entrenador_id);
-            $usuario->entrenador = $entrenador->dni . ' - ' . $entrenador->nombre;
+        if ($is_student) {
+            $entrenador = User::find($is_student->trainer_id);
+            $usuario->entrenador = $entrenador->document . ' - ' . $entrenador->name;
         } else {
             $usuario->entrenador = 'El alumno no tiene un entrenador actual';
         }
 
         // Checklists del alumno
-        $checklists = ChecklistRpta::with('checklistRelation', 'rpta_items')->where('alumno_id', $usuario->id)->get();
+        $checklists = ChecklistRpta::with('checklistRelation', 'rpta_items')->where('student_id', $usuario->id)->get();
         $checklistTemp = collect();
         $checklists->each(static function ($checklist_rpta, $key) use ($checklistTemp) {
-//            dd($checklist_rpta);
+            //            dd($checklist_rpta);
             $checklistTemp->push([
                 'titulo' => $checklist_rpta->checklistRelation->titulo,
                 'avance' => $checklist_rpta->porcentaje
             ]);
         });
         $usuario->checklists = $checklistTemp;
+        $usuario->cargo = '';
+        $usuario->botica = '';
+        $usuario->grupo_nombre = '';
 
         return response()->json([
             'error' => false,
-            'alumno' => $usuario->only('dni', 'nombre', 'cargo', 'botica', 'grupo_nombre', 'entrenador', 'checklists')
+            'alumno' => $usuario->only('document', 'name', 'cargo', 'botica', 'grupo_nombre', 'entrenador', 'checklists')
         ], 200);
     }
     // ALUMNOS
@@ -414,7 +431,7 @@ class EntrenamientoController extends Controller
     public function getChecklistsByAlumno(Usuario $alumno)
     {
         /*$user = auth('api')->user();*/
-//        $response = CheckList::getChecklistsByAlumno($user->id, $alumno->id);
+        //        $response = CheckList::getChecklistsByAlumno($user->id, $alumno->id);
         $response = CheckList::getChecklistsByAlumno($alumno->id);
 
         return response()->json($response, 200);

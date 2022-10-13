@@ -6,18 +6,16 @@ use App\Http\Controllers\ApiRest\HelperController;
 
 class CheckList extends BaseModel
 {
-    protected $table = 'checklist';
+    protected $table = 'checklists';
 
     protected $fillable = [
-        'titulo',
-        'descripcion',
-        'curso_id',
-        'carrera_id',
-        'estado'
+        'title',
+        'description',
+        'active'
     ];
 
     protected $casts = [
-        'estado' => 'boolean'
+        'active' => 'boolean'
     ];
 
     protected $hidden = [
@@ -34,16 +32,16 @@ class CheckList extends BaseModel
         return $this->hasMany(CheckListItem::class, 'checklist_id', 'id');
     }
 
-    public function cursos()
+    public function courses()
     {
-        return $this->belongsToMany(Curso::class, 'relaciones_checklist', 'checklist_id', 'curso_id');
+        return $this->belongsToMany(Course::class, 'checklist_relationships', 'checklist_id', 'course_id');
     }
 
     /*======================================================= SCOPES ==================================================================== */
 
-    public function scopeEstado($q, $estado)
+    public function scopeActive($q, $estado)
     {
-        return $q->where('estado', $estado);
+        return $q->where('active', $estado);
     }
 
     /*=================================================================================================================================== */
@@ -55,10 +53,10 @@ class CheckList extends BaseModel
 
         $queryChecklist = CheckList::with([
             'checklist_actividades' => function ($q) {
-                $q->orderBy('estado', 'desc')->orderBy('posicion');
+                $q->orderBy('active', 'desc')->orderBy('position');
             },
-            'cursos' => function ($q) {
-                $q->select('cursos.id', 'cursos.nombre', 'cursos.config_id', 'cursos.categoria_id');
+            'courses' => function ($q) {
+                $q->select('courses.id', 'courses.name');
             }
         ]);
 
@@ -69,21 +67,30 @@ class CheckList extends BaseModel
 
         if (!is_null($filtro) && !empty($filtro)) {
             $queryChecklist->where(function ($query) use ($filtro) {
-                $query->where('titulo', 'like', "%$filtro%");
-                $query->orWhere('descripcion', 'like', "%$filtro%");
+                $query->where('title', 'like', "%$filtro%");
+                $query->orWhere('description', 'like', "%$filtro%");
             });
         }
         $checklists = $queryChecklist->paginate(request('paginate', 15));
 
         foreach ($checklists->items() as $checklist) {
-            foreach ($checklist->cursos as $curso) {
-                $curso->modulo = $curso->config->codigo_matricula;
-                $curso->curso = $curso->nombre;
-                $curso->escuela = $curso->categoria->nombre;
-                $curso->nombre = $curso->config->codigo_matricula . ' - ' . $curso->categoria->nombre . ' - ' . $curso->nombre;
+            foreach ($checklist->checklist_actividades as $act) {
+                $type_id = $act->type_id ?? null;
+                $type_name = !is_null($type_id) ? Taxonomy::where('id', $type_id)->first() : null;
+                $type_name = !is_null($type_name) ? $type_name->code : '';
+                $act->type_name = $type_name;
+            }
+            foreach ($checklist->courses as $curso) {
+                $workspace = !is_null($curso->workspaces) && count($curso->workspaces) ? $curso->workspaces[0]->name : '';
+                $school = !is_null($curso->schools) && count($curso->schools) ? $curso->schools[0]->name : '';
+
+                $curso->modulo = $workspace;
+                $curso->curso = $curso->name;
+                $curso->escuela = $school;
+                $curso->nombre = $workspace . ' - ' . $school . ' - ' . $curso->name;
             }
 
-            $checklist->active = $checklist->estado;
+            $checklist->active = $checklist->active;
         }
 
         $response['data'] = $checklists->items();
@@ -105,7 +112,7 @@ class CheckList extends BaseModel
     }
 
     protected function getChecklistsByAlumno($alumno_id): array
-//    protected function getChecklistsByAlumno($entrenador_id, $alumno_id): array
+    //    protected function getChecklistsByAlumno($entrenador_id, $alumno_id): array
     {
         $entrenador = EntrenadorUsuario::where('usuario_id', $alumno_id)->where('estado', 1)->first();
         $entrenador_id = $entrenador->entrenador_id;
@@ -122,11 +129,11 @@ class CheckList extends BaseModel
             if ($curso->checklists->count() > 0) {
                 foreach ($curso->checklists as $checklist) {
                     if ($checklist->estado) {
-//                        info('CHECKLIST ID :: '.$checklist->id);
-//                        info('CURSO ID :: '.$curso->id);
+                        //                        info('CHECKLIST ID :: '.$checklist->id);
+                        //                        info('CURSO ID :: '.$curso->id);
                         $actividades_activas = $checklist->actividades->where('estado', 1)->where('tipo', 'entrenador_usuario')->sortBy('posicion');
                         $actividades_activasFeedback = $checklist->actividades->where('estado', 1)->where('tipo', 'usuario_entrenador')->sortBy('posicion');
-                        if (!$checklists->where('id', $checklist->id)->first() && $actividades_activas->count() >0 && $checklist->estado) {
+                        if (!$checklists->where('id', $checklist->id)->first() && $actividades_activas->count() > 0 && $checklist->estado) {
                             $r_x_c = Resumen_x_curso::where('usuario_id', $alumno_id)->where('curso_id', $curso->id)->first();
                             $disponible = $r_x_c && $r_x_c->estado === 'aprobado';
                             $checklistRpta = ChecklistRpta::checklist($checklist->id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
@@ -232,5 +239,4 @@ class CheckList extends BaseModel
             'feedback_disponible' => $feedback_disponible
         ];
     }
-
 }

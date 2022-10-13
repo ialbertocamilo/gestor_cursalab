@@ -8,6 +8,7 @@ use App\Http\Requests\MeetingAppRequest;
 
 use App\Models\Attendant;
 use App\Models\Abconfig;
+use App\Models\Workspace;
 use App\Models\Criterio;
 use App\Models\Taxonomy;
 use App\Models\Meeting;
@@ -26,13 +27,13 @@ use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
 
 class RestMeetingController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth.jwt', ['except' => [
-            'zoomWebhookEndMeeting','finishMeeting'
-        ]]);
-        return auth()->shouldUse('api');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth.jwt', ['except' => [
+    //         'zoomWebhookEndMeeting','finishMeeting'
+    //     ]]);
+    //     return auth()->shouldUse('api');
+    // }
 
     public function listUserMeetings(Request $request)
     {
@@ -42,7 +43,9 @@ class RestMeetingController extends Controller
         $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
         $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
 
-        $request->merge(['usuario_id' => auth()->user()->id]);
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['usuario_id' => auth()->user()->id, 'workspace_id' => $subworkspace->parent_id]);
 
         if ($request->code) {
             if ($request->code == 'today')
@@ -77,13 +80,17 @@ class RestMeetingController extends Controller
         return $this->successApp($result);
     }
 
-    public function getData()
+    public function getData(Request $request)
     {
         $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
         $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
         $finished = Taxonomy::getFirstData('meeting', 'status', 'finished');
         $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
         $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
+
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
 
         $filters_today = new Request([
             'usuario_id' => auth()->user()->id,
@@ -167,12 +174,14 @@ class RestMeetingController extends Controller
 
     public function getFormData(Request $request)
     {
-        $modulos = Abconfig::select('id', 'etapa as nombre')->get();
+        $subworkspace = auth()->user()->subworkspace;
+        // $modulos = Workspace::loadSubWorkspaces(['id','name as nombre']);
+        $modulos = Workspace::loadSubWorkspacesSiblings($subworkspace, ['id','name as nombre']);
         $user_types = Taxonomy::getData('meeting', 'user')->pluck('code', 'id');
 
         $params = ['config_id' => $request->config_id ?? auth()->user()->config_id];
 
-        $grupos = Criterio::getGruposForSelect($params);
+        $grupos = [];
 
         return $this->success(compact('grupos', 'modulos', 'user_types'));
     }
@@ -193,7 +202,7 @@ class RestMeetingController extends Controller
 
     public function edit(Meeting $meeting)
     {
-        $meeting->load('type', 'host.config:id,etapa,logo', 'status');
+        $meeting->load('type', 'host.config:id,name,logo', 'status');
 
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
 
@@ -224,7 +233,9 @@ class RestMeetingController extends Controller
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
         $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
 
-        $request->merge(['cohost' => $cohost, 'normal' => $normal]);
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
 
         $attendants = Attendant::searchAttendants($data);
 
@@ -242,7 +253,9 @@ class RestMeetingController extends Controller
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
         $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
 
-        $request->merge(['cohost' => $cohost, 'normal' => $normal]);
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
 
         $attendants = Attendant::searchAttendants($data);
 

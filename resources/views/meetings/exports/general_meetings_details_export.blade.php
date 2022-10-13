@@ -42,7 +42,7 @@
             <td align="center">{{ $meeting->finished_at ? $meeting->finished_at->format("d/m/Y g:i a") : '-' }}</td>
 
             {{--            <td align="center">{{ $meeting->user->name }} - {{ $meeting->user->email }}</td>--}}
-            <td align="center">{{ $meeting->host->dni }} - {{ $meeting->host->nombre }}</td>
+            <td align="center">{{ $meeting->host->document }} - {{ $meeting->host->name }}</td>
 
             <td align="center">{{ $meeting->type->name }}</td>
             <td align="center">{{ $meeting->status->name }}</td>

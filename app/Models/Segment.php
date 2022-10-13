@@ -53,7 +53,8 @@ class Segment extends BaseModel
             ->with([
                 'field_type:id,name,code',
                 'values' => function ($q) use ($workspace) {
-                    //                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
+
+//                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
                     // $q->select('id', 'value_text', 'position');
 //                    $q->whereIn('id', $values->pluck('id')->toArray());
                     $q
@@ -392,5 +393,35 @@ class Segment extends BaseModel
         }
 
         return $hasAValidDateRange;
+    }
+
+    /**
+     * Extract criterion value ids from segment
+     * values related to a supervisor
+     *
+     * @param int $supervisorId
+     * @return array|void
+     */
+    public static function loadSupervisorSegmentCriterionValuesIds(int $supervisorId)
+    {
+        // Load taxonomy for supervisors
+
+        $supervisorTaxonomy = Taxonomy::query()
+            ->where('group', 'segment')
+            ->where('code', 'user-supervise')
+            ->where('type', 'code')
+            ->where('active', 1)
+            ->first();
+
+        // Load criteria values ids
+
+        return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
+            ->where('segments.model_id', $supervisorId)
+            ->where('segments.code_id', $supervisorTaxonomy->id)
+            ->where('segments.active', 1)
+            ->select('segments_values.*')
+            ->get()
+            ->pluck('criterion_value_id')
+            ->toArray();
     }
 }

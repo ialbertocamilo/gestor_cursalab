@@ -75,7 +75,7 @@ class ValidationServiceProvider extends ServiceProvider
         });
 
         Validator::extend('available_for_meeting', function ($attribute, $value, $parameters, $validator) {
-return true;
+            // return true;
             $data = $validator->getData();
 
             $meeting_id = $parameters[0] ?? NULL;

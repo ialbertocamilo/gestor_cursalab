@@ -142,7 +142,7 @@ class Curso extends Model
 
             if ($curso) :
                 $curso->update($data);
-            else:
+            else :
                 $data['libre'] = $data['categoria_modalidad'] === 'libre' ? 1 : 0;
                 $curso = self::create($data);
             endif;
@@ -158,10 +158,10 @@ class Curso extends Model
 
     protected function validateCursoRequisito($data, $curso)
     {
-//        info($data);
+        //        info($data);
         $requisitos = Curso::select('id', 'nombre', 'categoria_id')->where('requisito_id', $curso->id)->get();
-        if (in_array($data['estado'], ['false', false, 0], true) && $requisitos->count() > 0):
-//            info('EL CURSO ES REQUISITO DE OTRO');
+        if (in_array($data['estado'], ['false', false, 0], true) && $requisitos->count() > 0) :
+            //            info('EL CURSO ES REQUISITO DE OTRO');
             $validate = [];
             foreach ($requisitos as $req) {
                 $route = route('cursos.editCurso', [$curso->config_id, $curso->categoria_id, $req->id]);
@@ -174,7 +174,7 @@ class Curso extends Model
                 'title' => 'Ocurrió un problema'
             ];
         endif;
-//        info('EL CURSO NO ES REQUISITO DE OTRO');
+        //        info('EL CURSO NO ES REQUISITO DE OTRO');
         return ['validate' => true];
     }
 
@@ -184,9 +184,11 @@ class Curso extends Model
             DB::beginTransaction();
 
             DB::table('cursos')->where('id', $curso->id)->update(
-                ['categoria_id' => $escuela_id,
+                [
+                    'categoria_id' => $escuela_id,
                     'requisito_id' => null,
-                ]);
+                ]
+            );
             DB::table('posteos')->where('curso_id', $curso->id)->update(['categoria_id' => $escuela_id]);
             DB::table('ev_abiertas')->where('curso_id', $curso->id)->update(['categoria_id' => $escuela_id]);
             DB::table('pruebas')->where('curso_id', $curso->id)->update(['categoria_id' => $escuela_id]);
@@ -235,10 +237,10 @@ class Curso extends Model
         $temas = $curso->temas;
         $hasActiveTema = $temas->where('estado', 1)->count() > 0;
 
-//        info("REQUISITOS COUNT :: " . $cursos_requisitos->count());
-//        info("TEMAS ACTIVOS:: " . $temas->count());
-//        info("ESTADO A ACTUALIZAR :: " . $estado);
-//        info("CURSO CONFIG ID :: " . $curso->config_id);
+        //        info("REQUISITOS COUNT :: " . $cursos_requisitos->count());
+        //        info("TEMAS ACTIVOS:: " . $temas->count());
+        //        info("ESTADO A ACTUALIZAR :: " . $estado);
+        //        info("CURSO CONFIG ID :: " . $curso->config_id);
 
         if ($cursos_requisitos->count() > 0 || $hasActiveTema) :
 
@@ -248,7 +250,6 @@ class Curso extends Model
 
                 $validacion = $this->avisoAllTemasInactive($curso);
                 $validate->push($validacion);
-
             }
 
             if ($cursos_requisitos->count() > 0) :
@@ -258,7 +259,7 @@ class Curso extends Model
 
             endif;
 
-            if ($hasActiveTema):
+            if ($hasActiveTema) :
 
                 $validacion = $this->validateHasActiveTema($curso, $temas);
                 $validate->push($validacion);
@@ -288,10 +289,10 @@ class Curso extends Model
         $temas = $curso->temas;
         $hasActiveTema = $temas->where('estado', 1)->count() > 0;
 
-//        info("REQUISITOS COUNT :: " . $cursos_requisitos->count());
-//        info("TEMAS ACTIVOS:: " . $temas->count());
-//        info("ESTADO A ACTUALIZAR :: " . $estado);
-//        info("CURSO CONFIG ID :: " . $curso->config_id);
+        //        info("REQUISITOS COUNT :: " . $cursos_requisitos->count());
+        //        info("TEMAS ACTIVOS:: " . $temas->count());
+        //        info("ESTADO A ACTUALIZAR :: " . $estado);
+        //        info("CURSO CONFIG ID :: " . $curso->config_id);
 
         if ($cursos_requisitos->count() > 0 || $hasActiveTema) :
 
@@ -301,7 +302,6 @@ class Curso extends Model
 
                 $validacion = $this->avisoAllTemasInactive($curso);
                 $validate->push($validacion);
-
             }
 
             if ($cursos_requisitos->count() > 0) :
@@ -311,12 +311,12 @@ class Curso extends Model
 
             endif;
 
-//            if ($hasActiveTema):
-//
-//                $validacion = $this->validateHasActiveTema($curso, $temas, 'eliminar');
-//                $validate->push($validacion);
-//
-//            endif;
+            //            if ($hasActiveTema):
+            //
+            //                $validacion = $this->validateHasActiveTema($curso, $temas, 'eliminar');
+            //                $validate->push($validacion);
+            //
+            //            endif;
 
             if ($validate->count() === 0) return ['validate' => true];
             // Si existe algún tema que impida el envío de formulario (show_confirm = false)
@@ -389,8 +389,8 @@ class Curso extends Model
     {
 
         $messages = [];
-//        dd($curso->wasChanged('estado'), $curso->estado, $curso->temas->count());
-        if (($curso->wasChanged('active') || $curso->active) && $curso->topics->count() > 0):
+        //        dd($curso->wasChanged('estado'), $curso->estado, $curso->temas->count());
+        if (($curso->wasChanged('active') || $curso->active) && $curso->topics->count() > 0) :
             $messages[] = [
                 'title' => $title,
                 'subtitle' => "Esto puede producir un ajuste en el avance de los usuarios. Los cambios se mostrarán en el app y web en unos minutos.",

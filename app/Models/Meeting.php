@@ -16,6 +16,7 @@ class Meeting extends BaseModel
     ];
 
     protected $fillable = [
+        'workspace_id',
         'name', 'description', 'embed', 'raw_data_response',
         'url', 'url_start', 'identifier', 'username', 'password',
         'starts_at', 'finishes_at', 'duration', 'started_at', 'finished_at', 'report_generated_at',
@@ -237,6 +238,10 @@ class Meeting extends BaseModel
     {
         $query = self::with('type', 'status', 'account.service', 'host', 'attendants.type')->withCount('attendants');
 
+        # meeting segun workspaceid
+        $currWorkspaceIndex = get_current_workspace_indexes('id');
+        $query->where('workspace_id', $currWorkspaceIndex);
+
         if ($request->usuario_id)
             $query->whereHas('attendants', function ($q) use ($request) {
                 $q->where('usuario_id', $request->usuario_id);
@@ -296,6 +301,7 @@ class Meeting extends BaseModel
             $host = Usuario::find($data['host_id']);
 
             $datesHaveChanged = $meeting && $meeting->datesHaveChanged($data);
+            $data['workspace_id'] = get_current_workspace_indexes('id'); #añadiendo workspace
 
             DB::beginTransaction();
 
@@ -306,7 +312,7 @@ class Meeting extends BaseModel
                     $account = Account::getOneAvailableForMeeting(
                         $type, $dates, $meeting
                     );
-                    $account->createOrUpdateMeetingService($data, $meeting);
+                    $account->createOrUpdateMeetingService($data, $meeting); // zoom ref
                     $data['account_id'] = $account->id;
 
                     Meeting::getScheduledAttendanceCall($data);
@@ -323,7 +329,7 @@ class Meeting extends BaseModel
                 $data['status_id'] = $status->id;
                 $data['account_id'] = $account->id;
 
-                $account->createOrUpdateMeetingService($data);
+                $account->createOrUpdateMeetingService($data); // zoom ref
 
                 Meeting::getScheduledAttendanceCall($data);
 
@@ -803,7 +809,7 @@ class Meeting extends BaseModel
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
 
         $top_attendants = $this->attendants()
-            ->with('usuario:id,nombre,dni')
+            ->with('usuario:id,name,document')
             ->select('total_duration', 'usuario_id')
             ->orderBy('total_duration', 'DESC')
             ->whereNotNull('total_duration')
@@ -814,7 +820,7 @@ class Meeting extends BaseModel
 
         foreach ($top_attendants as $top_attendant) {
 //            $data['labels'][] = "Top {$i}";
-            $data['labels'][] = $top_attendant->usuario->dni;
+            $data['labels'][] = $top_attendant->usuario->document;
             $data['values'][] = $top_attendant->total_duration;
             $i++;
         }

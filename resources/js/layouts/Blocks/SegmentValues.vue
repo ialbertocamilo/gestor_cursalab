@@ -1,8 +1,7 @@
 <template>
     <div>
         <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'date'">
-            <!--        <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'Fecha'">-->
-
+        <!-- <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'Fecha'"> -->
             <v-col cols="12" md="3" lg="3" class="p-0 vertical-align">
                 <date-picker
                     confirm

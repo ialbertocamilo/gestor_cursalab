@@ -46,6 +46,8 @@ class ErrorResource extends JsonResource
     {
         $emoji = '❔';
 
+        if (!$this->platform) return $emoji; 
+
         if ( $this->platform->code == 'app' ) $emoji = '📱';
         
         if ( $this->platform->code == 'gestor' ) $emoji = '💻';
