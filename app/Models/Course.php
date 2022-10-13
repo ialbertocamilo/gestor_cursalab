@@ -557,6 +557,13 @@ class Course extends BaseModel
         if($type=='users_id'){
             return $users_id_course;
         }
+        if($type=='users_full') {
+            return User::where('active',1)
+                       ->whereIn('id', $users_id_course)
+                       ->get();
+                       // ->simplePaginate(5);
+        }
+
         $users_have_course = User::where('active',1)->whereIn('id',$users_id_course)->select('id');
         return ($type=='get_records') ? $users_have_course->get() : $users_have_course->count();
     }

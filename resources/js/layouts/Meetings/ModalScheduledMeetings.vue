@@ -7,11 +7,11 @@
         <v-card>
             <v-list>
                 <v-list-item>
-                    <DefaultLogoImage
+                   <!--  <DefaultLogoImage
                         :image="options.header.logo"
                         class="mx-3"
                         max-width="70"
-                    />
+                    /> -->
 
                     <v-list-item-content>
                         <v-list-item-title>Reuniones ya agendadas</v-list-item-title>

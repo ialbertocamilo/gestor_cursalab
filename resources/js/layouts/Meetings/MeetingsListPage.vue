@@ -4,7 +4,7 @@
         <header class="page-header mt-5 py-0 mx-8">
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
-                    Aulas Virtuales
+                    Aulas Virtuales {{ usuario_id }} - {{ workspace_id }}
                     <v-spacer/>
 
 <!--                    <v-btn icon color="primary"-->
@@ -12,6 +12,23 @@
 <!--                    >-->
 <!--                        <v-icon v-text="'mdi-dots-vertical'"/>-->
 <!--                    </v-btn>-->
+
+
+                <DefaultModalButton
+                    label="Open Modal Workspace"
+                    @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación del workspace`)"/>
+
+                <SegmentFormModal
+                    :options="modalFormSegmentationOptions"
+                    width="55vw"
+                    model_type="App\Models\Workspace"
+                    :model_id="null"
+                    :ref="modalFormSegmentationOptions.ref"
+                    @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                    @onConfirm="closeSimpleModal(modalFormSegmentationOptions)"
+                  />
+
+
                     <DefaultInfoTooltip left
                         text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
 
@@ -144,14 +161,15 @@
 </template>
 
 <script>
+import SegmentFormModal from './../Blocks/SegmentFormModal';
 import MeetingFinishModal from "./MeetingFinishModal";
 import MeetingDirectionsModal from "./MeetingDirectionsModal";
 import MeetingDetailModal from "./MeetingDetailModal";
 import MeetingFormModal from "./MeetingFormModal";
 
 export default {
-    components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal,},
-    props: ['usuario_id'],
+    components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal, SegmentFormModal},
+    props: ['usuario_id', 'workspace_id'],
     data: () => ({
         dataTable: {
             endpoint: '/aulas-virtuales/search',
@@ -243,6 +261,14 @@ export default {
             base_endpoint: '/aulas-virtuales',
             confirmLabel: 'Guardar',
             resource: 'reunión',
+        },
+        modalFormSegmentationOptions:{
+            ref: 'SegmentFormModal',
+            open: false,
+            persistent: true,
+            base_endpoint: '/segments',
+            confirmLabel: 'Guardar',
+            resource: 'segmentación',
         },
         // modalFormDuplicateOptions: {
         //     ref: 'MeetingFormlModal',

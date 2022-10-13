@@ -72,7 +72,7 @@
         <td></td>
         <th width="260px" style="vertical-align: center"><b>ANFITRIÓN</b></th>
         <td width="280px" align="center">
-            {{$meeting->host->dni}} - {{$meeting->host->nombre}}
+            {{$meeting->host->document}} - {{$meeting->host->name}}
         </td>
     </tr>
     <tr>

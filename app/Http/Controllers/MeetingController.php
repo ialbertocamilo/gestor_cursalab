@@ -4,18 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Exports\Meeting\GeneralMeetingsExport;
 use App\Exports\Meeting\MeetingExport;
-use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
-use App\Http\Requests\Meeting\MeetingUploadAttendantsFormRequest;
 use App\Http\Requests\MeetingFinishRequest;
 use App\Http\Requests\MeetingRequest;
-use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
+use App\Http\Requests\Meeting\MeetingUploadAttendantsFormRequest;
 use App\Http\Resources\MeetingResource;
+use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
 use App\Models\Attendant;
 use App\Models\Criterion;
 use App\Models\Meeting;
 use App\Models\SourceMultimarca;
 use App\Models\Taxonomy;
 use App\Models\Usuario;
+use App\Models\Workspace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -25,7 +26,6 @@ class MeetingController extends Controller
     public function search(Request $request)
     {
         $meetings = Meeting::search($request);
-
         MeetingResource::collection($meetings);
 
         return $this->success($meetings);
@@ -45,12 +45,17 @@ class MeetingController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function getSelectSearchFilters(Request $request)
+    /*public function getSelectSearchFilters(Request $request)
     {
         $modulos = Criterion::getValuesForSelect('module');
         $grupos = Criterion::getValuesForSelect('group');
 
         return $this->success(compact('grupos', 'modulos'));
+    }*/
+    public function getSelectSearchFilters()
+    {
+        $modulos = Workspace::loadSubWorkspaces(['id','name as nombre']);
+        return $this->success(compact('modulos'));
     }
 
     /**
@@ -59,7 +64,7 @@ class MeetingController extends Controller
      * @param false $compactResponse
      * @return array|JsonResponse
      */
-    public function getFormSelects($compactResponse = false)
+     public function getFormSelects($compactResponse = false)
     {
 
         $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
@@ -67,9 +72,7 @@ class MeetingController extends Controller
         $types = Taxonomy::getSelectData('meeting', 'type');
         $hosts = Usuario::getCurrentHosts();
 
-        $response = compact(
-            'types', 'hosts', 'user_types', 'default_meeting_type'
-        );
+        $response = compact('types', 'hosts', 'user_types', 'default_meeting_type');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -83,13 +86,13 @@ class MeetingController extends Controller
     public function store(MeetingRequest $request)
     {
         $meeting = Meeting::storeRequest($request->validated());
-
         return $this->success(['msg' => 'Reunión creada correctamente.']);
     }
 
     public function getDuplicatedData(Meeting $meeting)
     {
-        $meeting->load('type', 'host.config');
+        // $meeting->load('type', 'host.config');
+        $meeting->load('type', 'host');
 
         extract(
             $this->getFormSelects(true), EXTR_OVERWRITE
@@ -223,13 +226,12 @@ class MeetingController extends Controller
     public function uploadAttendants(MeetingSearchAttendantRequest $request)
     {
         $data = $request->validated();
-
         $attendants = [];
-
         $data['usuarios_dni'] = Attendant::getUsuariosDniFromExcel($data);
 
         if (count($data['usuarios_dni']) > 0) {
             $attendants = Attendant::searchAttendants($data);
+            $attendants = MeetingSearchAttendantsResource::collection($attendants); /*mutando datos*/
             Attendant::filterEmptyMeetingInvitations($attendants);
         }
 
@@ -303,7 +305,7 @@ class MeetingController extends Controller
         $filters = $request->validated();
         $attendants = Attendant::searchAttendants($filters);
         $attendants = MeetingSearchAttendantsResource::collection($attendants);
-        Attendant::filterEmptyMeetingInvitations($attendants);
+        Attendant::filterEmptyMeetingInvitations($attendants); /* mutando resultados */
 
         return $this->success(compact('attendants'));
     }

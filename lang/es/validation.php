@@ -113,6 +113,28 @@ return [
         //     'min' => 'La cantidad mínima de cada producto es de :min.',
         //     'max' => 'La cantidad máxima de cada producto es de :max.',
         // ],
+
+        'answer_id' => [
+            'answer_ontime' => 'Respuesta fuera de tiempo',
+        ],
+
+        'config_id' => [
+            'required' => 'Debe de seleccionar un módulo.'
+        ],
+
+        'type_id' => [
+            'account_type_available' => 'No se encuentra una cuenta disponible para este tipo de reunión.',
+        ],
+
+        'host_id' => [
+            'available_for_meeting' => 'El anfitrión no se encuentra disponible en este horario.',
+        ],
+        'meeting_id' => [
+            'meeting_can_be_finished' => 'La reunión no se encuentra en progreso o no cuentas con el permiso de  anfitrión para realizar esta acción.',
+        ],
+        'starts_at' => [
+            'meeting_date_after_or_equal_today' => 'El campo fecha y hora debe ser una fecha posterior o igual a la hora actual.'
+        ],
     ],
 
     /*
@@ -303,6 +325,11 @@ return [
         'file_logo' => 'logo',
         'position' => 'orden',
         'rpta_ok' => 'respuesta correcta',
+
+        'today' => 'hoy',
+        'duration' => 'duración',
+        'attendants' => 'asistentes',
+        'q' => 'búsqueda',
     ],
 
 ];
