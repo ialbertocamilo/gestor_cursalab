@@ -368,7 +368,7 @@ class Attendant extends BaseModel
                                                          use ($filters, $currMeetingId) {
                                     $q->betweenScheduleDates($filters);
                                     $q->ofReservedStatus();
-                                    $q->excludeMeeting($currMeetingId);
+                                    $q->excludeMeeting($filters['meeting_id'] ?? null);
                                 }]);
 
         $query->select($visibleColumns)->where('active', ACTIVE);
