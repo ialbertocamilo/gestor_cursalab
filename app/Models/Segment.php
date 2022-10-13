@@ -363,7 +363,7 @@ class Segment extends BaseModel
 
         return match ($criterion_code) {
             'default' => $this->validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion),
-            'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion),
+//            'date' => $this->validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion),
             default => false,
         };
     }
