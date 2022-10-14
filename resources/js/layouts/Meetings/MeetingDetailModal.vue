@@ -100,7 +100,7 @@
                                            @click="downloadReport"
                                            class="no-hover-link mr-5"
                                            title="Descarga disponible en 10 minutos aprox.">
-                                            <v-icon color="grey-darken-2" small >mdi-download</v-icon>
+                                            <v-icon small >mdi-download</v-icon>
                                             Descargar reporte
                                         </a>
 
