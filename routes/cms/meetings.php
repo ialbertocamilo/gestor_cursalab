@@ -3,7 +3,7 @@
 use App\Http\Controllers\MeetingController;
 use \App\Http\Controllers\ApiRest\RestMeetingController;
 
-Route::prefix('cuentas')->group(base_path('routes/cms/accounts.php'));
+Route::prefix('cuentas')->middleware('checkrol:super-user')->group(base_path('routes/cms/accounts.php'));
 
 Route::get('/list', [RestMeetingController::class, 'listUserMeetings']);
 Route::get('/get-data', [RestMeetingController::class, 'getData']);

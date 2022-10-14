@@ -4,8 +4,9 @@
         <header class="page-header mt-5 py-0 mx-8">
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
-                    Aulas Virtuales {{ usuario_id }} - {{ workspace_id }}
+                    Aulas Virtuales
                     <v-spacer/>
+                     <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
 <!--                    <v-btn icon color="primary"-->
 <!--                           @click="openFormModal(modalDirectionsOptions, null, null, 'Recomendaciones')"-->
@@ -14,7 +15,7 @@
 <!--                    </v-btn>-->
 
 
-                <DefaultModalButton
+                <DefaultModalButton v-if="superuser"
                     label="Configurar Anfitriones"
                     @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
 
@@ -169,7 +170,7 @@ import MeetingFormModal from "./MeetingFormModal";
 
 export default {
     components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal, SegmentFormModal},
-    props: ['usuario_id', 'workspace_id'],
+    props: ['usuario_id', 'workspace_id', 'superuser'],
     data: () => ({
         dataTable: {
             endpoint: '/aulas-virtuales/search',
