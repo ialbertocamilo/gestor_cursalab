@@ -75,17 +75,17 @@ class UserResetPasswordNotification extends Notification
      */
     protected function buildMailMessage($url)
     {
-       $url = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url);
-       $url = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim($url, '/');
+        $url = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url);
+        $url = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim($url, '/');
 
-       return (new MailMessage)
-            ->subject(Lang::get('Resetear contraseña'))
+        return (new MailMessage)
+            ->subject(Lang::get('Recuperar contraseña'))
             ->greeting('Hola,')
             ->salutation('Saludos, Cursalab.')
-            ->line(Lang::get('Estás recibiendo este email, porque hemos recibido una solicitud de reseteo de contraseña para tu cuenta.'))
-            ->action(Lang::get('Resetear contraseña'), $url)
-            ->line(Lang::get('El enlace para resetear la contraseña expirará en :count minutos.', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]))
-            ->line(Lang::get('Si no solicitaste el reseteo de contraseña, no es necesario realizar ninguna acción.'));
+            ->line(Lang::get('Estás recibiendo este email, porque hemos recibido una solicitud de recuperación de contraseña para tu cuenta.'))
+            ->action(Lang::get('Recuperar contraseña'), $url)
+            ->line(Lang::get('El enlace para recuperar la contraseña expirará en :count minutos.', ['count' => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire')]))
+            ->line(Lang::get('Si no solicitaste la recuperación de contraseña, no es necesario realizar ninguna acción.'));
     }
 
     /**

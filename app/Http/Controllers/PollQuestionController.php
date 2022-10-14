@@ -76,6 +76,8 @@ class PollQuestionController extends Controller
 
         $encuestas_pregunta = PollQuestion::create($data);
 
+        cache_clear_model(Poll::class);
+
         return $this->success(['msg' => 'Pregunta creada correctamente.']);
     }
 
@@ -111,6 +113,8 @@ class PollQuestionController extends Controller
 
         $pollquestion->update($data);
 
+        cache_clear_model(Poll::class);
+
         return $this->success(['msg' => 'Pregunta actualizada correctamente.']);
     }
 
@@ -126,6 +130,8 @@ class PollQuestionController extends Controller
 
         $pollquestion->update(['active' => !$pollquestion->active]);
 
+        cache_clear_model(Poll::class);
+
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 
@@ -139,6 +145,8 @@ class PollQuestionController extends Controller
     public function destroy(Poll $poll, PollQuestion $pollquestion)
     {
         $pollquestion->delete();
+
+        cache_clear_model(Poll::class);
 
         return $this->success(['msg' => 'Pregunta eliminada correctamente.']);
     }

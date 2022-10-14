@@ -47,14 +47,14 @@ class Question extends BaseModel
     {
         $questions = Question::getByTopicAndType($topic, $code);
 
-        $questionsRequired = $questions->where('required', 1);
+        $questionsRequired = $questions->where('required', 1)->whereNotNull('score');
 
         $base = 20;
         $sum_required = $questionsRequired->sum('score');
 
         $missing_score = $base - $sum_required;
 
-        $questionsNotRequired = $questions->where('required', '<>', 1);
+        $questionsNotRequired = $questions->where('required', '<>', 1)->whereNotNull('score');
 
         $sum_not_required = $questionsNotRequired->sum('score');
         $i = 0;
@@ -62,23 +62,30 @@ class Question extends BaseModel
         if ( ($sum_required + $sum_not_required) >= $base ) {
             
             //ORDENAR SEGUN LA CONDICION DE PUNTAJES
-            
-            $val = true;
-            
-            while ($val) :
-                
-                $res = Question::randomItem(NULL, $missing_score, $questionsNotRequired);
 
-                if ($res['sum'] == $missing_score)
-                    $val = false;
-                
-            endwhile;
+            if ($missing_score == 0) {
 
-            $preguntas = $questionsRequired->merge($res['data']);
+                $preguntas = $questionsRequired;
+
+            } else {
+
+                $val = true;
+
+                while ($val) :
+                    
+                    $res = Question::randomItem(NULL, $missing_score, $questionsNotRequired);
+
+                    if ($res['sum'] == $missing_score)
+                        $val = false;
+                    
+                endwhile;
+                
+                $preguntas = $questionsRequired->merge($res['data']);
+            }
 
             $this->setRandomOptions($preguntas);
 
-            return $preguntas;
+            return $preguntas->shuffle();
 
         } 
 

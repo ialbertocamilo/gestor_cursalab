@@ -553,7 +553,7 @@ class Topic extends BaseModel
 
     protected function evaluateAnswers($respuestas, $topic)
     {
-        $questions = Question::select('id', 'rpta_ok')->where('topic_id', $topic->id)->get();
+        $questions = Question::select('id', 'rpta_ok', 'score')->where('topic_id', $topic->id)->get();
 
         $correct_answers = $failed_answers = $correct_answers_score = 0;
 
@@ -562,12 +562,12 @@ class Topic extends BaseModel
             $question = $questions->where('id', $respuesta['preg_id'])->first();
 
             if ($question->rpta_ok == $respuesta['opc']) {
-                
+
                 $correct_answers++;
 
                 $respuestas[$key]['score'] = $question->score;
 
-                $correct_answers_score += $question->score; 
+                $correct_answers_score += $question->score;
 
                 continue;
             }

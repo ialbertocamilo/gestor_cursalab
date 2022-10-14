@@ -27,16 +27,17 @@ class UsuarioAyudaResource extends JsonResource
             ],
             'reason' => clean_html($this->reason, 60),
             'detail' => $this->detail,
-            'dni' => '', // $this->user->dni ?? '',
-            'nombre' => $this->user->name ?? '',
-            'image' => '', //space_url($this->usuario->config->logo ?? ''),
+            'dni' => $this->dni ?? '',
+            'nombre' => $this->name ?? '',
+            'image' => $this->workspace ? ($this->workspace->logo ? space_url($this->workspace->logo) : '') : '',
+            'info_support' => $this->info_support ?? '',
+            'msg_to_user' => $this->msg_to_user ?? '',
 
             'created_at' => $this->created_at?->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at?->format('d/m/Y g:i a'),
         ];
 
-        if ($request->view == 'show')
-        {
+        if ($request->view == 'show') {
             $data['reason'] = $this->reason;
             $data['info_support'] = $this->info_support;
             $data['msg_to_user'] = $this->msg_to_user;

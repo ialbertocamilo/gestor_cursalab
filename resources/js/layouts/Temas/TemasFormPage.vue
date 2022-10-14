@@ -164,7 +164,7 @@
                                                 <DefaultToggle
                                                     v-model="media.downloadable"
                                                     no-label
-                                                    :disabled="['youtube', 'vimeo', 'scorm', 'link'].includes(media.type_id)"
+                                                    :disabled="['youtube', 'vimeo', 'scorm', 'link','genially','rise'].includes(media.type_id)"
                                                 />
                                             </div>
                                         </td>

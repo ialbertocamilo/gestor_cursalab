@@ -31,6 +31,8 @@ class CursosStoreUpdateRequest extends FormRequest
             'requisito_id' => 'nullable',
 
             'reinicios_programado' => 'nullable',
+            'mod_evaluaciones' => 'nullable',
+
             'lista_escuelas' =>  'required',
 
             'duration' => 'nullable' ,
@@ -52,6 +54,7 @@ class CursosStoreUpdateRequest extends FormRequest
         $data['active'] = $active;
         $data['validateForm'] = !!$this->validateForm;
         $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
+        $data['mod_evaluaciones'] = $this->mod_evaluaciones ? json_decode($this->mod_evaluaciones, true) : [];
 
         return $this->merge($data)->all();
     }
