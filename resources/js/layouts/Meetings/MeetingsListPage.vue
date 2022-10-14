@@ -15,8 +15,8 @@
 
 
                 <DefaultModalButton
-                    label="Open Modal Workspace"
-                    @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación del workspace`)"/>
+                    label="Configurar Anfitriones"
+                    @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
 
                 <SegmentFormModal
                     :options="modalFormSegmentationOptions"

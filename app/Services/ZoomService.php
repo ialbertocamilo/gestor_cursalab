@@ -233,7 +233,7 @@ class ZoomService extends MeetingService
         foreach ($attendants as $attendant) {
             $result[] = [
                 'email' => "user_{$attendant->usuario->id}_{$attendant->id}@cursalab.io",
-                'first_name' => $attendant->usuario->name,
+                'first_name' => "W-M_ID-D" . $attendant->usuario->name,
                 'last_name' => $attendant->usuario->lastname,
             ];
         }
