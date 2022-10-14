@@ -37,7 +37,7 @@
                             :items="selects.hosts"
                             v-model="resource.host"
                             label="Anfitrión"
-                            item-text="name"
+                            item-text="fullname"
                             return-object
                             :rules="rules.host"
                             @onChange="changeHost"
@@ -133,7 +133,7 @@
 <!--                                        max-width="70"-->
 <!--                                    />-->
                                     {{ resource.host.name ? '' : resource.host.dni + ' - ' }}
-                                    {{ resource.host.nombre || resource.host.name }}
+                                    {{ resource.host.fullname }}
                                     <!--                                    ({{ resource.host.apellido_paterno }}
                                                                         {{ resource.host.apellido_materno }}
                                                                         {{ resource.host.nombre }})-->
@@ -259,12 +259,12 @@
                 }"
             />
 
-            <MeetingInfoCreateModal
+         <!--    <MeetingInfoCreateModal
                 width="45vw"
                 :options="modalInfoCreateMeeting"
                 :ref="modalInfoCreateMeeting.ref"
                 @onCancel="closeFormModal(modalInfoCreateMeeting)"
-            />
+            /> -->
 
         </template>
     </DefaultDialog>
@@ -452,10 +452,10 @@ export default {
                         vue.$emit('onConfirm')
                         this.hideLoader()
 
-                        setTimeout(() => {
+                       /* setTimeout(() => {
                           vue.openFormModal(vue.modalInfoCreateMeeting, null, null, 'Reunión creada correctamente')
                           vue.modalInfoCreateMeeting.resource = data.data.status
-                        }, 500)
+                        }, 500)*/
 
                     }).catch((error) => {
                     this.hideLoader()

@@ -181,7 +181,7 @@ export default {
                 {text: "Nombre", value: "custom_meeting_name", sortable: false},
                 // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},
                 {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
-                {text: "Prefijo", value: "prefix", sortable: false, align: 'center'},
+                {text: "Código", value: "prefix", sortable: false, align: 'center'},
                 {text: "Estado", value: "status", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
                 {text: "Fecha de inicio", value: "starts_at", align: 'center',},

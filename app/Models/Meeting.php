@@ -192,14 +192,14 @@ class Meeting extends BaseModel
 
     public function buildPrefix(string $flag = 'M')
     {
+        /*
         $workSpaceParts = explode(' ', $this->workspace->name);
         $currentPrefix = '';
-
         foreach($workSpaceParts as $value) {
             $currentPrefix .= str_split($value)[0]; //first letter
-        }
+        } */
 
-        return implode('_', [$flag, $currentPrefix, $this->id, $this->starts_at->format('d/m/Y')]);
+        return $flag.$this->id.'-'.$this->starts_at->format('md');
     }
 
     public function isOnTime()
