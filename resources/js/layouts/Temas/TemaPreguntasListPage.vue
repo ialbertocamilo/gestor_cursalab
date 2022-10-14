@@ -131,7 +131,7 @@
                 width="50vw"
                 :ref="modalTemaPreguntasImport.ref"
                 :options="modalTemaPreguntasImport"
-                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters); reloadPage()"
+                @onConfirm="closeFormModal(modalTemaPreguntasImport, dataTable, filters);refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalTemaPreguntasImport);refreshDefaultTable(dataTable, filters) "
             />
             <DialogConfirm

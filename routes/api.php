@@ -91,7 +91,8 @@ Route::get('notifications', function () {
         'showCloseButtonM2' => env('SHOW_CLOSE_BUTTON_M2'),
         'showModalM3' => env('SHOW_MODAL_M3'),
         'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
-        'showMessageM4' => env('SHOW_MESSAGE_M4')
+        'showMessageM4' => env('SHOW_MESSAGE_M4'),
+        'showIosLink' => env('SHOW_IOS_LINK')
     ]);
 });
 
