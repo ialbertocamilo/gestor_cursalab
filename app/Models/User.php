@@ -730,4 +730,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('users.active', 1)
             ->count();
     }
+
+    // public function belongsToSegmentation($model)
+    // {
+        
+    // }
 }

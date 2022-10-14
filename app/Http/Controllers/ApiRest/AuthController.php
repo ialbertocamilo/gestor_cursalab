@@ -64,6 +64,14 @@ class AuthController extends Controller
 
         $supervisor = $user->isSupervisor();
 
+        // $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+
+        // $course_segment_criteria = $segment->values->groupBy('criterion_id');
+
+        // $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+
+        
+
         $user_data = [
             "id" => $user->id,
             "dni" => $user->document,
