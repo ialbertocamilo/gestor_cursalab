@@ -50,13 +50,17 @@ class ChecklistRpta extends Model
     {
         -$cumple = 0;
         $checklistValidos = 0;
-        $actividades = CheckListItem::where('checklist_id', $checklistRpta->checklist_id)->estado(1)->get();
+        $actividades = CheckListItem::where('checklist_id', $checklistRpta->checklist_id)->active(1)->get();
 
         foreach ($actividades as $actividad) {
-            if ($actividad->tipo === 'entrenador_usuario') {
+            $tax_trainer_user = Taxonomy::where('group', 'checklist')
+                ->where('type', 'type')
+                ->where('code', 'trainer_user')
+                ->first();
+            if ($actividad->type_id == $tax_trainer_user->id) {
                 $checklistValidos++;
-                $rpta_item = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_rpta_id', $checklistRpta->id)->first();
-                if ($rpta_item && ($rpta_item->calificacion === 'Cumple' || $rpta_item->calificacion === 'No cumple'))  $cumple++;
+                $rpta_item = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
+                if ($rpta_item && ($rpta_item->qualification === 'Cumple' || $rpta_item->qualification === 'No cumple'))  $cumple++;
             }
         }
 

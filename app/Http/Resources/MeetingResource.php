@@ -19,7 +19,7 @@ class MeetingResource extends JsonResource
         return [
             'id' => $this->id,
 //            'name' => "[ACC#{$this->account->id}] " . $this->name , // DEV
-           'name' => $this->name , // DEV
+            'name' => $this->name , // DEV
             'custom_meeting_name' => $this->name,
 //            'type' => "[{$this->account->service->name}] {$this->type->name} ". // DEV
             'type' => $this->type->name,
