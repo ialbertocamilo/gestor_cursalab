@@ -86,7 +86,9 @@ class MeetingController extends Controller
     public function store(MeetingRequest $request)
     {
         $meeting = Meeting::storeRequest($request->validated());
-        return $this->success(['msg' => 'Reunión creada correctamente.']);
+
+        return $this->success(['msg' => 'Reunión creada correctamente.',
+                               'status' => new MeetingResource($meeting) ]);
     }
 
     public function getDuplicatedData(Meeting $meeting)
@@ -165,6 +167,7 @@ class MeetingController extends Controller
         $meeting->real_percentage_attendees = $meeting->getRealPercetageOfAttendees();
         $meeting->download_ready = $meeting->checkIfDataIsReady();
         $meeting->getDatesFormatted();
+        $meeting->prefix = $meeting->buildPrefix();
         $meeting->isMasterOrAdminCursalab = auth()->user()->isMasterOrAdminCursalab();
 
 

@@ -4,7 +4,7 @@
         <header class="page-header mt-5 py-0 mx-8">
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
-                    Aulas Virtuales {{ usuario_id }} - {{ workspace_id }}
+                    Aulas Virtuales <!-- {{ usuario_id }} - {{ workspace_id }} -->
                     <v-spacer/>
 
 <!--                    <v-btn icon color="primary"-->
@@ -181,6 +181,7 @@ export default {
                 {text: "Nombre", value: "custom_meeting_name", sortable: false},
                 // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},
                 {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
+                {text: "Prefijo", value: "prefix", sortable: false, align: 'center'},
                 {text: "Estado", value: "status", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
                 {text: "Fecha de inicio", value: "starts_at", align: 'center',},

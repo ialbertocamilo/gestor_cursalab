@@ -52,7 +52,7 @@
 
                                 <v-row>
                                     <v-col cols="12" class="text-center">
-                                        <h5>{{ resource.name }}</h5>
+                                        <h5>{{ resource.name }} - {{ resource.prefix }}</h5>
                                     </v-col>
                                     <v-col cols="12" class="text-center">
                                         <h6>{{ resource.date_title }}</h6>
