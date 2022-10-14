@@ -258,6 +258,14 @@
                     host_id: resource.host ? resource.host.id : null
                 }"
             />
+
+            <MeetingInfoCreateModal
+                width="45vw"
+                :options="modalInfoCreateMeeting"
+                :ref="modalInfoCreateMeeting.ref"
+                @onCancel="closeFormModal(modalInfoCreateMeeting)"
+            />
+
         </template>
     </DefaultDialog>
 </template>
@@ -270,6 +278,7 @@ moment.locale("es");
 
 import Editor from "@tinymce/tinymce-vue";
 import MeetingSearchAttendants from "./MeetingSearchAttendants";
+import MeetingInfoCreateModal from './MeetingInfoCreateModal';
 import DefaultLogoImage from "../../components/globals/DefaultLogoImage";
 import MeetingItemListAttendant from "./MeetingItemListAttendant";
 import ModalScheduledMeetings from "./ModalScheduledMeetings";
@@ -285,6 +294,7 @@ export default {
         DefaultLogoImage,
         ModalScheduledMeetings,
         MeetingItemListAttendant,
+        MeetingInfoCreateModal,
         VueTimepicker,
         editor: Editor
     },
@@ -340,6 +350,14 @@ export default {
                 base_endpoint: '/aulas-virtuales',
                 resource: 'meetingAttendants',
                 confirmLabel: 'Agregar',
+                cancelLabel: 'Cerrar',
+            },
+            modalInfoCreateMeeting:{
+                ref: 'MeetingInfoCreateModal',
+                open: false,
+                base_endpoint: '/aulas-virtuales/cuentas',
+                resource:{ status: {color: null} },
+                hideConfirmBtn: true,
                 cancelLabel: 'Cerrar',
             },
             rules: {
@@ -427,12 +445,17 @@ export default {
                 vue.$http.post(url, formData)
                     .then(({data}) => {
 
-                        console.log(data);
+                        // console.log(data);
 
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
+
+                        setTimeout(() => {
+                          vue.openFormModal(vue.modalInfoCreateMeeting, null, null, 'Reunión creada correctamente')
+                          vue.modalInfoCreateMeeting.resource = data.data.status
+                        }, 500)
 
                     }).catch((error) => {
                     this.hideLoader()

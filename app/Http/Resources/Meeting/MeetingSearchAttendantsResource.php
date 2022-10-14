@@ -23,7 +23,7 @@ class MeetingSearchAttendantsResource extends JsonResource
         return [
             'id' => $this->id,
             'dni' => $this->document,
-            'nombre' => $this->name,
+            'nombre' => $this->name.' '.$this->lastname.' '.$this->surname,
             // 'subworkspace_id' => $this->config_id,
 
             'carrera' => $carrera->nombre ?? 'Sin carrera',

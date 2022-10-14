@@ -12,6 +12,8 @@ class MeetingResource extends JsonResource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
+
+
     public function toArray($request)
     {
         return [
@@ -30,6 +32,7 @@ class MeetingResource extends JsonResource
             'starts_at' => $this->starts_at->format('d/m/Y g:i a') . ' (' . $this->duration . ' min)',
 
             'attendants_count' => $this->attendants_count,
+            'prefix' => $this->buildPrefix(),
 
             'editable' => $this->canBeEdited(),
             'cancelable' => $this->canBeCancelled(),
