@@ -9,7 +9,7 @@
           <v-row>
             <v-col cols="12" class="text-center">
               <h5>Reunión : {{ options.resource.name }}</h5>
-              <h5>Prefijo : {{ options.resource.prefix }}</h5>
+              <h5>Código : {{ options.resource.prefix }}</h5>
             </v-col>
             <v-col cols="12" class="text-center">
                 <h6>Inicio : {{ options.resource.starts_at }}</h6>
