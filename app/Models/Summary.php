@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
+
 class Summary extends BaseModel
 {
     protected function setUserLastTimeEvaluation($model, $user = NULL)
@@ -136,23 +138,19 @@ class Summary extends BaseModel
         }
     }
 
-    protected function setSummaryUpdates($users, $courses = null)
+    protected function setSummaryUpdates($user_ids, $course_ids = null)
     {
-        $user_ids = $user->pluck('id');
-
         $data = [
             'summary_user_update' => true,
             'required_update_at' => now(),
         ];
 
-        if ($courses) {
-
-            $course_ids = $courses->implode('id', ',');
-
+        if ($course_ids) {
+            $course_ids = implode(',',$course_ids);
             $data['summary_course_update'] = true;
-            $data['summary_course_data'] = DB::raw("CONCAT(summary_course_data, ',', {$course_ids})");
+            User::whereIn('id', $user_ids)->whereNull('summary_course_data')->update(['summary_course_data'=>'0']);
+            $data['summary_course_data'] = DB::raw("CONCAT(summary_course_data,',','{$course_ids}')");
         }
-
         User::whereIn('id', $user_ids)->update($data);
     }
 

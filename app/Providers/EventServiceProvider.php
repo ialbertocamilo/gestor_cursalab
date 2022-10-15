@@ -2,18 +2,20 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
+use App\Models\Curso;
+use App\Models\Topic;
+use App\Models\Posteo;
+use App\Models\Categoria;
 
-use App\Observers\CourseObserver;
+use App\Observers\TopicObserver;
 // use App\Observers\PosteoObserver;
 // use App\Observers\CategoriaObserver;
 
-use App\Models\Curso;
-use App\Models\Posteo;
-use App\Models\Categoria;
+use App\Observers\CourseObserver;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -39,7 +41,7 @@ class EventServiceProvider extends ServiceProvider
 
         // Course::observe(CourseObserver::class);
         
-        // Posteo::observe(PosteoObserver::class);
+        Topic::observe(TopicObserver::class);
         // Curso::observe(CursoObserver::class);
         // Categoria::observe(CategoriaObserver::class);
     }
