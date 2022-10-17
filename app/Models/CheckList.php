@@ -51,6 +51,18 @@ class CheckList extends BaseModel
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
+        $workspace = get_current_workspace();
+
+        $cursos_x_wk = Workspace::leftJoin('course_workspace as cw', 'workspaces.id', '=', 'cw.workspace_id')
+            ->leftJoin('courses as c', 'cw.course_id', '=', 'c.id')
+            ->leftJoin('checklist_relationships as cr', 'c.id', '=', 'cr.course_id')
+            ->groupBy('cr.checklist_id')
+            ->where('workspaces.id', $workspace->id)
+            ->whereNotNull('cr.checklist_id')
+            ->select('cr.checklist_id')
+            ->pluck('cr.checklist_id')
+            ->unique();
+
         $queryChecklist = CheckList::with([
             'checklist_actividades' => function ($q) {
                 $q->orderBy('active', 'desc')->orderBy('position');
@@ -58,7 +70,7 @@ class CheckList extends BaseModel
             'courses' => function ($q) {
                 $q->select('courses.id', 'courses.name');
             }
-        ]);
+        ])->whereIn('id', $cursos_x_wk);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -67,8 +79,8 @@ class CheckList extends BaseModel
 
         if (!is_null($filtro) && !empty($filtro)) {
             $queryChecklist->where(function ($query) use ($filtro) {
-                $query->where('title', 'like', "%$filtro%");
-                $query->orWhere('description', 'like', "%$filtro%");
+                $query->where('checklists.title', 'like', "%$filtro%");
+                $query->orWhere('checklists.description', 'like', "%$filtro%");
             });
         }
         $checklists = $queryChecklist->paginate(request('paginate', 15));
@@ -150,11 +162,11 @@ class CheckList extends BaseModel
                             if (!$checklistRpta) {
                                 $checklistRpta = ChecklistRpta::create([
                                     'checklist_id' => $checklist->id,
-                                    'alumno_id' => $alumno_id,
-                                    'curso_id' => $curso->id,
-                                    'categoria_id' => $curso->categoria_id,
-                                    'entrenador_id' => $entrenador_id,
-                                    'porcentaje' => 0
+                                    'student_id' => $alumno_id,
+                                    'course_id' => $curso->id,
+                                    'school_id' => $curso->categoria['id'],
+                                    'coach_id' => $entrenador_id,
+                                    'percent' => 0
                                 ]);
                             }
                             $progresoActividad = $this->getProgresoActividades($checklist, $checklistRpta, $actividades_activas);
