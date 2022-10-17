@@ -76,7 +76,8 @@ class AuthController extends Controller
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
-            'can_be_host' => $can_be_host,
+            // 'can_be_host' => $can_be_host,
+            'can_be_host' => true,
 //            'carrera' => $carrera,
 //            'ciclo' => $ciclo
 //            "grupo" => $user->grupo,
