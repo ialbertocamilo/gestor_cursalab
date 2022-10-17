@@ -29,8 +29,33 @@ class AuthController extends Controller
             $credentials2['document'] = $userinput;
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)){
+
+                // When "Show message" variable is true and
+                // company is Farmacias Peruanas
+
+                if (env('SHOW_MESSAGE_M4')) {
+
+                    // Fetch subworkspaces ids of Farmacias Peruanas workspace
+
+                    $farmaciasIds = Workspace::where('parent_id', 25)
+                        ->pluck('id')
+                        ->toArray() ;
+
+                    // If user's subworkspace is in Farmacias, stop authentication
+                    Auth::check();
+                    $isFarmacias = in_array(
+                        Auth::user()->subworkspace_id, $farmaciasIds
+                    );
+
+                    if ($isFarmacias) {
+                        $message = 'Por el momento no tienes acceso a la plataforma. Estamos trabajando en actualizar tus datos. Puedes ingresar desde el 02/11';
+                        return $this->error($message, 401);
+                    }
+                }
+
                 return $this->respondWithDataAndToken($data);
-            }else{
+
+            } else {
                 return $this->error('No autorizado.', 401);
             }
 
@@ -58,11 +83,14 @@ class AuthController extends Controller
            ->where('id', $user->subworkspace_id)
            ->first();
 
+        $workspace = Workspace::find($user->subworkspace_id);
        // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
        // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
        // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
         $supervisor = $user->isSupervisor();
+
+        $can_be_host = $user->belongsToSegmentation($workspace);
 
         $user_data = [
             "id" => $user->id,
@@ -73,6 +101,7 @@ class AuthController extends Controller
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
+            // 'can_be_host' => $can_be_host,
             'can_be_host' => true,
 //            'carrera' => $carrera,
 //            'ciclo' => $ciclo

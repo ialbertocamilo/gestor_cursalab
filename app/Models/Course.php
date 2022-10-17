@@ -46,7 +46,7 @@ class Course extends BaseModel
 
     public function checklists()
     {
-        return $this->belongsToMany(Checklist::class, 'checklist_relationship', 'course_id', 'checklist_id');
+        return $this->belongsToMany(Checklist::class, 'checklist_relationships', 'course_id', 'checklist_id');
     }
 
     public function update_usuarios()

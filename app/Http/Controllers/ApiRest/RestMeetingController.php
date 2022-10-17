@@ -2,28 +2,25 @@
 
 namespace App\Http\Controllers\ApiRest;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\AppErrorRequest;
+use App\Http\Requests\MeetingAppRequest;
 use App\Http\Requests\Meeting\MeetingAppUploadAttendantsRequest;
 use App\Http\Requests\Meeting\MeetingAppUploadhAttendantsRequest;
-use App\Http\Requests\MeetingAppRequest;
-
-use App\Models\Attendant;
-use App\Models\Abconfig;
-use App\Models\Workspace;
-use App\Models\Criterio;
-use App\Models\Taxonomy;
-use App\Models\Meeting;
-use App\Models\Error;
-
-use Carbon\Carbon;
-
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\MeetingAppResource;
-use App\Http\Requests\AppErrorRequest;
-use stdClass;
-
 use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
+use App\Http\Resources\MeetingAppResource;
+use App\Http\Resources\MeetingResource;
 use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Models\Abconfig;
+use App\Models\Attendant;
+use App\Models\Criterio;
+use App\Models\Error;
+use App\Models\Meeting;
+use App\Models\Taxonomy;
+use App\Models\Workspace;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use stdClass;
 
 class RestMeetingController extends Controller
 {
@@ -189,8 +186,9 @@ class RestMeetingController extends Controller
     public function store(MeetingAppRequest $request)
     {
         $meeting = Meeting::storeRequest($request->validated());
-
-        return $this->success(['msg' => 'Reunión creada correctamente.']);
+        return $this->success(['msg' => 'Reunión creada correctamente',
+                               'meeting' => ['code' => $meeting->buildPrefix()] ]);
+                               // 'meeting' => new MeetingAppRequest($meeting)]);
     }
 
     public function update(Meeting $meeting, MeetingAppRequest $request)

@@ -115,8 +115,15 @@ class Account extends BaseModel
 
     protected function getAvailablesForMeeting($type, $dates, $meeting = NULL, $method = 'get')
     {
+        // From Gestor
+        $workspace = get_current_workspace();
+
+        // Or from APP
+        $subworkspace = $workspace ? NULL : auth()->user()->subworkspace;
+
         $accounts = self::where('type_id', $type->id)
                         ->where('active', ACTIVE)
+                        ->where('workspace_id', $workspace->id ?? $subworkspace->parent_id ?? NULL)
                         ->whereDoesntHave('meetings', function ($query) use ($dates, $meeting) {
                             $query->excludeMeeting($meeting);
                             $query->betweenScheduleDates($dates);

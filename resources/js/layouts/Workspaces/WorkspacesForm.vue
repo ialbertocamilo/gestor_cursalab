@@ -32,7 +32,7 @@
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogo"
                             v-model="resource.logo"
-                            label="Logotipo"
+                            label="Logotipo (400x142px)"
                             :file-types="['image']"
                             :rules="rules.logo"
                             @onSelect="setFile($event, resource,'logo')"/>
@@ -41,7 +41,7 @@
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogoNegativo"
                             v-model="resource.logo_negativo"
-                            label="Logotipo negativo"
+                            label="Logotipo negativo (400x142px)"
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'logo_negativo')"/>
                     </v-col>
@@ -74,8 +74,9 @@
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
                             :label="generateCriterionTitle(criterion)"
-                            :disabled="criterion.code === 'module'"
+                            :disabled="true"
                         >
+                            <!-- :disabled="criterion.code === 'module'" -->
                         </v-checkbox>
                     </v-col>
                     <v-col cols="6">

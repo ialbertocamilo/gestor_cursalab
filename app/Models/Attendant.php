@@ -360,7 +360,7 @@ class Attendant extends BaseModel
         // $currMeetingId = $filters['meeting_id'] ?? null;
 
         # === columnas a visualizar ===
-        $visibleColumns = ['id', 'name', 'email', 'subworkspace_id', 'document'];
+        $visibleColumns = ['id', 'name', 'lastname', 'surname', 'email', 'subworkspace_id', 'document'];
 
         $query = Usuario::with(['config:id,name,logo',
                                 'invitations.meeting' => function ($q)

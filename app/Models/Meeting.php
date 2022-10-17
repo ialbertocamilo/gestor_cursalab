@@ -58,6 +58,10 @@ class Meeting extends BaseModel
         return $this->belongsTo(Account::class);
     }
 
+    public function workspace() {
+        return $this->belongsTo(Workspace::class, 'workspace_id');
+    }
+
     public function host()
     {
         return $this->belongsTo(Usuario::class, 'host_id');
@@ -186,6 +190,18 @@ class Meeting extends BaseModel
         return 0;
     }
 
+    public function buildPrefix(string $flag = 'M')
+    {
+        /*
+        $workSpaceParts = explode(' ', $this->workspace->name);
+        $currentPrefix = '';
+        foreach($workSpaceParts as $value) {
+            $currentPrefix .= str_split($value)[0]; //first letter
+        } */
+
+        return $flag.$this->id.'-'.$this->starts_at->format('md');
+    }
+
     public function isOnTime()
     {
         return now()->between($this->starts_at, $this->finishes_at);
@@ -236,7 +252,7 @@ class Meeting extends BaseModel
 
     protected function search($request, $method = 'paginate')
     {
-        $query = self::with('type', 'status', 'account.service', 'host', 'attendants.type')->withCount('attendants');
+        $query = self::with('type', 'status', 'account.service', 'workspace', 'host', 'attendants.type')->withCount('attendants');
 
         # meeting segun workspaceid
         $currWorkspaceIndex = get_current_workspace_indexes('id');

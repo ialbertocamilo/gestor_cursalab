@@ -72,11 +72,14 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::post('registra_ayuda', [RestAyudaController::class, 'registra_ayuda']);
 
     Route::get('reportes-supervisores/init', [RestReportesSupervisores::class, 'init']);
+
+    Route::prefix('entrenamiento')->group(base_path('routes/app/checklist.php'));
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::post('registrar_soporte_login', [RestAyudaController::class, 'registra_ayuda_login']);
     Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
+    Route::prefix('checklist')->group(base_path('routes/app/checklist.php'));
 });
 
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);
@@ -91,7 +94,8 @@ Route::get('notifications', function () {
         'showCloseButtonM2' => env('SHOW_CLOSE_BUTTON_M2'),
         'showModalM3' => env('SHOW_MODAL_M3'),
         'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
-        'showMessageM4' => env('SHOW_MESSAGE_M4')
+        'showMessageM4' => env('SHOW_MESSAGE_M4'),
+        'showIosLink' => env('SHOW_IOS_LINK')
     ]);
 });
 
