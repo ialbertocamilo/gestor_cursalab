@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 
-use App\Taxonomy;
+use App\Models\Taxonomy;
 
 class MeetingAppRequest extends FormRequest
 {
