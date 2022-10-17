@@ -185,11 +185,11 @@ class RestMeetingController extends Controller
 
     public function store(MeetingAppRequest $request)
     {
+        $data = $request->validated();
         $subworkspace = auth()->user()->subworkspace;
+        $data['workspace_id'] = $subworkspace->parent_id;
 
-        $request->merge(['workspace_id' => $subworkspace->parent_id]);
-
-        $meeting = Meeting::storeRequest($request->validated());
+        $meeting = Meeting::storeRequest($data);
 
         return $this->success(['msg' => 'Reunión creada correctamente',
                                'meeting' => ['code' => $meeting->buildPrefix()] ]);
@@ -198,11 +198,11 @@ class RestMeetingController extends Controller
 
     public function update(Meeting $meeting, MeetingAppRequest $request)
     {
+        $data = $request->validated();
         $subworkspace = auth()->user()->subworkspace;
+        $data['workspace_id'] = $subworkspace->parent_id;
 
-        $request->merge(['workspace_id' => $subworkspace->parent_id]);
-
-        Meeting::storeRequest($request->validated(), $meeting);
+        Meeting::storeRequest($data, $meeting);
 
         return $this->success(['msg' => 'Reunión actualizada correctamente.']);
     }
@@ -230,11 +230,11 @@ class RestMeetingController extends Controller
         ];
 
         return $this->success($data);
+    $data = $request->validated();
     }
-
     public function uploadAttendants(MeetingAppUploadAttendantsRequest $request)
     {
-        $data = $request->validated();
+        $data = $data;
 
 //        $data['usuarios_dni'] = Attendant::getUsuariosDniFromExcel($data);
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
