@@ -59,7 +59,7 @@
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputLogo"
                                 v-model="resource.imagen"
-                                label="Imagen"
+                                label="Imagen (500x350px)"
                                 :file-types="['image']"
                                 @onSelect="setFile($event, resource,'imagen')"/>
                         </v-col>
@@ -164,7 +164,7 @@
                                                 <DefaultToggle
                                                     v-model="media.downloadable"
                                                     no-label
-                                                    :disabled="['youtube', 'vimeo', 'scorm', 'link','genially','rise'].includes(media.type_id)"
+                                                    :disabled="['youtube', 'vimeo', 'scorm', 'link','genially'].includes(media.type_id)"
                                                 />
                                             </div>
                                         </td>

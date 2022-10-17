@@ -11,7 +11,7 @@ const extensiones = {
     pdf: ["pdf"],
     excel: ["xls", 'xlsx', 'csv'],
     scorm: ["zip", "scorm"],
-    rise: ["zip", "rise"],
+    // rise: ["zip", "rise"],
 };
 const default_media_images = {
     video: "images/default-video-img_285_360.png",
@@ -35,7 +35,7 @@ export default {
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
                 {label: 'Genially', icon: 'mdi mdi-google-circles', type: 'genially'},
-                {label: 'Rise', icon: 'mdi mdi-archive', type: 'rise'},
+                // {label: 'Rise', icon: 'mdi mdi-archive', type: 'rise'},
             ],
             mixin_extensiones: extensiones,
             mixin_default_media_images: default_media_images,
