@@ -445,6 +445,8 @@ export default {
                 vue.$http.post(url, formData)
                     .then(({data}) => {
 
+                      // console.log('data_post_meeting', data);
+
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
