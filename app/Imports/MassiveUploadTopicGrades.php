@@ -55,7 +55,10 @@ class MassiveUploadTopicGrades implements ToCollection
         for ($i = 1; $i < $count; $i++) {
             $document_user = $excelData[$i][0];
             $grade = $excelData[$i][1];
-
+            if(!$document_user){
+                $this->pushNoProcesados($excelData[$i], 'Usuario no existe');
+                continue;
+            }
             $user = User::with('subworkspace:id,name,mod_evaluaciones,parent_id')
                 ->where('document', $document_user)->first();
 
