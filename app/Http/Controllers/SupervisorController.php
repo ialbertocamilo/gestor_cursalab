@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Criterion;
+use App\Models\Segment;
 use App\Models\Supervisor;
 use App\Models\Taxonomy;
 use App\Models\User;
@@ -103,9 +104,17 @@ class SupervisorController extends Controller
         return $this->success([]);
     }
 
-    public function destroy($supervisor)
+    public function destroy(User $supervisor)
     {
-        Supervisor::deleteSupervisor($supervisor);
+//        Supervisor::deleteSupervisor($supervisor);
+        $segments = Segment::where('model_type', User::class)->where('model_id', $supervisor->id)
+            ->whereRelation('code', 'code', 'user-supervise')
+            ->get();
+
+        foreach ($segments as $segment){
+            $segment->values()->delete();
+            $segment->delete();
+        }
         return $this->success(['msg' => 'Se eliminó el supervisor correctamente.']);
     }
 
@@ -150,7 +159,7 @@ class SupervisorController extends Controller
 
     public function initData()
     {
-        Taxonomy::create([
+        Taxonomy::firstOrCreate([
             'group' => 'segment',
             'type' => 'code',
             'code' => 'user-supervise',
