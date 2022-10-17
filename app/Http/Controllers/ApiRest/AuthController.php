@@ -29,8 +29,33 @@ class AuthController extends Controller
             $credentials2['document'] = $userinput;
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)){
+
+                // When "Show message" variable is true and
+                // company is Farmacias Peruanas
+
+                if (env('SHOW_MESSAGE_M4')) {
+
+                    // Fetch subworkspaces ids of Farmacias Peruanas workspace
+
+                    $farmaciasIds = Workspace::where('parent_id', 25)
+                        ->pluck('id')
+                        ->toArray() ;
+
+                    // If user's subworkspace is in Farmacias, stop authentication
+                    Auth::check();
+                    $isFarmacias = in_array(
+                        Auth::user()->subworkspace_id, $farmaciasIds
+                    );
+
+                    if ($isFarmacias) {
+                        $message = 'Por el momento no tienes acceso a la plataforma. Estamos trabajando en actualizar tus datos. Puedes ingresar desde el 02/11';
+                        return $this->error($message, 401);
+                    }
+                }
+
                 return $this->respondWithDataAndToken($data);
-            }else{
+
+            } else {
                 return $this->error('No autorizado.', 401);
             }
 
