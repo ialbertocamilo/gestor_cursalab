@@ -185,12 +185,12 @@ class RestMeetingController extends Controller
 
     public function store(MeetingAppRequest $request)
     {
-        info('request->validated()');
-        info($request->validated());
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+
         $meeting = Meeting::storeRequest($request->validated());
 
-        info('meeting');
-        info($meeting);
         return $this->success(['msg' => 'Reunión creada correctamente',
                                'meeting' => ['code' => $meeting->buildPrefix()] ]);
                                // 'meeting' => new MeetingAppRequest($meeting)]);
@@ -198,6 +198,10 @@ class RestMeetingController extends Controller
 
     public function update(Meeting $meeting, MeetingAppRequest $request)
     {
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+
         Meeting::storeRequest($request->validated(), $meeting);
 
         return $this->success(['msg' => 'Reunión actualizada correctamente.']);
