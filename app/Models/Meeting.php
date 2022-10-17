@@ -317,7 +317,7 @@ class Meeting extends BaseModel
             $host = Usuario::find($data['host_id']);
 
             $datesHaveChanged = $meeting && $meeting->datesHaveChanged($data);
-            $data['workspace_id'] = get_current_workspace_indexes('id'); #añadiendo workspace
+            $data['workspace_id'] = $data['workspace_id'] ?? get_current_workspace_indexes('id'); #añadiendo workspace
 
             DB::beginTransaction();
 
@@ -376,7 +376,8 @@ class Meeting extends BaseModel
 
         } catch (\Exception $e) {
 
-            dd($e);
+            info('e error meeting');
+            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());

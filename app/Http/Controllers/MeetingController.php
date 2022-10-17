@@ -84,7 +84,6 @@ class MeetingController extends Controller
      * @param MeetingRequest $request
      * @return JsonResponse
      */
-    // public function store(MeetingAppRequest $request)
     public function store(MeetingRequest $request)
     {
         $meeting = Meeting::storeRequest($request->validated());
