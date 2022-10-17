@@ -40,8 +40,8 @@ class MeetingAppRequest extends FormRequest
             'duration' => 'required|numeric|min:10|max:360',
             'embed' => 'required',
 
-            // 'attendants' => 'required',
-            'attendants.*.usuario_id' => 'required',
+            'attendants' => 'required',
+            // 'attendants.*.usuario_id' => 'required',
 
             'description' => 'nullable',
         ];
