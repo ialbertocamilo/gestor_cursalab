@@ -157,7 +157,7 @@ export default {
                         subpaths: ["aulas-virtuales"],
                         selected: false,
                         permission: "meetings",
-                        role: ["super-user", "admin-TEMPORAL_INACTIVO"]
+                        role: ["super-user", this.show_meeting_section]
                     },
                     {
                         title: "Cuentas Zoom",
@@ -166,7 +166,7 @@ export default {
                         subpaths: ["cuentas-zoom"],
                         selected: false,
                         permission: "accounts",
-                        role: ["super-user", "admin-TEMPORAL_INACTIVO"]
+                        role: ["super-user"]
                         //Fix -2
                         // permission:"accounts.list"
                     }
@@ -523,7 +523,12 @@ export default {
         roles: {
             type: Array,
             required: true
+        },
+        show_meeting_section: {
+            type: String,
+            required: true
         }
+
     },
     computed: {
         gruposFiltrado: function() {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\Meeting\GeneralMeetingsExport;
 use App\Exports\Meeting\MeetingExport;
+use App\Http\Requests\MeetingAppRequest;
 use App\Http\Requests\MeetingFinishRequest;
 use App\Http\Requests\MeetingRequest;
 use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
@@ -83,10 +84,12 @@ class MeetingController extends Controller
      * @param MeetingRequest $request
      * @return JsonResponse
      */
+    // public function store(MeetingAppRequest $request)
     public function store(MeetingRequest $request)
     {
         $meeting = Meeting::storeRequest($request->validated());
         return $this->success(['msg' => 'Reunión creada correctamente.']);
+                               // 'status' => $meeting->buildPrefix() ]);
     }
 
     public function getDuplicatedData(Meeting $meeting)
@@ -165,6 +168,7 @@ class MeetingController extends Controller
         $meeting->real_percentage_attendees = $meeting->getRealPercetageOfAttendees();
         $meeting->download_ready = $meeting->checkIfDataIsReady();
         $meeting->getDatesFormatted();
+        $meeting->prefix = $meeting->buildPrefix();
         $meeting->isMasterOrAdminCursalab = auth()->user()->isMasterOrAdminCursalab();
 
 

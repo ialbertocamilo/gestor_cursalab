@@ -83,11 +83,14 @@ class AuthController extends Controller
            ->where('id', $user->subworkspace_id)
            ->first();
 
+        $workspace = Workspace::find($user->subworkspace_id);
        // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
        // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
        // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
         $supervisor = $user->isSupervisor();
+
+        $can_be_host = $user->belongsToSegmentation($workspace);
 
         $user_data = [
             "id" => $user->id,
@@ -98,6 +101,7 @@ class AuthController extends Controller
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
+            // 'can_be_host' => $can_be_host,
             'can_be_host' => true,
 //            'carrera' => $carrera,
 //            'ciclo' => $ciclo

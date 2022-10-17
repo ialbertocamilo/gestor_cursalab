@@ -4,8 +4,9 @@
         <header class="page-header mt-5 py-0 mx-8">
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
-                    Aulas Virtuales {{ usuario_id }} - {{ workspace_id }}
+                    Aulas Virtuales
                     <v-spacer/>
+                     <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
 <!--                    <v-btn icon color="primary"-->
 <!--                           @click="openFormModal(modalDirectionsOptions, null, null, 'Recomendaciones')"-->
@@ -14,9 +15,9 @@
 <!--                    </v-btn>-->
 
 
-                <DefaultModalButton
-                    label="Open Modal Workspace"
-                    @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación del workspace`)"/>
+                <DefaultModalButton v-if="superuser"
+                    label="Configurar Anfitriones"
+                    @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
 
                 <SegmentFormModal
                     :options="modalFormSegmentationOptions"
@@ -169,7 +170,7 @@ import MeetingFormModal from "./MeetingFormModal";
 
 export default {
     components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal, SegmentFormModal},
-    props: ['usuario_id', 'workspace_id'],
+    props: ['usuario_id', 'workspace_id', 'superuser'],
     data: () => ({
         dataTable: {
             endpoint: '/aulas-virtuales/search',
@@ -181,6 +182,7 @@ export default {
                 {text: "Nombre", value: "custom_meeting_name", sortable: false},
                 // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},
                 {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
+                {text: "Código", value: "prefix", sortable: false, align: 'center'},
                 {text: "Estado", value: "status", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
                 {text: "Fecha de inicio", value: "starts_at", align: 'center',},

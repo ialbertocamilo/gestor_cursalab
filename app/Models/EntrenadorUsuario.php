@@ -172,43 +172,54 @@ class EntrenadorUsuario extends Model
             return $entrenador;
         }
         // TODO: Lista total de alumnos
-        $alumnos_ids = EntrenadorUsuario::estado(1)->entrenador($entrenador['data_usuario']->id)->get();
-        $queryDataAlumnos = Usuario::with([
-            'matricula_presente.carrera' => function ($q) {
-                $q->select('id', 'nombre');
-            }
-        ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
-            ->whereIn('id', $alumnos_ids->pluck('user_id')->all())
-            ->select('id', 'nombre', 'dni', 'botica', 'sexo');
+        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->get();
+
+        $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace');
+        // $queryDataAlumnos = User::with([
+        //     'matricula_presente.carrera' => function ($q) {
+        //         $q->select('id', 'nombre');
+        //     }
+        // ])->whereIn('id', $alumnos_ids->pluck('user_id')->all())
+        //     ->select('id', 'name', 'document', 'subworkspace_id');
 
         if (!empty($filtro)) {
             $queryDataAlumnos->where(function ($query) use ($filtro) {
-                $query->where('nombre', 'like', "%$filtro%");
-                $query->orWhere('dni', 'like', "%$filtro%");
+                $query->where('users.name', 'like', "%$filtro%");
+                $query->orWhere('users.document', 'like', "%$filtro%");
             });
         }
         $dataAlumnos = $queryDataAlumnos->get();
+
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
-            $value->makeHidden('matricula_presente');
-            $value->carrera = $value->matricula_presente->carrera->nombre;
+            // $value->makeHidden('matricula_presente');
+            $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
+            // $value->carrera = $value->matricula_presente->carrera->nombre;
+            $value->carrera = '';
         });
         $response['alumnos'] = $dataAlumnos;
 
         // TODO: Últimos 10 alumnos vistos
-        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('alumno_id', $alumnos_ids->pluck('user_id'))->orderBy('updated_at', 'DESC')->groupBy('alumno_id')->get();
-        $ultimos_alumnos = Usuario::with([
-            'matricula_presente.carrera' => function ($q) {
-                $q->select('id', 'nombre');
-            }
-        ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
-            ->whereIn('id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
-            ->select('id', 'nombre', 'dni', 'botica', 'sexo')
+        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id'))->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
+        $ultimos_alumnos = Usuario::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->whereIn('users.id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
             ->get();
+        // $ultimos_alumnos = Usuario::with([
+        //     'matricula_presente.carrera' => function ($q) {
+        //         $q->select('id', 'nombre');
+        //     }
+        // ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
+        //     ->whereIn('id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
+        //     ->select('id', 'nombre', 'dni', 'botica', 'sexo')
+        //     ->get();
 
         $ultimos_alumnos->each(function ($value, $key) use ($alumnos_ids, $ultimos_alumnos_ids, $entrenador) {
-            $value->makeHidden('matricula_presente');
-            $value->carrera = $value->matricula_presente->carrera->nombre;
-            $temp2 = $ultimos_alumnos_ids->where('alumno_id', $value->id)->where('trainer_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
+            // $value->makeHidden('matricula_presente');
+            // $value->carrera = $value->matricula_presente->carrera->nombre;
+            $value->carrera = '';
+            $temp2 = $ultimos_alumnos_ids->where('student_id', $value->id)->where('trainer_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
             if ($temp2) $value->ultima_actividad = $temp2->updated_at->format('Y-m-d H:i:s');
         });
         $response['ultimos_alumnos'] = $ultimos_alumnos;

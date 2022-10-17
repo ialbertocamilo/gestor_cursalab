@@ -186,6 +186,8 @@ class ZoomService extends MeetingService
     {
         $chunks = $attendants->chunk(30)->all();
         $result = [];
+        $prefix = $meeting->buildPrefix();
+
 //        info("prepareBatchAttendantsData");
 //        info('meeting');
 //        info($meeting);
@@ -196,7 +198,7 @@ class ZoomService extends MeetingService
             $data = [
                 'auto_approve' => true,
                 'registrants_confirmation_email' => true,
-                'registrants' => $this->setDataForRegistrants($chunk),
+                'registrants' => $this->setDataForRegistrants($chunk, $prefix),
             ];
 
             $temp = $this->batchRegistration($meeting, $data)['registrants'];
@@ -227,13 +229,13 @@ class ZoomService extends MeetingService
         return $usuario_id;
     }
 
-    public function setDataForRegistrants($attendants)
+    public function setDataForRegistrants($attendants, $prefix)
     {
         $result = [];
         foreach ($attendants as $attendant) {
             $result[] = [
                 'email' => "user_{$attendant->usuario->id}_{$attendant->id}@cursalab.io",
-                'first_name' => $attendant->usuario->name,
+                'first_name' => $prefix . ' - ' . $attendant->usuario->name,
                 'last_name' => $attendant->usuario->lastname,
             ];
         }
