@@ -150,7 +150,7 @@ class SupervisorController extends Controller
 
     public function initData()
     {
-        Taxonomy::create([
+        Taxonomy::firstOrCreate([
             'group' => 'segment',
             'type' => 'code',
             'code' => 'user-supervise',
