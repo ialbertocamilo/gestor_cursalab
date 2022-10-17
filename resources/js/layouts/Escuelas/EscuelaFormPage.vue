@@ -28,7 +28,7 @@
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputLogo"
                                 v-model="resource.imagen"
-                                label="Logo"
+                                label="Logo (500x350px)"
                                 :file-types="['image']"
                                 @onSelect="setFile($event, resource,'imagen')"/>
                         </v-col>
