@@ -132,7 +132,7 @@ export default {
                 ref: 'SupervisorTable',
                 headers: [
                     {text: "Módulo", value: "modulo", align: 'start', sortable: false},
-                    {text: "Nombre y Apellidos", value: "fullname", align: 'start', sortable: false},
+                    {text: "Nombre y Apellidos", value: "nombre", align: 'start', sortable: false},
                     // {text: "Apellidos", value: "apellidos", align: 'start', sortable: false},
                     {text: "Documento", value: "dni", align: 'start', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
