@@ -27,6 +27,15 @@ class Migration_1 extends Model
         // Capacitacion FP
     ];
 
+    private $uc_workspace = null;
+
+    public function __construct()
+    {
+        $this->uc_workspace = Workspace::where('slug', "farmacias-peruanas")->first();
+    }
+
+
+
     protected function connect()
     {
         $db_uc_data = config('database.connections.mysql_uc');
@@ -49,12 +58,13 @@ class Migration_1 extends Model
             'boticas' => [], 'modulos' => [], 'courses' => [], 'schools' => []
         ];
 
-        $this->setUsersData($client_LMS_data, $db);
 //        $this->setModulosData($client_LMS_data, $db);
-//        $this->setCarrerasData($client_LMS_data, $db);
-//        $this->setCiclosData($client_LMS_data, $db);
-//        $this->setGruposData($client_LMS_data, $db);
-//        $this->setBoticasData($client_LMS_data, $db);
+        $this->setUsersData($client_LMS_data, $db);
+        $this->setCarrerasData($client_LMS_data, $db);
+
+        $this->setCiclosData($client_LMS_data, $db);
+        $this->setGruposData($client_LMS_data, $db);
+        $this->setBoticasData($client_LMS_data, $db);
 
 //        $this->setSchoolsData($client_LMS_data, $db);
 //        $this->setCoursesData($client_LMS_data, $db);
@@ -67,15 +77,15 @@ class Migration_1 extends Model
 //        $this->insertModulosData($data);
 
         $this->insertUsersData($data);
+        $this->insertCarrerasData($data);
 
-//        $this->insertCarrerasData($data);
-//        $this->insertCiclosData($data);
-//
-//        $this->insertGruposData($data);
-//        $this->insertBoticasData($data);
-//
+        $this->insertCiclosData($data);
+
+        $this->insertGruposData($data);
+        $this->insertBoticasData($data);
+
 //        $this->insertCriterionUserData($data);
-//
+
 //        $this->insertSegmentacionCarrerasCiclosData();
 
 //        $this->insertSchoolData($data);
@@ -84,15 +94,7 @@ class Migration_1 extends Model
 
     public function setUsersData(&$result, $db)
     {
-//        $uc = [
-//            'name' => "Universidad Corporativa",
-//            'active' => ACTIVE
-//        ];
-//        $uc_workspace = Workspace::create($uc);
-
-        $uc_workspace = Workspace::where('slug', 'farmacias-peruanas')->first();
-
-        $user_db = User::select('document', 'email')->get();
+        $user_db = User::disableCache()->select('document', 'email')->get();
 
         $temp['users'] = $db->getTable('usuarios')
             ->select(
@@ -107,6 +109,7 @@ class Migration_1 extends Model
                 'created_at',
                 'updated_at'
             )
+            ->skip(100)
             ->limit(100)
 //            ->whereNotIn('dni', $users->pluck('document'))
 //            ->whereNotIn('email', $users->pluck('email'))
@@ -126,6 +129,7 @@ class Migration_1 extends Model
 
 //            info("Usuario a agregar {$user->dni}");
 //            print_r("Usuario a agregar {$user->dni}\n");
+
             $result['usuario_relations'][] = [
                 'usuario_id' => $user->id,
                 'config_id' => $user->config_id,
@@ -160,7 +164,7 @@ class Migration_1 extends Model
             ];
         }
 
-        $result['users'] = array_chunk($result['users'], self::CHUNK_LENGTH, true);
+//        $result['users'] = array_chunk($result['users'], self::CHUNK_LENGTH, true);
     }
 
     public function setModulosData(&$result, $db)
@@ -170,7 +174,7 @@ class Migration_1 extends Model
             'code' => 'module'
         ]);
 
-        $modules = Workspace::whereNotNull('parent_id')->get();
+        $modules = Workspace::disableCache()->whereNotNull('parent_id')->get();
 
         $temp['modulos'] = $db->getTable('ab_config')->get();
 
@@ -213,11 +217,12 @@ class Migration_1 extends Model
 
     public function setCarrerasData(&$result, $db) // migrar duplicados por modulos
     {
-        $carrera_criterion = Criterion::create([
+        $carrera_criterion = Criterion::firstOrCreate([
             'name' => 'Carrera',
             'code' => 'career'
         ]);
 
+        $carreras_values = CriterionValue::disableCache()->whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
         $temp['carreras'] = $db->getTable('carreras')
             ->select(
                 'id',
@@ -233,9 +238,16 @@ class Migration_1 extends Model
             ->get();
 
         foreach ($temp['carreras'] as $carrera) {
+            $name = "M{$carrera->config_id}::" . $carrera->nombre;
+
+            $career_exists = $carreras_values->where('value_text', $name)->first();
+            if ($career_exists) continue;
+
+            $career_exists = $carreras_values->where('value_text', $carrera->nombre)->first();
+            if ($career_exists) continue;
+
             $result['modulo_carrera'][] = [
                 'config_id' => $carrera->config_id,
-                //                'nombre' => $carrera->nombre,
                 'carrera_id' => $carrera->id,
             ];
 
@@ -243,11 +255,12 @@ class Migration_1 extends Model
             //            $found = in_array($carrera->nombre, $carreras_added);
 
             //            if ($found === false) {
+            //print_r("Se agrega :: {$name} \n");
             $result['carreras'][] = [
                 'external_id' => $carrera->id,
                 'criterion_id' => $carrera_criterion->id,
 
-                'value_text' => "M{$carrera->config_id}::" . $carrera->nombre,
+                'value_text' => $name,
 
                 'active' => $carrera->estado,
 
@@ -262,11 +275,9 @@ class Migration_1 extends Model
 
     public function setCiclosData(&$result, $db) // agrupar y asignar por carreras
     {
-        $ciclo_criterion = Criterion::create([
-            'name' => 'Ciclo',
-            'code' => 'ciclo',
-            'multiple' => ACTIVE
-        ]);
+        $ciclo_criterion = Criterion::where('code', 'cycle')->first();
+
+        $ciclos_values = CriterionValue::disableCache()->whereHas('criterion', fn($q) => $q->where('code', 'cycle'))->get();
 
         $temp['grouped_ciclos'] = $db->getTable('ciclos')
             ->select(
@@ -279,6 +290,12 @@ class Migration_1 extends Model
             ->get();
 
         foreach ($temp['grouped_ciclos'] as $ciclo) {
+
+            $ciclo_exists = $ciclos_values->where('value_text', $ciclo->nombre)->first();
+
+            if ($ciclo_exists) continue;
+
+
             $result['grouped_ciclos'][] = [
                 'criterion_id' => $ciclo_criterion->id,
 
@@ -289,7 +306,7 @@ class Migration_1 extends Model
             ];
         }
 
-        $result['grouped_ciclos'] = array_chunk($result['grouped_ciclos'], self::CHUNK_LENGTH, true);
+        $result['grouped_ciclos'] = array_chunk($result['grouped_ciclos'] ?? [], self::CHUNK_LENGTH, true);
 
         $temp['ciclos_all'] = $db->getTable('ciclos')
             ->select('nombre', 'carrera_id')
@@ -305,10 +322,10 @@ class Migration_1 extends Model
 
     public function setGruposData(&$result, $db) // migrar duplicados por modulos
     {
-        $grupo_criterion = Criterion::create([
-            'name' => 'Grupo',
-            'code' => 'group'
-        ]);
+        $grupo_criterion = Criterion::where('code', 'grupo')->first();
+
+        $grupos_values = CriterionValue::disableCache()->whereHas('criterion', fn($q) => $q->where('code', 'grupo'))
+            ->select('value_text')->get();
 
         $temp['grupos'] = $db->getTable('criterios')
             ->select(
@@ -321,6 +338,15 @@ class Migration_1 extends Model
             ->get();
 
         foreach ($temp['grupos'] as $grupo) {
+
+            $name = "M$grupo->config_id::" . $grupo->valor;
+
+            $grupo_exists = $grupos_values->where('value_text', $grupo->valor)->first();
+            if ($grupo_exists) continue;
+
+            $grupo_exists = $grupos_values->where('value_text', $name)->first();
+            if ($grupo_exists) continue;
+
             $result['grupo_carrera'][] = [
                 'config_id' => $grupo->config_id,
                 'grupo_id' => $grupo->id
@@ -330,7 +356,7 @@ class Migration_1 extends Model
                 'external_id' => $grupo->id,
                 'criterion_id' => $grupo_criterion->id,
 
-                'value_text' => "M{$grupo->config_id}::" . $grupo->valor,
+                'value_text' => $name,
 
                 'created_at' => $grupo->created_at,
                 'updated_at' => $grupo->updated_at,
@@ -342,10 +368,9 @@ class Migration_1 extends Model
 
     public function setBoticasData(&$result, $db) // migrar duplicados por grupos
     {
-        $botica_criterion = Criterion::create([
-            'name' => 'Botica',
-            'code' => 'botica'
-        ]);
+        $botica_criterion = Criterion::where('code', 'botica')->first();
+
+        $boticas_values = CriterionValue::disableCache()->whereHas('criterion', fn($q) => $q->where('code', 'botica'))->get();
 
         $temp['boticas'] = $db->getTable('boticas')
             ->select(
@@ -359,6 +384,14 @@ class Migration_1 extends Model
             ->get();
 
         foreach ($temp['boticas'] as $botica) {
+            $name = $botica->nombre;
+
+            $botica_exist = $boticas_values->where('value_text', $name)->first();
+
+            if ($botica_exist) continue;
+
+            //print_r("{$botica->id} - $botica->nombre}\n");
+
             $result['grupo_botica'][] = [
                 'grupo_id' => $botica->criterio_id,
                 'botica_id' => $botica->id
@@ -451,15 +484,10 @@ class Migration_1 extends Model
 
     public function insertUsersData($data)
     {
-//        info("DATA USERS");
-//        print_r($data['users']);
-//        info("============================");
-        $this->insertChunkedData('users', $data['users']);
         $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
 
         $user_temp = [];
         foreach ($data['users'] as $user) {
-//            info("Usuario a agregar {$user['document']}");
 //            $module_value = $modules_values->where('external_id', $user['config_id'])->first();
             $module_value = self::MODULOS_EQUIVALENCIA[$user['config_id']] ?? false;
             unset($user['config_id']);
@@ -479,7 +507,7 @@ class Migration_1 extends Model
 
         $module = Criterion::where('code', 'module')->first();
         $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
-        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+        $uc_workspace = $this->uc_workspace;
 
         DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $module->id]);
 
@@ -512,20 +540,23 @@ class Migration_1 extends Model
         $this->insertChunkedData('criterion_values', $data['carreras']);
 
         $career = Criterion::where('code', 'career')->first();
-        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
         $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
-        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
-        DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $career->id]);
+        $uc_workspace = $this->uc_workspace;
+        DB::table('criterion_workspace')->insert([
+            'workspace_id' => $uc_workspace->id,
+            'criterion_id' => $career->id
+        ]);
 
         $temp = [];
         $criterion_values_workspace = [];
-        foreach ($data['modulo_carrera'] as $relation) {
-            $module = $modules_values->where('external_id', $relation['config_id'])->first();
-            $career = $carreras_values->where('external_id', $relation['carrera_id'])->first();
-
+        foreach ($data['modulo_carrera'] ?? [] as $relation) {
+//            $module = $modules_values->where('external_id', $relation['config_id'])->first();
+            $module = self::MODULOS_EQUIVALENCIA[$relation['config_id']] ?? false;
+            $career_value = $carreras_values->where('external_id', $relation['carrera_id'])->first();
             if ($module and $career) {
-                $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $career->id];
-                $criterion_values_workspace[] = ['criterion_value_id' => $career->id, 'workspace_id' => $uc_workspace->id];
+//                $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $career->id];
+                $temp[] = ['criterion_value_parent_id' => $module, 'criterion_value_id' => $career_value->id];
+                $criterion_values_workspace[] = ['criterion_value_id' => $career_value->id, 'workspace_id' => $uc_workspace->id];
             }
         }
 
@@ -537,16 +568,16 @@ class Migration_1 extends Model
     {
         $this->insertChunkedData('criterion_values', $data['grouped_ciclos']);
 
-        $ciclo = Criterion::where('code', 'ciclo')->first();
-        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
+        $ciclo = Criterion::where('code', 'cycle')->first();
+        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'cycle'))->get();
         $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
-        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+        $uc_workspace = $this->uc_workspace;
 
         DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $ciclo->id]);
 
         $temp = [];
         $criterion_values_workspace = [];
-        foreach ($data['ciclos_all'] as $relation) {
+        foreach ($data['ciclos_all'] ?? [] as $relation) {
             $ciclo = $ciclos_values->where('value_text', $relation['ciclo_nombre'])->first();
             $career = $carreras_values->where('external_id', $relation['carrera_id'])->first();
 
@@ -564,21 +595,20 @@ class Migration_1 extends Model
     {
         $this->insertChunkedData('criterion_values', $data['grupos']);
 
-        $group = Criterion::where('code', 'group')->first();
-        $modules_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
-        $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
-        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+        $group = Criterion::where('code', 'grupo')->first();
+        $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'grupo'))->get();
+        $uc_workspace = $this->uc_workspace;
 
         DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $group->id]);
 
         $temp = [];
         $criterion_values_workspace = [];
-        foreach ($data['grupo_carrera'] as $relation) {
-            $module = $modules_values->where('external_id', $relation['config_id'])->first();
+        foreach ($data['grupo_carrera'] ?? [] as $relation) {
+            $module = self::MODULOS_EQUIVALENCIA[$relation['config_id']] ?? false;
             $group = $grupos_values->where('external_id', $relation['grupo_id'])->first();
 
             if ($module and $group) {
-                $temp[] = ['criterion_value_parent_id' => $module->id, 'criterion_value_id' => $group->id];
+                $temp[] = ['criterion_value_parent_id' => $module, 'criterion_value_id' => $group->id];
                 $criterion_values_workspace[] = ['criterion_value_id' => $group->id, 'workspace_id' => $uc_workspace->id];
             }
         }
@@ -595,13 +625,13 @@ class Migration_1 extends Model
         $botica = Criterion::where('code', 'botica')->first();
         $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
         $boticas_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'botica'))->get();
-        $uc_workspace = Workspace::where('name', "Universidad Corporativa")->first();
+        $uc_workspace = $this->uc_workspace;
 
         DB::table('criterion_workspace')->insert(['workspace_id' => $uc_workspace->id, 'criterion_id' => $botica->id]);
 
         $temp = [];
         $criterion_values_workspace = [];
-        foreach ($data['grupo_botica'] as $relation) {
+        foreach ($data['grupo_botica'] ?? [] as $relation) {
             $group = $grupos_values->where('external_id', $relation['grupo_id'])->first();
             $botica = $boticas_values->where('external_id', $relation['botica_id'])->first();
 
