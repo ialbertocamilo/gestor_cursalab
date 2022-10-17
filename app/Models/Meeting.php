@@ -376,7 +376,8 @@ class Meeting extends BaseModel
 
         } catch (\Exception $e) {
 
-            dd($e);
+            info('e error meeting');
+            info($e);
             DB::rollBack();
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
