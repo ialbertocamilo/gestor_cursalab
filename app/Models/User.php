@@ -731,8 +731,25 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->count();
     }
 
-    // public function belongsToSegmentation($model)
-    // {
+    public function belongsToSegmentation($model)
+    {
+        if (!$model) return false;
         
-    // }
+        $model->load('segments.values');
+
+        $user_criteria = $this->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+
+        $valid_segment = false;
+
+        foreach ($model->segments as $key => $segment) {
+
+            $model_segment_criteria = $segment->values->groupBy('criterion_id');
+
+            $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $model_segment_criteria);
+
+            if ($valid_segment) break;
+        }
+
+        return $valid_segment;
+    }
 }
