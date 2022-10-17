@@ -187,8 +187,8 @@ class RestMeetingController extends Controller
     {
         $meeting = Meeting::storeRequest($request->validated());
         return $this->success(['msg' => 'Reunión creada correctamente',
-                               'meeting' => [ 'code' => $meeting->buildPrefix() ] ]);
-                               // 'meeting' => new MeetingResource($meeting) ]);
+                               'meeting' => ['code' => $meeting->buildPrefix()]]);
+                               // 'meeting' => new MeetingAppRequest($meeting)]);
     }
 
     public function update(Meeting $meeting, MeetingAppRequest $request)

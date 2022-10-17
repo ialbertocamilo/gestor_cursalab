@@ -352,14 +352,14 @@ export default {
                 confirmLabel: 'Agregar',
                 cancelLabel: 'Cerrar',
             },
-            modalInfoCreateMeeting:{
+           /* modalInfoCreateMeeting:{
                 ref: 'MeetingInfoCreateModal',
                 open: false,
                 base_endpoint: '/aulas-virtuales/cuentas',
                 resource:{ status: {color: null} },
                 hideConfirmBtn: true,
                 cancelLabel: 'Cerrar',
-            },
+            },*/
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 type: this.getRules(['required']),
@@ -444,8 +444,6 @@ export default {
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
-
-                        // console.log(data);
 
                         vue.closeModal()
                         vue.showAlert(data.data.msg)

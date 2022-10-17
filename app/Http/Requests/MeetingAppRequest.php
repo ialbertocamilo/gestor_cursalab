@@ -62,8 +62,7 @@ class MeetingAppRequest extends FormRequest
         $data['finishes_at'] = carbonFromFormat($data['starts_at'])->addMinutes($this->duration ?? 0)->format('Y-m-d H:i:s');
         $data['embed'] = false;
 
-        // $data['attendants'] = $this->list_attendants;
-        // $data['attendants'] = $this->list_attendants;
+        $data['attendants'] = $this->list_attendants;
 
         return $this->merge($data)->all();
     }
