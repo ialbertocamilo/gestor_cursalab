@@ -15,7 +15,9 @@ class TopicObserver
      */
     public function created(Topic $topic)
     {
-        $this->updateUsers($topic);
+        if($topic->estado){
+            Summary::updateUsersByCourse($topic->course);
+        }
     }
 
     /**
@@ -27,7 +29,7 @@ class TopicObserver
     public function updated(Topic $topic)
     {
         if ($topic->isDirty('active') || $topic->isDirty('type_evaluation_id')) {
-            $this->updateUsers($topic);
+            Summary::updateUsersByCourse($topic->course);
         }
     }
 
@@ -39,7 +41,7 @@ class TopicObserver
      */
     public function deleted(Topic $topic)
     {
-        $this->updateUsers($topic);
+        Summary::updateUsersByCourse($topic->course);
     }
 
     /**
@@ -62,11 +64,5 @@ class TopicObserver
     public function forceDeleted(Topic $topic)
     {
         //
-    }
-
-    private function updateUsers($topic){
-        $topic->course->load('segments.values');
-        $users_id_segmented = $topic->course->usersSegmented($topic->course->segments,'users_id');
-        Summary::setSummaryUpdates($users_id_segmented,[$topic->course_id]); 
     }
 }

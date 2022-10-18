@@ -134,10 +134,15 @@ class Summary extends BaseModel
 
         foreach ($course_rows as $row) {
             // SummaryUser::
-
+            
         }
     }
-
+    protected function updateUsersByCourse($course){
+        // $course->load('segments.values');
+        // $users_id_segmented = $course->usersSegmented($course->segments,'users_id');
+        $users_id_segmented  = SummaryCourse::where('course_id',$course->id)->pluck('user_id');
+        self::setSummaryUpdates($users_id_segmented,[$course->id]); 
+    }
     protected function setSummaryUpdates($user_ids, $course_ids = null)
     {
         $data = [

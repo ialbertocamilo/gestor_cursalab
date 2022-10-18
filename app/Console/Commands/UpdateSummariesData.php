@@ -43,10 +43,11 @@ class UpdateSummariesData extends Command
     public function handle()
     {
         $users = User::whereNotNull('summary_user_update')->orWhereNotNull('summary_course_update')->get();
-
+        $bar = $this->output->createProgressBar($users->count());
+        $bar->start();
         foreach ($users as $key => $user) {
 
-            $user = User::find($user->id);
+            // $user = User::find($user->id);
 
             if ($user->summary_course_update) {
 
@@ -71,7 +72,8 @@ class UpdateSummariesData extends Command
                 // 'required_update_at' => NULL,
                 'last_summary_updated_at' => now(),
             ]);
+            $bar->advance();
         }
-
+        $bar->finish();
     }
 }
