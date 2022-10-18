@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Bouncer;
 
 class EntrenadorUsuario extends Model
 {
@@ -69,7 +70,7 @@ class EntrenadorUsuario extends Model
                 $temp = [
                     'id' => $value->user->id,
                     'document' => $value->user->document,
-                    'name' => $value->user->name,
+                    'name' => (!empty($value->user->fullname)) ? $value->user->fullname : $value->user->name,
                     'botica' => (!is_null($subw)) ? $subw->name : '',
                     'estado' => $value->active === 1,
                     'loading' => false
@@ -250,6 +251,17 @@ class EntrenadorUsuario extends Model
             $data['trainer_id'] = $trainer_id;
             $data['user_id'] = $user_id;
             EntrenadorUsuario::create($data);
+
+            $entrenador = User::where('id', $trainer_id)->where('active', 1)->first();
+            $entrenador_workspace = Workspace::select('parent_id')->where('id', $entrenador->subworkspace_id)->first();
+            if (is_null($entrenador_workspace)) {
+                $entrenador_workspace = AssignedRole::getUserAssignedRoles($entrenador->id)->first();
+                $entrenador_workspace_id = $entrenador_workspace->scope;
+            } else {
+                $entrenador_workspace_id = $entrenador_workspace->parent_id;
+            }
+            Bouncer::scope()->to($entrenador_workspace_id);
+            Bouncer::assign('trainer')->to($entrenador);
 
             $response['error'] = false;
             $response['msg'] = 'Se asignó el usuario al entrenador.';
