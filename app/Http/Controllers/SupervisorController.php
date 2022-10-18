@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Criterion;
+use App\Models\Segment;
 use App\Models\Supervisor;
 use App\Models\Taxonomy;
 use App\Models\User;
@@ -26,7 +27,7 @@ class SupervisorController extends Controller
             ->withCount([
                 'segments' => function ($q) {
                     $q->
-                        whereRelation('code', 'code', 'user-supervise');
+                    whereRelation('code', 'code', 'user-supervise');
                 },
             ])
             ->whereRelation('segments.code', 'code', 'user-supervise');
@@ -87,9 +88,10 @@ class SupervisorController extends Controller
     {
         $data = $request->all();
 
-        $users_id = array_column($data, 'id');
+//        $users_id = array_column($data, 'id');
+        $user_documents = array_column($data, 'document');
 
-        $users = User::with('subworkspace.module_criterion_value')->whereIn('id', $users_id)->get();
+        $users = User::with('subworkspace.module_criterion_value')->whereIn('document', $user_documents)->get();
 
         UserRelationship::setUsersAsSupervisor($users);
 
@@ -103,9 +105,17 @@ class SupervisorController extends Controller
         return $this->success([]);
     }
 
-    public function destroy($supervisor)
+    public function destroy(User $supervisor)
     {
-        Supervisor::deleteSupervisor($supervisor);
+//        Supervisor::deleteSupervisor($supervisor);
+        $segments = Segment::where('model_type', User::class)->where('model_id', $supervisor->id)
+            ->whereRelation('code', 'code', 'user-supervise')
+            ->get();
+
+        foreach ($segments as $segment){
+            $segment->values()->delete();
+            $segment->delete();
+        }
         return $this->success(['msg' => 'Se eliminó el supervisor correctamente.']);
     }
 
@@ -150,7 +160,7 @@ class SupervisorController extends Controller
 
     public function initData()
     {
-        Taxonomy::create([
+        Taxonomy::firstOrCreate([
             'group' => 'segment',
             'type' => 'code',
             'code' => 'user-supervise',
