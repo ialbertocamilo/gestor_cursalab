@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
+use App\Http\Controllers\ApiRest\RestController;
 use App\Http\Controllers\ApiRest\RestReportesSupervisores;
 use App\Http\Controllers\Auth\ForgotPasswordApiController;
 use App\Http\Controllers\Auth\ResetPasswordApiController;
@@ -39,11 +40,9 @@ use Illuminate\Support\Facades\Route;
 //     Route::prefix('roles')->group(base_path('routes/cms/roles.php'));
 
 // });
-
 Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
 Route::group(['prefix' => 'auth'], function () {
-
     Route::post('/login', [AuthController::class, 'login']);
 });
 
@@ -52,7 +51,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
 });
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
-
+    Route::post('/usuario_upload_file', [RestController::class, 'usuario_upload_file']);
     Route::post('/guardar_token_firebase', [FirebaseController::class, 'guardarToken']);
 
 
