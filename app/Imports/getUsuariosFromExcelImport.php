@@ -20,7 +20,8 @@ class getUsuariosFromExcelImport implements ToCollection
             return $key == 0;
         });
         $filtered = $filtered->each(function ($value, $key) use ($usuarios_ids) {
-            $usuarios_ids->push(trim($value[0]));
+            if (trim($value[0]))
+                $usuarios_ids->push(trim($value[0]));
         });
 
         $workspace = get_current_workspace();
@@ -31,8 +32,7 @@ class getUsuariosFromExcelImport implements ToCollection
             ->onlyAppUser()
             ->get();
 
-        $diff = $usuarios_ids->diff($usuarios->pluck('dni')->all());
-
+        $diff = $usuarios_ids->diff($usuarios->pluck('document')->all());
 
         $this->data = [
             'ok' => $usuarios->pluck('fullname', 'document')->all(),
