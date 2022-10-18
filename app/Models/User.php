@@ -69,7 +69,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
-        
+
         'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at',
     ];
 
@@ -651,7 +651,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('active', ACTIVE)
             ->get();
 
-        info("COUNT COURSES :: {$course_segmentations->count()}");
+//        info("COUNT COURSES :: {$course_segmentations->count()}");
 
 //        $user_criteria = $user->criterion_values->groupBy('criterion_id');
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
