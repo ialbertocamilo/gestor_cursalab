@@ -4,7 +4,7 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Reportes de conferencias
+                Reportes de conferencias {{ API_REPORTES }}
                 <v-spacer/>
                 <!-- <DefaultButton
                     append-icon="mdi-download"

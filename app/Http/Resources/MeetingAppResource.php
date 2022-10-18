@@ -80,6 +80,7 @@ class MeetingAppResource extends JsonResource
 
             'type' => $this->type,
             'status' => $this->status,
+            'code' => $this->buildPrefix(),
 
             'is_embed' => $this->embed,
 
