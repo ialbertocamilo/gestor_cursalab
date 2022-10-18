@@ -37,7 +37,7 @@
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogo"
                             v-model="resource.logo"
-                            label="Logo"
+                            label="Logo (400x142px) "
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'logo')"/>
                     </v-col>
@@ -45,7 +45,7 @@
                         <DefaultSelectOrUploadMultimedia
                             ref="inputPlantillaDiploma"
                             v-model="resource.plantilla_diploma"
-                            label="Plantilla de diploma"
+                            label="Plantilla de diploma (1743x1553px)"
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'plantilla_diploma')"/>
                     </v-col>

@@ -8,7 +8,7 @@ class UserRelationship extends BaseModel
 {
 
     const  SUPERVISOR_DIRECT_SEGMENTATION_NAME = 'Segmentación directa de supervisor';
-    const  SEGMENTATION_NAME_BY_SUPERVISORS_DOCUMENT = 'Segmentación directa de supervisor';
+    const  SEGMENTATION_NAME_BY_SUPERVISORS_DOCUMENT = 'Segmentación por dni de supervisor';
 
     protected $table = 'user_relationships';
 
