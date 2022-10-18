@@ -4,7 +4,7 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Reportes de conferencias {{ API_REPORTES }}
+                Reportes de conferencias
                 <v-spacer/>
                 <!-- <DefaultButton
                     append-icon="mdi-download"
@@ -36,6 +36,7 @@
                             v-model="filtros.tipo_evento"
                             :items="tipo_eventos"
                             label="Tipo reunión"
+                            item-text="name"
                         />
                     </v-col>
                     <!-- <v-col cols="12" sm="12" md="4" lg="4">
@@ -157,11 +158,7 @@ export default {
             date2: null,
             menu: false,
             menu2: false,
-            tipo_eventos: [
-                {id: 0, nombre: "Todos"},
-                {id: 1, nombre: "Aulas virtuales"},
-                {id: 2, nombre: "Evento en vivo"},
-            ],
+            tipo_eventos: [],
             estado_eventos: [
                 {id: 0, nombre: "Ninguno"},
                 {id: 1, nombre: "Pre-reserva"},
@@ -240,6 +237,15 @@ export default {
         },
     },
     created() {
+      let vue = this;
+
+      vue.$http.get('/exportar/meetings_types').then(
+        ({data}) => {
+          const { data:{ types } } = data;
+          vue.tipo_eventos = types;
+        },
+        (err) => console.error(err) );
+
         console.log("End point ", this.API_REPORTES);
     },
 };
