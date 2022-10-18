@@ -69,7 +69,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
-        
+
         'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at',
     ];
 
@@ -129,8 +129,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $this->belongsToMany(CriterionValue::class);
     }
-  
-    public function criterion_user() 
+
+    public function criterion_user()
     {
         return $this->hasMany(CriterionValueUser::class);
     }
@@ -283,6 +283,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $userWithSupervisorSegment = User::loadSupervisorWithSegment($this->id);
         return $userWithSupervisorSegment['segment'] !== null;
+    }
+
+    public function getActiveCycle()
+    {
+        $user = $this;
+        $user_cycles = $user->criterion_values()
+            ->whereRelation('criterion', 'code', 'cycle')
+            ->orderBy('position')
+            ->get();
+
+//        info("CICLOS DEL USUARIO {$user->fullname}");
+//        info($user_cycles->pluck('value_text'));
+//        info($user->criterion_values()->pluck('value_text'));
+
+        return $user_cycles->last();
     }
 
     /**
@@ -469,8 +484,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->load('criterion_values:id,value_text,criterion_id');
         $programs = collect();
         $all_courses = [];
-        // TODO: No considerar criterion_values que se excluyan (ciclo 0)
-
 
         if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
@@ -611,7 +624,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user->loadMissing('subworkspace.parent');
 
-        $workspace_id = $user->subworkspace->parent->id;
+        $workspace = $user->subworkspace->parent;
 
         $course_segmentations = Course::with([
             'segments.values.criterion_value',
@@ -634,19 +647,25 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
-            ->whereRelation('workspaces', 'id', $workspace_id)
+            ->whereRelation('workspaces', 'id', $workspace->id)
             ->where('active', ACTIVE)
             ->get();
 
+//        info("COUNT COURSES :: {$course_segmentations->count()}");
+
 //        $user_criteria = $user->criterion_values->groupBy('criterion_id');
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
-
+        $user->active_cycle = $user->getActiveCycle();
 
 //        $workspace_criteria = Criterion::whereRelation('workspaces', 'id', $workspace_id)->get();
 
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
+
+//                $valid_rule = $this->validateUCCyclesRule($segment, $user);
+//
+//                if (!$valid_rule) continue;
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
@@ -657,9 +676,48 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     $all_courses[] = $course;
                     break;
                 endif;
+
             }
 
         }
+    }
+
+    public function validateUCCyclesRule(Segment $segment, $user): bool
+    {
+        $workspace = $user->subworkspace->parent;
+
+        if ($workspace->slug !== 'farmacias-peruanas') return true;
+
+        $cycle_criterion = Criterion::where('code', 'cycle')->first();
+        $cycle_0 = CriterionValue::whereRelation('criterion', 'code', 'cycle')
+        ->where('value_text', 'Ciclo 0')->first();
+        $has_criterion_cycle = $segment->values->where('criterion_id', $cycle_criterion->id)->count() > 0;
+
+//        $criterion_values = CriterionValue::whereIn(
+//            'id', $segment->values->where('criterion_id', $cycle_criterion->id)->pluck('criterion_value_id'))
+//            ->pluck('value_text');
+//        info("CRITERIOS CICLOS DEL SEGMENTO :: {$criterion_values}");
+
+        if (!$has_criterion_cycle) return true;
+
+//        $user_active_cycle = $user->getActiveCycle();
+        $user_active_cycle = $user->active_cycle;
+//        info("CICLO ACTIVO :: {$user_active_cycle->value_text}");
+        if (!$user_active_cycle) return false;
+
+        $user_active_cycle_Ciclo_0 = $user_active_cycle->value_text === 'Ciclo 0';
+        $segment_has_Ciclo_0 = $segment->values->where('criterion_value_id', $cycle_0->id);
+
+//        info(strval($user_active_cycle_Ciclo_0));
+//        info($segment_has_Ciclo_0->toArray() );
+
+        if (
+            (!$user_active_cycle_Ciclo_0 && $segment_has_Ciclo_0->count() === 1)
+            || ($user_active_cycle_Ciclo_0 && !($segment_has_Ciclo_0->count() > 0))
+        )
+            return false;
+
+        return true;
     }
 
     public function updateLastUserLogin()
@@ -736,7 +794,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function belongsToSegmentation($model)
     {
         if (!$model) return false;
-        
+
         $model->load('segments.values');
 
         $user_criteria = $this->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');

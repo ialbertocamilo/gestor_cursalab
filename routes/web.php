@@ -1,27 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Middleware\CheckRol;
 use App\Http\Controllers\CursosController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GestorController;
-use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\WorkspaceController;
+use App\Http\Middleware\CheckRol;
+use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', 'login', 301);
 
@@ -53,7 +42,7 @@ Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', 'GestorContr
 Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', 'GestorController@descargaCertificadoEscuela');
 /**************************** ADJUNTAR ARCHIVOS **************************************/
 Route::group(['middleware' => ['jwt.verify']], function () {
-    Route::get('adjuntar_archivo', 'ApiRest\AdjuntarArchivosController@index')->name('adjuntar_archivo');
+    Route::get('adjuntar_archivo', [AdjuntarArchivosController::class, 'index'])->name('adjuntar_archivo');
 });
 /*Información entra de la app-web*/
 Route::get('informacion_app', function () {

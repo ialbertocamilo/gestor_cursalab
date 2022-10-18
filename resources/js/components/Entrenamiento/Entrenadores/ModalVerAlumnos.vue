@@ -203,6 +203,7 @@ export default {
             }
             if (vue.entrenador.alumnos)
                 return vue.entrenador.alumnos.filter((alumno) => {
+                    if(alumno.name != '' && alumno.name != null && alumno.document != '' && alumno.document != null)
                     return (
                         alumno.name.toLowerCase().includes(vue.txt_filtrar_alumnos.toLowerCase()) ||
                         alumno.document.toLowerCase().includes(vue.txt_filtrar_alumnos.toLowerCase())
