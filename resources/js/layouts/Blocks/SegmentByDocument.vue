@@ -167,7 +167,14 @@ export default {
             const url = `/segments/search-users`;
             vue.$http.post(url, formData)
                 .then(({data}) => {
-                    vue.filter_result = data.data;
+                    // vue.filter_result = data.data;
+                    data.data.forEach((user) => {
+                        const exist = vue.segment.criteria_selected.filter(el => el.document == user.document);
+
+                        if (exist.length === 0){
+                            vue.$emit("addUser", user);
+                        }
+                    });
 
                     vue.file = null;
 
@@ -191,7 +198,7 @@ export default {
 <style lang="scss">
 @import "resources/sass/variables";
 
-.upload-file-segment .v-input__prepend-outer{
+.upload-file-segment .v-input__prepend-outer {
     margin-top: 0px !important;
 }
 
