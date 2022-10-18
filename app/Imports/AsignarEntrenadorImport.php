@@ -29,11 +29,11 @@ class AsignarEntrenadorImport implements ToCollection
         });
         // Extraer toda la data del excel
         $filtered->each(function ($value, $key) use ($excelData) {
-            if (!empty($value[0]) && !empty($value[1]) && !empty($value[2])) {
+            if (!empty($value[0]) && !empty($value[1])) {
                 $temp = [
                     'entrenador_dni' => $value[0],
                     'usuario_dni' => $value[1],
-                    'estado' => $value[2]
+                    'estado' => 1
                 ];
                 $excelData->push($temp);
             }
@@ -68,8 +68,14 @@ class AsignarEntrenadorImport implements ToCollection
                 $data_no_procesada->push($temp);
                 continue;
             }
-            $entrenador_workspace = AssignedRole::getUserAssignedRoles($entrenador->id)->first();
-            $subworkspaces = Workspace::where('parent_id', $entrenador_workspace->scope)->pluck('id')->all();
+            $entrenador_workspace = Workspace::select('parent_id')->where('id', $entrenador->subworkspace_id)->first();
+            if (is_null($entrenador_workspace)) {
+                $entrenador_workspace = AssignedRole::getUserAssignedRoles($entrenador->id)->first();
+                $entrenador_workspace_id = $entrenador_workspace->scope;
+            } else {
+                $entrenador_workspace_id = $entrenador_workspace->parent_id;
+            }
+            $subworkspaces = Workspace::where('parent_id', $entrenador_workspace_id)->pluck('id')->all();
 
             $alumnos = collect($alumnos);
             $usuarios = User::whereIn('document', $alumnos->pluck('usuario_dni')->all())

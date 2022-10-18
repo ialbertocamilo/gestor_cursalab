@@ -186,6 +186,7 @@ class Segment extends BaseModel
 
             $this->storeSegmentationByDocument($request->all());
 
+            $this->updateSegmentToLaunchObeserver($request);
             DB::commit();
 
         } catch (\Exception $e) {
@@ -203,7 +204,13 @@ class Segment extends BaseModel
 
         return $this->success(['msg' => $message], $message);
     }
-
+    private function updateSegmentToLaunchObeserver($data){
+        $segments_id = array_column($data->segments, 'id');
+        info($segments_id);
+        self::whereIn('id', $segments_id)->update([
+            'updated_at'=>now()
+        ]);
+    }
     public function storeDirectSegmentation($data)
     {
         $segments_id = array_column($data->segments, 'id');
@@ -219,7 +226,7 @@ class Segment extends BaseModel
         foreach ($data->segments as $key => $segment_row) {
             if (count($segment_row['criteria_selected']) == 0) continue;
 
-            $data = [
+            $segment_data = [
                 'type_id' => $direct_segmentation->id,
                 'code_id' => $code_segmentation?->id,
                 'model_type' => $data->model_type,
@@ -229,7 +236,7 @@ class Segment extends BaseModel
             ];
 
             $segment = str_contains($segment_row['id'], "new-segment-") ?
-                Segment::create($data)
+                Segment::create($segment_data)
                 : Segment::find($segment_row['id']);
 
             $values = [];

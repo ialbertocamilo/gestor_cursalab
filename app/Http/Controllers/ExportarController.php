@@ -2,40 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Criterion;
-use Illuminate\Http\Request;
-use App\Models\Usuario;
-use App\Models\Prueba;
-use App\Models\Categoria;
-use App\Models\Curso;
-use App\Models\Perfil;
-use App\Models\Grupo;
-use App\Models\Abconfig;
-use App\Models\Carrera;
-use App\Models\Matricula;
-use App\Models\Visita;
-use App\Models\Posteo;
-use App\Models\Curricula;
-use App\Models\Vademecum;
-
-use Maatwebsite\Excel\Facades\Excel;
-
-use App\Exports\PruebasExport;
-use App\Exports\TemasExport;
-use App\Exports\PreguntasExport;
-use App\Exports\UsuariosExport;
 use App\Exports\NovisitasExport;
-use App\Exports\VisitasCompletoExport;
-use App\Exports\ReporteTotalExport;
-use App\Exports\ReporteTotalxFechaExport;
-use App\Exports\ReporteFiltradoExport;
-use App\Exports\ReportexCursoExport;
-use App\Exports\ReporteVisitasTotalExport;
-use App\Exports\ReporteVisitasSinEVExport;
+use App\Exports\PreguntasExport;
+use App\Exports\PruebasExport;
 use App\Exports\ReiniciosExport;
 use App\Exports\ReporteEvAbiertasExport;
-use Rap2hpoutre\FastExcel\FastExcel;
+use App\Exports\ReporteFiltradoExport;
+use App\Exports\ReporteTotalExport;
+use App\Exports\ReporteTotalxFechaExport;
+use App\Exports\ReporteVisitasSinEVExport;
+use App\Exports\ReporteVisitasTotalExport;
+use App\Exports\ReportexCursoExport;
+use App\Exports\TemasExport;
+use App\Exports\UsuariosExport;
+use App\Exports\VisitasCompletoExport;
+use App\Models\Abconfig;
+use App\Models\Carrera;
+use App\Models\Categoria;
+use App\Models\Criterion;
+use App\Models\Curricula;
+use App\Models\Curso;
+use App\Models\Grupo;
+use App\Models\Matricula;
+use App\Models\Perfil;
+use App\Models\Posteo;
+use App\Models\Prueba;
+use App\Models\Taxonomy;
+use App\Models\Usuario;
+use App\Models\Vademecum;
+use App\Models\Visita;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class ExportarController extends Controller
 {
@@ -632,5 +631,12 @@ class ExportarController extends Controller
     }
 
     ///////////////////
+
+    // AULAS VIRTUALES
+    public function meetings_types() {
+        $types = Taxonomy::getSelectData('meeting', 'type');
+
+        return $this->success(compact('types'));
+    }
 
 }

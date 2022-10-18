@@ -27,36 +27,6 @@ use function foo\func;
 
 class EntrenamientoController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('jwt.verify', [
-            'except' => [
-                // Funciones Test
-                'dataPruebaEntrenadores',
-                'dataPruebaChecklist',
-                // Funciones Servicios para el gestor
-                // Entrenadores
-                'search',
-                'searchChecklist',
-
-                'asignar',
-                'asignarMasivo',
-                'listarEntrenadores',
-                'cambiarEstadoEntrenadorAlumno',
-                'buscarAlumno',
-                'eliminarRelacionEntrenadorAlumno',
-                // Alumnos
-                'buscarAlumnoGestor',
-                //Checklist
-                'listarChecklist',
-                'guardarChecklist',
-                'guardarActividadByID',
-                'eliminarActividadByID',
-                'importChecklist',
-                'buscarCurso'
-            ]
-        ]);
-    }
 
     /* Funciones Test */
     public function dataPruebaEntrenadores(Request $request)

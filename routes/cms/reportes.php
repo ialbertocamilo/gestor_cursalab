@@ -39,6 +39,9 @@ Route::prefix('exportar')->controller(ExportarController::class)->group(function
 	Route::get('/reporte_filtrado', 'exportReporteFiltrado')->name('exportar.reporte_filtrado');
 
 
+	//****************** MEETINGS *****************/
+	Route::get('/meetings_types', 'meetings_types');
+
 	//****************** NODE *****************/
 	// Reportes Vue Node
 	Route::get('/obtenerdatos', 'obtenerDatos')->name('exportar.obtenerdatos');
