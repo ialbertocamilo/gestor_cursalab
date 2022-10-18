@@ -42,13 +42,14 @@ class AuthController extends Controller
                         ->toArray() ;
 
                     // If user's subworkspace is in Farmacias, stop authentication
+
                     Auth::check();
                     $isFarmacias = in_array(
                         Auth::user()->subworkspace_id, $farmaciasIds
                     );
 
                     if ($isFarmacias) {
-                        $message = 'Por el momento no tienes acceso a la plataforma. Estamos trabajando en actualizar tus datos. Puedes ingresar desde el 02/11';
+                        $message = 'ERROR_LOGIN_FARMACIAS_PERUANAS';
                         return $this->error($message, 401);
                     }
                 }
