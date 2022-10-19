@@ -202,9 +202,9 @@ class EntrenadorUsuario extends Model
         $response['alumnos'] = $dataAlumnos;
 
         // TODO: Últimos 10 alumnos vistos
-        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id'))->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
-        $ultimos_alumnos = Usuario::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-            ->whereIn('users.id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
+        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id')->all())->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
+        $ultimos_alumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->whereIn('users.id', $ultimos_alumnos_ids->pluck('student_id')->all())
             ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
             ->get();
         // $ultimos_alumnos = Usuario::with([
@@ -220,7 +220,8 @@ class EntrenadorUsuario extends Model
             // $value->makeHidden('matricula_presente');
             // $value->carrera = $value->matricula_presente->carrera->nombre;
             $value->carrera = '';
-            $temp2 = $ultimos_alumnos_ids->where('student_id', $value->id)->where('trainer_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
+            $temp2 = $ultimos_alumnos_ids->where('student_id', $value->id)->where('coach_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
+            $value->ultima_actividad = '';
             if ($temp2) $value->ultima_actividad = $temp2->updated_at->format('Y-m-d H:i:s');
         });
         $response['ultimos_alumnos'] = $ultimos_alumnos;

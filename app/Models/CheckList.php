@@ -203,8 +203,8 @@ class CheckList extends BaseModel
 
         foreach ($actividades as $actividad) {
             $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
-            $actividad->disponible = !(bool)$actividadProgreso;
-            if ($actividadProgreso) {
+            $actividad->disponible = !is_null($actividadProgreso);
+            if (!is_null($actividadProgreso)) {
                 $actividad->estado = $actividadProgreso->qualification;
             } else {
                 $actividad->estado = 'Pendiente';
@@ -212,7 +212,6 @@ class CheckList extends BaseModel
             $type_name = !is_null($actividad->type_id) ? Taxonomy::where('id', $actividad->type_id)->first() : null;
             $type_name = !is_null($type_name) ? $type_name->code : '';
             $actividad->tipo = $type_name;
-            $actividad->is_default = null;
         }
         return [
             'actividades_feedback' => $actividades->values()->all()
@@ -225,7 +224,7 @@ class CheckList extends BaseModel
         if ($checklistRpta->porcentaje !== 100) {
             foreach ($actividades as $actividad) {
                 $checklistRptaItem = ChecklistRptaItem::where('checklist_answer_id', $checklistRpta->id)->where('checklist_item_id', $actividad->id)->first();
-                if ($actividad->is_default && !$checklistRptaItem) {
+                if (!$checklistRptaItem) {
                     $checklistRptaItem = ChecklistRptaItem::create([
                         'checklist_answer_id' => $checklistRpta->id,
                         'checklist_item_id' => $actividad->id,
@@ -243,7 +242,6 @@ class CheckList extends BaseModel
                 $type_name = !is_null($actividad->type_id) ? Taxonomy::where('id', $actividad->type_id)->first() : null;
                 $type_name = !is_null($type_name) ? $type_name->code : '';
                 $actividad->tipo = $type_name;
-                $actividad->is_default = null;
             }
             $porcentaje = $completadas / count($actividades);
         } else {

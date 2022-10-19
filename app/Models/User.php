@@ -372,7 +372,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
-
+            $new_user = false;
             if ($user) :
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
@@ -380,7 +380,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $user->update($data);
             else :
                 $user = self::create($data);
-
+                $new_user = true;
             endif;
 
             $user->subworkspace_id = Workspace::query()
@@ -390,8 +390,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
-
-            if ($user->wasChanged('document') && ($data['document'] ?? false)) :
+            
+            if ($new_user || ($user->wasChanged('document') && ($data['document'] ?? false))):
                 $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
             endif;
 
@@ -408,9 +408,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function syncDocumentCriterionValue($old_document, $new_document)
     {
-        $document_criterion = Criterion::where('code', 'documento')->first();
+        $document_criterion = Criterion::where('code', 'document')->first();
 
-        $document_value = CriterionValue::whereRelation('criterion', 'code', 'documento')
+        $document_value = CriterionValue::whereRelation('criterion', 'code', 'document')
             ->where('value_text', $old_document)->first();
 
         $criterion_value_data = [
