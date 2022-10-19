@@ -59,9 +59,10 @@ class restablecer_funcionalidad extends Command
     }
     public function restoreCriterionDocument(){
         $document_criterion = Criterion::where('code', 'document')->first();
-
+        $criterionValues = CriterionValue::where('criterion_id',$document_criterion->id)->select('value_text')->get()->pluck('value_text');
         User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
             ->select('id', 'document', 'subworkspace_id')
+            ->whereNotIn('document',$criterionValues)
             ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
                 $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
                     ->whereIn('value_text', $users_chunked->pluck('document')->toArray())->get();
