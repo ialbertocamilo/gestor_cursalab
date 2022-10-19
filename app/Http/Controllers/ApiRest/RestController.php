@@ -41,7 +41,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class RestController extends Controller
 {
-    public function __construct()
+  /* public function __construct()
     {
         // header('Access-Control-Allow-Origin: *');
         // header('Access-Control-Allow-Methods:  GET,PUT,POST,DELETE,PATCH,OPTIONS');
@@ -53,7 +53,7 @@ class RestController extends Controller
         // Config::set('auth.providers.users.model', Usuario_rest::class);
         $this->middleware('auth.jwt', ['except' => ['appVersions', 'download_file']]);
         return auth()->shouldUse('api');
-    }
+    }*/
 
     public function index()
     {
@@ -3822,7 +3822,7 @@ class RestController extends Controller
     // Guardar usuario uploads
     public function usuario_upload_file(Request $request)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
         if (is_null($request)) {
             $response = array('error' => true, 'error_msg' => 'No se recibieron datos');
         } else {
