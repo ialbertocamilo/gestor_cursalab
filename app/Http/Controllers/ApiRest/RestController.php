@@ -2,50 +2,46 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use DB;
-
-use Config;
-use JWTAuth;
-use Storage;
-use DateTime;
-
-use App\Models\Ciclo;
-use App\Models\Curso;
-use App\Models\Posteo;
-use App\Models\Prueba;
-use App\Models\Visita;
-use App\Models\Announcement;
-use App\Models\Carrera;
-use App\Models\Usuario;
+use App\Http\Controllers\ApiRest\HelperController;
+use App\Http\Controllers\Controller;
+use App\Mail\RecuperarPass;
 use App\Models\Abconfig;
+use App\Models\Announcement;
 use App\Models\AyudaApp;
-use App\Models\Poll;
-use App\Models\Pregunta;
+use App\Models\Carrera;
 use App\Models\Categoria;
+use App\Models\Ciclo;
 use App\Models\Curricula;
+use App\Models\Curso;
+use App\Models\Curso_encuesta;
 use App\Models\Matricula;
 use App\Models\Notification;
-use App\Models\Usuario_rest;
-use App\Models\UsuarioAyuda;
-use App\Models\Curso_encuesta;
+use App\Models\Poll;
+use App\Models\Posteo;
+use App\Models\Pregunta;
+use App\Models\Prueba;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
-
+use App\Models\Usuario;
+use App\Models\UsuarioAyuda;
+use App\Models\Usuario_rest;
+use App\Models\Usuario_upload;
+use App\Models\Visita;
 use Carbon\Carbon;
-
-use App\Mail\RecuperarPass;
-
+use Config;
+use DB;
+use DateTime;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use JWTAuth;
+use Storage;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use App\Http\Controllers\ApiRest\HelperController;
 
 class RestController extends Controller
 {
-    public function __construct()
+  /* public function __construct()
     {
         // header('Access-Control-Allow-Origin: *');
         // header('Access-Control-Allow-Methods:  GET,PUT,POST,DELETE,PATCH,OPTIONS');
@@ -57,7 +53,7 @@ class RestController extends Controller
         // Config::set('auth.providers.users.model', Usuario_rest::class);
         $this->middleware('auth.jwt', ['except' => ['appVersions', 'download_file']]);
         return auth()->shouldUse('api');
-    }
+    }*/
 
     public function index()
     {
@@ -3791,6 +3787,7 @@ class RestController extends Controller
     // Guardar usuario uploads
     public function usuario_upload_link(Request $request)
     {
+        #$user = auth('api')->user();
         // return $request;
         $response = array('error' => 3, 'msg' => 'Ha ocurrido un error');
 
@@ -3801,13 +3798,18 @@ class RestController extends Controller
         if (is_null($usuario_id)) {
             $response = array('error' => 2);
         } else {
+            #set subwokspaces index
+            #$subworkspace_id = $user->subworkspace_id;
+
             $array = array(
+                #'subworkspace_id' => $subworkspace_id,
                 'usuario_id' => $usuario_id,
                 'link' => $link,
                 'description' => $description
             );
 
-            $result = DB::table('usuario_uploads')->insert($array);
+            $result = Usuario_upload::create($array);
+            // $result = DB::table('usuario_uploads')->insert($array);
 
             if ($result)
                 $response = array('error' => 0);
@@ -3820,7 +3822,7 @@ class RestController extends Controller
     // Guardar usuario uploads
     public function usuario_upload_file(Request $request)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
         if (is_null($request)) {
             $response = array('error' => true, 'error_msg' => 'No se recibieron datos');
         } else {
@@ -3840,13 +3842,19 @@ class RestController extends Controller
             $path = 'usuario_archivos/' . $fileName;
 
             if (Storage::put($path, file_get_contents($file), 'public')) {
+
+                #set subwokspaces index
+                $subworkspace_id = $user->subworkspace_id;
+
                 $array = array(
+                    'subworkspace_id' => $subworkspace_id,
                     'usuario_id' => $usuario_id,
                     'file' => $path,
                     'description' => $description
                 );
 
-                $result = DB::table('usuario_uploads')->insert($array);
+                $result = Usuario_upload::create($array);
+                // $result = DB::table('usuario_uploads')->insert($array);
             }
 
             if ($result)

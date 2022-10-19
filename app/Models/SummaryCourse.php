@@ -268,9 +268,11 @@ class SummaryCourse extends Summary
      */
     public static function calculateSupervisorCoursesTotals($supervisorId, $workspaceId): array
     {
-        $criterionValuesIds = Segment::loadSupervisorSegmentCriterionValuesIds($supervisorId);
+        // Load users ids which matches criterion values
 
-        if (count($criterionValuesIds) === 0) return [];
+        $usersIds = Segment::loadSupervisorSegmentUsersIds($supervisorId);
+
+        if (count($usersIds) === 0) return [];
 
         // Courses statuses from database
 
@@ -278,25 +280,6 @@ class SummaryCourse extends Summary
         $desarrollo = Taxonomy::getFirstData('course', 'user-status', 'desarrollo');
         $desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
         $encuestaPend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
-
-        // Load users ids which matches criterion values
-        $_criterionValuesIds = implode(',', $criterionValuesIds);
-        $usersIds = DB::select(DB::raw("
-            select
-                u.id
-            from users u
-                inner join criterion_value_user cvu on u.id = cvu.user_id
-                inner join workspaces w on u.subworkspace_id = w.id
-            where
-                w.parent_id = :workspaceId and
-                cvu.criterion_value_id in ($_criterionValuesIds)
-            group by u.id
-            having count(cvu.criterion_value_id) = :criterionCount
-        "), [
-            'workspaceId' => $workspaceId,
-            'criterionCount' => count($criterionValuesIds)
-        ]);
-        $usersIds = collect($usersIds)->pluck('id')->toArray();
 
         // Calculate courses totals
 

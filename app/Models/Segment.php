@@ -409,7 +409,7 @@ class Segment extends BaseModel
      * @param int $supervisorId
      * @return array|void
      */
-    public static function loadSupervisorSegmentCriterionValuesIds(int $supervisorId)
+    public static function loadSupervisorSegmentCriterionValues(int $supervisorId)
     {
         // Load taxonomy for supervisors
 
@@ -426,9 +426,80 @@ class Segment extends BaseModel
             ->where('segments.model_id', $supervisorId)
             ->where('segments.code_id', $supervisorTaxonomy->id)
             ->where('segments.active', 1)
-            ->select('segments_values.*')
-            ->get()
-            ->pluck('criterion_value_id')
-            ->toArray();
+            ->whereNull('segments_values.deleted_at')
+            ->select([
+                'segments_values.criterion_id',
+                'segments_values.criterion_value_id'
+            ])
+            ->orderBy('criterion_id')
+            ->get();
+    }
+
+    public static function loadSupervisorSegmentUsersIds($supervisorId): array|string
+    {
+
+        $criterionValues = Segment::loadSupervisorSegmentCriterionValues($supervisorId);
+
+        if (count($criterionValues) === 0) return [];
+
+        // Generate conditions
+
+        $criterionIds = [];
+        $previousCriterionId = null;
+        $WHERE = [];
+        foreach ($criterionValues as $value) {
+
+            $criterionId = $value->criterion_id;
+
+            if ($criterionId !== $previousCriterionId) {
+
+                if (!in_array($criterionId, $criterionIds))
+                    $criterionIds[] = $criterionId;
+
+                $previousCriterionId = $criterionId;
+
+                $criterionValuesIds = $criterionValues->where('criterion_id', $criterionId)
+                                                      ->pluck('criterion_value_id')
+                                                      ->toArray();
+                $WHERE[] = "(
+                    scv.criterion_id = $criterionId and
+                    scv.criterion_value_id in (" .implode(',', $criterionValuesIds). ")
+                )";
+            }
+        }
+
+        // When no condition was generated, stop method execution
+
+        if (count($WHERE) === 0) return [];
+
+        $WHERE = implode(' or ', $WHERE);
+        $criterionCount = count($criterionIds);
+        $criterionIds = implode(',', $criterionIds);
+        $query = "
+            select
+                user_id
+            from (
+                -- Users' criterion values
+                select
+                    cvu.user_id,
+                    cvu.criterion_value_id,
+                    cv.criterion_id
+                from
+                    criterion_value_user cvu
+                        inner join criterion_values cv on cv.id = cvu.criterion_value_id
+                where cv.criterion_id in ($criterionIds)
+            ) scv
+            where
+                $WHERE
+
+            group by
+                user_id
+            having count(user_id) = $criterionCount
+        ";
+
+        return collect(DB::select(DB::raw($query)))
+                ->pluck('user_id')
+                ->toArray();
     }
 }
+
