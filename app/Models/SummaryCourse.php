@@ -53,8 +53,13 @@ class SummaryCourse extends Summary
     ): void
     {
 
+        // Get "Desaprobado" status from taxonomies
+
+        $desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+
+
         $query = self::where('course_id', $courseId)
-            ->where('passed', 0)
+            ->where('status_id', $desaprobado->id)
             ->where('attempts', '>=', $attemptsLimit);
 
         if ($scheduleDate)
@@ -270,7 +275,7 @@ class SummaryCourse extends Summary
     {
         // Load users ids which matches criterion values
 
-        $usersIds = Segment::loadSupervisorSegmentUsersIds($supervisorId);
+        $usersIds = Segment::loadSupervisorSegmentUsersIds($supervisorId, $workspaceId);
 
         if (count($usersIds) === 0) return [];
 
@@ -287,30 +292,36 @@ class SummaryCourse extends Summary
         if (count($usersIds)) {
             $_usersIds = implode(',', $usersIds);
             $courseTotals = DB::select(DB::raw("
-            select
-                sum(if(sc.status_id = :aprobadoId, 1, 0)) aprobados,
-                sum(if(sc.status_id = :desarrolloId, 1, 0)) desarrollados,
-                sum(if(sc.status_id = :desaprobadoId, 1, 0)) desaprobados,
-                sum(if(sc.status_id = :encuestaPendId, 1, 0)) encuestaPend
+                select
+                    sum(if(sc.status_id = :aprobadoId, 1, 0)) aprobados,
+                    sum(if(sc.status_id = :desarrolloId, 1, 0)) desarrollados,
+                    sum(if(sc.status_id = :desaprobadoId, 1, 0)) desaprobados,
+                    sum(if(sc.status_id = :encuestaPendId, 1, 0)) encuestaPend
 
-            from
-                users u
-                    inner join summary_courses sc on sc.user_id = u.id
-            where
-                sc.deleted_at is null and
-                u.active = 1 and
-                u.id in ($_usersIds)
-        "), [
-                'aprobadoId' => $aprobado->id,
-                'desarrolloId' => $desarrollo->id,
-                'desaprobadoId' => $desaprobado->id,
-                'encuestaPendId' => $encuestaPend->id
-            ]);
+                from
+                    users u
+                        inner join summary_courses sc on sc.user_id = u.id
+                where
+                    sc.deleted_at is null and
+                    u.id in ($_usersIds)
+            "), [
+                    'aprobadoId' => $aprobado->id,
+                    'desarrolloId' => $desarrollo->id,
+                    'desaprobadoId' => $desaprobado->id,
+                    'encuestaPendId' => $encuestaPend->id
+                ]);
         }
+
+        // Count active users
+
+        $activeUsers = User::query()
+            ->where('active', 1)
+            ->whereIn('id', $usersIds)
+            ->count();
 
         return [
             'courses' => $courseTotals,
-            'users' => count($usersIds)
+            'users' => $activeUsers
         ];
     }
 }
