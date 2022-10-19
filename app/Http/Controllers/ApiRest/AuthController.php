@@ -28,7 +28,7 @@ class AuthController extends Controller
             $credentials1['username'] = $userinput;
             $credentials2['document'] = $userinput;
 
-            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)){
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
 
                 // When "Show message" variable is true and
                 // company is Farmacias Peruanas
@@ -39,13 +39,14 @@ class AuthController extends Controller
 
                     $farmaciasIds = Workspace::where('parent_id', 25)
                         ->pluck('id')
-                        ->toArray() ;
+                        ->toArray();
 
                     // If user's subworkspace is in Farmacias, stop authentication
 
                     Auth::check();
                     $isFarmacias = in_array(
-                        Auth::user()->subworkspace_id, $farmaciasIds
+                        Auth::user()->subworkspace_id,
+                        $farmaciasIds
                     );
 
                     if ($isFarmacias) {
@@ -55,13 +56,11 @@ class AuthController extends Controller
                 }
 
                 return $this->respondWithDataAndToken($data);
-
             } else {
                 return $this->error('No autorizado.', 401);
             }
-
         } catch (Exception $e) {
-//           info($e);
+            //           info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }
@@ -80,14 +79,14 @@ class AuthController extends Controller
         $user->updateUserDeviceVersion($data);
         $user->updateLastUserLogin($data);
 
-       $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma')
-           ->where('id', $user->subworkspace_id)
-           ->first();
+        $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma')
+            ->where('id', $user->subworkspace_id)
+            ->first();
 
         $workspace = Workspace::find($user->subworkspace_id);
-       // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
-       // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
-       // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
+        // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
+        // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
+        // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
         $supervisor = $user->isSupervisor();
 
@@ -98,30 +97,31 @@ class AuthController extends Controller
             "dni" => $user->document,
             "nombre" => $user->name,
             "apellido" => $user->lastname,
+            "full_name" => $user->fullname,
             'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
             // 'can_be_host' => $can_be_host,
             'can_be_host' => true,
-//            'carrera' => $carrera,
-//            'ciclo' => $ciclo
-//            "grupo" => $user->grupo,
-//            "botica" => $user->botica,
-//            "sexo" => $user->sexo,
-//            "cargo" => $user->cargo,
+            //            'carrera' => $carrera,
+            //            'ciclo' => $ciclo
+            //            "grupo" => $user->grupo,
+            //            "botica" => $user->botica,
+            //            "sexo" => $user->sexo,
+            //            "cargo" => $user->cargo,
         ];
 
-       $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
-       $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
+        $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
+        $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
 
-       $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
-       $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
+        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
+        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
 
         return response()->json([
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
-//            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            //            'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
         ]);
@@ -175,7 +175,7 @@ class AuthController extends Controller
 
     protected function respondOnlyToken($token)
     {
-//        \Log::info('New token refreshed' . $token);
+        //        \Log::info('New token refreshed' . $token);
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
