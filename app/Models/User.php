@@ -293,9 +293,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->orderBy('position')
             ->get();
 
-//        info("CICLOS DEL USUARIO {$user->fullname}");
-//        info($user_cycles->pluck('value_text'));
-//        info($user->criterion_values()->pluck('value_text'));
+        //        info("CICLOS DEL USUARIO {$user->fullname}");
+        //        info($user_cycles->pluck('value_text'));
+        //        info($user->criterion_values()->pluck('value_text'));
 
         return $user_cycles->last();
     }
@@ -329,9 +329,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
 
-        //        $training_role =
-
-        return null;
+        $is_student = EntrenadorUsuario::alumno($user->id)->first();
+        $is_trainer = EntrenadorUsuario::entrenador($user->id)->first();
+        if (!is_null($is_student)) {
+            return 'student';
+        } else if (!is_null($is_trainer)) {
+            return 'trainer';
+        } else {
+            return null;
+        }
     }
 
     public function updateStatusUser($active = null, $termination_date = null)
@@ -385,13 +391,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
 
-            if ($user->wasChanged('document') && ($data['document'] ?? false)):
+            if ($user->wasChanged('document') && ($data['document'] ?? false)) :
                 $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
             endif;
 
             $user->save();
             DB::commit();
-
         } catch (\Exception $e) {
 
             info($e);
@@ -603,19 +608,19 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                             endif;
                         }
-//                        $blocks->push([
-//                            'id' => $block_child->child->id,
-//                            'name' => $block_child->child->name,
-//                            'courses_count' => $courses->count(),
-//                            'courses' => $courses->sortBy('position')->values()->all()
-//                        ]);
+                    //                        $blocks->push([
+                    //                            'id' => $block_child->child->id,
+                    //                            'name' => $block_child->child->name,
+                    //                            'courses_count' => $courses->count(),
+                    //                            'courses' => $courses->sortBy('position')->values()->all()
+                    //                        ]);
                     endif;
                 }
-//                $programs->push([
-//                    'id' => $program->id,
-//                    'name' => $program->name,
-//                    'blocks' => $blocks,
-//                ]);
+            //                $programs->push([
+            //                    'id' => $program->id,
+            //                    'name' => $program->name,
+            //                    'blocks' => $blocks,
+            //                ]);
             endif;
         }
     }
@@ -640,10 +645,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'polls.questions',
             'topics.evaluation_type'
         ])
-//            ->whereHas('topics', function ($q) {
-//                $q->where('active', ACTIVE);
-//            })
-//            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
+            //            ->whereHas('topics', function ($q) {
+            //                $q->where('active', ACTIVE);
+            //            })
+            //            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
             ->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
@@ -651,34 +656,32 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('active', ACTIVE)
             ->get();
 
-//        info("COUNT COURSES :: {$course_segmentations->count()}");
+        //        info("COUNT COURSES :: {$course_segmentations->count()}");
 
-//        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+        //        $user_criteria = $user->criterion_values->groupBy('criterion_id');
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
         $user->active_cycle = $user->getActiveCycle();
 
-//        $workspace_criteria = Criterion::whereRelation('workspaces', 'id', $workspace_id)->get();
+        //        $workspace_criteria = Criterion::whereRelation('workspaces', 'id', $workspace_id)->get();
 
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
 
-//                $valid_rule = $this->validateUCCyclesRule($segment, $user);
-//
-//                if (!$valid_rule) continue;
+                //                $valid_rule = $this->validateUCCyclesRule($segment, $user);
+                //
+                //                if (!$valid_rule) continue;
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
                 $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
-//                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
+                //                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
                 if ($valid_segment) :
                     $all_courses[] = $course;
                     break;
                 endif;
-
             }
-
         }
     }
 
@@ -690,26 +693,26 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $cycle_criterion = Criterion::where('code', 'cycle')->first();
         $cycle_0 = CriterionValue::whereRelation('criterion', 'code', 'cycle')
-        ->where('value_text', 'Ciclo 0')->first();
+            ->where('value_text', 'Ciclo 0')->first();
         $has_criterion_cycle = $segment->values->where('criterion_id', $cycle_criterion->id)->count() > 0;
 
-//        $criterion_values = CriterionValue::whereIn(
-//            'id', $segment->values->where('criterion_id', $cycle_criterion->id)->pluck('criterion_value_id'))
-//            ->pluck('value_text');
-//        info("CRITERIOS CICLOS DEL SEGMENTO :: {$criterion_values}");
+        //        $criterion_values = CriterionValue::whereIn(
+        //            'id', $segment->values->where('criterion_id', $cycle_criterion->id)->pluck('criterion_value_id'))
+        //            ->pluck('value_text');
+        //        info("CRITERIOS CICLOS DEL SEGMENTO :: {$criterion_values}");
 
         if (!$has_criterion_cycle) return true;
 
-//        $user_active_cycle = $user->getActiveCycle();
+        //        $user_active_cycle = $user->getActiveCycle();
         $user_active_cycle = $user->active_cycle;
-//        info("CICLO ACTIVO :: {$user_active_cycle->value_text}");
+        //        info("CICLO ACTIVO :: {$user_active_cycle->value_text}");
         if (!$user_active_cycle) return false;
 
         $user_active_cycle_Ciclo_0 = $user_active_cycle->value_text === 'Ciclo 0';
         $segment_has_Ciclo_0 = $segment->values->where('criterion_value_id', $cycle_0->id);
 
-//        info(strval($user_active_cycle_Ciclo_0));
-//        info($segment_has_Ciclo_0->toArray() );
+        //        info(strval($user_active_cycle_Ciclo_0));
+        //        info($segment_has_Ciclo_0->toArray() );
 
         if (
             (!$user_active_cycle_Ciclo_0 && $segment_has_Ciclo_0->count() === 1)
@@ -750,7 +753,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
             $user->save();
         }
-
     }
 
     public function getSubworkspaceSetting($field, $value = null)
