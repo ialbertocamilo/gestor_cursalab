@@ -64,7 +64,7 @@ class ChecklistRpta extends Model
             }
         }
 
-        $checklistRpta->porcentaje = number_format((($cumple / $checklistValidos) * 100), 2);
+        $checklistRpta->percent = number_format((($cumple / $checklistValidos) * 100), 2);
         $checklistRpta->save();
     }
 }
