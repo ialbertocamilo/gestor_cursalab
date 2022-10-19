@@ -41,15 +41,17 @@ Route::get('multimedia/topic/{media_topic_id}/download', [\App\Http\Controllers\
 Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', 'GestorController@verCertificadoEscuela');
 Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', 'GestorController@descargaCertificadoEscuela');
 /**************************** ADJUNTAR ARCHIVOS **************************************/
-Route::group(['middleware' => ['jwt.verify']], function () {
-    Route::get('adjuntar_archivo', [AdjuntarArchivosController::class, 'index'])->name('adjuntar_archivo');
-});
+// Route::group(['middleware' => ['jwt.verify']], function () {
+//     Route::get('adjuntar_archivo', [AdjuntarArchivosController::class, 'index'])->name('adjuntar_archivo');
+// });
 /*Información entra de la app-web*/
 Route::get('informacion_app', function () {
     return view('informacion_app');
 });
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('adjuntar_archivo', [AdjuntarArchivosController::class, 'index'])->name('adjuntar_archivo');
 
     Route::view('welcome', 'welcome');
 
