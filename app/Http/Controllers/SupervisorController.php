@@ -88,9 +88,10 @@ class SupervisorController extends Controller
     {
         $data = $request->all();
 
-        $users_id = array_column($data, 'id');
+//        $users_id = array_column($data, 'id');
+        $user_documents = array_column($data, 'document');
 
-        $users = User::with('subworkspace.module_criterion_value')->whereIn('id', $users_id)->get();
+        $users = User::with('subworkspace.module_criterion_value')->whereIn('document', $user_documents)->get();
 
         UserRelationship::setUsersAsSupervisor($users);
 
