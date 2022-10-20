@@ -10,6 +10,7 @@ return [
     'tipos_scorm'=>[
         'index.html',
         'story.html',
+        'genially.html'
     ],
     'modalidad' => [
     	  'regular' => 'REGULAR (dentro de malla)',
