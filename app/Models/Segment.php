@@ -435,7 +435,7 @@ class Segment extends BaseModel
             ->get();
     }
 
-    public static function loadSupervisorSegmentUsersIds($supervisorId): array|string
+    public static function loadSupervisorSegmentUsersIds($supervisorId, $workspaceId): array|string
     {
 
         $criterionValues = Segment::loadSupervisorSegmentCriterionValues($supervisorId);
@@ -475,6 +475,7 @@ class Segment extends BaseModel
         $WHERE = implode(' or ', $WHERE);
         $criterionCount = count($criterionIds);
         $criterionIds = implode(',', $criterionIds);
+        $modulesIds = Workspace::loadSubWorkspacesIds($workspaceId)->toArray();
         $query = "
             select
                 user_id
@@ -487,7 +488,9 @@ class Segment extends BaseModel
                 from
                     criterion_value_user cvu
                         inner join criterion_values cv on cv.id = cvu.criterion_value_id
-                where cv.criterion_id in ($criterionIds)
+                        inner join users u on u.id = cvu.user_id
+                where cv.criterion_id in ($criterionIds) and
+                      u.subworkspace_id in (".implode(',', $modulesIds).")
             ) scv
             where
                 $WHERE

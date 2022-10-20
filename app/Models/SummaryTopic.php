@@ -88,8 +88,12 @@ class SummaryTopic extends Summary
     ): void
     {
 
+        // Get "Desaprobado" status from taxonomies
+
+        $desaprobado = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+
         $query = SummaryTopic::whereIn('topic_id', $topicsIds)
-            ->where('passed', 0)
+            ->where('status_id', $desaprobado->id)
             ->where('attempts', '>=', $attemptsLimit);
 
         if ($scheduleDate)

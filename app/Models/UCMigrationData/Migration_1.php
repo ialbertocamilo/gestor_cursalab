@@ -35,7 +35,6 @@ class Migration_1 extends Model
     }
 
 
-
     protected function connect()
     {
         $db_uc_data = config('database.connections.mysql_uc');
@@ -43,14 +42,14 @@ class Migration_1 extends Model
         return new OTFConnection($db_uc_data);
     }
 
-    protected function migrateData1()
+    protected function migrateData1($output)
     {
-        $client_lms_data = $this->setMigrationData_1();
+        $client_lms_data = $this->setMigrationData_1($output);
 
-        $this->insertMigrationData_1($client_lms_data);
+        $this->insertMigrationData_1($client_lms_data, $output);
     }
 
-    public function setMigrationData_1()
+    public function setMigrationData_1($output)
     {
         $db = self::connect();
         $client_LMS_data = [
@@ -59,12 +58,12 @@ class Migration_1 extends Model
         ];
 
 //        $this->setModulosData($client_LMS_data, $db);
-        $this->setUsersData($client_LMS_data, $db);
-        $this->setCarrerasData($client_LMS_data, $db);
-
-        $this->setCiclosData($client_LMS_data, $db);
-        $this->setGruposData($client_LMS_data, $db);
-        $this->setBoticasData($client_LMS_data, $db);
+//        $this->setUsersData($client_LMS_data, $db, $output);
+//        $this->setCarrerasData($client_LMS_data, $db);
+//
+//        $this->setCiclosData($client_LMS_data, $db);
+//        $this->setGruposData($client_LMS_data, $db);
+//        $this->setBoticasData($client_LMS_data, $db);
 
 //        $this->setSchoolsData($client_LMS_data, $db);
 //        $this->setCoursesData($client_LMS_data, $db);
@@ -72,19 +71,19 @@ class Migration_1 extends Model
         return $client_LMS_data;
     }
 
-    public function insertMigrationData_1($data)
+    public function insertMigrationData_1($data, $output)
     {
 //        $this->insertModulosData($data);
 
-        $this->insertUsersData($data);
-        $this->insertCarrerasData($data);
+//        $this->insertUsersData($data);
+//        $this->insertCarrerasData($data);
+//
+//        $this->insertCiclosData($data);
+//
+//        $this->insertGruposData($data);
+//        $this->insertBoticasData($data);
 
-        $this->insertCiclosData($data);
-
-        $this->insertGruposData($data);
-        $this->insertBoticasData($data);
-
-//        $this->insertCriterionUserData($data);
+        $this->insertCriterionUserData($data, $output);
 
 //        $this->insertSegmentacionCarrerasCiclosData();
 
@@ -92,9 +91,9 @@ class Migration_1 extends Model
 //        $this->insertCourseData($data);
     }
 
-    public function setUsersData(&$result, $db)
+    public function setUsersData(&$result, $db, $output)
     {
-        $user_db = User::disableCache()->select('document', 'email')->get();
+//        $user_db = User::disableCache()->select('document', 'email')->get();
 
         $temp['users'] = $db->getTable('usuarios')
             ->select(
@@ -109,8 +108,8 @@ class Migration_1 extends Model
                 'created_at',
                 'updated_at'
             )
-            ->skip(100)
-            ->limit(100)
+//            ->skip(100)
+//            ->limit(1000)
 //            ->whereNotIn('dni', $users->pluck('document'))
 //            ->whereNotIn('email', $users->pluck('email'))
             ->get();
@@ -119,13 +118,21 @@ class Migration_1 extends Model
 //        return $temp['users'];
 
         $type_client = Taxonomy::getFirstData('user', 'type', 'client');
-
+        $bar = $output->createProgressBar(count($temp['users']));
+        $bar->start();
         foreach ($temp['users'] as $user) {
+            $bar->advance();
 
-            $dni_exists = $user->dni && $user_db->where('document', $user->dni)->first();
-            $email_exists = $user->email && $user_db->where('document', $user->email)->first();
+            $user_db = User::disableCache()->select('document', 'email')->where('document', $user->dni)->first();
+//            $dni_exists = $user->dni && $user_db->where('document', $user->dni)->first();
+//            $email_exists = $user->email && $user_db->where('document', $user->email)->first();
 
-            if ($dni_exists || $email_exists) continue;
+            if ($user_db) {
+                $user_db->update(['external_id' => $user->id]);
+                continue;
+            }
+//            if ($dni_exists || $email_exists) continue;
+//            if ($dni_exists) continue;
 
 //            info("Usuario a agregar {$user->dni}");
 //            print_r("Usuario a agregar {$user->dni}\n");
@@ -163,7 +170,7 @@ class Migration_1 extends Model
                 'updated_at' => $user->updated_at,
             ];
         }
-
+        $bar->finish();
 //        $result['users'] = array_chunk($result['users'], self::CHUNK_LENGTH, true);
     }
 
@@ -645,15 +652,27 @@ class Migration_1 extends Model
         $this->makeChunkAndInsert($criterion_values_workspace, 'criterion_value_workspace');
     }
 
-    public function insertCriterionUserData($data)
+    public function insertCriterionUserData($data, $output)
     {
         $db = self::connect();
 
-        $users = User::all();
+//        $users = User::all();
+        $users = User::whereNotNull('external_id')
+            ->with([
+                'criterion_values' => function ($q) {
+                    $q->withWhereHas('criterion', function ($q) {
+                        $q->whereIn('code', ['module', 'career', 'cycle', 'grupo', 'botica']);
+                    })
+                        ->select('id', 'criterion_id', 'value_text');
+                }
+            ])
+            ->select('id', 'external_id')
+            ->limit(1000)
+            ->get();
         $modules_value = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'module'))->get();
         $carreras_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'career'))->get();
-        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'ciclo'))->get();
-        $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'group'))->get();
+        $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'cycle'))->get();
+        $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'grupo'))->get();
         $boticas_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'botica'))->get();
         $matriculas = $db->getTable('matricula')
             ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
@@ -661,13 +680,19 @@ class Migration_1 extends Model
             ->get();
 
         $criterion_user = [];
-
+        $bar = $output->createProgressBar($users->count());
+        $bar->start();
         foreach ($users as $user) {
+            $bar->advance();
 
             $user_relations_key = array_search($user->external_id, array_column($data['usuario_relations'], 'usuario_id'));
             $user_relations = $user_relations_key === false ? false : $data['usuario_relations'][$user_relations_key];
 
             $usuario_matriculas = $matriculas->where('usuario_id', $user->external_id);
+//            $usuario_matriculas = $db->getTable('matricula')
+//                ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
+//                ->where('usuario_id', $user->external_id)
+//                ->get();
 
             if ($usuario_matriculas->count() > 0) :
 
@@ -678,6 +703,7 @@ class Migration_1 extends Model
                 if ($career and $module and $ciclos->count() > 0) :
 
                     // Push modulo
+                    $exists = $user->criterion_values->where('value_text', $module->value_text)->first();
                     $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $module->id];
 
                     // Push carrera
@@ -715,7 +741,12 @@ class Migration_1 extends Model
                 endif;
 
             endif;
+
+
+
         }
+
+        $bar->finish();
 
         $this->makeChunkAndInsert($criterion_user, 'criterion_value_user');
     }
