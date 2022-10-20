@@ -16,6 +16,7 @@ class AuthController extends Controller
 {
     public function login(LoginAppRequest $request)
     {
+
         try {
             $data = $request->validated();
 
@@ -91,7 +92,14 @@ class AuthController extends Controller
 
         $supervisor = $user->isSupervisor();
 
-        $can_be_host = $user->belongsToSegmentation($workspace);
+        // $can_be_host = $user->belongsToSegmentation($workspace);
+        $subworkspace = auth()->user()->subworkspace;
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+
+        # verifica si existen el usuario existe como host
+        $currentHosts = Usuario::getCurrentHostsIds();
+        $can_be_host =  in_array($user->id, $currentHosts);
+        # verifica si existen el usuario existe como host
 
         $user_data = [
             "id" => $user->id,
@@ -102,8 +110,8 @@ class AuthController extends Controller
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
-            // 'can_be_host' => $can_be_host,
-            'can_be_host' => true,
+            'can_be_host' => $can_be_host,
+            // 'can_be_host' => true,
 //            'carrera' => $carrera,
 //            'ciclo' => $ciclo
 //            "grupo" => $user->grupo,

@@ -3830,7 +3830,8 @@ class RestController extends Controller
             // return $request;
 
             $usuario_id = $user->toArray()['id'];
-            $description = strip_tags($request->input('description'));
+            // $description = strip_tags($request->input('description'));
+            $description = strip_tags($request->description);
             // File
             $file = $request->file('file');
             $ext = $file->getClientOriginalExtension();
