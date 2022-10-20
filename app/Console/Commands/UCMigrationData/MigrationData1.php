@@ -54,18 +54,25 @@ class MigrationData1 extends Command
 
         if ($type === 'crud') {
             Migration_1::migrateCrudData($bar);
+            $this->info("\n CRUD MIGRATED");
+            info("\n CRUD MIGRATED");
         }
 
         if ($type === 'users') {
             Migration_1::migrateUsers($bar);
+            $this->info("\n USERS MIGRATED");
+            info("\n USERS MIGRATED");
         }
 
         if ($type === 'criteria_users') {
             Migration_1::migrateCriteriaUser($bar);
+            $this->info("\n CRITERIA USERS MIGRATED");
+            info("\n CRITERIA USERS MIGRATED");
         }
 
-        $this->info(" Fin: " . now());
-        info(" Fin: " . now());
+
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
 
     }
 }

@@ -129,7 +129,7 @@ class Migration_1 extends Model
             )
 //            ->skip(1000)
 //            ->limit(1000)
-//            ->where('config_id', 4)
+            ->where('config_id', 6)
             ->get();
 
         $j = 0;
@@ -147,10 +147,13 @@ class Migration_1 extends Model
                 'botica_id' => $user->botica_id
             ];
 
-            $user_db = User::disableCache()->select('document', 'email')->where('document', $user->dni)->first();
+            $user_db = User::disableCache()->select('id', 'document', 'email', 'subworkspace_id')->where('document', $user->dni)->first();
 
             if ($user_db) {
                 $j++;
+                $module_value = self::MODULOS_EQUIVALENCIA[$user->config_id] ?? false;
+                if (!$module_value) info("No hace match con modulo {$user->dni} - {$user_db->subworkspace_id}");
+
                 $user_db->update(['external_id' => $user->id, 'user_relations' => $user_relations, 'updated_at' => $now]);
                 continue;
             }
@@ -491,6 +494,7 @@ class Migration_1 extends Model
     public function insertUsersData($data)
     {
         $user_temp = [];
+        info("USERS A CREAR :: " . count($data['users']));
 
         foreach ($data['users'] as $user) {
             $module_value = self::MODULOS_EQUIVALENCIA[$user['config_id']] ?? false;
@@ -651,7 +655,7 @@ class Migration_1 extends Model
     {
         $db = self::connect();
 
-        $users = User::whereNotNull('external_id')
+        $users = User::disableCache()->whereNotNull('external_id')
             ->with([
                 'criterion_values' => function ($q) {
                     $q->withWhereHas('criterion', function ($q) {
@@ -661,7 +665,7 @@ class Migration_1 extends Model
                 }
             ])
             ->select('id', 'external_id', 'user_relations')
-            ->limit(1000)
+//            ->limit(5000)
             ->get();
         $module = Criterion::where('code', 'module')->first();
         $career = Criterion::where('code', 'career')->first();
@@ -673,10 +677,10 @@ class Migration_1 extends Model
         $ciclos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'cycle'))->get();
         $grupos_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'grupo'))->get();
         $boticas_values = CriterionValue::whereHas('criterion', fn($q) => $q->where('code', 'botica'))->get();
-        $matriculas = $db->getTable('matricula')
-            ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
-            ->whereIn('usuario_id', $users->pluck('external_id'))
-            ->get();
+//        $matriculas = $db->getTable('matricula')
+//            ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
+//            ->whereIn('usuario_id', $users->pluck('external_id'))
+//            ->get();
 
         $criterion_user = [];
         $bar = $output->createProgressBar($users->count());
@@ -684,22 +688,21 @@ class Migration_1 extends Model
         foreach ($users as $user) {
             $bar->advance();
 
-            $user_relations_key = array_search($user->external_id, array_column($user->user_relations, 'usuario_id'));
-            $user_relations = $user_relations_key === false ? false : $user->user_relations[$user_relations_key];
+            $user_relations = $user->user_relations;
 
-            $usuario_matriculas = $matriculas->where('usuario_id', $user->external_id);
-//            $usuario_matriculas = $db->getTable('matricula')
-//                ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
-//                ->where('usuario_id', $user->external_id)
-//                ->get();
+//            $usuario_matriculas = $matriculas->where('usuario_id', $user->external_id);
+            $usuario_matriculas = $db->getTable('matricula')
+                ->select('usuario_id', 'carrera_id', 'ciclo_id', 'secuencia_ciclo', 'presente', 'estado')
+                ->where('usuario_id', $user->external_id)
+                ->get();
 
             if ($usuario_matriculas->count() > 0) :
 
-                $module_value = $modules_value->where('external_id', $user_relations['config_id'])->first();
+                $module_value = self::MODULOS_EQUIVALENCIA[$user_relations['config_id']] ?? false;
                 $career_value = $carreras_values->where('external_id', $usuario_matriculas->first()->carrera_id)->first();
                 $ciclos = $ciclos_values->whereIn('position', $usuario_matriculas->pluck('secuencia_ciclo'));
 
-                if ($career and $module and $ciclos->count() > 0) :
+                if ($career_value and $module_value and $ciclos->count() > 0) :
 
                     // Push modulo
                     $this->validIfExistsCriterionValueUser($module, $module_value, $user, $criterion_user);
@@ -855,9 +858,9 @@ class Migration_1 extends Model
         if ($exists) {
             DB::table('criterion_value_user')->where('user_id', $user->id)
                 ->where('criterion_value_id', $exists->id)
-                ->update(['criterion_value_id' => $criterion_value->id]);
+                ->update(['criterion_value_id' => $criterion_value->id ?? $criterion_value]);
         } else {
-            $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $criterion_value->id];
+            $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $criterion_value->id ?? $criterion_value];
         }
     }
 }
