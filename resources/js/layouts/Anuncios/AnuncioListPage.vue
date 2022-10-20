@@ -40,8 +40,6 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                default-sort-by="publish_date"
-                :default-sort-desc="true"
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar anuncio')"

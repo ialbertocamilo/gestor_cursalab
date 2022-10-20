@@ -257,6 +257,7 @@ class Meeting extends BaseModel
         # meeting segun workspaceid
         $currWorkspaceIndex = get_current_workspace_indexes('id');
         $query->where('workspace_id', $currWorkspaceIndex);
+        # meeting segun workspaceid
 
         if ($request->usuario_id)
             $query->whereHas('attendants', function ($q) use ($request) {

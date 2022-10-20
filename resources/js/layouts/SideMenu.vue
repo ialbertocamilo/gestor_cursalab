@@ -73,7 +73,8 @@
                     v-for="(item, i) in grupo.items"
                     :key="i"
                     class="list_submenu"
-                >
+                    >
+
                     <v-list-item
                         dark
                         dense
@@ -93,6 +94,9 @@
                             class="item_title"
                         ></v-list-item-title>
                     </v-list-item>
+
+
+
                 </div>
             </v-list-group>
         </v-list>
@@ -100,6 +104,16 @@
 </template>
 
 <script>
+
+const SUB_ITEM_GLOSARY =  { title:"Glosario",
+                            icon:"fas fa-book",
+                            path:"/glosario",
+                            subpaths:["glosario"],
+                            selected:false,
+                            permission:"glosario",
+                            role:[ "super-user", "admin", "content-manager", "trainer" ]
+                          };
+
 export default {
     data: () => ({
         logoIsLoaded: true,
@@ -312,15 +326,6 @@ export default {
                             "trainer"
                         ]
                     }
-                    // {
-                    //     title:"Glosario",
-                    //     icon:"fas fa-book",
-                    //     path:"/glosario",
-                    //     subpaths:["glosario"],
-                    //     selected:false,
-                    //     permission:"glosario",
-                    //     role:["super-user","admin","content-manager","trainer"]
-                    // },
                     // {
                     //     title:"Vademécum",
                     //     icon:"fas fa-file-invoice",
@@ -584,6 +589,15 @@ export default {
                 vue.workspaces = data.data.data;
             });
         },
+
+        /**
+         * Add new Item by workspace id
+         * */
+        availableItemGroup(in_title, item) {
+          let vue = this;
+          const index = vue.grupos.findIndex(({title}) => title === in_title);
+          vue.grupos[index].items.push(item);
+        },
         /**
          * Load session data from server
          */
@@ -595,6 +609,14 @@ export default {
             let url = `/usuarios/session`;
             this.$http.get(url).then(({ data }) => {
                 vue.userSession = data;
+
+                //=== only for "Farmacias Peruanas"
+                const { session:{ workspace } } = data;
+                if(workspace.id === 25) {
+                  vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
+                }
+                //=== only for "Farmacias Peruanas"
+
             });
         },
         /**

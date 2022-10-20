@@ -22,6 +22,13 @@ class CheckRol
     {
         $user = auth()->user();
         $access = false;
+
+        // === check workpsace only to 25 - Farmacias Peruanas ===
+        $workspace_id = session('workspace')['id'];
+        if($workspace_id !== 25 and $request->is('glosario'))
+            Redirect::to('welcome')->send();
+        // === check workpsace only to 25 - Farmacias Peruanas ===
+
         if (!$user->isAn('super-user')) {
             foreach ($checkrol as $rol) {
                 if ($user->isAn($rol)) {
