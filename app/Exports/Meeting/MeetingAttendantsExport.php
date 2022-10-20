@@ -54,7 +54,7 @@ class MeetingAttendantsExport implements FromView, WithTitle, ShouldAutoSize, Wi
             ->orderBy('meeting_id')
             ->get();
 
-        dd($attendants);
+        // dd($attendants);
 
         $isAllowedToViewAll = auth()->user()->isMasterOrAdminCursalab();
 
