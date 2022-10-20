@@ -36,20 +36,23 @@ class School extends BaseModel
         $workspace = get_current_workspace();
 
         $escuelas = School::whereRelation('workspaces', 'workspace_id', $workspace->id)
-        // whereHas('courses', function ($j) use ($courses) {
-        //     $j->whereIn('course_id', $courses->pluck('id'));
-        // })->
-        ->withCount(['courses' => function ($c) use ($workspace) {
-            $c->whereRelation('workspaces', 'id', $workspace->id);
-        }]);
+            // whereHas('courses', function ($j) use ($courses) {
+            //     $j->whereIn('course_id', $courses->pluck('id'));
+            // })->
+            ->withCount(['courses' => function ($c) use ($workspace) {
+                $c->whereRelation('workspaces', 'id', $workspace->id);
+            }]);
 
         if ($request->q)
             $escuelas->where('name', 'like', "%$request->q%");
+        if (!is_null($request->sortBy)) {
+            $field = $request->sortBy ?? 'created_at';
+            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $field = $request->sortBy ?? 'position';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
-        $escuelas->orderBy($field, $sort);
+            $escuelas->orderBy($field, $sort);
+        } else {
+            $escuelas->orderBy('created_at', 'DESC');
+        }
 
         return $escuelas->paginate($request->paginate);
     }
@@ -78,7 +81,6 @@ class School extends BaseModel
             }
 
             DB::commit();
-
         } catch (\Exception $e) {
 
             DB::rollBack();

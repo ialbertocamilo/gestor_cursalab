@@ -216,7 +216,10 @@ class GlossaryController extends Controller
         $modulos = Criterion::getValuesForSelect('module');
         $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
 
-//        $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
+
+
+
+//      $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
 //                                  ->select('id', 'value_text as nombre')
 //                                  ->where('active', ACTIVE)
 //                                  ->groupBy('parent_id')
@@ -226,6 +229,7 @@ class GlossaryController extends Controller
                                     ->select('id', 'value_text as nombre')
                                     ->where('active', ACTIVE)
                                     ->get();
+
         $carreras = $carreras->groupBy('parent_id');
 
 //        foreach ($carreras as $carrera) {

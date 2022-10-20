@@ -86,7 +86,6 @@ class RestMeetingController extends Controller
         $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
 
         $subworkspace = auth()->user()->subworkspace;
-
         $request->merge(['workspace_id' => $subworkspace->parent_id]);
 
         $filters_today = new Request([

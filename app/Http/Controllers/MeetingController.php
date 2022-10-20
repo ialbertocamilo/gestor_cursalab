@@ -9,6 +9,7 @@ use App\Http\Requests\MeetingFinishRequest;
 use App\Http\Requests\MeetingRequest;
 use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
 use App\Http\Requests\Meeting\MeetingUploadAttendantsFormRequest;
+use App\Http\Resources\MeetingAppResource;
 use App\Http\Resources\MeetingResource;
 use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
 use App\Models\Attendant;
@@ -26,6 +27,7 @@ class MeetingController extends Controller
 {
     public function search(Request $request)
     {
+        // $request->merge(['usuario_id' => 436]);
         $meetings = Meeting::search($request);
         MeetingResource::collection($meetings);
 

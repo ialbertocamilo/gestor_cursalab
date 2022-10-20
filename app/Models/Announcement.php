@@ -81,11 +81,15 @@ class Announcement extends BaseModel
 
 
         // Set sorting values
+        if (!is_null($data->sortBy)) {
 
-        $field = $data->sortBy ?? 'publish_date';
-        $sort = $data->sortDesc == 'true' ? 'DESC' : 'ASC';
+            $field = $data->sortBy ?? 'publish_date';
+            $sort = $data->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $query->orderBy($field, $sort);
+            $query->orderBy($field, $sort);
+        } else {
+            $query->orderBy('created_at', 'DESC');
+        }
 
         return $query->paginate($data->paginate);
     }
@@ -124,11 +128,11 @@ class Announcement extends BaseModel
             ->where('active', ACTIVE)
             ->where(function ($query) {
 
-                $query->where(function($q){
+                $query->where(function ($q) {
                     $q->whereNull('publish_date');
                     $q->orWhereDate('publish_date', '<=', date('Y-m-d'));
                 });
-                $query->where(function($q){
+                $query->where(function ($q) {
                     $q->whereNull('end_date');
                     $q->orWhereDate('end_date', '>=', date('Y-m-d'));
                 });
@@ -140,9 +144,7 @@ class Announcement extends BaseModel
 
     // Save list of modules
 
-    public static function saveModules($announcementId, $modulesId) {
-
-
-
+    public static function saveModules($announcementId, $modulesId)
+    {
     }
 }

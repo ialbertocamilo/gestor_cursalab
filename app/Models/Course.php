@@ -122,10 +122,14 @@ class Course extends BaseModel
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
 
-        $field = $request->sortBy ?? 'position';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+        if (!is_null($request->sortBy)) {
+            $field = $request->sortBy ?? 'position';
+            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $q->orderBy($field, $sort);
+            $q->orderBy($field, $sort);
+        } else {
+            $q->orderBy('created_at', 'DESC');
+        }
 
         return $q->paginate($request->paginate);
     }
