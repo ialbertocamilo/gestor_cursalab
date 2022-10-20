@@ -69,7 +69,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
-
+        'user_relations',
         'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at',
     ];
 
@@ -96,6 +96,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $casts = [
         'email_verified_at' => 'datetime',
         'active' => 'boolean',
+        'user_relations' => 'array'
     ];
 
     public function getIdentifier()
@@ -390,7 +391,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
-            
+
             if ($new_user || ($user->wasChanged('document') && ($data['document'] ?? false))):
                 $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
             endif;

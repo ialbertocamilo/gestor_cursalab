@@ -39,6 +39,9 @@ class SupervisorController extends Controller
                 $query->where('parent_id', $request->workspace);
         });
 
+        if ($request->has('q'))
+            $data->filterText($request->q);
+
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
@@ -112,7 +115,7 @@ class SupervisorController extends Controller
             ->whereRelation('code', 'code', 'user-supervise')
             ->get();
 
-        foreach ($segments as $segment){
+        foreach ($segments as $segment) {
             $segment->values()->delete();
             $segment->delete();
         }
@@ -131,7 +134,7 @@ class SupervisorController extends Controller
         $workspace = get_current_workspace();
 
         $data = Criterion::query()
-            ->whereHas('workspaces', function($q) use($workspace){
+            ->whereHas('workspaces', function ($q) use ($workspace) {
                 $q->where('id', $workspace->id);
             })
             ->select('name as nombre', 'id')->get();
