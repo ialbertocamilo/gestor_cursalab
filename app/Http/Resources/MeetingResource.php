@@ -16,8 +16,12 @@ class MeetingResource extends JsonResource
 
     public function toArray($request)
     {
+        // $usuario_id = $request->usuario_id;
+        // $attendants = $this->attendants->where('type.code', 'cohost')->where('usuario_id', $usuario_id)->first();
         return [
             'id' => $this->id,
+            // 'attendants' => $attendants,
+            // 'attendants' => $this->attendants,
 //            'name' => "[ACC#{$this->account->id}] " . $this->name , // DEV
             'name' => $this->name , // DEV
             'custom_meeting_name' => $this->name,
