@@ -14,8 +14,7 @@ class MeetingAppResource extends JsonResource
      */
     public function toArray($request)
     {
-        // $usuario_id = auth()->user()->id;
-        $usuario_id = $request->usuario_id;
+        $usuario_id = auth()->user()->id;
         $cohost = $this->attendants->where('type.code', 'cohost')->where('usuario_id', $usuario_id)->first();
         $attendant = $this->attendants->where('usuario_id', $usuario_id)->first();
 
