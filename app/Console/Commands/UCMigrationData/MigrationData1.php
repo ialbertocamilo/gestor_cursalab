@@ -13,7 +13,7 @@ class MigrationData1 extends Command
      *
      * @var string
      */
-    protected $signature = 'uc-migration:migration-data-1';
+    protected $signature = 'uc-migration:migration-data-1 {type}';
 
     /**
      * The console command description.
@@ -44,12 +44,25 @@ class MigrationData1 extends Command
 //
 //        $this->info($user);
 
+        $type = $this->argument('type');
+
+
         $this->info(" Inicio: " . now());
         info(" Inicio: " . now());
 
         $bar = $this->output;
 
-        Migration_1::migrateData1($bar);
+        if ($type === 'crud') {
+            Migration_1::migrateCrudData($bar);
+        }
+
+        if ($type === 'users') {
+            Migration_1::migrateUsers($bar);
+        }
+
+        if ($type === 'criteria_users') {
+            Migration_1::migrateCriteriaUser($bar);
+        }
 
         $this->info(" Fin: " . now());
         info(" Fin: " . now());
