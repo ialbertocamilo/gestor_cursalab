@@ -93,7 +93,7 @@ class AuthController extends Controller
 
         // $can_be_host = $user->belongsToSegmentation($workspace);
         $subworkspace = auth()->user()->subworkspace;
-        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+        request()->merge(['workspace_id' => $subworkspace->parent_id]);
 
         # verifica si existen el usuario existe como host
         $currentHosts = Usuario::getCurrentHostsIds();
