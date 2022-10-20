@@ -47,7 +47,9 @@ class MigrationData1 extends Command
         $this->info(" Inicio: " . now());
         info(" Inicio: " . now());
 
-        Migration_1::migrateData1();
+        $bar = $this->output;
+
+        Migration_1::migrateData1($bar);
 
         $this->info(" Fin: " . now());
         info(" Fin: " . now());
