@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginAppRequest;
 use App\Models\Error;
 use App\Models\Workspace;
+use App\Models\Usuario;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
