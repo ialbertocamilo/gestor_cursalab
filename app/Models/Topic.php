@@ -13,9 +13,9 @@ class Topic extends BaseModel
         'active'
     ];
 
-//    protected $casts = [
-//        'assessable' => 'string'
-//    ];
+    //    protected $casts = [
+    //        'assessable' => 'string'
+    //    ];
 
     public function setActiveAttribute($value)
     {
@@ -87,7 +87,7 @@ class Topic extends BaseModel
     protected static function search($request, $paginate = 15)
     {
         $q = self::with('evaluation_type:id,code,name', 'questions.type')
-//            ->withCount('questions')
+            //            ->withCount('questions')
             ->where('course_id', $request->course_id);
         // $q = self::withCount('preguntas')
         //     ->where('categoria_id', $request->categoria_id)
@@ -96,10 +96,20 @@ class Topic extends BaseModel
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
 
-        $field = $request->sortBy ?? 'position';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $q->orderBy($field, $sort);
+        if (!is_null($request->sortBy)) {
+
+            $field = $request->sortBy ?? 'position';
+            if ($field == 'orden')
+                $field = 'position';
+            else if ($field == 'nombre')
+                $field = 'name';
+            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+            $q->orderBy($field, $sort);
+        } else {
+            $q->orderBy('created_at', 'DESC');
+        }
 
         return $q->paginate($request->paginate);
     }
@@ -109,7 +119,7 @@ class Topic extends BaseModel
         $question_type_code = $topic->evaluation_type->code === 'qualified'
             ? 'select-options'
             : 'written-answer';
-//        info($question_type_code);
+        //        info($question_type_code);
         $q = Question::whereRelation('type', 'code', $question_type_code)
             ->where('topic_id', $topic->id);
 
@@ -208,10 +218,10 @@ class Topic extends BaseModel
 
         return [
             'list' => $validations->toArray(),
-//            'list' => [123,123,123],
+            //            'list' => [123,123,123],
             'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
             'show_confirm' => $show_confirm,
-//            'show_confirm' => true,
+            //            'show_confirm' => true,
             'type' => 'validations-before-update'
         ];
     }
@@ -248,7 +258,7 @@ class Topic extends BaseModel
             $query->where('id', $topic->course->id);
         })->get();
 
-//        $course_requirements = $topic->course->requirements()->get();
+        //        $course_requirements = $topic->course->requirements()->get();
 
         $is_required_course = $course_requirements->count() > 0;
 
@@ -280,7 +290,7 @@ class Topic extends BaseModel
             $query->where('id', $topic->id);
         })->get();
 
-//        $requirements = $topic->requirements()->get();
+        //        $requirements = $topic->requirements()->get();
 
         $is_required_topic = $requirements->count() > 0;
         $will_be_deleted = $data['to_delete'] ?? false;
@@ -386,10 +396,10 @@ class Topic extends BaseModel
 
         return [
             'list' => $validations->toArray(),
-//            'list' => [123,123,123],
+            //            'list' => [123,123,123],
             'title' => !$show_confirm ? 'Alerta' : 'Tener en cuenta',
             'show_confirm' => $show_confirm,
-//            'show_confirm' => true,
+            //            'show_confirm' => true,
             'type' => 'validations-before-update'
         ];
     }
@@ -459,7 +469,7 @@ class Topic extends BaseModel
                     'disponible' => $topic_status['available'],
                     'intentos_restantes' => $topic_status['remaining_attempts'],
                     'estado_tema' => $topic_status['status'],
-//                    'estado_tema_str' => $topic_status['status'],
+                    //                    'estado_tema_str' => $topic_status['status'],
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                 ];
             }
@@ -531,7 +541,7 @@ class Topic extends BaseModel
         }
 
         return [
-//            'topic_name' => $topic->name,
+            //            'topic_name' => $topic->name,
             'status' => $topic_status,
             'topic_requirement' => $topic_requirement?->id,
             'grade' => $grade,
