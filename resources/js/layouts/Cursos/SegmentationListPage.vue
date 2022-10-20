@@ -291,7 +291,7 @@ export default {
     methods: {
         getSelects() {
             let vue = this
-            const url = `/escuelas/get-selects`
+            const url = `/escuelassss/get-datass`
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.school = data.data.school

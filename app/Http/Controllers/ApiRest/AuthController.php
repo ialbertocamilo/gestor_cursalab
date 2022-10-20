@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginAppRequest;
 use App\Models\Error;
 use App\Models\Workspace;
+use App\Models\Usuario;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -90,15 +91,7 @@ class AuthController extends Controller
         // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
         $supervisor = $user->isSupervisor();
-
-        // $can_be_host = $user->belongsToSegmentation($workspace);
-        $subworkspace = auth()->user()->subworkspace;
-        $request->merge(['workspace_id' => $subworkspace->parent_id]);
-
-        # verifica si existen el usuario existe como host
-        $currentHosts = Usuario::getCurrentHostsIds();
-        $can_be_host =  in_array($user->id, $currentHosts);
-        # verifica si existen el usuario existe como host
+        $can_be_host = $user->belongsToSegmentation($workspace);
 
         $user_data = [
             "id" => $user->id,
