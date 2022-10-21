@@ -176,7 +176,11 @@ class SortingModel extends Model
 
             $new_orden = $action == 'up' ? $resource->position + 1 : $resource->position - 1;
 
-            $next_resource = $model::where('position', $new_orden)->first();
+            if ($request->model == 'Poll') {
+                $next_resource = $model::where('position', $new_orden)->where('workspace_id', $resource->workspace_id)->first();
+            } else {
+                $next_resource = $model::where('position', $new_orden)->first();
+            }
 
             if ($next_resource) {
                 $next_resource->position = $resource->position;

@@ -9,7 +9,7 @@ class Poll extends BaseModel
     protected $table = 'polls';
 
     protected $fillable = [
-        'type_id', 'anonima', 'titulo', 'imagen', 'active', 'workspace_id'
+        'type_id', 'anonima', 'titulo', 'imagen', 'active', 'workspace_id', 'position'
     ];
 
     /*
@@ -57,7 +57,7 @@ class Poll extends BaseModel
         if ($request->q)
             $query->where('titulo', 'like', "%$request->q%");
 
-        $field = $request->sortBy ?? 'created_at';
+        $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort);
@@ -105,21 +105,21 @@ class Poll extends BaseModel
 
     protected function updateSummariesAfterCompletingPoll($course, $user)
     {
-//        $summary_user = $user->summary;
+        //        $summary_user = $user->summary;
         $summary_user = SummaryUser::getCurrentRow($user);
 
         $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
-//        info("updateSummariesAfterCompletingPoll");
-//        info($summary_course->status_id);
+        //        info("updateSummariesAfterCompletingPoll");
+        //        info($summary_course->status_id);
         $summary_course->update(['status_id' => $approved_status_taxonomy?->id, 'advanced_percentage' => '100',]);
-//        info($summary_course->status_id);
+        //        info($summary_course->status_id);
 
         $count_approved_courses = SummaryCourse::query()
             ->whereRelation('course', 'active', ACTIVE)
             ->whereRelation('status', 'code', 'aprobado')
-            ->whereHas('course.type', fn($q) => $q->where('code', '<>', 'free'))
+            ->whereHas('course.type', fn ($q) => $q->where('code', '<>', 'free'))
             ->where('user_id', $user->id)
             ->count();
 
