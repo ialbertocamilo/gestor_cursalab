@@ -406,6 +406,7 @@ class Migration_3 extends Model
         $db = self::connect();
 
         $users = [];
+        $admins = [];
         // $users = User::select('id', 'external_id')->whereNull('email')->get();
         // $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
         $topics = Topic::select('id', 'external_id')->whereNotNull('external_id')->get();
@@ -496,7 +497,8 @@ class Migration_3 extends Model
         $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(2500, function ($rows_reinicios) use ($admins, $db, $topics, $users) {
             foreach ($rows_reinicios as $restart) {
 
-                $user = $users->where('external_id', $restart->usuario_id)->first();
+                // $user = $users->where('external_id', $restart->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $restart->usuario_id)->first();
                 $topic = $topics->where('external_id', $restart->curso_id)->first();
 
                 $restarts = 0;
@@ -505,12 +507,14 @@ class Migration_3 extends Model
                 if ($restart)
                 {
                     $restarts = $restart->acumulado;
-                    $restarter = $admins->where('external_id', $restart->admin_id)->first();
+                    // $restarter = $admins->where('external_id', $restart->admin_id)->first();
+                    $restarter = $restart->admin_id;
                 }
 
                 $data = [
                     'restarts' => $restarts, // from reinicios
-                    'restarter_id' => $restarter->id ?? NULL, // from reinicios
+                    // 'restarter_id' => $restarter->id ?? NULL, // from reinicios
+                    'old_admin_id' => $restarter, // from reinicios
                 ];
 
                 DB::table('summary_topics')
@@ -525,7 +529,8 @@ class Migration_3 extends Model
         $db->getTable('visitas')->chunkById(2500, function ($rows_visitas) use ($db, $topics, $users, $statuses) {
             foreach ($rows_visitas as $row) {
 
-                $user = $users->where('external_id', $row->usuario_id)->first();
+                // $user = $users->where('external_id', $row->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
                 $topic = $topics->where('external_id', $row->curso_id)->first();
                 $status = $statuses->where('code', $row->estado_tema)->first();
 
