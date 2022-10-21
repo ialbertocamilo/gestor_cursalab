@@ -12,7 +12,7 @@ class MigrationData3 extends Command
      *
      * @var string
      */
-    protected $signature = 'uc-migration:migration-data-3';
+    protected $signature = 'uc-migration:migration-data-3 {type}';
 
     /**
      * The console command description.
@@ -32,8 +32,23 @@ class MigrationData3 extends Command
      */
     public function handle()
     {
-        // Migration_3::migratePruebas();
-        Migration_3::migrateEncuestas();
-        Migration_3::migrateResumenes();
+        $type = $this->argument('type');
+
+        $output = $this->output;
+
+        if ($type == 'polls')
+            Migration_3::migrateEncuestas($output);
+
+        if ($type == 'polls-answers')
+            Migration_3::migrateEncuestasRespuestas($output);
+
+        if ($type == 'summary-users')
+            Migration_3::migrateSummaryUsers($output);
+        
+        if ($type == 'summary-courses')
+            Migration_3::migrateResumenes($output);
+        
+        if ($type == 'summary-topics')
+            Migration_3::migrateResumenes($output);
     }
 }

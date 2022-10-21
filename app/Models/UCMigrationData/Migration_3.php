@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 class Migration_3 extends Model
 {
     const CHUNK_LENGTH = 2500;
+    const W_UCFP_ID = 25;
 
     protected function connect()
     {
@@ -23,25 +24,36 @@ class Migration_3 extends Model
         return new OTFConnection($db_uc_data);
     }
 
-    protected function migrateEncuestas()
+    protected function migrateEncuestas($output)
     {
         info('getEncuestasData');
-        $data = self::getEncuestasData();
+        $data = self::getEncuestasData($output);
         self::insertChunkedData($data, 'polls');
 
         info('getEncuestasPreguntasData');
-        $data = self::getEncuestasPreguntasData();
+        $data = self::getEncuestasPreguntasData($output);
         self::insertChunkedData($data, 'poll_questions');
+    }
 
+
+    protected function migrateEncuestasRespuestas()
+    {
         info('getAndInsertEncuestasPreguntasRespuestasData');
         self::getAndInsertEncuestasPreguntasRespuestasData();
     }
 
-    protected function migrateResumenes()
+    protected function migrateSummaryUsers($output)
     {
         info('getResumenGeneralData');
-        $data = self::getResumenGeneralData();
-        self::insertChunkedData($data, 'summary_users');
+        $data = self::getResumenGeneralData($output);
+        self::insertChunkedData($data, 'summary_users', $output);
+    }
+
+    protected function migrateResumenes()
+    {
+        // info('getResumenGeneralData');
+        // $data = self::getResumenGeneralData();
+        // self::insertChunkedData($data, 'summary_users');
 
         info('getAndInsertResumenCursosData');
         self::getAndInsertResumenCursosData();
@@ -52,24 +64,42 @@ class Migration_3 extends Model
     }
 
 
-    public function insertChunkedData($data, $table_name)
+    public function insertChunkedData($data, $table_name, $output)
     {
+        $output->line('init chunked ' . $table_name);
+        $output->newLine();
+
+        $bar = $output->createProgressBar(count($data));
+        $bar->start();
+
         foreach ($data as $chunk)
         {
             DB::table($table_name)->insert($chunk);
 
             info($table_name . ' chunked inserted');
+
+            $bar->advance();
         }
+        
+        $bar->finish();
+
+        $output->newLine();
     }
 
-    protected function getEncuestasData()
+    protected function getEncuestasData($output)
     {
         $db = self::connect();
+
+        $output->line('init getEncuestasData');
+        $output->newLine();
 
         $encuestas = $db->getTable('encuestas')->get();
         $types = Taxonomy::getData('poll', 'tipo')->get();
 
         $data = [];
+
+        $bar = $output->createProgressBar(count($encuestas));
+        $bar->start();
 
         foreach ($encuestas as $key => $encuesta)
         {
@@ -77,8 +107,7 @@ class Migration_3 extends Model
 
             $data[] = [
                 'external_id' => $encuesta->id,
-                // TODO: add workspace_id field
-                // 'workspace_id' => ????,
+                'workspace_id' => self::W_UCFP_ID,
                 'type_id' => $type->id ?? NULL,
                 'anonima' => $encuesta->anonima,
                 'titulo' => $encuesta->titulo,
@@ -87,20 +116,32 @@ class Migration_3 extends Model
                 'created_at' => $encuesta->created_at,
                 'updated_at' => $encuesta->updated_at,
             ];
+
+            $bar->advance();
         }
+
+        $bar->finish();
+
+        $output->newLine();
 
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
-    protected function getEncuestasPreguntasData()
+    protected function getEncuestasPreguntasData($output)
     {
         $db = self::connect();
 
+        $output->line('init getEncuestasPreguntasData');
+        $output->newLine();
+
         $preguntas = $db->getTable('encuestas_preguntas')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
-        $polls = Poll::all();
+        $polls = Poll::where('workspace_id', self::W_UCFP_ID)->whereNotNull('external_id')->get();
 
         $data = [];
+        
+        $bar = $output->createProgressBar(count($preguntas));
+        $bar->start();
 
         foreach ($preguntas as $key => $pregunta)
         {
@@ -117,21 +158,35 @@ class Migration_3 extends Model
                 'created_at' => $pregunta->created_at,
                 'updated_at' => $pregunta->updated_at,
             ];
+
+            $bar->advance();
         }
+
+        $bar->finish();
+
+        $output->newLine();
 
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
-    protected function getAndInsertEncuestasPreguntasRespuestasData()
+    protected function getAndInsertEncuestasPreguntasRespuestasData($output)
     {
         $db = self::connect();
+
+        $output->line('init getAndInsertEncuestasPreguntasRespuestasData');
+        $output->newLine();
 
         $courses = Course::select('id', 'external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
         $users = User::select('id', 'external_id')->whereNull('email')->get();
         $preguntas = PollQuestion::select('id', 'external_id')->get();
 
-        $db->getTable('encuestas_respuestas')->chunkById(2500, function ($respuestas) use ($users, $types, $courses, $preguntas) {
+        $count = $db->getTable('encuestas_respuestas')->count();
+
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
+        $db->getTable('encuestas_respuestas')->chunkById(2500, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar, $course_equivalent) {
 
             $chunk = [];
 
@@ -153,6 +208,8 @@ class Migration_3 extends Model
                     'created_at' => $respuesta->created_at,
                     'updated_at' => $respuesta->updated_at,
                 ];
+
+                $bar->advance();
             }
 
             DB::table('poll_question_answers')->insert($chunk);
@@ -160,24 +217,43 @@ class Migration_3 extends Model
             info('poll_question_answers chunked inserted');
         });
 
-
+        $bar->finish();
 
     }
 
-    protected function getResumenGeneralData()
+    protected function getResumenGeneralData($output)
     {
         $db = self::connect();
 
+        $output->line('init getResumenGeneralData');
+        $output->newLine();
+
         $rows = $db->getTable('resumen_general')->get();
 
-        $users = User::select('id', 'external_id')->whereNull('email')->get();
+        $users = User::select('id', 'external_id')->whereNotNull('external_id')->get();
 
         $data = [];
 
+
+        $bar = $output->createProgressBar(count($rows));
+        $bar->start();
+
         foreach ($rows as $row)
         {
-            $user = $users->where('external_id', $row->usuario_id)->first();
+            $user = User::select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+            // $user = $users->where('external_id', $row->usuario_id)->first();
             // $user = User::where('external_id', $row->usuario_id)->first();
+
+            $current_summary_user = SummaryUser::getCurrentRow($user, $user);
+
+            $bar->advance();
+
+            if ($current_summary_user) {
+
+                info("User => {$user->id} - {$user->document} ya tiene data en summary_user. Recalcular con la data actual.");
+                
+                continue;
+            }
 
             $data[] = [
                 'user_id' => $user->id ?? NULL,
@@ -196,6 +272,10 @@ class Migration_3 extends Model
                 'updated_at' => $row->updated_at,
             ];
         }
+
+        $bar->finish();
+
+        $output->newLine();
 
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
