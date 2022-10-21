@@ -46,7 +46,7 @@ class UpdateSummariesUser extends Command
 
             $user = $summary_user->user;
 
-            $summaries_courses = SummaryCourse::with('course')->where('user_id', $user->id)->get();
+            $summaries_courses = SummaryCourse::withWhereHas('course')->where('user_id', $user->id)->get();
 
             foreach ($summaries_courses as $summary_course)
                 SummaryCourse::updateUserData($summary_course->course, $user, update_attempts: false);
