@@ -178,7 +178,8 @@ class Migration_3 extends Model
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
         $users = [];
         // $users = User::select('id', 'external_id')->whereNull('email')->get();
-        $preguntas = PollQuestion::select('id', 'external_id')->whereNotNull('external_id')->get();
+        // $preguntas = PollQuestion::select('id', 'external_id')->whereNotNull('external_id')->get();
+        $preguntas = [];
 
         $count = $db->getTable('encuestas_respuestas')->count();
 
@@ -196,8 +197,8 @@ class Migration_3 extends Model
                 // $user = $users->where('external_id', $respuesta->usuario_id)->first();
                 $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
                 // $course = $courses->where('external_id', $respuesta->curso_id)->first();
-                $course = Course::disableCache()->where('external_id', $respuesta->curso_id)->first();
-                $question = $preguntas->where('external_id', $respuesta->pregunta_id)->first();
+                $course = Course::disableCache()->select('id', 'external_id')->where('external_id', $respuesta->curso_id)->first();
+                $question = PollQuestion::disableCache()->select('id', 'external_id')->where('external_id', $respuesta->pregunta_id)->first();
 
                 $chunk[] = [
                     'course_id' => $course->id ?? NULL,
