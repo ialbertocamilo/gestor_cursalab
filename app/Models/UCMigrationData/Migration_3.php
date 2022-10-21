@@ -39,10 +39,10 @@ class Migration_3 extends Model
     }
 
 
-    protected function migrateEncuestasRespuestas()
+    protected function migrateEncuestasRespuestas($output)
     {
         info('getAndInsertEncuestasPreguntasRespuestasData');
-        self::getAndInsertEncuestasPreguntasRespuestasData();
+        self::getAndInsertEncuestasPreguntasRespuestasData($output);
     }
 
     protected function migrateSummaryUsers($output)
@@ -80,7 +80,7 @@ class Migration_3 extends Model
 
             $bar->advance();
         }
-        
+
         $bar->finish();
 
         $output->newLine();
@@ -137,7 +137,7 @@ class Migration_3 extends Model
         $polls = Poll::where('workspace_id', self::W_UCFP_ID)->whereNotNull('external_id')->get();
 
         $data = [];
-        
+
         $bar = $output->createProgressBar(count($preguntas));
         $bar->start();
 
@@ -249,7 +249,7 @@ class Migration_3 extends Model
             if ($current_summary_user) {
 
                 info("User => {$user->id} [OLD - {$row->usuario_id}] - {$user->document} ya tiene data en summary_user. Recalcular con la data actual.");
-                
+
                 continue;
             }
 
@@ -394,7 +394,7 @@ class Migration_3 extends Model
 
             info('summary_courses diplomas chunked updateOrInsert');
         });
-        
+
         $bar->finish();
 
         $output->newLine();
