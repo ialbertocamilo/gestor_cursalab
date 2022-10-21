@@ -82,10 +82,11 @@ export default {
       downloadExcelObservations({errores,headers}){
         // let values =["dni", "nota", "info"];
         let vue = this;
-        const values = errores.map(error => error.row);
+        const values = errores.map(error => error.row.map(row => row || ''));
         let comments = [];
         errores.forEach((error,index)=>{
             error.errors_index.forEach((error_index) => {
+                console.log(this.abc[error_index.index],error_index.index);
                 comments.push({
                     cell_name:`${this.abc[error_index.index]}${index+2}`,
                     message:error_index.message
