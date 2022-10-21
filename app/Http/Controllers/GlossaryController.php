@@ -8,8 +8,10 @@ use App\Http\Resources\GlossaryResource;
 use App\Models\Carrera;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
+use App\Models\CriterionWorkspace;
 use App\Models\Glossary;
 use App\Models\Taxonomy;
+use App\Models\Workspace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -216,21 +218,25 @@ class GlossaryController extends Controller
         $modulos = Criterion::getValuesForSelect('module');
         $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
 
-
-
-
 //      $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
 //                                  ->select('id', 'value_text as nombre')
 //                                  ->where('active', ACTIVE)
 //                                  ->groupBy('parent_id')
 //                                  ->get();
 
-        $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
-                                    ->select('id', 'value_text as nombre')
-                                    ->where('active', ACTIVE)
-                                    ->get();
+        $carreras = Criterion::test_getValuesForSelect('module');
+        // $carreras = Criterion::getCriteriaFromWorkspace(25);
+        // $criterios = CriterionValue::getCriteriaFromWorkspace(25);
+        // $criterios = CriterionValue::getCriteriaFromWorkspace(25);
 
-        $carreras = $carreras->groupBy('parent_id');
+        // $carreras = Workspace::find(25)->criterionWorkspace;
+
+        // $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
+        //                             ->select('id', 'value_text as nombre')
+        //                             ->where('active', ACTIVE)
+        //                             ->get();
+
+        // $carreras = $carreras->groupBy('parent_id');
 
 //        foreach ($carreras as $carrera) {
 //            $carrera->glosario_categorias = [];

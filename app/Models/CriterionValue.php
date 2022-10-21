@@ -30,6 +30,11 @@ class CriterionValue extends BaseModel
         return $this->belongsToMany(CriterionValue::class, 'criterion_value_relationship', 'criterion_value_id', 'criterion_value_parent_id');
     }
 
+    public function criterion_workspace()
+    {
+        return $this->belongsToMany(CriterionWorkspace::class);
+    }
+
     public function workspaces()
     {
         return $this->belongsToMany(Workspace::class);
