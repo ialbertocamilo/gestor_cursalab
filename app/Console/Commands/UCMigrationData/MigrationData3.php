@@ -48,7 +48,16 @@ class MigrationData3 extends Command
         if ($type == 'summary-courses')
             Migration_3::migrateSummaryCourses($output);
         
-        if ($type == 'summary-topics')
-            Migration_3::migrateSummaryTopics($output);
+        if ($type == 'summary-topics-pruebas')
+            Migration_3::migrateSummaryTopics($output, 'pruebas');
+
+        if ($type == 'summary-topics-abiertas')
+            Migration_3::migrateSummaryTopics($output, 'abiertas');
+        
+        if ($type == 'summary-topics-reinicios')
+            Migration_3::migrateSummaryTopics($output, 'reinicios');
+
+        if ($type == 'summary-topics-visitas')
+            Migration_3::migrateSummaryTopics($output, 'visitas');
     }
 }
