@@ -190,7 +190,7 @@ class Migration_3 extends Model
                 $type = $types->where('code', $respuesta->tipo_pregunta)->first();
                 // $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
                 // $user = $users->where('external_id', $respuesta->usuario_id)->first();
-                $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
+                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
                 $course = $courses->where('external_id', $respuesta->curso_id)->first();
                 $question = $preguntas->where('external_id', $respuesta->pregunta_id)->first();
 
@@ -233,7 +233,7 @@ class Migration_3 extends Model
 
         foreach ($rows as $row)
         {
-            $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+            $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
             // $user = $users->where('external_id', $row->usuario_id)->first();
 
             $current_summary_user = SummaryUser::getCurrentRow($user, $user);
@@ -304,7 +304,7 @@ class Migration_3 extends Model
 
                 $status = $statuses->where('code', $row->estado)->first();
                 // $user = $users->where('external_id', $row->usuario_id)->first();
-                $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
                 $course = $courses->where('external_id', $row->curso_id)->first();
                 $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
                 // $certification = $rows_diplomas->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
@@ -373,7 +373,7 @@ class Migration_3 extends Model
                 $bar->advance();
 
                 // $user = $users->where('external_id', $row->usuario_id)->first();
-                $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
                 $course = $courses->where('external_id', $row->curso_id)->first();
 
                 DB::table('summary_courses')
@@ -413,7 +413,7 @@ class Migration_3 extends Model
             foreach ($rows_pruebas as $row) {
                 //
                 // $user = $users->where('external_id', $row->usuario_id)->first();
-                $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
                 $topic = $topics->where('external_id', $row->posteo_id)->first();
                 // $source_id = $sources->where('code', $prueba->fuente)->first();
 
@@ -451,7 +451,7 @@ class Migration_3 extends Model
             foreach ($rows_ev_abiertas as $prueba)
             {
                 $topic = $topics->where('external_id', $prueba->posteo_id)->first();
-                $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $prueba->usuario_id)->first();
+                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $prueba->usuario_id)->first();
                 // $user = $users->where('external_id', $prueba->usuario_id)->first();
                 // $source_id = $sources->where('code', $prueba->fuente)->first();
                 // $user_id = User::where('external_id', $prueba->usuario_id)->first();
@@ -491,7 +491,7 @@ class Migration_3 extends Model
             foreach ($rows_reinicios as $restart) {
 
                 // $user = $users->where('external_id', $restart->usuario_id)->first();
-                $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $restart->usuario_id)->first();
+                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $restart->usuario_id)->first();
                 $topic = $topics->where('external_id', $restart->curso_id)->first();
 
                 $restarts = 0;
@@ -523,7 +523,7 @@ class Migration_3 extends Model
             foreach ($rows_visitas as $row) {
 
                 // $user = $users->where('external_id', $row->usuario_id)->first();
-                $user = User::disableCache()select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
                 $topic = $topics->where('external_id', $row->curso_id)->first();
                 $status = $statuses->where('code', $row->estado_tema)->first();
 
