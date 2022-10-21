@@ -32,12 +32,14 @@ use Config;
 use DB;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use JWTAuth;
 use Storage;
 use Tymon\JWTAuth\Exceptions\JWTException;
+
 
 class RestController extends Controller
 {
@@ -3843,7 +3845,7 @@ class RestController extends Controller
             $file = $request->file('file');
             $ext = $file->getClientOriginalExtension();
             $namewithextension = $file->getClientOriginalName();
-            $name = str_slug(explode('.', $namewithextension)[0]);
+            $name = Str::slug(explode('.', $namewithextension)[0]);
             $name = $name . "_" . rand(100, 300);
             $fileName = $name . '.' . $ext;
 
