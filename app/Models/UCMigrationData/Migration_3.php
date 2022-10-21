@@ -186,7 +186,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('encuestas_respuestas')->chunkById(1000, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar) {
+        $db->getTable('encuestas_respuestas')->chunkById(1500, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar) {
 
             $chunk = [];
 
@@ -195,10 +195,10 @@ class Migration_3 extends Model
                 $type = $types->where('code', $respuesta->tipo_pregunta)->first();
                 // $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
                 // $user = $users->where('external_id', $respuesta->usuario_id)->first();
-                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
                 // $course = $courses->where('external_id', $respuesta->curso_id)->first();
-                $course = Course::disableCache()->select('id', 'external_id')->where('external_id', $respuesta->curso_id)->first();
-                $question = PollQuestion::disableCache()->select('id', 'external_id')->where('external_id', $respuesta->pregunta_id)->first();
+                $course = Course::select('id', 'external_id')->where('external_id', $respuesta->curso_id)->first();
+                $question = PollQuestion::select('id', 'external_id')->where('external_id', $respuesta->pregunta_id)->first();
 
                 $chunk[] = [
                     'course_id' => $course->id ?? NULL,
