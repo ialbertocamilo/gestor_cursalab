@@ -28,11 +28,11 @@ class Migration_3 extends Model
     {
         info('getEncuestasData');
         $data = self::getEncuestasData($output);
-        self::insertChunkedData($data, 'polls');
+        self::insertChunkedData($data, 'polls', $output);
 
         info('getEncuestasPreguntasData');
         $data = self::getEncuestasPreguntasData($output);
-        self::insertChunkedData($data, 'poll_questions');
+        self::insertChunkedData($data, 'poll_questions', $output);
     }
 
 
