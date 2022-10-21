@@ -129,7 +129,7 @@ class Migration_1 extends Model
             )
 //            ->skip(1000)
 //            ->limit(1000)
-            ->where('config_id', 6)
+//            ->where('config_id', 6)
             ->get();
 
         $j = 0;
