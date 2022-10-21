@@ -12,7 +12,7 @@ class MigrationData2 extends Command
      *
      * @var string
      */
-    protected $signature = 'uc-migration:migration-data-2';
+    protected $signature = 'uc-migration:migration-data-2 {type}';
 
     /**
      * The console command description.
@@ -31,13 +31,24 @@ class MigrationData2 extends Command
      */
     public function handle()
     {
+        $type = $this->argument('type');
+
         $this->info(" Inicio: " . now());
         info(" Inicio: " . now());
 
-        Migration_2::migrateEscuelas();
-        Migration_2::migrateCursos();
-        Migration_2::migrateTemas();
-        Migration_2::migrateCurricula();
+        $bar = $this->output;
+
+        if ($type === 'schools')
+            Migration_2::migrateEscuelas($bar);
+
+        if ($type === 'courses')
+            Migration_2::migrateCursos($bar);
+
+        if ($type === 'topics')
+            Migration_2::migrateTemas($bar);
+
+        if ($type === 'curricula')
+            Migration_2::migrateCurricula($bar);
 
         $this->info(" Fin: " . now());
         info(" Fin: " . now());
