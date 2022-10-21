@@ -44,6 +44,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MigracionPerfilImport;
 
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\UsuarioController;
 use App\Imports\UsuariosFarmaHistorialImport;
 use App\Models\Massive\ChangeStateUserMassive;
 use App\Http\Controllers\ApiRest\HelperController;
@@ -80,7 +81,13 @@ class MasivoController extends Controller
         }
         $import = new UserMassive();
         Excel::import($import, $request->file('file'));
-        return $this->success(['message' => 'Usuarios creados correctamente.','datos_procesados'=>$import->processed_users,'errores'=>$import->errors]);
+        $headers = $import->excelHeaders;
+        return $this->success([
+            'message' => 'Usuarios creados correctamente.',
+            'headers' => $headers,
+            'datos_procesados'=>$import->processed_users,
+            'errores'=>$import->errors
+        ]);
     }
     public function activeUsers(Request $request){
         $validator = $this->validateFile($request);

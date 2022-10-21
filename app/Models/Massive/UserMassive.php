@@ -16,6 +16,7 @@ class UserMassive implements ToCollection{
     public $errors = [];
     public $processed_users = 0;
     public $current_workspace = null;
+    public $excelHeaders = [];
     public function collection(Collection $rows){
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
@@ -40,6 +41,7 @@ class UserMassive implements ToCollection{
             ->orderBy('position')
             ->get();
         //obtenemos las cabezeras
+        $this->excelHeaders = $rows[0];
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
         $this->process_user($rows,$headers,$criteria);
@@ -222,8 +224,8 @@ class UserMassive implements ToCollection{
     public function getStaticHeaders(){
         return collect([
             ['required'=>true,'header_name'=>'ESTADO','code'=>'active'],
-            ['required'=>true,'header_name'=>'USERNAME','code'=>'username'],
             ['required'=>true,'header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
+            ['required'=>true,'header_name'=>'USERNAME','code'=>'username'],
             ['required'=>true,'header_name'=>'NOMBRES','code'=>'name'],
             ['required'=>true,'header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
             ['required'=>false,'header_name'=>'APELLIDO MATERNO','code'=>'surname'],

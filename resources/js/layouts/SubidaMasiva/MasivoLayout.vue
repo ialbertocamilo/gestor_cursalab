@@ -35,7 +35,7 @@
                         </div>
                     </v-col>
                 </v-row>
-                <mUsuarios :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" :q_error="0" @update_q_error="onUpdate_q_error" />
+                <mUsuarios :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" :q_error="0" @download-excel-observations="downloadExcelObservations" />
                 <ActivarUsuarios :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" :q_error="0" />
                 <InactivarUsuarios :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" :q_error="0" />
             </v-card-text>
@@ -79,26 +79,26 @@ export default {
             this.msg_alert = '';
             vue.url_template = vue.list_massive_processes.find(mp=>mp.id==vue.process_id).url_template;
       },
-      onUpdate_q_error(obj){
-          switch (obj.tipo) {
-                case 'usuarios':
-                  this.info_error.q_err_usu += obj.q_error;
-                  break;
-                case 'cesados':
-                  this.info_error.q_err_desct_usu += obj.q_error;
-                  break;
-                case 'activos':
-                    this.info_error.q_err_activ_usu += obj.q_error;
-                break;
-                case 'cursos':
-                    this.info_error.q_err_cur_tem_eva += obj.q_error;
-                break;
-                case 'carreras':
-                    this.info_error.q_err_cambio += obj.q_error;
-                break;
-              default:
-                  break;
-          }
+      downloadExcelObservations({errores,headers}){
+        // let values =["dni", "nota", "info"];
+        let vue = this;
+        const values = errores.map(error => error.row);
+        let comments = [];
+        errores.forEach((error,index)=>{
+            error.errors_index.forEach((error_index) => {
+                comments.push({
+                    cell_name:`${this.abc[error_index.index]}${index+2}`,
+                    message:error_index.message
+                });
+            });
+        });
+        console.log(comments);
+        vue.descargarExcelwithValuesInArray({
+            headers,
+            values,
+            comments,
+            filename:"No procesados_" + Math.floor(Math.random() * 1000),
+        });
       }
   }
 }

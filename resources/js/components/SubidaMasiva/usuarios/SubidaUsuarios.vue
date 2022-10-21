@@ -6,15 +6,21 @@
 					<!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
                     Se crea o actualiza a los usuarios según los datos indicados en el excel.
 				</v-card-text>
-                <!-- <v-card-title>Puntos a tomar en cuenta: </v-card-title>
+                <v-card-title>Puntos a tomar en cuenta: </v-card-title>
                 <v-card-text>
                     <ul>
                         <li class="mt-2">
-                            <b>Columnas del excel:</b> Módulo, Área, Sede, DNI, Apellidos y Nombres, Genero,Carrera, Ciclo, Cargo
+                            <b>Las columnas número de teléfono y email son opcionales</b>
                         </li>
-                        <li class="mt-2">Los errores encontrados en la subida masiva los podrás arreglar desde el botón "Ver errores" 👇</li>
+                        <li class="mt-2">
+                            <b>La columna estado toma los valores Active(usuario activo) , Inactive (usuarios inactivo)</b> 
+                        </li>
+                        <li class="mt-2">
+                            <b>Los criterios tipo fecha deben tener el formato (Y/m/d) o (d/m/Y)</b>
+                        </li>
+
                     </ul>
-                </v-card-text> -->
+                </v-card-text>
                 <!-- <v-card-actions class="d-flex justify-center">
 					<modalErrores :q_error="q_error" tipo="usuarios"></modalErrores>
 				</v-card-actions> -->
@@ -76,22 +82,20 @@
                     // console.log(data);
                     axios.post('/masivos/create-update-users',data).then((res)=>{
                         this.loading_guardar = false;
-                        if(res.data.error){
-                            // const tipo = 'usuarios';
-                            // this.$emit("update_q_error",tipo) ;
-                            this.$emit("update_q_error",{
-                                    tipo:'usuarios',
-                                    q_error: res.data.q_error
+                        const data = res.data.data;
+                        if(data.errores.length > 0){
+                            this.$emit("download-excel-observations",{
+                                    errores:data.errores,
+                                    headers:data.headers
                                 }
                             );
                         }
-                        const data = res.data.data;
                         const message = ` <ul>
                             <li>${data.message}</li>
                             <li>Cantidad de usuarios creados/actualizados: ${data.datos_procesados || 0}</li>
                             <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
                         </ul>`
-                        this.enviar_alerta(message);
+                        this.enviar_alerta(message,errores);
                     }).catch(err=>{
                         this.loading_guardar = false;
                     });
