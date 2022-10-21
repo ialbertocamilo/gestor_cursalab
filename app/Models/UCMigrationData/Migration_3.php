@@ -174,7 +174,7 @@ class Migration_3 extends Model
         $output->line('init getAndInsertEncuestasPreguntasRespuestasData');
         $output->newLine();
 
-        $courses = Course::select('id', 'external_id')->get();
+        $courses = Course::select('id', 'external_id')->whereNotNull('external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
         $users = [];
         // $users = User::select('id', 'external_id')->whereNull('email')->get();
@@ -218,7 +218,7 @@ class Migration_3 extends Model
         });
 
         $bar->finish();
-
+        $output->newLine();
     }
 
     protected function getResumenGeneralData($output)
@@ -247,7 +247,7 @@ class Migration_3 extends Model
 
             if ($current_summary_user) {
 
-                info("User => {$user->id} - {$user->document} ya tiene data en summary_user. Recalcular con la data actual.");
+                info("User => {$user->id} [OLD - {$row->usuario_id}] - {$user->document} ya tiene data en summary_user. Recalcular con la data actual.");
                 
                 continue;
             }
@@ -405,9 +405,10 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $users = User::select('id', 'external_id')->whereNull('email')->get();
-        $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
-        $topics = Posteo::select('id', 'external_id')->get();
+        $users = [];
+        // $users = User::select('id', 'external_id')->whereNull('email')->get();
+        // $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
+        $topics = Topic::select('id', 'external_id')->whereNotNull('external_id')->get();
         $sources = Taxonomy::getData('system', 'source')->get();
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
@@ -417,8 +418,9 @@ class Migration_3 extends Model
 
             foreach ($rows_pruebas as $row) {
                 //
-                $user = $users->where('external_id', $row->usuario_id)->first();
-                $topic = $topics->where('external_id', $row->curso_id)->first();
+                // $user = $users->where('external_id', $row->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                $topic = $topics->where('external_id', $row->posteo_id)->first();
                 // $source_id = $sources->where('code', $prueba->fuente)->first();
 
                 $chunk[] = [
@@ -455,13 +457,28 @@ class Migration_3 extends Model
             foreach ($rows_ev_abiertas as $prueba)
             {
                 $topic = $topics->where('external_id', $prueba->posteo_id)->first();
-                $user = $users->where('external_id', $prueba->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $prueba->usuario_id)->first();
+                // $user = $users->where('external_id', $prueba->usuario_id)->first();
                 // $source_id = $sources->where('code', $prueba->fuente)->first();
                 // $user_id = User::where('external_id', $prueba->usuario_id)->first();
+
+                $current_summary_topic = SummaryTopic::getCurrentRow($topic, $user);
+
+                if ($current_summary_topic) {
+
+                     info("User => {$user->id} [OLD - {$prueba->usuario_id}] - {$user->document} - TOPIC => {$topic->id} ya tiene data en summary_topic. Verificar según tipo de evaluación  (eva_bierta).");
+
+                    $current_summary_topic->update(['answers_old' => $prueba->usu_rptas]);
+
+                    continue;
+                }
+
+                // $field = $prueba->eva_abierta == 0 ? 'answers_open_old' : 'answers';
 
                 $chunk[] = [
                     'topic_id' => $topic->id ?? NULL,
                     'user_id' => $user->id ?? NULL,
+                    // 'answers' => $prueba->eva_abierta != 0 ? $prueba->usu_rptas : NULL,
                     'answers' => $prueba->usu_rptas,
                     // 'source_id' => $source_id,
                     // 'type_id' => $type_id,
