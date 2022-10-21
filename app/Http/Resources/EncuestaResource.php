@@ -25,6 +25,7 @@ class EncuestaResource extends JsonResource
             'anonima' => $this->anonima ? 'Anónima' : 'No anónima',
             // 'tipo' => $sections[$this->tipo] ?? '',
             'tipo' => $this->type->name ?? '',
+            'position' => $this->position,
 
             //'preguntas_count' => PollQuestion::where('poll_id', $this->id)->count(),
             'preguntas_count' => $this->questions_count,

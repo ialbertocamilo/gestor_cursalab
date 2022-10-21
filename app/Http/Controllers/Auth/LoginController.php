@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -76,13 +77,17 @@ class LoginController extends Controller
     {
         // In maintenance mode, stop login process
 
-        if (env('MAINTENANCE_MODE')) {
+        if ($request->email != 'kevin@cursalab.io') {
 
-            throw ValidationException::withMessages([
-                $this->username() => [config('errors.maintenance_message')],
-            ]);
+            if (env('MAINTENANCE_MODE')) {
+
+                throw ValidationException::withMessages([
+                    $this->username() => [config('errors.maintenance_message')],
+                ]);
+            }
         }
-    
+
+
         $this->validateLogin($request);
 
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
@@ -159,7 +164,7 @@ class LoginController extends Controller
         // otherwise
 
         if (count($workspaces) > 1) {
-            
+
             // session()->forget('workspace');
 
             return redirect('/workspaces/list');

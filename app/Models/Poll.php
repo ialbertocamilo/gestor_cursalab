@@ -9,7 +9,7 @@ class Poll extends BaseModel
     protected $table = 'polls';
 
     protected $fillable = [
-        'type_id', 'anonima', 'titulo', 'imagen', 'active', 'workspace_id'
+        'type_id', 'anonima', 'titulo', 'imagen', 'active', 'workspace_id', 'position'
     ];
 
     /*
@@ -57,14 +57,11 @@ class Poll extends BaseModel
         if ($request->q)
             $query->where('titulo', 'like', "%$request->q%");
 
-        if (!is_null($request->sortBy)) {
-            $field = $request->sortBy ?? 'created_at';
-            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-            $query->orderBy($field, $sort);
-        } else {
-            $query->orderBy('created_at', 'DESC');
-        }
+        $field = $request->sortBy ?? 'position';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $query->orderBy($field, $sort);
 
         return $query->paginate($request->paginate);
     }

@@ -10,7 +10,7 @@ class Topic extends BaseModel
         'name', 'slug', 'description', 'content', 'imagen',
         'position', 'visits_count', 'assessable', 'evaluation_verified',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
-        'active'
+        'active', 'position'
     ];
 
     //    protected $casts = [
@@ -96,20 +96,14 @@ class Topic extends BaseModel
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
 
+        $field = $request->sortBy ?? 'position';
+        if ($field == 'orden')
+            $field = 'position';
+        else if ($field == 'nombre')
+            $field = 'name';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        if (!is_null($request->sortBy)) {
-
-            $field = $request->sortBy ?? 'position';
-            if ($field == 'orden')
-                $field = 'position';
-            else if ($field == 'nombre')
-                $field = 'name';
-            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
-            $q->orderBy($field, $sort);
-        } else {
-            $q->orderBy('created_at', 'DESC');
-        }
+        $q->orderBy($field, $sort);
 
         return $q->paginate($request->paginate);
     }
