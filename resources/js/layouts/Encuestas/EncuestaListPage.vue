@@ -87,9 +87,9 @@ export default {
                 endpoint: '/encuestas/search',
                 ref: 'EncuestaTable',
                 headers: [
-                    {text: "Orden", value: "position",  align: 'center', model: "Poll"},
+                    {text: "Orden", value: "position",  align: 'center', model: "Poll", sortable: false},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Título", value: "titulo"},
+                    {text: "Título", value: "titulo", sortable: false},
                     {text: "Sección", value: "tipo", align: 'center', sortable: false},
                     {text: "Tipo", value: "anonima", align: 'center', sortable: false},
                     // {text: "Módulo", value: "module"},

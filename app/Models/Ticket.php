@@ -82,12 +82,18 @@ class Ticket extends BaseModel
         if ($request->ends_at)
             $query->whereDate('created_at', '<=', $request->ends_at);
 
-        $request->sortBy = $request->sortBy == 'status' ? 'estado' : $request->sortBy;
+        if (!is_null($request->sortBy)) {
 
-        $field = $request->sortBy ?? 'created_at';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+            $request->sortBy = $request->sortBy == 'status' ? 'estado' : $request->sortBy;
 
-        $query->orderBy($field, $sort);
+            $field = $request->sortBy ?? 'created_at';
+            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+            $query->orderBy($field, $sort);
+        } else {
+            $query->orderBy('created_at', 'DESC');
+        }
+
 
         return $query->paginate($request->paginate);
     }

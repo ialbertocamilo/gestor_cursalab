@@ -178,6 +178,8 @@ class SortingModel extends Model
 
             if ($request->model == 'Poll') {
                 $next_resource = $model::where('position', $new_orden)->where('workspace_id', $resource->workspace_id)->first();
+            } else if ($request->model == 'Topic') {
+                $next_resource = $model::where('position', $new_orden)->where('course_id', $resource->course_id)->first();
             } else {
                 $next_resource = $model::where('position', $new_orden)->first();
             }
