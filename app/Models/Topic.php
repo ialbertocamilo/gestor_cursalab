@@ -10,7 +10,7 @@ class Topic extends BaseModel
         'name', 'slug', 'description', 'content', 'imagen',
         'position', 'visits_count', 'assessable', 'evaluation_verified',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
-        'active'
+        'active', 'position'
     ];
 
     //    protected $casts = [
@@ -95,7 +95,6 @@ class Topic extends BaseModel
 
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
-
 
         if (!is_null($request->sortBy)) {
 
