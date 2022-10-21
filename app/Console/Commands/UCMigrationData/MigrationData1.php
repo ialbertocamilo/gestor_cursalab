@@ -13,7 +13,7 @@ class MigrationData1 extends Command
      *
      * @var string
      */
-    protected $signature = 'uc-migration:migration-data-1';
+    protected $signature = 'uc-migration:migration-data-1 {type}';
 
     /**
      * The console command description.
@@ -35,22 +35,34 @@ class MigrationData1 extends Command
      */
     public function handle()
     {
-//
-//        $user = User::query()
-//            ->withWhereHas('criterion_values', fn($q) => $q->whereIn('criterion_id', [5]))
-////            ->whereHas('criteria')
-////                ->where('id')
-//            ->first();
-//
-//        $this->info($user);
+        $type = $this->argument('type');
 
         $this->info(" Inicio: " . now());
         info(" Inicio: " . now());
 
-        Migration_1::migrateData1();
+        $bar = $this->output;
 
-        $this->info(" Fin: " . now());
-        info(" Fin: " . now());
+        if ($type === 'crud') {
+            Migration_1::migrateCrudData($bar);
+            $this->info("\n CRUD MIGRATED");
+            info("\n CRUD MIGRATED");
+        }
+
+        if ($type === 'users') {
+            Migration_1::migrateUsers($bar);
+            $this->info("\n USERS MIGRATED");
+            info("\n USERS MIGRATED");
+        }
+
+        if ($type === 'criteria_users') {
+            Migration_1::migrateCriteriaUser($bar);
+            $this->info("\n CRITERIA USERS MIGRATED");
+            info("\n CRITERIA USERS MIGRATED");
+        }
+
+
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
 
     }
 }
