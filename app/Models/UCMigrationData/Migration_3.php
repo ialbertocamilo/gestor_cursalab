@@ -49,18 +49,16 @@ class Migration_3 extends Model
         self::insertChunkedData($data, 'summary_users', $output);
     }
 
-    protected function migrateResumenes()
+    protected function migrateSummaryCourses($output)
     {
-        // info('getResumenGeneralData');
-        // $data = self::getResumenGeneralData();
-        // self::insertChunkedData($data, 'summary_users');
-
         info('getAndInsertResumenCursosData');
-        self::getAndInsertResumenCursosData();
-        // self::insertChunkedData($data, 'summary_courses');
+        self::getAndInsertResumenCursosData($output);
+    }
 
+    protected function migrateSummaryTopics($output)
+    {
         info('getAndInsertResumenTemasData');
-        self::getAndInsertResumenTemasData();
+        self::getAndInsertResumenTemasData($output);
     }
 
 
@@ -178,7 +176,8 @@ class Migration_3 extends Model
 
         $courses = Course::select('id', 'external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
-        $users = User::select('id', 'external_id')->whereNull('email')->get();
+        $users = [];
+        // $users = User::select('id', 'external_id')->whereNull('email')->get();
         $preguntas = PollQuestion::select('id', 'external_id')->get();
 
         $count = $db->getTable('encuestas_respuestas')->count();
@@ -186,7 +185,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('encuestas_respuestas')->chunkById(2500, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar, $course_equivalent) {
+        $db->getTable('encuestas_respuestas')->chunkById(2500, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar) {
 
             $chunk = [];
 
@@ -194,7 +193,8 @@ class Migration_3 extends Model
             {
                 $type = $types->where('code', $respuesta->tipo_pregunta)->first();
                 // $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
-                $user = $users->where('external_id', $respuesta->usuario_id)->first();
+                // $user = $users->where('external_id', $respuesta->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
                 $course = $courses->where('external_id', $respuesta->curso_id)->first();
                 $question = $preguntas->where('external_id', $respuesta->pregunta_id)->first();
 
@@ -230,10 +230,8 @@ class Migration_3 extends Model
 
         $rows = $db->getTable('resumen_general')->get();
 
-        $users = User::select('id', 'external_id')->whereNotNull('external_id')->get();
-
+        // $users = User::select('id', 'external_id')->whereNotNull('external_id')->get();
         $data = [];
-
 
         $bar = $output->createProgressBar(count($rows));
         $bar->start();
@@ -242,7 +240,6 @@ class Migration_3 extends Model
         {
             $user = User::select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
             // $user = $users->where('external_id', $row->usuario_id)->first();
-            // $user = User::where('external_id', $row->usuario_id)->first();
 
             $current_summary_user = SummaryUser::getCurrentRow($user, $user);
 
@@ -280,18 +277,28 @@ class Migration_3 extends Model
         return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
-    protected function getAndInsertResumenCursosData()
+    protected function getAndInsertResumenCursosData($output)
     {
         $db = self::connect();
 
+        $output->line('init getAndInsertResumenCursosData CURSOS');
+        $output->newLine();
+
         $rows_reinicios = $db->getTable('reinicios')->where('tipo', 'por_curso')->get();
 
-        $users = User::select('id', 'external_id')->whereNull('email')->get();
-        $courses = Course::select('id', 'external_id')->get();
-        $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
+        // $users = User::select('id', 'external_id')->whereNull('email')->get();
+        $courses = Course::select('id', 'external_id')->whereNotNull('external_id')->get();
+        // $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
+        $users = [];
+        $admins = [];
         $statuses = Taxonomy::getData('course', 'user-status')->get();
 
-        $db->getTable('resumen_x_curso')->chunkById(1000, function ($rows_cursos) use ($users, $rows_reinicios, $courses, $statuses, $admins) {
+        $count = $db->getTable('resumen_x_curso')->count();
+
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
+        $db->getTable('resumen_x_curso')->chunkById(1000, function ($rows_cursos) use ($users, $rows_reinicios, $courses, $statuses, $admins, $bar) {
 
             $chunk = [];
 
@@ -299,8 +306,11 @@ class Migration_3 extends Model
 
             foreach ($rows_cursos as $row)
             {
+                $bar->advance();
+
                 $status = $statuses->where('code', $row->estado)->first();
-                $user = $users->where('external_id', $row->usuario_id)->first();
+                // $user = $users->where('external_id', $row->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
                 $course = $courses->where('external_id', $row->curso_id)->first();
                 $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
                 // $certification = $rows_diplomas->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
@@ -311,7 +321,8 @@ class Migration_3 extends Model
                 if ($restart)
                 {
                     $restarts = $restart->acumulado;
-                    $restarter = $admins->where('external_id', $restart->admin_id)->first();
+                    // $restarter = $admins->where('external_id', $restart->admin_id)->first();
+                    $restarter = $restart->admin_id;
                 }
 
                 // $restarter_id = $users->where('external_id', $row->usuario_id)->first();
@@ -334,7 +345,8 @@ class Migration_3 extends Model
                     'views' => $row->visitas,
 
                     'restarts' => $restarts,
-                    'restarter_id' => $restarter->id ?? NULL,
+                    // 'restarter_id' => $restarter->id ?? NULL,
+                    'old_admin_id' => $restarter,
 
                     'last_time_evaluated_at' => $row->last_ev ?? NULL,
                     // 'certification_issued_at' => $certification->fecha_emision ?? NULL,
@@ -351,22 +363,45 @@ class Migration_3 extends Model
             info('summary_courses chunked inserted');
         });
 
-        $db->getTable('diplomas')->whereNull('posteo_id')->chunkById(2500, function ($rows_diplomas) use ($courses, $users) {
+        $bar->finish();
+        $output->newLine();
+
+        $output->line('init getAndInsertResumenCursosData DIPLOMAS');
+        $output->newLine();
+
+        $count = $db->getTable('diplomas')->count();
+
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
+        $db->getTable('diplomas')->whereNull('posteo_id')->chunkById(2500, function ($rows_diplomas) use ($courses, $users, $bar) {
             foreach ($rows_diplomas as $row) {
 
-                $user = $users->where('external_id', $row->usuario_id)->first();
+                $bar->advance();
+
+                // $user = $users->where('external_id', $row->usuario_id)->first();
+                $user = User::select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
                 $course = $courses->where('external_id', $row->curso_id)->first();
 
                 DB::table('summary_courses')
-                    ->updateOrInsert(['user_id' => $user->id ?? NULL, 'course_id' => $course->id ?? NULL], ['certification_issued_at' => $row->fecha_emision]);
+                    ->where('user_id', $user->id)
+                    ->where('course_id', $course->id)
+                    ->update(['certification_issued_at' => $row->fecha_emision]);
+
+                // DB::table('summary_courses')
+                    // ->updateOrInsert(['user_id' => $user->id ?? NULL, 'course_id' => $course->id ?? NULL], ['certification_issued_at' => $row->fecha_emision]);
 
             }
 
             info('summary_courses diplomas chunked updateOrInsert');
         });
+        
+        $bar->finish();
+
+        $output->newLine();
     }
 
-    protected function getAndInsertResumenTemasData()
+    protected function getAndInsertResumenTemasData($output)
     {
         $db = self::connect();
 
