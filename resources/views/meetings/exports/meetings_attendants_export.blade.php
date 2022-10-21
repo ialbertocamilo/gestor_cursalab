@@ -21,7 +21,7 @@
         <th width="150px" align="center"><b>MINUTOS EN REUNION</b></th>
         <th width="150px" align="center"><b>PRESENCIA EN REUNION</b></th>
 
-        @if($isAllowedToViewAll)
+        @if ($isAllowedToViewAll)
             <th width="150px" align="center"><b>NAVEGADOR</b></th>
             <th width="180px" align="center"><b>VERSIÓN DE NAVEGADOR</b></th>
             <th width="150px" align="center"><b>PLATAFORMA</b></th>
@@ -32,10 +32,10 @@
     </tr>
     </thead>
     <tbody>
-    @foreach($attendants as $key => $attendant)
+    @foreach ($attendants as $key => $attendant)
         <tr>
             <td align="center">{{ $attendant->meeting->name }}</td>
-            <td align="center">{{ $attendant->usuario->config->name }}</td>
+            <td align="center">{{ $attendant->user->subworkspace->name }}</td>
             <td align="center">{{ $attendant->type->name }}</td>
             <td align="center">{{ $attendant->usuario->document }}</td>
 
@@ -58,7 +58,7 @@
             <td align="center">{{ $attendant->getTotalDurationPercentInMeeting() }}%</td>
 
 
-            @if($isAllowedToViewAll)
+            @if ($isAllowedToViewAll)
             <td align="center">{{ $attendant->browser_family->name ?? 'No identificado' }}</td>
                 <td align="center">{{ $attendant->browser_version->name ?? 'No identificado' }}</td>
                 <td align="center">{{ $attendant->platform_family->name ?? 'No identificado' }}</td>

@@ -130,14 +130,14 @@ TABS
                         Ranking
                     </span>
                 </v-tab>
-<!--
+
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
+                    <v-icon left>mdi-monitor-account</v-icon>
                     <span class="pt-2">
                         Reuniones
                     </span>
                 </v-tab>
--->
+
 <!--
 
 TABS CONTENT
@@ -332,7 +332,7 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-<!--
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -340,7 +340,7 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
--->
+
             </v-tabs>
         </v-card>
         <!-- </v-app> -->
