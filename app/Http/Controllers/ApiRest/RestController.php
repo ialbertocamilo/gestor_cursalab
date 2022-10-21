@@ -3832,7 +3832,14 @@ class RestController extends Controller
             $usuario_id = $user->toArray()['id'];
             // $description = strip_tags($request->input('description'));
             $description = strip_tags($request->description);
-            // File
+
+            // check if exist file
+            if(!$request->hasFile('file')) {
+                return array('error' => true,
+                             'error_msg' => 'El archivo no fue encontrado',
+                             'details' => $request->all());
+            }
+
             $file = $request->file('file');
             $ext = $file->getClientOriginalExtension();
             $namewithextension = $file->getClientOriginalName();

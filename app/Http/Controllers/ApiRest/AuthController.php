@@ -17,6 +17,13 @@ class AuthController extends Controller
 {
     public function login(LoginAppRequest $request)
     {
+        // Stop login process and show maintenance message
+
+        if (env('MAINTENANCE_MODE')) {
+            return $this->error(
+                config('errors.maintenance_message'), 503
+            );
+        }
 
         try {
             $data = $request->validated();

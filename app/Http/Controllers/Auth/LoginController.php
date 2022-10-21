@@ -74,6 +74,15 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        // In maintenance mode, stop login process
+
+        if (env('MAINTENANCE_MODE')) {
+
+            throw ValidationException::withMessages([
+                $this->username() => [config('errors.maintenance_message')],
+            ]);
+        }
+    
         $this->validateLogin($request);
 
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
