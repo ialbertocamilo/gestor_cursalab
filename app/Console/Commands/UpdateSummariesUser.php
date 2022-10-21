@@ -29,6 +29,10 @@ class UpdateSummariesUser extends Command
      */
     public function handle()
     {
+
+        $this->info(" Inicio: " . now());
+        info(" Inicio: " . now());
+
         $summary_users = SummaryUser::with('user')->get();
 //        $summary_users = SummaryUser::with('user')
 //            ->where('user_id', 27660)->get();
@@ -52,5 +56,9 @@ class UpdateSummariesUser extends Command
             $bar->advance();
         }
         $bar->finish();
+
+
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
     }
 }
