@@ -60,7 +60,7 @@ class Migration_3 extends Model
 
     protected function migrateSummaryTopics($output, $type)
     {
-        info('getAndInsertResumenTemasData');
+        info('migrateSummaryTopics');
 
         if ($type == 'pruebas')
             self::getAndInsertResumenTemasDataPruebas($output);
