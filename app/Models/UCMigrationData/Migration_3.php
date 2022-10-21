@@ -9,6 +9,9 @@ use App\Models\Taxonomy;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\User;
+use App\Models\SummaryCourse;
+use App\Models\SummaryTopic;
+use App\Models\SummaryUser;
 use App\Models\Support\OTFConnection;
 use Illuminate\Support\Facades\DB;
 
