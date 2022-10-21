@@ -96,19 +96,14 @@ class Topic extends BaseModel
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
 
-        if (!is_null($request->sortBy)) {
+        $field = $request->sortBy ?? 'position';
+        if ($field == 'orden')
+            $field = 'position';
+        else if ($field == 'nombre')
+            $field = 'name';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-            $field = $request->sortBy ?? 'position';
-            if ($field == 'orden')
-                $field = 'position';
-            else if ($field == 'nombre')
-                $field = 'name';
-            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
-            $q->orderBy($field, $sort);
-        } else {
-            $q->orderBy('created_at', 'DESC');
-        }
+        $q->orderBy($field, $sort);
 
         return $q->paginate($request->paginate);
     }
