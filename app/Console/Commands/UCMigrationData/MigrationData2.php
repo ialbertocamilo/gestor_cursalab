@@ -12,7 +12,7 @@ class MigrationData2 extends Command
      *
      * @var string
      */
-    protected $signature = 'uc-migration:migration-data-2  {type}';
+    protected $signature = 'uc-migration:migration-data-2 {type}';
 
     /**
      * The console command description.
@@ -44,7 +44,7 @@ class MigrationData2 extends Command
         if ($type === 'courses')
             Migration_2::migrateCursos($bar);
 
-        if ($type === 'topicis')
+        if ($type === 'topics')
             Migration_2::migrateTemas($bar);
 
         if ($type === 'curricula')
