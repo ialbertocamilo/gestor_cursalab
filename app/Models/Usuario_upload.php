@@ -7,6 +7,8 @@ class Usuario_upload extends BaseModel
 {
     protected $table = 'usuario_uploads';
 
+    protected $fillable = ['usuario_id', 'subworkspace_id', 'file', 'link', 'descripcion'];
+
     /* AUDIT TAGS */
     public function generateTags(): array
     {
