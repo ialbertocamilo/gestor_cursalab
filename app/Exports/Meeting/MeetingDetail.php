@@ -4,6 +4,7 @@ namespace App\Exports\Meeting;
 
 use App\Models\Meeting;
 
+use App\Models\Workspace;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -11,7 +12,6 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithDrawings;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use function foo\func;
 
 class MeetingDetail implements FromView, ShouldAutoSize, WithTitle, WithDrawings
 {
@@ -46,13 +46,13 @@ class MeetingDetail implements FromView, ShouldAutoSize, WithTitle, WithDrawings
         $data = $this->data;
         $view_data = [];
 
-        if (isset($data['meeting'])):
+        if (isset($data['meeting'])) {
 
             $view = 'meetings.exports.meetings_details_export';
             $meeting = $data['meeting'];
             $view_data['meeting'] = $meeting;
 
-        else:
+        } else {
 
             $view = 'meetings.exports.general_meetings_details_export';
             $meetings = Meeting::query()
@@ -62,17 +62,14 @@ class MeetingDetail implements FromView, ShouldAutoSize, WithTitle, WithDrawings
                 ->when($data['finishes_at'] ?? null, function ($q) use ($data) {
                     $q->whereDate('starts_at', '<=', $data['finishes_at']);
                 })
+                ->where('workspace_id', get_current_workspace()->id)
                 ->withCount('attendants')
                 ->withCount('attendantsWithFirstLogintAt')
                 ->get();
 
-//            dd($meetings[0]->attendants_with_first_logint_at_count);
-
             $view_data['meetings'] = $meetings;
 
-        endif;
-
-//        dd($view, $view_data);
+        }
 
         return view($view, $view_data);
     }
