@@ -64,8 +64,7 @@ class Migration_3 extends Model
 
     public function insertChunkedData($data, $table_name, $output)
     {
-        $output->line('init chunked ' . $table_name);
-        $output->newLine();
+        $output->info('init chunked ' . $table_name);
 
         $bar = $output->createProgressBar(count($data));
         $bar->start();
@@ -88,8 +87,7 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $output->line('init getEncuestasData');
-        $output->newLine();
+        $output->info('init getEncuestasData');
 
         $encuestas = $db->getTable('encuestas')->get();
         $types = Taxonomy::getData('poll', 'tipo')->get();
@@ -129,8 +127,7 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $output->line('init getEncuestasPreguntasData');
-        $output->newLine();
+        $output->info('init getEncuestasPreguntasData');
 
         $preguntas = $db->getTable('encuestas_preguntas')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
@@ -171,8 +168,7 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $output->line('init getAndInsertEncuestasPreguntasRespuestasData');
-        $output->newLine();
+        $output->info('init getAndInsertEncuestasPreguntasRespuestasData');
 
         $courses = Course::select('id', 'external_id')->whereNotNull('external_id')->get();
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
@@ -225,8 +221,7 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $output->line('init getResumenGeneralData');
-        $output->newLine();
+        $output->info('init getResumenGeneralData');
 
         $rows = $db->getTable('resumen_general')->get();
 
@@ -281,8 +276,7 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
-        $output->line('init getAndInsertResumenCursosData CURSOS');
-        $output->newLine();
+        $output->info('init getAndInsertResumenCursosData CURSOS');
 
         $rows_reinicios = $db->getTable('reinicios')->where('tipo', 'por_curso')->get();
 
@@ -366,8 +360,7 @@ class Migration_3 extends Model
         $bar->finish();
         $output->newLine();
 
-        $output->line('init getAndInsertResumenCursosData DIPLOMAS');
-        $output->newLine();
+        $output->info('init getAndInsertResumenCursosData DIPLOMAS');
 
         $count = $db->getTable('diplomas')->count();
 
