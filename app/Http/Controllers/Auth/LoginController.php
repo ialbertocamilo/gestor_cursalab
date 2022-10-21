@@ -74,6 +74,18 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        // In maintenance mode, stop login process
+
+        if ($request->email != 'kevin@cursalab.io') {
+            
+            if (env('MAINTENANCE_MODE')) {
+
+                throw ValidationException::withMessages([
+                    $this->username() => [config('errors.maintenance_message')],
+                ]);
+            }
+        }
+
         $this->validateLogin($request);
 
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
@@ -150,7 +162,7 @@ class LoginController extends Controller
         // otherwise
 
         if (count($workspaces) > 1) {
-            
+
             // session()->forget('workspace');
 
             return redirect('/workspaces/list');

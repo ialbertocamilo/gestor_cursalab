@@ -39,6 +39,9 @@ class SupervisorController extends Controller
                 $query->where('parent_id', $request->workspace);
         });
 
+        if ($request->has('q'))
+            $data->filterText($request->q);
+
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
