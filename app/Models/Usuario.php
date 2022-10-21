@@ -299,9 +299,9 @@ class Usuario extends Model
         return $this->getCurrentHosts(true);
     }
 
-    protected function getCurrentHosts($indexOnly = false)
+    protected function getCurrentHosts($indexOnly = false, $workSpaceIdx = null)
     {
-        $workSpaceIndex = get_current_workspace_indexes('id');
+        $workSpaceIndex = $workSpaceIdx ?? get_current_workspace_indexes('id');
 
         # ==== criterios según segmentación (segmentacion directa). ====
         $currSegment = Workspace::find($workSpaceIndex)->segments;

@@ -91,7 +91,11 @@ class AuthController extends Controller
         // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
         $supervisor = $user->isSupervisor();
-        $can_be_host = $user->belongsToSegmentation($workspace);
+        // $can_be_host = $user->belongsToSegmentation($workspace);
+
+        $workSpaceIndex = $user->subworkspace->parent_id;
+        $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
+        $can_be_host = in_array($user->id, $current_hosts);
 
         $user_data = [
             "id" => $user->id,
