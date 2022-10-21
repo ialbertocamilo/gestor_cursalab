@@ -17,6 +17,20 @@ class Migration_2 extends Model
 {
     const CHUNK_LENGTH = 5000;
 
+    const MODULOS_EQUIVALENCIA = [
+        4 => '26', // Mifarma
+        5 => '27', // Inkafarma,
+        6 => '28' // Capacitacion FP
+    ];
+
+    private mixed $uc_workspace;
+
+    public function __construct()
+    {
+        $this->uc_workspace = Workspace::where('slug', "farmacias-peruanas")->first();
+        $this->db = self::connect();
+    }
+
     protected function connect()
     {
         $db_uc_data = config('database.connections.mysql_uc');
@@ -78,7 +92,8 @@ class Migration_2 extends Model
         $data = [];
 
         foreach ($categorias as $escuela) {
-            $data[] = [
+
+            $data['schools'][] = [
                 'external_id' => $escuela->id,
 
                 'name' => $escuela->nombre,
@@ -102,9 +117,16 @@ class Migration_2 extends Model
 
     protected function insertEscuelasData($data)
     {
-        $this->makeChunkAndInsert($data, 'schools');
+        $this->makeChunkAndInsert($data['schools'], 'schools');
 
+        $uc_workspace = $this->uc_workspace;
+        $schools = School::disableCache()->whereNotNull('external_id')->get();
+        $school_workspace = [];
 
+        foreach ($schools as $school)
+            $school_workspace[] = ['school_id' => $school->id, 'workspace_id' => $uc_workspace->id];
+
+        $this->makeChunkAndInsert($school_workspace, 'school_workspace');
     }
 
     protected function setCursosData()
@@ -161,8 +183,8 @@ class Migration_2 extends Model
     {
         $this->makeChunkAndInsert($data['cursos'], 'courses');
 
-        $schools = School::all();
-        $courses = Course::all();
+        $schools = School::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
+        $courses = Course::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
 
         $course_school = [];
         foreach ($data['escuela_curso'] as $relation) {
@@ -175,8 +197,9 @@ class Migration_2 extends Model
         }
         $this->makeChunkAndInsert($course_school, 'course_school');
 
+
         $course_requirements = [];
-        foreach ($data['curso_requisitos'] as $relation) {
+        foreach ($data['curso_requisitos'] ?? [] as $relation) {
             $course = $courses->where('external_id', $relation['curso_id'])->first();
             $course_requirement = $courses->where('external_id', $relation['curso_requisito_id'])->first();
 
@@ -191,17 +214,15 @@ class Migration_2 extends Model
         }
         $this->makeChunkAndInsert($course_requirements, 'requirements');
 
-        $uc_workspace = Workspace::where('slug', 'universidad-corporativa')->first();
-        $courses = Course::all();
-        $course_workspace = [];
 
+        $uc_workspace = $this->uc_workspace;
+        $course_workspace = [];
         foreach ($courses as $course) {
             $course_workspace[] = [
                 'workspace_id' => $uc_workspace->id,
                 'course_id' => $course->id,
             ];
         }
-
         $this->makeChunkAndInsert($course_workspace, 'course_workspace');
     }
 
@@ -215,7 +236,7 @@ class Migration_2 extends Model
                 'contenido', 'tipo_ev', 'evaluable', 'curso_id', 'requisito_id',
                 'estado', 'created_at', 'updated_at')
             ->get();
-        $courses = Course::all();
+        $courses = Course::disableCache()->select('id', 'external_id')->get();
         $data = [];
 
         $topic_open_evaluations_type = Taxonomy::getFirstData('topic', 'evaluation-type', 'open');

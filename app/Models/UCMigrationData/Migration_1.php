@@ -24,7 +24,7 @@ class Migration_1 extends Model
     const MODULOS_EQUIVALENCIA = [
         4 => '26', // Mifarma
         5 => '27', // Inkafarma,
-        // Capacitacion FP
+        6 => '28' // Capacitacion FP
     ];
 
     private $uc_workspace = null;
@@ -147,14 +147,25 @@ class Migration_1 extends Model
                 'botica_id' => $user->botica_id
             ];
 
-            $user_db = User::disableCache()->select('id', 'document', 'email', 'subworkspace_id')->where('document', $user->dni)->first();
+            $user_db = User::disableCache()
+                ->with([
+                    'subworkspace' => function ($q) {
+                        $q->with('parent:id,name')
+                            ->select('id', 'name', 'parent_id');
+                    }
+                ])
+                ->select('id', 'name', 'lastname', 'surname', 'document', 'email', 'subworkspace_id')
+                ->where('document', $user->dni)->first();
 
             if ($user_db) {
                 $j++;
                 $module_value = self::MODULOS_EQUIVALENCIA[$user->config_id] ?? false;
-                if (!$module_value) info("No hace match con modulo {$user->dni} - {$user_db->subworkspace_id}");
 
-                $user_db->update(['external_id' => $user->id, 'user_relations' => $user_relations, 'updated_at' => $now]);
+                $user_db->update(['external_id' => $user->id, 'user_relations' => $user_relations]);
+
+                if ($module_value != $user_db->subworkspace_id)
+                    info("{$user_db->subworkspace->parent->name} - {$user_db->subworkspace->name} - {$user_db->fullname} - {$user_db->document}");
+
                 continue;
             }
 
@@ -494,7 +505,7 @@ class Migration_1 extends Model
     public function insertUsersData($data)
     {
         $user_temp = [];
-        info("USERS A CREAR :: " . count($data['users']));
+        print_r("\nUSERS A CREAR :: " . count($data['users']));
 
         foreach ($data['users'] as $user) {
             $module_value = self::MODULOS_EQUIVALENCIA[$user['config_id']] ?? false;
