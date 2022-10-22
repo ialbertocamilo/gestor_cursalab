@@ -58,6 +58,12 @@ class Migration_3 extends Model
         self::getAndInsertResumenCursosData($output);
     }
 
+    protected function migrateSummaryCoursesCertifications($output)
+    {
+        info('getAndInsertResumenCursosData');
+        self::getAndInsertResumenCursosDataCertifications($output);
+    }
+
     protected function migrateSummaryTopics($output, $type)
     {
         info('migrateSummaryTopics');
@@ -327,10 +333,10 @@ class Migration_3 extends Model
 
         // $users = User::select('id', 'external_id')->whereNull('email')->get();
         // $courses = Course::select('id', 'external_id')->whereNotNull('external_id')->get();
-        $courses = [];
         // $admins = User::select('id', 'external_id', 'email')->whereNotNull('email')->get();
-        $users = [];
-        $admins = [];
+        // $courses = [];
+        // $users = [];
+        // $admins = [];
         $statuses = Taxonomy::getData('course', 'user-status')->get();
 
         $count = $db->getTable('resumen_x_curso')->count();
@@ -338,9 +344,15 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('resumen_x_curso')->chunkById(1000, function ($rows_cursos) use ($users, $rows_reinicios, $courses, $statuses, $admins, $bar) {
+        $db->getTable('resumen_x_curso')->chunkById(250, function ($rows_cursos) use ($rows_reinicios, $statuses, $bar) {
 
             $chunk = [];
+
+            $usuarios_ids = $rows_cursos->pluck('usuario_id')->toArray();
+            $courses_ids = $rows_cursos->pluck('curso_id')->toArray();
+
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
+            $courses = Course::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $courses_ids)->get();
 
             info('Start resumen_x_curso chunk');
 
@@ -349,10 +361,10 @@ class Migration_3 extends Model
                 $bar->advance();
 
                 $status = $statuses->where('code', $row->estado)->first();
-                // $user = $users->where('external_id', $row->usuario_id)->first();
-                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
-                // $course = $courses->where('external_id', $row->curso_id)->first();
-                $course = Course::select('id', 'external_id')->where('external_id', $row->curso_id)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $course = $courses->where('external_id', $row->curso_id)->first();
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                // $course = Course::select('id', 'external_id')->where('external_id', $row->curso_id)->first();
                 $restart = $rows_reinicios->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
                 // $certification = $rows_diplomas->where('usuario_id', $row->usuario_id)->where('curso_id', $row->curso_id)->first();
 
@@ -406,28 +418,48 @@ class Migration_3 extends Model
 
         $bar->finish();
         $output->newLine();
+    }
+
+    protected function getAndInsertResumenCursosDataCertifications($output)
+    {
+        $db = self::connect();
 
         $output->info('init getAndInsertResumenCursosData DIPLOMAS');
 
-        $count = $db->getTable('diplomas')->count();
+        $count = $db->getTable('diplomas')->whereNull('posteo_id')->whereNull('categoria_id')->count();
 
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('diplomas')->whereNull('posteo_id')->chunkById(2500, function ($rows_diplomas) use ($courses, $users, $bar) {
+        $db->getTable('diplomas')->whereNull('posteo_id')->whereNull('categoria_id')->chunkById(100, function ($rows_diplomas) use ($bar) {
+
+            $usuarios_ids = $rows_diplomas->pluck('usuario_id')->toArray();
+            $courses_ids = $rows_diplomas->pluck('curso_id')->toArray();
+
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
+            $courses = Course::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $courses_ids)->get();
+
             foreach ($rows_diplomas as $row) {
 
                 $bar->advance();
 
-                // $user = $users->where('external_id', $row->usuario_id)->first();
-                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
-                $course = Course::select('id', 'external_id')->where('external_id', $row->curso_id)->first();
-                // $course = $courses->where('external_id', $row->curso_id)->first();
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                // $course = Course::select('id', 'external_id')->where('external_id', $row->curso_id)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $course = $courses->where('external_id', $row->curso_id)->first();
 
-                DB::table('summary_courses')
-                    ->where('user_id', $user->id)
-                    ->where('course_id', $course->id)
-                    ->update(['certification_issued_at' => $row->fecha_emision]);
+                if ($user AND $course) {
+
+                    DB::table('summary_courses')
+                        ->where('user_id', $user->id ?? NULL)
+                        ->where('course_id', $course->id ?? NULL)
+                        ->update(['certification_issued_at' => $row->created_at]);
+
+                } else {
+
+                    info("[OLD USER - {$row->usuario_id}] o [OLD COURSE - {$row->curso_id}] ya no existe. Diploma no agregada.");
+                }
+
 
                 // DB::table('summary_courses')
                     // ->updateOrInsert(['user_id' => $user->id ?? NULL, 'course_id' => $course->id ?? NULL], ['certification_issued_at' => $row->fecha_emision]);
