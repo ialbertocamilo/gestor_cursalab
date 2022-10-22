@@ -187,6 +187,7 @@ class Migration_3 extends Model
         // $courses = Course::select('id', 'external_id')->whereNotNull('external_id')->get();
         $courses = [];
         $types = Taxonomy::getData('poll', 'tipo-pregunta')->get();
+        // $types = [];
         $users = [];
         // $users = User::select('id', 'external_id')->whereNull('email')->get();
         // $preguntas = PollQuestion::select('id', 'external_id')->whereNotNull('external_id')->get();
@@ -201,19 +202,29 @@ class Migration_3 extends Model
 
             $chunk = [];
 
+            $usuarios_ids = $respuestas->pluck('usuario_id')->toArray();
+            $courses_ids = $respuestas->pluck('curso_id')->toArray();
+            $questions_ids = $respuestas->pluck('pregunta_id')->toArray();
+
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
+            $courses = Course::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $courses_ids)->get();
+            $preguntas = PollQuestion::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $questions_ids)->get();
+
             foreach ($respuestas as $key => $respuesta)
             {
                 $type = $types->where('code', $respuesta->tipo_pregunta)->first();
                 // $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
-                // $user = $users->where('external_id', $respuesta->usuario_id)->first();
-                $user = User::select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
-                // $course = $courses->where('external_id', $respuesta->curso_id)->first();
-                $course = Course::select('id', 'external_id')->where('external_id', $respuesta->curso_id)->first();
-                $question = PollQuestion::select('id', 'external_id')->where('external_id', $respuesta->pregunta_id)->first();
+                $user = $users->where('external_id', $respuesta->usuario_id)->first();
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $respuesta->usuario_id)->first();
+                $course = $courses->where('external_id', $respuesta->curso_id)->first();
+                // $course = Course::select('id', 'external_id')->where('external_id', $respuesta->curso_id)->first();
+                // $question = PollQuestion::select('id', 'external_id')->where('external_id', $respuesta->pregunta_id)->first();
+                $question = $preguntas->where('external_id', $respuesta->pregunta_id)->first();
 
                 $chunk[] = [
                     'course_id' => $course->id ?? NULL,
                     'user_id' => $user->id ?? NULL,
+                    // 'user_id' => 1,
                     'type_id' => $type->id ?? NULL,
                     'poll_question_id' => $question->id ?? NULL,
 
