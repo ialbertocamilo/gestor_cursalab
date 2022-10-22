@@ -198,7 +198,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('encuestas_respuestas')->chunkById(500, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar) {
+        $db->getTable('encuestas_respuestas')->chunkById(100, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar) {
 
             $chunk = [];
 
