@@ -49,7 +49,7 @@ class Migration_3 extends Model
     {
         info('getResumenGeneralData');
         $data = self::getResumenGeneralData($output);
-        self::insertChunkedData($data, 'summary_users', $output);
+        // self::insertChunkedData($data, 'summary_users', $output);
     }
 
     protected function migrateSummaryCourses($output)
@@ -198,7 +198,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('encuestas_respuestas')->chunkById(1500, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar) {
+        $db->getTable('encuestas_respuestas')->chunkById(1000, function ($respuestas) use ($users, $types, $courses, $preguntas, $bar) {
 
             $chunk = [];
 
@@ -236,9 +236,13 @@ class Migration_3 extends Model
                 $bar->advance();
             }
 
+            // DB::enableQueryLog();
+
             DB::table('poll_question_answers')->insert($chunk);
 
-            info('poll_question_answers chunked inserted');
+            // info(DB::getQueryLog());
+
+            // info('poll_question_answers chunked inserted');
         });
 
         $bar->finish();
@@ -251,53 +255,66 @@ class Migration_3 extends Model
 
         $output->info('init getResumenGeneralData');
 
-        $rows = $db->getTable('resumen_general')->get();
+        // $rows = $db->getTable('resumen_general')->get();
+        $count = $db->getTable('resumen_general')->count();
 
         // $users = User::select('id', 'external_id')->whereNotNull('external_id')->get();
-        $data = [];
 
-        $bar = $output->createProgressBar(count($rows));
+        $bar = $output->createProgressBar($count);
         $bar->start();
 
-        foreach ($rows as $row)
-        {
-            $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
-            // $user = $users->where('external_id', $row->usuario_id)->first();
+        $db->getTable('resumen_general')->chunkById(500, function ($rows) use ($bar) {
+            
+            $chunk = [];
 
-            $current_summary_user = SummaryUser::getCurrentRow($user, $user);
+            $usuarios_ids = $rows->pluck('usuario_id')->toArray();
 
-            $bar->advance();
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
 
-            if ($current_summary_user) {
+            foreach ($rows as $row)
+            {
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
 
-                info("User => {$user->id} [OLD - {$row->usuario_id}] - {$user->document} ya tiene data en summary_user. Recalcular con la data actual.");
+                $current_summary_user = SummaryUser::disableCache()->where('user_id', $user->id)->first();
 
-                continue;
+                $bar->advance();
+
+                if ($current_summary_user) {
+
+                    info("User => {$user->id} [OLD - {$row->usuario_id}] - {$user->document} ya tiene data en summary_user. Recalcular con la data actual.");
+
+                    continue;
+                }
+
+                $chunk[] = [
+                    'user_id' => $user->id ?? NULL,
+
+                    'score' => $row->rank,
+                    'attempts' => $row->intentos,
+                    'grade_average' => $row->nota_prom,
+                    'advanced_percentage' => $row->porcentaje,
+
+                    'courses_assigned' => $row->cur_asignados,
+                    'courses_completed' => $row->tot_completados,
+
+                    'last_time_evaluated_at' => $row->last_ev,
+
+                    'created_at' => $row->created_at,
+                    'updated_at' => $row->updated_at,
+                ];
             }
 
-            $data[] = [
-                'user_id' => $user->id ?? NULL,
+            DB::table('summary_users')->insert($chunk);
 
-                'score' => $row->rank,
-                'attempts' => $row->intentos,
-                'grade_average' => $row->nota_prom,
-                'advanced_percentage' => $row->porcentaje,
-
-                'courses_assigned' => $row->cur_asignados,
-                'courses_completed' => $row->tot_completados,
-
-                'last_time_evaluated_at' => $row->last_ev,
-
-                'created_at' => $row->created_at,
-                'updated_at' => $row->updated_at,
-            ];
-        }
+            info('summary_users chunked inserted');
+        });
 
         $bar->finish();
 
         $output->newLine();
 
-        return array_chunk($data, self::CHUNK_LENGTH, true);
+        // return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
     protected function getAndInsertResumenCursosData($output)
