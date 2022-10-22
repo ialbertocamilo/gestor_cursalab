@@ -93,7 +93,7 @@ class Migration_1 extends Model
     protected function migrateUsers($output)
     {
         $client_lms_data = $this->setUCUsersData($output);
-        $this->insetUCUsersData($client_lms_data);
+        $this->insertUCUsersData($client_lms_data);
     }
 
     public function setUCUsersData($output)
@@ -104,11 +104,12 @@ class Migration_1 extends Model
         ];
 
         $this->setUsersData($client_LMS_data, $db, $output);
+//        $this->setUsersDatav2($client_LMS_data, $db, $output);
 
         return $client_LMS_data;
     }
 
-    public function insetUCUsersData($data)
+    public function insertUCUsersData($data)
     {
         $this->insertUsersData($data);
     }
@@ -199,6 +200,105 @@ class Migration_1 extends Model
         }
         print_r("\n ya existen :: $j usuarios \n");
         $bar->finish();
+    }
+    public function setUsersDatav2(&$result, $db, $output)
+    {
+        $user_migrated = User::disableCache()->whereNotNull('external_id')->whereNotNull('user_relations')
+            ->pluck('external_id')->toArray();
+
+        $count = $db->getTable('usuarios')->count();
+        $type_client = Taxonomy::getFirstData('user', 'type', 'employee');
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
+        $temp['users'] = $db->getTable('usuarios')
+            ->select(
+                'id',
+                'nombre',
+                'email',
+                'dni',
+                'config_id',
+                'grupo',
+                'botica_id',
+                'sexo',
+                'estado',
+                'created_at',
+                'updated_at'
+            )
+            ->whereNotIn('id', $user_migrated)
+            ->chunkById(5000, function ($usuarios) use ($bar, $type_client, $result) {
+                $usuarios_dni = $usuarios->pluck('dni')->toArray();
+
+                $users = User::disableCache()
+                    ->with([
+                        'subworkspace' => function ($q) {
+                            $q->with('parent:id,name')
+                                ->select('id', 'name', 'parent_id');
+                        }
+                    ])
+                    ->select('id', 'name', 'lastname', 'surname', 'document', 'email', 'subworkspace_id')
+                    ->whereIn('document', $usuarios_dni)
+                    ->get();
+
+                foreach ($usuarios as $key => $user) {
+                    $bar->advance();
+
+                    $user_relations = [
+                        'usuario_id' => $user->id,
+                        'config_id' => $user->config_id,
+                        'grupo_id' => $user->grupo,
+                        'botica_id' => $user->botica_id,
+                        'genero' => $user->sexo
+                    ];
+
+//                    $user_db = User::disableCache()
+//                        ->with([
+//                            'subworkspace' => function ($q) {
+//                                $q->with('parent:id,name')
+//                                    ->select('id', 'name', 'parent_id');
+//                            }
+//                        ])
+//                        ->select('id', 'name', 'lastname', 'surname', 'document', 'email', 'subworkspace_id')
+//                        ->where('document', $user->dni)->first();
+                    $user_db = $users->where('document', $user->dni)->first();
+
+                    if ($user_db) {
+                        $module_value = self::MODULOS_EQUIVALENCIA[$user->config_id] ?? false;
+
+                        $user_db->update(['external_id' => $user->id, 'user_relations' => $user_relations]);
+
+                        if ($module_value != $user_db->subworkspace_id)
+                            info("{$user_db->subworkspace->parent->name} - {$user_db->subworkspace->name} - {$user_db->fullname} - {$user_db->document}");
+
+                        continue;
+                    }
+
+                    $result['users'][] = [
+                        'external_id' => $user->id,
+                        'user_relations' => json_encode($user_relations),
+
+                        'name' => $user->nombre,
+
+                        'email' => $user->email,
+                        'document' => $user->dni,
+
+                        'type_id' => $type_client->id,
+                        'config_id' => $user->config_id,
+
+                        'password' => bcrypt($user->dni),
+
+                        'active' => $user->estado,
+
+                        'created_at' => $user->created_at,
+                        'updated_at' => $user->updated_at,
+                    ];
+                }
+
+            });
+        $bar->finish();
+        $output->newLine();
+
+        return $result;
     }
 
     public function setModulosData(&$result, $db)
