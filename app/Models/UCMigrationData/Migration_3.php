@@ -60,7 +60,7 @@ class Migration_3 extends Model
 
     protected function migrateSummaryCoursesCertifications($output)
     {
-        info('getAndInsertResumenCursosData');
+        info('getAndInsertResumenCursosDataCertifications');
         self::getAndInsertResumenCursosDataCertifications($output);
     }
 
@@ -344,7 +344,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('resumen_x_curso')->chunkById(250, function ($rows_cursos) use ($rows_reinicios, $statuses, $bar) {
+        $db->getTable('resumen_x_curso')->chunkById(100, function ($rows_cursos) use ($rows_reinicios, $statuses, $bar) {
 
             $chunk = [];
 
