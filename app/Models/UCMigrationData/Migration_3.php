@@ -625,7 +625,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar($count);
         $bar->start();
 
-        $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(250, function ($rows_reinicios, $bar) {
+        $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(250, function ($rows_reinicios) use ($bar) {
 
             $usuarios_ids = $rows_reinicios->pluck('usuario_id')->toArray();
             $topics_ids = $rows_reinicios->pluck('posteo_id')->toArray();
@@ -701,7 +701,7 @@ class Migration_3 extends Model
 
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
-        $db->getTable('visitas')->chunkById(250, function ($rows_visitas) use ($statuses, $bar) {
+        $db->getTable('visitas')->chunkById(50, function ($rows_visitas) use ($statuses, $bar) {
 
             $usuarios_ids = $rows_visitas->pluck('usuario_id')->toArray();
             $topics_ids = $rows_visitas->pluck('post_id')->toArray();
@@ -710,6 +710,8 @@ class Migration_3 extends Model
             $topics = Topic::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $topics_ids)->get();
 
             foreach ($rows_visitas as $row) {
+
+                $bar->advance();
 
                 $user = $users->where('external_id', $row->usuario_id)->first();
                 $topic = $topics->where('external_id', $row->post_id)->first();
@@ -735,7 +737,7 @@ class Migration_3 extends Model
 
                 $data = [
                     'downloads' => $row->descargas,
-                    'views' => $row->sumatorias,
+                    'views' => $row->sumatoria,
                     'status_id' => $status->id ?? NULL,
                 ];
 
