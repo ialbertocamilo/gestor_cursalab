@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Taxonomy;
 use App\Models\Course;
 use App\Models\Posteo;
+use App\Models\Topic;
 use App\Models\User;
 use App\Models\SummaryCourse;
 use App\Models\SummaryTopic;
@@ -478,24 +479,40 @@ class Migration_3 extends Model
     {
         $db = self::connect();
 
+        $output->info('init getAndInsertResumenTemasDataPruebas');
+
+        $count = $db->getTable('pruebas')->count();
+
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
         $sources = Taxonomy::getData('system', 'platform')->get();
 
-        $db->getTable('pruebas')->chunkById(1000, function ($rows_pruebas) use ($sources) {
+        $db->getTable('pruebas')->chunkById(50, function ($rows_pruebas) use ($sources, $bar) {
+
+            $usuarios_ids = $rows_pruebas->pluck('usuario_id')->toArray();
+            $topics_ids = $rows_pruebas->pluck('posteo_id')->toArray();
+
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
+            $topics = Topic::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $topics_ids)->get();
 
             $chunk = [];
 
             foreach ($rows_pruebas as $row) {
-                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
-                $topic = Topic::select('id', 'external_id')->where('external_id', $row->posteo_id)->first();
-                // $user = $users->where('external_id', $row->usuario_id)->first();
-                // $topic = $topics->where('external_id', $row->posteo_id)->first();
-                $source_id = $sources->where('code', $prueba->fuente)->first();
+
+                $bar->advance();
+
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                // $topic = Topic::select('id', 'external_id')->where('external_id', $row->posteo_id)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $topic = $topics->where('external_id', $row->posteo_id)->first();
+                $source = $sources->where('code', $row->fuente)->first();
 
                 $chunk[] = [
                     'user_id' => $user->id ?? NULL,
                     'topic_id' => $topic->id ?? NULL,
 
-                    'source_id' => $source_id,
+                    'source_id' => $source->id ?? NULL,
 
                     'attempts' => $row->intentos,
                     'correct_answers' => $row->rptas_ok,
@@ -515,31 +532,48 @@ class Migration_3 extends Model
 
             DB::table('summary_topics')->insert($chunk);
 
-            info('summary_topics pruebas chunked inserted');
+            // info('summary_topics pruebas chunked inserted');
         });
 
+        $bar->finish();
+
+        $output->newLine();
     }
 
     protected function getAndInsertResumenTemasDataAbiertas($output)
     {
         $db = self::connect();
 
+        $output->info('init getAndInsertResumenTemasDataPruebas');
+
+        $count = $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->count();
+
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
         $sources = Taxonomy::getData('system', 'platform')->get();
 
-        $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(2000, function ($rows_ev_abiertas) use ($sources) {
+        $db->getTable('ev_abiertas')->where('posteo_id', '<>', 0)->chunkById(50, function ($rows_ev_abiertas) use ($sources, $bar) {
+
+            $usuarios_ids = $rows_ev_abiertas->pluck('usuario_id')->toArray();
+            $topics_ids = $rows_ev_abiertas->pluck('posteo_id')->toArray();
+
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
+            $topics = Topic::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $topics_ids)->get();
 
             $chunk = [];
 
-            foreach ($rows_ev_abiertas as $prueba)
-            {
-                // $topic = $topics->where('external_id', $prueba->posteo_id)->first();
-                $topic = Topic::select('id', 'external_id')->where('external_id', $prueba->posteo_id)->first();
-                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $prueba->usuario_id)->first();
-                // $user = $users->where('external_id', $prueba->usuario_id)->first();
-                $source_id = $sources->where('code', $prueba->fuente)->first();
+            foreach ($rows_ev_abiertas as $prueba) {
+
+                $bar->advance();
+                // $topic = Topic::select('id', 'external_id')->where('external_id', $prueba->posteo_id)->first();
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $prueba->usuario_id)->first();
+                $topic = $topics->where('external_id', $prueba->posteo_id)->first();
+                $user = $users->where('external_id', $prueba->usuario_id)->first();
+                $source = $sources->where('code', $prueba->fuente)->first();
                 // $user_id = User::where('external_id', $prueba->usuario_id)->first();
 
-                $current_summary_topic = SummaryTopic::getCurrentRow($topic, $user);
+                $current_summary_topic = SummaryTopic::disableCache()->where('user_id', $user->id)->where('topic_id', $topic->id)->first();
 
                 if ($current_summary_topic) {
 
@@ -555,7 +589,7 @@ class Migration_3 extends Model
                     'user_id' => $user->id ?? NULL,
                     // 'answers' => $prueba->eva_abierta != 0 ? $prueba->usu_rptas : NULL,
                     'answers' => $prueba->usu_rptas,
-                    'source_id' => $source_id,
+                    'source_id' => $source->id ?? NULL,
                     // 'type_id' => $type_id,
 
                     'created_at' => $prueba->created_at,
@@ -565,16 +599,30 @@ class Migration_3 extends Model
 
             DB::table('summary_topics')->insert($chunk);
 
-            info('summary_topics ev_abiertas chunked inserted');
+            // info('summary_topics ev_abiertas chunked inserted');
         });
+
+        $bar->finish();
+
+        $output->newLine();
     }
 
     protected function getAndInsertResumenTemasDataReinicios($output)
     {
         $db = self::connect();
 
-        $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(2000, function ($rows_reinicios) {
+        $output->info('init getAndInsertResumenTemasDataReinicios');
+
+        $count = $db->getTable('reinicios')->where('tipo', 'por_tema')->count();
+
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
+        $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(250, function ($rows_reinicios, $bar) {
+
             foreach ($rows_reinicios as $restart) {
+
+                $bar->advance();
 
                 // $user = $users->where('external_id', $restart->usuario_id)->first();
                 // $topic = $topics->where('external_id', $restart->curso_id)->first();
@@ -584,8 +632,8 @@ class Migration_3 extends Model
                 $restarts = 0;
                 $restarter = NULL;
 
-                if ($restart)
-                {
+                if ($restart) {
+
                     $restarts = $restart->acumulado;
                     // $restarter = $admins->where('external_id', $restart->admin_id)->first();
                     $restarter = $restart->admin_id;
@@ -603,15 +651,29 @@ class Migration_3 extends Model
                     ->update($data);
             }
 
-            info('summary_topics reinicios chunked update');
+            // info('summary_topics reinicios chunked update');
         });
+
+        $bar->finish();
+
+        $output->newLine();
     }
 
     protected function getAndInsertResumenTemasDataVisitas($output)
     {
+        $db = self::connect();
+
+        $output->info('init getAndInsertResumenTemasDataVisitas');
+
+        $count = $db->getTable('visitas')->count();
+
+        $bar = $output->createProgressBar($count);
+        $bar->start();
+
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
-        $db->getTable('visitas')->chunkById(2000, function ($rows_visitas) use ($statuses) {
+        $db->getTable('visitas')->chunkById(250, function ($rows_visitas) use ($statuses, $bar) {
+
             foreach ($rows_visitas as $row) {
 
                 // $user = $users->where('external_id', $row->usuario_id)->first();
@@ -631,7 +693,11 @@ class Migration_3 extends Model
 
             }
 
-            info('summary_topics visitas chunked updateOrInsert');
+            // info('summary_topics visitas chunked updateOrInsert');
         });
+
+        $bar->finish();
+
+        $output->newLine();
     }
 }
