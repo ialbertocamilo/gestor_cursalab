@@ -573,11 +573,18 @@ class Migration_3 extends Model
                 $source = $sources->where('code', $prueba->fuente)->first();
                 // $user_id = User::where('external_id', $prueba->usuario_id)->first();
 
+                if (!$user OR !$topic)
+                {
+                    info("[OLD - {$prueba->usuario_id}] o [OLD TOPIC => {$prueba->posteo_id}] no existe en IR. Verificar Eva Abiertas.");
+
+                    continue;
+                }
+
                 $current_summary_topic = SummaryTopic::disableCache()->where('user_id', $user->id)->where('topic_id', $topic->id)->first();
 
                 if ($current_summary_topic) {
 
-                     info("User => {$user->id} [OLD - {$prueba->usuario_id}] - {$user->document} - TOPIC => {$topic->id} ya tiene data en summary_topic. Verificar según tipo de evaluación  (eva_bierta).");
+                    info("User => {$user->id} [OLD - {$prueba->usuario_id}] - {$user->document} - TOPIC => {$topic->id} ya tiene data en summary_topic. Verificar según tipo de evaluación  (eva_bierta).");
 
                     $current_summary_topic->update(['answers_old' => $prueba->usu_rptas]);
 
@@ -620,14 +627,36 @@ class Migration_3 extends Model
 
         $db->getTable('reinicios')->where('tipo', 'por_tema')->chunkById(250, function ($rows_reinicios, $bar) {
 
+            $usuarios_ids = $rows_reinicios->pluck('usuario_id')->toArray();
+            $topics_ids = $rows_reinicios->pluck('posteo_id')->toArray();
+
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
+            $topics = Topic::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $topics_ids)->get();
+
             foreach ($rows_reinicios as $restart) {
 
                 $bar->advance();
 
-                // $user = $users->where('external_id', $restart->usuario_id)->first();
-                // $topic = $topics->where('external_id', $restart->curso_id)->first();
-                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $restart->usuario_id)->first();
-                $topic = Topic::select('id', 'external_id')->where('external_id', $restart->posteo_id)->first();
+                $user = $users->where('external_id', $restart->usuario_id)->first();
+                $topic = $topics->where('external_id', $restart->posteo_id)->first();
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $restart->usuario_id)->first();
+                // $topic = Topic::select('id', 'external_id')->where('external_id', $restart->posteo_id)->first();
+
+                if (!$user OR !$topic)
+                {
+                    info("[OLD - {$restart->usuario_id}] o [OLD TOPIC => {$restart->posteo_id}] no existe en IR. Verificar Reinicios.");
+
+                    continue;
+                }
+
+                $current_summary_topic = SummaryTopic::disableCache()->where('user_id', $user->id)->where('topic_id', $topic->id)->first();
+
+                if (!$current_summary_topic) {
+
+                    info("User => {$user->id} [OLD - {$restart->usuario_id}] - {$user->document} - TOPIC => {$topic->id} no tiene data en summary_topic. Verificar en reinicios.");
+
+                    continue;
+                }
 
                 $restarts = 0;
                 $restarter = NULL;
@@ -674,13 +703,35 @@ class Migration_3 extends Model
 
         $db->getTable('visitas')->chunkById(250, function ($rows_visitas) use ($statuses, $bar) {
 
+            $usuarios_ids = $rows_visitas->pluck('usuario_id')->toArray();
+            $topics_ids = $rows_visitas->pluck('post_id')->toArray();
+
+            $users = User::disableCache()->select('id', 'external_id')->whereIn('external_id', $usuarios_ids)->get();
+            $topics = Topic::disableCache()->select('id', 'external_id')->whereNotNull('external_id')->whereIn('external_id', $topics_ids)->get();
+
             foreach ($rows_visitas as $row) {
 
-                // $user = $users->where('external_id', $row->usuario_id)->first();
-                // $topic = $topics->where('external_id', $row->curso_id)->first();
-                $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
-                $topic = Topic::select('id', 'external_id')->where('external_id', $row->post_id)->first();
+                $user = $users->where('external_id', $row->usuario_id)->first();
+                $topic = $topics->where('external_id', $row->post_id)->first();
+                // $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
+                // $topic = Topic::select('id', 'external_id')->where('external_id', $row->post_id)->first();
                 $status = $statuses->where('code', $row->estado_tema)->first();
+
+                if (!$user OR !$topic)
+                {
+                    info("[OLD - {$row->usuario_id}] o [OLD TOPIC => {$row->post_id}] no existe en IR. Verificar Visitas.");
+
+                    continue;
+                }
+
+                $current_summary_topic = SummaryTopic::disableCache()->where('user_id', $user->id)->where('topic_id', $topic->id)->first();
+
+                if (!$current_summary_topic) {
+
+                    info("User => {$user->id} [OLD - {$row->usuario_id}] - {$user->document} - TOPIC => {$topic->id} no tiene data en summary_topic. Verificar en visitas.");
+
+                    continue;
+                }
 
                 $data = [
                     'downloads' => $row->descargas,
@@ -689,7 +740,12 @@ class Migration_3 extends Model
                 ];
 
                 DB::table('summary_topics')
-                    ->updateOrInsert(['user_id' => $user->id ?? NULL, 'topic_id' => $topic->id ?? NULL], $data);
+                    ->where('user_id', $user->id ?? NULL)
+                    ->where('topic_id', $topic->id ?? NULL)
+                    ->update($data);
+
+                // DB::table('summary_topics')
+                //     ->updateOrInsert(['user_id' => $user->id ?? NULL, 'topic_id' => $topic->id ?? NULL], $data);
 
             }
 
