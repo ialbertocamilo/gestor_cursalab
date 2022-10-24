@@ -9,15 +9,15 @@ use App\Models\Workspace;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Http\Request;
+
+class SubworkspaceInMaintenance extends Exception {};
 
 class AuthController extends Controller
 {
     public function login(LoginAppRequest $request)
     {
         // Stop login process and show maintenance message
-
         if (env('MAINTENANCE_MODE')) {
             return $this->error(
                 config('errors.maintenance_message'), 503
@@ -42,8 +42,14 @@ class AuthController extends Controller
                 return $this->error('No autorizado.', 401);
             }
 
-        } catch (Exception $e) {
-//           info($e);
+        } 
+        catch (SubworkspaceInMaintenance $e){
+            return $this->error(
+                    config('errors.maintenance_subworkspace_message'), 503
+                );
+        }
+        catch (Exception $e) {
+            // info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }
@@ -54,6 +60,9 @@ class AuthController extends Controller
         $user = Auth::user();
         $user->tokens()->delete();
         $token = $user->createToken('accessToken')->accessToken;
+
+        // Stop login to users from specific workspaces 
+        $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
         if (!$user->active)
             return $this->error("Usuario inactivo.", http_code: 401);
@@ -158,5 +167,14 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => 560
         ]);
+    }
+
+    public function checkForMaintenanceModeSubworkspace($subworkspace_id){
+        if (!empty(env('MAINTENANCE_SUBWORKSPACES'))) {
+            $subworkspace_maintenance_array = explode (",", env('MAINTENANCE_SUBWORKSPACES'));
+            if (in_array($subworkspace_id, $subworkspace_maintenance_array)) {
+                throw new SubworkspaceInMaintenance();
+            }
+        }
     }
 }
