@@ -57,20 +57,23 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValues();
         $this->restoreCriterionDocument();
     }
-    public function restoreCriterionDocument(){
+
+    public function restoreCriterionDocument()
+    {
         $document_criterion = Criterion::where('code', 'document')->first();
-        $criterionValues = CriterionValue::where('criterion_id',$document_criterion->id)->select('value_text')->get()->pluck('value_text');
-        User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
-            ->select('id', 'document', 'subworkspace_id')
-            ->whereNotIn('document',$criterionValues)
+
+        $users = User::whereDoesntHave('criterion_values', function ($q) {
+            $q->whereRelation('criterion', 'code', 'document');
+        })
             ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
-                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
-                    ->whereIn('value_text', $users_chunked->pluck('document')->toArray())->get();
+                $document_values = CriterionValue::query()->whereRelation('criterion', 'code', 'document')
+                    ->whereIn('value_text', $users_chunked->pluck('document')->toArray())
+                    ->get();
                 $bar = $this->output->createProgressBar($users_chunked->count());
                 $bar->start();
                 foreach ($users_chunked as $user) {
                     $document_value = $document_values->where('value_text', $user->document)->first();
-                    if(!$document_value){
+                    if (!$document_value) {
                         $criterion_value_data = [
                             'value_text' => $user->document,
                             'criterion_id' => $document_criterion?->id,
@@ -78,14 +81,73 @@ class restablecer_funcionalidad extends Command
                             'active' => ACTIVE
                         ];
                         $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
-    
+
                         $user->criterion_values()->syncWithoutDetaching([$document?->id]);
                     }
                     $bar->advance();
                 }
                 $bar->finish();
             });
+
+//        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')
+//            ->chunkByid(5000, function ($docs_chunked) use ($document_criterion) {
+//                $docs = $docs_chunked->pluck('value_text');
+//
+//                $users = User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
+//                    ->select('id', 'document', 'subworkspace_id')
+//                    ->whereNotIn('document', $docs)
+//                    ->get();
+//
+//                $bar = $this->output->createProgressBar($users->count());
+//                $bar->start();
+//                foreach ($users as $user) {
+//
+//                    $document_value = $docs_chunked->where('value_text', $user->document)->first();
+//                    if (!$document_value) {
+//                        $criterion_value_data = [
+//                            'value_text' => $user->document,
+//                            'criterion_id' => $document_criterion?->id,
+//                            'workspace_id' => $user->subworkspace?->parent?->id,
+//                            'active' => ACTIVE
+//                        ];
+//                        $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
+//
+//                        $user->criterion_values()->syncWithoutDetaching([$document?->id]);
+//                    }
+//                    $bar->advance();
+//                }
+//
+//                $bar->finish();
+//            });
+
+//        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')->get()->pluck('value_text');
+//        User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
+//            ->select('id', 'document', 'subworkspace_id')
+//            ->whereNotIn('document', $criterionValues)
+//            ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
+//                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
+//                    ->whereIn('value_text', $users_chunked->pluck('document')->toArray())->get();
+//                $bar = $this->output->createProgressBar($users_chunked->count());
+//                $bar->start();
+//                foreach ($users_chunked as $user) {
+//                    $document_value = $document_values->where('value_text', $user->document)->first();
+//                    if (!$document_value) {
+//                        $criterion_value_data = [
+//                            'value_text' => $user->document,
+//                            'criterion_id' => $document_criterion?->id,
+//                            'workspace_id' => $user->subworkspace?->parent?->id,
+//                            'active' => ACTIVE
+//                        ];
+//                        $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
+//
+//                        $user->criterion_values()->syncWithoutDetaching([$document?->id]);
+//                    }
+//                    $bar->advance();
+//                }
+//                $bar->finish();
+//            });
     }
+
     public function restoreCriterionValues()
     {
         $criteria = Criterion::with('values')
