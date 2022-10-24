@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Criterio;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Curso;
@@ -24,7 +25,7 @@ class restablecer_funcionalidad extends Command
      *
      * @var string
      */
-    protected $signature = 'restablecer:funcionalidad';
+    protected $signature = 'restablecer:funcionalidad {user_id?}';
 
     /**
      * The console command description.
@@ -50,75 +51,76 @@ class restablecer_funcionalidad extends Command
      */
     public function handle()
     {
+        $this->info(" Inicio: " . now());
+        info(" Inicio: " . now());
+
         // $this->restablecer_estado_tema();
         // $this->restablecer_estado_tema_2();
         // $this->restablecer_matricula();
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
         $this->restoreCriterionDocument();
+
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
     }
 
     public function restoreCriterionDocument()
     {
+        $user_id = $this->argument("user_id");
         $document_criterion = Criterion::where('code', 'document')->first();
 
-        $users = User::disableCache()->whereDoesntHave('criterion_values', function ($q) {
-            $q->whereRelation('criterion', 'code', 'document');
-        })
-            ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
+
+        $users_count = User::query()
+            ->when(!$user_id, function ($q) {
+                $q->whereDoesntHave('criterion_values', function ($q) {
+                    $q->whereRelation('criterion', 'code', 'document');
+                });
+            })
+            ->when($user_id, function ($q) use ($user_id) {
+                $q->where('id', $user_id);
+            })
+            ->count();
+
+        $_bar = $this->output->createProgressBar($users_count);
+        $_bar->start();
+
+        $users = User::with('subworkspace:id,parent_id')
+            ->when(!$user_id, function ($q) {
+                $q->whereDoesntHave('criterion_values', function ($q) {
+                    $q->whereRelation('criterion', 'code', 'document');
+                });
+            })
+            ->when($user_id, function ($q) use ($user_id) {
+                $q->where('id', $user_id);
+            })
+            ->select('id', 'subworkspace_id', 'document')
+            ->chunkById(150, function ($users_chunked) use ($document_criterion, $_bar) {
                 $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
                     ->whereIn('value_text', $users_chunked->pluck('document')->toArray())
+                    ->select('id', 'value_text')
                     ->get();
-                $bar = $this->output->createProgressBar($users_chunked->count());
-                $bar->start();
+
                 foreach ($users_chunked as $user) {
                     $document_value = $document_values->where('value_text', $user->document)->first();
+
                     if (!$document_value) {
                         $criterion_value_data = [
                             'value_text' => $user->document,
                             'criterion_id' => $document_criterion?->id,
-                            'workspace_id' => $user->subworkspace?->parent?->id,
+                            'workspace_id' => $user->subworkspace?->parent_id,
                             'active' => ACTIVE
                         ];
-                        $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
-
-                        $user->criterion_values()->syncWithoutDetaching([$document?->id]);
+                        $document_value = CriterionValue::storeRequest($criterion_value_data, $document_value);
                     }
-                    $bar->advance();
-                }
-                $bar->finish();
-            });
 
-//        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')
-//            ->chunkByid(5000, function ($docs_chunked) use ($document_criterion) {
-//                $docs = $docs_chunked->pluck('value_text');
-//
-//                $users = User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
-//                    ->select('id', 'document', 'subworkspace_id')
-//                    ->whereNotIn('document', $docs)
-//                    ->get();
-//
-//                $bar = $this->output->createProgressBar($users->count());
-//                $bar->start();
-//                foreach ($users as $user) {
-//
-//                    $document_value = $docs_chunked->where('value_text', $user->document)->first();
-//                    if (!$document_value) {
-//                        $criterion_value_data = [
-//                            'value_text' => $user->document,
-//                            'criterion_id' => $document_criterion?->id,
-//                            'workspace_id' => $user->subworkspace?->parent?->id,
-//                            'active' => ACTIVE
-//                        ];
-//                        $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
-//
-//                        $user->criterion_values()->syncWithoutDetaching([$document?->id]);
-//                    }
-//                    $bar->advance();
-//                }
-//
-//                $bar->finish();
-//            });
+                    $user->criterion_values()->syncWithoutDetaching([$document_value?->id]);
+                    $_bar->advance();
+                }
+            });
+        $_bar->finish();
+
+//        $document_criterion = Criterion::where('code', 'document')->first();
 
 //        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')->get()->pluck('value_text');
 //        User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
