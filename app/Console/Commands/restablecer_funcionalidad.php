@@ -25,7 +25,7 @@ class restablecer_funcionalidad extends Command
      *
      * @var string
      */
-    protected $signature = 'restablecer:funcionalidad';
+    protected $signature = 'restablecer:funcionalidad {user_id?}';
 
     /**
      * The console command description.
@@ -67,11 +67,17 @@ class restablecer_funcionalidad extends Command
 
     public function restoreCriterionDocument()
     {
+        $user_id = $this->argument("user_id");
         $document_criterion = Criterion::where('code', 'document')->first();
 
         $users_count = User::query()
-            ->whereDoesntHave('criterion_values', function ($q) {
-                $q->whereRelation('criterion', 'code', 'document');
+            ->when(!$user_id, function ($q) {
+                $q->whereDoesntHave('criterion_values', function ($q) {
+                    $q->whereRelation('criterion', 'code', 'document');
+                });
+            })
+            ->when($user_id, function ($q) use ($user_id) {
+                $q->where('id', $user_id);
             })
             ->count();
 
@@ -79,8 +85,13 @@ class restablecer_funcionalidad extends Command
         $_bar->start();
 
         $users = User::with('subworkspace:id,parent_id')
-            ->whereDoesntHave('criterion_values', function ($q) {
-                $q->whereRelation('criterion', 'code', 'document');
+            ->when(!$user_id, function ($q) {
+                $q->whereDoesntHave('criterion_values', function ($q) {
+                    $q->whereRelation('criterion', 'code', 'document');
+                });
+            })
+            ->when($user_id, function ($q) use ($user_id) {
+                $q->where('id', $user_id);
             })
             ->select('id', 'subworkspace_id', 'document')
             ->chunkById(150, function ($users_chunked) use ($document_criterion, $_bar) {
