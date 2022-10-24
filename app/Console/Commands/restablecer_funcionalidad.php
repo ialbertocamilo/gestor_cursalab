@@ -79,6 +79,8 @@ class restablecer_funcionalidad extends Command
             ->when($user_id, function ($q) use ($user_id) {
                 $q->where('id', $user_id);
             })
+            ->whereNotNull('document')
+            ->whereNotNull('subworkspace_id')
             ->count();
 
         $_bar = $this->output->createProgressBar($users_count);
@@ -93,6 +95,8 @@ class restablecer_funcionalidad extends Command
             ->when($user_id, function ($q) use ($user_id) {
                 $q->where('id', $user_id);
             })
+            ->whereNotNull('document')
+            ->whereNotNull('subworkspace_id')
             ->select('id', 'subworkspace_id', 'document')
             ->chunkById(150, function ($users_chunked) use ($document_criterion, $_bar) {
                 $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
