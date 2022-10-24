@@ -36,7 +36,7 @@
         <tr>
             <td align="center">{{ $attendant->meeting->name }}</td>
             <td align="center">{{ $attendant->user->subworkspace->name }}</td>
-            <td align="center">{{ $attendant->type->name }}</td>
+            <td align="center">{{ $attendant->type ? $attendant->type->name : '' }}</td>
             <td align="center">{{ $attendant->usuario->document }}</td>
 
             <td>{{ $attendant->usuario->name.' '.$attendant->usuario->lastname.' '.$attendant->usuario->surname  }}</td>
