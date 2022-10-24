@@ -373,15 +373,25 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
-            $new_user = false;
+
             if ($user) :
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
+
                 $user->update($data);
+
+                if ($user->wasChanged('document') && ($data['document'] ?? false)):
+                    $user_document = $this->syncDocumentCriterionValue(user: $user, old_document: $old_document, new_document: $data['document']);
+                else:
+                    $user_document = CriterionValue::whereRelation('criterion', 'code', 'document')
+                        ->where('value_text', $old_document)->first();
+                endif;
             else :
+
                 $user = self::create($data);
-                $new_user = true;
+                $user_document = $this->syncDocumentCriterionValue(user: $user, old_document: null, new_document: $data['document']);
+
             endif;
 
             $user->subworkspace_id = Workspace::query()
@@ -389,12 +399,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->first()
                 ?->id;
 
-            $user->criterion_values()
-                ->sync(array_values($data['criterion_list_final']) ?? []);
 
-            if ($new_user || ($user->wasChanged('document') && ($data['document'] ?? false))):
-                $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
-            endif;
+            $data['criterion_list_final'][] = $user_document->id;
+
+            $user->criterion_values()
+                ->sync($data['criterion_list_final']);
 
             $user->save();
             DB::commit();
@@ -407,7 +416,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function syncDocumentCriterionValue($old_document, $new_document)
+    public function syncDocumentCriterionValue($user, $old_document, $new_document)
     {
         $document_criterion = Criterion::where('code', 'document')->first();
 
@@ -420,7 +429,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'active' => ACTIVE
         ];
 
-        CriterionValue::storeRequest($criterion_value_data, $document_value);
+        $document_value = CriterionValue::storeRequest($criterion_value_data, $document_value);
+
+        return $document_value;
     }
 
     protected function storeRequestFull($data = [], $user = null)
@@ -609,19 +620,19 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                             endif;
                         }
-                    //                        $blocks->push([
-                    //                            'id' => $block_child->child->id,
-                    //                            'name' => $block_child->child->name,
-                    //                            'courses_count' => $courses->count(),
-                    //                            'courses' => $courses->sortBy('position')->values()->all()
-                    //                        ]);
+                        //                        $blocks->push([
+                        //                            'id' => $block_child->child->id,
+                        //                            'name' => $block_child->child->name,
+                        //                            'courses_count' => $courses->count(),
+                        //                            'courses' => $courses->sortBy('position')->values()->all()
+                        //                        ]);
                     endif;
                 }
-            //                $programs->push([
-            //                    'id' => $program->id,
-            //                    'name' => $program->name,
-            //                    'blocks' => $blocks,
-            //                ]);
+                //                $programs->push([
+                //                    'id' => $program->id,
+                //                    'name' => $program->name,
+                //                    'blocks' => $blocks,
+                //                ]);
             endif;
         }
     }

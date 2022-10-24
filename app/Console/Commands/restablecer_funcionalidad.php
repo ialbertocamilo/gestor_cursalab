@@ -69,29 +69,29 @@ class restablecer_funcionalidad extends Command
     {
         $document_criterion = Criterion::where('code', 'document')->first();
 
-        $users = User::query()
+        $users_count = User::query()
             ->whereDoesntHave('criterion_values', function ($q) {
                 $q->whereRelation('criterion', 'code', 'document');
             })
-            ->get();
+            ->count();
 
-        $_bar = $this->output->createProgressBar($users->count());
+        $_bar = $this->output->createProgressBar($users_count);
         $_bar->start();
-
 
         $users = User::with('subworkspace:id,parent_id')
             ->whereDoesntHave('criterion_values', function ($q) {
                 $q->whereRelation('criterion', 'code', 'document');
             })
-            ->chunkById(5000, function ($users_chunked) use ($document_criterion, $_bar) {
-//                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
-//                    ->whereIn('value_text', $users_chunked->pluck('document')->toArray())
-//                    ->select('id', 'value_text')
-//                    ->get();
+            ->select('id', 'subworkspace_id', 'document')
+            ->chunkById(150, function ($users_chunked) use ($document_criterion, $_bar) {
+                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
+                    ->whereIn('value_text', $users_chunked->pluck('document')->toArray())
+                    ->select('id', 'value_text')
+                    ->get();
 
                 foreach ($users_chunked as $user) {
-//                    $document_value = $document_values->where('value_text', $user->document)->first();
-                    $document_value = CriterionValue::where('value_text', $user->document)->first();
+                    $document_value = $document_values->where('value_text', $user->document)->first();
+
                     if (!$document_value) {
                         $criterion_value_data = [
                             'value_text' => $user->document,
@@ -103,45 +103,12 @@ class restablecer_funcionalidad extends Command
                     }
 
                     $user->criterion_values()->syncWithoutDetaching([$document_value?->id]);
-//                    $bar->advance();
                     $_bar->advance();
                 }
-//                $bar->finish();
-//                $this->newLine();
             });
         $_bar->finish();
 
-
-//        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')
-//            ->chunkByid(5000, function ($docs_chunked) use ($document_criterion) {
-//                $docs = $docs_chunked->pluck('value_text');
-//
-//                $users = User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
-//                    ->select('id', 'document', 'subworkspace_id')
-//                    ->whereNotIn('document', $docs)
-//                    ->get();
-//
-//                $bar = $this->output->createProgressBar($users->count());
-//                $bar->start();
-//                foreach ($users as $user) {
-//
-//                    $document_value = $docs_chunked->where('value_text', $user->document)->first();
-//                    if (!$document_value) {
-//                        $criterion_value_data = [
-//                            'value_text' => $user->document,
-//                            'criterion_id' => $document_criterion?->id,
-//                            'workspace_id' => $user->subworkspace?->parent?->id,
-//                            'active' => ACTIVE
-//                        ];
-//                        $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
-//
-//                        $user->criterion_values()->syncWithoutDetaching([$document?->id]);
-//                    }
-//                    $bar->advance();
-//                }
-//
-//                $bar->finish();
-//            });
+//        $document_criterion = Criterion::where('code', 'document')->first();
 
 //        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')->get()->pluck('value_text');
 //        User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
