@@ -62,11 +62,11 @@ class restablecer_funcionalidad extends Command
     {
         $document_criterion = Criterion::where('code', 'document')->first();
 
-        $users = User::whereDoesntHave('criterion_values', function ($q) {
+        $users = User::disableCache()->whereDoesntHave('criterion_values', function ($q) {
             $q->whereRelation('criterion', 'code', 'document');
         })
             ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
-                $document_values = CriterionValue::query()->whereRelation('criterion', 'code', 'document')
+                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
                     ->whereIn('value_text', $users_chunked->pluck('document')->toArray())
                     ->get();
                 $bar = $this->output->createProgressBar($users_chunked->count());
