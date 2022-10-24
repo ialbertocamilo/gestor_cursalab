@@ -154,6 +154,7 @@ class MeetingController extends Controller
     {
         $meeting->load(
             'type',
+            'host',
             //'host.config', // user is no longer related to meeting
             'status',
             'user'

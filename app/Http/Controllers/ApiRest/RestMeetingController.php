@@ -176,7 +176,6 @@ class RestMeetingController extends Controller
         $user_types = Taxonomy::getData('meeting', 'user')->pluck('code', 'id');
 
         $params = ['config_id' => $request->config_id ?? auth()->user()->config_id];
-
         $grupos = [];
 
         return $this->success(compact('grupos', 'modulos', 'user_types'));
@@ -185,6 +184,7 @@ class RestMeetingController extends Controller
     public function store(MeetingAppRequest $request)
     {
         $data = $request->validated();
+
         $subworkspace = auth()->user()->subworkspace;
         $data['workspace_id'] = $subworkspace->parent_id;
 
@@ -233,18 +233,13 @@ class RestMeetingController extends Controller
     }
     public function uploadAttendants(MeetingAppUploadAttendantsRequest $request)
     {
-        $data = $data;
-
-//        $data['usuarios_dni'] = Attendant::getUsuariosDniFromExcel($data);
-        $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
-        $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
+        $data = $request->validated();
+        // data['usuarios_dni'] = Attendant::getUsuariosDniFromExcel($data);
 
         $subworkspace = auth()->user()->subworkspace;
-
-        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
 
         $attendants = Attendant::searchAttendants($data);
-
         $attendants = MeetingSearchAttendantsResource::collection($attendants);
 
         Attendant::filterEmptyMeetingInvitations($attendants);
@@ -256,15 +251,11 @@ class RestMeetingController extends Controller
     {
         $data = $request->validated();
 
-        $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
-        $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
 
         $subworkspace = auth()->user()->subworkspace;
-
-        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
 
         $attendants = Attendant::searchAttendants($data);
-
         $attendants = MeetingSearchAttendantsResource::collection($attendants);
 
         Attendant::filterEmptyMeetingInvitations($attendants);
