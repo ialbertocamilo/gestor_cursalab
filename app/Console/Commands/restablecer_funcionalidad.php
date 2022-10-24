@@ -75,7 +75,7 @@ class restablecer_funcionalidad extends Command
             ->get();
         $this->info("\nTotal usuarios :: {$users->count()}");
 
-        $_bar = $this->output->createProgressBar($users->countt());
+        $_bar = $this->output->createProgressBar($users->count());
         $_bar->start();
 
 
