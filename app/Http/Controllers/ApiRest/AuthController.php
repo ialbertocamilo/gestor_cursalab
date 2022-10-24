@@ -49,7 +49,7 @@ class AuthController extends Controller
                 );
         }
         catch (Exception $e) {
-            // info($e);
+            info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }
@@ -87,7 +87,7 @@ class AuthController extends Controller
             "nombre" => $user->name,
             "apellido" => $user->lastname,
             'criteria' => $user->criterion_values,
-            'rol_entrenamiento' => $user->getTrainingRole(),
+            // 'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
 //            'carrera' => $carrera,
