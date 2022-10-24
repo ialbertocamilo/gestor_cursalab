@@ -50,23 +50,43 @@ class restablecer_funcionalidad extends Command
      */
     public function handle()
     {
+        $this->info(" Inicio: " . now());
+        info(" Inicio: " . now());
+
         // $this->restablecer_estado_tema();
         // $this->restablecer_estado_tema_2();
         // $this->restablecer_matricula();
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
         $this->restoreCriterionDocument();
+
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
     }
 
     public function restoreCriterionDocument()
     {
         $document_criterion = Criterion::where('code', 'document')->first();
 
+        $users = User::query()
+            ->whereDoesntHave('criterion_values', function ($q) {
+                $q->whereRelation('criterion', 'code', 'document');
+            })
+            ->get();
+        $this->info("\nTotal usuarios :: {$users->count()}");
+
+        $_bar = $this->output->createProgressBar($users->countt());
+        $_bar->start();
+
+
         $users = User::whereDoesntHave('criterion_values', function ($q) {
             $q->whereRelation('criterion', 'code', 'document');
         })
-            ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
-                $document_values = CriterionValue::query()->whereRelation('criterion', 'code', 'document')
+            ->chunkById(5000, function ($users_chunked) use (
+                $document_criterion,
+//                $_bar
+            ) {
+                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
                     ->whereIn('value_text', $users_chunked->pluck('document')->toArray())
                     ->get();
                 $bar = $this->output->createProgressBar($users_chunked->count());
@@ -80,14 +100,18 @@ class restablecer_funcionalidad extends Command
                             'workspace_id' => $user->subworkspace?->parent?->id,
                             'active' => ACTIVE
                         ];
-                        $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
-
-                        $user->criterion_values()->syncWithoutDetaching([$document?->id]);
+                        $document_value = CriterionValue::storeRequest($criterion_value_data, $document_value);
                     }
+
+                    $user->criterion_values()->syncWithoutDetaching([$document_value?->id]);
                     $bar->advance();
+//                    $_bar->advance();
                 }
                 $bar->finish();
+                $this->newLine();
             });
+//            $_bar->finish();
+
 
 //        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')
 //            ->chunkByid(5000, function ($docs_chunked) use ($document_criterion) {
