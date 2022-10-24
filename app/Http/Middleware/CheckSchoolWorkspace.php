@@ -20,19 +20,10 @@ class CheckSchoolWorkspace
      */
     public function handle(Request $request, Closure $next)
     {
-        // $user = auth()->user();
-
-        // info($request->segment(0));
-        // info($request->segment(1));
         $school_id = $request->segment(2);
-
-        // $school = School::
 
         $access = false;
         $workspace = get_current_workspace();
-
-        info('W => ' . $workspace->id);
-        info('S => ' . $school_id);
 
         if ($workspace)
         {
@@ -40,12 +31,7 @@ class CheckSchoolWorkspace
 
             $school = $workspace->schools->where('id', $school_id)->first();
 
-            info($school);
-
             if ($school)  $access = true;
-
-            // $schools_id = $workspace->schools->pluck('id')
-            // schools
         }
 
         if (!$access) {
