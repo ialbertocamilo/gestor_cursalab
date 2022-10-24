@@ -64,6 +64,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkrol' => \App\Http\Middleware\CheckRol::class,
+        'check-school-workspace' => \App\Http\Middleware\CheckSchoolWorkspace::class,
         'scope-bouncer' => \App\Http\Middleware\ScopeBouncer::class,
         'secretKey' =>\App\Http\Middleware\ApiIntegrationsMiddleware::class,
         'auth.guard' =>\App\Http\Middleware\AssignGuard::class
