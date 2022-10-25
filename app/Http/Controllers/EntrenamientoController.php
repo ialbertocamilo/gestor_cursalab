@@ -266,7 +266,7 @@ class EntrenamientoController extends Controller
         $cursos = collect($data['courses']);
         $checklist->courses()->sync($cursos->pluck('id'));
 
-        cache_clear_model(CheckList::class);
+        \Artisan::call('modelCache:clear', array('--model' => CheckList::class));
         return $this->success($checklist);
     }
 
