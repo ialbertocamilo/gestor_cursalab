@@ -66,7 +66,9 @@ class RestMeetingController extends Controller
 
         $meetings = Meeting::search($request);
 
+        // return ['data' => $meetings ];
         MeetingAppResource::collection($meetings);
+        // return ['data' => $meetings ];
 
         $result = json_decode($meetings->toJson(), true);
 
@@ -226,7 +228,7 @@ class RestMeetingController extends Controller
         // $meeting->load('type', 'host.config');
         $data = [
             // 'type' => $meeting->type,
-            'host' => $meeting->host,
+            // 'host' => $meeting->host,
             'attendants' => Attendant::getMeetingAttendantsForMeeting($meeting),
             'description' => $meeting->description,
             'name' => $meeting->name,
@@ -234,7 +236,6 @@ class RestMeetingController extends Controller
         ];
 
         return $this->success($data);
-        // $data = $request->validated();
     }
     public function uploadAttendants(MeetingAppUploadAttendantsRequest $request)
     {
