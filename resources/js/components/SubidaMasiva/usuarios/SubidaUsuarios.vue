@@ -73,14 +73,14 @@
             cambio_archivo(res){
                 this.archivo = res;
             },
-            enviar_archivo(){
+            async enviar_archivo(){
                 let validar_data = this.validar_data();
                 if(validar_data){
                     this.loading_guardar = true;
                     let data = new FormData();
                     data.append("file", this.archivo);
                     // console.log(data);
-                    axios.post('/masivos/create-update-users',data).then((res)=>{
+                    await axios.post('/masivos/create-update-users',data).then((res)=>{
                         this.loading_guardar = false;
                         const data = res.data.data;
                         if(data.errores.length > 0){
@@ -95,8 +95,9 @@
                             <li>Cantidad de usuarios creados/actualizados: ${data.datos_procesados || 0}</li>
                             <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
                         </ul>`
-                        this.enviar_alerta(message,errores);
+                        this.enviar_alerta(message);
                     }).catch(err=>{
+                        this.enviar_alerta(err.response.data.message);
                         this.loading_guardar = false;
                     });
                 }

@@ -35,9 +35,9 @@
                         </div>
                     </v-col>
                 </v-row>
-                <mUsuarios :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" :q_error="0" @download-excel-observations="downloadExcelObservations" />
-                <ActivarUsuarios :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" :q_error="0" />
-                <InactivarUsuarios :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" :q_error="0" />
+                <mUsuarios :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" @download-excel-observations="downloadExcelObservations" />
+                <ActivarUsuarios :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" />
+                <InactivarUsuarios :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" />
             </v-card-text>
         </v-card>
     </section>
@@ -86,14 +86,12 @@ export default {
         let comments = [];
         errores.forEach((error,index)=>{
             error.errors_index.forEach((error_index) => {
-                console.log(this.abc[error_index.index],error_index.index);
                 comments.push({
                     cell_name:`${this.abc[error_index.index]}${index+2}`,
                     message:error_index.message
                 });
             });
         });
-        console.log(comments);
         vue.descargarExcelwithValuesInArray({
             headers,
             values,

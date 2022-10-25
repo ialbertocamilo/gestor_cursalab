@@ -40,8 +40,7 @@ export default {
             mixin_extensiones: extensiones,
             mixin_default_media_images: default_media_images,
             abc: [
-                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "U", "V", "W", "X", "Y", "Z",
-                "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AU", "AV", "AW", "AX", "AY", "AZ",
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S","T","U", "V", "W", "X", "Y", "Z","AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AU", "AV", "AW", "AX", "AY", "AZ",
             ],
         }
     },
@@ -49,21 +48,22 @@ export default {
     methods: {
         descargarExcelwithValuesInArray({headers,values,comments,filename}){
             //values like array's of array [["name","lastname","email"],["aldo","lopez","aldo@gmail.com"]["pepe","perez","pepe@gmail.com"]]
-            values.unshift(headers);
-            const data = XLSX.utils.aoa_to_sheet(values);
-            //set comments
-            for (const comment of comments) {
-                let cell = data[comment.cell_name];
-                console.log(cell,comment.cell_name);
-                if(cell){
-                    if(!cell.c) cell.c = [];
-                    cell.c.hidden = true;
-                    cell.c.push({a:"SheetJS", t:comment.message});
+            if (window.confirm('Se han encontrado observaciones. ¿Desea descargar lista de observaciones?')) {
+                values.unshift(headers);
+                const data = XLSX.utils.aoa_to_sheet(values);
+                //set comments
+                for (const comment of comments) {
+                    let cell = data[comment.cell_name];
+                    if(cell){
+                        if(!cell.c) cell.c = [];
+                        cell.c.hidden = true;
+                        cell.c.push({a:"SheetJS", t:comment.message});
+                    }
                 }
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, data, filename);
+                XLSX.writeFile(workbook, `${filename}.xlsx`);
             }
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, data, filename);
-            XLSX.writeFile(workbook, `${filename}.xlsx`);
         },
         descargarExcelFromArray(headers, values, array, filename, confirm_text,confirm=false) {
             if ((confirm) || window.confirm(confirm_text)) {

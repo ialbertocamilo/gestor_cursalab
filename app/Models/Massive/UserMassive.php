@@ -2,6 +2,7 @@
 
 namespace App\Models\Massive;
 
+use Exception;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Criterion;
@@ -40,7 +41,10 @@ class UserMassive implements ToCollection{
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
             ->orderBy('position')
             ->get();
-        //obtenemos las cabezeras
+        //Don't count the header in the constraint, verifyConstraintMassive <- function in helpers.php
+        verifyConstraintMassive('usser_update_massive',count($rows) - 1);
+        dd('prueba');
+        //Get headers
         $this->excelHeaders = $rows[0];
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
@@ -111,10 +115,13 @@ class UserMassive implements ToCollection{
             }
         }
         //verify username and email fields are unique
-        $user_username_email =  User::where(function($q)use($user){
-            isset($user['username']) && $q->where('username',$user['username']);
-            isset($user['email']) && $q->where('email',$user['email']);
-        })->where('document','<>',$user['document'])->select('email','username')->first();
+        $user_username_email = null;
+        if(isset($user['document'])){
+            $user_username_email =  User::where(function($q)use($user){
+                isset($user['username']) && $q->where('username',$user['username']);
+                isset($user['email']) && $q->where('email',$user['email']);
+            })->where('document','<>',$user['document'])->select('email','username')->first();
+        }
         if($user_username_email ){
             if( $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
                 $has_error = true;
