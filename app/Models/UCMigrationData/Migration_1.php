@@ -201,6 +201,7 @@ class Migration_1 extends Model
         print_r("\n ya existen :: $j usuarios \n");
         $bar->finish();
     }
+
     public function setUsersDatav2(&$result, $db, $output)
     {
         $user_migrated = User::disableCache()->whereNotNull('external_id')->whereNotNull('user_relations')
@@ -877,9 +878,98 @@ class Migration_1 extends Model
         $this->makeChunkAndInsert($criterion_user, 'criterion_value_user');
     }
 
-    public function insertSegmentacionCarrerasCiclosData()
+    protected function insertSegmentacionCarrerasCiclosData()
     {
         $db = self::connect();
+
+        $direct_segmentation_type = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+        $courses = Course::disableCache()->select('id', 'external_id', 'name')->get();
+        $carreras_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'career')
+            ->select('id', 'external_id', 'criterion_id')
+            ->get();
+        $ciclos_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'cycle')
+            ->select('id', 'value_text', 'criterion_id')
+            ->get();
+        $grupos_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'grupo')
+            ->select('id', 'value_text', 'criterion_id')
+            ->get();
+
+        $curriculas = $db->getTable('curricula')
+            ->join('ciclos', 'ciclos.id', 'curricula.ciclo_id')
+            ->whereIn('curricula.carrera_id', $carreras_values->pluck('external_id')->toArray())
+            ->select('curricula.id as curricula_id', 'curricula.carrera_id', 'curricula.curso_id', 'ciclos.nombre as ciclo_nombre', 'all_criterios',
+                'curricula.created_at', 'curricula.updated_at')
+            ->limit(200)
+            ->get();
+
+        $curricula_grouped_by_course_id = $curriculas->groupBy('curso_id');
+
+        foreach ($curricula_grouped_by_course_id as $course_external_id => $curricula) {
+            $course = $courses->where('external_id', $course_external_id)->first();
+
+            if (!$course) {
+//                info("");
+                continue;
+            }
+
+            $curricula_by_carrera = $curricula->groupBy('carrera_id');
+
+            foreach ($curricula_by_carrera as $carrera_id => $curricula_carrera) {
+                $segment_criterion = collect();
+                $career = $carreras_values->where('external_id', $carrera_id)->first();
+
+                if (!$career) {
+                    info("");
+                    continue;
+                }
+
+                $ciclos = $ciclos_values->whereIn('value_text', $curricula_carrera->pluck('ciclo_nombre'));
+
+                if ($curricula_carrera->first()->all_criterios) {
+                    // TODO: Agregar todos los grupos del modulo al que pertenece el cursoc
+//                    $grupos = $grupos_values->where('external_id', $grupos_id);
+                    $grupos = [];
+                } else {
+                    $grupos_id = $db->getTable('curricula_criterio')
+                        ->where('curricula_id', $curricula_carrera->first()->curricula_id)
+                        ->pluck('criterio_id')
+                        ->toArray();
+                    $grupos = $grupos_values->where('external_id', $grupos_id);
+                    info($grupos);
+                }
+
+                $segment_criterion->push($career);
+                $segment_criterion->merge($ciclos);
+                $segment_criterion->merge($grupos);
+
+                $values = [];
+                foreach ($segment_criterion as $criterion_value) {
+                    $values[] = [
+                        'criterion_value_id' => $criterion_value->id,
+                        'criterion_id' => $criterion_value->criterion_id,
+                        'type_id' => null,
+                    ];
+                }
+
+//                info($values);
+                continue;
+
+                $segment = Segment::create([
+                    'name' => "Curricula {$curricula_carrera->first()->curricula_id} ",
+                    'model_type' => Course::class,
+                    'model_id' => $course->id,
+                    'type_id' => $direct_segmentation_type->id,
+                    'active' => ACTIVE,
+                ]);
+
+                $segment->values()->sync($values);
+            }
+
+        }
+
+
+        return;
+
 
         $default = Taxonomy::getFirstData('criterion', 'type', 'default');
 

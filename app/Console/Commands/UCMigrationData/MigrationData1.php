@@ -60,6 +60,12 @@ class MigrationData1 extends Command
             info("\n CRITERIA USERS MIGRATED");
         }
 
+        if ($type === 'curriculas') {
+            Migration_1::insertSegmentacionCarrerasCiclosData($bar);
+            $this->info("\n CURRICULAS MIGRATED");
+            info("\n CURRICULAS MIGRATED");
+        }
+
 
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
