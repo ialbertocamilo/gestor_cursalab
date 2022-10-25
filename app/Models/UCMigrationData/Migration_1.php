@@ -1137,7 +1137,7 @@ class Migration_1 extends Model
                         ->whereRelation('criterion', 'code', 'modulo')
                         ->first();
 
-                    info("El usuario {$user->id} tiene el criterion_value {$wrong_sub_workspace_value->id} y se le va a cambiar por {$correct_sub_workspace_value->id}");
+                    info("El usuario {$user->id} tiene el criterion_value {$wrong_sub_workspace_value->id} y se le va a cambiar por {$correct_sub_workspace_value}");
 
                     DB::table('criterion_value_user')
                         ->where('user_id', $user->id)
