@@ -29,7 +29,7 @@ class MassiveUploadTopicGrades implements ToCollection
     public mixed $evaluation_type;
     public mixed $topics = [];
     public mixed $topic_states = null;
-
+    private $updated_users_id = [];
     public function __construct($data)
     {
         $this->evaluation_type = $data['evaluation_type'];
@@ -53,6 +53,7 @@ class MassiveUploadTopicGrades implements ToCollection
 
 
         for ($i = 1; $i < $count; $i++) {
+            \Log::channel('soporte_log')->info("Inicio");
             $document_user = $excelData[$i][0];
             $grade = $excelData[$i][1];
             if(!$document_user){
@@ -106,7 +107,9 @@ class MassiveUploadTopicGrades implements ToCollection
 //            info("TOPICS ID::");
 //            info($topics->pluck('id')->toArray());
             $this->uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData[$i]);
+            \Log::channel('soporte_log')->info("Fin");
         }
+        Summary::updateUsersByCourse($this->course,$this->updated_users_id);
     }
 
     public function uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData)
@@ -176,13 +179,14 @@ class MassiveUploadTopicGrades implements ToCollection
             }
         }
 
-        // if ($a_topic_was_created) {
-        //     SummaryCourse::getCurrentRowOrCreate($this->course, $user);
-        //     SummaryCourse::updateUserData($this->course, $user, update_attempts: false);
+        if ($a_topic_was_created) {
+            $this->updated_users_id[] = $user->id;
+            // SummaryCourse::getCurrentRowOrCreate($this->course, $user);
+            // SummaryCourse::updateUserData($this->course, $user, update_attempts: false);
 
-        //     SummaryUser::getCurrentRowOrCreate($user, $user);
-        //     SummaryUser::updateUserData($user);
-        // }
+            // SummaryUser::getCurrentRowOrCreate($user, $user);
+            // SummaryUser::updateUserData($user);
+        }
     }
 
     public function storeSummaryTopic($topic, $user, $data)
