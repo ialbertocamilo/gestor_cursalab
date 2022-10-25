@@ -8,9 +8,11 @@ use App\Http\Resources\VademecumCategoriaResource;
 use App\Http\Resources\VademecumResource;
 use App\Models\Abconfig;
 use App\Models\Criterion;
+use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\Taxonomy;
 use App\Models\Vademecum;
+use App\Models\Workspace;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -47,7 +49,7 @@ class VademecumController extends Controller
      */
     public function getListSelects()
     {
-        $modules = Criterion::getValuesForSelect('module');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
         $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
 
         return $this->success(get_defined_vars());
@@ -63,8 +65,7 @@ class VademecumController extends Controller
     {
 
         $vademecum = Vademecum::search($request);
-
-        $modules = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
         $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
         $subcategories = [];
 
@@ -87,7 +88,7 @@ class VademecumController extends Controller
      */
     public function create()
     {
-        $modules = Criterion::getValuesForSelect('module');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
         $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
         $subcategories = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
 
@@ -131,9 +132,9 @@ class VademecumController extends Controller
 
         $vademecum->scorm = $vademecum->media->file ?? null;
 
-        $modulos = Criterion::getValuesForSelect('module');
-        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        $subcategorias = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
+        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        $subcategories = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
 
         return $this->success(get_defined_vars());
     }

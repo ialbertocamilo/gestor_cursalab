@@ -41,7 +41,6 @@ class Vademecum extends Model
 
     --------------------------------------------------------------------------*/
 
-
     public function modules()
     {
         return $this->belongsToMany(
@@ -77,7 +76,6 @@ class Vademecum extends Model
         Attributes
 
     --------------------------------------------------------------------------*/
-
 
     public function setActiveAttribute($value)
     {
@@ -126,9 +124,11 @@ class Vademecum extends Model
 
             $relationships = [
                 'modules' => function ($q) use ($request) {
-                    if ($request->module_id)
-                        $q->where('id', $request->module_id);
-                },
+                    if ($request->module_id) {
+                        $workspace = Workspace::find($request->module_id);
+                        $q->where('module_id', $workspace->criterion_value_id);
+                    }
+                 },
                 'subcategory',
                 'category',
                 'media',
@@ -151,14 +151,15 @@ class Vademecum extends Model
         if ($request->q)
             $query->where('name', 'like', "%{$request->q}%");
 
-        if ($request->module_id)
+        if ($request->module_id) {
+
             $query->whereHas('modules', function ($q) use ($request) {
-                $q->where('id', $request->modulo_id);
+                $q->where('module_id', $request->module_id);
             });
+        }
 
         if ($request->active)
             $query->where('active', $request->active);
-
 
         if ($api) {
 
