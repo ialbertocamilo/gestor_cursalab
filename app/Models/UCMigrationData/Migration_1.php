@@ -1134,7 +1134,7 @@ class Migration_1 extends Model
                 foreach ($users_chunked as $user) {
                     $correct_sub_workspace_value = $user->subworkspace->criterion_value_id;
                     $wrong_sub_workspace_value = $user->criterion_values()
-                        ->whereRelation('criterion', 'code', 'modulo')
+                        ->whereRelation('criterion', 'code', 'module')
                         ->first();
 
                     info("El usuario {$user->id} tiene el criterion_value {$wrong_sub_workspace_value->id} y se le va a cambiar por {$correct_sub_workspace_value}");
