@@ -70,6 +70,7 @@ class restablecer_funcionalidad extends Command
         $user_id = $this->argument("user_id");
         $document_criterion = Criterion::where('code', 'document')->first();
 
+
         $users_count = User::query()
             ->when(!$user_id, function ($q) {
                 $q->whereDoesntHave('criterion_values', function ($q) {
