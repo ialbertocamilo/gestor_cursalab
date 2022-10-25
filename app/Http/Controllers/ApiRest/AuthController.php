@@ -64,7 +64,7 @@ class AuthController extends Controller
         // Stop login to users from specific workspaces 
         $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
-        if ($user->subworkspace_id == 28 AND $user->external_id)
+        if ($user->subworkspace_id == 29 AND $user->external_id)
             return $this->error("Usuario inactivo temporalmente. Migración en progreso.", http_code: 401);
 
         if (!$user->active)
