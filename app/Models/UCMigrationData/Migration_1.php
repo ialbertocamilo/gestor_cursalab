@@ -1139,10 +1139,14 @@ class Migration_1 extends Model
 
                     info("El usuario {$user->id} tiene el criterion_value {$wrong_sub_workspace_value->id} y se le va a cambiar por {$correct_sub_workspace_value}");
 
-                    DB::table('criterion_value_user')
+                    $row = DB::table('criterion_value_user')
                         ->where('user_id', $user->id)
-                        ->where('criterion_value_id', $wrong_sub_workspace_value)
-                        ->update(['criterion_value_id' => $correct_sub_workspace_value]);
+                        ->where('criterion_value_id', $wrong_sub_workspace_value->id)
+                        ->first();
+
+//                        ->update(['criterion_value_id' => $correct_sub_workspace_value]);
+
+                    info($row);
                 }
 
             });
