@@ -66,6 +66,12 @@ class MigrationData1 extends Command
             info("\n CURRICULAS MIGRATED");
         }
 
+        if ($type === 'fix_subworkspace_relation'){
+            Migration_1::fixSubworkpsaceIdUsers($bar);
+            $this->info("\n fixSubworkpsaceIdUsers MIGRATED");
+            info("\n fixSubworkpsaceIdUsers MIGRATED");
+        }
+
 
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());

@@ -1082,4 +1082,69 @@ class Migration_1 extends Model
             $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $criterion_value->id ?? $criterion_value];
         }
     }
+
+    protected function fixSubworkpsaceIdUsers($bar)
+    {
+
+        /*
+         select
+            cvu.user_id,
+                    u.name,
+                    u.document,
+                    w.name as modulo_sub,
+                    u.subworkspace_id,
+
+            c.name criterion_name,
+            cv.value_text
+        from
+            users u
+                inner join workspaces w on w.id = u.subworkspace_id
+                inner join criterion_value_user cvu on cvu.user_id = u.id
+                inner join criterion_values cv on cv.id = cvu.criterion_value_id
+                inner join criteria c on c.id = cv.criterion_id and criterion_id = 1
+        where
+            w.criterion_value_id <> cv.id
+
+         order by cv.id;
+         */
+        $temp = [];
+
+        $subworkspaces = Workspace::whereNotNull('parent_id')->select('id', 'parent_id')->get();
+        $users = User::with('subworkspace:id,criterion_value_id')
+            ->select('id', 'external_id')
+            ->whereIn('document', ["46433433", "42247612", "46565943", "44330661", "46887809", "42741364", "40597411", "28308031",
+                "29352756", "32906236", "19097673", "10837066", "47513408", "15451095", "46206350", "12345678", "75663555", "05070324",
+                "45060159", "72891715", "70773655", "08347556", "71572018", "47862484", "10616934", "40424512", "43803826", "45744664",
+                "46049224", "47592776", "10731959", "74254235", "40517832", "41659279", "44044164", "07637425", "45553468", "48338391",
+                "70231669", "42219757", "41581150", "47108286", "47452220", "76141781", "47573998", "70105227", "73207776", "47831934",
+                "40767297", "44176799", "48000944", "43548565", "74893711", "02664328", "73180221", "80019474", "46999044", "46273667",
+                "10627213", "47409571", "47133565", "44477935", "75281810", "72692589", "73518166", "72260598", "43832960", "76591670",
+                "70585847", "41736644", "46162402", "76149320", "43921575", "70158566", "48423715", "07642898", "74990343", "47047503",
+                "47181011", "72860795", "75911233", "10614358", "76436084", "77054697", "75151181", "46894486", "71522997", "00000001",
+                "77160728", "48684317", "76306261", "45601256", "10549769", "09537241", "11223344", "47732319", "75387687", "48110606",
+                "46902369", "77226368", "75169793", "47020692", "76247389", "72921929", "44180295", "46481548", "70565193", "77867069",
+                "32836810", "70972433", "70978430", "43511255", "46264965", "46969409", "42260942", "73238982", "45517931", "45731902",
+                "45617421", "71003619", "75998526", "46668255", "25829447", "42212145", "42642909", "48986495", "44814865", "44538161",
+                "43881654", "47042869", "73120320", "41246507", "72932141", "46011932", "42626031", "45642286", "75581472", "48238488",
+                "70036718", "75338751", "71608937", "77293698", "70168069", "70363934", "46011926", "42128916", "72226569", "76001082",
+                "47875138", "45990845", "45944034", "73062738", "46652379", "10340111", "45031869", "10443321", "76448275", "47011955",
+                "62768481"])
+            ->chunkById(200, function ($users_chunked) {
+
+                foreach ($users_chunked as $user) {
+                    $correct_sub_workspace_value = $user->subworkspace->criterion_value_id;
+                    $wrong_sub_workspace_value = $user->criterion_values()
+                        ->whereRelation('criterion', 'code', 'modulo')
+                        ->first();
+
+                    info("El usuario {$user->id} tiene el criterion_value {$wrong_sub_workspace_value?->id} y se le va a cambiar por {$correct_sub_workspace_value->id}");
+
+//                    DB::table('criterion_value_user')
+//                        ->where('user_id', $user->id)
+//                        ->where('criterion_value_id', $wrong_sub_workspace_value)
+//                        ->update(['criterion_value_id' => $correct_sub_workspace_value]);
+                }
+
+            });
+    }
 }
