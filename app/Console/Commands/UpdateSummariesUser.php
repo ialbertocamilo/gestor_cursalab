@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\SummaryCourse;
 use App\Models\SummaryUser;
 use Illuminate\Console\Command;
 
@@ -28,6 +29,10 @@ class UpdateSummariesUser extends Command
      */
     public function handle()
     {
+
+        $this->info(" Inicio: " . now());
+        info(" Inicio: " . now());
+
         $summary_users = SummaryUser::with('user')->get();
 //        $summary_users = SummaryUser::with('user')
 //            ->where('user_id', 27660)->get();
@@ -39,10 +44,21 @@ class UpdateSummariesUser extends Command
 
         foreach ($summary_users as $summary_user){
 
+            $user = $summary_user->user;
+
+            $summaries_courses = SummaryCourse::withWhereHas('course')->where('user_id', $user->id)->get();
+
+            foreach ($summaries_courses as $summary_course)
+                SummaryCourse::updateUserData($summary_course->course, $user, update_attempts: false);
+
             SummaryUser::updateUserData($summary_user->user);
 
             $bar->advance();
         }
         $bar->finish();
+
+
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
     }
 }

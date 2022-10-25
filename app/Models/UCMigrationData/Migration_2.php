@@ -17,6 +17,20 @@ class Migration_2 extends Model
 {
     const CHUNK_LENGTH = 5000;
 
+    const MODULOS_EQUIVALENCIA = [
+        4 => '26', // Mifarma
+        5 => '27', // Inkafarma,
+        6 => '28' // Capacitacion FP
+    ];
+
+    private mixed $uc_workspace;
+
+    public function __construct()
+    {
+        $this->uc_workspace = Workspace::where('slug', "farmacias-peruanas")->first();
+        $this->db = self::connect();
+    }
+
     protected function connect()
     {
         $db_uc_data = config('database.connections.mysql_uc');
@@ -24,39 +38,151 @@ class Migration_2 extends Model
         return new OTFConnection($db_uc_data);
     }
 
-    public function insertChunkedData($data, $table_name)
+    public function insertChunkedData($data, $table_name, $output)
     {
+        $output->info($table_name);
+
+        $bar = $output->createProgressBar(count($data));
+        $bar->start();
+
         foreach ($data as $chunk) {
+            $bar->advance();
             DB::table($table_name)->insert($chunk);
         }
+
+        $bar->finish();
+        $output->newLine();
+
     }
 
-    public function makeChunkAndInsert($data, $table_name)
+    public function makeChunkAndInsert($data, $table_name, $output)
     {
         $chunk = array_chunk($data, self::CHUNK_LENGTH, true);
 
-        $this->insertChunkedData($chunk, $table_name);
+        $this->insertChunkedData($chunk, $table_name, $output);
     }
 
-    protected function migrateEscuelas()
+    protected function migrateEscuelas($output)
     {
-        $escuelas_data = self::setEscuelasData();
+        $escuelas_data = self::setEscuelasData($output);
 
-        self::insertEscuelasData($escuelas_data);
+        self::insertEscuelasData($escuelas_data, $output);
     }
 
-    protected function migrateCursos()
+    protected function migrateEscuelasNombre($output)
     {
-        $cursos_data = self::setCursosData();
 
-        self::insertCursosData($cursos_data);
+        $db = self::connect();
+
+        $schools = School::disableCache()->whereNotNull('external_id')->get();
+        $categorias = $db->getTable('categorias')
+            ->select('id', 'config_id')
+            ->get();
+
+        $bar = $output->createProgressBar($categorias->count());
+        $output->info("UPDATE SCHOOLS NAME");
+        $bar->start();
+
+        foreach ($schools as $school) {
+            $bar->advance();
+
+            $categoria = $categorias->where('id', $school->external_id)->first();
+
+            if ($categoria) {
+                $name = "M{$categoria->config_id}-$school->name";
+                $school->update([
+                    'name' => $name,
+                ]);
+            }
+        }
+
+        $bar->finish();
+        $output->newLine();
     }
 
-    protected function migrateTemas()
-    {
-        $temas_data = self::setTemasData();
+    protected function migrateCursosNombre($output){
+        $db = self::connect();
 
-        self::insertTemasData($temas_data);
+        $courses = Course::disableCache()->whereNotNull('external_id')->get();
+        $cursos = $db->getTable('cursos')
+            ->select('id', 'config_id')
+            ->get();
+
+        $bar = $output->createProgressBar($cursos->count());
+        $output->info("UPDATE COURSES NAME");
+        $bar->start();
+
+        foreach ($courses as $course) {
+            $bar->advance();
+
+            $curso = $cursos->where('id', $course->external_id)->first();
+
+            if ($curso) {
+                $name = "M{$curso->config_id}-$course->name";
+                $course->update([
+                    'name' => $name,
+                ]);
+            }
+        }
+
+        $bar->finish();
+        $output->newLine();
+    }
+
+    protected function migrateCursos($output)
+    {
+        $cursos_data = self::setCursosData($output);
+
+        self::insertCursosData($cursos_data, $output);
+    }
+
+    protected function migrateTemas($output)
+    {
+        $temas_data = self::setTemasData($output);
+
+        self::insertTemasData($temas_data, $output);
+    }
+
+    protected function migrateMediaTopics($output)
+    {
+        $db = self::connect();
+
+        $media_temas = $db->getTable('media_temas')->get();
+
+        $topics = Topic::disableCache()->whereNotNull('external_id')->select('id')->get();
+        $data = [];
+        $bar = $output->createProgressBar($media_temas->count());
+        $bar->start();
+
+        foreach ($media_temas as $media) {
+            $bar->advance();
+
+            $topic = $topics->where('external_id', $media->tema_id)->first();
+
+            if (!$topic) {
+                info("[migrateMediaTopics] No se encuentra el media_tema_id-{$media->tema_id} en los temas migrados");
+                continue;
+            }
+
+            $data[] = [
+                'topic_id' => $media->tema_id,
+
+                'title' => $media->nombre,
+                'value' => $media->valor,
+
+                'type_id' => $media->tipo,
+                'embed' => $media->embed,
+                'downloadable' => $media->descarga,
+                'position' => $media->orden,
+
+                'created_at' => $media->created_at,
+                'updated_at' => $media->updated_at,
+            ];
+        }
+        $bar->finish();
+        $output->newLine();
+
+        $this->makeChunkAndInsert($data, 'media_topics', $output);
     }
 
     protected function migrateCurricula()
@@ -65,23 +191,29 @@ class Migration_2 extends Model
         self::insertCurriculaData();
     }
 
-    protected function setEscuelasData()
+    protected function setEscuelasData($output)
     {
         $db = self::connect();
 
         $categorias = $db->getTable('categorias')
             ->select(
-                'id', 'nombre', 'descripcion', 'imagen', 'orden',
+                'id', 'config_id', 'nombre', 'descripcion', 'imagen', 'orden',
                 'plantilla_diploma', 'reinicios_programado',
                 'estado', 'created_at', 'updated_at')
             ->get();
         $data = [];
 
+        $bar = $output->createProgressBar($categorias->count());
+        $bar->start();
+
         foreach ($categorias as $escuela) {
-            $data[] = [
+            $bar->advance();
+            $name = "M{$escuela->config_id}-$escuela->nombre";
+
+            $data['schools'][] = [
                 'external_id' => $escuela->id,
 
-                'name' => $escuela->nombre,
+                'name' => $name,
                 'description' => $escuela->descripcion,
 
                 'imagen' => $escuela->imagen,
@@ -96,31 +228,44 @@ class Migration_2 extends Model
                 'updated_at' => $escuela->updated_at,
             ];
         }
+        $bar->finish();
+        $output->newLine();
 
         return $data;
     }
 
-    protected function insertEscuelasData($data)
+    protected function insertEscuelasData($data, $output)
     {
-        $this->makeChunkAndInsert($data, 'schools');
+        $this->makeChunkAndInsert($data['schools'] ?? [], 'schools', $output);
 
+        $uc_workspace = $this->uc_workspace;
+        $schools = School::disableCache()->whereNotNull('external_id')->get();
+        $school_workspace = [];
 
+        foreach ($schools as $school)
+            $school_workspace[] = ['school_id' => $school->id, 'workspace_id' => $uc_workspace->id];
+
+        $this->makeChunkAndInsert($school_workspace, 'school_workspace', $output);
     }
 
-    protected function setCursosData()
+    protected function setCursosData($output)
     {
         $db = self::connect();
 
         $cursos = $db->getTable('cursos')
             ->select(
-                'id', 'nombre', 'descripcion', 'imagen', 'orden',
+                'id', 'config_id', 'nombre', 'descripcion', 'imagen', 'orden',
                 'plantilla_diploma', 'reinicios_programado', 'c_evaluable', 'libre',
                 'categoria_id', 'requisito_id',
                 'estado', 'created_at', 'updated_at')
             ->get();
-        $data = [];
 
+        $data = [];
+        $bar = $output->createProgressBar($cursos->count());
+        $bar->start();
         foreach ($cursos as $curso) {
+            $bar->advance();
+
             if ($curso->requisito_id):
 
                 $data['curso_requisitos'][] = [
@@ -153,19 +298,21 @@ class Migration_2 extends Model
                 'updated_at' => $curso->updated_at,
             ];
         }
+        $bar->finish();
+        $output->newLine();
 
         return $data;
     }
 
-    protected function insertCursosData($data)
+    protected function insertCursosData($data, $output)
     {
-        $this->makeChunkAndInsert($data['cursos'], 'courses');
+        $this->makeChunkAndInsert($data['cursos'] ?? [], 'courses', $output);
 
-        $schools = School::all();
-        $courses = Course::all();
+        $schools = School::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
+        $courses = Course::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
 
         $course_school = [];
-        foreach ($data['escuela_curso'] as $relation) {
+        foreach ($data['escuela_curso'] ?? [] as $relation) {
             $course = $courses->where('external_id', $relation['curso_id'])->first();
             $school = $schools->where('external_id', $relation['escuela_id'])->first();
 
@@ -173,10 +320,11 @@ class Migration_2 extends Model
                 $course_school[] = ['course_id' => $course->id, 'school_id' => $school->id];
 
         }
-        $this->makeChunkAndInsert($course_school, 'course_school');
+        $this->makeChunkAndInsert($course_school, 'course_school', $output);
+
 
         $course_requirements = [];
-        foreach ($data['curso_requisitos'] as $relation) {
+        foreach ($data['curso_requisitos'] ?? [] as $relation) {
             $course = $courses->where('external_id', $relation['curso_id'])->first();
             $course_requirement = $courses->where('external_id', $relation['curso_requisito_id'])->first();
 
@@ -189,23 +337,21 @@ class Migration_2 extends Model
                 ];
             }
         }
-        $this->makeChunkAndInsert($course_requirements, 'requirements');
+        $this->makeChunkAndInsert($course_requirements, 'requirements', $output);
 
-        $uc_workspace = Workspace::where('slug', 'universidad-corporativa')->first();
-        $courses = Course::all();
+
+        $uc_workspace = $this->uc_workspace;
         $course_workspace = [];
-
         foreach ($courses as $course) {
             $course_workspace[] = [
                 'workspace_id' => $uc_workspace->id,
                 'course_id' => $course->id,
             ];
         }
-
-        $this->makeChunkAndInsert($course_workspace, 'course_workspace');
+        $this->makeChunkAndInsert($course_workspace, 'course_workspace', $output);
     }
 
-    protected function setTemasData()
+    protected function setTemasData($output)
     {
         $db = self::connect();
 
@@ -215,13 +361,17 @@ class Migration_2 extends Model
                 'contenido', 'tipo_ev', 'evaluable', 'curso_id', 'requisito_id',
                 'estado', 'created_at', 'updated_at')
             ->get();
-        $courses = Course::all();
+        $courses = Course::disableCache()->select('id', 'external_id')->get();
         $data = [];
 
         $topic_open_evaluations_type = Taxonomy::getFirstData('topic', 'evaluation-type', 'open');
         $topic_qualified_evaluations_type = Taxonomy::getFirstData('topic', 'evaluation-type', 'qualified');
 
+        $bar = $output->createProgressBar($temas->count());
+        $bar->start();
         foreach ($temas as $tema) {
+            $bar->advance();
+
             $course = $courses->where('external_id', $tema->curso_id)->first();
 
             if ($course):
@@ -229,7 +379,9 @@ class Migration_2 extends Model
 
                     $data['tema_requisitos'][] = [
                         'tema_id' => $tema->id,
-                        'tema_requisito_id' => $tema->requisito_id
+                        'tema_requisito_id' => $tema->requisito_id,
+                        'created_at' => $tema->created_at,
+                        'updated_at' => $tema->updated_at,
                     ];
 
                 endif;
@@ -258,13 +410,15 @@ class Migration_2 extends Model
                 ];
             endif;
         }
+        $bar->finish();
+        $output->newLine();
 
         return $data;
     }
 
-    protected function insertTemasData($data)
+    protected function insertTemasData($data, $output)
     {
-        $this->makeChunkAndInsert($data['temas'], 'topics');
+        $this->makeChunkAndInsert($data['temas'], 'topics', $output);
 
         $topics = Topic::all();
         $topic_requirements = [];
@@ -278,11 +432,14 @@ class Migration_2 extends Model
                     'model_type' => Topic::class,
                     'model_id' => $topic->id,
                     'requirement_type' => Topic::class,
-                    'requirement_id' => $topic_requirement->id
+                    'requirement_id' => $topic_requirement->id,
+                    'created_at' => $relation['created_at'],
+                    'updated_at' => $relation['updated_at'],
                 ];
             }
         }
-        $this->makeChunkAndInsert($topic_requirements, 'requirements');
+
+        $this->makeChunkAndInsert($topic_requirements, 'requirements', $output);
     }
 
     public function insertCurriculaData()

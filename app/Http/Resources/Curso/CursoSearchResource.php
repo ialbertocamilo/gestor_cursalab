@@ -25,7 +25,7 @@ class CursoSearchResource extends JsonResource
 
         $schools = $this->schools->pluck('name')->toArray();
 
-        info($schools);
+        // info($schools);
 
         return [
             'id' => $this->id,

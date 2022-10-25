@@ -27,4 +27,4 @@ Route::controller(EscuelaController::class)->group(function () {
 });
 
 // CURSOS
-Route::prefix('{school}/cursos')->group(base_path('routes/cms/cursos.php'));
+Route::prefix('{school}/cursos')->middleware('check-school-workspace')->group(base_path('routes/cms/cursos.php'));
