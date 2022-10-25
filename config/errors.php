@@ -10,4 +10,6 @@ return [
         'stand-by' => '#767676',
         '' => '',
     ],
+
+    'maintenance_message' => 'Estamos actualizando la plataforma, puedes volver a ingresar este Lunes desde las 10am.'
 ];

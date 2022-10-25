@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SummaryCourse extends Summary
 {
@@ -12,6 +13,7 @@ class SummaryCourse extends Summary
     protected $fillable = [
         'last_time_evaluated_at', 'user_id', 'course_id', 'status_id', 'assigned', 'attempts',
         'views', 'advanced_percentage', 'grade_average', 'passed', 'taken', 'reviewed', 'failed',
+        'old_admin_id',
         'completed', 'restarts', 'restarter_id', 'certification_issued_at',
     ];
 
@@ -52,8 +54,13 @@ class SummaryCourse extends Summary
     ): void
     {
 
+        // Get "Desaprobado" status from taxonomies
+
+        $desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+
+
         $query = self::where('course_id', $courseId)
-            ->where('passed', 0)
+            ->where('status_id', $desaprobado->id)
             ->where('attempts', '>=', $attemptsLimit);
 
         if ($scheduleDate)
@@ -255,5 +262,67 @@ class SummaryCourse extends Summary
         // info($row_course);
 
         return $row_course;
+    }
+
+    /**
+     * Calculate totals from summary coourse statuses,
+     * including only users from supervisor
+     *
+     * @param $supervisorId
+     * @param $workspaceId
+     * @return array
+     */
+    public static function calculateSupervisorCoursesTotals($supervisorId, $workspaceId): array
+    {
+        // Load users ids which matches criterion values
+
+        $usersIds = Segment::loadSupervisorSegmentUsersIds($supervisorId, $workspaceId);
+
+        if (count($usersIds) === 0) return [];
+
+        // Courses statuses from database
+
+        $aprobado = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+        $desarrollo = Taxonomy::getFirstData('course', 'user-status', 'desarrollo');
+        $desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+        $encuestaPend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
+
+        // Calculate courses totals
+
+        $courseTotals = [];
+        if (count($usersIds)) {
+            $_usersIds = implode(',', $usersIds);
+            $courseTotals = DB::select(DB::raw("
+                select
+                    sum(if(sc.status_id = :aprobadoId, 1, 0)) aprobados,
+                    sum(if(sc.status_id = :desarrolloId, 1, 0)) desarrollados,
+                    sum(if(sc.status_id = :desaprobadoId, 1, 0)) desaprobados,
+                    sum(if(sc.status_id = :encuestaPendId, 1, 0)) encuestaPend
+
+                from
+                    users u
+                        inner join summary_courses sc on sc.user_id = u.id
+                where
+                    sc.deleted_at is null and
+                    u.id in ($_usersIds)
+            "), [
+                    'aprobadoId' => $aprobado->id,
+                    'desarrolloId' => $desarrollo->id,
+                    'desaprobadoId' => $desaprobado->id,
+                    'encuestaPendId' => $encuestaPend->id
+                ]);
+        }
+
+        // Count active users
+
+        $activeUsers = User::query()
+            ->where('active', 1)
+            ->whereIn('id', $usersIds)
+            ->count();
+
+        return [
+            'courses' => $courseTotals,
+            'users' => $activeUsers
+        ];
     }
 }

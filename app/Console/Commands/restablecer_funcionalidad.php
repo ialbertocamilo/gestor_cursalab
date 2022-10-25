@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Curso;
 use App\Models\Posteo;
 use App\Models\Prueba;
@@ -11,6 +12,7 @@ use App\Models\Abconfig;
 use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\UsuarioCurso;
+use App\Models\CriterionValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiRest\RestAvanceController;
@@ -52,9 +54,38 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_estado_tema_2();
         // $this->restablecer_matricula();
         // $this->restablecer_preguntas();
-        $this->restoreCriterionValues();
+        // $this->restoreCriterionValues();
+        $this->restoreCriterionDocument();
     }
-
+    public function restoreCriterionDocument(){
+        $document_criterion = Criterion::where('code', 'document')->first();
+        $criterionValues = CriterionValue::where('criterion_id',$document_criterion->id)->select('value_text')->get()->pluck('value_text');
+        User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
+            ->select('id', 'document', 'subworkspace_id')
+            ->whereNotIn('document',$criterionValues)
+            ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
+                $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
+                    ->whereIn('value_text', $users_chunked->pluck('document')->toArray())->get();
+                $bar = $this->output->createProgressBar($users_chunked->count());
+                $bar->start();
+                foreach ($users_chunked as $user) {
+                    $document_value = $document_values->where('value_text', $user->document)->first();
+                    if(!$document_value){
+                        $criterion_value_data = [
+                            'value_text' => $user->document,
+                            'criterion_id' => $document_criterion?->id,
+                            'workspace_id' => $user->subworkspace?->parent?->id,
+                            'active' => ACTIVE
+                        ];
+                        $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
+    
+                        $user->criterion_values()->syncWithoutDetaching([$document?->id]);
+                    }
+                    $bar->advance();
+                }
+                $bar->finish();
+            });
+    }
     public function restoreCriterionValues()
     {
         $criteria = Criterion::with('values')

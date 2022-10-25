@@ -39,6 +39,9 @@ class SupervisorController extends Controller
                 $query->where('parent_id', $request->workspace);
         });
 
+        if ($request->has('q'))
+            $data->filterText($request->q);
+
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
@@ -88,9 +91,10 @@ class SupervisorController extends Controller
     {
         $data = $request->all();
 
-        $users_id = array_column($data, 'id');
+//        $users_id = array_column($data, 'id');
+        $user_documents = array_column($data, 'document');
 
-        $users = User::with('subworkspace.module_criterion_value')->whereIn('id', $users_id)->get();
+        $users = User::with('subworkspace.module_criterion_value')->whereIn('document', $user_documents)->get();
 
         UserRelationship::setUsersAsSupervisor($users);
 
