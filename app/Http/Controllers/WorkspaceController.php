@@ -11,6 +11,7 @@ use App\Http\Resources\SubWorkspaceResource;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\Media;
+use App\Models\SegmentValue;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
 
@@ -76,6 +77,14 @@ class WorkspaceController extends Controller
         // Load criteria
 
         $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+
+        foreach ($workspace['criteria'] as $wk_crit) {
+            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
+            $in_segment_list = $in_segment->pluck('id')->all();
+            $wk_crit->its_used = false;
+            if (count($in_segment_list))
+                $wk_crit->its_used = true;
+        }
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
