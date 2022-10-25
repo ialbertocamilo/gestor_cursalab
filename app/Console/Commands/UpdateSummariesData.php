@@ -56,12 +56,13 @@ class UpdateSummariesData extends Command
                 $courses = Course::whereIn('id', $course_ids)->get();
 
                 foreach ($courses as $course) {
+                    SummaryCourse::getCurrentRowOrCreate($course, $user);
                     SummaryCourse::updateUserData($course, $user, false);
                 }
             } 
 
             if ($user->summary_user_update) {
-
+                SummaryUser::getCurrentRowOrCreate($user, $user);
                 SummaryUser::updateUserData($user);
             }
 
