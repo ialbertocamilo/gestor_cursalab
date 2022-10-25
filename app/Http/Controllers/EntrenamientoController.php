@@ -21,6 +21,7 @@ use App\Imports\ChecklistImport;
 use App\Models\Course;
 use App\Models\Taxonomy;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Str;
 use function foo\func;
 
@@ -266,7 +267,7 @@ class EntrenamientoController extends Controller
         $cursos = collect($data['courses']);
         $checklist->courses()->sync($cursos->pluck('id'));
 
-        \Artisan::call('modelCache:clear', array('--model' => CheckList::class));
+        cache_clear_model(Workspace::class);
         return $this->success($checklist);
     }
 
