@@ -238,13 +238,15 @@ class EntrenamientoController extends Controller
 
     public function guardarChecklist(Request $request)
     {
+        $workspace = get_current_workspace();
         $data = $request->all();
         $checklist = CheckList::updateOrCreate(
             ['id' => $data['id']],
             [
                 'title' => $data['title'],
                 'description' => $data['description'],
-                'active' => $data['active']
+                'active' => $data['active'],
+                'workspace_id' => $workspace->id
             ]
         );
 
@@ -267,7 +269,6 @@ class EntrenamientoController extends Controller
         $cursos = collect($data['courses']);
         $checklist->courses()->sync($cursos->pluck('id'));
 
-        cache_clear_model(Workspace::class);
         return $this->success($checklist);
     }
 
