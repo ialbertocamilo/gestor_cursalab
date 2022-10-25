@@ -10,7 +10,7 @@ use App\Http\Requests\Meeting\MeetingAppUploadhAttendantsRequest;
 use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
 use App\Http\Resources\MeetingAppResource;
 use App\Http\Resources\MeetingResource;
-use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Http\Resources\Meeting\MeetingAppSearchAttendantsResource;
 use App\Models\Abconfig;
 use App\Models\Attendant;
 use App\Models\Criterio;
@@ -171,7 +171,6 @@ class RestMeetingController extends Controller
     public function getFormData(Request $request)
     {
         $subworkspace = auth()->user()->subworkspace;
-        // $modulos = Workspace::loadSubWorkspaces(['id','name as nombre']);
         $modulos = Workspace::loadSubWorkspacesSiblings($subworkspace, ['id','name as nombre']);
         $user_types = Taxonomy::getData('meeting', 'user')->pluck('code', 'id');
 
@@ -185,8 +184,10 @@ class RestMeetingController extends Controller
     {
         $data = $request->validated();
 
+        # set workspace id
         $subworkspace = auth()->user()->subworkspace;
         $data['workspace_id'] = $subworkspace->parent_id;
+        # set workspace id
 
         $meeting = Meeting::storeRequest($data);
 
@@ -198,8 +199,11 @@ class RestMeetingController extends Controller
     public function update(Meeting $meeting, MeetingAppRequest $request)
     {
         $data = $request->validated();
+
+        # set workspace id
         $subworkspace = auth()->user()->subworkspace;
         $data['workspace_id'] = $subworkspace->parent_id;
+        # set workspace id
 
         Meeting::storeRequest($data, $meeting);
 
@@ -220,27 +224,29 @@ class RestMeetingController extends Controller
     public function getDuplicatedData(Meeting $meeting)
     {
         // $meeting->load('type', 'host.config');
-
         $data = [
             // 'type' => $meeting->type,
-            // 'host' => $meeting->host,
+            'host' => $meeting->host,
             'attendants' => Attendant::getMeetingAttendantsForMeeting($meeting),
             'description' => $meeting->description,
+            'name' => $meeting->name,
+            'duration' => $meeting->duration,
         ];
 
         return $this->success($data);
-    $data = $request->validated();
+        // $data = $request->validated();
     }
     public function uploadAttendants(MeetingAppUploadAttendantsRequest $request)
     {
         $data = $request->validated();
-        // data['usuarios_dni'] = Attendant::getUsuariosDniFromExcel($data);
 
-        $subworkspace = auth()->user()->subworkspace;
-        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+        # get subworkspaces ids
+        $workspace = Workspace::find(auth()->user()->subworkspace->parent_id);
+        $data['config_id'] = $workspace->subworkspaces->pluck('id');
+        # get subworkspaces ids
 
         $attendants = Attendant::searchAttendants($data);
-        $attendants = MeetingSearchAttendantsResource::collection($attendants);
+        $attendants = MeetingAppSearchAttendantsResource::collection($attendants);
 
         Attendant::filterEmptyMeetingInvitations($attendants);
 
@@ -251,12 +257,13 @@ class RestMeetingController extends Controller
     {
         $data = $request->validated();
 
-
-        $subworkspace = auth()->user()->subworkspace;
-        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+        # get subworkspaces ids
+        $workspace = Workspace::find(auth()->user()->subworkspace->parent_id);
+        $data['config_id'] = $workspace->subworkspaces->pluck('id');
+        # get subworkspaces ids
 
         $attendants = Attendant::searchAttendants($data);
-        $attendants = MeetingSearchAttendantsResource::collection($attendants);
+        $attendants = MeetingAppSearchAttendantsResource::collection($attendants);
 
         Attendant::filterEmptyMeetingInvitations($attendants);
 

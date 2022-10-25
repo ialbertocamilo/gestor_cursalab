@@ -81,7 +81,7 @@ class AuthController extends Controller
         $user->tokens()->delete();
         $token = $user->createToken('accessToken')->accessToken;
 
-       /* if (!$user->active)
+        if (!$user->active)
             return $this->error("Usuario inactivo.", http_code: 401);
 
         $user->load('criterion_values:id,value_text');
@@ -116,12 +116,12 @@ class AuthController extends Controller
             'module' => $user->subworkspace,
             'can_be_host' => $can_be_host
             // 'can_be_host' => true,
-//            'carrera' => $carrera,
-//            'ciclo' => $ciclo
-//            "grupo" => $user->grupo,
-//            "botica" => $user->botica,
-//            "sexo" => $user->sexo,
-//            "cargo" => $user->cargo,
+            // 'carrera' => $carrera,
+            // 'ciclo' => $ciclo
+            // "grupo" => $user->grupo,
+            // "botica" => $user->botica,
+            // "sexo" => $user->sexo,
+            // "cargo" => $user->cargo,
         ];
 
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
@@ -136,15 +136,7 @@ class AuthController extends Controller
             //            'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
-        ]);*/
-
-        /*FOR MYLOCAL*/
-        return response()->json([
-            'access_token' => $token,
-            'bucket_base_url' => get_media_url(),
-            'usuario' => $user
         ]);
-
     }
 
     /**

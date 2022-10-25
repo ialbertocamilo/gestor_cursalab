@@ -373,8 +373,11 @@ class Attendant extends BaseModel
         $query->select($visibleColumns)->where('active', ACTIVE);
 
         # === usuarios por todos o un workspace ===
-        if ($currSubworkspaces) $query->where('subworkspace_id', $currSubworkspaces);
-        else {
+        if ($currSubworkspaces) {
+            $currSubworkspacesIndexes = is_numeric($currSubworkspaces) ? [$currSubworkspaces]:
+                                                                          $currSubworkspaces;
+            $query->whereIn('subworkspace_id', $currSubworkspacesIndexes);
+        } else {
             $currSubworkspacesIndexes = get_current_workspace_indexes('ids');
             $query->whereIn('subworkspace_id', $currSubworkspacesIndexes);
         }
