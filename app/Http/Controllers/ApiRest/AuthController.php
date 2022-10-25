@@ -21,7 +21,8 @@ class AuthController extends Controller
 
         if (env('MAINTENANCE_MODE')) {
             return $this->error(
-                config('errors.maintenance_message'), 503
+                config('errors.maintenance_message'),
+                503
             );
         }
 

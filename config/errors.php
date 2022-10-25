@@ -11,5 +11,6 @@ return [
         '' => '',
     ],
 
-    'maintenance_message' => 'Estamos actualizando la plataforma, puedes volver a ingresar este Lunes desde las 10am.'
+    'maintenance_message' => 'Estamos actualizando la plataforma, puedes volver a ingresar este Lunes desde las 10am.',
+    'maintenance_subworkspace_message' => 'Estimado(a) usuario, estamos preparando la plataforma para una mejor experiencia. Puedes volver a ingresar en otro momento.'
 ];

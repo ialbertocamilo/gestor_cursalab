@@ -67,10 +67,10 @@ class Migration_3 extends Model
 
         if ($type == 'abiertas')
             self::getAndInsertResumenTemasDataAbiertas($output);
-        
+
         if ($type == 'reinicios')
             self::getAndInsertResumenTemasDataReinicios($output);
-        
+
         if ($type == 'visitas')
             self::getAndInsertResumenTemasDataVisitas($output);
     }
@@ -83,8 +83,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar(count($data));
         $bar->start();
 
-        foreach ($data as $chunk)
-        {
+        foreach ($data as $chunk) {
             DB::table($table_name)->insert($chunk);
 
             info($table_name . ' chunked inserted');
@@ -111,8 +110,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar(count($encuestas));
         $bar->start();
 
-        foreach ($encuestas as $key => $encuesta)
-        {
+        foreach ($encuestas as $key => $encuesta) {
             $type = $types->where('code', $encuesta->tipo)->first();
 
             $data[] = [
@@ -152,8 +150,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar(count($preguntas));
         $bar->start();
 
-        foreach ($preguntas as $key => $pregunta)
-        {
+        foreach ($preguntas as $key => $pregunta) {
             $type = $types->where('code', $pregunta->tipo_pregunta)->first();
             $poll = $polls->where('external_id', $pregunta->encuesta_id)->first();
 
@@ -201,8 +198,7 @@ class Migration_3 extends Model
 
             $chunk = [];
 
-            foreach ($respuestas as $key => $respuesta)
-            {
+            foreach ($respuestas as $key => $respuesta) {
                 $type = $types->where('code', $respuesta->tipo_pregunta)->first();
                 // $poll_id = $polls->where('external_id', $respuesta->encuesta_id)->first();
                 // $user = $users->where('external_id', $respuesta->usuario_id)->first();
@@ -248,8 +244,7 @@ class Migration_3 extends Model
         $bar = $output->createProgressBar(count($rows));
         $bar->start();
 
-        foreach ($rows as $row)
-        {
+        foreach ($rows as $row) {
             $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $row->usuario_id)->first();
             // $user = $users->where('external_id', $row->usuario_id)->first();
 
@@ -316,8 +311,7 @@ class Migration_3 extends Model
 
             info('Start resumen_x_curso chunk');
 
-            foreach ($rows_cursos as $row)
-            {
+            foreach ($rows_cursos as $row) {
                 $bar->advance();
 
                 $status = $statuses->where('code', $row->estado)->first();
@@ -331,8 +325,7 @@ class Migration_3 extends Model
                 $restarts = 0;
                 $restarter = NULL;
 
-                if ($restart)
-                {
+                if ($restart) {
                     $restarts = $restart->acumulado;
                     // $restarter = $admins->where('external_id', $restart->admin_id)->first();
                     $restarter = $restart->admin_id;
@@ -402,7 +395,7 @@ class Migration_3 extends Model
                     ->update(['certification_issued_at' => $row->fecha_emision]);
 
                 // DB::table('summary_courses')
-                    // ->updateOrInsert(['user_id' => $user->id ?? NULL, 'course_id' => $course->id ?? NULL], ['certification_issued_at' => $row->fecha_emision]);
+                // ->updateOrInsert(['user_id' => $user->id ?? NULL, 'course_id' => $course->id ?? NULL], ['certification_issued_at' => $row->fecha_emision]);
 
             }
 
@@ -457,7 +450,6 @@ class Migration_3 extends Model
 
             info('summary_topics pruebas chunked inserted');
         });
-
     }
 
     protected function getAndInsertResumenTemasDataAbiertas($output)
@@ -470,8 +462,7 @@ class Migration_3 extends Model
 
             $chunk = [];
 
-            foreach ($rows_ev_abiertas as $prueba)
-            {
+            foreach ($rows_ev_abiertas as $prueba) {
                 // $topic = $topics->where('external_id', $prueba->posteo_id)->first();
                 $topic = Topic::select('id', 'external_id')->where('external_id', $prueba->posteo_id)->first();
                 $user = User::disableCache()->select('id', 'external_id', 'document')->where('external_id', $prueba->usuario_id)->first();
@@ -483,7 +474,7 @@ class Migration_3 extends Model
 
                 if ($current_summary_topic) {
 
-                     info("User => {$user->id} [OLD - {$prueba->usuario_id}] - {$user->document} - TOPIC => {$topic->id} ya tiene data en summary_topic. Verificar según tipo de evaluación  (eva_bierta).");
+                    info("User => {$user->id} [OLD - {$prueba->usuario_id}] - {$user->document} - TOPIC => {$topic->id} ya tiene data en summary_topic. Verificar según tipo de evaluación  (eva_bierta).");
 
                     $current_summary_topic->update(['answers_old' => $prueba->usu_rptas]);
 
@@ -524,8 +515,7 @@ class Migration_3 extends Model
                 $restarts = 0;
                 $restarter = NULL;
 
-                if ($restart)
-                {
+                if ($restart) {
                     $restarts = $restart->acumulado;
                     // $restarter = $admins->where('external_id', $restart->admin_id)->first();
                     $restarter = $restart->admin_id;
@@ -568,7 +558,6 @@ class Migration_3 extends Model
 
                 DB::table('summary_topics')
                     ->updateOrInsert(['user_id' => $user->id ?? NULL, 'topic_id' => $topic->id ?? NULL], $data);
-
             }
 
             info('summary_topics visitas chunked updateOrInsert');

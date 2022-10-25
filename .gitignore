@@ -3,8 +3,11 @@
 /public/storage
 /storage/*.key
 /vendor
+
 .env
 .env.backup
+.env.remoto
+
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -17,10 +20,9 @@ soketi-config.json
 firebase-config.json
 package-lock.json
 
-
 /public/archivos
 /public/images
-/public/uploads/scorm
+/public/uploads/scorm/*
 /public/js/app.js
 /public/js/documentation_page.js
 /public/css/app.css
@@ -31,11 +33,5 @@ package-lock.json
 /public/fonts/vendor/*
 
 /.vagrant
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
-.env
-.env.remoto
 
 /public/fonts/vendor/@mdi/*
