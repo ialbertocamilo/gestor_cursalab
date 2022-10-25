@@ -1111,7 +1111,7 @@ class Migration_1 extends Model
 
         $subworkspaces = Workspace::whereNotNull('parent_id')->select('id', 'parent_id')->get();
         $users = User::with('subworkspace:id,criterion_value_id')
-            ->select('id', 'external_id')
+            ->select('id', 'external_id', 'subworkspace_id')
             ->whereIn('document', ["46433433", "42247612", "46565943", "44330661", "46887809", "42741364", "40597411", "28308031",
                 "29352756", "32906236", "19097673", "10837066", "47513408", "15451095", "46206350", "12345678", "75663555", "05070324",
                 "45060159", "72891715", "70773655", "08347556", "71572018", "47862484", "10616934", "40424512", "43803826", "45744664",
