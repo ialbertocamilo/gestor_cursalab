@@ -201,6 +201,7 @@ class Migration_1 extends Model
         print_r("\n ya existen :: $j usuarios \n");
         $bar->finish();
     }
+
     public function setUsersDatav2(&$result, $db, $output)
     {
         $user_migrated = User::disableCache()->whereNotNull('external_id')->whereNotNull('user_relations')
@@ -877,9 +878,98 @@ class Migration_1 extends Model
         $this->makeChunkAndInsert($criterion_user, 'criterion_value_user');
     }
 
-    public function insertSegmentacionCarrerasCiclosData()
+    protected function insertSegmentacionCarrerasCiclosData()
     {
         $db = self::connect();
+
+        $direct_segmentation_type = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+        $courses = Course::disableCache()->select('id', 'external_id', 'name')->get();
+        $carreras_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'career')
+            ->select('id', 'external_id', 'criterion_id')
+            ->get();
+        $ciclos_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'cycle')
+            ->select('id', 'value_text', 'criterion_id')
+            ->get();
+        $grupos_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'grupo')
+            ->select('id', 'value_text', 'criterion_id')
+            ->get();
+
+        $curriculas = $db->getTable('curricula')
+            ->join('ciclos', 'ciclos.id', 'curricula.ciclo_id')
+            ->whereIn('curricula.carrera_id', $carreras_values->pluck('external_id')->toArray())
+            ->select('curricula.id as curricula_id', 'curricula.carrera_id', 'curricula.curso_id', 'ciclos.nombre as ciclo_nombre', 'all_criterios',
+                'curricula.created_at', 'curricula.updated_at')
+            ->limit(200)
+            ->get();
+
+        $curricula_grouped_by_course_id = $curriculas->groupBy('curso_id');
+
+        foreach ($curricula_grouped_by_course_id as $course_external_id => $curricula) {
+            $course = $courses->where('external_id', $course_external_id)->first();
+
+            if (!$course) {
+//                info("");
+                continue;
+            }
+
+            $curricula_by_carrera = $curricula->groupBy('carrera_id');
+
+            foreach ($curricula_by_carrera as $carrera_id => $curricula_carrera) {
+                $segment_criterion = collect();
+                $career = $carreras_values->where('external_id', $carrera_id)->first();
+
+                if (!$career) {
+                    info("");
+                    continue;
+                }
+
+                $ciclos = $ciclos_values->whereIn('value_text', $curricula_carrera->pluck('ciclo_nombre'));
+
+                if ($curricula_carrera->first()->all_criterios) {
+                    // TODO: Agregar todos los grupos del modulo al que pertenece el cursoc
+//                    $grupos = $grupos_values->where('external_id', $grupos_id);
+                    $grupos = [];
+                } else {
+                    $grupos_id = $db->getTable('curricula_criterio')
+                        ->where('curricula_id', $curricula_carrera->first()->curricula_id)
+                        ->pluck('criterio_id')
+                        ->toArray();
+                    $grupos = $grupos_values->where('external_id', $grupos_id);
+                    info($grupos);
+                }
+
+                $segment_criterion->push($career);
+                $segment_criterion->merge($ciclos);
+                $segment_criterion->merge($grupos);
+
+                $values = [];
+                foreach ($segment_criterion as $criterion_value) {
+                    $values[] = [
+                        'criterion_value_id' => $criterion_value->id,
+                        'criterion_id' => $criterion_value->criterion_id,
+                        'type_id' => null,
+                    ];
+                }
+
+//                info($values);
+                continue;
+
+                $segment = Segment::create([
+                    'name' => "Curricula {$curricula_carrera->first()->curricula_id} ",
+                    'model_type' => Course::class,
+                    'model_id' => $course->id,
+                    'type_id' => $direct_segmentation_type->id,
+                    'active' => ACTIVE,
+                ]);
+
+                $segment->values()->sync($values);
+            }
+
+        }
+
+
+        return;
+
 
         $default = Taxonomy::getFirstData('criterion', 'type', 'default');
 
@@ -991,5 +1081,70 @@ class Migration_1 extends Model
         } else {
             $criterion_user[] = ['user_id' => $user->id, 'criterion_value_id' => $criterion_value->id ?? $criterion_value];
         }
+    }
+
+    protected function fixSubworkpsaceIdUsers($bar)
+    {
+
+        /*
+         select
+            cvu.user_id,
+                    u.name,
+                    u.document,
+                    w.name as modulo_sub,
+                    u.subworkspace_id,
+
+            c.name criterion_name,
+            cv.value_text
+        from
+            users u
+                inner join workspaces w on w.id = u.subworkspace_id
+                inner join criterion_value_user cvu on cvu.user_id = u.id
+                inner join criterion_values cv on cv.id = cvu.criterion_value_id
+                inner join criteria c on c.id = cv.criterion_id and criterion_id = 1
+        where
+            w.criterion_value_id <> cv.id
+
+         order by cv.id;
+         */
+        $temp = [];
+
+        $subworkspaces = Workspace::whereNotNull('parent_id')->select('id', 'parent_id')->get();
+        $users = User::with('subworkspace:id,criterion_value_id')
+            ->select('id', 'external_id', 'subworkspace_id')
+            ->whereIn('document', ["46433433", "42247612", "46565943", "44330661", "46887809", "42741364", "40597411", "28308031",
+                "29352756", "32906236", "19097673", "10837066", "47513408", "15451095", "46206350", "12345678", "75663555", "05070324",
+                "45060159", "72891715", "70773655", "08347556", "71572018", "47862484", "10616934", "40424512", "43803826", "45744664",
+                "46049224", "47592776", "10731959", "74254235", "40517832", "41659279", "44044164", "07637425", "45553468", "48338391",
+                "70231669", "42219757", "41581150", "47108286", "47452220", "76141781", "47573998", "70105227", "73207776", "47831934",
+                "40767297", "44176799", "48000944", "43548565", "74893711", "02664328", "73180221", "80019474", "46999044", "46273667",
+                "10627213", "47409571", "47133565", "44477935", "75281810", "72692589", "73518166", "72260598", "43832960", "76591670",
+                "70585847", "41736644", "46162402", "76149320", "43921575", "70158566", "48423715", "07642898", "74990343", "47047503",
+                "47181011", "72860795", "75911233", "10614358", "76436084", "77054697", "75151181", "46894486", "71522997", "00000001",
+                "77160728", "48684317", "76306261", "45601256", "10549769", "09537241", "11223344", "47732319", "75387687", "48110606",
+                "46902369", "77226368", "75169793", "47020692", "76247389", "72921929", "44180295", "46481548", "70565193", "77867069",
+                "32836810", "70972433", "70978430", "43511255", "46264965", "46969409", "42260942", "73238982", "45517931", "45731902",
+                "45617421", "71003619", "75998526", "46668255", "25829447", "42212145", "42642909", "48986495", "44814865", "44538161",
+                "43881654", "47042869", "73120320", "41246507", "72932141", "46011932", "42626031", "45642286", "75581472", "48238488",
+                "70036718", "75338751", "71608937", "77293698", "70168069", "70363934", "46011926", "42128916", "72226569", "76001082",
+                "47875138", "45990845", "45944034", "73062738", "46652379", "10340111", "45031869", "10443321", "76448275", "47011955",
+                "62768481"])
+            ->chunkById(200, function ($users_chunked) {
+
+                foreach ($users_chunked as $user) {
+                    $correct_sub_workspace_value = $user->subworkspace->criterion_value_id;
+                    $wrong_sub_workspace_value = $user->criterion_values()
+                        ->whereRelation('criterion', 'code', 'module')
+                        ->first();
+
+                    info("El usuario {$user->id} tiene el criterion_value {$wrong_sub_workspace_value->id} y se le va a cambiar por {$correct_sub_workspace_value}");
+
+                    DB::table('criterion_value_user')
+                        ->where('user_id', $user->id)
+                        ->where('criterion_value_id', $wrong_sub_workspace_value)
+                        ->update(['criterion_value_id' => $correct_sub_workspace_value]);
+                }
+
+            });
     }
 }

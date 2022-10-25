@@ -68,8 +68,8 @@ class AuthController extends Controller
             
             // return $this->error("Usuario inactivo temporalmente. Migración en progreso.", http_code: 401);
             return $this->error(
-                    config('errors.maintenance_subworkspace_message'), 503
-                );
+                config('errors.maintenance_ucfp'), 503
+            );
         }
 
         if (!$user->active)
