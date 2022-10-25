@@ -65,7 +65,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkrol' => \App\Http\Middleware\CheckRol::class,
         'scope-bouncer' => \App\Http\Middleware\ScopeBouncer::class,
-        'secretKey' =>\App\Http\Middleware\ApiIntegrationsMiddleware::class,
-        'auth.guard' =>\App\Http\Middleware\AssignGuard::class
+        'secretKey' => \App\Http\Middleware\ApiIntegrationsMiddleware::class,
+        'auth.guard' => \App\Http\Middleware\AssignGuard::class
     ];
 }

@@ -21,7 +21,8 @@ class AuthController extends Controller
 
         if (env('MAINTENANCE_MODE')) {
             return $this->error(
-                config('errors.maintenance_message'), 503
+                config('errors.maintenance_message'),
+                503
             );
         }
 
@@ -116,12 +117,12 @@ class AuthController extends Controller
             'module' => $user->subworkspace,
             'can_be_host' => $can_be_host
             // 'can_be_host' => true,
-//            'carrera' => $carrera,
-//            'ciclo' => $ciclo
-//            "grupo" => $user->grupo,
-//            "botica" => $user->botica,
-//            "sexo" => $user->sexo,
-//            "cargo" => $user->cargo,
+            //            'carrera' => $carrera,
+            //            'ciclo' => $ciclo
+            //            "grupo" => $user->grupo,
+            //            "botica" => $user->botica,
+            //            "sexo" => $user->sexo,
+            //            "cargo" => $user->cargo,
         ];
 
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();

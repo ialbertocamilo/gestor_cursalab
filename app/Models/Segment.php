@@ -54,14 +54,15 @@ class Segment extends BaseModel
                 'field_type:id,name,code',
                 'values' => function ($q) use ($workspace) {
 
-//                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
+                    //                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
                     // $q->select('id', 'value_text', 'position');
-//                    $q->whereIn('id', $values->pluck('id')->toArray());
+                    //                    $q->whereIn('id', $values->pluck('id')->toArray());
                     $q
                         ->select('id', 'criterion_id', 'value_boolean', 'value_date', 'value_text')
                         ->whereRelation('workspaces', 'id', $workspace->id);
-//                        ->whereRelation('type', 'code', '<>', 'date');
-                }])
+                    //                        ->whereRelation('type', 'code', '<>', 'date');
+                }
+            ])
             ->whereHas('workspaces', function ($q) use ($workspace) {
                 $q->where('workspace_id', $workspace->id);
             })
@@ -97,7 +98,6 @@ class Segment extends BaseModel
                     default => [],
                 };
             }
-
         } else {
 
             $segments = [];
@@ -121,7 +121,7 @@ class Segment extends BaseModel
 
                 $criterion_code = $g['criterion']['field_type']['code'];
 
-                if ($criterion_code === 'date'):
+                if ($criterion_code === 'date') :
 
                     $starts_at = carbonFromFormat($g['starts_at'])->format('Y-m-d');
                     $finishes_at = carbonFromFormat($g['finishes_at'])->format('Y-m-d');
@@ -132,7 +132,7 @@ class Segment extends BaseModel
                     $new['name'] = "{$starts_at} - {$finishes_at}";
                 endif;
 
-                if ($criterion_code === 'default'):
+                if ($criterion_code === 'default') :
                     $new = $g['criterion_value'];
                 endif;
 
@@ -188,7 +188,6 @@ class Segment extends BaseModel
 
             $this->updateSegmentToLaunchObeserver($request);
             DB::commit();
-
         } catch (\Exception $e) {
 
             info($e);
@@ -204,11 +203,12 @@ class Segment extends BaseModel
 
         return $this->success(['msg' => $message], $message);
     }
-    private function updateSegmentToLaunchObeserver($data){
+    private function updateSegmentToLaunchObeserver($data)
+    {
         $segments_id = array_column($data->segments, 'id');
         info($segments_id);
         self::whereIn('id', $segments_id)->update([
-            'updated_at'=>now()
+            'updated_at' => now()
         ]);
     }
     public function storeDirectSegmentation($data)
@@ -250,7 +250,6 @@ class Segment extends BaseModel
                 };
 
                 $values = array_merge($values, $temp_values);
-
             }
 
             $segment->values()->sync($values);
@@ -351,7 +350,7 @@ class Segment extends BaseModel
 
             $user_has_criterion_id = $user_criteria[$criterion_id] ?? false;
 
-            if (!$user_has_criterion_id):
+            if (!$user_has_criterion_id) :
                 $segment_valid = false;
                 break;
             endif;
@@ -459,11 +458,11 @@ class Segment extends BaseModel
                 $previousCriterionId = $criterionId;
 
                 $criterionValuesIds = $criterionValues->where('criterion_id', $criterionId)
-                                                      ->pluck('criterion_value_id')
-                                                      ->toArray();
+                    ->pluck('criterion_value_id')
+                    ->toArray();
                 $WHERE[] = "(
                     scv.criterion_id = $criterionId and
-                    scv.criterion_value_id in (" .implode(',', $criterionValuesIds). ")
+                    scv.criterion_value_id in (" . implode(',', $criterionValuesIds) . ")
                 )";
             }
         }
@@ -490,7 +489,7 @@ class Segment extends BaseModel
                         inner join criterion_values cv on cv.id = cvu.criterion_value_id
                         inner join users u on u.id = cvu.user_id
                 where cv.criterion_id in ($criterionIds) and
-                      u.subworkspace_id in (".implode(',', $modulesIds).")
+                      u.subworkspace_id in (" . implode(',', $modulesIds) . ")
             ) scv
             where
                 $WHERE
@@ -501,8 +500,7 @@ class Segment extends BaseModel
         ";
 
         return collect(DB::select(DB::raw($query)))
-                ->pluck('user_id')
-                ->toArray();
+            ->pluck('user_id')
+            ->toArray();
     }
 }
-

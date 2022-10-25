@@ -57,12 +57,13 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValues();
         $this->restoreCriterionDocument();
     }
-    public function restoreCriterionDocument(){
+    public function restoreCriterionDocument()
+    {
         $document_criterion = Criterion::where('code', 'document')->first();
-        $criterionValues = CriterionValue::where('criterion_id',$document_criterion->id)->select('value_text')->get()->pluck('value_text');
+        $criterionValues = CriterionValue::where('criterion_id', $document_criterion->id)->select('value_text')->get()->pluck('value_text');
         User::whereNotNull('subworkspace_id')->whereNotNull('document')->with('subworkspace.parent')
             ->select('id', 'document', 'subworkspace_id')
-            ->whereNotIn('document',$criterionValues)
+            ->whereNotIn('document', $criterionValues)
             ->chunkById(5000, function ($users_chunked) use ($document_criterion) {
                 $document_values = CriterionValue::whereRelation('criterion', 'code', 'document')
                     ->whereIn('value_text', $users_chunked->pluck('document')->toArray())->get();
@@ -70,7 +71,7 @@ class restablecer_funcionalidad extends Command
                 $bar->start();
                 foreach ($users_chunked as $user) {
                     $document_value = $document_values->where('value_text', $user->document)->first();
-                    if(!$document_value){
+                    if (!$document_value) {
                         $criterion_value_data = [
                             'value_text' => $user->document,
                             'criterion_id' => $document_criterion?->id,
@@ -78,7 +79,7 @@ class restablecer_funcionalidad extends Command
                             'active' => ACTIVE
                         ];
                         $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
-    
+
                         $user->criterion_values()->syncWithoutDetaching([$document?->id]);
                     }
                     $bar->advance();
@@ -98,8 +99,8 @@ class restablecer_funcionalidad extends Command
             foreach ($criterion->values as $value) {
                 $date_parse = !$value->value_date ? $value->value_text : $value->value_date;
                 $date_parse = trim(strval($date_parse));
-//                $valid_date = _validateDate($date_parse, 'Y-m-d') || _validateDate($date_parse, 'Y/m/d')
-//                    || _validateDate($date_parse, 'd/m/Y') || _validateDate($date_parse, 'd-m-Y');
+                //                $valid_date = _validateDate($date_parse, 'Y-m-d') || _validateDate($date_parse, 'Y/m/d')
+                //                    || _validateDate($date_parse, 'd/m/Y') || _validateDate($date_parse, 'd-m-Y');
                 $format = null;
 
                 _validateDate($date_parse, 'Y-m-d') && $format = 'Y-m-d';
@@ -108,10 +109,10 @@ class restablecer_funcionalidad extends Command
                 _validateDate($date_parse, 'd-m-Y') && $format = 'd-m-Y';
 
                 if ($date_parse && $format) {
-//                    info($date_parse);
-//                    if ($date_parse === "15/08/;2001" ) dd($date_parse);
+                    //                    info($date_parse);
+                    //                    if ($date_parse === "15/08/;2001" ) dd($date_parse);
 
-//                    $new_value = Carbon::parse($date_parse)->format('Y-m-d');
+                    //                    $new_value = Carbon::parse($date_parse)->format('Y-m-d');
                     $new_value = carbonFromFormat($date_parse, $format)->format("Y-m-d");
                     $value->value_text = $new_value;
                     $value->value_date = $new_value;

@@ -392,7 +392,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
 
-            if ($new_user || ($user->wasChanged('document') && ($data['document'] ?? false))):
+            if ($new_user || ($user->wasChanged('document') && ($data['document'] ?? false))) :
                 $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
             endif;
 
