@@ -12,5 +12,6 @@ return [
     ],
 
     'maintenance_message' => 'Estamos actualizando la plataforma, puedes volver a ingresar este Lunes desde las 10am.',
-    'maintenance_subworkspace_message' => 'Estimado(a) usuario, estamos preparando la plataforma para una mejor experiencia. Puedes volver a ingresar en otro momento.'
+    'maintenance_subworkspace_message' => 'Estimado(a) usuario, estamos preparando la plataforma para una mejor experiencia. Puedes volver a ingresar en otro momento.',
+    'maintenance_ucfp' => 'Estimado(a) usuario, estamos preparando tu nueva plataforma de capacitación, podrás ingresar desde el 02/11 a las 10:00am.'
 ];
