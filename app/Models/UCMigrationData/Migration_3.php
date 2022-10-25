@@ -694,14 +694,14 @@ class Migration_3 extends Model
 
         $output->info('init getAndInsertResumenTemasDataVisitas');
 
-        $count = $db->getTable('visitas')->count();
+        $count = $db->getTable('visitas')->where('id', '>', 2000000)->count();
 
         $bar = $output->createProgressBar($count);
         $bar->start();
 
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
-        $db->getTable('visitas')->chunkById(50, function ($rows_visitas) use ($statuses, $bar) {
+        $db->getTable('visitas')->where('id', '>', 2000000)->chunkById(100, function ($rows_visitas) use ($statuses, $bar) {
 
             $usuarios_ids = $rows_visitas->pluck('usuario_id')->toArray();
             $topics_ids = $rows_visitas->pluck('post_id')->toArray();
