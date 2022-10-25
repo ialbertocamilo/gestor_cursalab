@@ -63,7 +63,7 @@ class CheckList extends BaseModel
             ->pluck('cr.checklist_id')
             ->unique();
 
-        $queryChecklist = CheckList::with([
+        $queryChecklist = CheckList::disableCache()->with([
             'checklist_actividades' => function ($q) {
                 $q->orderBy('active', 'desc')->orderBy('position');
             },
