@@ -248,7 +248,6 @@ class EntrenamientoController extends Controller
         );
 
         foreach ($data['checklist_actividades'] as $key => $checklist_actividad) {
-            // ($checklist_actividad['tipo'] == 'user_trainer') && $checklist_actividad['is_default'] != null;
             $type = Taxonomy::where('group', 'checklist')
                 ->where('type', 'type')
                 ->where('code', $checklist_actividad['type_name'])
@@ -261,14 +260,13 @@ class EntrenamientoController extends Controller
                     'active' => $checklist_actividad['active'],
                     'checklist_id' => $checklist->id,
                     'position' => $key + 1,
-                    // 'is_default' => $checklist_actividad['is_default']
                 ]
             );
         }
         $cursos = collect($data['courses']);
         $checklist->courses()->sync($cursos->pluck('id'));
 
-        // return response()->json(['error' => false, 'checklist' => $checklist, 'msg' => 'Checklist creado.'], 200);
+        \Artisan::call('modelCache:clear', array('--model' => CheckList::class));
         return $this->success($checklist);
     }
 
