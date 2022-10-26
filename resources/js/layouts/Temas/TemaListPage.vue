@@ -125,9 +125,9 @@ export default {
                 endpoint: `/${vue.ruta}cursos/${vue.course_id}/temas/search`,
                 ref: 'cursosTable',
                 headers: [
-                    {text: "Orden", value: "orden", align: 'center', model: 'Topic'},
+                    {text: "Orden", value: "position", align: 'center', model: 'Topic', sortable: false},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombre", value: "nombre"},
+                    {text: "Nombre", value: "nombre", sortable: false},
                     {text: "Evaluable", value: "assessable", sortable: false},
                     {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},

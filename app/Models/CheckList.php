@@ -6,18 +6,16 @@ use App\Http\Controllers\ApiRest\HelperController;
 
 class CheckList extends BaseModel
 {
-    protected $table = 'checklist';
+    protected $table = 'checklists';
 
     protected $fillable = [
-        'titulo',
-        'descripcion',
-        'curso_id',
-        'carrera_id',
-        'estado'
+        'title',
+        'description',
+        'active'
     ];
 
     protected $casts = [
-        'estado' => 'boolean'
+        'active' => 'boolean'
     ];
 
     protected $hidden = [
@@ -34,16 +32,16 @@ class CheckList extends BaseModel
         return $this->hasMany(CheckListItem::class, 'checklist_id', 'id');
     }
 
-    public function cursos()
+    public function courses()
     {
-        return $this->belongsToMany(Curso::class, 'relaciones_checklist', 'checklist_id', 'curso_id');
+        return $this->belongsToMany(Course::class, 'checklist_relationships', 'checklist_id', 'course_id');
     }
 
     /*======================================================= SCOPES ==================================================================== */
 
-    public function scopeEstado($q, $estado)
+    public function scopeActive($q, $estado)
     {
-        return $q->where('estado', $estado);
+        return $q->where('active', $estado);
     }
 
     /*=================================================================================================================================== */
@@ -53,14 +51,26 @@ class CheckList extends BaseModel
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
+        $workspace = get_current_workspace();
+
+        $cursos_x_wk = Workspace::leftJoin('course_workspace as cw', 'workspaces.id', '=', 'cw.workspace_id')
+            ->leftJoin('courses as c', 'cw.course_id', '=', 'c.id')
+            ->leftJoin('checklist_relationships as cr', 'c.id', '=', 'cr.course_id')
+            ->groupBy('cr.checklist_id')
+            ->where('workspaces.id', $workspace->id)
+            ->whereNotNull('cr.checklist_id')
+            ->select('cr.checklist_id')
+            ->pluck('cr.checklist_id')
+            ->unique();
+
         $queryChecklist = CheckList::with([
             'checklist_actividades' => function ($q) {
-                $q->orderBy('estado', 'desc')->orderBy('posicion');
+                $q->orderBy('active', 'desc')->orderBy('position');
             },
-            'cursos' => function ($q) {
-                $q->select('cursos.id', 'cursos.nombre', 'cursos.config_id', 'cursos.categoria_id');
+            'courses' => function ($q) {
+                $q->select('courses.id', 'courses.name');
             }
-        ]);
+        ])->whereIn('id', $cursos_x_wk);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -69,21 +79,30 @@ class CheckList extends BaseModel
 
         if (!is_null($filtro) && !empty($filtro)) {
             $queryChecklist->where(function ($query) use ($filtro) {
-                $query->where('titulo', 'like', "%$filtro%");
-                $query->orWhere('descripcion', 'like', "%$filtro%");
+                $query->where('checklists.title', 'like', "%$filtro%");
+                $query->orWhere('checklists.description', 'like', "%$filtro%");
             });
         }
         $checklists = $queryChecklist->paginate(request('paginate', 15));
 
         foreach ($checklists->items() as $checklist) {
-            foreach ($checklist->cursos as $curso) {
-                $curso->modulo = $curso->config->codigo_matricula;
-                $curso->curso = $curso->nombre;
-                $curso->escuela = $curso->categoria->nombre;
-                $curso->nombre = $curso->config->codigo_matricula . ' - ' . $curso->categoria->nombre . ' - ' . $curso->nombre;
+            foreach ($checklist->checklist_actividades as $act) {
+                $type_id = $act->type_id ?? null;
+                $type_name = !is_null($type_id) ? Taxonomy::where('id', $type_id)->first() : null;
+                $type_name = !is_null($type_name) ? $type_name->code : '';
+                $act->type_name = $type_name;
+            }
+            foreach ($checklist->courses as $curso) {
+                $workspace = !is_null($curso->workspaces) && count($curso->workspaces) ? $curso->workspaces[0]->name : '';
+                $school = !is_null($curso->schools) && count($curso->schools) ? $curso->schools[0]->name : '';
+
+                $curso->modulo = $workspace;
+                $curso->curso = $curso->name;
+                $curso->escuela = $school;
+                $curso->nombre = $workspace . ' - ' . $school . ' - ' . $curso->name;
             }
 
-            $checklist->active = $checklist->estado;
+            $checklist->active = $checklist->active;
         }
 
         $response['data'] = $checklists->items();
@@ -105,49 +124,59 @@ class CheckList extends BaseModel
     }
 
     protected function getChecklistsByAlumno($alumno_id): array
-//    protected function getChecklistsByAlumno($entrenador_id, $alumno_id): array
     {
-        $entrenador = EntrenadorUsuario::where('usuario_id', $alumno_id)->where('estado', 1)->first();
-        $entrenador_id = $entrenador->entrenador_id;
+        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->first();
+        $entrenador_id = !is_null($entrenador) ? $entrenador->trainer_id : null;
 
         $response['error'] = false;
         $checklistCompletados = 0;
 
-        $helper = new HelperController();
-        $cursos_ids = $helper->help_cursos_x_matricula_con_cursos_libre($alumno_id);
-        $cursos = Curso::with('checklists', 'categoria')->whereIn('id', $cursos_ids)->get();
+        $user = User::where('id', $alumno_id)->first();
+        $cursos_x_user = $user->getCurrentCourses();
+        $cursos_ids = $cursos_x_user->pluck('id');
+
+        $cursos = Course::with('checklists', 'schools')->whereIn('id', $cursos_ids)->get();
         $checklists = collect();
         foreach ($cursos as $curso) {
-            $curso->categoria = $curso->categoria->only('id', 'nombre');
+            $curso->categoria = $curso->schools->first()->only('id', 'name');
             if ($curso->checklists->count() > 0) {
                 foreach ($curso->checklists as $checklist) {
-                    if ($checklist->estado) {
-//                        info('CHECKLIST ID :: '.$checklist->id);
-//                        info('CURSO ID :: '.$curso->id);
-                        $actividades_activas = $checklist->actividades->where('estado', 1)->where('tipo', 'entrenador_usuario')->sortBy('posicion');
-                        $actividades_activasFeedback = $checklist->actividades->where('estado', 1)->where('tipo', 'usuario_entrenador')->sortBy('posicion');
-                        if (!$checklists->where('id', $checklist->id)->first() && $actividades_activas->count() >0 && $checklist->estado) {
-                            $r_x_c = Resumen_x_curso::where('usuario_id', $alumno_id)->where('curso_id', $curso->id)->first();
-                            $disponible = $r_x_c && $r_x_c->estado === 'aprobado';
+                    if ($checklist->active) {
+                        $tax_trainer_user = Taxonomy::where('group', 'checklist')
+                            ->where('type', 'type')
+                            ->where('code', 'trainer_user')
+                            ->first();
+                        $tax_user_trainer = Taxonomy::where('group', 'checklist')
+                            ->where('type', 'type')
+                            ->where('code', 'user_trainer')
+                            ->first();
+                        $actividades_activas = $checklist->actividades->where('active', 1)->where('type_id', $tax_trainer_user->id)->sortBy('position');
+                        $actividades_activasFeedback = $checklist->actividades->where('active', 1)->where('type_id', $tax_user_trainer->id)->sortBy('position');
+                        if (!$checklists->where('id', $checklist->id)->first() && $actividades_activas->count() > 0 && $checklist->active) {
+                            $r_x_c = SummaryCourse::where('user_id', $alumno_id)->where('course_id', $curso->id)->first();
+
+                            $aprobado = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+
+                            $disponible = $r_x_c && $r_x_c->status_id === $aprobado->id;
                             $checklistRpta = ChecklistRpta::checklist($checklist->id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
                             if (!$checklistRpta) {
                                 $checklistRpta = ChecklistRpta::create([
                                     'checklist_id' => $checklist->id,
-                                    'alumno_id' => $alumno_id,
-                                    'curso_id' => $curso->id,
-                                    'categoria_id' => $curso->categoria_id,
-                                    'entrenador_id' => $entrenador_id,
-                                    'porcentaje' => 0
+                                    'student_id' => $alumno_id,
+                                    'course_id' => $curso->id,
+                                    'school_id' => $curso->categoria['id'],
+                                    'coach_id' => $entrenador_id,
+                                    'percent' => 0
                                 ]);
                             }
                             $progresoActividad = $this->getProgresoActividades($checklist, $checklistRpta, $actividades_activas);
                             $progresoActividadFeedback = $this->getProgresoActividadesFeedback($checklistRpta, $actividades_activasFeedback);
                             $tempChecklist = [
                                 'id' => $checklist->id,
-                                'titulo' => $checklist->titulo,
-                                'descripcion' => $checklist->descripcion,
+                                'titulo' => $checklist->title,
+                                'descripcion' => $checklist->description,
                                 'disponible' => $disponible,
-                                'curso' => $curso->only('id', 'nombre', 'categoria'),
+                                'curso' => $curso->only('id', 'name', 'categoria'),
                                 'porcentaje' => $progresoActividad['porcentaje'],
                                 'actividades_totales' => $progresoActividad['actividades_totales'],
                                 'actividades_completadas' => $progresoActividad['actividades_completadas'],
@@ -173,13 +202,16 @@ class CheckList extends BaseModel
     {
 
         foreach ($actividades as $actividad) {
-            $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_rpta_id', $checklistRpta->id)->first();
-            $actividad->disponible = !(bool)$actividadProgreso;
-            if ($actividadProgreso) {
-                $actividad->estado = $actividadProgreso->calificacion;
+            $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
+            $actividad->disponible = !is_null($actividadProgreso);
+            if (!is_null($actividadProgreso)) {
+                $actividad->estado = $actividadProgreso->qualification;
             } else {
                 $actividad->estado = 'Pendiente';
             }
+            $type_name = !is_null($actividad->type_id) ? Taxonomy::where('id', $actividad->type_id)->first() : null;
+            $type_name = !is_null($type_name) ? $type_name->code : '';
+            $actividad->tipo = $type_name;
         }
         return [
             'actividades_feedback' => $actividades->values()->all()
@@ -191,34 +223,37 @@ class CheckList extends BaseModel
         $completadas = 0;
         if ($checklistRpta->porcentaje !== 100) {
             foreach ($actividades as $actividad) {
-                $checklistRptaItem = ChecklistRptaItem::where('checklist_rpta_id', $checklistRpta->id)->where('checklist_item_id', $actividad->id)->first();
-                if ($actividad->is_default && !$checklistRptaItem) {
+                $checklistRptaItem = ChecklistRptaItem::where('checklist_answer_id', $checklistRpta->id)->where('checklist_item_id', $actividad->id)->first();
+                if (!$checklistRptaItem) {
                     $checklistRptaItem = ChecklistRptaItem::create([
-                        'checklist_rpta_id' => $checklistRpta->id,
+                        'checklist_answer_id' => $checklistRpta->id,
                         'checklist_item_id' => $actividad->id,
-                        'calificacion' => 'Cumple'
+                        'qualification' => 'Cumple'
                     ]);
                     ChecklistRpta::actualizarChecklistRpta($checklistRpta);
                 }
-                $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_rpta_id', $checklistRpta->id)->first();
+                $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
                 if ($actividadProgreso) {
-                    $actividad->estado = $actividadProgreso->calificacion;
+                    $actividad->estado = $actividadProgreso->qualification;
                     if (in_array($actividad->estado, ['Cumple', 'No cumple'])) $completadas++;
                 } else {
                     $actividad->estado = 'Pendiente';
                 }
+                $type_name = !is_null($actividad->type_id) ? Taxonomy::where('id', $actividad->type_id)->first() : null;
+                $type_name = !is_null($type_name) ? $type_name->code : '';
+                $actividad->tipo = $type_name;
             }
             $porcentaje = $completadas / count($actividades);
         } else {
-            $actividadProgreso = ChecklistRptaItem::with('rpta_items')->where('checklist_rpta_id', $checklistRpta->id)->get();
+            $actividadProgreso = ChecklistRptaItem::with('rpta_items')->where('checklist_answer_id', $checklistRpta->id)->get();
             $actividades = collect();
             foreach ($actividadProgreso->rpta_items as $rpta) {
                 $actividades->push([
                     'id' => $rpta->actividad->id,
                     'checklist_id' => $rpta->actividad->checklist_id,
-                    'posicion' => $rpta->actividad->posicion,
+                    'posicion' => $rpta->actividad->position,
                     'tipo' => $rpta->actividad->tipo,
-                    'estado' => $rpta->calificacion
+                    'estado' => $rpta->qualification
                 ]);
             }
             $porcentaje = $checklistRpta->porcentaje;
@@ -232,5 +267,4 @@ class CheckList extends BaseModel
             'feedback_disponible' => $feedback_disponible
         ];
     }
-
 }

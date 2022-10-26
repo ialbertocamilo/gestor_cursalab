@@ -52,7 +52,7 @@
 
                                 <v-row>
                                     <v-col cols="12" class="text-center">
-                                        <h5>{{ resource.name }}</h5>
+                                        <h5>{{ resource.name }} - {{ resource.prefix }}</h5>
                                     </v-col>
                                     <v-col cols="12" class="text-center">
                                         <h6>{{ resource.date_title }}</h6>
@@ -97,17 +97,10 @@
                                     <v-col cols="10" class="text-center">
                                         <a v-if="resource.status.code == 'finished' && resource.download_ready"
                                            href="javascript:;"
-                                           download @click="downloadReport" class="no-hover-link mr-5"
-                                           title="Descargar reporte">
-                                            <v-icon color="primary" small>mdi-download</v-icon>
-                                            Descargar reporte
-                                        </a>
-
-                                        <a v-if="resource.status.code == 'finished' && !resource.download_ready"
-                                           href="javascript:;"
-                                           class="grey--text text--darken--2 no-hover-link mr-5"
+                                           @click="downloadReport"
+                                           class="no-hover-link mr-5"
                                            title="Descarga disponible en 10 minutos aprox.">
-                                            <v-icon color="grey-darken-2" small>mdi-download</v-icon>
+                                            <v-icon color="primary" small >mdi-download</v-icon>
                                             Descargar reporte
                                         </a>
 

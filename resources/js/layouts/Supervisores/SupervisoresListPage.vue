@@ -1,6 +1,6 @@
 <template>
-    <section class="section-list ">
-        <v-card flat class="elevation-0 mb-4">
+    <section className="section-list ">
+        <v-card flat className="elevation-0 mb-4">
             <v-card-title>
                 Supervisores
                 <v-spacer/>
@@ -15,7 +15,7 @@
             </v-card-title>
         </v-card>
 
-        <v-card flat class="elevation-0 mb-4">
+        <v-card flat className="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
                     <v-col cols="4">
@@ -86,20 +86,20 @@
                 @onConfirm="changeLabelModal"
                 @onCancel="changeLabelModal"
             />
-<!--            <AsignarUsuariosASupervisorModal-->
-<!--                width="60vw"-->
-<!--                :ref="modalOptionsAsignarUsuarios.ref"-->
-<!--                :options="modalOptionsAsignarUsuarios"-->
-<!--                @onConfirm="closeFormModal(modalOptionsAsignarUsuarios, dataTable, filters)"-->
-<!--                @onCancel="closeFormModal(modalOptionsAsignarUsuarios)"-->
-<!--            />-->
-<!--            <AsignarCriteriosASupervisorModal-->
-<!--                width="40vw"-->
-<!--                :ref="modalOptionsAsignarCriterios.ref"-->
-<!--                :options="modalOptionsAsignarCriterios"-->
-<!--                @onConfirm="closeFormModal(modalOptionsAsignarCriterios, dataTable, filters)"-->
-<!--                @onCancel="closeFormModal(modalOptionsAsignarCriterios)"-->
-<!--            />-->
+            <!--            <AsignarUsuariosASupervisorModal-->
+            <!--                width="60vw"-->
+            <!--                :ref="modalOptionsAsignarUsuarios.ref"-->
+            <!--                :options="modalOptionsAsignarUsuarios"-->
+            <!--                @onConfirm="closeFormModal(modalOptionsAsignarUsuarios, dataTable, filters)"-->
+            <!--                @onCancel="closeFormModal(modalOptionsAsignarUsuarios)"-->
+            <!--            />-->
+            <!--            <AsignarCriteriosASupervisorModal-->
+            <!--                width="40vw"-->
+            <!--                :ref="modalOptionsAsignarCriterios.ref"-->
+            <!--                :options="modalOptionsAsignarCriterios"-->
+            <!--                @onConfirm="closeFormModal(modalOptionsAsignarCriterios, dataTable, filters)"-->
+            <!--                @onCancel="closeFormModal(modalOptionsAsignarCriterios)"-->
+            <!--            />-->
 
         </v-card>
     </section>

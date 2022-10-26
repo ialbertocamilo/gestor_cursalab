@@ -9,6 +9,7 @@ use Firebase\JWT\JWT;
 class Account extends BaseModel
 {
     protected $fillable = [
+        'workspace_id',
         'name', 'description', 'email', 'username', 'password', 'identifier', 'active',
         'key', 'secret', 'token', 'refresh_token', 'sdk_token', 'zak_token',
         'service_id', 'plan_id', 'type_id', 'max_assistants', 'old_id'
@@ -65,6 +66,10 @@ class Account extends BaseModel
     {
         $query = self::with('service', 'plan');
 
+        # meeting segun workspaceid
+        $currWorkspaceIndex = get_current_workspace_indexes('id');
+        $query->where('workspace_id', $currWorkspaceIndex);
+
         if ($request->q) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', "%$request->q%");
@@ -110,8 +115,15 @@ class Account extends BaseModel
 
     protected function getAvailablesForMeeting($type, $dates, $meeting = NULL, $method = 'get')
     {
+        // From Gestor
+        $workspace = get_current_workspace();
+
+        // Or from APP
+        $subworkspace = $workspace ? NULL : auth()->user()->subworkspace;
+
         $accounts = self::where('type_id', $type->id)
                         ->where('active', ACTIVE)
+                        ->where('workspace_id', $workspace->id ?? $subworkspace->parent_id ?? NULL)
                         ->whereDoesntHave('meetings', function ($query) use ($dates, $meeting) {
                             $query->excludeMeeting($meeting);
                             $query->betweenScheduleDates($dates);
@@ -169,6 +181,7 @@ class Account extends BaseModel
                 $data['identifier'] = $result['id'] ?? $meeting->identifier;
                 $data['password'] = $result['password'] ?? $meeting->password;
 
+                // dd($data);
                 break;
 
             case 'jitsi':

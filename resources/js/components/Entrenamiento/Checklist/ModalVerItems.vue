@@ -37,7 +37,7 @@
 										<v-row v-else no-gutters style="width: 100%">
 											<v-col cols="6">
 												Dirigido a:
-												{{ actividad.tipo == "entrenador_usuario" ? "Alumnos" : "Entrenador" }}
+												{{ actividad.tipo == "trainer_user" ? "Alumnos" : "Entrenador" }}
 											</v-col>
 											<v-col cols="6">
 												Estado: {{ checklist.estado == 1 ? "Activo" : "Inactivo" }}
@@ -108,11 +108,11 @@
   			tipo_actividades: [
   				{
   					text: "Alumno",
-  					value: "entrenador_usuario"
+  					value: "trainer_user"
   				},
   				{
   					text: "Entrenador",
-  					value: "usuario_entrenador"
+  					value: "user_trainer"
   				}
   			],
   			dialog: false,
@@ -219,7 +219,7 @@
   				id: newID,
   				actividad: "Nueva actividad",
   				estado: 0,
-  				tipo: "entrenador_usuario",
+  				tipo: "trainer_user",
   				checklist_id: vue.checklist.id
   			};
   			vue.checklist.checklist_actividades.unshift(newActividad);

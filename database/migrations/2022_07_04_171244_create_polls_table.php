@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('titulo');
             $table->string('imagen');
 
+            $table->tinyInteger('position')->nullable();
+
             $table->boolean('active')->nullable()->default(true);
 
 

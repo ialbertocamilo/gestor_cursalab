@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
+use App\Http\Controllers\ApiRest\RestController;
+use App\Http\Controllers\ApiRest\RestReportesSupervisores;
 use App\Http\Controllers\Auth\ForgotPasswordApiController;
 use App\Http\Controllers\Auth\ResetPasswordApiController;
 use App\Http\Controllers\FirebaseController;
@@ -38,11 +40,9 @@ use Illuminate\Support\Facades\Route;
 //     Route::prefix('roles')->group(base_path('routes/cms/roles.php'));
 
 // });
-
 Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
 Route::group(['prefix' => 'auth'], function () {
-
     Route::post('/login', [AuthController::class, 'login']);
 });
 
@@ -51,15 +51,13 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
 });
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
-
+    Route::post('/usuario_upload_file', [RestController::class, 'usuario_upload_file']);
     Route::post('/guardar_token_firebase', [FirebaseController::class, 'guardarToken']);
 
 
     Route::prefix('announcements')->group(base_path('routes/app/announcements.php'));
 
-
     Route::prefix('meetings')->group(base_path('routes/app/meetings.php'));
-
 
     Route::prefix('progreso')->group(base_path('routes/app/progreso.php'));
     Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
@@ -71,11 +69,16 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::get('preguntas_seccion_ayuda', [RestAyudaController::class, 'preguntas_seccion_ayuda']);
     Route::get('preguntas_frecuentes', [RestAyudaController::class, 'preguntas_frecuentes']);
     Route::post('registra_ayuda', [RestAyudaController::class, 'registra_ayuda']);
+
+    Route::get('reportes-supervisores/init', [RestReportesSupervisores::class, 'init']);
+
+    Route::prefix('entrenamiento')->group(base_path('routes/app/checklist.php'));
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::post('registrar_soporte_login', [RestAyudaController::class, 'registra_ayuda_login']);
     Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
+    Route::prefix('checklist')->group(base_path('routes/app/checklist.php'));
 });
 
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);
@@ -90,9 +93,11 @@ Route::get('notifications', function () {
         'showCloseButtonM2' => env('SHOW_CLOSE_BUTTON_M2'),
         'showModalM3' => env('SHOW_MODAL_M3'),
         'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
-        'showMessageM4' => env('SHOW_MESSAGE_M4')
+        'showMessageM4' => env('SHOW_MESSAGE_M4'),
+        'showIosLink' => env('SHOW_IOS_LINK')
     ]);
 });
+
 
 
 //Route::controller(TestController::class)->group(function () {

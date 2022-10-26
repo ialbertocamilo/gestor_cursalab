@@ -152,8 +152,8 @@ export default {
                 endpoint: '/entrenamiento/entrenadores/search',
                 ref: 'EntrenadorTable',
                 headers: [
-                    {text: "DNI", value: "dni", align: 'start', sortable: false},
-                    {text: "Entrenador", value: "nombre", align: 'start'},
+                    {text: "DNI", value: "document", align: 'start', sortable: false},
+                    {text: "Entrenador", value: "name", align: 'start'},
                     {text: "Cant. Alumnos (Activos)", value: "alumnos_count", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
@@ -248,7 +248,7 @@ export default {
                     } else {
                         vue.filtroAlumnoTemp = response.alumno
                         vue.modalDataModalFiltroaLumno.open = true
-                        vue.modalDataModalFiltroaLumno.title = `Alumno: ${response.alumno.dni} - ${response.alumno.nombre}`
+                        vue.modalDataModalFiltroaLumno.title = `Alumno: ${response.alumno.document} - ${response.alumno.name}`
                     }
                 })
         },

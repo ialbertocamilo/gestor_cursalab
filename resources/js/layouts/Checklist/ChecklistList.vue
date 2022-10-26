@@ -7,7 +7,7 @@
                 <v-spacer/>
                 <DefaultActivityButton :label="'Subida masiva'" @click="modal.subida_masiva= true"/>
                 <DefaultModalButton :label="'Checklist'" @click="
-                                abrirModalCreateEditChecklist({ id: 0, titulo: '', descripcion: '', estado: true, checklist_actividades: [], cursos: [] })
+                                abrirModalCreateEditChecklist({ id: 0, title: '', description: '', active: true, checklist_actividades: [], courses: [] })
                             "/>
             </v-card-title>
         </v-card>
@@ -88,7 +88,7 @@ export default {
                 endpoint: '/entrenamiento/checklists/search',
                 ref: 'ChecklistTable',
                 headers: [
-                    {text: "Título", value: "titulo", align: 'start', sortable: true},
+                    {text: "Título", value: "title", align: 'start', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
