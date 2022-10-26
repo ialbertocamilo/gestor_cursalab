@@ -34,6 +34,7 @@ if (isset($fullScreen)) {
 <div>
     <div id="pageloader">
         <img src="{{ asset('img/small_loader.gif') }}" alt="Cargando...">
+        <span  style="color:blue" id="percentLoader"></span>
     </div>
 </div>
 
