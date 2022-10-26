@@ -4,7 +4,9 @@ namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
 use App\Models\Taxonomy;
+use App\Models\User;
 use App\Models\Vademecum;
+use App\Models\Workspace;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -12,53 +14,56 @@ class RestVademecumController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth.jwt');
-        return auth()->shouldUse('api');
+        //this->middleware('auth.jwt');
+        //return auth()->shouldUse('api');
         Carbon::setLocale('es');
     }
 
-    public function storeVisit(Vademecum $elemento, Request $request)
+    public function storeVisit(Vademecum $vademecum, Request $request): array
     {
-        $accion_visita = Taxonomy::where('group', 'vademecum')
+        $visitAction = Taxonomy::where('group', 'vademecum')
                                   ->where('type', 'accion')
                                   ->where('name', 'view')
                                   ->first();
 
-        $row = $elemento->incrementAction($accion_visita->id);
+        $row = $vademecum->incrementAction($visitAction->id);
 
-        return array('error' => 0, 'data' => compact('row'));
+        return ['error' => 0, 'data' => compact('row')];
     }
 
-    public function getElements(Request $request)
+    public function loadUserModuleVademecum(Request $request): array
     {
-        $request->merge(['modulo_id' => auth()->user()->config_id, 'estado' => 1]);
+        $user = auth('api')->user();
+        $subworkspace = Workspace::find($user->subworkspace_id);
 
-        $elementos = Vademecum::search($request, true);
+        if ($subworkspace) {
+            $request->merge([
+                'module_id' => $subworkspace->criterion_value_id
+            ]);
 
-        $data = Vademecum::prepareSearchedData($elementos);
+            $elementos = Vademecum::search($request, true);
+            $data = Vademecum::prepareSearchedData($elementos);
 
-        return array('error' => 0, 'data' => $data);
+        } else {
+            $data = [];
+        }
+
+        return ['error' => 0, 'data' => $data];
     }
 
-    public function getSelects()
+    public function getSelects(): array
     {
-        $data['categorias'] = Taxonomy::whereHas('vademecums', function($q){
-                                        $q->where('active', 1);
-                                    })
-                                    ->where('group', 'vademecum')
-                                    ->where('type', 'categoria')
-                                    ->get()
-                                    ->pluck('name', 'id')
-                                    ->toArray();
+        $data['categorias'] = Taxonomy::getDataForSelect(
+            'vademecum', 'categoria'
+        );
 
-        return array('error' => 0, 'data' => $data);
+        return ['error' => 0, 'data' => $data];
     }
 
-    public function getSubCategorias($categoria_id)
+    public function getSubCategorias($categoryId)
     {
-        $subcategorias = Taxonomy::subcategoriaVademecum($categoria_id)
-                                    ->select('name', 'id', 'parent_taxonomia_id as categoria_id')
-                                    ->get();
+        $query = Taxonomy::vademecumSubcategory($categoryId);
+        $subcategorias = $query->get();
         return response()->json(compact('subcategorias'), 200);
     }
 }
