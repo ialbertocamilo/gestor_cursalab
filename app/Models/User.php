@@ -374,7 +374,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
-            $new_user = false;
             if ($user) :
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
