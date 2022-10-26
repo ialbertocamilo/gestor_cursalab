@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('checklists', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces');
             $table->unsignedBigInteger('external_id')->nullable()->index();
 
             $table->string('title');
