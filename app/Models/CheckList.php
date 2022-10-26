@@ -11,7 +11,8 @@ class CheckList extends BaseModel
     protected $fillable = [
         'title',
         'description',
-        'active'
+        'active',
+        'workspace_id'
     ];
 
     protected $casts = [
@@ -53,16 +54,6 @@ class CheckList extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $cursos_x_wk = Workspace::leftJoin('course_workspace as cw', 'workspaces.id', '=', 'cw.workspace_id')
-            ->leftJoin('courses as c', 'cw.course_id', '=', 'c.id')
-            ->leftJoin('checklist_relationships as cr', 'c.id', '=', 'cr.course_id')
-            ->groupBy('cr.checklist_id')
-            ->where('workspaces.id', $workspace->id)
-            ->whereNotNull('cr.checklist_id')
-            ->select('cr.checklist_id')
-            ->pluck('cr.checklist_id')
-            ->unique();
-
         $queryChecklist = CheckList::with([
             'checklist_actividades' => function ($q) {
                 $q->orderBy('active', 'desc')->orderBy('position');
@@ -70,7 +61,7 @@ class CheckList extends BaseModel
             'courses' => function ($q) {
                 $q->select('courses.id', 'courses.name');
             }
-        ])->whereIn('id', $cursos_x_wk);
+        ])->where('workspace_id', $workspace->id);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';

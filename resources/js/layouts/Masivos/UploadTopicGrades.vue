@@ -108,7 +108,14 @@
 </template>
 
 <script>
+const percentLoader = document.getElementById('percentLoader');
+const number_socket = Math.floor(Math.random(6)*1000000);
 export default {
+    props:{
+        user_id:{
+            required:true
+        }
+    },  
     data() {
         return {
             base_url: '/importar-notas',
@@ -131,9 +138,15 @@ export default {
             },
         };
     },
-
     mounted() {
         this.getInitialData();
+        window.Echo.channel(`upload-topic-grades.${this.user_id}.${number_socket}`).listen('MassiveUploadTopicGradesProgressEvent',result=>{
+            if(percentLoader){
+                if(result.percent){
+                    percentLoader.innerHTML = `${result.percent}%`;
+                }
+            }
+        })
     },
     methods: {
         getInitialData() {
@@ -171,7 +184,7 @@ export default {
             const only_qualified_topics = vue.select.evaluation_type === 'assessable' ? 1 : 0;
             vue.arrays.topics = course.topics.filter(topic => topic.assessable == only_qualified_topics);
         },
-        uploadExcel() {
+        async uploadExcel() {
             let vue = this;
             if (!vue.archivo) {
                 vue.showAlert("Aviso! Debe seleccionar un archivo", 'warning');
@@ -182,12 +195,14 @@ export default {
             formData.append("file", vue.archivo);
             formData.append("course", vue.select.course);
             formData.append("evaluation_type", vue.select.evaluation_type);
+            formData.append("number_socket", number_socket);
+            
             vue.select.topics.forEach(topic => formData.append("topics[]", topic));
-
-            vue.$http.post(`${vue.base_url}/upload`, formData)
+            percentLoader.innerHTML = ``;
+            await vue.$http.post(`${vue.base_url}/upload`, formData)
                 .then(({data}) => {
                     // console.log(data.data.info);
-                    const has_error_messages = data.data.info.length > 0;
+                    const has_error_messages = (data.data) ? data.data.info.length > 0 : true;
 
                     if (!has_error_messages) {
                         const success_message = data.data.msg;

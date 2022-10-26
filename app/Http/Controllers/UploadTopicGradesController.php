@@ -46,7 +46,6 @@ class UploadTopicGradesController extends Controller
     public function upload(MassiveUploadTopicGradesRequest $request)
     {
         $data = $request->validated();
-//        dd($data);
 //        if (count($data['topics'] ? []) === 0) return $this->error('No se ha seleccionado ningún tema.');
 
         $import = new MassiveUploadTopicGrades($data);

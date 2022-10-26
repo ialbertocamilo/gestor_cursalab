@@ -2,18 +2,19 @@
 
 namespace App\Imports;
 
+use App\Models\User;
+use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Summary;
-use App\Models\SummaryCourse;
-use App\Models\SummaryTopic;
-use App\Models\SummaryUser;
 use App\Models\Taxonomy;
-use App\Models\Topic;
-use App\Models\User;
+use App\Models\SummaryUser;
+use App\Models\SummaryTopic;
+use App\Models\SummaryCourse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use App\Events\MassiveUploadTopicGradesProgressEvent;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class MassiveUploadTopicGrades implements ToCollection
@@ -29,13 +30,14 @@ class MassiveUploadTopicGrades implements ToCollection
     public mixed $evaluation_type;
     public mixed $topics = [];
     public mixed $topic_states = null;
-
+    private $updated_users_id = [];
+    private $number_socket = 0;
     public function __construct($data)
     {
         $this->evaluation_type = $data['evaluation_type'];
         $this->course_id = $data['course'];
         $this->topics = $data['topics'] ?? [];
-
+        $this->number_socket = $data['number_socket'];
         $this->topic_states = [];
         $this->source = [];
     }
@@ -47,12 +49,14 @@ class MassiveUploadTopicGrades implements ToCollection
         $this->course = Course::find($this->course_id);
 
         $this->topic_states = Taxonomy::getData('topic', 'user-status')->get();
-//        info("topic_states");
-//        info($this->topic_states->toArray());
         $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
-
-
+        $percent_sent = [];
         for ($i = 1; $i < $count; $i++) {
+            $currente_percent = round(($i/$count)*100);
+            if(($currente_percent % 10) == 0 && !in_array($currente_percent,$percent_sent)){
+                $percent_sent[] = $currente_percent;
+                event(new MassiveUploadTopicGradesProgressEvent($currente_percent,$this->number_socket));
+            }
             $document_user = $excelData[$i][0];
             $grade = $excelData[$i][1];
             if(!$document_user){
@@ -107,6 +111,7 @@ class MassiveUploadTopicGrades implements ToCollection
 //            info($topics->pluck('id')->toArray());
             $this->uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData[$i]);
         }
+        Summary::updateUsersByCourse($this->course,$this->updated_users_id);
     }
 
     public function uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData)
@@ -177,11 +182,12 @@ class MassiveUploadTopicGrades implements ToCollection
         }
 
         if ($a_topic_was_created) {
-            SummaryCourse::getCurrentRowOrCreate($this->course, $user);
-            SummaryCourse::updateUserData($this->course, $user, update_attempts: false);
+            $this->updated_users_id[] = $user->id;
+            // SummaryCourse::getCurrentRowOrCreate($this->course, $user);
+            // SummaryCourse::updateUserData($this->course, $user, update_attempts: false);
 
-            SummaryUser::getCurrentRowOrCreate($user, $user);
-            SummaryUser::updateUserData($user);
+            // SummaryUser::getCurrentRowOrCreate($user, $user);
+            // SummaryUser::updateUserData($user);
         }
     }
 
