@@ -382,7 +382,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $user->update($data);
 
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
-                    $user_document = $this->syncDocumentCriterionValue(user: $user, old_document: $old_document, new_document: $data['document']);
+                    $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
                     $user_document = CriterionValue::whereRelation('criterion', 'code', 'document')
                         ->where('value_text', $old_document)->first();
@@ -390,7 +390,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             else :
 
                 $user = self::create($data);
-                $user_document = $this->syncDocumentCriterionValue(user: $user, old_document: null, new_document: $data['document']);
+                $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
 
             endif;
 
@@ -416,7 +416,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function syncDocumentCriterionValue($user, $old_document, $new_document)
+    public function syncDocumentCriterionValue($old_document, $new_document)
     {
         $document_criterion = Criterion::where('code', 'document')->first();
 
