@@ -69,6 +69,66 @@ class Migration_2 extends Model
         self::insertEscuelasData($escuelas_data, $output);
     }
 
+    protected function migrateEscuelasNombre($output)
+    {
+
+        $db = self::connect();
+
+        $schools = School::disableCache()->whereNotNull('external_id')->get();
+        $categorias = $db->getTable('categorias')
+            ->select('id', 'config_id')
+            ->get();
+
+        $bar = $output->createProgressBar($categorias->count());
+        $output->info("UPDATE SCHOOLS NAME");
+        $bar->start();
+
+        foreach ($schools as $school) {
+            $bar->advance();
+
+            $categoria = $categorias->where('id', $school->external_id)->first();
+
+            if ($categoria) {
+                $name = "M{$categoria->config_id}-$school->name";
+                $school->update([
+                    'name' => $name,
+                ]);
+            }
+        }
+
+        $bar->finish();
+        $output->newLine();
+    }
+
+    protected function migrateCursosNombre($output){
+        $db = self::connect();
+
+        $courses = Course::disableCache()->whereNotNull('external_id')->get();
+        $cursos = $db->getTable('cursos')
+            ->select('id', 'config_id')
+            ->get();
+
+        $bar = $output->createProgressBar($cursos->count());
+        $output->info("UPDATE COURSES NAME");
+        $bar->start();
+
+        foreach ($courses as $course) {
+            $bar->advance();
+
+            $curso = $cursos->where('id', $course->external_id)->first();
+
+            if ($curso) {
+                $name = "M{$curso->config_id}-$course->name";
+                $course->update([
+                    'name' => $name,
+                ]);
+            }
+        }
+
+        $bar->finish();
+        $output->newLine();
+    }
+
     protected function migrateCursos($output)
     {
         $cursos_data = self::setCursosData($output);
@@ -83,6 +143,48 @@ class Migration_2 extends Model
         self::insertTemasData($temas_data, $output);
     }
 
+    protected function migrateMediaTopics($output)
+    {
+        $db = self::connect();
+
+        $media_temas = $db->getTable('media_temas')->get();
+
+        $topics = Topic::disableCache()->whereNotNull('external_id')->select('id')->get();
+        $data = [];
+        $bar = $output->createProgressBar($media_temas->count());
+        $bar->start();
+
+        foreach ($media_temas as $media) {
+            $bar->advance();
+
+            $topic = $topics->where('external_id', $media->tema_id)->first();
+
+            if (!$topic) {
+                info("[migrateMediaTopics] No se encuentra el media_tema_id-{$media->tema_id} en los temas migrados");
+                continue;
+            }
+
+            $data[] = [
+                'topic_id' => $media->tema_id,
+
+                'title' => $media->nombre,
+                'value' => $media->valor,
+
+                'type_id' => $media->tipo,
+                'embed' => $media->embed,
+                'downloadable' => $media->descarga,
+                'position' => $media->orden,
+
+                'created_at' => $media->created_at,
+                'updated_at' => $media->updated_at,
+            ];
+        }
+        $bar->finish();
+        $output->newLine();
+
+        $this->makeChunkAndInsert($data, 'media_topics', $output);
+    }
+
     protected function migrateCurricula()
     {
 
@@ -95,7 +197,7 @@ class Migration_2 extends Model
 
         $categorias = $db->getTable('categorias')
             ->select(
-                'id', 'nombre', 'descripcion', 'imagen', 'orden',
+                'id', 'config_id', 'nombre', 'descripcion', 'imagen', 'orden',
                 'plantilla_diploma', 'reinicios_programado',
                 'estado', 'created_at', 'updated_at')
             ->get();
@@ -106,11 +208,12 @@ class Migration_2 extends Model
 
         foreach ($categorias as $escuela) {
             $bar->advance();
+            $name = "M{$escuela->config_id}-$escuela->nombre";
 
             $data['schools'][] = [
                 'external_id' => $escuela->id,
 
-                'name' => $escuela->nombre,
+                'name' => $name,
                 'description' => $escuela->descripcion,
 
                 'imagen' => $escuela->imagen,
@@ -133,7 +236,7 @@ class Migration_2 extends Model
 
     protected function insertEscuelasData($data, $output)
     {
-        $this->makeChunkAndInsert($data['schools'], 'schools', $output);
+        $this->makeChunkAndInsert($data['schools'] ?? [], 'schools', $output);
 
         $uc_workspace = $this->uc_workspace;
         $schools = School::disableCache()->whereNotNull('external_id')->get();
@@ -151,7 +254,7 @@ class Migration_2 extends Model
 
         $cursos = $db->getTable('cursos')
             ->select(
-                'id', 'nombre', 'descripcion', 'imagen', 'orden',
+                'id', 'config_id', 'nombre', 'descripcion', 'imagen', 'orden',
                 'plantilla_diploma', 'reinicios_programado', 'c_evaluable', 'libre',
                 'categoria_id', 'requisito_id',
                 'estado', 'created_at', 'updated_at')
@@ -202,13 +305,13 @@ class Migration_2 extends Model
 
     protected function insertCursosData($data, $output)
     {
-        $this->makeChunkAndInsert($data['cursos'], 'courses', $output);
+        $this->makeChunkAndInsert($data['cursos'] ?? [], 'courses', $output);
 
         $schools = School::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
         $courses = Course::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
 
         $course_school = [];
-        foreach ($data['escuela_curso'] as $relation) {
+        foreach ($data['escuela_curso'] ?? [] as $relation) {
             $course = $courses->where('external_id', $relation['curso_id'])->first();
             $school = $schools->where('external_id', $relation['escuela_id'])->first();
 

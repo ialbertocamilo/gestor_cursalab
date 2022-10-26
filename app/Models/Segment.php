@@ -150,14 +150,19 @@ class Segment extends BaseModel
 
     public function setDataSegmentationByDocument(Segment $segment)
     {
+        $criterion_value_documents = CriterionValue::whereIn('id', $segment->values->pluck('criterion_value_id'))
+            ->pluck('value_text');
+
         $criteria_selected = User::query()
             ->select('id', 'name', 'surname', 'lastname', 'document')
-            ->withWhereHas('criterion_values', function ($q) use ($segment) {
-                $q->select('id', 'value_text')
-                    ->whereIn('id', $segment->values->pluck('criterion_value_id'))
-                    ->whereRelation('criterion', 'code', 'document');
-            })
-            ->limit(50)->get();
+            ->whereIn('document', $criterion_value_documents)
+//            ->withWhereHas('criterion_values', function ($q) use ($segment) {
+//                $q->select('id', 'value_text')
+//                    ->whereIn('id', $segment->values->pluck('criterion_value_id'))
+//                    ->whereRelation('criterion', 'code', 'document');
+//            })
+//            ->limit(50)
+            ->get();
 
         $temp = [];
         foreach ($criteria_selected as $user) {

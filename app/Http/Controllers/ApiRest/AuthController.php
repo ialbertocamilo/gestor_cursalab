@@ -10,15 +10,15 @@ use App\Models\Usuario;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Http\Request;
+
+class SubworkspaceInMaintenance extends Exception {};
 
 class AuthController extends Controller
 {
     public function login(LoginAppRequest $request)
     {
         // Stop login process and show maintenance message
-
         if (env('MAINTENANCE_MODE')) {
             return $this->error(
                 config('errors.maintenance_message'), 503
@@ -68,8 +68,15 @@ class AuthController extends Controller
             } else {
                 return $this->error('No autorizado.', 401);
             }
-        } catch (Exception $e) {
-            //           info($e);
+
+        } 
+        catch (SubworkspaceInMaintenance $e){
+            return $this->error(
+                    config('errors.maintenance_subworkspace_message'), 503
+                );
+        }
+        catch (Exception $e) {
+            info($e);
             Error::storeAndNotificateException($e, request());
             return $this->error('Server error.', 500);
         }
@@ -80,6 +87,17 @@ class AuthController extends Controller
         $user = Auth::user();
         $user->tokens()->delete();
         $token = $user->createToken('accessToken')->accessToken;
+
+        // Stop login to users from specific workspaces 
+        $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
+
+        if ($user->subworkspace_id == 29 AND $user->external_id) {
+            
+            // return $this->error("Usuario inactivo temporalmente. Migración en progreso.", http_code: 401);
+            return $this->error(
+                config('errors.maintenance_ucfp'), 503
+            );
+        }
 
         if (!$user->active)
             return $this->error("Usuario inactivo.", http_code: 401);
@@ -107,7 +125,7 @@ class AuthController extends Controller
             "apellido" => $user->lastname,
             "full_name" => $user->fullname,
             'criteria' => $user->criterion_values,
-            'rol_entrenamiento' => $user->getTrainingRole(),
+            // 'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
             'can_be_host' => $can_be_host
@@ -189,5 +207,14 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => 560
         ]);
+    }
+
+    public function checkForMaintenanceModeSubworkspace($subworkspace_id){
+        if (!empty(env('MAINTENANCE_SUBWORKSPACES'))) {
+            $subworkspace_maintenance_array = explode (",", env('MAINTENANCE_SUBWORKSPACES'));
+            if (in_array($subworkspace_id, $subworkspace_maintenance_array)) {
+                throw new SubworkspaceInMaintenance();
+            }
+        }
     }
 }

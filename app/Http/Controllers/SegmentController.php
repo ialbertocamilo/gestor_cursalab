@@ -81,29 +81,36 @@ class SegmentController extends Controller
         $workspace = get_current_workspace();
 
         $users = User::query()
-            ->withWhereHas('criterion_values', function ($q) use ($data) {
-                $q->select('id', 'value_text')
-                    // ->where('value_text', 'like', "%{$data['filter_text']}%")
-                    ->whereRelation('criterion', 'code', 'document');
-            })
+//            ->withWhereHas('criterion_values', function ($q) use ($data) {
+//                $q->select('id', 'value_text')
+//                    // ->where('value_text', 'like', "%{$data['filter_text']}%")
+//                    ->whereRelation('criterion', 'code', 'document');
+//            })
             ->when($data['filter_text'] ?? null, function ($q) use ($data) {
                 $q->filterText($data['filter_text']);
-                // ->withWhereHas('criterion_values', function ($q) use ($data) {
-                //     $q->select('id', 'value_text')
-                //         // ->where('value_text', 'like', "%{$data['filter_text']}%")
-                //         ->whereRelation('criterion', 'code', 'document');
-                // });
             })
             ->when($documents ?? null, function ($q) use ($documents) {
                 $q->whereIn('document', $documents);
             })
             ->select('id', 'name', 'surname', 'lastname', 'document')
             ->whereRelation('subworkspace', 'parent_id', $workspace?->id)
-            ->limit(50)->get();
+            ->limit(100)->get();
 
-        $users = SegmentSearchUsersResource::collection($users);
+//        $users = SegmentSearchUsersResource::collection($users);
+        $temp = [];
+        foreach ($users as $user) {
+            $criterion_value_id = CriterionValue::where('value_text', $user->document)->first()?->id;
+            if ($criterion_value_id){
+                $temp[] = [
+                    'document' => $user->document,
+                    'fullname' => $user->fullname,
+                    'criterion_value_id' => $criterion_value_id,
+                ];
+            }
+        }
 
-        return $this->success($users);
+//        return $this->success($users);
+        return $this->success($temp);
     }
 
     public function syncSegmentValuesType()
