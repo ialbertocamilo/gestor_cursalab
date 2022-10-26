@@ -23,6 +23,7 @@
                             clearable dense
                             :items="selects.modules"
                             v-model="filters.module_id"
+                            :itemText="'name'"
                             label="Módulos"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
@@ -115,6 +116,7 @@ export default {
                         type: 'route',
                         route: 'scorm_route',
                         route_type: 'external',
+                        disable_btn: true
                     },
                     {
                         text: "Editar",
