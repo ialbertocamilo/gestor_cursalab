@@ -53,7 +53,7 @@ class MassiveUploadTopicGrades implements ToCollection
         $percent_sent = [];
         for ($i = 1; $i < $count; $i++) {
             $currente_percent = round(($i/$count)*100);
-            if(($currente_percent % 10) == 0 && !in_array($currente_percent,$percent_sent)){
+            if($currente_percent==0 ||(($currente_percent % 5) == 0 && !in_array($currente_percent,$percent_sent))){
                 $percent_sent[] = $currente_percent;
                 event(new MassiveUploadTopicGradesProgressEvent($currente_percent,$this->number_socket));
             }
