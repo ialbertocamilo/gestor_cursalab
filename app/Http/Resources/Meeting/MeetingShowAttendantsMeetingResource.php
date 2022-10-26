@@ -27,7 +27,7 @@ class MeetingShowAttendantsMeetingResource extends JsonResource
             'id' => $this->id,
             'usuario_id' => $this->usuario ? $this->usuario->id : '',
             'dni' => $this->usuario ? $this->usuario->document : '',
-            'nombre' => $this->usuario ? $this->usuario->fullname: '',
+            'nombre' => $this->usuario ? $this->usuario->name.' '.$this->usuario->lastname.' '.$this->usuario->surname : '',
             'config' => $this->usuario ? $this->usuario->config : '',
 
             'carrera' => $carrera->nombre ?? 'No definido',

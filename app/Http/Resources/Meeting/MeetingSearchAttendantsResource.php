@@ -16,9 +16,16 @@ class MeetingSearchAttendantsResource extends JsonResource
      */
     public function toArray($request)
     {
-
+        # get hosts by workspace
         $idsCoHostCareers = Usuario::getCurrentHostsIds();
+        # get hosts by workspace
+
         $isCoHost = in_array($this->id, $idsCoHostCareers);
+
+        # set type id
+        $cohost_id = $request->cohost ? $request->cohost->id : NULL;
+        $normal_id = $request->normal ? $request->normal->id : NULL;
+        # set type id
 
         return [
             'id' => $this->id,
@@ -29,7 +36,7 @@ class MeetingSearchAttendantsResource extends JsonResource
             'carrera' => $carrera->nombre ?? 'Sin carrera',
             'isCoHost' => $isCoHost,
 
-            'type_id' => '',
+            'type_id' => $isCoHost ? $cohost_id : $normal_id,
 
             'invitations' => $this->invitations ?? [],
             'invitations_count' => $this->invitations
