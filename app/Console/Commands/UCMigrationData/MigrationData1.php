@@ -72,6 +72,12 @@ class MigrationData1 extends Command
             info("\n fixSubworkpsaceIdUsers MIGRATED");
         }
 
+        if ($type === 'fix_grupo_values_relations'){
+            Migration_1::fixGrupoValuesRelationships($bar);
+            $this->info("\n fix_grupo_values_relations MIGRATED");
+            info("\n fix_grupo_values_relations MIGRATED");
+        }
+
 
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
