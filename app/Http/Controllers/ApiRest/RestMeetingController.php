@@ -26,10 +26,10 @@ class RestMeetingController extends Controller
 {
     // public function __construct()
     // {
-    //     $this->middleware('auth.jwt', ['except' => [
-    //         'zoomWebhookEndMeeting','finishMeeting'
-    //     ]]);
-    //     return auth()->shouldUse('api');
+    //     $this->middleware('auth')
+    //          ->except(['zoomWebhookEndMeeting', 'finishMeeting']);
+
+    //     // return auth()->shouldUse('api');
     // }
 
     public function listUserMeetings(Request $request)
@@ -161,9 +161,10 @@ class RestMeetingController extends Controller
 
     public function zoomWebhookEndMeeting(Request $request)
     {
-        $data = $request->all();
+        info(__function__, $request->all());
 
-        Meeting::finalizeWebhook($data, 'zoom');
+        $data = $request->all();
+        $response = Meeting::finalizeWebhook($data, 'zoom');
     }
 
     public function getFormData(Request $request)
@@ -205,7 +206,7 @@ class RestMeetingController extends Controller
 
         Meeting::storeRequest($data, $meeting);
 
-        return $this->success(['msg' => 'Reunión actualizada correctamente.']);
+        return $this->success(['msg' => 'Reunión actualizada correctamente']);
     }
 
     public function edit(Meeting $meeting)

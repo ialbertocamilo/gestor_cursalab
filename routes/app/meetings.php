@@ -7,7 +7,7 @@ Route::controller(RestMeetingController::class)->group(function() {
 	Route::get('/get-data', 'getData');
 	Route::get('/list', 'listUserMeetings');
 
-	Route::post('/zoom/webhook-end-meeting', 'zoomWebhookEndMeeting');
+	// Route::post('/zoom/webhook-end-meeting', 'zoomWebhookEndMeeting');
 
 	Route::get('/get-form-data', 'getFormData');
 	Route::post('/store', 'store');

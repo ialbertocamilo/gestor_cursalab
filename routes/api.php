@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
 use App\Http\Controllers\ApiRest\RestController;
+use App\Http\Controllers\ApiRest\RestMeetingController;
 use App\Http\Controllers\ApiRest\RestReportesSupervisores;
 use App\Http\Controllers\Auth\ForgotPasswordApiController;
 use App\Http\Controllers\Auth\ResetPasswordApiController;
@@ -79,6 +80,8 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::post('registrar_soporte_login', [RestAyudaController::class, 'registra_ayuda_login']);
     Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
     Route::prefix('checklist')->group(base_path('routes/app/checklist.php'));
+    Route::post('/meetings/zoom/webhook-end-meeting', [RestMeetingController::class, 'zoomWebhookEndMeeting']);
+
 });
 
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);

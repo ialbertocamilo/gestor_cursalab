@@ -217,18 +217,12 @@ class GlossaryController extends Controller
     {
         $modulos = Criterion::getValuesForSelect('module');
         $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
+        $st_carreras = Criterion::getValuesByCode('position_name');
 
-//      $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
-//                                  ->select('id', 'value_text as nombre')
-//                                  ->where('active', ACTIVE)
-//                                  ->groupBy('parent_id')
-//                                  ->get();
+        // $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
 
-        $carreras = Criterion::test_getValuesForSelect('module');
         // $carreras = Criterion::getCriteriaFromWorkspace(25);
         // $criterios = CriterionValue::getCriteriaFromWorkspace(25);
-        // $criterios = CriterionValue::getCriteriaFromWorkspace(25);
-
         // $carreras = Workspace::find(25)->criterionWorkspace;
 
         // $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
@@ -236,19 +230,22 @@ class GlossaryController extends Controller
         //                             ->where('active', ACTIVE)
         //                             ->get();
 
-        // $carreras = $carreras->groupBy('parent_id');
 
-//        foreach ($carreras as $carrera) {
-//            $carrera->glosario_categorias = [];
-//        }
+        $carreras = [];
 
-//        $carreras = Carrera::with('glosario_categorias:id,nombre')
-//                           ->where('estado', 1)
-//                           ->get(['id', 'config_id', 'nombre']);
-//
-//        $carreras = $carreras->groupBy('config_id');
+        foreach ($modulos as $key => $val) {
+            foreach($st_carreras as $carrera) {
+                $carrera->glosario_categorias = $categorias;
+                $resCarrera[] = $carrera;
+            }
+            $carreras[$key] = $resCarrera;
+        }
 
-        return $this->success(get_defined_vars());
+       // $carreras = Carrera::with('glosario_categorias:id,nombre')
+       //                    ->where('estado', 1)
+       //                    ->get(['id', 'config_id', 'nombre']);
+
+       return $this->success(compact('modulos','categorias','carreras'));
     }
 
     public function carreerCategoriesStore(Request $request)
@@ -267,12 +264,6 @@ class GlossaryController extends Controller
 
         return $selects;
     }
-
-
-
-
-
-
 
     public function response($result, $route = 'glosarios.index')
     {
