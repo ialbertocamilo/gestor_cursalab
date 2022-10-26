@@ -13,10 +13,12 @@
         "axios": "^0.25",
         "bootstrap": "^4.0.0",
         "jquery": "^3.2",
+        "laravel-echo": "^1.14.1",
         "laravel-mix": "^2.0",
         "lodash": "^4.17.19",
         "popper.js": "^1.12",
         "postcss": "^8.1.14",
+        "pusher-js": "^7.4.0",
         "vue": "^2.5.7",
         "vuex": "^3.6.2",
         "webpack-bundle-analyzer": "^4.6.1"
