@@ -44,6 +44,7 @@ class VerifyTopicEvaluation extends Command
                     ->withCount('questions')
                     ->whereHas('course')
                     ->whereHas('questions')
+                    ->where('evaluation_verified','<>', 1)
                     ->where('assessable', 1)
                     ->get();
 
