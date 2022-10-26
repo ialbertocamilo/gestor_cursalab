@@ -51,7 +51,17 @@ class MassiveUploadTopicGrades implements ToCollection
         $this->topic_states = Taxonomy::getData('topic', 'user-status')->get();
         $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
         $this->course->load('segments.values');
-
+        $topics = count($this->topics) > 0
+        ? Topic::disableCache()->with('course')->where('course_id', $this->course_id)->whereIn('id', $this->topics)->get()
+        : Topic::disableCache()->with('course')->where('course_id', $this->course_id)
+            ->where(function ($q) {
+                $q->where('assessable', INACTIVE); // NO evaluables
+                $q->orWhere(function ($q2) { // Evaluables calificados
+                    $q2->where('assessable', ACTIVE)
+                        ->whereRelation('evaluation_type', 'code', 'qualified');
+                });
+            })
+            ->get();
         $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'get_records');
         $percent_sent = [];
         for ($i = 1; $i < $count; $i++) {
@@ -104,17 +114,7 @@ class MassiveUploadTopicGrades implements ToCollection
             // }
 
             $sub_workspace_settings = $user->getSubworkspaceSetting('mod_evaluaciones');
-            $topics = count($this->topics) > 0
-                ? Topic::disableCache()->with('course')->where('course_id', $this->course_id)->whereIn('id', $this->topics)->get()
-                : Topic::disableCache()->with('course')->where('course_id', $this->course_id)
-                    ->where(function ($q) {
-                        $q->where('assessable', INACTIVE); // NO evaluables
-                        $q->orWhere(function ($q2) { // Evaluables calificados
-                            $q2->where('assessable', ACTIVE)
-                                ->whereRelation('evaluation_type', 'code', 'qualified');
-                        });
-                    })
-                    ->get();
+            
 //            info("TOPICS ID::");
 //            info($topics->pluck('id')->toArray());
             $this->uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData[$i]);
