@@ -68,7 +68,7 @@ class Vademecum extends Model
 
     public function actions()
     {
-        return $this->morphMany(UsuarioAccion::class, 'model');
+        return $this->morphMany(UserAction::class, 'model');
     }
 
     /*
@@ -103,7 +103,13 @@ class Vademecum extends Model
                         compact('user_id', 'type_id')
                     );
 
-        $row->increment('score', $quantity);
+        if ($row->score === null) {
+            $row->score = 0;
+            $row->save();
+        }
+
+        $row->score += $quantity;
+        $row->save();
 
         return $row;
     }
@@ -112,11 +118,11 @@ class Vademecum extends Model
      * Load filtered paginated records from database
      *
      * @param $request
-     * @param $api
-     * @param $paginate
+     * @param bool $api
+     * @param int $paginate
      * @return LengthAwarePaginator
      */
-    protected function search($request, $api = false, $paginate = 20)
+    protected function search($request, bool $api = false, int $paginate = 20)
     {
         $relationships = ['modules', 'category', 'subcategory', 'media'];
 
@@ -153,8 +159,21 @@ class Vademecum extends Model
 
         if ($request->module_id) {
 
+            // Filter vademecum with specific module
+
             $query->whereHas('modules', function ($q) use ($request) {
                 $q->where('module_id', $request->module_id);
+            });
+
+        } else {
+
+            // Filter vademecum from modules of the current workspace
+
+            $modulesIds = Workspace::loadSubWorkspaces(['criterion_value_id'])
+                ->pluck('criterion_value_id');
+
+            $query->whereHas('modules', function ($q) use ($modulesIds) {
+                $q->whereIn('module_id', $modulesIds);
             });
         }
 

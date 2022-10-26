@@ -4,6 +4,7 @@ use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
 use App\Http\Controllers\ApiRest\RestController;
 use App\Http\Controllers\ApiRest\RestReportesSupervisores;
+use App\Http\Controllers\ApiRest\RestVademecumController;
 use App\Http\Controllers\Auth\ForgotPasswordApiController;
 use App\Http\Controllers\Auth\ResetPasswordApiController;
 use App\Http\Controllers\FirebaseController;
@@ -73,6 +74,11 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::get('reportes-supervisores/init', [RestReportesSupervisores::class, 'init']);
 
     Route::prefix('entrenamiento')->group(base_path('routes/app/checklist.php'));
+
+    Route::get('vademecum/selects', [RestVademecumController::class, 'getSelects']);
+    Route::get('vademecum/search', [RestVademecumController::class, 'loadUserModuleVademecum']);
+    Route::get('vademecum/subcategorias/{categoryId}', [RestVademecumController::class, 'getSubCategorias']);
+    Route::post('vademecum/store-visit/{vademecum}', [RestVademecumController::class, 'storeVisit']);
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
