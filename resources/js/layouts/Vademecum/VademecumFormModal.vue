@@ -26,6 +26,7 @@
                             clearable
                             :items="selects.modules"
                             v-model="resource.modules"
+                            :itemText="'name'"
                             label="Módulos"
                             multiple
                             return-object
