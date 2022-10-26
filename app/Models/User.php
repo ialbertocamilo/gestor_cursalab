@@ -696,6 +696,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 endif;
             }
         }
+        unset($user->active_cycle);
     }
 
     public function validateUCCyclesRule(Segment $segment, $user): bool
