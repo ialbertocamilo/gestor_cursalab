@@ -87,7 +87,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
     Route::prefix('checklist')->group(base_path('routes/app/checklist.php'));
     Route::post('/meetings/zoom/webhook-end-meeting', [RestMeetingController::class, 'zoomWebhookEndMeeting']);
-
+    Route::post('/meetings/{meeting}/finish', [RestMeetingController::class,'finishMeeting']);
 });
 
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);

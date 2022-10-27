@@ -163,9 +163,6 @@ class RestMeetingController extends Controller
 
     public function zoomWebhookEndMeeting(Request $request)
     {
-        // info(__function__, $request->all());
-        dd(__function__, $request->all());
-
         $data = $request->all();
         $response = Meeting::finalizeWebhook($data, 'zoom');
     }
