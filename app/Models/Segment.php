@@ -156,11 +156,12 @@ class Segment extends BaseModel
         $criteria_selected = User::query()
             ->select('id', 'name', 'surname', 'lastname', 'document')
             ->whereIn('document', $criterion_value_documents)
-//            ->withWhereHas('criterion_values', function ($q) use ($segment) {
-//                $q->select('id', 'value_text')
+            //->withWhereHas('criterion_values', function ($q) use ($segment) {
+            ->with('criterion_values', function ($q) use ($segment) {
+                $q->select('id', 'value_text')
 //                    ->whereIn('id', $segment->values->pluck('criterion_value_id'))
-//                    ->whereRelation('criterion', 'code', 'document');
-//            })
+                    ->whereRelation('criterion', 'code', 'document');
+            })
 //            ->limit(50)
             ->get();
 
