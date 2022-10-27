@@ -53,8 +53,11 @@ class RestVademecumController extends Controller
 
     public function getSelects(): array
     {
-        $data['categorias'] = Taxonomy::getDataForSelect(
-            'vademecum', 'categoria'
+        $user = auth('api')->user();
+        $subworkspace = Workspace::find($user->subworkspace_id);
+
+        $data['categorias'] = Taxonomy::vademecumCategory(
+            $subworkspace->parent_id
         );
 
         return ['error' => 0, 'data' => $data];
@@ -62,7 +65,12 @@ class RestVademecumController extends Controller
 
     public function getSubCategorias($categoryId)
     {
-        $query = Taxonomy::vademecumSubcategory($categoryId);
+        $user = auth('api')->user();
+        $subworkspace = Workspace::find($user->subworkspace_id);
+
+        $query = Taxonomy::vademecumSubcategory(
+            $subworkspace->parent_id, $categoryId
+        );
         $subcategorias = $query->get();
         return response()->json(compact('subcategorias'), 200);
     }

@@ -229,7 +229,7 @@ class VademecumController extends Controller
     public function categorias_search(Request $request)
     {
 
-        $query = Taxonomy::vademecumCategory()
+        $query = Taxonomy::vademecumCategory(get_current_workspace()->id)
                          ->withCount('children');
 
         if ($request->q)
@@ -332,7 +332,9 @@ class VademecumController extends Controller
      */
     public function subcategorias_search(Taxonomy $categoria, Request $request)
     {
-        $query = Taxonomy::vademecumSubcategory($categoria->id);
+        $query = Taxonomy::vademecumSubcategory(
+            get_current_workspace()->id, $categoria->id
+        );
 
         if ($request->q)
             $query->where('name', 'like', "%{$request->q}%");
