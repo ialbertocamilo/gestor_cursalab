@@ -216,7 +216,7 @@ class MassiveUploadTopicGrades implements ToCollection
 
     public function getNewSummaryQualifiedTopicStatus($grade, $min_grade)
     {
-        $code = $grade > $min_grade ? 'aprobado' : 'desaprobado';
+        $code = $grade >= $min_grade ? 'aprobado' : 'desaprobado';
 
         return $this->topic_states->where('code', $code)->first();
     }
