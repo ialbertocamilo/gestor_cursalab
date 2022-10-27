@@ -122,6 +122,7 @@ class Error extends Model
         if ( $this->errorIsFaviconIco($request->getRequestUri()) ) return false;
         if ( $this->errorIsUnauthenticated($message, $filename) ) return false;
         if ( $this->errorIsZoom3001($exception, $code, $additional_message) ) return false;
+        if ( $this->errorIs404($code, $request->getRequestUri(), $filename) ) return false;
         if ( $this->errorIsFileMaps($request->getRequestUri(), $filename) ) return false;
 
         $platform_code = $request->is('api/*') ? 'app' : 'web';
@@ -345,6 +346,32 @@ class Error extends Model
 
             if ($body_code == 3001 AND $code == 404)
                 return true;
+        }
+
+        return false;
+    }
+
+    public function errorIs404($code, $uri, $filename)
+    {
+        if ($code == 404) {
+
+            $folders = [
+                '/uploads/scorm',
+            ];
+
+            $files = [
+                'AbstractRouteCollection.php',
+                // 'RouteCollection.php',
+            ];
+
+            if (in_array($filename, $files)) {
+
+                foreach ($folders as $key => $folder) {
+
+                    if ( str_starts_with($uri, $folder) ) 
+                        return true;
+                }
+            }
         }
 
         return false;

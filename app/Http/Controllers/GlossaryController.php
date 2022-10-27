@@ -233,12 +233,11 @@ class GlossaryController extends Controller
 
         $carreras = [];
 
-        foreach ($modulos as $key => $val) {
+        foreach ($modulos as $modulo) {
             foreach($st_carreras as $carrera) {
                 $carrera->glosario_categorias = $categorias;
-                $resCarrera[] = $carrera;
             }
-            $carreras[$key] = $resCarrera;
+            $carreras[$modulo->id] = $st_carreras;
         }
 
        // $carreras = Carrera::with('glosario_categorias:id,nombre')
