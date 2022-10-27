@@ -67,6 +67,8 @@ class RestMeetingController extends Controller
         $meetings = Meeting::search($request);
         MeetingAppResource::collection($meetings);
 
+        info(__function__);
+
         $result = json_decode($meetings->toJson(), true);
         $result['data'] = collect($result['data'])->groupBy('key')->all();
 
@@ -161,10 +163,9 @@ class RestMeetingController extends Controller
 
     public function zoomWebhookEndMeeting(Request $request)
     {
-        info(__function__, $request->all());
-
+        info(__function__);
         $data = $request->all();
-        $response = Meeting::finalizeWebhook($data, 'zoom');
+        Meeting::finalizeWebhook($data, 'zoom');
     }
 
     public function getFormData(Request $request)

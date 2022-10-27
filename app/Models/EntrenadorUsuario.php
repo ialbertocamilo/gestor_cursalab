@@ -10,7 +10,7 @@ class EntrenadorUsuario extends Model
 {
     protected $table = 'trainer_user';
 
-    protected $fillable = ['trainer_id', 'user_id'];
+    protected $fillable = ['trainer_id', 'user_id', 'active'];
     public $timestamps = false;
     public function user()
     {
@@ -132,7 +132,7 @@ class EntrenadorUsuario extends Model
 
         $alumnos_ids = EntrenadorUsuario::where('trainer_id', $entrenador['data_usuario']->id)->get();
         $queryDataAlumnos = User::whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.document', 'users.subworkspace_id', DB::raw("CONCAT(users.document, ' - ', users.name) as text"));
+            ->select('users.id', 'users.name', 'users.lastname', 'users.surname', 'users.document', 'users.subworkspace_id', DB::raw("CONCAT(users.document, ' - ', users.name) as text"));
 
         if (!empty($filtro))
             $queryDataAlumnos->where(function ($query) use ($filtro) {
@@ -149,8 +149,8 @@ class EntrenadorUsuario extends Model
         } else {
             $dataAlumnos->each(function ($value, $key) use ($alumnos_ids) {
                 $subw = Workspace::where('id', $value->subworkspace_id)->first();
-
-                $value->estado = $alumnos_ids->where('user_id', $value->id)->first()->estado;
+                $value->name = $value->fullname;
+                $value->estado = $alumnos_ids->where('user_id', $value->id)->first()->active;
                 $value->loading = false; // Modal Ver Alumnos : v-switch->value
                 $value->botica = (!is_null($subw)) ? $subw->name : '';
             });
@@ -173,7 +173,7 @@ class EntrenadorUsuario extends Model
             return $entrenador;
         }
         // TODO: Lista total de alumnos
-        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->get();
+        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
 
         $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())

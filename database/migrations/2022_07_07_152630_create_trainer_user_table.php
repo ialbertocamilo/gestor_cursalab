@@ -14,8 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::create('trainer_user', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('trainer_id')->nullable()->constrained('users');
             $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->boolean('active')->nullable()->default(true);
         });
     }
 

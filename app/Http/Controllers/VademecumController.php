@@ -258,8 +258,10 @@ class VademecumController extends Controller
             'type' => 'categoria',
             'group' => 'vademecum',
             'name' => $request->name,
+            'workspace_id' => get_current_workspace()->id,
             'active' => 1
         ]);
+
 
         return $this->success(['msg' => 'Categoría creada correctamente.']);
     }
@@ -366,10 +368,11 @@ class VademecumController extends Controller
             'type' => 'subcategoria',
             'name' => $request->name,
             'parent_id' => $categoria->id,
+            'workspace_id' => get_current_workspace()->id,
             'active' => 1
         ]);
 
-        return $this->success(['msg' => 'Sub Categoría creada correctamente.']);
+        return $this->success(['msg' => 'Sub categoría creada correctamente.']);
     }
 
     /**
