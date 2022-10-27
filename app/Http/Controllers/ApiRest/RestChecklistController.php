@@ -36,7 +36,7 @@ class RestChecklistController extends Controller
     public function marcarActividad(Request $request)
     {
         $alumno_id = $request->alumno_id;
-        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->first();
+        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->where('active', 1)->first();
         $checklist_id = $request->checklist_id;
 
         $estado = $request->estado;

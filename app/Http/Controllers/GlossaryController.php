@@ -249,6 +249,8 @@ class GlossaryController extends Controller
 
     public function carreerCategoriesStore(Request $request)
     {
+        return $request->all();
+
         return Glossary::storeCarreerCategories($request->all());
     }
 
