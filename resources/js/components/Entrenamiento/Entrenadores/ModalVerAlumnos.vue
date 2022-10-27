@@ -100,11 +100,11 @@
                     "
                 >
                     <v-col cols="12" md="2" lg="2" class="d-flex justify-start"> DNI</v-col>
-                    <v-col cols="12" md="5" lg="5" class="d-flex justify-start"> Nombres y Apellidos</v-col>
-                    <v-col cols="12" md="3" lg="3" class="d-flex justify-start"> Workspace</v-col>
-                    <!-- <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'" class="d-flex justify-center">
+                    <v-col cols="12" md="4" lg="4" class="d-flex justify-start"> Nombres y Apellidos</v-col>
+                    <v-col cols="12" md="2" lg="2" class="d-flex justify-start"> Workspace</v-col>
+                    <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'" class="d-flex justify-center">
                         Estado
-                    </v-col> -->
+                    </v-col>
                     <v-col cols="12" md="2" lg="2" class="d-flex justify-center" v-if="isMaster"> Eliminar</v-col>
                 </v-row>
                 <v-virtual-scroll
@@ -119,13 +119,13 @@
                             <v-col cols="12" md="2" lg="2" class="py-2">
                                 {{ item.document }}
                             </v-col>
-                            <v-col cols="12" md="5" lg="5" class="py-2">
+                            <v-col cols="12" md="4" lg="4" class="py-2">
                                 {{ item.name }}
                             </v-col>
-                            <v-col cols="12" md="3" lg="3" class="py-2">
+                            <v-col cols="12" md="2" lg="2" class="py-2">
                                 {{ item.botica }}
                             </v-col>
-                            <!-- <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'"
+                            <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'"
                                    class="d-flex justify-center py-2">
                                 <v-switch
                                     inset
@@ -134,7 +134,7 @@
                                     @change="cambiarEstado(item)"
                                     :disabled="item.loading"
                                 ></v-switch>
-                            </v-col> -->
+                            </v-col>
                             <v-col cols="12" md="2" lg="2" class="pt-0 text-center" v-if="isMaster">
                                 <v-btn icon color="primary" style="" @click="dialog_delete= true; data_eliminar = item">
                                     <v-icon>mdi-trash-can</v-icon>

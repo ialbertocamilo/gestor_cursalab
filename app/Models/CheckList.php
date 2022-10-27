@@ -116,7 +116,7 @@ class CheckList extends BaseModel
 
     protected function getChecklistsByAlumno($alumno_id): array
     {
-        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->first();
+        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->where('active', 1)->first();
         $entrenador_id = !is_null($entrenador) ? $entrenador->trainer_id : null;
 
         $response['error'] = false;
@@ -190,6 +190,7 @@ class CheckList extends BaseModel
         $response['checklists_completados'] = $checklistCompletados;
         $response['porcentaje'] = $checklists->count() > 0 ? (float)number_format((($checklistCompletados / $checklists->count()) * 100), 2) : 0;
         $response['checklists'] = $checklists->sortByDesc('disponible')->values()->all();
+        $response['active'] = !is_null($entrenador);
         return $response;
     }
 
