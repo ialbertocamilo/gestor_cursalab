@@ -17,7 +17,7 @@ class SegmentObserver
     {
 
         if($segment->model()->first()->active){
-            Summary::updateUsersByCourse($segment->model()->first());
+//            Summary::updateUsersByCourse($segment->model()->first());
         }
     }
 
@@ -30,7 +30,7 @@ class SegmentObserver
     public function updated(Segment $segment)
     {
         if($segment->wasChange('updated_at') && $segment->model()->first()->active){
-//            Summary::updateUsersByCourse($segment->model()->first());
+            Summary::updateUsersByCourse($segment->model()->first());
         }
     }
 
