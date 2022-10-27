@@ -931,7 +931,7 @@ class Migration_1 extends Model
             ->select('curricula.id as curricula_id', 'curricula.carrera_id', 'curricula.curso_id', 'ciclos.nombre as ciclo_nombre', 'all_criterios',
                 'carreras.config_id', 'curricula.created_at', 'curricula.updated_at')
 //            ->limit(200)
-            ->whereIn('curso_id', [804, 805])
+//            ->whereIn('curso_id', [804, 805])
             ->get();
 
         $curricula_grouped_by_course_id = $curriculas->groupBy('curso_id');
