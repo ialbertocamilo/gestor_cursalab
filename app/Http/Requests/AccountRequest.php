@@ -42,6 +42,7 @@ class AccountRequest extends FormRequest
             'password' => 'nullable',
             'token' => 'nullable',
             'refresh_token' => 'nullable',
+            'workspace_id' => 'nullable',
 
         ];
 
@@ -50,6 +51,7 @@ class AccountRequest extends FormRequest
 
     public function validationData()
     {
+        $data['workspace_id'] = get_current_workspace_indexes('id'); #añadiendo workspace
         $data['service_id'] = $this->has('service') ? $this->service : null;
         $data['plan_id'] = $this->has('plan') ? $this->plan : null;
         $data['type_id'] = $this->has('type') ? $this->type : null;

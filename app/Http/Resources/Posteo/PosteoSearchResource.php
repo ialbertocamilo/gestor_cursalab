@@ -22,18 +22,18 @@ class PosteoSearchResource extends JsonResource
                 : $topic->questions->where('type.code', 'written-answer')->count()
             )
             : null;
-//        info($topic->questions);
-//        info( $topic->questions->where('type.code', 'select-options')->count());
+        //        info($topic->questions);
+        //        info( $topic->questions->where('type.code', 'select-options')->count());
         return [
             'id' => $topic->id,
             'nombre' => $topic->name,
             'tipo_evaluacion' => $topic->evaluation_type->name ?? '---', //$topic->getTipoEvaluacion(),
             'image' => get_media_url($topic->imagen),
             'active' => (bool)$topic->active,
-            'orden' => $topic->position,
+            'position' => $topic->position,
             'assessable' => $topic->assessable ? 'Sí' : 'No',
             'es_evaluable' => $topic->assessable,
-//            'preguntas_count' => $topic->questions_count,
+            //            'preguntas_count' => $topic->questions_count,
             'preguntas_count' => $questions_count,
 
             'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $topic->id]),

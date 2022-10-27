@@ -53,7 +53,8 @@ class Segment extends BaseModel
             ->with([
                 'field_type:id,name,code',
                 'values' => function ($q) use ($workspace) {
-                    //                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
+
+//                    $values = CriterionValue::whereRelation('workspaces', 'id', $workspace->id)->get();
                     // $q->select('id', 'value_text', 'position');
 //                    $q->whereIn('id', $values->pluck('id')->toArray());
                     $q
@@ -149,14 +150,19 @@ class Segment extends BaseModel
 
     public function setDataSegmentationByDocument(Segment $segment)
     {
+        $criterion_value_documents = CriterionValue::whereIn('id', $segment->values->pluck('criterion_value_id'))
+            ->pluck('value_text');
+
         $criteria_selected = User::query()
             ->select('id', 'name', 'surname', 'lastname', 'document')
-            ->withWhereHas('criterion_values', function ($q) use ($segment) {
-                $q->select('id', 'value_text')
-                    ->whereIn('id', $segment->values->pluck('criterion_value_id'))
-                    ->whereRelation('criterion', 'code', 'document');
-            })
-            ->limit(50)->get();
+            ->whereIn('document', $criterion_value_documents)
+//            ->withWhereHas('criterion_values', function ($q) use ($segment) {
+//                $q->select('id', 'value_text')
+//                    ->whereIn('id', $segment->values->pluck('criterion_value_id'))
+//                    ->whereRelation('criterion', 'code', 'document');
+//            })
+//            ->limit(50)
+            ->get();
 
         $temp = [];
         foreach ($criteria_selected as $user) {
@@ -185,6 +191,7 @@ class Segment extends BaseModel
 
             $this->storeSegmentationByDocument($request->all());
 
+            $this->updateSegmentToLaunchObeserver($request);
             DB::commit();
 
         } catch (\Exception $e) {
@@ -202,7 +209,13 @@ class Segment extends BaseModel
 
         return $this->success(['msg' => $message], $message);
     }
-
+    private function updateSegmentToLaunchObeserver($data){
+        $segments_id = array_column($data->segments, 'id');
+        info($segments_id);
+        self::whereIn('id', $segments_id)->update([
+            'updated_at'=>now()
+        ]);
+    }
     public function storeDirectSegmentation($data)
     {
         $segments_id = array_column($data->segments, 'id');
@@ -218,7 +231,7 @@ class Segment extends BaseModel
         foreach ($data->segments as $key => $segment_row) {
             if (count($segment_row['criteria_selected']) == 0) continue;
 
-            $data = [
+            $segment_data = [
                 'type_id' => $direct_segmentation->id,
                 'code_id' => $code_segmentation?->id,
                 'model_type' => $data->model_type,
@@ -228,7 +241,7 @@ class Segment extends BaseModel
             ];
 
             $segment = str_contains($segment_row['id'], "new-segment-") ?
-                Segment::create($data)
+                Segment::create($segment_data)
                 : Segment::find($segment_row['id']);
 
             $values = [];
@@ -393,4 +406,108 @@ class Segment extends BaseModel
 
         return $hasAValidDateRange;
     }
+
+    /**
+     * Extract criterion value ids from segment
+     * values related to a supervisor
+     *
+     * @param int $supervisorId
+     * @return array|void
+     */
+    public static function loadSupervisorSegmentCriterionValues(int $supervisorId)
+    {
+        // Load taxonomy for supervisors
+
+        $supervisorTaxonomy = Taxonomy::query()
+            ->where('group', 'segment')
+            ->where('code', 'user-supervise')
+            ->where('type', 'code')
+            ->where('active', 1)
+            ->first();
+
+        // Load criteria values ids
+
+        return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
+            ->where('segments.model_id', $supervisorId)
+            ->where('segments.code_id', $supervisorTaxonomy->id)
+            ->where('segments.active', 1)
+            ->whereNull('segments_values.deleted_at')
+            ->select([
+                'segments_values.criterion_id',
+                'segments_values.criterion_value_id'
+            ])
+            ->orderBy('criterion_id')
+            ->get();
+    }
+
+    public static function loadSupervisorSegmentUsersIds($supervisorId, $workspaceId): array|string
+    {
+
+        $criterionValues = Segment::loadSupervisorSegmentCriterionValues($supervisorId);
+
+        if (count($criterionValues) === 0) return [];
+
+        // Generate conditions
+
+        $criterionIds = [];
+        $previousCriterionId = null;
+        $WHERE = [];
+        foreach ($criterionValues as $value) {
+
+            $criterionId = $value->criterion_id;
+
+            if ($criterionId !== $previousCriterionId) {
+
+                if (!in_array($criterionId, $criterionIds))
+                    $criterionIds[] = $criterionId;
+
+                $previousCriterionId = $criterionId;
+
+                $criterionValuesIds = $criterionValues->where('criterion_id', $criterionId)
+                                                      ->pluck('criterion_value_id')
+                                                      ->toArray();
+                $WHERE[] = "(
+                    scv.criterion_id = $criterionId and
+                    scv.criterion_value_id in (" .implode(',', $criterionValuesIds). ")
+                )";
+            }
+        }
+
+        // When no condition was generated, stop method execution
+
+        if (count($WHERE) === 0) return [];
+
+        $WHERE = implode(' or ', $WHERE);
+        $criterionCount = count($criterionIds);
+        $criterionIds = implode(',', $criterionIds);
+        $modulesIds = Workspace::loadSubWorkspacesIds($workspaceId)->toArray();
+        $query = "
+            select
+                user_id
+            from (
+                -- Users' criterion values
+                select
+                    cvu.user_id,
+                    cvu.criterion_value_id,
+                    cv.criterion_id
+                from
+                    criterion_value_user cvu
+                        inner join criterion_values cv on cv.id = cvu.criterion_value_id
+                        inner join users u on u.id = cvu.user_id
+                where cv.criterion_id in ($criterionIds) and
+                      u.subworkspace_id in (".implode(',', $modulesIds).")
+            ) scv
+            where
+                $WHERE
+
+            group by
+                user_id
+            having count(user_id) = $criterionCount
+        ";
+
+        return collect(DB::select(DB::raw($query)))
+                ->pluck('user_id')
+                ->toArray();
+    }
 }
+

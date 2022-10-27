@@ -2,7 +2,7 @@
     <v-dialog :max-width="width" v-model="value" @click:outside="closeModal">
         <v-card elevation="0">
             <v-card-title class="default-dialog-title">
-                Alumnos de {{ entrenador.nombre }} - {{entrenador.dni}}
+                Alumnos de {{ entrenador.name }} - {{entrenador.document}}
                 <v-spacer></v-spacer>
                 <v-btn icon :ripple="false" color="white" @click="closeModal">
                     <v-icon v-text="'mdi-close'"/>
@@ -67,7 +67,7 @@
                                 :items="results_search"
                                 :loading="isLoading"
                                 item-text="text"
-                                item-value="dni"
+                                item-value="document"
                                 clearable
                                 no-data-text="No hay resultados"
                                 return-object
@@ -81,7 +81,7 @@
                             >
                                 <template v-slot:selection="data">
                                     <v-chip small v-bind="data.attrs" :input-value="data.selected">
-                                        {{ data.item.nombre }}
+                                        {{ data.item.name }}
                                     </v-chip>
                                 </template>
                             </v-autocomplete>
@@ -100,11 +100,11 @@
                     "
                 >
                     <v-col cols="12" md="2" lg="2" class="d-flex justify-start"> DNI</v-col>
-                    <v-col cols="12" md="4" lg="4" class="d-flex justify-start"> Nombres y Apellidos</v-col>
-                    <v-col cols="12" md="2" lg="2" class="d-flex justify-start"> Botica</v-col>
-                    <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'" class="d-flex justify-center">
+                    <v-col cols="12" md="5" lg="5" class="d-flex justify-start"> Nombres y Apellidos</v-col>
+                    <v-col cols="12" md="3" lg="3" class="d-flex justify-start"> Workspace</v-col>
+                    <!-- <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'" class="d-flex justify-center">
                         Estado
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="12" md="2" lg="2" class="d-flex justify-center" v-if="isMaster"> Eliminar</v-col>
                 </v-row>
                 <v-virtual-scroll
@@ -117,15 +117,15 @@
                     <template v-slot:default="{ item }">
                         <v-row class="" style="border-top: 1px solid #e0e0e0;">
                             <v-col cols="12" md="2" lg="2" class="py-2">
-                                {{ item.dni }}
+                                {{ item.document }}
                             </v-col>
-                            <v-col cols="12" md="4" lg="4" class="py-2">
-                                {{ item.nombre }}
+                            <v-col cols="12" md="5" lg="5" class="py-2">
+                                {{ item.name }}
                             </v-col>
-                            <v-col cols="12" md="2" lg="2" class="py-2">
+                            <v-col cols="12" md="3" lg="3" class="py-2">
                                 {{ item.botica }}
                             </v-col>
-                            <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'"
+                            <!-- <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'"
                                    class="d-flex justify-center py-2">
                                 <v-switch
                                     inset
@@ -134,7 +134,7 @@
                                     @change="cambiarEstado(item)"
                                     :disabled="item.loading"
                                 ></v-switch>
-                            </v-col>
+                            </v-col> -->
                             <v-col cols="12" md="2" lg="2" class="pt-0 text-center" v-if="isMaster">
                                 <v-btn icon color="primary" style="" @click="dialog_delete= true; data_eliminar = item">
                                     <v-icon>mdi-trash-can</v-icon>
@@ -154,7 +154,7 @@
                 <v-card-text class="py-3">
                     <v-row>
                         <v-col cols="12" md="12" lg="12">
-                            Se eliminará a <strong>{{ data_eliminar ? data_eliminar.nombre : '' }}</strong> con <strong>DNI {{ data_eliminar ? data_eliminar.dni : '' }}</strong> de la lista de alumnos de {{ entrenador.nombre }}.
+                            Se eliminará a <strong>{{ data_eliminar ? data_eliminar.name : '' }}</strong> con <strong>DNI {{ data_eliminar ? data_eliminar.document : '' }}</strong> de la lista de alumnos de {{ entrenador.name }}.
                             <br>
                             <br>
                             <div class="text-center">
@@ -203,9 +203,10 @@ export default {
             }
             if (vue.entrenador.alumnos)
                 return vue.entrenador.alumnos.filter((alumno) => {
+                    if(alumno.name != '' && alumno.name != null && alumno.document != '' && alumno.document != null)
                     return (
-                        alumno.nombre.toLowerCase().includes(vue.txt_filtrar_alumnos.toLowerCase()) ||
-                        alumno.dni.toLowerCase().includes(vue.txt_filtrar_alumnos.toLowerCase())
+                        alumno.name.toLowerCase().includes(vue.txt_filtrar_alumnos.toLowerCase()) ||
+                        alumno.document.toLowerCase().includes(vue.txt_filtrar_alumnos.toLowerCase())
                     );
                 });
         }
@@ -250,8 +251,8 @@ export default {
             let vue = this;
             alumno.loading = true;
             const data = {
-                entrenador: vue.entrenador.dni,
-                alumno: alumno.dni,
+                entrenador: vue.entrenador.document,
+                alumno: alumno.document,
                 estado: alumno.estado
             };
             axios
@@ -285,7 +286,7 @@ export default {
 
             const data = {
                 entrenador_id: vue.entrenador.id,
-                entrenador_dni: vue.entrenador.dni,
+                entrenador_dni: vue.entrenador.document,
                 alumnos: vue.alumno_seleccionados,
                 filtro: "",
                 estado: 1

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
+
 class Summary extends BaseModel
 {
     protected function setUserLastTimeEvaluation($model, $user = NULL)
@@ -135,4 +137,26 @@ class Summary extends BaseModel
 
         }
     }
+    protected function updateUsersByCourse($course,$users_id = null){
+        // $course->load('segments.values');
+        // $users_id_segmented = $course->usersSegmented($course->segments,'users_id');
+        $users_id_segmented  = ($users_id) ? $users_id :SummaryCourse::where('course_id',$course->id)->pluck('user_id');
+        self::setSummaryUpdates($users_id_segmented,[$course->id]);
+    }
+    protected function setSummaryUpdates($user_ids, $course_ids = null)
+    {
+        $data = [
+            'summary_user_update' => true,
+            'required_update_at' => now(),
+        ];
+
+        if ($course_ids) {
+            $course_ids = implode(',',$course_ids);
+            $data['summary_course_update'] = true;
+            User::whereIn('id', $user_ids)->whereNull('summary_course_data')->update(['summary_course_data'=>'0']);
+            $data['summary_course_data'] = DB::raw("CONCAT(summary_course_data,',','{$course_ids}')");
+        }
+        User::whereIn('id', $user_ids)->update($data);
+    }
+
 }

@@ -17,37 +17,37 @@ use Illuminate\Support\Facades\Broadcast;
 //     return (int) $user->id === (int) $id;
 // });
 
-Broadcast::channel('users.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+// Broadcast::channel('users.{id}', function ($user, $id) {
+//     return (int) $user->id === (int) $id;
+// });
 
 
-Broadcast::channel('test', function () {
-    // return (int) $user->id === (int) $id;
-    return ['chann' => 'test', 'test' => true];
-});
+// Broadcast::channel('test', function () {
+//     // return (int) $user->id === (int) $id;
+//     return ['chann' => 'test', 'test' => true];
+// });
 
-Broadcast::channel('gaming-test', function ($user) {
-    // return (int) $user->id === (int) $id;
-    return ['id' => $user->id, 'name' => $user->fullname];
-});
+// Broadcast::channel('gaming-test', function ($user) {
+//     // return (int) $user->id === (int) $id;
+//     return ['id' => $user->id, 'name' => $user->fullname];
+// });
 
-Broadcast::channel('chat',function($user){
-    // return $user;
-    return ['chann' => 'chat', 'chat' => true, 'user' => $user];
-});
+// Broadcast::channel('chat',function($user){
+//     // return $user;
+//     return ['chann' => 'chat', 'chat' => true, 'user' => $user];
+// });
 
-Broadcast::channel('public', function () {
-    return true;
-});
+// Broadcast::channel('public', function () {
+//     return true;
+// });
 
-Broadcast::channel('private.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+// Broadcast::channel('private.{id}', function ($user, $id) {
+//     return (int) $user->id === (int) $id;
+// });
 
-// Broadcast::channel('presence.{groupId}', function ($user,int $groupId) {
-Broadcast::channel('presence.{groupId}', function ($user, int $groupId) {
-    // if ($user->canJoinGroup($groupId)) {
-        return ['id' => $user->id, 'name' => $user->name, 'qwerty' => 'abcde', 'groupId' => $groupId];
-    // }
-});
+// // Broadcast::channel('presence.{groupId}', function ($user,int $groupId) {
+// Broadcast::channel('presence.{groupId}', function ($user, int $groupId) {
+//     // if ($user->canJoinGroup($groupId)) {
+//         return ['id' => $user->id, 'name' => $user->name, 'qwerty' => 'abcde', 'groupId' => $groupId];
+//     // }
+// });

@@ -126,7 +126,7 @@ return [
             ]) : [],
         ],
 
-        'mysql_master' => array(
+/*        'mysql_master' => array(
             'driver'    => 'mysql',
             'host' => env('DB2_HOST', '127.0.0.1'),
             'port' => env('DB2_PORT', '3306'),
@@ -138,7 +138,7 @@ return [
             'prefix'    => '',
             'strict' => false,
             'engine' => null,
-        ),
+        ),*/
 
         'pgsql_external' => [
             'driver' => 'pgsql',

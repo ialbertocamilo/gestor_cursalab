@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Course;
+use App\Models\Summary;
 
 class CourseObserver
 {
@@ -26,19 +27,19 @@ class CourseObserver
     public function updated(Course $course)
     {
         if ( $course->isDirty('active') ) {
+            Summary::updateUsersByCourse($course);
+            // $action = $course->active ? 'actived' : 'inactived';
 
-            $action = $course->active ? 'actived' : 'inactived';
+            // if ($course->hasBeenSegmented()) {
 
-            if ($course->hasBeenSegmented()) {
+            //     // Usuarios impactados por segmentación del curso
+            //     $users = $course->getUsersBySegmentation();
 
-                // Usuarios impactados por segmentación del curso
-                $users = $course->getUsersBySegmentation();
-
-                Summary::updateUsersDataByCourse($users, $course, $action);
-                    // Actualizar resumen de usuarios (cantidades y avance)
-                        // - filtrar por usuarios impactados en resumenes
-                        // calcular y actualizar datos
-            }
+            //     Summary::updateUsersDataByCourse($users, $course, $action);
+            //         // Actualizar resumen de usuarios (cantidades y avance)
+            //             // - filtrar por usuarios impactados en resumenes
+            //             // calcular y actualizar datos
+            // }
 
 
 
@@ -56,12 +57,15 @@ class CourseObserver
      */
     public function deleted(Course $course)
     {
-        if ($course->hasBeenSegmented()) {
-
-            $users = $course->getUsersBySegmentation();
-
-            Summary::updateUsersDataByCourse($users, $course, 'deleted');
+        if($course->active){
+            Summary::updateUsersByCourse($course);
         }
+        // if ($course->hasBeenSegmented()) {
+
+        //     $users = $course->getUsersBySegmentation();
+
+        //     Summary::updateUsersDataByCourse($users, $course, 'deleted');
+        // }
     }
 
     /**

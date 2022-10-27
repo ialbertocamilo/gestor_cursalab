@@ -27,7 +27,7 @@ class SupervisorController extends Controller
             ->withCount([
                 'segments' => function ($q) {
                     $q->
-                        whereRelation('code', 'code', 'user-supervise');
+                    whereRelation('code', 'code', 'user-supervise');
                 },
             ])
             ->whereRelation('segments.code', 'code', 'user-supervise');
@@ -115,7 +115,7 @@ class SupervisorController extends Controller
             ->whereRelation('code', 'code', 'user-supervise')
             ->get();
 
-        foreach ($segments as $segment){
+        foreach ($segments as $segment) {
             $segment->values()->delete();
             $segment->delete();
         }
@@ -134,7 +134,7 @@ class SupervisorController extends Controller
         $workspace = get_current_workspace();
 
         $data = Criterion::query()
-            ->whereHas('workspaces', function($q) use($workspace){
+            ->whereHas('workspaces', function ($q) use ($workspace) {
                 $q->where('id', $workspace->id);
             })
             ->select('name as nombre', 'id')->get();

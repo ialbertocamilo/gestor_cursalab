@@ -3,7 +3,12 @@ use Illuminate\Support\Facades\DB;
 
 $user = auth()->user();
 $roles = $user->getRoles();
+$subworkspace = get_current_workspace();
+$accounts_count = \App\Models\Account::where('active', ACTIVE)->where('workspace_id', $subworkspace->parent_id ?? NULL)->count();
+
+$show_meeting_section = $accounts_count > 0 ? "admin" : "admin_DISABLE";
 @endphp
+
 @include('layouts.header')
 
 <?php
@@ -34,6 +39,7 @@ if (isset($fullScreen)) {
 <div>
     <div id="pageloader">
         <img src="{{ asset('img/small_loader.gif') }}" alt="Cargando...">
+        <span  style="color:blue" id="percentLoader"></span>
     </div>
 </div>
 
@@ -43,7 +49,7 @@ if (isset($fullScreen)) {
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
                 {{-- <v-app> --}}
-                <side-menu :roles="{{ json_encode($roles) }}" />
+                <side-menu :roles="{{ json_encode($roles) }}" :show_meeting_section="'{{ $show_meeting_section }}'" />
                 {{-- </v-app> --}}
             </div>
         </div>

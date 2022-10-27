@@ -78,7 +78,7 @@ class LoginController extends Controller
         // In maintenance mode, stop login process
 
         if ($request->email != 'kevin@cursalab.io') {
-            
+
             if (env('MAINTENANCE_MODE')) {
 
                 throw ValidationException::withMessages([
@@ -86,6 +86,7 @@ class LoginController extends Controller
                 ]);
             }
         }
+
 
         $this->validateLogin($request);
 

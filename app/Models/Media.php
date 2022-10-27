@@ -55,7 +55,7 @@ class Media extends BaseModel
     {
 
         // Get file values
-
+        // info('Inicia');
         $ext = $file->getClientOriginalExtension();
 
         if (!$name) {
@@ -110,8 +110,9 @@ class Media extends BaseModel
         } else if (in_array(strtolower($ext), $valid_ext6)) {
             $path = 'office-files/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext5)) {
+            // info('Inicia Nombre');
             $name_scorm = $this->verify_scorm($file,$name);
-
+            // info('Fin Nombre');
             // Set values for file in S3 bucket
 
 //            $path = 'scorm/' . $fileName;
@@ -161,7 +162,7 @@ class Media extends BaseModel
         }
 
         // Return media or path;
-
+        // info('Fin');
         if ($return_media)
             return $media;
 
@@ -174,14 +175,28 @@ class Media extends BaseModel
         $find_main_file = false;
         $tipos_scorm = config('constantes.tipos_scorm');
         $nombre = '';
-        for( $i = 0; $i < $zip->numFiles; $i++ ){
-            $stat = $zip->statIndex( $i );
-            if (!str_contains($stat['name'], '/') && in_array($stat['name'],$tipos_scorm)) {
-                // $nombre = str_replace(" ","-",strtolower($name)).'-'. rand(300, 600).'/'.$stat['name'];
-                $nombre = $stat['name'];
+        //Search in main folder
+        foreach ($tipos_scorm as $main_file_name) {
+            if($zip->statName($main_file_name)){
+                $nombre = $main_file_name;
                 $find_main_file = true;
-                if($stat['name']=='index.html'){
+                if($main_file_name=='index.html'){
                     break;
+                }
+            }
+        }
+        //if not found in main folder, verify only in subfolders
+        if (!$find_main_file) {
+            for( $i = 0; $i < $zip->numFiles; $i++ ){
+                $stat = $zip->statIndex($i);
+                foreach ($tipos_scorm as $main_file_name) {
+                    if (count(explode('/',$stat['name']))==2 && str_contains($stat['name'], '/'.$main_file_name)) {
+                        $nombre = $stat['name'];
+                        $find_main_file = true;
+                        if($main_file_name=='index.html'){
+                            break;
+                        }
+                    }
                 }
             }
         }

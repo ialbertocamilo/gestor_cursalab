@@ -14,16 +14,12 @@ class MeetingAppResource extends JsonResource
      */
     public function toArray($request)
     {
-        $usuario = auth()->user();
-
-        $cohost = $this->attendants->where('type.code', 'cohost')->where('usuario_id', $usuario->id)->first();
-
-        $attendant = $this->attendants->where('usuario_id', $usuario->id)->first();
+        $usuario_id = auth()->user()->id;
+        $cohost = $this->attendants->where('type.code', 'cohost')->where('usuario_id', $usuario_id)->first();
+        $attendant = $this->attendants->where('usuario_id', $usuario_id)->first();
 
         $was_present = ($attendant AND $attendant->first_login_at);
-
         $url = ($attendant AND $attendant->link) ? $attendant->link : $this->url;
-
         $isHostOrCohost = in_array($attendant->type->code, ['host', 'cohost']);
 
         return [
@@ -80,6 +76,7 @@ class MeetingAppResource extends JsonResource
 
             'type' => $this->type,
             'status' => $this->status,
+            'code' => $this->buildPrefix(),
 
             'is_embed' => $this->embed,
 
@@ -88,7 +85,8 @@ class MeetingAppResource extends JsonResource
                 'text' => $was_present ? 'Asistí' : 'No asistí', // Ausente
             ],
 
-            'current_usuario_is_host' => auth()->user()->id == $this->host->id,
+            // 'current_usuario_is_host' => auth()->user()->id == $this->host->id,
+            'current_usuario_is_host' => $usuario_id == $this->host->id,
             'current_usuario_is_cohost' => $cohost ? true : false,
 
             'attendants_count' => $this->attendants_count,

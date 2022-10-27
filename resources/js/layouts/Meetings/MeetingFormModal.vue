@@ -37,7 +37,7 @@
                             :items="selects.hosts"
                             v-model="resource.host"
                             label="Anfitrión"
-                            item-text="name"
+                            item-text="fullname"
                             return-object
                             :rules="rules.host"
                             @onChange="changeHost"
@@ -133,7 +133,7 @@
 <!--                                        max-width="70"-->
 <!--                                    />-->
                                     {{ resource.host.name ? '' : resource.host.dni + ' - ' }}
-                                    {{ resource.host.nombre || resource.host.name }}
+                                    {{ resource.host.fullname }}
                                     <!--                                    ({{ resource.host.apellido_paterno }}
                                                                         {{ resource.host.apellido_materno }}
                                                                         {{ resource.host.nombre }})-->
@@ -258,6 +258,14 @@
                     host_id: resource.host ? resource.host.id : null
                 }"
             />
+
+         <!--    <MeetingInfoCreateModal
+                width="45vw"
+                :options="modalInfoCreateMeeting"
+                :ref="modalInfoCreateMeeting.ref"
+                @onCancel="closeFormModal(modalInfoCreateMeeting)"
+            /> -->
+
         </template>
     </DefaultDialog>
 </template>
@@ -270,6 +278,7 @@ moment.locale("es");
 
 import Editor from "@tinymce/tinymce-vue";
 import MeetingSearchAttendants from "./MeetingSearchAttendants";
+import MeetingInfoCreateModal from './MeetingInfoCreateModal';
 import DefaultLogoImage from "../../components/globals/DefaultLogoImage";
 import MeetingItemListAttendant from "./MeetingItemListAttendant";
 import ModalScheduledMeetings from "./ModalScheduledMeetings";
@@ -285,6 +294,7 @@ export default {
         DefaultLogoImage,
         ModalScheduledMeetings,
         MeetingItemListAttendant,
+        MeetingInfoCreateModal,
         VueTimepicker,
         editor: Editor
     },
@@ -342,6 +352,14 @@ export default {
                 confirmLabel: 'Agregar',
                 cancelLabel: 'Cerrar',
             },
+           /* modalInfoCreateMeeting:{
+                ref: 'MeetingInfoCreateModal',
+                open: false,
+                base_endpoint: '/aulas-virtuales/cuentas',
+                resource:{ status: {color: null} },
+                hideConfirmBtn: true,
+                cancelLabel: 'Cerrar',
+            },*/
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 type: this.getRules(['required']),
@@ -426,10 +444,18 @@ export default {
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
+
+                      // console.log('data_post_meeting', data);
+
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
+
+                       /* setTimeout(() => {
+                          vue.openFormModal(vue.modalInfoCreateMeeting, null, null, 'Reunión creada correctamente')
+                          vue.modalInfoCreateMeeting.resource = data.data.status
+                        }, 500)*/
 
                     }).catch((error) => {
                     this.hideLoader()

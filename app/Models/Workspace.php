@@ -37,6 +37,11 @@ class Workspace extends BaseModel
         'reinicios_programado' => 'array',
     ];
 
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
+    }
+
     public function users()
     {
         return $this->hasMany(User::class, 'subworkspace_id');
@@ -60,7 +65,7 @@ class Workspace extends BaseModel
     public function criterionWorkspace()
     {
         return $this->belongsToMany(
-            Criterion::class,
+            Criterion::class
             // 'criterion_workspace',
             // 'workspace_id',
             // 'criterion_id'
@@ -362,5 +367,30 @@ class Workspace extends BaseModel
         }
 
         return $data;
+    }
+
+    #test functions
+    public static function loadSubWorkspaces($attributes)
+    {
+        // $workspaceId = get_current_workspace_indexes('id');
+        $workspace = get_current_workspace();
+
+        return Workspace::select($attributes)
+                        ->where('active', ACTIVE)
+                        ->where('parent_id', $workspace->id)
+                        ->get();
+    }
+
+    protected function loadSubWorkspacesSiblings($subworkspace, $attributes)
+    {
+        return Workspace::select($attributes)
+                        ->where('active', ACTIVE)
+                        ->where('parent_id', $subworkspace->parent_id)
+                        ->get();
+    }
+
+    public function criterion_workspace()
+    {
+        return $this->hasMany(CriterionValueWorkspace::class);
     }
 }

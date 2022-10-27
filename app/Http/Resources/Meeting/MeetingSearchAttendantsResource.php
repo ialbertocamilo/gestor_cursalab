@@ -22,8 +22,9 @@ class MeetingSearchAttendantsResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'dni' => $this->dni,
-            'nombre' => $this->nombre,
+            'dni' => $this->document,
+            'nombre' => $this->name.' '.$this->lastname.' '.$this->surname,
+            // 'subworkspace_id' => $this->config_id,
 
             'carrera' => $carrera->nombre ?? 'Sin carrera',
             'isCoHost' => $isCoHost,
@@ -34,7 +35,6 @@ class MeetingSearchAttendantsResource extends JsonResource
             'invitations_count' => $this->invitations
                                     ? $this->invitations->count()
                                     : 0,
-
             'config' => $this->config ?? [
                 'image' => '',
                 'logo' => ''

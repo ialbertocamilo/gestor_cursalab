@@ -223,6 +223,19 @@ function get_current_workspace()
     return null;
 }
 
+function get_current_workspace_indexes(string $key = NULL)
+{
+    $currWorkspace = get_current_workspace();
+
+    $currWorkspaceIndex = $currWorkspace->id;
+    $currSubworkspacesIndexes = $currWorkspace->subworkspaces->pluck('id');
+
+    $dynamicKeys = ['id' => $currWorkspaceIndex,
+                    'ids' => $currSubworkspacesIndexes ];
+    $stateKey = $dynamicKeys[$key] ?? true;
+
+    return is_bool($stateKey) ? $dynamicKeys : $stateKey;
+}
 
 function cache_clear_model($model)
 {

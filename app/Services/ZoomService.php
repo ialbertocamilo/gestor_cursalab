@@ -186,6 +186,8 @@ class ZoomService extends MeetingService
     {
         $chunks = $attendants->chunk(30)->all();
         $result = [];
+        $prefix = $meeting->buildPrefix();
+
 //        info("prepareBatchAttendantsData");
 //        info('meeting');
 //        info($meeting);
@@ -195,10 +197,12 @@ class ZoomService extends MeetingService
 
             $data = [
                 'auto_approve' => true,
-                'registrants' => $this->setDataForRegistrants($chunk),
+                'registrants_confirmation_email' => true,
+                'registrants' => $this->setDataForRegistrants($chunk, $prefix),
             ];
 
             $temp = $this->batchRegistration($meeting, $data)['registrants'];
+
             foreach ($temp as $item) {
 
                 $usuario_id = $this->getIdFromBatchResult($item);
@@ -225,14 +229,14 @@ class ZoomService extends MeetingService
         return $usuario_id;
     }
 
-    public function setDataForRegistrants($attendants)
+    public function setDataForRegistrants($attendants, $prefix)
     {
         $result = [];
         foreach ($attendants as $attendant) {
             $result[] = [
                 'email' => "user_{$attendant->usuario->id}_{$attendant->id}@cursalab.io",
-                'first_name' => $attendant->usuario->nombre,
-                'last_name' => "",
+                'first_name' => $prefix . ' - ' . $attendant->usuario->name,
+                'last_name' => $attendant->usuario->lastname,
             ];
         }
         return $result;
@@ -252,8 +256,8 @@ class ZoomService extends MeetingService
             $participantsGrouppedByIdentifier = $only_in_meeting->groupBy('registrant_id');
             $participantsGrouppedByIpAddress = $only_in_meeting->groupBy('ip_address');
 
-            $attendantsByIdentifier = Attendant::with('usuario:id,nombre,dni')->where('meeting_id', $meeting->id)->whereIn('identifier', $id_registrants)->get();
-            $attendantsByIpAddress = Attendant::with('usuario:id,nombre,dni')->where('meeting_id', $meeting->id)->whereIn('ip', $ip_registrants)->get();
+            $attendantsByIdentifier = Attendant::with('usuario:id,name,document')->where('meeting_id', $meeting->id)->whereIn('identifier', $id_registrants)->get();
+            $attendantsByIpAddress = Attendant::with('usuario:id,name,document')->where('meeting_id', $meeting->id)->whereIn('ip', $ip_registrants)->get();
 
             $unknownParticipants = Arr::pull($participantsGrouppedByIdentifier, '');
             $extra_participants = $unknownParticipants->groupBy('ip_address');

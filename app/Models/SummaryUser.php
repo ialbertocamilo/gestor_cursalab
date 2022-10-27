@@ -33,7 +33,9 @@ class SummaryUser extends Summary
 //        info("COUNT COURSES ASSIGNED :: ". $count_courses_assigned);
 
         $row_user = SummaryUser::getCurrentRow(null, $user);
-
+        if(!$row_user){
+            return true;
+        }
         $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
             ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))
             ->whereRelation('topic', 'assessable', ACTIVE)
@@ -81,7 +83,6 @@ class SummaryUser extends Summary
             'last_time_evaluated_at' => now(),
             'advanced_percentage' => $percent_general
         ];
-
         $row_user->update($user_data);
 
         return $row_user;

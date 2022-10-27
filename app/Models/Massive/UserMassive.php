@@ -89,6 +89,8 @@ class UserMassive implements ToCollection{
                 ];
             }
         }
+        cache_clear_model(User::class);
+        cache_clear_model(CriterionValue::class);
     }
     private function prepare_data_user($data_users,$data_criteria,$criteria){
         $user = [];

@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+// use App\Models\CriterionValueWorkspace;
+use App\Models\Course;
+use App\Models\Segment;
+use App\Models\User;
+use App\Models\Workspace;
 use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Session;
 
 class Usuario extends Model
@@ -44,9 +48,10 @@ class Usuario extends Model
     /**
      * obtener area asosiado a este usuaio
      */
+
     public function config()
     {
-        return $this->belongsTo(Abconfig::class, 'config_id');
+        return $this->belongsTo(Workspace::class, 'subworkspace_id');
     }
 
     public function modulo()
@@ -288,30 +293,23 @@ class Usuario extends Model
      * @param bool $idsOnly When true load users ids only
      * @return mixed
      */
-    protected function getCurrentHosts($idsOnly = false): mixed
-    {
-        // todo: criterion values should come from workspace configuration
-        $criterionValues = [6, 17]; // ids from "Monitor de Ventas"
-
-        // Load users who met specific criterion values (in this case careers)
-
-        // $users = User::join('criterion_value_user as crit_val_us', 'users.id', '=', 'crit_val_us.user_id')
-        //              ->whereIn('crit_val_us.criterion_value_id', $criterionValues);
-
-        $users = User::whereHas('subworkspace', function($q){
-            $q->where('active', ACTIVE);
-        })->toSql();
-        
-
-        if ($idsOnly) {
-            return $users->pluck('id')->toArray();
-        } else {
-            return $users->get();
-        }
-    }
 
     protected function getCurrentHostsIds() {
 
         return $this->getCurrentHosts(true);
+    }
+
+    protected function getCurrentHosts($indexOnly = false)
+    {
+        $workSpaceIndex = get_current_workspace_indexes('id');
+
+        # ==== criterios según segmentación (segmentacion directa). ====
+        $currSegment = Workspace::find($workSpaceIndex)->segments;
+
+        # ==== usuarios bajo criterio ====
+        $course = new Course;
+        $currUsers = $course->usersSegmented($currSegment, 'users_full');
+
+        return $indexOnly ? $currUsers->pluck('id')->toArray() : $currUsers;
     }
 }

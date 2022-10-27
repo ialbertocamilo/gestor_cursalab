@@ -6,12 +6,30 @@
                 <v-card-title>
                     Aulas Virtuales
                     <v-spacer/>
+                     <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
 <!--                    <v-btn icon color="primary"-->
 <!--                           @click="openFormModal(modalDirectionsOptions, null, null, 'Recomendaciones')"-->
 <!--                    >-->
 <!--                        <v-icon v-text="'mdi-dots-vertical'"/>-->
 <!--                    </v-btn>-->
+
+
+                <DefaultModalButton v-if="superuser"
+                    label="Configurar Anfitriones"
+                    @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
+
+                <SegmentFormModal
+                    :options="modalFormSegmentationOptions"
+                    width="55vw"
+                    model_type="App\Models\Workspace"
+                    :model_id="null"
+                    :ref="modalFormSegmentationOptions.ref"
+                    @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                    @onConfirm="closeSimpleModal(modalFormSegmentationOptions)"
+                  />
+
+
                     <DefaultInfoTooltip left
                         text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
 
@@ -144,14 +162,15 @@
 </template>
 
 <script>
+import SegmentFormModal from './../Blocks/SegmentFormModal';
 import MeetingFinishModal from "./MeetingFinishModal";
 import MeetingDirectionsModal from "./MeetingDirectionsModal";
 import MeetingDetailModal from "./MeetingDetailModal";
 import MeetingFormModal from "./MeetingFormModal";
 
 export default {
-    components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal,},
-    props: ['usuario_id'],
+    components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal, SegmentFormModal},
+    props: ['usuario_id', 'workspace_id', 'superuser'],
     data: () => ({
         dataTable: {
             endpoint: '/aulas-virtuales/search',
@@ -163,6 +182,7 @@ export default {
                 {text: "Nombre", value: "custom_meeting_name", sortable: false},
                 // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},
                 {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
+                {text: "Código", value: "prefix", sortable: false, align: 'center'},
                 {text: "Estado", value: "status", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
                 {text: "Fecha de inicio", value: "starts_at", align: 'center',},
@@ -243,6 +263,14 @@ export default {
             base_endpoint: '/aulas-virtuales',
             confirmLabel: 'Guardar',
             resource: 'reunión',
+        },
+        modalFormSegmentationOptions:{
+            ref: 'SegmentFormModal',
+            open: false,
+            persistent: true,
+            base_endpoint: '/segments',
+            confirmLabel: 'Guardar',
+            resource: 'segmentación',
         },
         // modalFormDuplicateOptions: {
         //     ref: 'MeetingFormlModal',

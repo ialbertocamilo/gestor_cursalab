@@ -21,12 +21,12 @@ class SourceMultimarca extends Model
         'type_id'
     ];
 
-    protected $connection = 'mysql2';
+    protected $connection = 'mysql_master';
 
     public static function insertSource($code,$type,$type_id)
     {
         $url = url('/');
-        $customer = DB::connection('mysql2')->table('customers')->where('route',$url)->first();
+        $customer = DB::connection('mysql_master')->table('customers')->where('route',$url)->first();
         if($customer){
             self::insert([
                 'code'=>$code,

@@ -4,42 +4,34 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Bouncer;
 
 class EntrenadorUsuario extends Model
 {
-    protected $table = 'entrenadores_usuarios';
+    protected $table = 'trainer_user';
 
-    protected $fillable = ['entrenador_id', 'usuario_id', 'estado'];
-
-    protected $hidden = [
-        'created_at', 'updated_at'
-    ];
-
-    public function usuario()
+    protected $fillable = ['trainer_id', 'user_id'];
+    public $timestamps = false;
+    public function user()
     {
-        return $this->belongsTo(Usuario::class, 'usuario_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // public function entrenador()
     // {
-    //     return $this->belongsTo('App\Usuario', 'entrenador_id');
+    //     return $this->belongsTo('App\Usuario', 'trainer_id');
     // }
 
     /*======================================================= SCOPES ====================================================================*/
 
-    public function scopeEstado($q, $estado)
+    public function scopeEntrenador($q, $trainer_id)
     {
-        return $q->where('estado', $estado);
-    }
-
-    public function scopeEntrenador($q, $entrenador_id)
-    {
-        return $q->where('entrenador_id', $entrenador_id);
+        return $q->where('trainer_id', $trainer_id);
     }
 
     public function scopeAlumno($q, $alumno_id)
     {
-        return $q->where('usuario_id', $alumno_id);
+        return $q->where('user_id', $alumno_id);
     }
 
     /*==============================================================================================================================*/
@@ -49,35 +41,38 @@ class EntrenadorUsuario extends Model
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
-        $queryEntrenadores = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR);
+        $queryEntrenadores = User::whereIs('trainer');
+
+        // $queryEntrenadores = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR);
         if (!empty($filtro) || $filtro == null)
             $queryEntrenadores->where(function ($query) use ($filtro) {
-                $query->where('nombre', 'like', "%$filtro%");
-                $query->orWhere('dni', 'like', "%$filtro%");
+                $query->where('name', 'like', "%$filtro%");
+                $query->orWhere('document', 'like', "%$filtro%");
             });
 
         $field = request('sortBy') ?? 'created_at';
         $sort = request('sortDesc') == 'true' ? 'DESC' : 'ASC';
-        
+
         $queryEntrenadores->orderBy($field, $sort);
 
         $entrenadores = $queryEntrenadores->paginate(request('paginate', 15));
 
         // info($entrenadores);
-        // dd($entrenadores);
+        // dd($entrenadores->pluck('id')->all());
 
-        $entrenador_usuario = EntrenadorUsuario::with('usuario')->whereIn('entrenador_id', $entrenadores->pluck('id')->all())->get();
+        $entrenador_usuario = EntrenadorUsuario::with('user')->whereIn('trainer_id', $entrenadores->pluck('id')->all())->get();
         $responseData = [];
         foreach ($entrenadores->items() as $entrenador) {
-            $alumnosEntrenador = $entrenador_usuario->where('entrenador_id', $entrenador->id)->where('estado', 1)->sortByDesc('updated_at');
+            $alumnosEntrenador = $entrenador_usuario->where('trainer_id', $entrenador->id)->sortByDesc('updated_at');
             $tempAlumnos = collect();
             $alumnosEntrenador->each(function ($value, $key) use ($tempAlumnos) {
+                $subw = $value->user->subworkspace()->first();
                 $temp = [
-                    'id' => $value->usuario->id,
-                    'dni' => $value->usuario->dni,
-                    'nombre' => $value->usuario->nombre,
-                    'botica' => $value->usuario->botica,
-                    'estado' => $value->estado === 1,
+                    'id' => $value->user->id,
+                    'document' => $value->user->document,
+                    'name' => (!empty($value->user->fullname)) ? $value->user->fullname : $value->user->name,
+                    'botica' => (!is_null($subw)) ? $subw->name : '',
+                    'estado' => $value->active === 1,
                     'loading' => false
                 ];
                 $tempAlumnos->push($temp);
@@ -86,7 +81,7 @@ class EntrenadorUsuario extends Model
             $entrenador->alumnos_count = $entrenador->alumnos->count();
             $entrenador->asignar_ver_alumnos = false;
             $entrenador->asignar_alumnos = false;
-            $responseData[] = $entrenador->only('dni', 'nombre', 'alumnos', 'asignar_ver_alumnos', 'botica', 'asignar_alumnos', 'config_id', 'id', 'alumnos_count');
+            $responseData[] = $entrenador->only('document', 'name', 'alumnos', 'asignar_ver_alumnos', 'botica', 'asignar_alumnos', 'config_id', 'id', 'alumnos_count');
         }
 
         $response['data'] = $responseData;
@@ -111,7 +106,7 @@ class EntrenadorUsuario extends Model
     public function validarUsuario($usuario_dni)
     {
         $response['error'] = false;
-        $entrenador = Usuario::where('dni', $usuario_dni)->first();
+        $entrenador = User::where('document', $usuario_dni)->first();
         $response['data_usuario'] = $entrenador;
         if (!$entrenador) {
             $response['error'] = true;
@@ -135,26 +130,29 @@ class EntrenadorUsuario extends Model
         if ($entrenador['error']) return $entrenador;
 
 
-        $alumnos_ids = EntrenadorUsuario::where('entrenador_id', $entrenador['data_usuario']->id)->get();
-        $queryDataAlumnos = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)->whereIn('id', $alumnos_ids->pluck('usuario_id')->all())
-            ->select('id', 'nombre', 'dni', 'botica', DB::raw("CONCAT(dni, ' - ', nombre, ' - ', botica) as text"));
+        $alumnos_ids = EntrenadorUsuario::where('trainer_id', $entrenador['data_usuario']->id)->get();
+        $queryDataAlumnos = User::whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
+            ->select('users.id', 'users.name', 'users.document', 'users.subworkspace_id', DB::raw("CONCAT(users.document, ' - ', users.name) as text"));
 
         if (!empty($filtro))
             $queryDataAlumnos->where(function ($query) use ($filtro) {
-                $query->where('nombre', 'like', "%$filtro%");
-                $query->orWhere('dni', 'like', "%$filtro%");
+                $query->where('users.name', 'like', "%$filtro%");
+                $query->orWhere('users.document', 'like', "%$filtro%");
             });
 
         $dataAlumnos = $queryDataAlumnos->get();
         if ($dataAlumnos->count() == 0) {
             $response['error'] = true;
-            $msg = 'El usuario no es un entrendor o no tiene usuarios con estado: ';
+            $msg = 'El usuario no es un entrenador o no tiene usuarios con estado: ';
             $txt_estado = ($estado == 1) ? 'Activo' : 'Inactivo';
             $response['msg'] = $msg . $txt_estado;
         } else {
             $dataAlumnos->each(function ($value, $key) use ($alumnos_ids) {
-                $value->estado = $alumnos_ids->where('usuario_id', $value->id)->first()->estado;
+                $subw = Workspace::where('id', $value->subworkspace_id)->first();
+
+                $value->estado = $alumnos_ids->where('user_id', $value->id)->first()->estado;
                 $value->loading = false; // Modal Ver Alumnos : v-switch->value
+                $value->botica = (!is_null($subw)) ? $subw->name : '';
             });
             $response['data'] = $dataAlumnos;
         }
@@ -175,45 +173,56 @@ class EntrenadorUsuario extends Model
             return $entrenador;
         }
         // TODO: Lista total de alumnos
-        $alumnos_ids = EntrenadorUsuario::estado(1)->entrenador($entrenador['data_usuario']->id)->get();
-        $queryDataAlumnos = Usuario::with([
-            'matricula_presente.carrera' => function ($q) {
-                $q->select('id', 'nombre');
-            }
-        ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
-            ->whereIn('id', $alumnos_ids->pluck('usuario_id')->all())
-            ->select('id', 'nombre', 'dni', 'botica', 'sexo');
+        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->get();
+
+        $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace');
+        // $queryDataAlumnos = User::with([
+        //     'matricula_presente.carrera' => function ($q) {
+        //         $q->select('id', 'nombre');
+        //     }
+        // ])->whereIn('id', $alumnos_ids->pluck('user_id')->all())
+        //     ->select('id', 'name', 'document', 'subworkspace_id');
 
         if (!empty($filtro)) {
             $queryDataAlumnos->where(function ($query) use ($filtro) {
-                $query->where('nombre', 'like', "%$filtro%");
-                $query->orWhere('dni', 'like', "%$filtro%");
+                $query->where('users.name', 'like', "%$filtro%");
+                $query->orWhere('users.document', 'like', "%$filtro%");
             });
         }
         $dataAlumnos = $queryDataAlumnos->get();
+
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
-            $value->makeHidden('matricula_presente');
-            $value->carrera = $value->matricula_presente->carrera->nombre;
+            // $value->makeHidden('matricula_presente');
+            $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
+            // $value->carrera = $value->matricula_presente->carrera->nombre;
+            $value->carrera = '';
         });
         $response['alumnos'] = $dataAlumnos;
 
         // TODO: Últimos 10 alumnos vistos
-        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('alumno_id', $alumnos_ids->pluck('usuario_id'))->orderBy('updated_at', 'DESC')->groupBy('alumno_id')->get();
-        $ultimos_alumnos = Usuario::with([
-            'matricula_presente.carrera' => function ($q) {
-                $q->select('id', 'nombre');
-            }
-        ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
-            ->whereIn('id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
-            ->select('id', 'nombre', 'dni', 'botica', 'sexo')
+        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id')->all())->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
+        $ultimos_alumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->whereIn('users.id', $ultimos_alumnos_ids->pluck('student_id')->all())
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
             ->get();
+        // $ultimos_alumnos = Usuario::with([
+        //     'matricula_presente.carrera' => function ($q) {
+        //         $q->select('id', 'nombre');
+        //     }
+        // ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
+        //     ->whereIn('id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
+        //     ->select('id', 'nombre', 'dni', 'botica', 'sexo')
+        //     ->get();
 
         $ultimos_alumnos->each(function ($value, $key) use ($alumnos_ids, $ultimos_alumnos_ids, $entrenador) {
-            $value->makeHidden('matricula_presente');
-            $value->carrera = $value->matricula_presente->carrera->nombre;
-            $temp2 = $ultimos_alumnos_ids->where('alumno_id', $value->id)->where('entrenador_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
+            // $value->makeHidden('matricula_presente');
+            // $value->carrera = $value->matricula_presente->carrera->nombre;
+            $value->carrera = '';
+            $temp2 = $ultimos_alumnos_ids->where('student_id', $value->id)->where('coach_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
+            $value->ultima_actividad = '';
             if ($temp2) $value->ultima_actividad = $temp2->updated_at->format('Y-m-d H:i:s');
-
         });
         $response['ultimos_alumnos'] = $ultimos_alumnos;
 
@@ -222,48 +231,46 @@ class EntrenadorUsuario extends Model
 
     protected function asignar($data)
     {
-        $entrenador_id = $data['entrenador_id'];
-        $usuario_id = $data['usuario_id'];
-        $estado = $data['estado'];
+        $trainer_id = $data['trainer_id'];
+        $user_id = $data['user_id'];
+        $estado = $data['active'];
 
         $response['error'] = false;
 
-        $alumno = Usuario::where('id', $usuario_id)->first();
-        if ($alumno->rol_entrenamiento === 'entrenador') {
+        $alumno = EntrenadorUsuario::where('trainer_id', $user_id)->first();
+        if (!is_null($alumno)) {
             $response['error'] = true;
             $response['msg'] = 'El alumno que se quiere asignar, es un entrenador.';
             return $response;
         }
 
-        $registro = EntrenadorUsuario::where('entrenador_id', $entrenador_id)
-            ->where('usuario_id', $usuario_id)
+        $registro = EntrenadorUsuario::where('trainer_id', $trainer_id)
+            ->where('user_id', $user_id)
             ->first();
-        if (!$registro) {
-            $response['error'] = true;
-            $response['msg'] = 'No se puede asginar el usuario al entrenador con estado inactivo.';
-            if ($estado == 1) {
-                // TODO: Los alumnos deben estar definidos como tal antes de asignarle un entrenador o se debe asginarle el rol de alumno y luego asignarlo al entrenador?
-                $alumno = Usuario::find($usuario_id);
-                if ($alumno->rol_entrenamiento === null){
-                    $alumno->rol_entrenamiento = Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO;
-                    $alumno->save();
-                }
+        if (is_null($registro) || !$registro) {
 
-                $response['error'] = false;
-                $data['estado'] = 1;
-                $data['estado_notificacion'] = 0;
-                EntrenadorUsuario::create($data);
-                $response['msg'] = 'Se asignó el usuario al entrenador.';
+            $data['trainer_id'] = $trainer_id;
+            $data['user_id'] = $user_id;
+            EntrenadorUsuario::create($data);
+
+            $entrenador = User::where('id', $trainer_id)->where('active', 1)->first();
+            $entrenador_workspace = Workspace::select('parent_id')->where('id', $entrenador->subworkspace_id)->first();
+            if (is_null($entrenador_workspace)) {
+                $entrenador_workspace = AssignedRole::getUserAssignedRoles($entrenador->id)->first();
+                $entrenador_workspace_id = $entrenador_workspace->scope;
+            } else {
+                $entrenador_workspace_id = $entrenador_workspace->parent_id;
             }
+            Bouncer::scope()->to($entrenador_workspace_id);
+            Bouncer::assign('trainer')->to($entrenador);
+
+            $response['error'] = false;
+            $response['msg'] = 'Se asignó el usuario al entrenador.';
         } else {
-            $estado_txt = $estado == 1 ? 'activó' : 'inactivó';
-            $registro->estado = $estado;
-            $registro->estado_notificacion = $estado === 1 ? 0 : $registro->estado_notificacion;
             $registro->save();
-            $msg = "Se $estado_txt la asignación existente del usuario y el entrenador.";
+            $msg = "Se asignó el usuario y el entrenador.";
             $response['msg'] = $msg;
         }
         return $response;
     }
-
 }

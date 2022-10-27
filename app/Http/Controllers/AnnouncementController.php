@@ -108,7 +108,7 @@ class AnnouncementController extends Controller
     public function edit(Announcement $announcement)
     {
         $announcement['module_ids'] = $announcement->criterionValues()
-                                                   ->pluck('criterion_value_id');
+            ->pluck('criterion_value_id');
         $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
 

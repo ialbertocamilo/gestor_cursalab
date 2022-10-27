@@ -15,7 +15,7 @@
                             color="primary"
                             class="mx-1"
                             @click="
-                                abrirModalCreateEditChecklist({ id: 0, titulo: 'Título', descripcion: 'Descripción', estado: true, checklist_actividades: [], cursos: [] })
+                                abrirModalCreateEditChecklist({ id: 0, title: 'Título', description: 'Descripción', active: true, checklist_actividades: [], cursos: [] })
                             "
                         >
                             <v-icon>mdi-plus</v-icon>
@@ -89,11 +89,11 @@
                             <v-list-item two-line>
                                 <v-list-item-content>
                                     <v-list-item-title style="width: 100px">{{
-                                            checklist.titulo
+                                            checklist.title
                                         }}
                                     </v-list-item-title>
                                     <v-list-item-subtitle style="width: 100px">{{
-                                            checklist.descripcion
+                                            checklist.description
                                         }}
                                     </v-list-item-subtitle>
                                 </v-list-item-content>
@@ -103,8 +103,8 @@
                             <v-list-item>
                                 <v-list-item-content>
                                     <v-list-item-title>
-                                        <v-chip :color="checklist.estado ? 'green': 'red' " class="white--text">
-                                            {{ checklist.estado ? 'Activo' : 'Inactivo' }}
+                                        <v-chip :color="checklist.active ? 'green': 'red' " class="white--text">
+                                            {{ checklist.active ? 'Activo' : 'Inactivo' }}
                                         </v-chip>
                                     </v-list-item-title>
                                 </v-list-item-content>
@@ -165,12 +165,12 @@ export default {
                 {
                     text: 'Titulo',
                     align: 'start',
-                    value: 'titulo',
+                    value: 'title',
                 },
                 {
                     text: 'Estado',
                     align: 'center',
-                    value: 'estado'
+                    value: 'active'
                 },
                 {
                     text: 'Acciones',

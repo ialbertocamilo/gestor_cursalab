@@ -14,7 +14,7 @@
                     <v-row>
                         <v-col cols="12" md="12" lg="12" class="pb-0">
                             <DefaultInput clearable
-                                          v-model="checklist.titulo"
+                                          v-model="checklist.title"
                                           label="Título"
                                           :rules="formRules.titulo_descripcion"
                                           :counter="280"
@@ -28,14 +28,14 @@
                                 hide-details="auto"
                                 label="Descripción"
                                 :counter="280"
-                                v-model="checklist.descripcion"
+                                v-model="checklist.description"
                                 :rules="formRules.titulo_descripcion"
                             ></v-textarea>
                         </v-col>
                         <v-col cols="12" md="2" lg="2" class="d-flex align-center">
-                            <DefaultToggle v-model="checklist.estado"/>
+                            <DefaultToggle v-model="checklist.active"/>
                         </v-col>
-                        
+
                     </v-row>
 
                     <v-divider/>
@@ -90,7 +90,7 @@
                                                             <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
                                                             </v-icon>
                                                             {{
-                                                                actividad.actividad || 'Ingrese un nombre a la actividad'
+                                                                actividad.activity || 'Ingrese un nombre a la actividad'
                                                             }}
                                                         </v-col>
                                                         <v-col cols="6" class="text--secondary">
@@ -99,12 +99,12 @@
                                                                 <v-row v-else no-gutters style="width: 100%">
                                                                     <v-col cols="6" class="d-flex align-center">
                                                                         Califica a: {{
-                                                                            actividad.tipo == "entrenador_usuario" ? "Alumnos" : "Entrenador"
+                                                                            actividad.type_name == "trainer_user" ? "Alumnos" : "Entrenador"
                                                                         }}
                                                                     </v-col>
                                                                     <v-col cols="4" class="d-flex align-center">
                                                                         {{
-                                                                            actividad.estado == 1 ? "Activo" : "Inactivo"
+                                                                            actividad.active == 1 ? "Activo" : "Inactivo"
                                                                         }}
                                                                     </v-col>
                                                                     <v-col cols="2" class="d-flex align-center">
@@ -129,7 +129,7 @@
                                                                 dense
                                                                 hide-details="auto"
                                                                 label="Actividad"
-                                                                v-model="actividad.actividad"
+                                                                v-model="actividad.activity"
                                                                 :rules="formRules.actividad"
                                                             ></v-textarea>
                                                         </v-col>
@@ -141,15 +141,15 @@
                                                                 attach
                                                                 label="Califica a"
                                                                 :items="tipo_actividades"
-                                                                v-model="actividad.tipo"
+                                                                v-model="actividad.type_name"
                                                                 item-text="text"
                                                                 item-value="value"
                                                             >
                                                             </v-select>
                                                         </v-col>
                                                         <v-col cols="12" md="6" lg="6" class="d-flex align-center">
-                                                            <DefaultToggle v-model="actividad.estado"/>
-                                                            <DefaultToggle v-if="actividad.tipo == 'entrenador_usuario'"  v-model="actividad.is_default" activeLabel='Evaluar automáticamente' inactiveLabel="No evaluar automáticamente" />
+                                                            <DefaultToggle v-model="actividad.active"/>
+                                                            <!-- <DefaultToggle v-if="actividad.type_name == 'trainer_user'"  v-model="actividad.is_default" activeLabel='Evaluar automáticamente' inactiveLabel="No evaluar automáticamente" /> -->
                                                         </v-col>
                                                     </v-row>
                                                 </v-expansion-panel-content>
@@ -198,7 +198,7 @@
                                         </thead>
                                         <tbody>
                                         <tr
-                                            v-for="(curso, index) in checklist.cursos" :key="curso.id"
+                                            v-for="(curso, index) in checklist.courses" :key="curso.id"
                                         >
                                             <td>{{ curso.modulo }}</td>
                                             <td>{{ curso.escuela }}</td>
@@ -245,7 +245,7 @@
                                 outlined
                                 dense
                                 hide-details
-                                v-model="checklist.cursos"
+                                v-model="checklist.courses"
                                 :items="results_search"
                                 label="Resultados de búsqueda"
                                 :loading="isLoading"
@@ -332,11 +332,11 @@ export default {
             tipo_actividades: [
                 {
                     text: "Alumno",
-                    value: "entrenador_usuario"
+                    value: "trainer_user"
                 },
                 {
                     text: "Entrenador",
-                    value: "usuario_entrenador"
+                    value: "user_trainer"
                 }
             ],
             dialog: false,
@@ -435,7 +435,7 @@ export default {
             }
             let hasActividadEntrenadorUsuario = false;
             vue.checklist.checklist_actividades.map(actividad=>{
-               if( actividad.tipo=='entrenador_usuario') hasActividadEntrenadorUsuario=true; 
+               if( actividad.type_name=='trainer_user') hasActividadEntrenadorUsuario=true;
             });
             if(!hasActividadEntrenadorUsuario){
                 this.modalAlert.open= true;
@@ -482,9 +482,9 @@ export default {
             const newID = `n-${vue.checklist.checklist_actividades.length + 1}`;
             const newActividad = {
                 id: newID,
-                actividad: "",
-                estado: 1,
-                tipo: "entrenador_usuario",
+                activity: "",
+                active: 1,
+                type_name: "trainer_user",
                 checklist_id: vue.checklist.id,
                 hasErrors: false,
                 is_default:false
@@ -522,7 +522,7 @@ export default {
         },
         removeCurso(index) {
             let vue = this;
-            vue.checklist.cursos.splice(index, 1)
+            vue.checklist.courses.splice(index, 1)
 
         }
     }

@@ -28,6 +28,7 @@ class MassiveUploadTopicGradesRequest extends FormRequest
             'course' => 'required',
             'topics' => 'nullable',
             'evaluation_type' => 'required',
+            'number_socket' => 'required',
         ];
     }
 
