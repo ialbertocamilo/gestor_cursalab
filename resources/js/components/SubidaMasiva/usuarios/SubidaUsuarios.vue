@@ -26,26 +26,6 @@
 				</v-card-actions> -->
         </v-col>
         <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
-            <v-row justify="center">
-                <v-overlay
-                    class="custom-overlay"
-                    color="#796aee"
-                    opacity="0.75"
-                    :value="loading_guardar"
-                    style="z-index:37"
-                >
-                    <div
-                        style="display: flex; flex-direction: column; align-items: center"
-                        class="text-center justify-center overlay-curricula"
-                    >
-                        <v-progress-circular indeterminate size="64"></v-progress-circular>
-                            <p class="text-h6" v-if="loading_guardar">
-                                Este proceso puede tomar más de un minuto, espere por favor.
-                            </p>
-                            <p class="text-h6" v-if="loading_guardar">No actualice la página.</p>
-                        </div>
-                    </v-overlay>
-                </v-row>
             <v-row class="d-flex justify-content-center my-2">
                 <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta" />
             </v-row>
@@ -58,15 +38,15 @@
     </v-row>
 </template>
 <script>
+    const percentLoader = document.getElementById('percentLoader');
     import vuedropzone  from "./../dropzone.vue";
 	import modalErrores from "./../ModalErrores.vue"
     export default {
-        props:['q_error'],
+        props:['q_error','number_socket'],
         components:{vuedropzone,modalErrores},
         data () {
             return {
                 archivo:null,
-                loading_guardar:false,
             }
         },
         methods:{
@@ -76,12 +56,13 @@
             async enviar_archivo(){
                 let validar_data = this.validar_data();
                 if(validar_data){
-                    this.loading_guardar = true;
                     let data = new FormData();
+                    this.showLoader();
                     data.append("file", this.archivo);
                     // console.log(data);
+                    data.append("number_socket", this.number_socket || null);
+                    percentLoader.innerHTML = ``;
                     await axios.post('/masivos/create-update-users',data).then((res)=>{
-                        this.loading_guardar = false;
                         const data = res.data.data;
                         if(data.errores.length > 0){
                             this.$emit("download-excel-observations",{
@@ -95,10 +76,11 @@
                             <li>Cantidad de usuarios creados/actualizados: ${data.datos_procesados || 0}</li>
                             <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
                         </ul>`
+                        this.hideLoader();
                         this.enviar_alerta(message);
                     }).catch(err=>{
+                        this.hideLoader();
                         this.enviar_alerta(err.response.data.message);
-                        this.loading_guardar = false;
                     });
                 }
             },

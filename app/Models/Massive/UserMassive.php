@@ -5,6 +5,7 @@ namespace App\Models\Massive;
 use Exception;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Massive;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use Illuminate\Support\Collection;
@@ -13,12 +14,20 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class UserMassive implements ToCollection{
+class UserMassive extends Massive implements ToCollection {
     public $errors = [];
     public $processed_users = 0;
     public $current_workspace = null;
     public $excelHeaders = [];
+    public function __construct($data=[])
+    {
+        $this->name_socket = $this->formatNameSocket('upload-massive',$data['number_socket'] ?? null);
+        $this->percent_sent = [];
+    }
     public function collection(Collection $rows){
+        //Don't count the header in the constraint, verifyConstraintMassive <- function extends from class Massive
+        $this->verifyConstraintMassive('usser_update_massive',count($rows) - 1);
+
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
         if(is_null($this->current_workspace)){
@@ -41,9 +50,7 @@ class UserMassive implements ToCollection{
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
             ->orderBy('position')
             ->get();
-        //Don't count the header in the constraint, verifyConstraintMassive <- function in helpers.php
-        verifyConstraintMassive('usser_update_massive',count($rows) - 1);
-        dd('prueba');
+       
         //Get headers
         $this->excelHeaders = $rows[0];
         $headers = $this->process_header($rows[0],$criteria);
@@ -51,8 +58,13 @@ class UserMassive implements ToCollection{
         $this->process_user($rows,$headers,$criteria);
     }
     private function process_user($users,$headers,$criteria){
-
+        $count_users = count($users);
+        $counter = 0;
         foreach ($users as $user) {
+            $percent=round(($counter/$count_users)*100);
+            $this->sendEchoPercentEvent($percent,$this->name_socket,$this->percent_sent) && $this->percent_sent[]=$percent;
+            $counter++;
+
             $data_users = collect();
             $data_criteria = collect();
             $headers->each(function ($obj) use ($data_criteria, $data_users, $user) {
@@ -88,6 +100,7 @@ class UserMassive implements ToCollection{
                     'errors_index'=>$data_user['errors_index']
                 ];
             }
+            
         }
         cache_clear_model(User::class);
         cache_clear_model(CriterionValue::class);

@@ -11,7 +11,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class MassiveUploadTopicGradesProgressEvent implements ShouldBroadcast
+class MassiveUploadProgressEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,12 +20,12 @@ class MassiveUploadTopicGradesProgressEvent implements ShouldBroadcast
      *
      * @return void
      */
+    private $name_chanell;
     private $percent;
-    private $number_socket;
-    public function __construct($percent,$number_socket)
+    public function __construct($name_chanell,$percent)
     {
+        $this->name_chanell = $name_chanell;
         $this->percent = $percent;
-        $this->number_socket = $number_socket;
     }
 
     /**
@@ -35,7 +35,8 @@ class MassiveUploadTopicGradesProgressEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('upload-topic-grades.'.Auth::user()->id.'.'.$this->number_socket);
+        return new Channel($this->name_chanell);
+        // return new Channel('upload-topic-grades.'.Auth::user()->id.'.'.$this->number_socket);
         // return new PrivateChannel('upload-topic-grades.'.auth()->id.'-'.$percent);
     }
 

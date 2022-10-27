@@ -1,10 +1,6 @@
 <?php
 
 return [
-    'max_uploads'=>collect([
-      ['type'=>'usser_update_massive','max'=>1],
-      ['type'=>'usser_active_massive','max'=>2500]
-    ]),
     'tipopreg' => [
     	'texto' => 'Respuesta en texto',
 		'simple'=> 'Opción única',

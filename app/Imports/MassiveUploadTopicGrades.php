@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use App\Events\MassiveUploadTopicGradesProgressEvent;
+use App\Events\MassiveUploadProgressEvent;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class MassiveUploadTopicGrades implements ToCollection
@@ -69,7 +69,7 @@ class MassiveUploadTopicGrades implements ToCollection
             $currente_percent = round(($i/$count)*100);
             if(($currente_percent==0 ||($currente_percent % 5) == 0) && !in_array($currente_percent,$percent_sent)){
                 $percent_sent[] = $currente_percent;
-                event(new MassiveUploadTopicGradesProgressEvent($currente_percent,$this->number_socket));
+                event(new MassiveUploadProgressEvent($currente_percent,$this->number_socket));
             }
             $document_user = $excelData[$i][0];
             $grade = $excelData[$i][1];

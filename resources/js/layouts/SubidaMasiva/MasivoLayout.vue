@@ -35,9 +35,9 @@
                         </div>
                     </v-col>
                 </v-row>
-                <mUsuarios :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" @download-excel-observations="downloadExcelObservations" />
-                <ActivarUsuarios :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" />
-                <InactivarUsuarios :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" />
+                <mUsuarios :number_socket="number_socket" :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" @download-excel-observations="downloadExcelObservations" />
+                <ActivarUsuarios :number_socket="number_socket" :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" />
+                <InactivarUsuarios :number_socket="number_socket" :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" />
             </v-card-text>
         </v-card>
     </section>
@@ -46,12 +46,17 @@
 import mUsuarios from "../../components/SubidaMasiva/usuarios/SubidaUsuarios.vue";
 import ActivarUsuarios from "../../components/SubidaMasiva/activar/ActivarUsuarios.vue";
 import InactivarUsuarios from "../../components/SubidaMasiva/desactivar/DesactivarUsuarios.vue"
-
-
+const percentLoader = document.getElementById('percentLoader');
 export default {
   components:{ mUsuarios,ActivarUsuarios,InactivarUsuarios },
+  props:{
+    user_id:{
+        required:true
+    }
+  },    
   data() {
     return {
+      number_socket:Math.floor(Math.random(6)*1000000),
       info_error:0,
       overlay: true,
       s_alert:false,
@@ -68,6 +73,15 @@ export default {
       ],
     };
   },
+  mounted(){
+        window.Echo.channel(`upload-massive.${this.user_id}.${this.number_socket}`).listen('MassiveUploadProgressEvent',result=>{
+            if(percentLoader){
+                if(result.percent){
+                    percentLoader.innerHTML = `${result.percent}%`;
+                }
+            }
+        })
+    },
   methods:{
       show_alert_msg(message){
             this.s_alert=true;

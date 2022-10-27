@@ -77,9 +77,12 @@ class MasivoController extends Controller
     public function createUpdateUsers(Request $request){
         $validator = $this->validateFile($request);
         if (!$validator){
-            return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+            return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.'],500);
         }
-        $import = new UserMassive();
+        $data= [
+            'number_socket' => $request->get('number_socket') ?? null
+        ];
+        $import = new UserMassive($data);
         Excel::import($import, $request->file('file'));
         $headers = $import->excelHeaders;
         return $this->success([

@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'max-uploads'=>collect([
+        ['type'=>'usser_update_massive','max'=>11],
+        ['type'=>'usser_active_massive','max'=>2500]
+    ]),
     'upload-topic-grades' =>[
         'Solo se actualiza las notas si el usuario tiene el curso asignado en la segmentación.',
         'Solo se registra o actualiza notas a temas que son evaluables calificadas y no evaluables.',

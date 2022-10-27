@@ -264,12 +264,3 @@ function excelDateToDate($fecha)
         return null;
     }
 }
-function verifyConstraintMassive($type,$count_rows,$message=null){
-    $max_upload_rows_size = config('constantes.max_uploads')->where('type',$type)->first();
-    if(isset($max_upload_rows_size['max']) && $count_rows > $max_upload_rows_size['max']){
-        if(!$message){
-            $message = 'Esta subiendo '.$count_rows.' filas; la cantidad máxima es de '.$max_upload_rows_size['max'].' filas por excel.';
-        }
-        throw new Exception($message, 1);
-     }
-}

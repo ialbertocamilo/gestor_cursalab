@@ -55,9 +55,16 @@ export default {
                 for (const comment of comments) {
                     let cell = data[comment.cell_name];
                     if(cell){
+                        console.log(cell);
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern:'darkVertical',
+                            fgColor:{argb:'006080'}
+                        };
                         if(!cell.c) cell.c = [];
                         cell.c.hidden = true;
                         cell.c.push({a:"SheetJS", t:comment.message});
+                        
                     }
                 }
                 const workbook = XLSX.utils.book_new();
