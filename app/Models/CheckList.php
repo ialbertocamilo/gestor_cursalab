@@ -124,7 +124,7 @@ class CheckList extends BaseModel
 
         $user = User::where('id', $alumno_id)->first();
         $cursos_x_user = $user->getCurrentCourses();
-        $cursos_ids = $cursos_x_user->pluck('id');
+        $cursos_ids = $cursos_x_user->pluck('id')->toArray();
 
         $cursos = Course::with('checklists', 'schools')->whereIn('id', $cursos_ids)->get();
         $checklists = collect();
@@ -167,7 +167,11 @@ class CheckList extends BaseModel
                                 'titulo' => $checklist->title,
                                 'descripcion' => $checklist->description,
                                 'disponible' => $disponible,
-                                'curso' => $curso->only('id', 'name', 'categoria'),
+                                'curso' => $checklist->courses()->with([
+                                    'schools' => function ($query) {
+                                        $query->select('id', 'name');
+                                    }
+                                ])->select('id', 'name')->get(),
                                 'porcentaje' => $progresoActividad['porcentaje'],
                                 'actividades_totales' => $progresoActividad['actividades_totales'],
                                 'actividades_completadas' => $progresoActividad['actividades_completadas'],
@@ -219,7 +223,7 @@ class CheckList extends BaseModel
                     $checklistRptaItem = ChecklistRptaItem::create([
                         'checklist_answer_id' => $checklistRpta->id,
                         'checklist_item_id' => $actividad->id,
-                        'qualification' => 'Cumple'
+                        'qualification' => 'Pendiente'
                     ]);
                     ChecklistRpta::actualizarChecklistRpta($checklistRpta);
                 }
