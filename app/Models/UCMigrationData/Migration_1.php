@@ -1128,4 +1128,45 @@ class Migration_1 extends Model
 
             });
     }
+
+    protected function fixTypeCourses($output)
+    {
+        $db = $this->connect();
+
+        $courses = Course::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
+        $type_courses = Taxonomy::getData('course', 'type')->select('id', 'code')->get();
+        $cursos = $db->getTable('cursos')
+            ->join('categorias', 'categorias.id', 'cursos.categoria_id')
+            ->select(
+                'cursos.id as curso_id',
+                'categorias.modalidad',
+                'categorias.id as categoria_id',
+            )
+            ->get();
+
+        $equivalencias = [
+            'extra' => 'extra-curricular',
+            'libre' => 'free',
+            'regular' => 'regular'
+        ];
+
+        $bar = $output->createProgressBar($courses->count());
+        $bar->start();
+
+        foreach ($cursos as $curso) {
+            $bar->advance();
+
+            $course = $courses->where('external_id', $curso->curso_id)->first();
+            $type = $type_courses->where('code', $equivalencias[$curso->modalidad] ?? false)->first();
+
+            if (!$course || !$type) continue;
+
+            info("Se va a actualizar al curso externo {$course->external_id} con el tipo {$type->code}");
+            $course->update([
+                'type_id' => $type->id,
+            ]);
+
+        }
+        $bar->finish();
+    }
 }

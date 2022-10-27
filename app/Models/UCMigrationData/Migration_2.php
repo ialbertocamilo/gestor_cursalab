@@ -178,6 +178,8 @@ class Migration_2 extends Model
                 'created_at' => $media->created_at,
                 'updated_at' => $media->updated_at,
             ];
+
+            // TODO: Agregar registro a la tabla 'medias'
         }
         $bar->finish();
         $output->newLine();
