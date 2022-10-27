@@ -893,9 +893,9 @@ class Migration_1 extends Model
         }
     }
 
-    protected function fixGrupoValuesRelationships($output)
+    protected function fixCarreraValuesRelationships($output)
     {
-        $grupo_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'grupo')
+        $grupo_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'career')
             ->select('id', 'value_text', 'criterion_id')
             ->get();
 
@@ -921,7 +921,7 @@ class Migration_1 extends Model
             ->select('id', 'value_text', 'criterion_id')
             ->get();
         $grupos_values = CriterionValue::disableCache()->whereRelation('criterion', 'code', 'grupo')
-            ->select('id', 'value_text', 'criterion_id')
+            ->select('id', 'value_text', 'criterion_id', 'external_id')
             ->get();
 
         $curriculas = $db->getTable('curricula')
@@ -931,6 +931,7 @@ class Migration_1 extends Model
             ->select('curricula.id as curricula_id', 'curricula.carrera_id', 'curricula.curso_id', 'ciclos.nombre as ciclo_nombre', 'all_criterios',
                 'carreras.config_id', 'curricula.created_at', 'curricula.updated_at')
 //            ->limit(200)
+            ->whereIn('curso_id', [804, 805])
             ->get();
 
         $curricula_grouped_by_course_id = $curriculas->groupBy('curso_id');
@@ -968,7 +969,9 @@ class Migration_1 extends Model
                         ->where('curricula_id', $curricula_carrera->first()->curricula_id)
                         ->pluck('criterio_id')
                         ->toArray();
+//                    info($grupos_id);
                     $grupos = $grupos_values->whereIn('external_id', $grupos_id);
+//                    info($grupos->pluck('value_text', 'id')->toArray());
                 }
 
                 //CriterionValue::whereRelation('criterion', 'code', 'grupo')->whereHas('parents', function ($q) {$q->where('id', 19);})->count();
@@ -986,7 +989,7 @@ class Migration_1 extends Model
                     ];
                 }
 
-                info("CURSO :: {$course_external_id} - GRUPOS :: {$grupos->count()} - VALUES :: " . count($values));
+//                info("CURSO :: {$course_external_id} - GRUPOS :: {$grupos->count()} - VALUES :: " . count($values));
 //                continue;
                 $segment = Segment::create([
                     'name' => "Segmentacion migrada (Curso UCFP-{$course_external_id})",
