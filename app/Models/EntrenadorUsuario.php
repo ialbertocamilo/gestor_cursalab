@@ -132,7 +132,7 @@ class EntrenadorUsuario extends Model
 
         $alumnos_ids = EntrenadorUsuario::where('trainer_id', $entrenador['data_usuario']->id)->get();
         $queryDataAlumnos = User::whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.document', 'users.subworkspace_id', DB::raw("CONCAT(users.document, ' - ', users.name) as text"));
+            ->select('users.id', 'users.name', 'users.lastname', 'users.surname', 'users.document', 'users.subworkspace_id', DB::raw("CONCAT(users.document, ' - ', users.name) as text"));
 
         if (!empty($filtro))
             $queryDataAlumnos->where(function ($query) use ($filtro) {
@@ -149,8 +149,8 @@ class EntrenadorUsuario extends Model
         } else {
             $dataAlumnos->each(function ($value, $key) use ($alumnos_ids) {
                 $subw = Workspace::where('id', $value->subworkspace_id)->first();
-
-                $value->estado = $alumnos_ids->where('user_id', $value->id)->first()->estado;
+                $value->name = $value->fullname;
+                $value->estado = $alumnos_ids->where('user_id', $value->id)->first()->active;
                 $value->loading = false; // Modal Ver Alumnos : v-switch->value
                 $value->botica = (!is_null($subw)) ? $subw->name : '';
             });
