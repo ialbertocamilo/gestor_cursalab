@@ -68,14 +68,20 @@ class MigrationData1 extends Command
 
         if ($type === 'fix_subworkspace_relation'){
             Migration_1::fixSubworkpsaceIdUsers($bar);
-            $this->info("\n fixSubworkpsaceIdUsers MIGRATED");
-            info("\n fixSubworkpsaceIdUsers MIGRATED");
+            $this->info("\n fixSubworkpsaceIdUsers FIXED");
+            info("\n fixSubworkpsaceIdUsers FIXED");
         }
 
         if ($type === 'fix_grupo_values_relations'){
             Migration_1::fixGrupoValuesRelationships($bar);
-            $this->info("\n fix_grupo_values_relations MIGRATED");
-            info("\n fix_grupo_values_relations MIGRATED");
+            $this->info("\n fix_grupo_values_relations FIXED");
+            info("\n fix_grupo_values_relations FIXED");
+        }
+
+        if ($type === 'fix_carrera_values_relations'){
+            Migration_1::fixCarreraValuesRelationships($bar);
+            $this->info("\n fix_carrera_values_relations FIXED");
+            info("\n fix_carrera_values_relations FIXED");
         }
 
 
