@@ -9,6 +9,6 @@ return [
         'Se registran y actualizan la nota del excel para todos los temas del curso seleccionado; en caso el curso contenga temas no evaluables estas se marcarán como revisados.',
         'Si se encuentra algún error, se podrá descargar un excel con la lista de errores.',
         'Las notas en el excel deben estar en el rango de 0 a 20.',
-        'El progreso del usuario se verán reflejados en los reportes pasado 20 minutos de haber procesado el excel.'
+        'El progreso del usuario se verán reflejados en los reportes luego de unos minutos.'
     ]
 ];

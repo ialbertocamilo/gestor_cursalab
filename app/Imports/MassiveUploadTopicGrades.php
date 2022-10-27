@@ -50,8 +50,22 @@ class MassiveUploadTopicGrades implements ToCollection
 
         $this->topic_states = Taxonomy::getData('topic', 'user-status')->get();
         $this->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
+        $this->course->load('segments.values');
+        $topics = count($this->topics) > 0
+        ? Topic::disableCache()->with('course')->where('course_id', $this->course_id)->whereIn('id', $this->topics)->get()
+        : Topic::disableCache()->with('course')->where('course_id', $this->course_id)
+            ->where(function ($q) {
+                $q->where('assessable', INACTIVE); // NO evaluables
+                $q->orWhere(function ($q2) { // Evaluables calificados
+                    $q2->where('assessable', ACTIVE)
+                        ->whereRelation('evaluation_type', 'code', 'qualified');
+                });
+            })
+            ->get();
+        $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'get_records');
         $percent_sent = [];
         for ($i = 1; $i < $count; $i++) {
+            // info('Inicio');
             $currente_percent = round(($i/$count)*100);
             if(($currente_percent==0 ||($currente_percent % 5) == 0) && !in_array($currente_percent,$percent_sent)){
                 $percent_sent[] = $currente_percent;
@@ -63,7 +77,7 @@ class MassiveUploadTopicGrades implements ToCollection
                 $this->pushNoProcesados($excelData[$i], 'Usuario no existe');
                 continue;
             }
-            $user = User::with('subworkspace:id,name,mod_evaluaciones,parent_id')
+            $user = User::disableCache()->with('subworkspace:id,name,mod_evaluaciones,parent_id')
                 ->where('document', $document_user)->first();
 
             if (!$user) {
@@ -88,28 +102,23 @@ class MassiveUploadTopicGrades implements ToCollection
                 continue;
             }
 
-            $assigned_courses = $user->getCurrentCourses();
-
-            if (!in_array($this->course_id, $assigned_courses->pluck('id')->toArray())) {
+            // $assigned_courses = $user->getCurrentCourses();
+            $user_has_course = $usersSegmented->where('id',$user->id)->first();
+            if(!$user_has_course){
                 $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
                 continue;
             }
+            // if (!in_array($this->course_id, $assigned_courses->pluck('id')->toArray())) {
+            //     $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
+            //     continue;
+            // }
 
             $sub_workspace_settings = $user->getSubworkspaceSetting('mod_evaluaciones');
-            $topics = count($this->topics) > 0
-                ? Topic::with('course')->where('course_id', $this->course_id)->whereIn('id', $this->topics)->get()
-                : Topic::with('course')->where('course_id', $this->course_id)
-                    ->where(function ($q) {
-                        $q->where('assessable', INACTIVE); // NO evaluables
-                        $q->orWhere(function ($q2) { // Evaluables calificados
-                            $q2->where('assessable', ACTIVE)
-                                ->whereRelation('evaluation_type', 'code', 'qualified');
-                        });
-                    })
-                    ->get();
+            
 //            info("TOPICS ID::");
 //            info($topics->pluck('id')->toArray());
             $this->uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData[$i]);
+            // info('Inicio');
         }
         Summary::updateUsersByCourse($this->course,$this->updated_users_id);
     }
@@ -120,7 +129,7 @@ class MassiveUploadTopicGrades implements ToCollection
 
         $grade = $excelData[1];
 
-        $topic_summaries = SummaryTopic::whereIn('topic_id', $topics->pluck('id')->toArray())->where('user_id', $user->id)
+        $topic_summaries = SummaryTopic::disableCache()->whereIn('topic_id', $topics->pluck('id')->toArray())->where('user_id', $user->id)
             ->get();
 //        info("SUMMARIES ID :: ");
 //        info($topic_summaries->pluck('id')->toArray());
