@@ -228,8 +228,7 @@ export default {
         },
         validateRoleMaster() {
             let vue = this
-            let index = vue.roles.findIndex(role => role.name === 'Master')
-            if (index !== -1) {
+            if (vue.roles) {
                 vue.isMaster = true
             }
         },

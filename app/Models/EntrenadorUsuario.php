@@ -10,7 +10,7 @@ class EntrenadorUsuario extends Model
 {
     protected $table = 'trainer_user';
 
-    protected $fillable = ['trainer_id', 'user_id'];
+    protected $fillable = ['trainer_id', 'user_id', 'active'];
     public $timestamps = false;
     public function user()
     {
@@ -173,7 +173,7 @@ class EntrenadorUsuario extends Model
             return $entrenador;
         }
         // TODO: Lista total de alumnos
-        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->get();
+        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
 
         $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
