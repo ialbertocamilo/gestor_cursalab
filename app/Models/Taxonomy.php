@@ -34,6 +34,7 @@ class Taxonomy extends Model
         'description',
         'detail',
         'parent_id',
+        'workspace_id',
         'external_parent_id',
         'external_parent_id_es',
     ];
@@ -114,6 +115,7 @@ class Taxonomy extends Model
     protected function vademecumCategory()
     {
         return Taxonomy::query()
+            ->where('workspace_id', get_current_workspace()->id)
             ->where('group', 'vademecum')
             ->where('type', 'categoria')
             ->where('active', ACTIVE);
@@ -127,9 +129,12 @@ class Taxonomy extends Model
      */
     protected function vademecumSubcategory($categoryId) {
 
-        return Taxonomy::getChildrenData(
-            $categoryId, 'vademecum', 'subcategoria'
-        );
+        return Taxonomy::query()
+            ->where('workspace_id', get_current_workspace()->id)
+            ->where('group', 'vademecum')
+            ->where('type', 'subcategoria')
+            ->where('parent_id', $categoryId)
+            ->where('active', ACTIVE);
     }
 
     /**
