@@ -351,10 +351,10 @@ export default {
             let vue = this
             vue.showLoader()
 
-            // let validar = this.$refs.form_notificacion.validate();
+            let validar = this.$refs.form_notificacion.validate();
             vue.btn_disabled = true;
             const validateModuleSelected = await vue.validateModuleSelected();
-            if (!validateModuleSelected) {
+            if (!validateModuleSelected || !validar) {
                 vue.btn_disabled = false;
                 vue.showAlert('Debe seleccionar al menos un módulo', 'warning');
                 vue.hideLoader()
