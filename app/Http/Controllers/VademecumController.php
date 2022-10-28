@@ -50,7 +50,9 @@ class VademecumController extends Controller
     public function getListSelects()
     {
         $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
-        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        $categories = Taxonomy::vademecumCategory(
+            get_current_workspace()->id
+        )->get();
 
         return $this->success(get_defined_vars());
     }

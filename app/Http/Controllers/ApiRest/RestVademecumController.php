@@ -71,7 +71,7 @@ class RestVademecumController extends Controller
         $subcategorias = Taxonomy::vademecumSubcategory(
             $subworkspace->parent_id, $categoryId
         )->get();
-        
+
         return response()->json(compact('subcategorias'), 200);
     }
 }

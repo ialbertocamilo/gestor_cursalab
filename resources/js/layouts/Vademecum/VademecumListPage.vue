@@ -33,6 +33,7 @@
                             clearable dense
                             :items="selects.categories"
                             v-model="filters.category_id"
+                            :itemText="'name'"
                             label="Categorías"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
