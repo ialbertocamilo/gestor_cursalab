@@ -222,4 +222,13 @@ class AuthController extends Controller
             'expires_in' => 560
         ]);
     }
+
+    public function checkForMaintenanceModeSubworkspace($subworkspace_id){
+        if (!empty(env('MAINTENANCE_SUBWORKSPACES'))) {
+            $subworkspace_maintenance_array = explode (",", env('MAINTENANCE_SUBWORKSPACES'));
+            if (in_array($subworkspace_id, $subworkspace_maintenance_array)) {
+                throw new SubworkspaceInMaintenance();
+            }
+        }
+    }
 }
