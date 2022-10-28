@@ -81,11 +81,11 @@ class SegmentController extends Controller
         $workspace = get_current_workspace();
 
         $users = User::query()
-//            ->withWhereHas('criterion_values', function ($q) use ($data) {
-//                $q->select('id', 'value_text')
-//                    // ->where('value_text', 'like', "%{$data['filter_text']}%")
-//                    ->whereRelation('criterion', 'code', 'document');
-//            })
+            // ->withWhereHas('criterion_values', function ($q) use ($data) {
+            //     $q->select('id', 'value_text')
+            //         // ->where('value_text', 'like', "%{$data['filter_text']}%")
+            //         ->whereRelation('criterion', 'code', 'document');
+            // })
             ->when($data['filter_text'] ?? null, function ($q) use ($data) {
                 $q->filterText($data['filter_text']);
             })
@@ -94,23 +94,11 @@ class SegmentController extends Controller
             })
             ->select('id', 'name', 'surname', 'lastname', 'document')
             ->whereRelation('subworkspace', 'parent_id', $workspace?->id)
-            ->limit(100)->get();
+            ->limit(50)->get();
 
-//        $users = SegmentSearchUsersResource::collection($users);
-        $temp = [];
-        foreach ($users as $user) {
-            $criterion_value_id = CriterionValue::where('value_text', $user->document)->first()?->id;
-            if ($criterion_value_id){
-                $temp[] = [
-                    'document' => $user->document,
-                    'fullname' => $user->fullname,
-                    'criterion_value_id' => $criterion_value_id,
-                ];
-            }
-        }
+        $users = SegmentSearchUsersResource::collection($users);
 
-//        return $this->success($users);
-        return $this->success($temp);
+        return $this->success($users);
     }
 
     public function syncSegmentValuesType()
@@ -124,14 +112,14 @@ class SegmentController extends Controller
             'position' => 1,
         ]);
 
-//        $date_range_type = Taxonomy::firstOrCreate([
-//            'group' => 'segment-value',
-//            'type' => 'type',
-//            'code' => 'date-range',
-//            'name' => 'Rango de fechas',
-//            'active' => ACTIVE,
-//            'position' => 2,
-//        ]);
+        //        $date_range_type = Taxonomy::firstOrCreate([
+        //            'group' => 'segment-value',
+        //            'type' => 'type',
+        //            'code' => 'date-range',
+        //            'name' => 'Rango de fechas',
+        //            'active' => ACTIVE,
+        //            'position' => 2,
+        //        ]);
 
         SegmentValue::query()->update(['type_id' => $criterion_value_type?->id]);
     }
@@ -203,11 +191,9 @@ class SegmentController extends Controller
                     $document = CriterionValue::storeRequest($criterion_value_data, $document_value);
 
                     $user->criterion_values()->syncWithoutDetaching([$document?->id]);
-
                 }
             });
 
         info(now()->format("Y-m-d H:i:s"));
     }
-
 }

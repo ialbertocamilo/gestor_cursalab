@@ -56,6 +56,11 @@ export default {
             this.showLoader()
             let UFC = this.$refs.EstadoFiltroComponent;
 
+            // Get bucket base url
+
+            const baseUrl = document.querySelector('meta[name=BUCKET_BASE_URL]')
+                                    .getAttribute('content');
+
             // Perform request to generate report
 
             let urlReport = `${this.$props.reportsBaseUrl}/exportar/user_uploads`
@@ -66,7 +71,8 @@ export default {
                     data: {
                         workspaceId: this.workspaceId,
                         UsuariosActivos: UFC.UsuariosActivos,
-                        UsuariosInactivos: UFC.UsuariosInactivos
+                        UsuariosInactivos: UFC.UsuariosInactivos,
+                        baseUrl: baseUrl
                     }
                 })
 

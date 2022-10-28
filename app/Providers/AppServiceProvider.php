@@ -9,9 +9,6 @@ use App\Models\Role;
 use Carbon\Carbon;
 use Bouncer;
 
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\DB;
-
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -35,12 +32,5 @@ class AppServiceProvider extends ServiceProvider
         //Bouncer::cache();
         // Passport::loadKeysFrom(base_path(config('passport.key_path')));
         Bouncer::useRoleModel(Role::class);
-
-        // DB::listen(function($query) {
-        //     File::append(
-        //         storage_path('/logs/query.log'),
-        //         $query->sql . ' [' . implode(', ', $query->bindings) . ']' . PHP_EOL
-        //    );
-        // });
     }
 }

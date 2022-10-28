@@ -21,6 +21,7 @@ use App\Imports\ChecklistImport;
 use App\Models\Course;
 use App\Models\Taxonomy;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Str;
 use function foo\func;
 
@@ -171,14 +172,14 @@ class EntrenamientoController extends Controller
         $estado = $request->estado;
         $dni_entrenador = $request->entrenador;
         $dni_alumno = $request->alumno;
-        $entrenador = Usuario::where('dni', $dni_entrenador)->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR)->first();
-        $alumno = Usuario::where('dni', $dni_alumno)->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)->first();
+        $entrenador = User::where('document', $dni_entrenador)->first();
+        $alumno = User::where('document', $dni_alumno)->first();
         if ($entrenador && $alumno) {
-            $registro = EntrenadorUsuario::where('entrenador_id', $entrenador->id)
-                ->where('usuario_id', $alumno->id)
+            $registro = EntrenadorUsuario::where('trainer_id', $entrenador->id)
+                ->where('user_id', $alumno->id)
                 ->first();
             if ($registro) {
-                $registro->estado = $estado;
+                $registro->active = $estado ? 1 : 0;
                 $registro->save();
                 //TODO:
                 //                if ()
@@ -215,7 +216,7 @@ class EntrenamientoController extends Controller
         $entrenador = $request->entrenador;
         $alumno = $request->alumno;
 
-        EntrenadorUsuario::where('entrenador_id', $entrenador['id'])->where('usuario_id', $alumno['id'])->delete();
+        EntrenadorUsuario::where('trainer_id', $entrenador['id'])->where('user_id', $alumno['id'])->delete();
         return response()->json(['error' => false, 'msg' => 'Relación Entrenador-Alumno eliminada.'], 200);
     }
 
@@ -237,18 +238,19 @@ class EntrenamientoController extends Controller
 
     public function guardarChecklist(Request $request)
     {
+        $workspace = get_current_workspace();
         $data = $request->all();
         $checklist = CheckList::updateOrCreate(
             ['id' => $data['id']],
             [
                 'title' => $data['title'],
                 'description' => $data['description'],
-                'active' => $data['active']
+                'active' => $data['active'],
+                'workspace_id' => $workspace->id
             ]
         );
 
         foreach ($data['checklist_actividades'] as $key => $checklist_actividad) {
-            // ($checklist_actividad['tipo'] == 'user_trainer') && $checklist_actividad['is_default'] != null;
             $type = Taxonomy::where('group', 'checklist')
                 ->where('type', 'type')
                 ->where('code', $checklist_actividad['type_name'])
@@ -261,14 +263,12 @@ class EntrenamientoController extends Controller
                     'active' => $checklist_actividad['active'],
                     'checklist_id' => $checklist->id,
                     'position' => $key + 1,
-                    // 'is_default' => $checklist_actividad['is_default']
                 ]
             );
         }
         $cursos = collect($data['courses']);
         $checklist->courses()->sync($cursos->pluck('id'));
 
-        // return response()->json(['error' => false, 'checklist' => $checklist, 'msg' => 'Checklist creado.'], 200);
         return $this->success($checklist);
     }
 
@@ -352,7 +352,8 @@ class EntrenamientoController extends Controller
         }
 
         // Entrenador activo
-        if ($is_student) {
+        $entrenadorActivo = EntrenadorUsuario::where('user_id', $usuario->id)->where('active', 1)->first();
+        if ($is_student && $entrenadorActivo) {
             $entrenador = User::find($is_student->trainer_id);
             $usuario->entrenador = $entrenador->document . ' - ' . $entrenador->name;
         } else {

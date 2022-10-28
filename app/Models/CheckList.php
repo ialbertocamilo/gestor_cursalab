@@ -11,7 +11,8 @@ class CheckList extends BaseModel
     protected $fillable = [
         'title',
         'description',
-        'active'
+        'active',
+        'workspace_id'
     ];
 
     protected $casts = [
@@ -53,16 +54,6 @@ class CheckList extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $cursos_x_wk = Workspace::leftJoin('course_workspace as cw', 'workspaces.id', '=', 'cw.workspace_id')
-            ->leftJoin('courses as c', 'cw.course_id', '=', 'c.id')
-            ->leftJoin('checklist_relationships as cr', 'c.id', '=', 'cr.course_id')
-            ->groupBy('cr.checklist_id')
-            ->where('workspaces.id', $workspace->id)
-            ->whereNotNull('cr.checklist_id')
-            ->select('cr.checklist_id')
-            ->pluck('cr.checklist_id')
-            ->unique();
-
         $queryChecklist = CheckList::with([
             'checklist_actividades' => function ($q) {
                 $q->orderBy('active', 'desc')->orderBy('position');
@@ -70,7 +61,7 @@ class CheckList extends BaseModel
             'courses' => function ($q) {
                 $q->select('courses.id', 'courses.name');
             }
-        ])->whereIn('id', $cursos_x_wk);
+        ])->where('workspace_id', $workspace->id);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -125,7 +116,7 @@ class CheckList extends BaseModel
 
     protected function getChecklistsByAlumno($alumno_id): array
     {
-        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->first();
+        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->where('active', 1)->first();
         $entrenador_id = !is_null($entrenador) ? $entrenador->trainer_id : null;
 
         $response['error'] = false;
@@ -133,7 +124,7 @@ class CheckList extends BaseModel
 
         $user = User::where('id', $alumno_id)->first();
         $cursos_x_user = $user->getCurrentCourses();
-        $cursos_ids = $cursos_x_user->pluck('id');
+        $cursos_ids = $cursos_x_user->pluck('id')->toArray();
 
         $cursos = Course::with('checklists', 'schools')->whereIn('id', $cursos_ids)->get();
         $checklists = collect();
@@ -176,7 +167,11 @@ class CheckList extends BaseModel
                                 'titulo' => $checklist->title,
                                 'descripcion' => $checklist->description,
                                 'disponible' => $disponible,
-                                'curso' => $curso->only('id', 'name', 'categoria'),
+                                'curso' => $checklist->courses()->with([
+                                    'schools' => function ($query) {
+                                        $query->select('id', 'name');
+                                    }
+                                ])->select('id', 'name')->get(),
                                 'porcentaje' => $progresoActividad['porcentaje'],
                                 'actividades_totales' => $progresoActividad['actividades_totales'],
                                 'actividades_completadas' => $progresoActividad['actividades_completadas'],
@@ -195,6 +190,7 @@ class CheckList extends BaseModel
         $response['checklists_completados'] = $checklistCompletados;
         $response['porcentaje'] = $checklists->count() > 0 ? (float)number_format((($checklistCompletados / $checklists->count()) * 100), 2) : 0;
         $response['checklists'] = $checklists->sortByDesc('disponible')->values()->all();
+        $response['active'] = !is_null($entrenador);
         return $response;
     }
 
@@ -228,7 +224,7 @@ class CheckList extends BaseModel
                     $checklistRptaItem = ChecklistRptaItem::create([
                         'checklist_answer_id' => $checklistRpta->id,
                         'checklist_item_id' => $actividad->id,
-                        'qualification' => 'Cumple'
+                        'qualification' => 'Pendiente'
                     ]);
                     ChecklistRpta::actualizarChecklistRpta($checklistRpta);
                 }

@@ -318,7 +318,10 @@ class Meeting extends BaseModel
             $host = Usuario::find($data['host_id']);
 
             $datesHaveChanged = $meeting && $meeting->datesHaveChanged($data);
-            $data['workspace_id'] = $data['workspace_id'] ?? get_current_workspace_indexes('id'); #añadiendo workspace
+
+            #add workspace id
+            $data['workspace_id'] = $data['workspace_id'] ?? get_current_workspace_indexes('id');
+            #add workspace id
 
             DB::beginTransaction();
 

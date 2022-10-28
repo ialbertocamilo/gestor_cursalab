@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\CriterionValue;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class SegmentSearchUsersResource extends JsonResource
@@ -21,8 +20,7 @@ class SegmentSearchUsersResource extends JsonResource
             'document' => $user->document,
             'fullname' => $user->fullname,
 
-//            'criterion_value_id' => $user->criterion_values?->first()?->id,
-            'criterion_value_id' => CriterionValue::where('value_text', $user->document)->first()?->id,
+            'criterion_value_id' => $user->criterion_values?->first()?->id,
         ];
     }
 }

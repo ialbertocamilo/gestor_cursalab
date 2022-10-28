@@ -10,18 +10,19 @@ use App\Models\Usuario;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 
-class SubworkspaceInMaintenance extends Exception {};
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
     public function login(LoginAppRequest $request)
     {
         // Stop login process and show maintenance message
+
         if (env('MAINTENANCE_MODE')) {
             return $this->error(
-                config('errors.maintenance_message'), 503
+                config('errors.maintenance_message'),
+                503
             );
         }
 
@@ -116,7 +117,19 @@ class AuthController extends Controller
         // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
         $supervisor = $user->isSupervisor();
-        $can_be_host = $user->belongsToSegmentation($workspace);
+        // $can_be_host = $user->belongsToSegmentation($workspace);
+
+        $workSpaceIndex = $user->subworkspace->parent_id;
+        $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
+        $can_be_host = in_array($user->id, $current_hosts);
+
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name')->where('id', $workspace->parent_id)->first() : null;
+        if ($workspace_data) {
+            $workspace_data->logo = get_media_url($workspace_data->logo);
+        }
+        if ($user->subworkspace->logo) {
+            $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
+        }
 
         $user_data = [
             "id" => $user->id,
@@ -125,17 +138,18 @@ class AuthController extends Controller
             "apellido" => $user->lastname,
             "full_name" => $user->fullname,
             'criteria' => $user->criterion_values,
-            // 'rol_entrenamiento' => $user->getTrainingRole(),
+            'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
+            'workspace' => $workspace_data,
             'can_be_host' => $can_be_host
             // 'can_be_host' => true,
-//            'carrera' => $carrera,
-//            'ciclo' => $ciclo
-//            "grupo" => $user->grupo,
-//            "botica" => $user->botica,
-//            "sexo" => $user->sexo,
-//            "cargo" => $user->cargo,
+            // 'carrera' => $carrera,
+            // 'ciclo' => $ciclo
+            // "grupo" => $user->grupo,
+            // "botica" => $user->botica,
+            // "sexo" => $user->sexo,
+            // "cargo" => $user->cargo,
         ];
 
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
@@ -207,14 +221,5 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => 560
         ]);
-    }
-
-    public function checkForMaintenanceModeSubworkspace($subworkspace_id){
-        if (!empty(env('MAINTENANCE_SUBWORKSPACES'))) {
-            $subworkspace_maintenance_array = explode (",", env('MAINTENANCE_SUBWORKSPACES'));
-            if (in_array($subworkspace_id, $subworkspace_maintenance_array)) {
-                throw new SubworkspaceInMaintenance();
-            }
-        }
     }
 }

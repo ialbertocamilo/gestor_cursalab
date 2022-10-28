@@ -132,8 +132,8 @@
 <!--                                        class="mx-2"-->
 <!--                                        max-width="70"-->
 <!--                                    />-->
-                                    {{ resource.host.name ? '' : resource.host.dni + ' - ' }}
-                                    {{ resource.host.fullname }}
+                                    {{ resource.host.document }} - {{  resource.host.name+' '+resource.host.lastname+' '+resource.host.surname }}
+                                    <!-- - {{ resource.host.document }} -->
                                     <!--                                    ({{ resource.host.apellido_paterno }}
                                                                         {{ resource.host.apellido_materno }}
                                                                         {{ resource.host.nombre }})-->

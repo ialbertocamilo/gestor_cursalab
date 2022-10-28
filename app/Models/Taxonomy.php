@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -34,6 +35,7 @@ class Taxonomy extends Model
         'description',
         'detail',
         'parent_id',
+        'workspace_id',
         'external_parent_id',
         'external_parent_id_es',
     ];
@@ -109,11 +111,13 @@ class Taxonomy extends Model
     /**
      * Load Vademecum categories
      *
+     * @param $workspaceId
      * @return Builder
      */
-    protected function vademecumCategory()
+    public static function vademecumCategory($workspaceId): Builder
     {
         return Taxonomy::query()
+            ->where('workspace_id', $workspaceId)
             ->where('group', 'vademecum')
             ->where('type', 'categoria')
             ->where('active', ACTIVE);
@@ -122,14 +126,18 @@ class Taxonomy extends Model
     /**
      * Load Vademecum subcategories from specific category
      *
+     * @param $workspaceId
      * @param $categoryId
-     * @return mixed
+     * @return Builder
      */
-    protected function vademecumSubcategory($categoryId) {
-
-        return Taxonomy::getChildrenData(
-            $categoryId, 'vademecum', 'subcategoria'
-        );
+    public static function vademecumSubcategory($workspaceId, $categoryId): Builder
+    {
+        return Taxonomy::query()
+            ->where('workspace_id', $workspaceId)
+            ->where('group', 'vademecum')
+            ->where('type', 'subcategoria')
+            ->where('parent_id', $categoryId)
+            ->where('active', ACTIVE);
     }
 
     /**

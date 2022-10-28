@@ -8,9 +8,11 @@ use App\Http\Resources\VademecumCategoriaResource;
 use App\Http\Resources\VademecumResource;
 use App\Models\Abconfig;
 use App\Models\Criterion;
+use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\Taxonomy;
 use App\Models\Vademecum;
+use App\Models\Workspace;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -47,8 +49,10 @@ class VademecumController extends Controller
      */
     public function getListSelects()
     {
-        $modules = Criterion::getValuesForSelect('module');
-        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
+        $categories = Taxonomy::vademecumCategory(
+            get_current_workspace()->id
+        )->get();
 
         return $this->success(get_defined_vars());
     }
@@ -63,8 +67,7 @@ class VademecumController extends Controller
     {
 
         $vademecum = Vademecum::search($request);
-
-        $modules = Abconfig::where('estado', 1)->pluck('etapa', 'id')->toArray();
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
         $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
         $subcategories = [];
 
@@ -87,7 +90,7 @@ class VademecumController extends Controller
      */
     public function create()
     {
-        $modules = Criterion::getValuesForSelect('module');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
         $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
         $subcategories = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
 
@@ -131,9 +134,9 @@ class VademecumController extends Controller
 
         $vademecum->scorm = $vademecum->media->file ?? null;
 
-        $modulos = Criterion::getValuesForSelect('module');
-        $categorias = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        $subcategorias = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
+        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
+        $subcategories = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
 
         return $this->success(get_defined_vars());
     }
@@ -228,7 +231,7 @@ class VademecumController extends Controller
     public function categorias_search(Request $request)
     {
 
-        $query = Taxonomy::vademecumCategory()
+        $query = Taxonomy::vademecumCategory(get_current_workspace()->id)
                          ->withCount('children');
 
         if ($request->q)
@@ -257,8 +260,10 @@ class VademecumController extends Controller
             'type' => 'categoria',
             'group' => 'vademecum',
             'name' => $request->name,
+            'workspace_id' => get_current_workspace()->id,
             'active' => 1
         ]);
+
 
         return $this->success(['msg' => 'Categoría creada correctamente.']);
     }
@@ -329,7 +334,9 @@ class VademecumController extends Controller
      */
     public function subcategorias_search(Taxonomy $categoria, Request $request)
     {
-        $query = Taxonomy::vademecumSubcategory($categoria->id);
+        $query = Taxonomy::vademecumSubcategory(
+            get_current_workspace()->id, $categoria->id
+        );
 
         if ($request->q)
             $query->where('name', 'like', "%{$request->q}%");
@@ -365,10 +372,11 @@ class VademecumController extends Controller
             'type' => 'subcategoria',
             'name' => $request->name,
             'parent_id' => $categoria->id,
+            'workspace_id' => get_current_workspace()->id,
             'active' => 1
         ]);
 
-        return $this->success(['msg' => 'Sub Categoría creada correctamente.']);
+        return $this->success(['msg' => 'Sub categoría creada correctamente.']);
     }
 
     /**

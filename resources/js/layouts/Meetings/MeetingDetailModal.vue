@@ -278,7 +278,7 @@
                                                     />
                                                     <div class="clickable--">
                                                         {{ resource.host.document }} -
-                                                        {{ resource.host.name }}
+                                                        {{ `${resource.host.name} ${resource.host.lastname} ${resource.host.surname}` }}
                                                     </div>
                                                 </div>
                                                 <div class="item-options-meeting-search-attendants-results"

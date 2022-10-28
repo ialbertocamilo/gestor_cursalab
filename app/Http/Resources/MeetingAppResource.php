@@ -16,11 +16,12 @@ class MeetingAppResource extends JsonResource
     {
         $usuario_id = auth()->user()->id;
         $cohost = $this->attendants->where('type.code', 'cohost')->where('usuario_id', $usuario_id)->first();
+
         $attendant = $this->attendants->where('usuario_id', $usuario_id)->first();
 
         $was_present = ($attendant AND $attendant->first_login_at);
         $url = ($attendant AND $attendant->link) ? $attendant->link : $this->url;
-        $isHostOrCohost = in_array($attendant->type->code, ['host', 'cohost']);
+        $isHostOrCohost = in_array($attendant->type?->code, ['host', 'cohost']);
 
         return [
             'key' => $this->starts_at->format('Y-m-d'),

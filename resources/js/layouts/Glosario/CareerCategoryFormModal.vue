@@ -31,29 +31,30 @@
                         :key="index"
                         :value="'modulo-' + index"
                     >
-                        <v-card flat class="mt-5">
-                            <v-row justify="space-around">
-                                <v-col
-                                   cols="6"
-                                   class="d-flex justify-content-center"
-                                   v-for="carrera in carreras"
-                                   :key="'modulo-' + index + '-carrera-' + carrera.id"
-                                >
-                                    <DefaultSelect
-                                        clearable
-                                        :items="selects.categorias"
-                                        v-model="carrera.glosario_categorias"
-                                        :label="carrera.nombre"
-                                        multiple
-                                        return-object
-                                        :count-show-values="3"
-                                        :show-select-all="false"
-                                    />
-                                </v-col>
-                            </v-row>
-                        </v-card>
+                      <v-card flat class="mt-5">
+                        <v-row justify="space-around">
+                            <v-col
+                               cols="6"
+                               class="d-flex justify-content-center"
+                               v-for="carrera in carreras"
+                               :key="'modulo-' + index + '-carrera-' + carrera.id"
+                            >
+                                <DefaultSelect
+                                    clearable
+                                    :items="selects.categorias"
+                                    v-model="carrera.glosario_categorias"
+                                    :label="carrera.nombre"
+                                    multiple
+                                    return-object
+                                    :count-show-values="3"
+                                    :show-select-all="false"
+                                />
+                            </v-col>
+                        </v-row>
+                      </v-card>
                     </v-tab-item>
                 </v-tabs-items>
+
             </v-form>
         </template>
 
@@ -78,6 +79,7 @@ export default {
     },
     data() {
         return {
+            tabs: null,
             tabs: null,
             resourceDefault: {
                 modulos_carreras: [],

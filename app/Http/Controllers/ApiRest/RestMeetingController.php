@@ -26,10 +26,10 @@ class RestMeetingController extends Controller
 {
     // public function __construct()
     // {
-    //     $this->middleware('auth.jwt', ['except' => [
-    //         'zoomWebhookEndMeeting','finishMeeting'
-    //     ]]);
-    //     return auth()->shouldUse('api');
+    //     $this->middleware('auth')
+    //          ->except(['zoomWebhookEndMeeting', 'finishMeeting']);
+
+    //     // return auth()->shouldUse('api');
     // }
 
     public function listUserMeetings(Request $request)
@@ -65,11 +65,11 @@ class RestMeetingController extends Controller
         }
 
         $meetings = Meeting::search($request);
-
         MeetingAppResource::collection($meetings);
 
-        $result = json_decode($meetings->toJson(), true);
+        info(__function__);
 
+        $result = json_decode($meetings->toJson(), true);
         $result['data'] = collect($result['data'])->groupBy('key')->all();
 
         if (count($result['data']) === 0) $result['data'] = new stdClass();
@@ -163,20 +163,18 @@ class RestMeetingController extends Controller
 
     public function zoomWebhookEndMeeting(Request $request)
     {
+        info(__function__);
         $data = $request->all();
-
         Meeting::finalizeWebhook($data, 'zoom');
     }
 
     public function getFormData(Request $request)
     {
         $subworkspace = auth()->user()->subworkspace;
-        // $modulos = Workspace::loadSubWorkspaces(['id','name as nombre']);
         $modulos = Workspace::loadSubWorkspacesSiblings($subworkspace, ['id','name as nombre']);
         $user_types = Taxonomy::getData('meeting', 'user')->pluck('code', 'id');
 
         $params = ['config_id' => $request->config_id ?? auth()->user()->config_id];
-
         $grupos = [];
 
         return $this->success(compact('grupos', 'modulos', 'user_types'));
@@ -185,8 +183,11 @@ class RestMeetingController extends Controller
     public function store(MeetingAppRequest $request)
     {
         $data = $request->validated();
+
+        # set workspace id
         $subworkspace = auth()->user()->subworkspace;
         $data['workspace_id'] = $subworkspace->parent_id;
+        # set workspace id
 
         $meeting = Meeting::storeRequest($data);
 
@@ -198,12 +199,15 @@ class RestMeetingController extends Controller
     public function update(Meeting $meeting, MeetingAppRequest $request)
     {
         $data = $request->validated();
+
+        # set workspace id
         $subworkspace = auth()->user()->subworkspace;
         $data['workspace_id'] = $subworkspace->parent_id;
+        # set workspace id
 
         Meeting::storeRequest($data, $meeting);
 
-        return $this->success(['msg' => 'Reunión actualizada correctamente.']);
+        return $this->success(['msg' => 'Reunión actualizada correctamente']);
     }
 
     public function edit(Meeting $meeting)
@@ -220,31 +224,33 @@ class RestMeetingController extends Controller
     public function getDuplicatedData(Meeting $meeting)
     {
         // $meeting->load('type', 'host.config');
-
         $data = [
             // 'type' => $meeting->type,
             // 'host' => $meeting->host,
             'attendants' => Attendant::getMeetingAttendantsForMeeting($meeting),
             'description' => $meeting->description,
+            // 'name' => $meeting->name,
+            // 'duration' => $meeting->duration,
         ];
 
         return $this->success($data);
-    $data = $request->validated();
     }
     public function uploadAttendants(MeetingAppUploadAttendantsRequest $request)
     {
-        $data = $data;
+        $data = $request->validated();
 
-//        $data['usuarios_dni'] = Attendant::getUsuariosDniFromExcel($data);
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
         $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
 
-        $subworkspace = auth()->user()->subworkspace;
+        $workSpaceIndex = auth()->user()->subworkspace->parent_id;
+        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $workSpaceIndex]);
 
-        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
+        # get subworkspaces ids
+        $workspace = Workspace::find($workSpaceIndex);
+        $data['config_id'] = $workspace->subworkspaces->pluck('id');
+        # get subworkspaces ids
 
         $attendants = Attendant::searchAttendants($data);
-
         $attendants = MeetingSearchAttendantsResource::collection($attendants);
 
         Attendant::filterEmptyMeetingInvitations($attendants);
@@ -259,12 +265,15 @@ class RestMeetingController extends Controller
         $cohost = Taxonomy::getFirstData('meeting', 'user', 'cohost');
         $normal = Taxonomy::getFirstData('meeting', 'user', 'normal');
 
-        $subworkspace = auth()->user()->subworkspace;
+        $workSpaceIndex = auth()->user()->subworkspace->parent_id;
+        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $workSpaceIndex]);
 
-        $request->merge(['cohost' => $cohost, 'normal' => $normal, 'workspace_id' => $subworkspace->parent_id]);
+        # get subworkspaces ids
+        $workspace = Workspace::find($workSpaceIndex);
+        $data['config_id'] = $workspace->subworkspaces->pluck('id');
+        # get subworkspaces ids
 
         $attendants = Attendant::searchAttendants($data);
-
         $attendants = MeetingSearchAttendantsResource::collection($attendants);
 
         Attendant::filterEmptyMeetingInvitations($attendants);

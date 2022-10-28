@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Meeting;
 
-use App\Http\Requests\ApiFormRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MeetingSearchAttendantRequest extends FormRequest

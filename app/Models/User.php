@@ -69,7 +69,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
-        
         'user_relations',
         'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at',
     ];
@@ -378,7 +377,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
-
                 $user->update($data);
 
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
@@ -388,10 +386,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                         ->where('value_text', $old_document)->first();
                 endif;
             else :
-
                 $user = self::create($data);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
-
             endif;
 
             $user->subworkspace_id = Workspace::query()
@@ -399,6 +395,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->first()
                 ?->id;
 
+            $user->criterion_values()
+                ->sync(array_values($data['criterion_list_final']) ?? []);
 
             $data['criterion_list_final'][] = $user_document->id;
 
@@ -620,6 +618,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                             endif;
                         }
+
                         //                        $blocks->push([
                         //                            'id' => $block_child->child->id,
                         //                            'name' => $block_child->child->name,

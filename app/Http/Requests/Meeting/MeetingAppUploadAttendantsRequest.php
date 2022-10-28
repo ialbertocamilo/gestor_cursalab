@@ -31,16 +31,20 @@ class MeetingAppUploadAttendantsRequest extends FormRequest
 
             'meeting_id' => 'nullable',
             'config_id' => 'nullable',
-//            'file' => 'nullable',
-            'usuarios_dni' => "required",
+            // 'file' => 'nullable',
+            'usuarios_dni' => 'required',
             'grupos_id' => 'nullable'
+            // 'grupos_id' => 'nullable',
+            // 'exclude_host_id' => 'nullable'
         ];
     }
 
     public function validationData()
     {
         $data['starts_at'] = "{$this->date} {$this->time}:00";
-        $data['finishes_at'] = carbonFromFormat($data['starts_at'])->addMinutes($this->duration ?? 0)->format('Y-m-d H:i:s');
+        $data['finishes_at'] = carbonFromFormat($data['starts_at'])
+                                ->addMinutes($this->duration ?? 0)
+                                ->format('Y-m-d H:i:s');
 
         return $this->merge($data)->all();
     }

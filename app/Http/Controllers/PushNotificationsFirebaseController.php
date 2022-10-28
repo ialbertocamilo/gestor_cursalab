@@ -11,6 +11,7 @@ use App\Models\Matricula;
 use App\Models\PushNotification;
 use App\Models\User;
 use App\Models\Usuario;
+use App\Models\Workspace;
 use Carbon\Carbon;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -70,31 +71,31 @@ class PushNotificationsFirebaseController extends Controller
     public function enviarNotificacionCustom(Request $request)
     {
 //        dd($request->all());
-        $destinatarios = json_decode($request->destinatarios);
         $_destinatarios = collect();
 
-        // todo: when replacement for Matricula table is defined
-        foreach ($destinatarios as $mod) {
+        foreach ($request->destinatarios as $module) {
 
-            foreach ($mod->carreras as $carr) {
-//                dd($carr->carrera_id);
-                $users = User::whereHas('criterion_values', function ($q) use ($carr) {
-                    $q->whereIn('id', [$carr->carrera_id]);
-                })
-                    ->pluck('id');
+            $sub_workspace = Workspace::where('criterion_value_id', $module['criterion_value_id'])->first();
 
-//                $usuarios_matriculas = Matricula::where('carrera_id', $carr->carrera_id)
-//                                                ->where('presente', 1)
-//                                                ->get(['usuario_id']);
-//
-                foreach ($users as $us)
-                    $_destinatarios->push($us);
+            if (!$module['carreras_selected']) {
 
+                $query = User::query();
+
+            } else {
+                $carreras_values_id = array_column($module['carreras_selected'], 'id');
+//                info($carreras_values_id);
+                $query = User::whereHas('criterion_values', function ($q) use ($module, $carreras_values_id) {
+                    $q->whereIn('id', $carreras_values_id);
+                });
             }
+
+            $users = $query->where('subworkspace_id', $sub_workspace->id)->pluck('id');
+
+            $_destinatarios = $_destinatarios->merge($users->toArray());
         }
 
+//        dd($request->all());
         // Calculates notification time
-
         $push_chunk = 500;
         $envio_inicio = 2;
         $intervalo = 15;
@@ -124,8 +125,9 @@ class PushNotificationsFirebaseController extends Controller
         $nueva_notificacion = new PushNotification();
         $nueva_notificacion->titulo = $request->titulo;
         $nueva_notificacion->texto = $request->texto;
-        $nueva_notificacion->destinatarios = $request->destinatarios;
-        $nueva_notificacion->creador_id = $request->creador_id;
+//        $nueva_notificacion->destinatarios = $request->destinatarios;
+        $nueva_notificacion->destinatarios = $request->selected_detail;
+        $nueva_notificacion->creador_id = auth()->user()->id;
         $nueva_notificacion->estado_envio = 1; // PENDIENTE (aún no iniciado)
         $nueva_notificacion->detalles_json = json_encode($_detalles_json);
         $nueva_notificacion->success = 0;
@@ -134,7 +136,7 @@ class PushNotificationsFirebaseController extends Controller
 
         return response()->json([
                 'error' => false,
-                'title' => 'Notificación registrada',
+                'title' => 'Notificación registrada.',
                 'msg' => "Se enviará durante los próximos minutos."
             ]
             , 200
