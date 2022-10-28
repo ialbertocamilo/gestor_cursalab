@@ -100,7 +100,8 @@ class Migration_2 extends Model
         $output->newLine();
     }
 
-    protected function migrateCursosNombre($output){
+    protected function migrateCursosNombre($output)
+    {
         $db = self::connect();
 
         $courses = Course::disableCache()->whereNotNull('external_id')->get();
@@ -149,8 +150,9 @@ class Migration_2 extends Model
 
         $media_temas = $db->getTable('media_temas')->get();
 
-        $topics = Topic::disableCache()->whereNotNull('external_id')->select('id')->get();
+        $topics = Topic::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
         $data = [];
+        $table_media = [];
         $bar = $output->createProgressBar($media_temas->count());
         $bar->start();
 
@@ -167,7 +169,7 @@ class Migration_2 extends Model
             $data[] = [
                 'topic_id' => $media->tema_id,
 
-                'title' => $media->nombre,
+                'title' => $media->titulo,
                 'value' => $media->valor,
 
                 'type_id' => $media->tipo,
@@ -179,12 +181,23 @@ class Migration_2 extends Model
                 'updated_at' => $media->updated_at,
             ];
 
-            // TODO: Agregar registro a la tabla 'medias'
+            $table_media[] = [
+                'external_id' => $media->id,
+                'title' => $media->titulo,
+
+                'file' => $media->valor,
+                'ext' => $media->tipo,
+            ];
         }
         $bar->finish();
         $output->newLine();
 
-        $this->makeChunkAndInsert($data, 'media_topics', $output);
+        info("CANT MEDIA TOPIC DATA ::");
+        info(count($data));
+        info("CANT MEDIA DATAt ::");
+        info(count($table_media));
+//        $this->makeChunkAndInsert($data, 'media_topics', $output);
+//        $this->makeChunkAndInsert($table_media, 'media', $output);
     }
 
     protected function migrateCurricula()
