@@ -166,8 +166,9 @@ class Migration_2 extends Model
                 continue;
             }
 
-//            $valor = in_array($media->ttipo, ['audio', 'scorm']) ?
-//            str_replace('');
+//            $valor = $media->valor;
+//            if ($media->tipo)
+//                $valor = str_replace('', );
 
             $data[] = [
                 'topic_id' => $topic->id,
