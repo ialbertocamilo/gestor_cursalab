@@ -110,7 +110,7 @@
                                         Módulo
                                     </th>
                                     <th class="text-left" style="width: 75% !important">
-                                        Selector de criterios
+                                        Seleccionar puesto (opcional)
                                     </th>
                                 </tr>
                                 </thead>
@@ -272,7 +272,6 @@ export default {
         //         .then((res) => {
         //             vue.modules = res.data.modules;
         //             vue.notificaciones = res.data._notificaciones;
-
         //             vue.paginate.total_paginas = res.data.paginate.total_paginas;
         //         })
         //         .catch((err) => {
@@ -314,31 +313,27 @@ export default {
                 }
             });
         },
-        // cambiar_pagina(page) {
-        //     let vue = this;
-        //     vue.getData(page);
-        // },
         generarJson() {
             let vue = this;
             let cadena = "[";
-            if (vue.existeDestinatarios) {
-                vue.modules.forEach((mod) => {
-                    if (mod.carreras_selected.length > 0) {
-                        cadena +=
-                            '{"modulo_id":' + mod.id + ', "modulo_nombre": "' + mod.nombre + '", "carreras": [';
+            vue.modules.forEach((mod) => {
 
-                        mod.carreras_selected.forEach((carr) => {
-                            cadena += '{"carrera_id":' + carr.id + ', "carrera_nombre": "' + carr.nombre + '" },';
-                        });
-                        cadena = cadena.substring(0, cadena.length - 1);
-                        cadena += "]},";
-                    }
-                });
-                cadena = cadena.substring(0, cadena.length - 1);
-            }
+                cadena +=
+                    '{"modulo_id":' + mod.id + ', "modulo_nombre": "' + mod.nombre + '", "carreras": [';
+
+                if (mod.carreras_selected) {
+                    mod.carreras_selected.forEach((carr) => {
+                        cadena += '{"carrera_id":' + carr.id + ', "carrera_nombre": "' + carr.nombre + '" },';
+                    });
+                    cadena = cadena.substring(0, cadena.length - 1);
+                }
+
+                cadena += "]},";
+            });
+            cadena = cadena.substring(0, cadena.length - 1);
+
             cadena += "]";
-            // console.log(cadena);
-            // console.log(JSON.parse(cadena));
+
             vue.nueva_notificacion.destinatarios = cadena;
         },
         showOverlay(text) {
@@ -351,57 +346,60 @@ export default {
             vue.overlay = false;
             vue.loader_text = "";
         },
-        confirmModal() {
+        async confirmModal() {
 
             let vue = this
-            this.showLoader()
+            vue.showLoader()
 
-            let validar = this.$refs.form_notificacion.validate();
+            // let validar = this.$refs.form_notificacion.validate();
             vue.btn_disabled = true;
-            // vue.showOverlay("Enviando notificaciones ...");
-            if (validar) {
-                vue.generarJson();
-                // return;
-                vue.$http
-                    .post(
-                        "/notificaciones_push/enviarNotificacionCustom",
-                        vue.nueva_notificacion
-                    )
-                    .then((response) => {
-                        // vue.$notification.success(response.data.msg, {
-                        //     title: response.data.title,
-                        //     timer: 10,
-                        //     showLeftIcn: false,
-                        //     showCloseIcn: true,
-                        // });
-
-                        vue.closeModal()
-                        vue.showAlert(response.data.title)
-                        vue.$emit('onConfirm')
-                        this.hideLoader()
-
-                    })
-                    .catch((err) => {
-                        // console.log(err.response.data);
-                        vue.$notification.error(err.response.data.msg, {
-                            timer: 10,
-                            title: err.response.data.title,
-                            showLeftIcn: false,
-                            showCloseIcn: true,
-                        });
-                    });
-
-                vue.getData();
-                setTimeout(() => {
-                    vue.btn_disabled = false;
-                    vue.closeModal();
-                    // vue.hideOverlay();
-                }, 1500);
-
-            } else {
+            const validateModuleSelected = await vue.validateModuleSelected();
+            if (!validateModuleSelected) {
                 vue.btn_disabled = false;
+                vue.showAlert('Debe seleccionar al menos un módulo', 'warning');
+                vue.hideLoader()
+                return;
             }
+
+            vue.generarJson();
+            const {titulo, texto, destinatarios} = vue.nueva_notificacion;
+
+            const data = {
+                titulo,
+                texto,
+                selected_detail: destinatarios,
+                destinatarios: vue.modules
+                    .filter((module) => module.modulo_selected)
+                    .map((mod) => {
+                        return {criterion_value_id: mod.id, carreras_selected: mod.carreras_selected}
+                    })
+            }
+
+            vue.$http
+                .post(
+                    "/notificaciones_push/enviarNotificacionCustom",
+                    // vue.nueva_notificacion
+                    data
+                )
+                .then((response) => {
+                    vue.closeModal();
+                    vue.showAlert(response.data.title);
+                    vue.$emit('onConfirm');
+                    this.hideLoader();
+
+                })
+                .catch(() => {
+                    vue.hideLoader();
+                    vue.btn_disabled = false;
+                });
         },
+
+        validateModuleSelected() {
+            let vue = this;
+
+            return !(vue.modules.filter(module => module.modulo_selected === true).length === 0);
+        },
+
         closeModal() {
             let vue = this;
             vue.nueva_notificacion.titulo = "";
