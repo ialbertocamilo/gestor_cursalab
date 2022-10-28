@@ -47,9 +47,9 @@ export default {
                 "name": text,
                 "lastname": text,
                 "surname": text,
-                "user_name": text,
+                "username": text,
                 "phone_number": number,
-                "email_address": text,
+                "email": text,
                 "criterions": {
                     "module":text,
                     "user_action_id":text,
@@ -151,9 +151,9 @@ let data = JSON.stringify({
             "name": text,
             "lastname": text,
             "surname": text,
-            "user_name": text,
+            "username": text,
             "phone_number": number,
-            "email_address": text,
+            "email": text,
             "criterions": {
                 "module":text,
                 "user_action_id":text,
