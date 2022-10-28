@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\IntegrationRest;
 
+use App\Models\Error;
 use App\Models\Course;
 use App\Models\Integrations;
 use Illuminate\Http\Request;
@@ -19,6 +20,8 @@ class IntegrationsController extends Controller
             $response = Integrations::updateCreateUsers($users,$workspace_id);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            //Message in Slack
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -29,6 +32,7 @@ class IntegrationsController extends Controller
             $response = Integrations::getCourses($request);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -40,6 +44,7 @@ class IntegrationsController extends Controller
             $response = Integrations::getCourseProgress($request);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -50,6 +55,7 @@ class IntegrationsController extends Controller
             $response = Integrations::progressUser($request);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -60,6 +66,7 @@ class IntegrationsController extends Controller
             $response = Integrations::getSecretKey($request);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -70,6 +77,7 @@ class IntegrationsController extends Controller
             $response = Integrations::authUser($request);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -80,6 +88,7 @@ class IntegrationsController extends Controller
             $response = Integrations::getCriteria();
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -90,6 +99,7 @@ class IntegrationsController extends Controller
             $response = Integrations::getValuesCriterion($criterion_id);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -100,6 +110,7 @@ class IntegrationsController extends Controller
             $response = Integrations::getWorkspaces();
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -110,6 +121,7 @@ class IntegrationsController extends Controller
             $response = Integrations::inactivateUsers($request->all());
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -120,6 +132,7 @@ class IntegrationsController extends Controller
             $response = Integrations::activateUsers($request->all());
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
+            Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
