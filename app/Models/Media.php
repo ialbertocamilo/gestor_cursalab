@@ -55,7 +55,7 @@ class Media extends BaseModel
     {
 
         // Get file values
-        info('Inicia');
+        // info('Inicia');
         $ext = $file->getClientOriginalExtension();
 
         if (!$name) {
@@ -110,9 +110,9 @@ class Media extends BaseModel
         } else if (in_array(strtolower($ext), $valid_ext6)) {
             $path = 'office-files/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext5)) {
-            info('Inicia Nombre');
+            // info('Inicia Nombre');
             $name_scorm = $this->verify_scorm($file,$name);
-            info('Fin Nombre');
+            // info('Fin Nombre');
             // Set values for file in S3 bucket
 
 //            $path = 'scorm/' . $fileName;
@@ -162,7 +162,7 @@ class Media extends BaseModel
         }
 
         // Return media or path;
-        info('Fin');
+        // info('Fin');
         if ($return_media)
             return $media;
 

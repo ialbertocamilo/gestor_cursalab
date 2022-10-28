@@ -34,6 +34,8 @@ class MigrationData3 extends Command
     {
         $type = $this->argument('type');
 
+        $this->info(" Inicio: " . now());
+
         $output = $this->output;
 
         if ($type == 'polls')
@@ -44,20 +46,25 @@ class MigrationData3 extends Command
 
         if ($type == 'summary-users')
             Migration_3::migrateSummaryUsers($output);
-
+        
         if ($type == 'summary-courses')
             Migration_3::migrateSummaryCourses($output);
 
+        if ($type == 'summary-courses-certifications')
+            Migration_3::migrateSummaryCoursesCertifications($output);
+        
         if ($type == 'summary-topics-pruebas')
             Migration_3::migrateSummaryTopics($output, 'pruebas');
 
         if ($type == 'summary-topics-abiertas')
             Migration_3::migrateSummaryTopics($output, 'abiertas');
-
+        
         if ($type == 'summary-topics-reinicios')
             Migration_3::migrateSummaryTopics($output, 'reinicios');
 
         if ($type == 'summary-topics-visitas')
             Migration_3::migrateSummaryTopics($output, 'visitas');
+
+        $this->info("\n Fin: " . now());
     }
 }

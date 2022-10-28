@@ -41,11 +41,20 @@ class MigrationData2 extends Command
         if ($type === 'schools')
             Migration_2::migrateEscuelas($bar);
 
+        if ($type === 'update_schools_name')
+            Migration_2::migrateEscuelasNombre($bar);
+
         if ($type === 'courses')
             Migration_2::migrateCursos($bar);
 
+        if ($type === 'update_courses_name')
+            Migration_2::migrateCursosNombre($bar);
+
         if ($type === 'topics')
             Migration_2::migrateTemas($bar);
+
+        if ($type === 'media_topics')
+            Migration_2::migrateMediaTopics($bar);
 
         if ($type === 'curricula')
             Migration_2::migrateCurricula($bar);

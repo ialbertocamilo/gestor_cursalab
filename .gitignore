@@ -22,7 +22,8 @@ package-lock.json
 
 /public/archivos
 /public/images
-/public/uploads/scorm/*
+/public/uploads/*
+#/public/uploads/scorm/*
 /public/js/app.js
 /public/js/documentation_page.js
 /public/css/app.css

@@ -60,6 +60,36 @@ class MigrationData1 extends Command
             info("\n CRITERIA USERS MIGRATED");
         }
 
+        if ($type === 'curriculas') {
+            Migration_1::insertSegmentacionCarrerasCiclosData($bar);
+            $this->info("\n CURRICULAS MIGRATED");
+            info("\n CURRICULAS MIGRATED");
+        }
+
+        if ($type === 'fix_subworkspace_relation'){
+            Migration_1::fixSubworkpsaceIdUsers($bar);
+            $this->info("\n fixSubworkpsaceIdUsers FIXED");
+            info("\n fixSubworkpsaceIdUsers FIXED");
+        }
+
+        if ($type === 'fix_grupo_values_relations'){
+            Migration_1::fixGrupoValuesRelationships($bar);
+            $this->info("\n fix_grupo_values_relations FIXED");
+            info("\n fix_grupo_values_relations FIXED");
+        }
+
+        if ($type === 'fix_carrera_values_relations'){
+            Migration_1::fixCarreraValuesRelationships($bar);
+            $this->info("\n fix_carrera_values_relations FIXED");
+            info("\n fix_carrera_values_relations FIXED");
+        }
+
+        if ($type === 'fix_type_courses'){
+            Migration_1::fixTypeCourses($bar);
+            $this->info("\n fix_type_courses FIXED");
+            info("\n fix_type_courses FIXED");
+        }
+
 
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
