@@ -284,6 +284,7 @@ class Vademecum extends Model
             $data[$key]['category'] = $row['category']['name'] ?? null;
             $data[$key]['category_id'] = $row['category_id'];
             $data[$key]['subcategory_id'] = $row['subcategory_id'];
+            $data[$key]['active'] = $row['active'];
         }
 
         $result['data'] = $data;
