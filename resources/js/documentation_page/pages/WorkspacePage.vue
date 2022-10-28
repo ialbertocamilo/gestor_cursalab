@@ -82,7 +82,8 @@ code:
         "workspaces": [
             {
                 "workspace_id": "Identificador del workspace",
-                "name": "Nombre del workspace"
+                "name": "Nombre del workspace",
+                "subworkspaces":"Listado de subworkspaces('modulos') asociados"
             }
         ]
     }

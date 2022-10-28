@@ -114,7 +114,12 @@ class Integrations extends BaseModel
         return  ['data'=>['criteria'=>$criteria],'code'=>200];
     }
     protected function getWorkspaces(){
-        $workspaces = Workspace::select('id as workspace_id','name')->where('active',1)->whereNull('parent_id')->get();
+        $workspaces = Workspace::select('id as workspace_id','name')->where('active',1)->whereNull('parent_id')->get()
+                        ->map(function($w){
+                            $w['sub_workspaces'] = Workspace::where('parent_id',$w->workspace_id)
+                                                    ->select('name')->get();
+                            return $w;
+                        });
         return  ['data'=>['workspaces'=>$workspaces],'code'=>200];
     }
     protected function getValuesCriterion($criterion_id){
