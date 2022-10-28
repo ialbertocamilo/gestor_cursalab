@@ -28,14 +28,22 @@
                             <tbody>
                             <tr class="text-left my-1" v-for="(modulo, index) in resource.segmentacion" :key="index">
                                 <td class="py-4" v-text="modulo.modulo_nombre"></td>
-                                <td>
+                                <td v-if="modulo.carreras.length > 0">
                                     <v-chip
                                         small
                                         class="m-1"
                                         color="#C0C1ED"
                                         v-for="(carrera, index3) in modulo.carreras"
                                         v-text="carrera.carrera_nombre"
-                                        :key="index3" />
+                                        :key="index3"/>
+                                </td>
+                                <td v-else>
+                                    <v-chip
+                                        small
+                                        class="m-1"
+                                        color="#C0C1ED"
+                                        v-text="`Todos los puestos seleccionados`"
+                                    />
                                 </td>
                             </tr>
                             </tbody>
@@ -52,16 +60,21 @@
                     <v-row>
                         <v-col v-if="resource.resumen_estado" cols="5">
                             <p class="mb-0">Resumen de estados (sobre el total):</p>
-                            <p class="mb-0" v-text="`Alcanzados = ${resource.resumen_estado.alcanzados || 'Data no encontrada.'}`">Alcanzados = 50</p>
-                            <p class="mb-0" v-text="`No Alcanzados = ${resource.resumen_estado.no_alcanzados || 'Data no encontrada.'}`"></p>
-                            <p class="mb-0" v-text="`Pendientes = ${resource.resumen_estado.pendientes || 'Data no encontrada.'}`"></p>
-                            <p class="mb-0" v-text="`Objetivo = ${resource.resumen_estado.objetivo || 'Data no encontrada.'}`"></p>
+                            <p class="mb-0"
+                               v-text="`Alcanzados = ${resource.resumen_estado.alcanzados || 'Data no encontrada.'}`">
+                                Alcanzados = 50</p>
+                            <p class="mb-0"
+                               v-text="`No Alcanzados = ${resource.resumen_estado.no_alcanzados || 'Data no encontrada.'}`"></p>
+                            <p class="mb-0"
+                               v-text="`Pendientes = ${resource.resumen_estado.pendientes || 'Data no encontrada.'}`"></p>
+                            <p class="mb-0"
+                               v-text="`Objetivo = ${resource.resumen_estado.objetivo || 'Data no encontrada.'}`"></p>
                         </v-col>
                         <v-col cols="7" class="d-flex flex-column">
-<!--
-                            <GeneralGraphic
-                                :graphic_data="grafico.envios"
-                            /> -->
+                            <!--
+                                                        <GeneralGraphic
+                                                            :graphic_data="grafico.envios"
+                                                        /> -->
 
                         </v-col>
                     </v-row>
@@ -96,7 +109,7 @@
                             <!--                            </tbody>-->
                             <tbody>
                             <tr class="text-left my-1" v-for="(lote, index) in resource.lotes" :key="index">
-                                <td class="text-center">{{ index+1 }}</td>
+                                <td class="text-center">{{ index + 1 }}</td>
                                 <td class="text-left" v-text="lote.datetime"></td>
                                 <td class="text-center" v-text="lote.estado"></td>
                                 <td class="text-center" v-text="lote.quantity"></td>
@@ -182,16 +195,16 @@ export default {
             //         },
             //     }
             // }
-            resourceDefault:{
-                id:0,
-                segmentacion:[],
-                resumen_estado:{
-                    alcanzados:0,
-                    no_alcanzados:0,
-                    pendientes:0,
-                    objetivo:0
+            resourceDefault: {
+                id: 0,
+                segmentacion: [],
+                resumen_estado: {
+                    alcanzados: 0,
+                    no_alcanzados: 0,
+                    pendientes: 0,
+                    objetivo: 0
                 },
-                lotes:[]
+                lotes: []
             },
             resource: {},
         }
@@ -210,7 +223,7 @@ export default {
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
-            console.log(resource.id,resource);
+            console.log(resource.id, resource);
             let url = `${vue.options.base_endpoint}/detalle/${resource.id}`
             await vue.$http.get(url).then(({data}) => {
                 vue.resource = data;

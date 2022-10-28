@@ -65,7 +65,11 @@ class Integrations extends BaseModel
         $user_massive->current_workspace = Workspace::where('id',$workspace_id)->first();
         $users_collect = collect();
         $static_headers = $user_massive->getStaticHeaders();
-        $criteria = Criterion::select('id as criterion_id','name','code')->where('active',1)->orderBy('position')->get();
+        $criteria = Criterion::select('id as criterion_id','name','code')
+                        ->where('code','<>','document')
+                        ->where('active',1)
+                        ->orderBy('position')
+                        ->get();
         $static_header_api = $static_headers->pluck('code');
         $users_collect->push($static_headers->pluck('header_name')->merge($criteria->pluck('name')));
         foreach ($users as $user) {
@@ -96,6 +100,7 @@ class Integrations extends BaseModel
     protected function getCriteria(){
         $criteria = Criterion::with('field_type:id,code')->select('field_id','id','name','code')
                     ->where('active',1)
+                    ->where('code','<>','document')
                     ->orderBy('position')
                     ->get()->map(function($criterion){
                         return [
@@ -109,7 +114,12 @@ class Integrations extends BaseModel
         return  ['data'=>['criteria'=>$criteria],'code'=>200];
     }
     protected function getWorkspaces(){
-        $workspaces = Workspace::select('id as workspace_id','name')->where('active',1)->whereNull('parent_id')->get();
+        $workspaces = Workspace::select('id as workspace_id','name')->where('active',1)->whereNull('parent_id')->get()
+                        ->map(function($w){
+                            $w['sub_workspaces'] = Workspace::where('parent_id',$w->workspace_id)
+                                                    ->select('name')->get();
+                            return $w;
+                        });
         return  ['data'=>['workspaces'=>$workspaces],'code'=>200];
     }
     protected function getValuesCriterion($criterion_id){

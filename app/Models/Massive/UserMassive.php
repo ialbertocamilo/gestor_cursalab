@@ -5,6 +5,7 @@ namespace App\Models\Massive;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Criterion;
+use App\Models\Workspace;
 use App\Models\CriterionValue;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -16,12 +17,14 @@ class UserMassive implements ToCollection{
     public $errors = [];
     public $processed_users = 0;
     public $current_workspace = null;
+    private $subworkspaces = [];
     public function collection(Collection $rows){
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
         if(is_null($this->current_workspace)){
             $this->current_workspace = get_current_workspace();
         }
+        $this->subworkspaces = Workspace::select('id','criterion_value_id')->where('parent_id',$this->current_workspace->id)->get();
         // $current_workspace = $this->current_workspace;
         $criteria = Criterion::query()
             ->with([
@@ -35,10 +38,12 @@ class UserMassive implements ToCollection{
                 // },
                 'field_type:id,code'
             ])
+            ->where('code','<>','document')
             // ->whereRelation('workspaces', 'id', $current_workspace?->id)
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
             ->orderBy('position')
             ->get();
+        // dd($criteria->where('code','document')->first());
         //obtenemos las cabezeras
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
@@ -116,7 +121,7 @@ class UserMassive implements ToCollection{
             isset($user['email']) && $q->where('email',$user['email']);
         })->where('document','<>',$user['document'])->select('email','username')->first();
         if($user_username_email ){
-            if( $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
+            if(isset($user['username']) && $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$username_index,
@@ -157,7 +162,7 @@ class UserMassive implements ToCollection{
                     //     $colum_name = 'external_value';
                     // }
                 $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
-                if($dc['criterion_code']=='module' && !$criterion_value){
+                if($dc['criterion_code']=='module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id',$criterion_value->id)->first())){
                     $has_error = true;
                     $errors_index[] = [
                         'index'=>$dc['index'],
