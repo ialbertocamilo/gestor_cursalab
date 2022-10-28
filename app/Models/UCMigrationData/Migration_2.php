@@ -166,8 +166,11 @@ class Migration_2 extends Model
                 continue;
             }
 
+//            $valor = in_array($media->ttipo, ['audio', 'scorm']) ?
+//            str_replace('');
+
             $data[] = [
-                'topic_id' => $media->tema_id,
+                'topic_id' => $topic->id,
 
                 'title' => $media->titulo,
                 'value' => $media->valor,
@@ -192,12 +195,8 @@ class Migration_2 extends Model
         $bar->finish();
         $output->newLine();
 
-        info("CANT MEDIA TOPIC DATA ::");
-        info(count($data));
-        info("CANT MEDIA DATAt ::");
-        info(count($table_media));
-//        $this->makeChunkAndInsert($data, 'media_topics', $output);
-//        $this->makeChunkAndInsert($table_media, 'media', $output);
+        $this->makeChunkAndInsert($data, 'media_topics', $output);
+        $this->makeChunkAndInsert($table_media, 'media', $output);
     }
 
     protected function migrateCurricula()

@@ -1169,4 +1169,6 @@ class Migration_1 extends Model
         }
         $bar->finish();
     }
+
+
 }
