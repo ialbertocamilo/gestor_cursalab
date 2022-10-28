@@ -84,6 +84,12 @@ class MigrationData1 extends Command
             info("\n fix_carrera_values_relations FIXED");
         }
 
+        if ($type === 'fix_type_courses'){
+            Migration_1::fixTypeCourses($bar);
+            $this->info("\n fix_type_courses FIXED");
+            info("\n fix_type_courses FIXED");
+        }
+
 
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());

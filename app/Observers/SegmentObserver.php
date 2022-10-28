@@ -15,7 +15,7 @@ class SegmentObserver
      */
     public function created(Segment $segment)
     {
-        
+
         if($segment->model()->first()->active){
             Summary::updateUsersByCourse($segment->model()->first());
         }
