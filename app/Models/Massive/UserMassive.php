@@ -5,6 +5,7 @@ namespace App\Models\Massive;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Criterion;
+use App\Models\Workspace;
 use App\Models\CriterionValue;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -16,12 +17,14 @@ class UserMassive implements ToCollection{
     public $errors = [];
     public $processed_users = 0;
     public $current_workspace = null;
+    private $subworkspaces = [];
     public function collection(Collection $rows){
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
         if(is_null($this->current_workspace)){
             $this->current_workspace = get_current_workspace();
         }
+        $this->subworkspaces = Workspace::select('id','criterion_value_id')->where('parent_id',$this->current_workspace->id)->get();
         // $current_workspace = $this->current_workspace;
         $criteria = Criterion::query()
             ->with([
@@ -159,7 +162,7 @@ class UserMassive implements ToCollection{
                     //     $colum_name = 'external_value';
                     // }
                 $criterion_value = CriterionValue::where('criterion_id',$criterion->id)->where($colum_name,$dc['value_excel'])->first();
-                if($dc['criterion_code']=='module' && !$criterion_value){
+                if($dc['criterion_code']=='module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id',$criterion_value->id)->first())){
                     $has_error = true;
                     $errors_index[] = [
                         'index'=>$dc['index'],
