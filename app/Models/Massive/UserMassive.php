@@ -35,10 +35,12 @@ class UserMassive implements ToCollection{
                 // },
                 'field_type:id,code'
             ])
+            ->where('code','<>','document')
             // ->whereRelation('workspaces', 'id', $current_workspace?->id)
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
             ->orderBy('position')
             ->get();
+        // dd($criteria->where('code','document')->first());
         //obtenemos las cabezeras
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
@@ -116,7 +118,7 @@ class UserMassive implements ToCollection{
             isset($user['email']) && $q->where('email',$user['email']);
         })->where('document','<>',$user['document'])->select('email','username')->first();
         if($user_username_email ){
-            if( $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
+            if(isset($user['username']) && $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$username_index,
