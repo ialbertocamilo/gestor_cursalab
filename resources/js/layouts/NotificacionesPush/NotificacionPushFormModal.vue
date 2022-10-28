@@ -313,28 +313,51 @@ export default {
                 }
             });
         },
-        generarJson() {
+        async generarJson() {
             let vue = this;
-            let cadena = "[";
-            vue.modules.forEach((mod) => {
+            // let cadena = "[";
+            // vue.modules.forEach((mod) => {
+            //     if (mod.modulo_selected) {
+            //
+            //         cadena +=
+            //             '{"modulo_id":' + mod.id + ', "modulo_nombre": "' + mod.nombre + '", "carreras": [';
+            //
+            //         if (mod.carreras_selected) {
+            //             mod.carreras_selected.forEach((carr) => {
+            //                 cadena += '{"carrera_id":' + carr.id + ', "carrera_nombre": "' + carr.nombre + '" },';
+            //             });
+            //             cadena = cadena.substring(0, cadena.length - 1);
+            //         }
+            //
+            //         cadena += "]},";
+            //     }
+            //
+            // });
+            // cadena = cadena.substring(0, cadena.length - 1);
+            //
+            //
+            // cadena += "]";
 
-                cadena +=
-                    '{"modulo_id":' + mod.id + ', "modulo_nombre": "' + mod.nombre + '", "carreras": [';
+            let data = [];
 
-                if (mod.carreras_selected) {
-                    mod.carreras_selected.forEach((carr) => {
-                        cadena += '{"carrera_id":' + carr.id + ', "carrera_nombre": "' + carr.nombre + '" },';
-                    });
-                    cadena = cadena.substring(0, cadena.length - 1);
+            vue.modules.forEach(mod => {
+                if (mod.modulo_selected) {
+                    data.push({
+                        modulo_id: mod.id,
+                        modulo_nombre: mod.nombre,
+                        carreras: !mod.carreras_selected ? []
+                            : mod.carreras_selected.map((carrera) => {
+                                return {carrera_id: carrera.id, carrera_nombre: carrera.nombre};
+                            })
+                    })
                 }
-
-                cadena += "]},";
             });
-            cadena = cadena.substring(0, cadena.length - 1);
 
-            cadena += "]";
+            const cadena = JSON.stringify(data);
+            console.log(cadena);
 
-            vue.nueva_notificacion.destinatarios = cadena;
+            return cadena;
+            // vue.nueva_notificacion.destinatarios = cadena;
         },
         showOverlay(text) {
             let vue = this;
@@ -356,20 +379,21 @@ export default {
             const validateModuleSelected = await vue.validateModuleSelected();
             if (!validateModuleSelected || !validar) {
                 vue.btn_disabled = false;
-                vue.showAlert('Debe seleccionar al menos un módulo', 'warning');
+                if (!validateModuleSelected)
+                    vue.showAlert('Debe seleccionar al menos un módulo', 'warning');
                 vue.hideLoader()
                 return;
             }
 
-            vue.generarJson();
+            // await vue.generarJson();
             const {titulo, texto, destinatarios} = vue.nueva_notificacion;
 
             const data = {
                 titulo,
                 texto,
-                selected_detail: destinatarios,
+                selected_detail: await vue.generarJson(),
                 destinatarios: vue.modules
-                    .filter((module) => module.modulo_selected)
+                    // .filter((module) => module.modulo_selected)
                     .map((mod) => {
                         return {criterion_value_id: mod.id, carreras_selected: mod.carreras_selected}
                     })
