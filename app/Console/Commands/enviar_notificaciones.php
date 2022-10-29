@@ -90,13 +90,23 @@ class enviar_notificaciones extends Command
 //            $this->info(" USUARIOS ID: ", $usuarios_tokens->pluck('id'));
 //            info(" USUARIOS ID: ", $usuarios_tokens->pluck('id'));
             $resultado = PushNotification::enviar($notificacion->titulo, $notificacion->texto, $usuarios_tokens->pluck('token_firebase'), ["mensaje" => ""]);
+
+            if (isset($resultado['success']) AND isset($resultado['failure']) {
+
+                $notificacion->success = $notificacion->success + $resultado['success'];
+                $notificacion->failure = $notificacion->failure + $resultado['failure'];
+                $notificacion->estado_envio = 2;
+                $notificacion->save();
+                
+                return true;
+
+            } else {
+
+                info($resultado);
+
+                return false;
+            }
 //            $this->info($resultado);
-//            info($resultado);
-            $notificacion->success = $notificacion->success + $resultado['success'];
-            $notificacion->failure = $notificacion->failure + $resultado['failure'];
-            $notificacion->estado_envio = 2;
-            $notificacion->save();
-            return true;
         } catch (\Exception $e) {
 //            info($e);
             Error::storeAndNotificateException($e, request());
