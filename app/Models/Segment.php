@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Http\Resources\SegmentSearchUsersResource;
 use DB;
 
-class Segment extends BaseModel
+class
+Segment extends BaseModel
 {
     protected $fillable = [
         'name', 'model_id', 'model_type', 'active', 'type_id', 'code_id'
@@ -150,6 +151,9 @@ class Segment extends BaseModel
 
     public function setDataSegmentationByDocument(Segment $segment)
     {
+        $criterion_value_documents = CriterionValue::whereIn('id', $segment->values->pluck('criterion_value_id'))
+            ->pluck('value_text');
+
         $criteria_selected = User::query()
             ->select('id', 'name', 'surname', 'lastname', 'document')
             ->whereIn('document', $criterion_value_documents)
