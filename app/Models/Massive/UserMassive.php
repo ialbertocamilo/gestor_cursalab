@@ -2,8 +2,10 @@
 
 namespace App\Models\Massive;
 
+use Exception;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Massive;
 use App\Models\Criterion;
 use App\Models\Workspace;
 use App\Models\CriterionValue;
@@ -13,12 +15,22 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class UserMassive implements ToCollection{
+class UserMassive extends Massive implements ToCollection {
     public $errors = [];
     public $processed_users = 0;
     public $current_workspace = null;
     private $subworkspaces = [];
+    public $excelHeaders = [];
+    public $messageInSpanish = true;
+    public function __construct($data=[])
+    {
+        $this->name_socket = $this->formatNameSocket('upload-massive',$data['number_socket'] ?? null);
+        $this->percent_sent = [];
+    }
     public function collection(Collection $rows){
+        //Don't count the header in the constraint, verifyConstraintMassive <- function extends from class Massive
+        $this->verifyConstraintMassive('user_update_massive',count($rows) - 1);
+
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
         if(is_null($this->current_workspace)){
@@ -45,13 +57,21 @@ class UserMassive implements ToCollection{
             ->get();
         // dd($criteria->where('code','document')->first());
         //obtenemos las cabezeras
+       
+        //Get headers
+        $this->excelHeaders = $rows[0];
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
         $this->process_user($rows,$headers,$criteria);
     }
     private function process_user($users,$headers,$criteria){
-
+        $count_users = count($users);
+        $counter = 0;
         foreach ($users as $user) {
+            $percent=round(($counter/$count_users)*100);
+            $this->sendEchoPercentEvent($percent,$this->name_socket,$this->percent_sent) && $this->percent_sent[]=$percent;
+            $counter++;
+
             $data_users = collect();
             $data_criteria = collect();
             $headers->each(function ($obj) use ($data_criteria, $data_users, $user) {
@@ -68,6 +88,7 @@ class UserMassive implements ToCollection{
                 } else {
                     $data_users->push([
                         'code' => $obj['header_static_code'],
+                        'name'=> $obj['name_header'],
                         'required'=>$obj['header_static_required'],
                         'value_excel'=>$value_excel,
                         'index' => $obj['index']
@@ -87,6 +108,7 @@ class UserMassive implements ToCollection{
                     'errors_index'=>$data_user['errors_index']
                 ];
             }
+            
         }
         cache_clear_model(User::class);
         cache_clear_model(CriterionValue::class);
@@ -106,7 +128,7 @@ class UserMassive implements ToCollection{
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$dt['index'],
-                    'message'=>'The field '.$dt['code']. ' is required'
+                    'message'=> ($this->messageInSpanish) ? 'El campo '.$dt['name']. ' es requerido.': 'The field '.$dt['code']. ' is required' 
                 ];
                 continue;
             }
@@ -116,23 +138,26 @@ class UserMassive implements ToCollection{
             }
         }
         //verify username and email fields are unique
-        $user_username_email =  User::where(function($q)use($user){
-            isset($user['username']) && $q->where('username',$user['username']);
-            isset($user['email']) && $q->where('email',$user['email']);
-        })->where('document','<>',$user['document'])->select('email','username')->first();
+        $user_username_email = null;
+        if(isset($user['document'])){
+            $user_username_email =  User::where(function($q)use($user){
+                isset($user['username']) && $q->where('username',$user['username']);
+                isset($user['email']) && $q->where('email',$user['email']);
+            })->where('document','<>',$user['document'])->select('email','username')->first();
+        }
         if($user_username_email ){
             if(isset($user['username']) && $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$username_index,
-                    'message'=>'The field username must be unique.'
+                    'message'=> ($this->messageInSpanish) ? 'Este username es usado por otro usuario.' : 'The field username must be unique.'
                 ];
             }
             if($user['email']!='' && !is_null($user_username_email->email) && strtolower($user_username_email->email) == strtolower($user['email'])){
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$email_index,
-                    'message'=>'The field email must be unique.'
+                    'message'=> ($this->messageInSpanish) ? 'Este email es usado por otro usuario.' : 'The field email must be unique.'  
                 ];
             }
         }
@@ -152,7 +177,7 @@ class UserMassive implements ToCollection{
                         $has_error = true;
                         $errors_index[] = [
                             'index'=>$dc['index'],
-                            'message'=>'The field '.$dc['criterion_code']. ' is invalid date.'
+                            'message'=>($this->messageInSpanish) ? 'Fecha inválida.' : 'The field '.$dc['criterion_code']. ' is invalid date.'
                         ];
                         continue;
                     }
@@ -166,7 +191,7 @@ class UserMassive implements ToCollection{
                     $has_error = true;
                     $errors_index[] = [
                         'index'=>$dc['index'],
-                        'message'=>'The field '.$dc['criterion_code']. ' not exist.'
+                        'message'=>($this->messageInSpanish) ? 'El módulo no existe.' :'The field '.$dc['criterion_code']. ' not exist.'
                     ];
                     continue;
                 }
@@ -229,8 +254,8 @@ class UserMassive implements ToCollection{
     public function getStaticHeaders(){
         return collect([
             ['required'=>true,'header_name'=>'ESTADO','code'=>'active'],
-            ['required'=>true,'header_name'=>'USERNAME','code'=>'username'],
             ['required'=>true,'header_name'=>'NOMBRE COMPLETO','code'=>'fullname'],
+            ['required'=>true,'header_name'=>'USERNAME','code'=>'username'],
             ['required'=>true,'header_name'=>'NOMBRES','code'=>'name'],
             ['required'=>true,'header_name'=>'APELLIDO PATERNO','code'=>'lastname'],
             ['required'=>false,'header_name'=>'APELLIDO MATERNO','code'=>'surname'],

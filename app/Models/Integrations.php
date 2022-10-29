@@ -62,6 +62,7 @@ class Integrations extends BaseModel
     }
     protected function updateCreateUsers($users,$workspace_id){
         $user_massive = new UserMassive();
+        $user_massive->current_workspace = true;
         $user_massive->current_workspace = Workspace::where('id',$workspace_id)->first();
         $users_collect = collect();
         $static_headers = $user_massive->getStaticHeaders();

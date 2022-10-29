@@ -44,6 +44,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MigracionPerfilImport;
 
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\UsuarioController;
 use App\Imports\UsuariosFarmaHistorialImport;
 use App\Models\Massive\ChangeStateUserMassive;
 use App\Http\Controllers\ApiRest\HelperController;
@@ -76,11 +77,20 @@ class MasivoController extends Controller
     public function createUpdateUsers(Request $request){
         $validator = $this->validateFile($request);
         if (!$validator){
-            return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+            return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.'],500);
         }
-        $import = new UserMassive();
+        $data= [
+            'number_socket' => $request->get('number_socket') ?? null
+        ];
+        $import = new UserMassive($data);
         Excel::import($import, $request->file('file'));
-        return $this->success(['message' => 'Usuarios creados correctamente.','datos_procesados'=>$import->processed_users,'errores'=>$import->errors]);
+        $headers = $import->excelHeaders;
+        return $this->success([
+            'message' => 'Usuarios creados correctamente.',
+            'headers' => $headers,
+            'datos_procesados'=>$import->processed_users,
+            'errores'=>$import->errors
+        ]);
     }
     public function activeUsers(Request $request){
         $validator = $this->validateFile($request);
@@ -91,7 +101,12 @@ class MasivoController extends Controller
         $import->identificator = 'document';
         $import->state_user_massive = 1;
         Excel::import($import, $request->file('file'));
-        return $this->success(['message' => 'Usuarios activados correctamente.','datos_procesados'=>$import->q_change_status,'errores'=>$import->errors]);
+        return $this->success([
+            'message' => 'Usuarios activados correctamente.',
+            'headers' => $import->getStaticHeader(true,true),
+            'datos_procesados'=>$import->q_change_status,
+            'errores'=>$import->errors
+        ]);
     }
     public function inactiveUsers(Request $request){
         $validator = $this->validateFile($request);
@@ -102,7 +117,12 @@ class MasivoController extends Controller
         $import->identificator = 'document';
         $import->state_user_massive = 0;
         Excel::import($import, $request->file('file'));
-        return $this->success(['message' => 'Usuarios inactivados correctamente.','datos_procesados'=>$import->q_change_status,'errores'=>$import->errors]);
+        return $this->success([
+            'message' => 'Usuarios inactivados correctamente.',
+            'headers' => $import->getStaticHeader(false,true),
+            'datos_procesados'=>$import->q_change_status,
+            'errores'=>$import->errors
+        ]);
     }
     private function validateFile($request){
         $input = $request->all();
