@@ -97,7 +97,10 @@ class MasivoController extends Controller
         if (!$validator){
             return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.']);
         }
-        $import = new ChangeStateUserMassive();
+        $data= [
+            'number_socket' => $request->get('number_socket') ?? null
+        ];
+        $import = new ChangeStateUserMassive($data);
         $import->identificator = 'document';
         $import->state_user_massive = 1;
         Excel::import($import, $request->file('file'));
@@ -113,7 +116,10 @@ class MasivoController extends Controller
         if (!$validator){
             return response()->json(['message'=>'Se encontró un error, porfavor vuelva a cargar el archivo.']);
         }
-        $import = new ChangeStateUserMassive();
+        $data= [
+            'number_socket' => $request->get('number_socket') ?? null
+        ];
+        $import = new ChangeStateUserMassive($data);
         $import->identificator = 'document';
         $import->state_user_massive = 0;
         Excel::import($import, $request->file('file'));
