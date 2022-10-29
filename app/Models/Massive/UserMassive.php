@@ -19,6 +19,7 @@ class UserMassive extends Massive implements ToCollection {
     public $processed_users = 0;
     public $current_workspace = null;
     public $excelHeaders = [];
+    public $messageInSpanish = true;
     public function __construct($data=[])
     {
         $this->name_socket = $this->formatNameSocket('upload-massive',$data['number_socket'] ?? null);
@@ -26,7 +27,7 @@ class UserMassive extends Massive implements ToCollection {
     }
     public function collection(Collection $rows){
         //Don't count the header in the constraint, verifyConstraintMassive <- function extends from class Massive
-        $this->verifyConstraintMassive('usser_update_massive',count($rows) - 1);
+        $this->verifyConstraintMassive('user_update_massive',count($rows) - 1);
 
         $user =  new UsuarioController();
         // $criteria = $user->getFormSelects(true);
@@ -81,6 +82,7 @@ class UserMassive extends Massive implements ToCollection {
                 } else {
                     $data_users->push([
                         'code' => $obj['header_static_code'],
+                        'name'=> $obj['name_header'],
                         'required'=>$obj['header_static_required'],
                         'value_excel'=>$value_excel,
                         'index' => $obj['index']
@@ -120,7 +122,7 @@ class UserMassive extends Massive implements ToCollection {
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$dt['index'],
-                    'message'=>'The field '.$dt['code']. ' is required'
+                    'message'=> ($this->messageInSpanish) ? 'El campo '.$dt['name']. ' es requerido.': 'The field '.$dt['code']. ' is required' 
                 ];
                 continue;
             }
@@ -142,14 +144,14 @@ class UserMassive extends Massive implements ToCollection {
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$username_index,
-                    'message'=>'The field username must be unique.'
+                    'message'=> ($this->messageInSpanish) ? 'Este username es usado por otro usuario.' : 'The field username must be unique.'
                 ];
             }
             if($user['email']!='' && !is_null($user_username_email->email) && strtolower($user_username_email->email) == strtolower($user['email'])){
                 $has_error = true;
                 $errors_index[] = [
                     'index'=>$email_index,
-                    'message'=>'The field email must be unique.'
+                    'message'=> ($this->messageInSpanish) ? 'Este email es usado por otro usuario.' : 'The field email must be unique.'  
                 ];
             }
         }
@@ -169,7 +171,7 @@ class UserMassive extends Massive implements ToCollection {
                         $has_error = true;
                         $errors_index[] = [
                             'index'=>$dc['index'],
-                            'message'=>'The field '.$dc['criterion_code']. ' is invalid date.'
+                            'message'=>($this->messageInSpanish) ? 'Fecha inválida.' : 'The field '.$dc['criterion_code']. ' is invalid date.'
                         ];
                         continue;
                     }
@@ -183,7 +185,7 @@ class UserMassive extends Massive implements ToCollection {
                     $has_error = true;
                     $errors_index[] = [
                         'index'=>$dc['index'],
-                        'message'=>'The field '.$dc['criterion_code']. ' not exist.'
+                        'message'=>($this->messageInSpanish) ? 'El módulo no existe.' :'The field '.$dc['criterion_code']. ' not exist.'
                     ];
                     continue;
                 }

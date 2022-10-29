@@ -101,7 +101,12 @@ class MasivoController extends Controller
         $import->identificator = 'document';
         $import->state_user_massive = 1;
         Excel::import($import, $request->file('file'));
-        return $this->success(['message' => 'Usuarios activados correctamente.','datos_procesados'=>$import->q_change_status,'errores'=>$import->errors]);
+        return $this->success([
+            'message' => 'Usuarios activados correctamente.',
+            'headers' => $import->getStaticHeader(true,true),
+            'datos_procesados'=>$import->q_change_status,
+            'errores'=>$import->errors
+        ]);
     }
     public function inactiveUsers(Request $request){
         $validator = $this->validateFile($request);
@@ -112,7 +117,12 @@ class MasivoController extends Controller
         $import->identificator = 'document';
         $import->state_user_massive = 0;
         Excel::import($import, $request->file('file'));
-        return $this->success(['message' => 'Usuarios inactivados correctamente.','datos_procesados'=>$import->q_change_status,'errores'=>$import->errors]);
+        return $this->success([
+            'message' => 'Usuarios inactivados correctamente.',
+            'headers' => $import->getStaticHeader(false,true),
+            'datos_procesados'=>$import->q_change_status,
+            'errores'=>$import->errors
+        ]);
     }
     private function validateFile($request){
         $input = $request->all();

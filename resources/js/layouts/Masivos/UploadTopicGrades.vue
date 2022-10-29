@@ -221,6 +221,11 @@ export default {
                         "Se han encontrado observaciones. Descargar lista de observaciones"
                     );
                     vue.hideLoader();
+                }).catch(err=>{
+                    vue.hideLoader();
+                    if(err.message){
+                        alert(err.message);
+                    }
                 })
         },
         disabledButton() {

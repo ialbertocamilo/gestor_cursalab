@@ -68,8 +68,7 @@ export default {
           {id:1,nombre:'Creación/Actualización de usuarios',url_template:'/masivos/download-template-user'},
           {id:2,nombre:'Activar Usuarios',url_template:'/templates/Plantilla_activar_usuarios.xlsx'},
           {id:3,nombre:'Desactivar(Cesar) usuarios',url_template:'/templates/Plantilla_cesar_usuarios.xlsx'},
-        //   {id:4,nombre:'Actualización de usuarios',url_template:''},
-        //   {id:5,nombre:'Subida de cursos',url_template:''},
+        //   {id:4,nombre:'Subida de cursos',url_template:''},
       ],
     };
   },
@@ -94,7 +93,6 @@ export default {
             vue.url_template = vue.list_massive_processes.find(mp=>mp.id==vue.process_id).url_template;
       },
       downloadExcelObservations({errores,headers}){
-        // let values =["dni", "nota", "info"];
         let vue = this;
         const values = errores.map(error => error.row.map(row => row || ''));
         let comments = [];

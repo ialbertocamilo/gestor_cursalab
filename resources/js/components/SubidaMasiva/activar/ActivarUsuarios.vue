@@ -9,39 +9,15 @@
                 <v-card-text>
                     <ul>
                         <li class="mt-2">
+                            <b>La cantidad máxima de filas por excel es de 2500</b>
+                        </li>
+                        <li class="mt-2">
                             <b>Columnas del excel:</b>DNI
                         </li>
-						<!-- <li class="mt-2">
-                            <b>Acción: </b>  No es necesario colocar una acción.
-                        </li> -->
-                        <!-- <li class="mt-2">Los errores encontrados en la subida masiva los podrás arreglar desde el botón "Ver errores" 👇</li> -->
                     </ul>
                 </v-card-text>
-                <!-- <v-card-actions class="d-flex justify-center">
-					<modalErrores :q_error="q_error" tipo="activos"></modalErrores>
-				</v-card-actions> -->
         </v-col>
         <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
-            <v-row justify="center">
-                <v-overlay
-                    class="custom-overlay"
-                    color="#796aee"
-                    opacity="0.75"
-                    :value="loading_guardar"
-                    style="z-index:37"
-                >
-                    <div
-                        style="display: flex; flex-direction: column; align-items: center"
-                        class="text-center justify-center overlay-curricula"
-                    >
-                        <v-progress-circular indeterminate size="64"></v-progress-circular>
-                            <p class="text-h6" v-if="loading_guardar">
-                                Este proceso puede tomar más de un minuto, espere por favor.
-                            </p>
-                            <p class="text-h6" v-if="loading_guardar">No actualice la página.</p>
-                        </div>
-                    </v-overlay>
-                </v-row>
             <v-row class="d-flex justify-content-center my-2">
                 <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta" />
             </v-row>
@@ -55,14 +31,13 @@
 </template>
 <script>
     import vuedropzone  from "./../dropzone.vue";
-	import modalErrores from "./../ModalErrores"
+    const percentLoader = document.getElementById('percentLoader');
     export default {
         props:['q_error'],
-        components:{vuedropzone,modalErrores},
+        components:{vuedropzone},
         data () {
             return {
                 archivo:null,
-                loading_guardar:false,
             }
         },
         methods:{
@@ -72,27 +47,34 @@
             enviar_archivo(){
                 let validar_data = this.validar_data();
                 if(validar_data){
-                    this.loading_guardar = true;
+                    this.showLoader();
                     let data = new FormData();
                     data.append("file", this.archivo);
+                    data.append("number_socket", this.number_socket || null);
+                    percentLoader.innerHTML = ``;
                     axios.post('/masivos/active-users',data).then((res)=>{
-                        this.loading_guardar = false;
-                        if(res.data.error){
-                            this.$emit("update_q_error",{
-                                    tipo:'activos',
-                                    q_error: res.data.q_error
-                                }
+                        const data = res.data.data;
+                        if(data.errores.length > 0){
+                            let headers = data.headers;
+                            let values =Object.keys(data.errores[0]);
+                            this.descargarExcelFromArray(
+                                headers,
+                                values,
+                                data.errores,
+                                "No procesados_" + Math.floor(Math.random() * 1000),
+                                "Se han encontrado observaciones. ¿Desea descargar lista de observaciones?"
                             );
                         }
-                        const data = res.data.data;
                         const message = ` <ul>
                             <li>${data.message}</li>
                             <li>Cantidad de usuarios activados: ${data.datos_procesados || 0}</li>
                             <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
                         </ul>`
+                        this.hideLoader();
                         this.enviar_alerta(message);
                     }).catch(err=>{
-                        this.loading_guardar = false;
+                        this.hideLoader();
+                        this.enviar_alerta(err.response.data.message);
                     });
                 }
             },

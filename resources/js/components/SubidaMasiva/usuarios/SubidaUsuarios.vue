@@ -10,20 +10,20 @@
                 <v-card-text>
                     <ul>
                         <li class="mt-2">
+                            <b>La cantidad máxima de filas por excel es de 2500</b>
+                        </li>
+                        <li class="mt-2">
                             <b>Las columnas número de teléfono y email son opcionales</b>
                         </li>
                         <li class="mt-2">
                             <b>La columna estado toma los valores Active(usuario activo) , Inactive (usuarios inactivo)</b> 
                         </li>
                         <li class="mt-2">
-                            <b>Los criterios tipo fecha deben tener el formato (Y/m/d) o (d/m/Y)</b>
+                            <b>Los criterios tipo fecha deben tener el formato (YYYY/mm/dd) o (dd/mm/YYYY)</b>
                         </li>
 
                     </ul>
                 </v-card-text>
-                <!-- <v-card-actions class="d-flex justify-center">
-					<modalErrores :q_error="q_error" tipo="usuarios"></modalErrores>
-				</v-card-actions> -->
         </v-col>
         <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
             <v-row class="d-flex justify-content-center my-2">
@@ -40,10 +40,9 @@
 <script>
     const percentLoader = document.getElementById('percentLoader');
     import vuedropzone  from "./../dropzone.vue";
-	import modalErrores from "./../ModalErrores.vue"
     export default {
         props:['q_error','number_socket'],
-        components:{vuedropzone,modalErrores},
+        components:{vuedropzone},
         data () {
             return {
                 archivo:null,
