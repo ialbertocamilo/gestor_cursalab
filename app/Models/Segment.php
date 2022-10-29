@@ -150,6 +150,9 @@ class Segment extends BaseModel
 
     public function setDataSegmentationByDocument(Segment $segment)
     {
+        $criterion_value_documents = CriterionValue::whereIn('id', $segment->values->pluck('criterion_value_id'))
+            ->pluck('value_text');
+
         $criteria_selected = User::query()
             ->select('id', 'name', 'surname', 'lastname', 'document')
             ->whereIn('document', $criterion_value_documents)
