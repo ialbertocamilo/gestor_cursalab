@@ -91,7 +91,7 @@ class enviar_notificaciones extends Command
 //            info(" USUARIOS ID: ", $usuarios_tokens->pluck('id'));
             $resultado = PushNotification::enviar($notificacion->titulo, $notificacion->texto, $usuarios_tokens->pluck('token_firebase'), ["mensaje" => ""]);
 
-            if (isset($resultado['success']) AND isset($resultado['failure']) {
+            if (isset($resultado['success']) AND isset($resultado['failure'])) {
 
                 $notificacion->success = $notificacion->success + $resultado['success'];
                 $notificacion->failure = $notificacion->failure + $resultado['failure'];
