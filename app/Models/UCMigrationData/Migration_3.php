@@ -694,14 +694,14 @@ class Migration_3 extends Model
 
         $output->info('init getAndInsertResumenTemasDataVisitas');
 
-        $count = $db->getTable('visitas')->where('id', '>', 2300000)->count();
+        $count = $db->getTable('visitas')->where('estado_tema', 'revisado')->count();
 
         $bar = $output->createProgressBar($count);
         $bar->start();
 
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
-        $db->getTable('visitas')->where('id', '>', 2300000)->chunkById(100, function ($rows_visitas) use ($statuses, $bar) {
+        $db->getTable('visitas')->where('estado_tema', 'revisado')->chunkById(50, function ($rows_visitas) use ($statuses, $bar) {
 
             $usuarios_ids = $rows_visitas->pluck('usuario_id')->toArray();
             $topics_ids = $rows_visitas->pluck('post_id')->toArray();
@@ -726,14 +726,14 @@ class Migration_3 extends Model
                     continue;
                 }
 
-                $current_summary_topic = SummaryTopic::disableCache()->where('user_id', $user->id)->where('topic_id', $topic->id)->first();
+                // $current_summary_topic = SummaryTopic::disableCache()->where('user_id', $user->id)->where('topic_id', $topic->id)->first();
 
-                if (!$current_summary_topic) {
+                // if (!$current_summary_topic) {
 
-                    info("User => {$user->id} [OLD - {$row->usuario_id}] - {$user->document} - TOPIC => {$topic->id} no tiene data en summary_topic. Verificar en visitas.");
+                //     info("User => {$user->id} [OLD - {$row->usuario_id}] - {$user->document} - TOPIC => {$topic->id} no tiene data en summary_topic. Verificar en visitas.");
 
-                    continue;
-                }
+                //     continue;
+                // }
 
                 $data = [
                     'downloads' => $row->descargas,
@@ -741,13 +741,13 @@ class Migration_3 extends Model
                     'status_id' => $status->id ?? NULL,
                 ];
 
-                DB::table('summary_topics')
-                    ->where('user_id', $user->id ?? NULL)
-                    ->where('topic_id', $topic->id ?? NULL)
-                    ->update($data);
-
                 // DB::table('summary_topics')
-                //     ->updateOrInsert(['user_id' => $user->id ?? NULL, 'topic_id' => $topic->id ?? NULL], $data);
+                //     ->where('user_id', $user->id ?? NULL)
+                //     ->where('topic_id', $topic->id ?? NULL)
+                //     ->update($data);
+
+                DB::table('summary_topics')
+                    ->updateOrInsert(['user_id' => $user->id, 'topic_id' => $topic->id], $data);
 
             }
 
