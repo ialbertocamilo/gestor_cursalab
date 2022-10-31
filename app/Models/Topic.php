@@ -421,9 +421,17 @@ class Topic extends BaseModel
     {
         if ($user_courses->count() === 0) return [];
 
+        $workspace_id = auth()->user()->subworkspace->parent_id;
+
         $schools = $user_courses->groupBy('schools.*.id');
         $courses = $schools[$school_id] ?? collect();
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
+
+        // UC
+        $school_name = $school->name;
+        if ($workspace_id === 25){
+            $school_name = removeUCModuleNameFromCourseName($school_name);
+        }
 
         $sub_workspace = $user->subworkspace;
         $mod_eval = $sub_workspace->mod_evaluaciones;
@@ -435,6 +443,12 @@ class Topic extends BaseModel
         $topic_status_arr = config('topics.status');
 
         foreach ($courses as $course) {
+            // UC rule
+            $course_name = $course->name;
+            if ($workspace_id === 25){
+                $course_name = removeUCModuleNameFromCourseName($course_name);
+            }
+
             $course_status = Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
 
@@ -470,7 +484,8 @@ class Topic extends BaseModel
 
             $schools_courses[] = [
                 'id' => $course->id,
-                'nombre' => $course->name,
+//                'nombre' => $course->name,
+                'nombre' => $course_name,
                 'descripcion' => $course->description,
                 'imagen' => $course->imagen,
                 'requisito_id' => $course->require,
@@ -492,7 +507,8 @@ class Topic extends BaseModel
 
         return [
             'id' => $school?->id,
-            'nombre' => $school?->name,
+//            'nombre' => $school?->name,
+            'nombre' => $school_name,
             'cursos' => $schools_courses
         ];
     }
