@@ -701,7 +701,7 @@ class Migration_3 extends Model
 
         $statuses = Taxonomy::getData('topic', 'user-status')->get();
 
-        $db->getTable('visitas')->where('estado_tema', 'revisado')->chunkById(50, function ($rows_visitas) use ($statuses, $bar) {
+        $db->getTable('visitas')->where('estado_tema', 'revisado')->chunkById(25, function ($rows_visitas) use ($statuses, $bar) {
 
             $usuarios_ids = $rows_visitas->pluck('usuario_id')->toArray();
             $topics_ids = $rows_visitas->pluck('post_id')->toArray();
@@ -739,6 +739,8 @@ class Migration_3 extends Model
                     'downloads' => $row->descargas,
                     'views' => $row->sumatoria,
                     'status_id' => $status->id ?? NULL,
+                    'created_at' => $row->created_at,
+                    'updated_at' => $row->updated_at,
                 ];
 
                 // DB::table('summary_topics')
