@@ -1170,5 +1170,16 @@ class Migration_1 extends Model
         $bar->finish();
     }
 
+    protected function unificarCarreras($output)
+    {
+        $db = $this->connect();
+
+
+        $bar = $output->createProgressBar(2);
+        $bar->start();
+
+
+
+    }
 
 }
