@@ -473,7 +473,7 @@ class Course extends BaseModel
         if ($requirement_course) {
             $summary_requirement_course = SummaryCourse::with('course')
                 ->where('user_id', $user->id)
-                ->where('course_id', $requirement_course->id)
+                ->where('course_id', $requirement_course->requirement_id)
                 ->whereRelation('status', 'code', '=', 'aprobado')
                 ->first();
             //            info("requirement_course");
