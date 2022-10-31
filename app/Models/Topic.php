@@ -442,6 +442,8 @@ class Topic extends BaseModel
 
         $topic_status_arr = config('topics.status');
 
+        $courses = $courses->sortBy('position');
+
         foreach ($courses as $course) {
             // UC rule
             $course_name = $course->name;

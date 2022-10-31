@@ -356,6 +356,8 @@ class Course extends BaseModel
             $school_percentage = 0;
             $last_course_reviewed = null;
 
+            $courses = $courses->sortBy('position');
+
             foreach ($courses as $course) {
                 $school_assigned++;
                 $last_topic = null;
