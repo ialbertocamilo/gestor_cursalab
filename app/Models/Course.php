@@ -446,9 +446,13 @@ class Course extends BaseModel
                 'porcentaje' => $school_percentage,
                 'estado' => $school_status,
                 'ultimo_curso' => $last_course_reviewed,
-                "cursos" => $school_courses
+                'orden' => $school->position,
+                "cursos" => $school_courses,
             ];
         }
+
+        $columns = array_column($data, 'orden');
+        array_multisort($columns, SORT_ASC, $data);
 
         return $data;
     }
