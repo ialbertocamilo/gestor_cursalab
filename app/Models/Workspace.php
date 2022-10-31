@@ -314,11 +314,15 @@ class Workspace extends BaseModel
 
             DB::beginTransaction();
 
-            if ($subworkspace) :
-
+            if ($subworkspace){
+                
                 $subworkspace->update($data);
-
-            else:
+                if($subworkspace->wasChanged('name')){
+                    CriterionValue::where('id',$subworkspace->criterion_value_id)->update([
+                        'value_text' => $data['name'],
+                    ]);
+                }
+            }else{
 
                 $data['parent_id'] = session('workspace')->id ?? NULL;
 
@@ -336,7 +340,7 @@ class Workspace extends BaseModel
                 $workspace = get_current_workspace();
                 $workspace->criteriaValue()->attach($criterion_value);
 
-            endif;
+            };
 
             if (!empty($data['app_menu'])):
                 $subworkspace->app_menu()->sync($data['app_menu']);
