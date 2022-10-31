@@ -60,21 +60,6 @@ class Criterion extends BaseModel
             ->get();
     }
 
-
-
-    protected function getValuesByCode($criterion_code)
-    {
-        $current_workspace = get_current_workspace();
-        $criterion = Criterion::with('field_type')->where('code', $criterion_code)->first();
-        $column_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
-
-        return CriterionValue::query()
-            ->whereRelation('criterion', 'code', $criterion_code)
-            ->select('id', 'value_text as nombre')
-            ->where('active', ACTIVE)
-            ->limit(5)->get();
-    }
-
     protected function search($request)
     {
         $criterion_values_id = CriterionValue::whereRelation('workspaces', 'id', $request->workspace_id)->pluck('id')->toArray();

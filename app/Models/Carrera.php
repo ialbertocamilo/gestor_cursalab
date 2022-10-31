@@ -11,11 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Carrera extends Model
 {
+    protected $table = 'carrera_glosario_categoria';
 
-
-    protected $fillable = [
+    public $timestamps = false;
+    /*protected $fillable = [
     	'config_id', 'nombre', 'malla_archivo', 'estado'
-    ];
+    ];*/
 
     public function setEstadoAttribute($value)
     {
@@ -42,7 +43,15 @@ class Carrera extends Model
         );
     }
 
-    public function cursos($categoria_id)
+    public function glosario_carreras()
+    {
+        return $this->belongsTo(
+            CriterionValue::class,
+            'carrera_id'
+        );
+    }
+
+    public function cursos($categoria_id)   
     {
         $ciclo_ids = $this->ciclos()->pluck('id');
 

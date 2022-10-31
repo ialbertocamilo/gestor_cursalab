@@ -385,17 +385,126 @@ class Glossary extends Model
         return ['status' => 'success', 'message' => $message];
     }
 
+    protected function getCareersModule($carreras_module, $index) {
+        $stack_carreras = [];
+
+        foreach($carreras_module as $key => $cm_module) {
+            $carreras_id = $cm_module->carrera_id;
+
+            if($cm_module->module_id === $index) {
+                $stack_carreras[$carreras_id]['id'] = $cm_module->carrera_id;
+                $stack_carreras[$carreras_id]['nombre'] = $cm_module->glosario_carreras->value_text;
+                
+                # check null                
+                if(!$cm_module->glosario_categoria_id) {
+                    $stack_carreras[$carreras_id]['glosario_categorias'] = [];
+                } else {
+                    $stack_carreras[$carreras_id]['glosario_categorias'][]['id'] = $cm_module->glosario_categoria_id;
+                }
+            }
+        }
+
+        return array_values($stack_carreras);
+    }
+
+    protected function getCareersCategory($modulos, $code = 'position_name') {
+
+        $criterion = Criterion::with('field_type')->where('code', $code)->first();
+        $carreras_module = Carrera::with('glosario_categorias')
+                                  ->with('glosario_carreras')
+                                  ->get();
+
+        $modulos_in = $carreras_module->pluck('module_id')->toArray();
+        sort($modulos_in);
+        
+        $carreras = [];
+        foreach($modulos as $modulo) {
+            $carreras_state = in_array($modulo->id, $modulos_in); 
+            
+            if($carreras_state) {
+                $carrera_current = $this->getCareersModule($carreras_module, $modulo->id);
+            } else {
+                $carrera_current = [];
+            }
+
+            $carreras[$modulo->id] = $carrera_current;
+        }
+
+        return $carreras;
+    }
+
+
+    protected function insertCareerCategory($module_id, $carrera_id, $data) 
+    {
+        foreach ($data as $key => ['id' => $index]) {
+
+            $instance = new Carrera;
+            
+            $instance->module_id = $module_id;
+            $instance->carrera_id = $carrera_id;
+            $instance->glosario_categoria_id = $index;
+
+            $instance->save();
+        }
+    }
+
+    protected function deleteCareerCategory($module_id, $carrera_id) 
+    {
+        return Carrera::where('carrera_id', $carrera_id)
+                      ->where('module_id', $module_id)
+                      ->delete();
+    }
+
+    protected function checkRowIsAvailable($module_id, $carrera_id)
+    {
+        return Carrera::where('module_id', $module_id)
+                      ->where('carrera_id', $carrera_id)
+                      ->count();
+    }
+
+    protected function setNullCategories($module_id, $carrera_id) {
+
+        return Carrera::where('module_id', $module_id)
+                      ->where('carrera_id', $carrera_id)
+                      ->update(['glosario_categoria_id' => NULL]);
+    } 
+
     protected function storeCarreerCategories($data)
     {
         try {
 
             $message = 'Registros actualizados correctamente';
-
             DB::beginTransaction();
 
-            foreach ($data['modulos_carreras'] as $modulo_id => $carreras)
+            ['modulos_carreras' => $modulos_carreras] = $data;
+
+            foreach($modulos_carreras as $module_id => $carreras) {
+                // $module_id = module_id
+                foreach ($carreras as $key => [ 'id' => $carrera_id,
+                                                'glosario_categorias' => $glosario_categorias]) 
+                {
+                    $check_categories = empty($glosario_categorias); 
+                    $check_available = $this->checkRowIsAvailable($module_id, $carrera_id);
+
+                    #update insert dinamic
+                    if($check_available) {
+
+                        if($check_categories) {
+                            $this->setNullCategories($module_id, $carrera_id);
+                        }
+
+                        if(!$check_categories) {
+                            $this->deleteCareerCategory($module_id, $carrera_id);
+                            $this->insertCareerCategory($module_id, $carrera_id, $glosario_categorias);
+                        }
+                    }
+
+                }
+            }
+
+            /*foreach ($data['modulos_carreras'] as $modulo_id => $carreras)
             {
-                foreach($carreras AS $carrera)
+                foreach($carreras as $carrera)
                 {
                     $model = Carrera::find($carrera['id']);
 
@@ -403,8 +512,9 @@ class Glossary extends Model
                     // $categorias = !empty($row['glosario_categoria_id']) ? $row['glosario_categoria_id'] : [];
 
                     $model->glosario_categorias()->sync($categorias);
+
                 }
-            }
+            }*/
 
             DB::commit();
 
