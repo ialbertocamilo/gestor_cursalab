@@ -466,6 +466,8 @@ class Course extends BaseModel
         $completed_topics = 0;
 
         $requirement_course = $course->requirements->first();
+        info("REQUISITO DEL CURSO {$course->name}");
+        info($requirement_course);
         // info("requirement_course");
         // info($requirement_course);
         if ($requirement_course) {
