@@ -77,7 +77,7 @@ class Migration_2 extends Model
         $schools = School::disableCache()->whereNotNull('external_id')->get();
         $categorias = $db->getTable('categorias')
             ->join('ab_config', 'ab_config.id', 'categorias.config_id')
-            ->select('categorias.id as categoria_id', 'etapa')
+            ->select('categorias.id as categoria_id', 'etapa', 'categorias.nombre')
             ->get();
 
         $bar = $output->createProgressBar($categorias->count());
@@ -90,7 +90,7 @@ class Migration_2 extends Model
             $categoria = $categorias->where('categoria_id', $school->external_id)->first();
 
             if ($categoria) {
-                $name = "{$categoria->etapa} - {$school->name}";
+                $name = "{$categoria->etapa} - {$categoria->nombre}";
                 $school->update(['name' => $name]);
             }
         }
@@ -106,7 +106,7 @@ class Migration_2 extends Model
         $courses = Course::disableCache()->whereNotNull('external_id')->get();
         $cursos = $db->getTable('cursos')
             ->join('ab_config', 'ab_config.id', 'cursos.config_id')
-            ->select('cursos.id as curso_id', 'etapa')
+            ->select('cursos.id as curso_id', 'etapa', 'cursos.nombre')
             ->get();
 
         $bar = $output->createProgressBar($cursos->count());
@@ -119,7 +119,7 @@ class Migration_2 extends Model
             $curso = $cursos->where('curso_id', $course->external_id)->first();
 
             if ($curso) {
-                $name = "{$curso->etapa} - {$course->name}";
+                $name = "{$curso->etapa} - {$curso->nombre}";
                 $course->update(['name' => $name]);
             }
         }
