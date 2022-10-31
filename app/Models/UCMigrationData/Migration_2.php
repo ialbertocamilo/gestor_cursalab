@@ -76,7 +76,8 @@ class Migration_2 extends Model
 
         $schools = School::disableCache()->whereNotNull('external_id')->get();
         $categorias = $db->getTable('categorias')
-            ->select('id', 'config_id')
+            ->join('ab_config', 'ab_config.id', 'categorias.config_id')
+            ->select('categorias.id as categoria_id', 'etapa')
             ->get();
 
         $bar = $output->createProgressBar($categorias->count());
@@ -86,13 +87,11 @@ class Migration_2 extends Model
         foreach ($schools as $school) {
             $bar->advance();
 
-            $categoria = $categorias->where('id', $school->external_id)->first();
+            $categoria = $categorias->where('categoria_id', $school->external_id)->first();
 
             if ($categoria) {
-                $name = "M{$categoria->config_id}-$school->name";
-                $school->update([
-                    'name' => $name,
-                ]);
+                $name = "{$categoria->etapa} - {$school->name}";
+                $school->update(['name' => $name]);
             }
         }
 
@@ -106,7 +105,8 @@ class Migration_2 extends Model
 
         $courses = Course::disableCache()->whereNotNull('external_id')->get();
         $cursos = $db->getTable('cursos')
-            ->select('id', 'config_id')
+            ->join('ab_config', 'ab_config.id', 'cursos.config_id')
+            ->select('cursos.id as curso_id', 'etapa')
             ->get();
 
         $bar = $output->createProgressBar($cursos->count());
@@ -116,13 +116,11 @@ class Migration_2 extends Model
         foreach ($courses as $course) {
             $bar->advance();
 
-            $curso = $cursos->where('id', $course->external_id)->first();
+            $curso = $cursos->where('curso_id', $course->external_id)->first();
 
             if ($curso) {
-                $name = "M{$curso->config_id}-$course->name";
-                $course->update([
-                    'name' => $name,
-                ]);
+                $name = "{$curso->etapa} - {$course->name}";
+                $course->update(['name' => $name]);
             }
         }
 
