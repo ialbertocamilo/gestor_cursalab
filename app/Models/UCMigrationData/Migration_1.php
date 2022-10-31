@@ -9,6 +9,7 @@ use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\School;
 use App\Models\Segment;
+use App\Models\SegmentValue;
 use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
 use App\Models\User;
@@ -1170,5 +1171,87 @@ class Migration_1 extends Model
         $bar->finish();
     }
 
+    protected function unificarCarreras()
+    {
+        $db = $this->connect();
+
+        $carreras_values = CriterionValue::disableCache()
+            ->whereRelation('criterion', 'code', 'career')
+            ->whereNotNull('external_id')
+            ->select('id', 'value_text', 'external_id', 'criterion_id')
+            ->get();
+
+        foreach ($carreras_values as $carrera) {
+            if (str_contains($carrera->value, '::')) {
+                $temp = explode('::', $carrera->value_text);
+                $new_value_text = $temp[1];
+
+                $carrera->update(['value_text' => $new_value_text]);
+            }
+            $carrera->parents()->sync([]);
+
+            $carreras = $db->getTable('carreras')->where('nombre', $carrera->value_text)->get();
+            foreach ($carreras as $carreraUC) {
+                $module_value = self::MODULOS_CRITERION_VALUE[$carreraUC->config_id] ?? false;
+                if ($module_value)
+                    $carrera->parents()->attach($module_value);
+            }
+
+        }
+
+        $carreras_values = CriterionValue::disableCache()
+            ->whereRelation('criterion', 'code', 'career')
+            ->select('id', 'value_text', 'external_id', 'criterion_id')
+            ->get();
+
+        $grouped_bye_value_text = $carreras_values->groupBy('value_text');
+        $temp = [];
+
+        foreach ($grouped_bye_value_text as $carrera_name => $values) {
+            $temp[$values->first()->id] = $values->where('id', '<>', $values->first()->id)->pluck('id')->toArray();
+        }
+
+        foreach ($temp as $criterion_value_id => $equivalents) {
+            SegmentValue::whereIn('criterion_value_id', $equivalents)
+                ->update(['criterion_value_id' => $criterion_value_id]);
+
+            DB::table('criterion_value_user')
+                ->whereIn('criterion_value_id', $equivalents)
+                ->update(['criterion_value_id' => $criterion_value_id]);
+
+            DB::table('criterion_value_workspace')
+                ->whereIn('criterion_value_id', $equivalents)
+                ->update(['criterion_value_id' => $criterion_value_id]);
+
+            CriterionValue::whereIn('id', $equivalents)->delete();
+        }
+
+        $segmentos = Segment::disableCache()
+            ->where('name', 'like', '%Segmentacion migrada%')
+            ->get();
+
+        foreach ($segmentos as $segment) {
+
+            $config_id = $db->getTable('cursos')->where('id', $segment->model->external_id)->first()->config_id;
+            $modulo_value_id = self::MODULOS_CRITERION_VALUE[$config_id] ?? false;
+
+            if ($modulo_value_id) {
+
+                $segment->values()->firstOrCreate(
+                    ['criterion_value_id' => $modulo_value_id],
+                    [
+                        'criterion_value_id' => $modulo_value_id,
+                        'criterion_id' => 1, // Modulo criteria_id
+                        'type_id' => NULL,
+                    ]
+                );
+
+            }
+
+        }
+
+//        CriterionValue::with('parents:id,value_text')->where('value_text', 'Técnico de Farmacia')->get();
+
+    }
 
 }
