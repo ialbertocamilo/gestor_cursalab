@@ -315,6 +315,7 @@ class ExternalLMSMigration6 extends Model
             ->get();
         foreach ($temp['temp_accounts'] as $user) {
             $result['accounts'][] = [
+                'workspace_id' => 25,
                 'external_id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
@@ -399,6 +400,7 @@ class ExternalLMSMigration6 extends Model
             ->get();
         foreach ($temp['temp_meetings'] as $user) {
             $result['meetings'][] = [
+                'workspace_id' => 25,
                 'external_id' => $user->id,
                 'name' => $user->name,
                 'description' => $user->description,
