@@ -84,9 +84,12 @@ class RestUserProgressController extends Controller
 //                'estado_str' => '',
                 'completados' => $school_status['completed'],
                 'asignados' => $courses->count(),
+                'orden' => $school->position,
                 'courses' => $courses_data
             ];
         }
+        $columns = array_column($data, 'orden');
+        array_multisort($columns, SORT_ASC, $data);
 
         return $data;
     }
