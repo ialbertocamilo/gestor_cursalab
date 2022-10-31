@@ -49,7 +49,7 @@ class MigrationData1 extends Command
         }
 
         if ($type === 'unificar_carreras') {
-            Migration_1::unificarCarreras($bar);
+            Migration_1::unificarCarreras();
             $this->info("\n CARRERAS FIXED");
             info("\n CARRERAS FIXED");
         }
