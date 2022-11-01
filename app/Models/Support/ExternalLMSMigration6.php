@@ -6,6 +6,7 @@ use App\Models\CriterionValue;
 use App\Models\Taxonomy;
 use App\Models\Topic;
 use App\Models\User;
+use App\Models\Announcement;
 use Illuminate\Database\Eloquent\Model;
 
 use DB;
@@ -15,6 +16,18 @@ use Illuminate\Support\Facades\Hash;
 class ExternalLMSMigration6 extends Model
 {
     const CHUNK_LENGTH = 5000;
+
+    const MODULOS_EQUIVALENCIA = [
+        4 => '26', // Mifarma
+        5 => '27', // Inkafarma,
+        6 => '28' // Capacitacion FP
+    ];
+
+    const MODULOS_CRITERION_VALUE = [
+        4 => '18', // Mifarma
+        5 => '19', // Inkafarma,
+        6 => '20' // Capacitacion FP
+    ];
 
     protected function connect()
     {
@@ -61,25 +74,26 @@ class ExternalLMSMigration6 extends Model
     {
         $db = self::connect();
         $client_LMS_data = [
-            'push_notifications' => [],
-            'glossaries' => [],
             'announcements' => [],
-            'tickets' => [],
-            'faq' => [],
-            'user_actions' => [],
-            'supervisores' => [],
-            'entrenadores' => [],
-            'ayuda_app' => [],
+            // 'user_actions' => [],
+            // 'entrenadores' => [],
+
+            // 'push_notifications' => [],
+            // 'glossaries' => [],
+            // 'tickets' => [],
+            // 'faq' => [],
+            // 'supervisores' => [],
+            // 'ayuda_app' => [],
         ];
-        $this->setPushNotificationsData($client_LMS_data, $db);
-        $this->setGlossariesData($client_LMS_data, $db);
         $this->setAnnouncementsData($client_LMS_data, $db);
-        $this->setTicketsData($client_LMS_data, $db);
-        $this->setFaqData($client_LMS_data, $db);
-        $this->setUserActionsData($client_LMS_data, $db);
-        $this->setSupervisoresData($client_LMS_data, $db);
-        $this->setEntrenadoresData($client_LMS_data, $db);
-        $this->setAyudaAppData($client_LMS_data, $db);
+        // $this->setEntrenadoresData($client_LMS_data, $db);
+        // $this->setUserActionsData($client_LMS_data, $db);
+        // $this->setPushNotificationsData($client_LMS_data, $db);
+        // $this->setGlossariesData($client_LMS_data, $db);
+        // $this->setTicketsData($client_LMS_data, $db);
+        // $this->setFaqData($client_LMS_data, $db);
+        // $this->setSupervisoresData($client_LMS_data, $db);
+        // $this->setAyudaAppData($client_LMS_data, $db);
 
         return $client_LMS_data;
     }
@@ -136,26 +150,45 @@ class ExternalLMSMigration6 extends Model
 
     public function setAnnouncementsData(&$result, $db)
     {
-        $temp['temp_announcements'] = $db->getTable('anuncios')
-            ->select()
-            ->get();
-        foreach ($temp['temp_announcements'] as $user) {
-            $result['announcements'][] = [
-                'config_id' => $user->config_id,
-                'nombre' => $user->nombre,
-                'contenido' => $user->contenido,
-                'imagen' => $user->imagen,
-                'archivo' => $user->archivo,
-                'destino' => $user->destino,
-                'link' => $user->link,
-                'position' => $user->orden,
-                'active' => $user->estado,
-                'publish_date' => $user->publish_date,
+        $anuncios = $db->getTable('anuncios')->get();
 
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
+        foreach ($anuncios as $anuncio) {
+
+            $data = [
+                'nombre' => $anuncio->nombre,
+                'contenido' => $anuncio->contenido,
+                'imagen' => $anuncio->imagen,
+                'archivo' => $anuncio->archivo,
+                'destino' => $anuncio->destino,
+                'link' => $anuncio->link,
+                'position' => $anuncio->orden,
+                'active' => $anuncio->estado,
+                'publish_date' => $anuncio->publication_starts_at,
+                'end_date' => $anuncio->publication_ends_at,
+
+                'created_at' => $anuncio->created_at,
+                'updated_at' => $anuncio->updated_at,
             ];
+
+            $announcement = Announcement::create($data);
+
+            $configs = json_decode($anuncio->config_id);
+
+            if (!$configs) continue;
+
+            $modules = [];
+
+            foreach ($configs as $key => $config) {
+
+                $module = self::MODULOS_CRITERION_VALUE[$config] ?? NULL;
+
+                if ($module) $modules[] = $module;
+            }
+
+            $announcement->criterionValues()->sync($modules);
         }
+
+
     }
 
     public function setUserActionsData(&$result, $db)
@@ -315,6 +348,7 @@ class ExternalLMSMigration6 extends Model
             ->get();
         foreach ($temp['temp_accounts'] as $user) {
             $result['accounts'][] = [
+                'workspace_id' => 25,
                 'external_id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
@@ -399,6 +433,7 @@ class ExternalLMSMigration6 extends Model
             ->get();
         foreach ($temp['temp_meetings'] as $user) {
             $result['meetings'][] = [
+                'workspace_id' => 25,
                 'external_id' => $user->id,
                 'name' => $user->name,
                 'description' => $user->description,

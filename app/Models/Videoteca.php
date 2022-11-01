@@ -5,12 +5,9 @@ namespace App\Models;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 
-class Videoteca extends Model
+class Videoteca extends BaseModel
 {
-    use SoftDeletes;
-
     protected $table = 'videoteca';
 
     protected $fillable = [
