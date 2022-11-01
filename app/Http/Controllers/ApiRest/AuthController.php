@@ -136,8 +136,8 @@ class AuthController extends Controller
         $user_data = [
             "id" => $user->id,
             "dni" => $user->document,
-            "nombre" => $user->name,
-            "apellido" => $user->lastname,
+            "nombre" => $user->name ?? '',
+            "apellido" => $user->lastname ?? '',
             "full_name" => $user->fullname,
             'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),

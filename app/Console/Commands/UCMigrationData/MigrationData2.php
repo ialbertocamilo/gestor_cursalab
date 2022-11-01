@@ -56,6 +56,9 @@ class MigrationData2 extends Command
         if ($type === 'media_topics')
             Migration_2::migrateMediaTopics($bar);
 
+        if ($type === 'media')
+            Migration_2::insertMultimedia($bar);
+
         if ($type === 'curricula')
             Migration_2::migrateCurricula($bar);
 

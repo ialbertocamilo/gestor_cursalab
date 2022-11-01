@@ -58,6 +58,8 @@ class RestUserProgressController extends Controller
 
     public function getProgressDetailSchoolsByUser($user_courses, $user)
     {
+        $workspace_id = auth()->user()->subworkspace->parent_id;
+
         $schools = $user_courses->groupBy('schools.*.id');
 
         $data = [];
@@ -66,18 +68,28 @@ class RestUserProgressController extends Controller
             $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
             $courses_data = $this->getSchoolProgress($courses);
 
+            // UC
+            $school_name = $school->name;
+            if ($workspace_id === 25){
+                $school_name = removeUCModuleNameFromCourseName($school_name);
+            }
+
             $data[] = [
                 'id' => $school->id,
-                'name' => $school->name,
+//                'name' => $school->name,
+                'name' => $school_name,
                 'imagen' => $school->imagen,
                 'porcentaje' => $school_status['percentage'],
 //                'estado' => $school_status['status'],
 //                'estado_str' => '',
                 'completados' => $school_status['completed'],
                 'asignados' => $courses->count(),
+                'orden' => $school->position,
                 'courses' => $courses_data
             ];
         }
+        $columns = array_column($data, 'orden');
+        array_multisort($columns, SORT_ASC, $data);
 
         return $data;
     }
@@ -118,6 +130,7 @@ class RestUserProgressController extends Controller
     public function getSchoolProgress($courses)
     {
         $user = auth()->user();
+        $workspace_id = $user->subworkspace->parent_id;
 //        $assigned_courses = $user->getCurrentCourses();
 //
 //        $schools = $assigned_courses->groupBy('schools.*.id');
@@ -131,6 +144,12 @@ class RestUserProgressController extends Controller
         $school_courses = [];
 //        foreach ($data_school as $school_id => $course) {
         foreach ($courses as $course) {
+            // UC rule
+            $course_name = $course->name;
+            if ($workspace_id === 25){
+                $course_name = removeUCModuleNameFromCourseName($course_name);
+            }
+
             $course_status = Course::getCourseProgressByUser($user, $course);
 
             $active_course_topics = $course->topics->where('active', ACTIVE)->sortBy('position');
@@ -151,7 +170,8 @@ class RestUserProgressController extends Controller
 
             $school_courses[] = [
                 'id' => $course->id,
-                'name' => $course->name,
+//                'name' => $course->name,
+                'name' => $course_name,
                 'nota' => $course_status['average_grade'],
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],

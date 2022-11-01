@@ -48,6 +48,12 @@ class MigrationData1 extends Command
             info("\n CRUD MIGRATED");
         }
 
+        if ($type === 'unificar_carreras') {
+            Migration_1::unificarCarreras();
+            $this->info("\n CARRERAS FIXED");
+            info("\n CARRERAS FIXED");
+        }
+
         if ($type === 'users') {
             Migration_1::migrateUsers($bar);
             $this->info("\n USERS MIGRATED");

@@ -14,6 +14,7 @@
             Route::post('/activate-users', 'activateUsers');
 
             Route::get('/user-progress', 'progressUser');
+            Route::get('/users', 'listUsers');
 
             Route::get('/courses', 'getCourses');
             Route::get('/course-progress/{course}', 'getCourseProgress');

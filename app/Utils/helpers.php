@@ -231,7 +231,7 @@ function get_current_workspace_indexes(string $key = NULL)
     $currSubworkspacesIndexes = $currWorkspace->subworkspaces->pluck('id');
 
     $dynamicKeys = ['id' => $currWorkspaceIndex,
-                    'ids' => $currSubworkspacesIndexes ];
+        'ids' => $currSubworkspacesIndexes];
     $stateKey = $dynamicKeys[$key] ?? true;
 
     return is_bool($stateKey) ? $dynamicKeys : $stateKey;
@@ -263,4 +263,23 @@ function excelDateToDate($fecha)
     } catch (\Exception $e) {
         return null;
     }
+}
+
+function removeUCModuleNameFromCourseName($course_name): string
+{
+    $name = $course_name;
+
+    if (str_contains($course_name, "Capacitación Mifarma - ")){
+        $name = substr($course_name, 23);
+    }
+
+    if (str_contains($course_name, "Capacitación Inkafarma - ")){
+        $name = substr($course_name, 25);
+    }
+
+    if (str_contains($course_name, "Capacitación Farmacias Peruanas - ")){
+        $name = substr($course_name, 34);
+    }
+
+    return $name;
 }

@@ -76,7 +76,8 @@ class Migration_2 extends Model
 
         $schools = School::disableCache()->whereNotNull('external_id')->get();
         $categorias = $db->getTable('categorias')
-            ->select('id', 'config_id')
+            ->join('ab_config', 'ab_config.id', 'categorias.config_id')
+            ->select('categorias.id as categoria_id', 'etapa', 'categorias.nombre')
             ->get();
 
         $bar = $output->createProgressBar($categorias->count());
@@ -86,13 +87,11 @@ class Migration_2 extends Model
         foreach ($schools as $school) {
             $bar->advance();
 
-            $categoria = $categorias->where('id', $school->external_id)->first();
+            $categoria = $categorias->where('categoria_id', $school->external_id)->first();
 
             if ($categoria) {
-                $name = "M{$categoria->config_id}-$school->name";
-                $school->update([
-                    'name' => $name,
-                ]);
+                $name = "{$categoria->etapa} - {$categoria->nombre}";
+                $school->update(['name' => $name]);
             }
         }
 
@@ -106,7 +105,8 @@ class Migration_2 extends Model
 
         $courses = Course::disableCache()->whereNotNull('external_id')->get();
         $cursos = $db->getTable('cursos')
-            ->select('id', 'config_id')
+            ->join('ab_config', 'ab_config.id', 'cursos.config_id')
+            ->select('cursos.id as curso_id', 'etapa', 'cursos.nombre')
             ->get();
 
         $bar = $output->createProgressBar($cursos->count());
@@ -116,13 +116,11 @@ class Migration_2 extends Model
         foreach ($courses as $course) {
             $bar->advance();
 
-            $curso = $cursos->where('id', $course->external_id)->first();
+            $curso = $cursos->where('curso_id', $course->external_id)->first();
 
             if ($curso) {
-                $name = "M{$curso->config_id}-$course->name";
-                $course->update([
-                    'name' => $name,
-                ]);
+                $name = "{$curso->etapa} - {$curso->nombre}";
+                $course->update(['name' => $name]);
             }
         }
 
@@ -148,11 +146,12 @@ class Migration_2 extends Model
     {
         $db = self::connect();
 
-        $media_temas = $db->getTable('media_temas')->get();
+        $media_temas = $db->getTable('media_temas')
+//            ->whereIn('tipo', ['audio', 'scorm'])
+            ->get();
 
         $topics = Topic::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
         $data = [];
-        $table_media = [];
         $bar = $output->createProgressBar($media_temas->count());
         $bar->start();
 
@@ -166,9 +165,16 @@ class Migration_2 extends Model
                 continue;
             }
 
-//            $valor = $media->valor;
-//            if ($media->tipo)
-//                $valor = str_replace('', );
+            $valor = $media->valor;
+
+            if ($media->tipo === 'scorm') {
+                $valor = str_replace('https://gestor.universidadcorporativafp.com.pe/', 'https://gestiona.inretail.cursalab.io/', $valor);
+            }
+
+            if ($media->tipo === 'audio') {
+                $bucket_base_url = 'https://cursalabio.s3.sa-east-1.amazonaws.com/';
+                $valor = str_replace('https://ucfp.sfo2.cdn.digitaloceanspaces.com/', $bucket_base_url, $valor);
+            }
 
             $data[] = [
                 'topic_id' => $topic->id,
@@ -176,7 +182,8 @@ class Migration_2 extends Model
                 'title' => $media->titulo,
                 'value' => $media->valor,
 
-                'type_id' => $media->tipo,
+                'type_id' => $valor,
+//                'type_id' => $media->tipo,
                 'embed' => $media->embed,
                 'downloadable' => $media->descarga,
                 'position' => $media->orden,
@@ -184,20 +191,55 @@ class Migration_2 extends Model
                 'created_at' => $media->created_at,
                 'updated_at' => $media->updated_at,
             ];
-
-            $table_media[] = [
-                'external_id' => $media->id,
-                'title' => $media->titulo,
-
-                'file' => $media->valor,
-                'ext' => $media->tipo,
-            ];
         }
+
         $bar->finish();
         $output->newLine();
 
         $this->makeChunkAndInsert($data, 'media_topics', $output);
-        $this->makeChunkAndInsert($table_media, 'media', $output);
+    }
+
+    protected function insertMultimedia($output)
+    {
+        $db = $this->connect();
+        $multimedia = $db->getTable('media')
+            ->select()
+            ->get();
+        $medias = [];
+        $bar = $output->createProgressBar($multimedia->count());
+        $bar->start();
+
+        foreach ($multimedia as $media) {
+            $bar->advance();
+
+            $valor = $media->file;
+
+            if ($media->ext === 'scorm') {
+                $valor = str_replace('https://gestor.universidadcorporativafp.com.pe/', 'https://gestiona.inretail.cursalab.io/', $valor);
+            }
+
+            if ($media->ext === 'audio') {
+                $bucket_base_url = 'https://cursalabio.s3.sa-east-1.amazonaws.com/';
+                $valor = str_replace('https://ucfp.sfo2.cdn.digitaloceanspaces.com/', $bucket_base_url, $valor);
+            }
+
+            $medias[] = [
+                'external_id' => $media->id,
+                'title' => $media->title,
+                'description' => $media->description,
+//                'file' => $media->file,
+                'file' => $valor,
+                'ext' => $media->ext,
+
+                'created_at' => $media->created_at,
+                'updated_at' => $media->updated_at,
+            ];
+        }
+
+        $bar->finish();
+        $output->newLine();
+
+        $this->makeChunkAndInsert($medias, 'media', $output);
     }
 
     protected function migrateCurricula()
