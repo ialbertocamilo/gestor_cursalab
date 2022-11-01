@@ -12,6 +12,7 @@ import ActivatePage from  '../pages/ActivatePage.vue';
 import ProgressPage from  '../pages/ProgressPage.vue';
 import WorkspacePage from '../pages/WorkspacePage.vue'
 import CoursePage from '../pages/CoursePage.vue'
+import UsersPage from '../pages/UsersPage.vue'
 import CourseDetailPage from '../pages/CourseDetailPage.vue'
 
 Vue.use(VueRouter);
@@ -58,12 +59,17 @@ const routes = [
     },
 	{
         path: "/documentation-api/activate-users",
-		name: "inactivar_usuarios",
+		name: "activar_usuarios",
 		component:ActivatePage,
     },
 	{
+        path: "/documentation-api/users",
+		name: "users",
+		component:UsersPage,
+    },
+	{
         path: "/documentation-api/progress",
-		name: "inactivar_usuarios",
+		name: "progress_page",
 		component:ProgressPage,
     },
 	{

@@ -61,6 +61,17 @@ class IntegrationsController extends Controller
             ,500);
         }
     }
+    public function listUsers(Request $request){
+        // try {
+            $response = Integrations::listUsers($request);
+            return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
+        // } catch (\Throwable $th) {
+        //     Error::storeAndNotificateException($th, request());
+        //     return response()->json(
+        //         ['message'=>'Server error.']
+        //     ,500);
+        // }
+    }
     public function getSecretKey(AuthRequest $request){
         try {
             $response = Integrations::getSecretKey($request);
