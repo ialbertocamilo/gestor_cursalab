@@ -335,9 +335,10 @@ class Course extends BaseModel
         return $temp;
     }
 
-
     protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
+        $workspace_id = auth()->user()->subworkspace->parent_id;
+
         $schools = $user_courses->groupBy('schools.*.id');
         $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
             $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
@@ -354,6 +355,8 @@ class Course extends BaseModel
             $school_assigned = 0;
             $school_percentage = 0;
             $last_course_reviewed = null;
+
+            $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
                 $school_assigned++;
@@ -380,13 +383,18 @@ class Course extends BaseModel
                         }
                     }
                 }
+                // UC rule
+                $course_name = $course->name;
+                if ($workspace_id === 25){
+                    $course_name = removeUCModuleNameFromCourseName($course_name);
+                }
 
                 $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
 
                 if (is_null($last_course_reviewed) && $course_status['status'] != 'completado') {
                     $last_course_reviewed = [
                         'id' => $course->id,
-                        'nombre' => $course->name,
+                        'nombre' => $course_name,
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
                         'ultimo_tema_visto' => $last_topic_reviewed,
@@ -395,7 +403,8 @@ class Course extends BaseModel
 
                 $school_courses[] = [
                     'id' => $course->id,
-                    'nombre' => $course->name,
+//                    'nombre' => $course->name,
+                    'nombre' => $course_name,
                     'descripcion' => $course->description,
                     'imagen' => $course->imagen,
                     'c_evaluable' => $course->assessable,
@@ -422,17 +431,28 @@ class Course extends BaseModel
             endif;
             $school_percentage = round($school_percentage);
 
+            // UC
+            $school_name = $school->name;
+            if ($workspace_id === 25){
+                $school_name = removeUCModuleNameFromCourseName($school_name);
+            }
+
             $data[] = [
                 'categoria_id' => $school->id,
-                'categoria' => $school->name,
+//                'categoria' => $school->name,
+                'categoria' => $school_name,
                 'completados' => $school_completed,
                 'asignados' => $school_assigned,
                 'porcentaje' => $school_percentage,
                 'estado' => $school_status,
                 'ultimo_curso' => $last_course_reviewed,
-                "cursos" => $school_courses
+                'orden' => $school->position,
+                "cursos" => $school_courses,
             ];
         }
+
+        $columns = array_column($data, 'orden');
+        array_multisort($columns, SORT_ASC, $data);
 
         return $data;
     }
@@ -450,12 +470,14 @@ class Course extends BaseModel
         $completed_topics = 0;
 
         $requirement_course = $course->requirements->first();
+//        info("REQUISITO DEL CURSO {$course->name}");
+//        info($requirement_course);
         // info("requirement_course");
         // info($requirement_course);
         if ($requirement_course) {
             $summary_requirement_course = SummaryCourse::with('course')
                 ->where('user_id', $user->id)
-                ->where('course_id', $requirement_course->id)
+                ->where('course_id', $requirement_course->requirement_id)
                 ->whereRelation('status', 'code', '=', 'aprobado')
                 ->first();
             //            info("requirement_course");
