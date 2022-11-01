@@ -396,10 +396,12 @@ class Glossary extends Model
         
         $stack_categories = [];
         foreach ($carreras_module as $cm_module) {
-            $stack_categories[$cm_module->module_id][$cm_module->carrera_id][]['id'] = $cm_module->glosario_categoria_id; 
+            if(!$cm_module->glosario_categoria_id) {
+                $stack_categories[$cm_module->module_id][$cm_module->carrera_id] = []; 
+            }else {
+                $stack_categories[$cm_module->module_id][$cm_module->carrera_id][]['id'] = $cm_module->glosario_categoria_id; 
+            }
         }
-
-        // return $stack_categories;
 
         $carreras = [];
         foreach($modulos as $modulo) {
@@ -434,8 +436,8 @@ class Glossary extends Model
 
     protected function deleteCareerCategory($module_id, $carrera_id) 
     {
-        return Carrera::where('carrera_id', $carrera_id)
-                      ->where('module_id', $module_id)
+        return Carrera::where('module_id', $module_id)
+                      ->where('carrera_id', $carrera_id)
                       ->delete();
     }
 
