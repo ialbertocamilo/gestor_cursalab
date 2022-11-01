@@ -383,10 +383,13 @@ class Course extends BaseModel
                         }
                     }
                 }
+
                 // UC rule
                 $course_name = $course->name;
-                if ($workspace_id === 25){
+                $tags = [];
+                if ($workspace_id === 25) {
                     $course_name = removeUCModuleNameFromCourseName($course_name);
+                    $tags = $this->getCourseTagsToUCByUser($course, $user);
                 }
 
                 $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
@@ -419,6 +422,7 @@ class Course extends BaseModel
                         : $topics->count(),
                     'temas_completados' => $course_status['completed_topics'],
                     'porcentaje' => $course_status['progress_percentage'],
+                    'tags' => $tags,
                     'ultimo_tema_visto' => $last_topic_reviewed
                 ];
             }
@@ -433,7 +437,7 @@ class Course extends BaseModel
 
             // UC
             $school_name = $school->name;
-            if ($workspace_id === 25){
+            if ($workspace_id === 25) {
                 $school_name = removeUCModuleNameFromCourseName($school_name);
             }
 
@@ -568,6 +572,7 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
+
     public function usersSegmented($course_segments, $type = 'get_records')
     {
         $users = DB::table('criterion_value_user');
@@ -598,6 +603,7 @@ class Course extends BaseModel
         $users_have_course = User::where('active', 1)->whereIn('id', $users_id_course)->select('id');
         return ($type == 'get_records') ? $users_have_course->get() : $users_have_course->count();
     }
+
     public function getUsersBySegmentation()
     {
         $this->load('segments.values');
@@ -628,5 +634,48 @@ class Course extends BaseModel
         }
 
         return $users;
+    }
+
+    public function getCourseTagsToUCByUser($course, $user)
+    {
+        $tags = [''];
+
+        $user_active_cycle = $user->getActiveCycle();
+
+        if ($user_active_cycle->value_text === 'Ciclo 0') {
+
+            $tags = ['Ciclo 0'];
+
+        } else {
+
+            $temp_segment = null;
+            $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+
+            foreach ($course->segments as $segment) {
+
+                $course_segment_criteria = $segment->values->groupBy('criterion_id');
+
+                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+
+                if ($valid_segment) :
+                    $temp_segment = $segment;
+                    break;
+                endif;
+
+            }
+
+//            $ciclos_values = $temp_segment->values()->whereRelation('criterion', 'code', 'cycle')->pluck('criterion_value_id');
+//            $ciclos = CriterionValue::whereIn('id', $ciclos_values)->where('value_text', '<>', 'Ciclo 0')->get();
+
+            $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
+                ->whereRelation('criterion', 'code', 'cycle')
+                ->where('value_text', '<>', 'Ciclo 0')
+                ->orderBy('position')
+                ->first();
+
+            $tags = [$ciclo->value_text];
+        }
+
+        return $tags;
     }
 }
