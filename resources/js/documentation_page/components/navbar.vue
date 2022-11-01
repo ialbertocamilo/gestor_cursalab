@@ -120,7 +120,7 @@ export default {
                             link:'/documentation-api/progress',
                         },
                         {
-                            icon:'mdi-chart-users',
+                            icon:'mdi-account',
                             title:'Listado de usuarios',
                             link:'/documentation-api/users',
                         },
