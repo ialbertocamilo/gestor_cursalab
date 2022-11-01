@@ -385,49 +385,33 @@ class Glossary extends Model
         return ['status' => 'success', 'message' => $message];
     }
 
-    protected function getCareersModule($carreras_module, $index) {
-        $stack_carreras = [];
+    protected function getCareersCategory($modulos, $code = 'position_name') {
+        $carreras_module = Carrera::with('glosario_categorias')->get();
 
-        foreach($carreras_module as $key => $cm_module) {
-            $carreras_id = $cm_module->carrera_id;
-
-            if($cm_module->module_id === $index) {
-                $stack_carreras[$carreras_id]['id'] = $cm_module->carrera_id;
-                $stack_carreras[$carreras_id]['nombre'] = $cm_module->glosario_carreras->value_text;
-                
-                # check null                
-                if(!$cm_module->glosario_categoria_id) {
-                    $stack_carreras[$carreras_id]['glosario_categorias'] = [];
-                } else {
-                    $stack_carreras[$carreras_id]['glosario_categorias'][]['id'] = $cm_module->glosario_categoria_id;
-                }
-            }
+        $criterios = CriterionValue::query() 
+                                   ->whereRelation('criterion', 'code', $code)
+                                   ->where('active', ACTIVE)
+                                   ->select('id', "value_text as nombre")
+                                   ->limit(5)->get();
+        
+        $stack_categories = [];
+        foreach ($carreras_module as $cm_module) {
+            $stack_categories[$cm_module->module_id][$cm_module->carrera_id][]['id'] = $cm_module->glosario_categoria_id; 
         }
 
-        return array_values($stack_carreras);
-    }
+        // return $stack_categories;
 
-    protected function getCareersCategory($modulos, $code = 'position_name') {
-
-        $criterion = Criterion::with('field_type')->where('code', $code)->first();
-        $carreras_module = Carrera::with('glosario_categorias')
-                                  ->with('glosario_carreras')
-                                  ->get();
-
-        $modulos_in = $carreras_module->pluck('module_id')->toArray();
-        sort($modulos_in);
-        
         $carreras = [];
         foreach($modulos as $modulo) {
-            $carreras_state = in_array($modulo->id, $modulos_in); 
-            
-            if($carreras_state) {
-                $carrera_current = $this->getCareersModule($carreras_module, $modulo->id);
-            } else {
-                $carrera_current = [];
-            }
 
-            $carreras[$modulo->id] = $carrera_current;
+            foreach ($criterios as $key => $criterio) {
+                $categories = $stack_categories[$modulo->id][$criterio->id] ?? [];
+                
+                $stack[$key]['id'] = $criterio->id;
+                $stack[$key]['nombre'] = $criterio->nombre;
+                $stack[$key]['glosario_categorias'] = $categories;
+            }
+            $carreras[$modulo->id] = $stack;
         }
 
         return $carreras;
@@ -497,8 +481,11 @@ class Glossary extends Model
                             $this->deleteCareerCategory($module_id, $carrera_id);
                             $this->insertCareerCategory($module_id, $carrera_id, $glosario_categorias);
                         }
-                    }
 
+                    } else {
+                        $this->insertCareerCategory($module_id, $carrera_id, $glosario_categorias);
+                    }
+            
                 }
             }
 
