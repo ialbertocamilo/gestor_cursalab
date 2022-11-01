@@ -43,8 +43,10 @@ class RestDataController extends Controller
         endforeach;
 
         $data['categoria']['list'] = [];
+
+        #get critrion by user_index
+
         $matricula = Matricula::with('carrera.glosario_categorias')->where('usuario_id', auth()->user()->id)->first();
-  /* */
         // $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
         $carreras = Carrera::with('glosario_categorias')->get();
         
@@ -61,7 +63,7 @@ class RestDataController extends Controller
 
     public function glosarioSearch(Request $request)
     {
-        $request->merge(['modulo_id' => auth()->user()->config_id, 'estado' => 1]);
+        $request->merge(['modulo_id' => auth()->user()->subworkspace_id, 'estado' => 1]);
 
         $glosarios = Glossary::search($request, true);
 
