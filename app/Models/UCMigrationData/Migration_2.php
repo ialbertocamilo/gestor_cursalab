@@ -5,6 +5,7 @@ namespace App\Models\UCMigrationData;
 use App\Models\Block;
 use App\Models\Course;
 use App\Models\CriterionValue;
+use App\Models\MediaTema;
 use App\Models\School;
 use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
@@ -150,6 +151,7 @@ class Migration_2 extends Model
 //            ->whereIn('tipo', ['audio', 'scorm'])
             ->get();
 
+//        $media_topics = DB::table('media_topics')->get();
         $topics = Topic::disableCache()->whereNotNull('external_id')->select('id', 'external_id')->get();
         $data = [];
         $bar = $output->createProgressBar($media_temas->count());
@@ -180,9 +182,10 @@ class Migration_2 extends Model
                 'topic_id' => $topic->id,
 
                 'title' => $media->titulo,
-                'value' => $media->valor,
+//                'value' => $media->valor,
+                'value' => $valor,
 
-                'type_id' => $valor,
+                'type_id' => $media->tipo,
 //                'type_id' => $media->tipo,
                 'embed' => $media->embed,
                 'downloadable' => $media->descarga,

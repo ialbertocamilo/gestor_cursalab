@@ -643,7 +643,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $workspace = $user->subworkspace->parent;
 
         $course_segmentations = Course::with([
-            'segments.values.criterion_value',
+            'segments.values.criterion_value.criterion',
+//            'segments' => [
+//                'values.criterion_value',
+//                'criterion'
+//            ],
             'requirements',
             'schools' => function ($query) {
                 $query->where('active', ACTIVE);

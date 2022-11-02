@@ -146,7 +146,9 @@ class RestUserProgressController extends Controller
         foreach ($courses as $course) {
             // UC rule
             $course_name = $course->name;
+            $tags = [];
             if ($workspace_id === 25){
+                $tags = $course->getCourseTagsToUCByUser($course, $user);
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
 
@@ -175,9 +177,12 @@ class RestUserProgressController extends Controller
                 'nota' => $course_status['average_grade'],
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
+                'tags' => $tags,
                 'temas' => $temp_topics
             ];
         }
+        $columns = array_column($school_courses, 'name');
+        array_multisort($columns, SORT_ASC, $school_courses);
 
         return $school_courses;
 //        return $this->success(['courses' => $school_courses]);

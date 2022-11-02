@@ -53,33 +53,37 @@ class ExternalDatabase6 extends Model
 
     protected function insertMigrationData7($data)
     {
-        // Require the Users Table
-        // Push Notifications
-        $this->insertPushNotificationsData($data);
-
-        // Glossaries
-        $this->insertGlossariesData($data);
-
         // Announcements
         $this->insertAnnouncementsData($data);
 
-        // Tickets (Soporte)
-        $this->insertTicketsData($data);
-
-        // Preguntas Frecuentes
-        $this->insertFaqData($data);
-
         // User Actions
-        $this->insertUserActionsData($data);
+        // $this->insertUserActionsData($data);
 
         // User Actions (Supervisores)
-        $this->insertUserActionsSupervisoresData($data);
+        // $this->insertUserActionsSupervisoresData($data);
 
         // User Actions (Entrenadores)
-        $this->insertUserActionsEntrenadoresData($data);
+        // $this->insertUserActionsEntrenadoresData($data);
+
+        
+        // Require the Users Table
+        // Push Notifications
+        // $this->insertPushNotificationsData($data);
+
+        // Glossaries
+        // $this->insertGlossariesData($data);
+
+
+
+        // Tickets (Soporte)
+        // $this->insertTicketsData($data);
+
+        // Preguntas Frecuentes
+        // $this->insertFaqData($data);
+
 
         // Ayuda App
-        $this->insertAyudaAppData($data);
+        // $this->insertAyudaAppData($data);
     }
 
     // Push Notifications
@@ -157,32 +161,32 @@ class ExternalDatabase6 extends Model
     // Announcements
     public function insertAnnouncementsData($data)
     {
-        $temp = [];
-        foreach ($data['announcements'] as $item) {
+        // $temp = [];
+        // foreach ($data['announcements'] as $item) {
 
-            $config_id = json_decode($item['config_id']);
-            $id_criteria = DB::table('criteria')->where('code', 'module')->first('id');
-            $id_criteria = (!is_null($id_criteria)) ? $id_criteria->id : null;
+        //     $config_id = json_decode($item['config_id']);
+        //     $id_criteria = DB::table('criteria')->where('code', 'module')->first('id');
+        //     $id_criteria = (!is_null($id_criteria)) ? $id_criteria->id : null;
 
-            $temp_an = array();
-            if (is_array($config_id) && count($config_id) > 0) {
-                foreach ($config_id as $config) {
+        //     $temp_an = array();
+        //     if (is_array($config_id) && count($config_id) > 0) {
+        //         foreach ($config_id as $config) {
 
-                    $id = DB::table('criterion_values')
-                        ->where('criterion_id', $id_criteria)
-                        ->where('external_id', $config)
-                        ->first('id');
-                    $id = (!is_null($id)) ? $id->id : null;
+        //             $id = DB::table('criterion_values')
+        //                 ->where('criterion_id', $id_criteria)
+        //                 ->where('external_id', $config)
+        //                 ->first('id');
+        //             $id = (!is_null($id)) ? $id->id : null;
 
-                    array_push($temp_an, $id);
-                }
-            }
-            $item['config_id'] = json_encode($temp_an);
+        //             array_push($temp_an, $id);
+        //         }
+        //     }
+        //     $item['config_id'] = json_encode($temp_an);
 
-            array_push($temp, $item);
-        }
+        //     array_push($temp, $item);
+        // }
 
-        $this->insertChunkedData($temp, 'announcements');
+        // $this->insertChunkedData($temp, 'announcements');
     }
 
     // Tickets
