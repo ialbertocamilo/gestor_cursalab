@@ -10,18 +10,20 @@
                 <v-card-text>
                     <ul>
                         <li class="mt-2">
-                            <b>La cantidad máxima de filas por excel es de 2500</b>
+                            <b>La cantidad máxima de filas por excel es de 2500.</b>
                         </li>
                         <li class="mt-2">
-                            <b>Las columnas número de teléfono y email son opcionales</b>
+                            <b>Las columnas número de teléfono y email son opcionales.</b>
                         </li>
                         <li class="mt-2">
-                            <b>La columna estado toma los valores Active(usuario activo) , Inactive (usuarios inactivo)</b> 
+                            <b>Colocar en la columna de "Estado" los términos Active o Inactive. (editado)</b> 
                         </li>
                         <li class="mt-2">
-                            <b>Los criterios tipo fecha deben tener el formato (YYYY/mm/dd) o (dd/mm/YYYY)</b>
+                            <b>Para los campos de fechas se pueden usar estos dos formatos (yyyy/mm/dd) o (dd/mm/yyyy).</b>
                         </li>
-
+                        <li class="mt-2">
+                            Colocar en la columna de "Módulo" los módulos existentes.
+                        </li>
                     </ul>
                 </v-card-text>
         </v-col>

@@ -9,13 +9,13 @@
                 <v-card-text>
                     <ul>
                         <li class="mt-2">
-                            <b>La cantidad máxima de filas por excel es de 2500</b>
+                            <b>La cantidad máxima de filas por excel es de 2500.</b>
                         </li>
                         <li class="mt-2">
-                            <b>Columnas del excel:</b>DNI - Fecha de cese (opcional)
+                            <b>Columnas del excel:</b>DNI - Fecha de cese (opcional).
                         </li>
                         <li class="mt-2">
-                            <b>La fecha de cese debe tener el formato (YYYY/mm/dd) o (dd/mm/YYYY)</b>
+                            <b>La fecha de cese debe tener el formato (yyyy/mm/dd) o (dd/mm/yyyy).</b>
                         </li>
                     </ul>
                 </v-card-text>

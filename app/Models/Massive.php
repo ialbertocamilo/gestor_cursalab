@@ -12,7 +12,7 @@ class Massive
         $max_upload_rows_size = config('massive.max-uploads')->where('type',$type)->first();
         if(isset($max_upload_rows_size['max']) && $count_rows > $max_upload_rows_size['max']){
             if(!$message){
-                $message = 'Esta subiendo '.$count_rows.' filas; la cantidad máxima es de '.$max_upload_rows_size['max'].' fila por excel.';
+                $message = 'Estás subiendo '.$count_rows.' filas, la cantidad máxima permitida es de '.$max_upload_rows_size['max'].' por archivo.';
             }
             throw ValidationException::withMessages(compact('message'));
          }

@@ -15,6 +15,6 @@ return [
         'Si se encuentra algún error, se podrá descargar un excel con la lista de errores.',
         'Las notas en el excel deben estar en el rango de 0 a 20.',
         'El progreso del usuario se verán reflejados en los reportes luego de unos minutos.',
-        'La cantidad máxima es de 6000(seis mil) filas por excel'
+        'La cantidad máxima es de 6000 (seis mil) filas por excel'
     ]
 ];

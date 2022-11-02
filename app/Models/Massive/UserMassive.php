@@ -191,7 +191,7 @@ class UserMassive extends Massive implements ToCollection {
                     $has_error = true;
                     $errors_index[] = [
                         'index'=>$dc['index'],
-                        'message'=>($this->messageInSpanish) ? 'El módulo no existe.' :'The field '.$dc['criterion_code']. ' not exist.'
+                        'message'=>($this->messageInSpanish) ? 'Colocar un módulo existente.' :'The field '.$dc['criterion_code']. ' not exist.'
                     ];
                     continue;
                 }

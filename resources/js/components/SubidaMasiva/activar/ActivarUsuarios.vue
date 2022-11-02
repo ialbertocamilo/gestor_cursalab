@@ -9,10 +9,10 @@
                 <v-card-text>
                     <ul>
                         <li class="mt-2">
-                            <b>La cantidad máxima de filas por excel es de 2500</b>
+                            <b>La cantidad máxima de filas por excel es de 2500.</b>
                         </li>
                         <li class="mt-2">
-                            <b>Columnas del excel:</b>DNI
+                            <b>Columnas del excel:</b>DNI.
                         </li>
                     </ul>
                 </v-card-text>
