@@ -47,6 +47,9 @@ class MigrationData2 extends Command
         if ($type === 'courses')
             Migration_2::migrateCursos($bar);
 
+        if ($type === 'course_polls')
+            Migration_2::migrateCoursePolls($bar);
+
         if ($type === 'update_courses_name')
             Migration_2::migrateCursosNombre($bar);
 
@@ -61,6 +64,12 @@ class MigrationData2 extends Command
 
         if ($type === 'curricula')
             Migration_2::migrateCurricula($bar);
+
+        if ($type === 'checklist_info')
+            Migration_2::migrateChecklistInfo($bar);
+
+        if ($type === 'checklist_user_data')
+            Migration_2::migrateChecklistUserData($bar);
 
         $this->info(" Fin: " . now());
         info(" Fin: " . now());

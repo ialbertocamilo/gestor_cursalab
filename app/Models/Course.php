@@ -638,9 +638,11 @@ class Course extends BaseModel
 
     public function getCourseTagsToUCByUser($course, $user)
     {
-        $tags = [''];
+        $tags = [];
 
         $user_active_cycle = $user->getActiveCycle();
+
+        if (!$user_active_cycle) return $tags;
 
         if ($user_active_cycle->value_text === 'Ciclo 0') {
 
