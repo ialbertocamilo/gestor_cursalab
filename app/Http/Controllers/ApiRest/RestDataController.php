@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Glossary;
 //use App\Models\Matricula;
 use App\Models\Carrera;
-use App\Models\Criterion;
 use App\Models\User;
 use App\Models\Taxonomy;
 use Config;
@@ -62,15 +61,8 @@ class RestDataController extends Controller
                 }
             }
         }
-        $logger = [ 'usuario_criterios' => $usuario_criterios,
-                    'usuario_categories' => $usuario_categories,
-                    'glosario_categorias' => $glosario_categorias,
-                    'data_log' => $data,
-                    'user' => auth()->user() ];
 
-        info($logger);
-
-        return $logger;
+        return [ 'res' => $usuario_categories, 'all' => Carrera::all() ];
 
         /*
         # get critrion by user_index

@@ -393,7 +393,6 @@ class Glossary extends Model
                                    ->where('active', ACTIVE)
                                    ->select('id', "value_text as nombre")
                                    ->get();
-                                   //->limit(5)->get();
         
         $stack_categories = [];
         foreach ($carreras_module as $cm_module) {
