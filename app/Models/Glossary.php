@@ -385,14 +385,15 @@ class Glossary extends Model
         return ['status' => 'success', 'message' => $message];
     }
 
-    protected function getCareersCategory($modulos, $code = 'career') {
+    protected function getCareersCategory($modulos, $code = 'position_code') {
         $carreras_module = Carrera::with('glosario_categorias')->get();
 
         $criterios = CriterionValue::query() 
                                    ->whereRelation('criterion', 'code', $code)
                                    ->where('active', ACTIVE)
                                    ->select('id', "value_text as nombre")
-                                   ->limit(5)->get();
+                                   ->get();
+                                   //->limit(5)->get();
         
         $stack_categories = [];
         foreach ($carreras_module as $cm_module) {
