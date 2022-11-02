@@ -133,6 +133,11 @@ class AuthController extends Controller
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
         }
 
+        $ciclo_actual = null;
+        if ($user->subworkspace->parent_id == 25){
+            $ciclo_actual = $user->getActiveCycle()?->value_text;
+        }
+
         $user_data = [
             "id" => $user->id,
             "dni" => $user->document,
@@ -145,7 +150,7 @@ class AuthController extends Controller
             'module' => $user->subworkspace,
             'workspace' => $workspace_data,
             'can_be_host' => $can_be_host,
-            'ciclo_actual' => $user->getActiveCycle()
+            'ciclo_actual' => $ciclo_actual
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo
