@@ -23,7 +23,8 @@ class RestUserProgressController extends Controller
 //        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
         $completed_courses = $summary_user ?
             $user->summary_courses()
-                ->whereHas('course', fn($q) => $q->whereRelation('type', 'code', '<>', 'free')
+                ->whereHas('course', fn($q) => $q
+//                    ->whereRelation('type', 'code', '<>', 'free')
                     ->whereIn('id', $assigned_courses->pluck('id'))
                 )
                 ->whereRelation('status', 'code', 'aprobado')
@@ -32,7 +33,8 @@ class RestUserProgressController extends Controller
         $pending_courses = $assigned_courses->count() - $completed_courses;
         $disapproved_courses = $summary_user ?
             $user->summary_courses()
-                ->whereHas('course', fn($q) => $q->whereRelation('type', 'code', '<>', 'free')
+                ->whereHas('course', fn($q) => $q
+//                    ->whereRelation('type', 'code', '<>', 'free')
                     ->whereIn('id', $assigned_courses->pluck('id')))
                 ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
@@ -43,7 +45,7 @@ class RestUserProgressController extends Controller
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses
-                ->where('type.code', '<>', 'free')
+//                ->where('type.code', '<>', 'free')
                 ->count(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,

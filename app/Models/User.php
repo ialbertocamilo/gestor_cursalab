@@ -493,7 +493,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true)
+    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses= true)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
@@ -503,7 +503,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
         // TODO: Agregar segmentacion directa
-        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses);
+        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
 
         return collect($all_courses)->unique()->values();
     }
@@ -636,7 +636,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function setCoursesWithDirectSegmentation($user, &$all_courses)
+    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses)
     {
         $user->loadMissing('subworkspace.parent');
 
@@ -668,6 +668,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $workspace->id)
+            ->when(!$withFreeCourses, function ($q){
+                $q->whereRelation('type', 'code', '<>', 'free');
+            })
             ->where('active', ACTIVE)
             ->get();
 
