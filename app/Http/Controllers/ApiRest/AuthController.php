@@ -72,7 +72,7 @@ class AuthController extends Controller
                 return $this->error('No autorizado.', 401);
             }
 
-        } 
+        }
         catch (SubworkspaceInMaintenance $e){
             return $this->error(
                     config('errors.maintenance_subworkspace_message'), 503
@@ -91,11 +91,11 @@ class AuthController extends Controller
         $user->tokens()->delete();
         $token = $user->createToken('accessToken')->accessToken;
 
-        // Stop login to users from specific workspaces 
+        // Stop login to users from specific workspaces
         $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
         if ($user->subworkspace_id == 29 AND $user->external_id) {
-            
+
             // return $this->error("Usuario inactivo temporalmente. Migración en progreso.", http_code: 401);
             return $this->error(
                 config('errors.maintenance_ucfp'), 503
@@ -144,7 +144,8 @@ class AuthController extends Controller
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
             'workspace' => $workspace_data,
-            'can_be_host' => $can_be_host
+            'can_be_host' => $can_be_host,
+            'ciclo_actual' => $user->getActiveCycle()
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo
