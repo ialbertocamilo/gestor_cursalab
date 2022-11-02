@@ -47,6 +47,9 @@ class MigrationData2 extends Command
         if ($type === 'courses')
             Migration_2::migrateCursos($bar);
 
+        if ($type === 'course_polls')
+            Migration_2::migrateCoursePolls($bar);
+
         if ($type === 'update_courses_name')
             Migration_2::migrateCursosNombre($bar);
 
