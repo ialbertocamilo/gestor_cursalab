@@ -46,7 +46,9 @@ class RestDataController extends Controller
         # usuario - carrera -  criterios
         $usuario_criterios = User::find(auth()->user()->id)
                                  ->criterion_user->pluck('criterion_value_id');
-        $usuario_categories = Carrera::whereIn('carrera_id', $usuario_criterios)->get();
+        $usuario_categories = Carrera::whereIn('carrera_id', $usuario_criterios)
+                                       ->where('module_id', auth()->user()->subworkspace_id)->get();
+                                       
         $glosario_categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
 
         foreach ($usuario_categories as $key => $uc_categoria) {
