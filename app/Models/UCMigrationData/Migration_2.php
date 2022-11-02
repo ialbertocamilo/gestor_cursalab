@@ -6,6 +6,7 @@ use App\Models\Block;
 use App\Models\Course;
 use App\Models\CriterionValue;
 use App\Models\MediaTema;
+use App\Models\Poll;
 use App\Models\School;
 use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
@@ -552,5 +553,47 @@ class Migration_2 extends Model
 //                dd($program_criterion_values->toArray(), $block_child_criterion_values->toArray(), $courses->pluck('id')->toArray());
             }
         }
+    }
+
+    protected function migrateCoursePolls($output)
+    {
+        $db = self::connect();
+
+        $courses = Course::disableCache()
+            ->whereNotNull('external_id')
+            ->get();
+
+        $polls = Poll::disableCache()
+            ->whereNotNull('external_id')
+            ->get();
+
+        $curso_encuestas = $db->getTable('curso_encuesta')->get();
+        $bar = $output->createProgressBar($curso_encuestas->count());
+        $bar->start();
+
+        $course_poll = [];
+
+        foreach ($curso_encuestas as $curso_encuesta){
+            $bar->advance();
+
+            $course = $courses->where('external_id', $curso_encuesta->curso_id)->first();
+            $poll = $polls->where('external_id', $curso_encuesta->encuesta_id)->first();
+
+            if (!$course || !$poll){
+                info("CURSO ID {$curso_encuesta->curso_id} o ENCUESTA ID {$curso_encuesta->encuesta_id} no existe en UC-IR.");
+                continue;
+            }
+
+            $course_poll[] = ['course_id' => $course->id, 'poll_id' => $poll->id];
+        }
+
+        $bar->finish();
+
+        $this->makeChunkAndInsert($course_poll, 'course_poll', $output);
+    }
+
+    protected function migrateChecklistInfo($output)
+    {
+        $db = self::connect();
     }
 }

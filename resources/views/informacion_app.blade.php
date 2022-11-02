@@ -69,10 +69,10 @@
             <div>
                 <h5>Android</h5>
                 <p>Si tu telefono es un android corresponde descargar una aplicación desde 
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     PlayStore. 
                   </a>
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     <img style="width: 40px;" src="/img/playstore.png" class="img-thumbnail ml-1">
                   </a>
                 </p>
@@ -80,24 +80,24 @@
             <div>
                 <h5>Huawei</h5>
                 <p>Si tu telefono es un Huawei moderno y cuenta solo con App Gallery, actualiza tu app desde 
-                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C103425579">
+                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C106822677">
                     App Gallery.
                   </a>
-                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C103425579">
+                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C106822677">
                     <img style="width: 40px;" src="/img/app_galery.png" class="img-thumbnail ml-2">
                   </a>
                 </p>
                 <p>Si tu telefono es un Huawei y no cuenta con App Gallery, actualiza tu app desde 
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     PlayStore. 
                   </a>
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     <img style="width: 40px;" src="/img/playstore.png" class="img-thumbnail ml-1">
                   </a>
             </div>
             <div>
                 <p>
-                    Si ninguna de estas opciones no se adecua a tu teléfono móvil, contáctate con soporte al whatsapp 
+                    Si ninguna de estas opciones se adecua a tu teléfono móvil, contáctate con soporte al whatsapp 
                       <a target="_blank" href="https://wa.me/51960169962?text=Necesito%20ayuda%20con%20la%20actualización%20de%20mi%20aplicación.">
                         960-169-962 
                       </a>
