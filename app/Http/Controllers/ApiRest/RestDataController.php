@@ -44,7 +44,7 @@ class RestDataController extends Controller
 
         $data['categoria']['list'] = [];
 
-        #get critrion by user_index
+        #get critrion by user_inde
 
         $matricula = Matricula::with('carrera.glosario_categorias')->where('usuario_id', auth()->user()->id)->first();
         // $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
