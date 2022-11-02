@@ -70,7 +70,7 @@ class RestDataController extends Controller
 
         info($logger);
 
-        return $data;
+        return $logger;
 
         /*
         # get critrion by user_index
