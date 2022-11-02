@@ -1182,7 +1182,7 @@ class Migration_1 extends Model
             ->get();
 
         foreach ($carreras_values as $carrera) {
-            if (str_contains($carrera->value, '::')) {
+            if (str_contains($carrera->value_text, '::')) {
                 $temp = explode('::', $carrera->value_text);
                 $new_value_text = $temp[1];
 
@@ -1226,29 +1226,29 @@ class Migration_1 extends Model
             CriterionValue::whereIn('id', $equivalents)->delete();
         }
 
-        $segmentos = Segment::disableCache()
-            ->where('name', 'like', '%Segmentacion migrada%')
-            ->get();
-
-        foreach ($segmentos as $segment) {
-
-            $config_id = $db->getTable('cursos')->where('id', $segment->model->external_id)->first()->config_id;
-            $modulo_value_id = self::MODULOS_CRITERION_VALUE[$config_id] ?? false;
-
-            if ($modulo_value_id) {
-
-                $segment->values()->firstOrCreate(
-                    ['criterion_value_id' => $modulo_value_id],
-                    [
-                        'criterion_value_id' => $modulo_value_id,
-                        'criterion_id' => 1, // Modulo criteria_id
-                        'type_id' => NULL,
-                    ]
-                );
-
-            }
-
-        }
+//        $segmentos = Segment::disableCache()
+//            ->where('name', 'like', '%Segmentacion migrada%')
+//            ->get();
+//
+//        foreach ($segmentos as $segment) {
+//
+//            $config_id = $db->getTable('cursos')->where('id', $segment->model->external_id)->first()->config_id;
+//            $modulo_value_id = self::MODULOS_CRITERION_VALUE[$config_id] ?? false;
+//
+//            if ($modulo_value_id) {
+//
+//                $segment->values()->firstOrCreate(
+//                    ['criterion_value_id' => $modulo_value_id],
+//                    [
+//                        'criterion_value_id' => $modulo_value_id,
+//                        'criterion_id' => 1, // Modulo criteria_id
+//                        'type_id' => NULL,
+//                    ]
+//                );
+//
+//            }
+//
+//        }
 
 //        CriterionValue::with('parents:id,value_text')->where('value_text', 'Técnico de Farmacia')->get();
 
