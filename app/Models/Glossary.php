@@ -476,7 +476,7 @@ class Glossary extends Model
                     if($check_available) {
 
                         if($check_categories) {
-                            $this->setNullCategories($module_id, $carrera_id);
+                            $this->deleteCareerCategory($module_id, $carrera_id);
                         }
 
                         if(!$check_categories) {
@@ -625,26 +625,28 @@ class Glossary extends Model
 
         foreach ($glossaries as $key => $row)
         {
-            $modulo = $row->modulos->first();
+            $modulo = $row->modules->first();
 
             $data[$key]['name'] = $row->name;
-            $data[$key]['codigo'] = $modulo->pivot->codigo ?? '';
+            # code glosario
+            # $data[$key]['codigo'] = $modulo->pivot->codigo ?? '';
+            $data[$key]['codigo'] = $row->code ?? '';
 
-            $data[$key]['categoria'] = $row->categoria->nombre ?? '';
-            $data[$key]['jerarquia'] = $row->jerarquia->nombre ?? '';
-            $data[$key]['laboratorio'] = $row->laboratorio->nombre ?? '';
-            $data[$key]['advertencia'] = $row->advertencias->nombre ?? '';
-            $data[$key]['condicion_de_venta'] = $row->condicion_de_venta->nombre ?? '';
-            $data[$key]['via_de_administracion'] = $row->via_de_administracion->nombre ?? '';
-            $data[$key]['grupo_farmacologico'] = $row->grupo_farmacologico->nombre ?? '';
-            $data[$key]['dosis_adulto'] = $row->dosis_adulto->nombre ?? '';
-            $data[$key]['dosis_nino'] = $row->dosis_nino->nombre ?? '';
-            $data[$key]['recomendacion_de_administracion'] = $row->recomendacion_de_administracion->nombre ?? '';
+            $data[$key]['categoria'] = $row->categoria->name ?? '';
+            $data[$key]['jerarquia'] = $row->jerarquia->name ?? '';
+            $data[$key]['laboratorio'] = $row->laboratorio->name ?? '';
+            $data[$key]['advertencia'] = $row->advertencias->name ?? '';
+            $data[$key]['condicion_de_venta'] = $row->condicion_de_venta->name ?? '';
+            $data[$key]['via_de_administracion'] = $row->via_de_administracion->name ?? '';
+            $data[$key]['grupo_farmacologico'] = $row->grupo_farmacologico->name ?? '';
+            $data[$key]['dosis_adulto'] = $row->dosis_adulto->name ?? '';
+            $data[$key]['dosis_nino'] = $row->dosis_nino->name ?? '';
+            $data[$key]['recomendacion_de_administracion'] = $row->recomendacion_de_administracion->name ?? '';
 
-            $data[$key]['principios_activos'] = $row->principios_activos->pluck('nombre')->toArray();
-            $data[$key]['contraindicaciones'] = $row->contraindicaciones->pluck('nombre')->toArray();
-            $data[$key]['reacciones'] = $row->reacciones->pluck('nombre')->toArray();
-            $data[$key]['interacciones'] = $row->interacciones->pluck('nombre')->toArray();
+            $data[$key]['principios_activos'] = $row->principios_activos->pluck('name')->toArray();
+            $data[$key]['contraindicaciones'] = $row->contraindicaciones->pluck('name')->toArray();
+            $data[$key]['reacciones'] = $row->reacciones->pluck('name')->toArray();
+            $data[$key]['interacciones'] = $row->interacciones->pluck('name')->toArray();
         }
 
         $result['data'] = $data;
