@@ -325,7 +325,7 @@ export default {
                             "content-manager",
                             "trainer"
                         ]
-                    }
+                    },
                     // {
                     //     title:"Vademécum",
                     //     icon:"fas fa-file-invoice",
@@ -335,15 +335,15 @@ export default {
                     //     permission:"vademecum",
                     //     role:["super-user","admin","content-manager","trainer"]
                     // },
-                    // {
-                    //     title:"Videoteca",
-                    //     icon:"fas fa-caret-square-right",
-                    //     path:"/videoteca/list",
-                    //     subpaths:["videoteca"],
-                    //     selected:false,
-                    //     permission:"videoteca",
-                    //     role:["super-user","admin","content-manager","trainer"]
-                    // },
+                    {
+                         title:"Videoteca",
+                         icon:"fas fa-caret-square-right",
+                         path:"/videoteca/list",
+                         subpaths:["videoteca"],
+                         selected:false,
+                         permission:"videoteca",
+                         role:["super-user","admin","content-manager","trainer"]
+                     },
                 ]
             },
             {
