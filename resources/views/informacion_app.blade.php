@@ -97,7 +97,7 @@
             </div>
             <div>
                 <p>
-                    Si ninguna de estas opciones no se adecua a tu teléfono móvil, contáctate con soporte al whatsapp 
+                    Si ninguna de estas opciones se adecua a tu teléfono móvil, contáctate con soporte al whatsapp 
                       <a target="_blank" href="https://wa.me/51960169962?text=Necesito%20ayuda%20con%20la%20actualización%20de%20mi%20aplicación.">
                         960-169-962 
                       </a>
