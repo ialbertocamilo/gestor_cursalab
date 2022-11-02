@@ -436,7 +436,7 @@ class Topic extends BaseModel
         $sub_workspace = $user->subworkspace;
         $mod_eval = $sub_workspace->mod_evaluaciones;
 
-        $max_attempts = (int)$mod_eval['nro_intentos'];
+        $max_attempts = isset($mod_eval['nro_intentos']) ? (int)$mod_eval['nro_intentos'] : 5;
 
         $schools_courses = [];
 
