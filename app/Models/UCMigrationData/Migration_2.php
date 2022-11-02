@@ -592,4 +592,8 @@ class Migration_2 extends Model
         $this->makeChunkAndInsert($course_poll, 'course_poll', $output);
     }
 
+    protected function migrateChecklistInfo($output)
+    {
+        $db = self::connect();
+    }
 }
