@@ -170,7 +170,21 @@ import MeetingFormModal from "./MeetingFormModal";
 
 export default {
     components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal, SegmentFormModal},
-    props: ['usuario_id', 'workspace_id', 'superuser'],
+    // props: ['usuario_id', 'workspace_id', 'superuser'],
+    props: {
+        usuario_id: {
+            type: Number|String,
+            required: true
+        },
+        workspace_id: {
+            type: Number|String,
+            required: true
+        },
+        superuser: {
+            type: Boolean,
+            required: true
+        },
+    },
     data: () => ({
         dataTable: {
             endpoint: '/aulas-virtuales/search',

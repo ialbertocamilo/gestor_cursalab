@@ -542,7 +542,7 @@ class Topic extends BaseModel
         } else {
             $summary_requirement_topic = SummaryTopic::with('status')
                 ->where('user_id', $user->id)
-                ->where('topic_id', $topic_requirement->requirement_id)
+                ->where('topic_id', $topic_requirement->id)
                 ->first();
 
             $activity_requirement = in_array($summary_requirement_topic?->status->code, ['aprobado', 'realizado', 'revisado']);
