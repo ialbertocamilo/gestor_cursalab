@@ -18,7 +18,7 @@ class Carrera extends Model
     	'config_id', 'nombre', 'malla_archivo', 'estado'
     ];*/
 
-    public function setEstadoAttribute($value)
+    /*public function setEstadoAttribute($value)
     {
         $this->attributes['estado'] = ($value==='true' OR $value === true OR $value === 1 OR $value === '1' );
     }
@@ -31,7 +31,7 @@ class Carrera extends Model
     public function config()
     {
         return $this->belongsTo(Abconfig::class, 'config_id');
-    }
+    }*/
 
     public function glosario_categorias()
     {
@@ -43,15 +43,7 @@ class Carrera extends Model
         );
     }
 
-    public function glosario_carreras()
-    {
-        return $this->belongsTo(
-            CriterionValue::class,
-            'carrera_id'
-        );
-    }
-
-    public function cursos($categoria_id)   
+    /*public function cursos($categoria_id)   
     {
         $ciclo_ids = $this->ciclos()->pluck('id');
 
@@ -65,7 +57,7 @@ class Carrera extends Model
 
 
         return $cursos;
-    }
+    }*/
 
     // public function temas($categoria_id, $posteo_id)
     // {
@@ -97,19 +89,19 @@ class Carrera extends Model
     //     return parent::delete();
     // }
 
-    /* AUDIT TAGS */
+    /* AUDIT TAGS 
     public function generateTags(): array
     {
         return [
             'modelo_independiente'
         ];
-    }
-    /* AUDIT TAGS */
+    }*/
+    /* AUDIT TAGS 
 
     protected function getHostIds()
     {
         return Carrera::whereIn('nombre',
             [""]
         )->pluck('id')->toArray();
-    }
+    }*/
 }

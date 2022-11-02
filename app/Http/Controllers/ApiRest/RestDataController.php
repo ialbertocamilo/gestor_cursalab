@@ -41,24 +41,36 @@ class RestDataController extends Controller
             endif;
 
         endforeach;
+        $data['categoria']['list'] = [];
+
+        # usuario - carrera -  criterios
+        $usuario_criterios = User::find(auth()->user()->id)
+                                 ->criterion_user->pluck('criterion_value_id');
+        $usuario_categories = Carrera::whereIn('carrera_id', $usuario_criterios)->get();
+        $glosario_categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
+
+        foreach ($usuario_categories as $key => $uc_categoria) {
+            foreach ($glosario_categorias as $gc_categoria) {
+                if($uc_categoria->glosario_categoria_id === $gc_categoria->id) {
+                    $response_match = $gc_categoria;
+                }
+            }
+            $data['categoria']['list'][$key] = $response_match;
+        }
 
         return $data;
 
-        $data['categoria']['list'] = [];
+        /*
+        # get critrion by user_index
+        # $matricula = Matricula::with('carrera.glosario_categorias')->where('usuario_id', auth()->user()->id)->first();
 
-        #get critrion by user_index
-        $matricula = Matricula::with('carrera.glosario_categorias')->where('usuario_id', auth()->user()->id)->first();
-
-        // $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
-        $carreras = Carrera::with('glosario_categorias')->get();
-        
-        return $carreras;
+        # user carrera - categories 
 
         if ($matricula and $matricula->carrera) :
             $data['categoria']['list'] = $matricula->carrera->glosario_categorias->pluck('nombre', 'id')->toArray();
         endif;
 
-        return $data;
+        return $data;*/
     }
 
     public function glosarioSearch(Request $request)
