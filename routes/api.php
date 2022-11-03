@@ -93,19 +93,20 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);
 Route::post('password/reset', [ResetPasswordApiController::class, 'reset']);
 Route::post('cambiar-contrasenia', [ResetPasswordApiController::class, 'reset']);
+Route::get('notifications', [FirebaseController::class, 'notificationValues']);
 
-Route::get('notifications', function () {
-    return response()->json([
-        'showModalM1' => env('SHOW_MODAL_M1'),
-        'showCloseButtonM1' => env('SHOW_CLOSE_BUTTON_M1'),
-        'showModalM2' => env('SHOW_MODAL_M2'),
-        'showCloseButtonM2' => env('SHOW_CLOSE_BUTTON_M2'),
-        'showModalM3' => env('SHOW_MODAL_M3'),
-        'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
-        'showMessageM4' => env('SHOW_MESSAGE_M4'),
-        'showIosLink' => env('SHOW_IOS_LINK')
-    ]);
-});
+// Route::get('notifications', function () {
+//     return response()->json([
+//         'showModalM1' => env('SHOW_MODAL_M1'),
+//         'showCloseButtonM1' => env('SHOW_CLOSE_BUTTON_M1'),
+//         'showModalM2' => env('SHOW_MODAL_M2'),
+//         'showCloseButtonM2' => env('SHOW_CLOSE_BUTTON_M2'),
+//         'showModalM3' => env('SHOW_MODAL_M3'),
+//         'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
+//         'showMessageM4' => env('SHOW_MESSAGE_M4'),
+//         'showIosLink' => env('SHOW_IOS_LINK')
+//     ]);
+// });
 
 
 
