@@ -146,6 +146,10 @@ class UserMassive extends Massive implements ToCollection {
             })->where('document','<>',$user['document'])->select('email','username')->first();
         }else{
             $has_error = true;
+            $errors_index[] = [
+                'index'=>$dt['index'],
+                'message'=> ($this->messageInSpanish) ? 'El campo documento es requerido.': 'The field document is required' 
+            ];
         }
         if($user_username_email ){
             if(isset($user['username']) && $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
