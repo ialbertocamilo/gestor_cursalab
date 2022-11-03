@@ -675,7 +675,8 @@ class Course extends BaseModel
                 ->orderBy('position')
                 ->first();
 
-            $tags = [$ciclo->value_text];
+            if ($ciclo)
+                $tags = [$ciclo->value_text];
         }
 
         return $tags;

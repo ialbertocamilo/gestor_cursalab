@@ -3,6 +3,7 @@
 namespace App\Models\UCMigrationData;
 
 use App\Models\Block;
+use App\Models\CheckList;
 use App\Models\Course;
 use App\Models\CriterionValue;
 use App\Models\MediaTema;
@@ -573,13 +574,13 @@ class Migration_2 extends Model
 
         $course_poll = [];
 
-        foreach ($curso_encuestas as $curso_encuesta){
+        foreach ($curso_encuestas as $curso_encuesta) {
             $bar->advance();
 
             $course = $courses->where('external_id', $curso_encuesta->curso_id)->first();
             $poll = $polls->where('external_id', $curso_encuesta->encuesta_id)->first();
 
-            if (!$course || !$poll){
+            if (!$course || !$poll) {
                 info("CURSO ID {$curso_encuesta->curso_id} o ENCUESTA ID {$curso_encuesta->encuesta_id} no existe en UC-IR.");
                 continue;
             }
@@ -595,5 +596,54 @@ class Migration_2 extends Model
     protected function migrateChecklistInfo($output)
     {
         $db = self::connect();
+
+
+        $UCchecklists = $db->getTable('checklists')->get();
+        $UCChecklist_actividades = $db->getTable('checklist_items')->get();
+        $checklist_curso = $db->getTable('relaciones_checklist')->get();
+
+        $uc_workspace = $this->uc_workspace;
+
+        $checklists_table = [];
+        $checklist_items_table = [];
+        foreach ($UCchecklists as $checklist) {
+            $checklists_table[] = [
+                'external_id' => $checklist->id,
+                'workspace_id' => $uc_workspace->id,
+                'title' => $checklist->titulo,
+                'description' => $checklist->descripcion,
+                'active' => $checklist->estado,
+            ];
+
+
+        }
+
+        $this->makeChunkAndInsert($checklists_table, 'checklists', $output);
+
+        $checklists = CheckList::disableCache()->whereNotNull('external_id')->get();
+        $checklist_items_type = Taxonomy::getData('checklist', 'type');
+
+        $type_equivalence = [
+            'usuario_entrenador' => $checklist_items_type->where('code', 'user_trainer')->first()->id,
+            'entrenador_usuario' => $checklist_items_type->where('code', 'trainer_user')->first()->id,
+        ];
+
+        foreach ($checklists as $checklist) {
+            $actividades = $UCChecklist_actividades->where('external_id', $checklist->external_id);
+
+            $temp = [];
+            foreach ($actividades as $actividad) {
+                $temp[] = [
+                    'checklist_id' => $checklist->id,
+                    'activity' => $actividad->actividad,
+                    'position' => $actividad->posicion,
+                    'type_id' => $type_equivalence[$actividad->tipo],
+                    'active' => $actividad->estado
+                ];
+            }
+
+            $checklist->actividades()->sync($temp);
+        }
+
     }
 }
