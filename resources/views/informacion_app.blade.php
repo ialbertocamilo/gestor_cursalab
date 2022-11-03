@@ -17,7 +17,7 @@
         flex-direction:column; 
         height:100%;
     }
-    footer{
+ /*   footer{
         margin-top: 50px;
         background: #1a2033;
         padding: 30px 0;
@@ -25,7 +25,7 @@
         font-size: 14px;
         clear: both;
         position: relative;
-    }
+    }*/
     .main-style{
         padding:1.8rem 1.4rem;
         width:80%;
@@ -49,7 +49,7 @@
     }
   </style>
   <body>
-        <header class="masthead mb-auto mt-3 ml-3 ">
+        <header class="masthead ssmb-auto mt-3 mb-5 ml-3 text-center">
           <div class="container-fluid">
               <!--Mods logo-->
               <div id="logo">
@@ -59,11 +59,11 @@
               </div>
           </div>
         </header>
-        <main role="main" class="container justify-content-center main-style">
+        <main role="main" class="container justify-content-center main-style text-center">
             <div class="text-center">
-                <h2 style="font-size:1.5rem">Actualiza tu app de Universidad Corporativa</h2>
+                <h2 style="font-size:1.5rem">Actualiza tu APP</h2>
             </div>
-            <div style="margin-top:2rem">
+            <div style="margin-top:3rem">
                 <p>Escoge la opción que corresponda a tu teléfono para ir a la tienda de aplicaciones.</p>
             </div>
             <div>
@@ -107,9 +107,9 @@
                 </p>
             </div> --}}
         </main>
-      {{-- <footer id="footer" style="margin-top: 7vh;" >
+      <footer id="footer" style="margin-top: 7vh;" >
         <div class="container-fluid">
-          <div class="sub_footer row">
+         {{--  <div class="sub_footer row">
             <div class="copyright col-lg-6 col-md-6 mr-lg-auto text-center ">
               <h5 class="mt-0">Contáctanos</h5>
               <ul class="contacts">
@@ -134,8 +134,8 @@
           <hr>
           <div class="text-center">
             <small>© Plataforma de propiedad de La Media Digital Lab.</small>
-          </div>		
+          </div>	 --}}	
         </div>
-      </footer> --}}
+      </footer>
   </body>
 </html>
