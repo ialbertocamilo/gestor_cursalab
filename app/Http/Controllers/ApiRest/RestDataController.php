@@ -36,7 +36,7 @@ class RestDataController extends Controller
 
             if ($select['api'] == true) :
                 $data[$select['key']] = $select;
-                $data[$select['key']]['list'] = Taxonomy::getDataForSelect('glosario', $select['key']);
+                $data[$select['key']]['list'] = Taxonomy::getDataForSelectAttrs('glosario', $select['key'], ['id', 'name as nombre']);
             endif;
 
         endforeach;
@@ -52,12 +52,12 @@ class RestDataController extends Controller
                                      ->where('module_id', auth()->user()->subworkspace_id)
                                      ->get();
                                        
-        $glosario_categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
+        $glosario_categorias = Taxonomy::getDataForSelectAttrs('glosario', 'categoria', ['id', 'name as nombre']);
 
         foreach ($usuario_categories as $key => $uc_categoria) {
             foreach ($glosario_categorias as $gc_categoria) {
                 if($uc_categoria->glosario_categoria_id === $gc_categoria->id) {
-                    $data['categoria']['list'][$key] = $gc_categoria;
+                    $data['categoria']['list'][$gc_categoria->id] = $gc_categoria->nombre;
                 }
             }
         }
