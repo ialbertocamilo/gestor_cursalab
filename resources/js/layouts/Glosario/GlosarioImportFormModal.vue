@@ -163,7 +163,7 @@ export default {
             vue.selects.modulos = []
             vue.selects.categorias = []
 
-             vue.removeFileFromDropzone(vue.resource.excel, 'inputExcel')
+            vue.removeFileFromDropzone(vue.resource.file_excel, 'inputExcel')
         },
         async loadData(resource) {
             let vue = this

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Glossary;
 //use App\Models\Matricula;
 use App\Models\Carrera;
-use App\Models\Criterion;
 use App\Models\User;
 use App\Models\Taxonomy;
 use Config;
@@ -41,29 +40,45 @@ class RestDataController extends Controller
             endif;
 
         endforeach;
-
-        return $data;
-
         $data['categoria']['list'] = [];
 
-        #get critrion by user_index
-        $matricula = Matricula::with('carrera.glosario_categorias')->where('usuario_id', auth()->user()->id)->first();
 
-        // $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
-        $carreras = Carrera::with('glosario_categorias')->get();
-        
-        return $carreras;
+        # usuario - carrera -  criterios
+        $usuario_criterios = User::find(auth()->user()->id)->criterion_user
+                                 ->pluck('criterion_value_id')
+                                 ->toArray();
 
+        $usuario_categories = Carrera::whereIn('carrera_id', $usuario_criterios)
+                                     ->where('module_id', auth()->user()->subworkspace_id)
+                                     ->get();
+                                       
+        $glosario_categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
+
+        foreach ($usuario_categories as $key => $uc_categoria) {
+            foreach ($glosario_categorias as $gc_categoria) {
+                if($uc_categoria->glosario_categoria_id === $gc_categoria->id) {
+                    $data['categoria']['list'][$key] = $gc_categoria;
+                }
+            }
+        }
+
+        return $data;
+        //return ['user' => auth()->user(), 'data' => $data ];
+
+        /*
+        # get critrion by user_index
+        # $matricula = Matricula::with('carrera.glosario_categorias')->where('usuario_id', auth()->user()->id)->first();
+        # user carrera - categories 
         if ($matricula and $matricula->carrera) :
             $data['categoria']['list'] = $matricula->carrera->glosario_categorias->pluck('nombre', 'id')->toArray();
         endif;
-
-        return $data;
+        return $data;*/
     }
 
     public function glosarioSearch(Request $request)
     {
-        $request->merge(['modulo_id' => auth()->user()->subworkspace_id, 'estado' => 1]);
+        $request->merge(['modulo_id' => auth()->user()->subworkspace_id, 
+                         'estado' => 1]);
 
         $glosarios = Glossary::search($request, true);
         $data = Glossary::prepareSearchedData($glosarios);
