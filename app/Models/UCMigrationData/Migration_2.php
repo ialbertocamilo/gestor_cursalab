@@ -12,6 +12,7 @@ use App\Models\School;
 use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
 use App\Models\Topic;
+use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -593,35 +594,34 @@ class Migration_2 extends Model
         $this->makeChunkAndInsert($course_poll, 'course_poll', $output);
     }
 
-    protected function migrateChecklistInfo($output)
+    protected function migrateChecklistData($output)
     {
         $db = self::connect();
 
+        $checklist_items_type = Taxonomy::getData('checklist', 'type')->get();
 
-        $UCchecklists = $db->getTable('checklists')->get();
+        $UC_checklists = $db->getTable('checklist')->get();
         $UCChecklist_actividades = $db->getTable('checklist_items')->get();
         $checklist_curso = $db->getTable('relaciones_checklist')->get();
 
         $uc_workspace = $this->uc_workspace;
 
         $checklists_table = [];
-        $checklist_items_table = [];
-        foreach ($UCchecklists as $checklist) {
+        foreach ($UC_checklists as $checklist) {
             $checklists_table[] = [
                 'external_id' => $checklist->id,
                 'workspace_id' => $uc_workspace->id,
                 'title' => $checklist->titulo,
                 'description' => $checklist->descripcion,
                 'active' => $checklist->estado,
+
+                'created_at' => $checklist->created_at,
+                'updated_at' => $checklist->updated_at,
             ];
-
-
         }
-
         $this->makeChunkAndInsert($checklists_table, 'checklists', $output);
 
         $checklists = CheckList::disableCache()->whereNotNull('external_id')->get();
-        $checklist_items_type = Taxonomy::getData('checklist', 'type');
 
         $type_equivalence = [
             'usuario_entrenador' => $checklist_items_type->where('code', 'user_trainer')->first()->id,
@@ -629,7 +629,8 @@ class Migration_2 extends Model
         ];
 
         foreach ($checklists as $checklist) {
-            $actividades = $UCChecklist_actividades->where('external_id', $checklist->external_id);
+            //actividades
+            $actividades = $UCChecklist_actividades->where('checklist_id', $checklist->external_id);
 
             $temp = [];
             foreach ($actividades as $actividad) {
@@ -637,13 +638,90 @@ class Migration_2 extends Model
                     'checklist_id' => $checklist->id,
                     'activity' => $actividad->actividad,
                     'position' => $actividad->posicion,
-                    'type_id' => $type_equivalence[$actividad->tipo],
-                    'active' => $actividad->estado
+                    'type_id' => $type_equivalence[$actividad->tipo] ?? null,
+                    'active' => $actividad->estado,
+
+                    'created_at' => $actividad->created_at,
+                    'updated_at' => $actividad->updated_at,
                 ];
             }
 
-            $checklist->actividades()->sync($temp);
+            $this->makeChunkAndInsert($temp, 'checklist_items', $output);
+
+            // courses
+            $relaciones_checklist = $checklist_curso->where('checklist_id', $checklist->external_id);
+            $courses_id = Course::disableCache()->whereIn('external_id', $relaciones_checklist->pluck('curso_id'))
+                ->pluck('id')->toArray();
+
+            $checklist->courses()->sync($courses_id);
         }
+
+    }
+
+    protected function migrateChecklistUserData($output)
+    {
+        $db = self::connect();
+
+        // headers
+        $checklist_rptas = $db->getTable('checklist_rptas')->get();
+        $checklist_answers_items = [];
+
+        $checklist_answers = [];
+        foreach ($checklist_rptas as $checklist_rpta) {
+            $checklist = CheckList::disableCache()->where('external_id', $checklist_rpta->checklist_id)->first();
+            $coach = User::disableCache()->where('external_id', $checklist_rpta->entrenador_id)->first();
+            $student = User::disableCache()->where('external_id', $checklist_rpta->alumno_id)->first();
+            $course = Course::disableCache()->where('external_id', $checklist_rpta->curso_id)->first();
+            $school = School::disableCache()->where('external_id', $checklist_rpta->categoria_id)->first();
+
+
+            if (!$checklist || !$coach || !$student || !$course || !$school) {
+                info("CHECKLIST :: {$checklist_rpta->checlist_id} - COACH :: {$checklist_rpta->entrenador_id} - STUDENT :: {$checklist_rpta->alumno_id} - SCHOOL :: {$checklist_rpta->categoria_id} -  CURSO :: {$checklist_rpta->curso_id}");
+                continue;
+            }
+
+            $checklist_answer_data = [
+                'checklist_id' => $checklist->id,
+                'coach_id' => $coach->id,
+                'student_id' => $student->id,
+                'course_id' => $course->id,
+                'school_id' => $school->id,
+                'percent' => $checklist_rpta->porcentaje,
+
+                'created_at' => $checklist_rpta->created_at,
+                'updated_at' => $checklist_rpta->updated_at,
+            ];
+
+            $checklist_answer_id = DB::table('checklist_answers')->insertGetId($checklist_answer_data);
+
+            $checklist_rptas_items = $db->getTable('checklist_rptas_items')
+                ->where('checklist_rpta_id', $checklist_rpta->id)->get();
+
+            $checklist_answers_items_data = [];
+            foreach ($checklist_rptas_items as $checklist_rpta_item) {
+
+                $checklist_item_UC = $db->getTable('checklist_items')
+                    ->where('id', $checklist_rpta_item->checklist_item_id)->first();
+
+                if (!$checklist_item_UC) continue;
+
+                $checklist_item = DB::table('checklist_items')->where('checklist_id', $checklist->id)
+                    ->where('activity', $checklist_item_UC->actividad)->first();
+
+                $checklist_answers_items_data[] = [
+                    'checklist_answer_id' => $checklist_answer_id,
+                    'checklist_item_id' => $checklist_item->id,
+                    'qualification' => $checklist_rpta_item->calificacion,
+
+                    'created_at' => $checklist_rpta_item->created_at,
+                    'updated_at' => $checklist_rpta_item->updated_at,
+                ];
+            }
+
+            $this->makeChunkAndInsert($checklist_answers_items_data, 'checklist_answers_items', $output);
+
+        }
+
 
     }
 }

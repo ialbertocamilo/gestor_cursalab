@@ -65,8 +65,8 @@ class MigrationData2 extends Command
         if ($type === 'curricula')
             Migration_2::migrateCurricula($bar);
 
-        if ($type === 'checklist_info')
-            Migration_2::migrateChecklistInfo($bar);
+        if ($type === 'checklist_data')
+            Migration_2::migrateChecklistData($bar);
 
         if ($type === 'checklist_user_data')
             Migration_2::migrateChecklistUserData($bar);
