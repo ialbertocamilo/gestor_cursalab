@@ -44,15 +44,12 @@ class RestDataController extends Controller
 
 
         # usuario - carrera -  criterios
-        $user = User::find(auth()->user()->id);
-
-        $usuario_criterios = $user->criterion_user
-                                  ->pluck('criterion_value_id')
-                                  ->toArray();
-        $usuario_module_idx = $user->subworkspace->criterion_value_id;
+        $usuario_criterios = User::find(auth()->user()->id)->criterion_user
+                                 ->pluck('criterion_value_id')
+                                 ->toArray();
 
         $usuario_categories = Carrera::whereIn('carrera_id', $usuario_criterios)
-                                     ->where('module_id', $usuario_module_idx)
+                                     ->where('module_id', auth()->user()->subworkspace_id)
                                      ->get();
                                        
         $glosario_categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
@@ -66,26 +63,21 @@ class RestDataController extends Controller
         }
 
         return $data;
+        //return ['user' => auth()->user(), 'data' => $data ];
 
         /*
         # get critrion by user_index
         # $matricula = Matricula::with('carrera.glosario_categorias')->where('usuario_id', auth()->user()->id)->first();
-
         # user carrera - categories 
-
         if ($matricula and $matricula->carrera) :
             $data['categoria']['list'] = $matricula->carrera->glosario_categorias->pluck('nombre', 'id')->toArray();
         endif;
-
         return $data;*/
     }
 
     public function glosarioSearch(Request $request)
     {
-        $user = User::find(auth()->user()->id);
-        $usuario_module_idx = $user->subworkspace->criterion_value_id;
-
-        $request->merge(['modulo_id' => $usuario_module_idx, 
+        $request->merge(['modulo_id' => auth()->user()->subworkspace_id, 
                          'estado' => 1]);
 
         $glosarios = Glossary::search($request, true);

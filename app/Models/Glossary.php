@@ -385,14 +385,21 @@ class Glossary extends Model
         return ['status' => 'success', 'message' => $message];
     }
 
-    protected function getCareersCategory($modulos, $code = 'career') {
+    protected function getValuesModule()
+    {
+        return Workspace::loadSubWorkspaces(['id', 'name as nombre']);
+    }
+
+
+    protected function getCareersCategory($modulos, $code = 'position_name') {
         $carreras_module = Carrera::with('glosario_categorias')->get();
 
         $criterios = CriterionValue::query() 
                                    ->whereRelation('criterion', 'code', $code)
                                    ->where('active', ACTIVE)
                                    ->select('id', "value_text as nombre")
-                                   ->get();
+                                   ->limit(5)->get();
+                                   //->get();
         
         $stack_categories = [];
         foreach ($carreras_module as $cm_module) {
@@ -657,7 +664,8 @@ class Glossary extends Model
     protected function getModulesWithCode($glossaryModules)
     {
 
-        $modules = Criterion::getValuesForSelect('module');
+        // $modules = Criterion::getValuesForSelect('module');
+        $modules = $this->getValuesModule();
 
         $glossaryModules = $glossaryModules->toArray();
         foreach ($glossaryModules as $module) {
