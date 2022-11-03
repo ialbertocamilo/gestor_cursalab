@@ -108,6 +108,16 @@ class Taxonomy extends Model
             ->get(['name', 'id', 'code', 'name as nombre']);
     }
 
+    protected function getDataForSelectAttrs(string $groupName, string $typeName, array $attributes)
+    {
+        return Taxonomy::where('type', $typeName)
+            ->where('group', $groupName)
+            ->where('active', 1)
+            ->orderBy('name', 'ASC')
+            ->get($attributes);
+    }
+
+
     /**
      * Load Vademecum categories
      *
