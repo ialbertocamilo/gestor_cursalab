@@ -20,7 +20,7 @@ class UserMassive extends Massive implements ToCollection {
     public $processed_users = 0;
     public $current_workspace = null;
     private $subworkspaces = [];
-    public $excelHeaders = [];
+    public $excelHeaders;
     public $messageInSpanish = true;
     public function __construct($data=[])
     {
@@ -28,6 +28,7 @@ class UserMassive extends Massive implements ToCollection {
         $this->percent_sent = [];
     }
     public function collection(Collection $rows){
+        $this->excelHeaders = $rows[0];
         //Don't count the header in the constraint, verifyConstraintMassive <- function extends from class Massive
         $this->verifyConstraintMassive('user_update_massive',count($rows) - 1);
 
@@ -59,7 +60,6 @@ class UserMassive extends Massive implements ToCollection {
         //obtenemos las cabezeras
        
         //Get headers
-        $this->excelHeaders = $rows[0];
         $headers = $this->process_header($rows[0],$criteria);
         $rows->shift();
         $this->process_user($rows,$headers,$criteria);
