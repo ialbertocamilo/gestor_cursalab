@@ -95,7 +95,7 @@
                     <img style="width: 40px;" src="/img/playstore.png" class="img-thumbnail ml-1">
                   </a>
             </div>
-            <div>
+            {{-- <div>
                 <p>
                     Si ninguna de estas opciones se adecua a tu teléfono móvil, contáctate con soporte al whatsapp 
                       <a target="_blank" href="https://wa.me/51960169962?text=Necesito%20ayuda%20con%20la%20actualización%20de%20mi%20aplicación.">
@@ -105,9 +105,9 @@
                         <img style="width: 40px;" src="/img/whatsapp.png" class="img-thumbnail ml-1"> 
                       </a> de Lunes a Viernes, de 9am a 6pm
                 </p>
-            </div>
+            </div> --}}
         </main>
-      <footer id="footer" style="margin-top: 7vh;" >
+      {{-- <footer id="footer" style="margin-top: 7vh;" >
         <div class="container-fluid">
           <div class="sub_footer row">
             <div class="copyright col-lg-6 col-md-6 mr-lg-auto text-center ">
@@ -131,12 +131,11 @@
               </p>
             </div>
           </div>
-          <!--/row-->	
           <hr>
           <div class="text-center">
             <small>© Plataforma de propiedad de La Media Digital Lab.</small>
           </div>		
         </div>
-      </footer>
+      </footer> --}}
   </body>
 </html>
