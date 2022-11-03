@@ -144,6 +144,8 @@ class UserMassive extends Massive implements ToCollection {
                 isset($user['username']) && $q->where('username',$user['username']);
                 isset($user['email']) && $q->where('email',$user['email']);
             })->where('document','<>',$user['document'])->select('email','username')->first();
+        }else{
+            $has_error = true;
         }
         if($user_username_email ){
             if(isset($user['username']) && $user['username']!='' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])){
