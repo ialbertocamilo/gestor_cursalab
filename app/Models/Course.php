@@ -337,7 +337,8 @@ class Course extends BaseModel
 
     protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
-        $workspace_id = auth()->user()->subworkspace->parent_id;
+        // $workspace_id = auth()->user()->subworkspace->parent_id;
+        $workspace_id = $user->subworkspace->parent_id;
 
         $schools = $user_courses->groupBy('schools.*.id');
         $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
