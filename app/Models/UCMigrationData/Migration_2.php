@@ -6,6 +6,7 @@ use App\Models\Block;
 use App\Models\CheckList;
 use App\Models\Course;
 use App\Models\CriterionValue;
+use App\Models\Media;
 use App\Models\MediaTema;
 use App\Models\Poll;
 use App\Models\School;
@@ -13,9 +14,12 @@ use App\Models\Support\OTFConnection;
 use App\Models\Taxonomy;
 use App\Models\Topic;
 use App\Models\User;
+use App\Models\Vademecum;
+use App\Models\Videoteca;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Spatie\MediaLibrary\Conversions\ImageGenerators\Video;
 
 class Migration_2 extends Model
 {
@@ -25,6 +29,12 @@ class Migration_2 extends Model
         4 => '26', // Mifarma
         5 => '27', // Inkafarma,
         6 => '28' // Capacitacion FP
+    ];
+
+    const MODULOS_CRITERION_VALUE = [
+        4 => '18', // Mifarma
+        5 => '19', // Inkafarma,
+        6 => '20' // Capacitacion FP
     ];
 
     private mixed $uc_workspace;
@@ -724,4 +734,196 @@ class Migration_2 extends Model
 
 
     }
+
+    protected function migrateUserActionsData($output)
+    {
+
+        $db = self::connect();
+
+        $usuario_acciones = $db->getTable('usuario_acciones')->get();
+        $user_actions_data = [];
+
+        $bar = $output->createProgressBar($usuario_acciones->count());
+        $bar->start();
+
+        foreach ($usuario_acciones as $usuario_accion) {
+            $bar->advance();
+
+            $model = null;
+
+            if (str_contains($usuario_accion->model_type, 'Vademecum'))
+                $model = Vademecum::class;
+
+            if (str_contains($usuario_accion->model_type, 'Videoteca'))
+                $model = Videoteca::class;
+
+            if (!$model) {
+                info("No es encontro el modelo {$usuario_accion->model_type}");
+                continue;
+            }
+
+            $resource = $model::where('external_id', $usuario_accion->model_id)->first();
+
+            $user = User::where('external_id', $usuario_accion->user_id)->first();
+
+            if (!$user || !$resource) {
+                info("Mo se encontro el USER :: {$usuario_accion->user_id} -  RESOURCE :: {$usuario_accion->model_id}");
+                continue;
+            }
+
+            $user_actions_data[] = [
+                'user_id' => $user->id,
+                'model_type' => $model,
+                'model_id' => $resource->id,
+                'score' => $usuario_accion->score
+            ];
+
+        }
+
+        $bar->finish();
+
+        $this->makeChunkAndInsert($user_actions_data, 'user_actions', $output);
+    }
+
+    protected function migrateVideotecaData($output)
+    {
+
+        $db = self::connect();
+
+        $videoteca_UC = $db->getTable('videoteca')->get();
+        $bar = $output->createProgressBar($videoteca_UC->count());
+        $bar->start();
+
+        $videoteca_data = [];
+        foreach ($videoteca_UC as $videoteca) {
+            $bar->advance();
+
+            $category = Taxonomy::where('external_id_es', $videoteca->category_id)->first();
+
+            $media = Media::where('external_id', $videoteca->media_id)->first();
+            $preview = Media::where('external_id', $videoteca->preview_id)->first();
+
+            if (!$category) {
+                info("La categoria :: {$videoteca->category_id} no se ha migrado");
+                continue;
+            }
+
+            $videoteca_data[] = [
+
+                'external_id' => $videoteca->id,
+
+                'title' => $videoteca->title,
+                'description' => $videoteca->description,
+                'category_id' => $category->id,
+
+                'media_video' => $videoteca->media_video,
+                'media_type' => $videoteca->media_type,
+                'media_id' => $media?->id,
+
+                'preview_id' => $preview?->id,
+                'active' => $videoteca->active,
+
+                'created_at' => $videoteca->created_at,
+                'updated_at' => $videoteca->updated_at,
+            ];
+
+        }
+        $bar->finish();
+        $this->makeChunkAndInsert($videoteca_data, 'videoteca', $output);
+
+        $videotecaIR = Videoteca::disableCache()->whereNotNull('external_id')<>get();
+        foreach ($videotecaIR as $videoteca) {
+
+            $temp_modules = [];
+            $videoteca_modulo = $db->getTable('videoteca_module')
+                ->where('videoteca_id', $videoteca->external_id)
+                ->get();
+            foreach ($videoteca_modulo as $row) {
+                $module_value = self::MODULOS_CRITERION_VALUE[$row->module_id] ?? false;
+
+                if ($module_value) $temp_modules[] = $module_value;
+            }
+
+            $videoteca->modules()->sync($temp_modules);
+
+
+            $temp_tags = [];
+            $videoteca_tag = $db->getTable('videoteca_tag')
+                ->where('videoteca_id', $videoteca->external_id)
+                ->get();
+            foreach ($videoteca_tag as $row) {
+                $tag_value = Taxonomy::where('external_id_es', $row->tag_id)->first();
+
+                if ($tag_value) $temp_tags[] = $tag_value->id;
+            }
+
+            $videoteca->tags()->sync($temp_tags);
+
+        }
+    }
+
+    protected function migrateVademecumData($output)
+    {
+
+        $db = self::connect();
+
+        $vademecumUC = $db->getTable('vademecum')->get();
+        $bar = $output->createProgressBar($vademecumUC->count());
+        $bar->start();
+
+        $vademecum_data = [];
+        foreach ($vademecumUC as $vademecum) {
+            $bar->advance();
+
+            $category = Taxonomy::where('external_id_es', $vademecum->categoria_id)->first();
+            $subcategory = Taxonomy::where('external_id_es', $vademecum->subcategoria_id)->first();
+            $media = Media::where('external_id', $vademecum->media_id)->first();
+
+            if (!$category || !$media) {
+                info("CATEGORIA :: {$vademecum->categoria_id} - MEDIA :: {$vademecum->media_id} no se ha migrado.");
+                continue;
+            }
+
+
+            $vademecum_data[] = [
+
+                'external_id' => $vademecum->id,
+
+                'name' => $vademecum->nombre,
+                'media_id' => $vademecum->media_id,
+                'category_id' => $category->id,
+                'subcategory_id' => $subcategory?->id,
+
+                'active' => $vademecum->estado,
+
+                'created_at' => $vademecum->created_at,
+                'updated_at' => $vademecum->updated_at,
+            ];
+        }
+        $bar->finish();
+
+        $this->makeChunkAndInsert($vademecum_data, 'vademecum', $output);
+
+
+        $vademecumIR = Vademecum::whereNotNull('external_id')->get();
+
+        foreach ($vademecumIR as $vademecum){
+
+
+            $modules_values = $db->getTable('vademecum_modulo')
+                ->where('vademecum_id', $vademecum->external_id)->get();
+
+            $temp_modules = [];
+            foreach ($modules_values as $row) {
+                $module_value = self::MODULOS_CRITERION_VALUE[$row->modulo_id] ?? false;
+
+                if ($module_value) $temp_modules[] = $module_value;
+            }
+
+            $vademecum->modules()->sync($temp_modules);
+        }
+
+    }
+
+
 }
