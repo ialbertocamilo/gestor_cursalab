@@ -210,8 +210,6 @@ class RestQuizController extends Controller
 
         if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft()) {
 
-            info("Usuario {$user->id} {$topic->id} sin intentos.");
-
             $times = [];
 
             if ($topic->course->reinicios_programado)
@@ -222,9 +220,6 @@ class RestQuizController extends Controller
 
             if ($user->subworkspace->reinicios_programado)
                 $times[] = $user->subworkspace->reinicios_programado;
-
-            info('times');
-            info($times);
 
             if (count($times) > 0) {
 
@@ -241,12 +236,6 @@ class RestQuizController extends Controller
                         break;
                     }
                 }
-
-                info('scheduled');
-                info($scheduled);
-
-                info('row->last_time_evaluated_at');
-                info($row->last_time_evaluated_at);
 
                 if ($scheduled and $row->last_time_evaluated_at) {
 
