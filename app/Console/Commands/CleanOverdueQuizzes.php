@@ -43,7 +43,7 @@ class CleanOverdueQuizzes extends Command
      */
     public function handle()
     {
-        $rows = SummaryTopic::with('topic.course', 'user.subworkspace')
+        $rows = SummaryTopic::with('topic.course', 'user.subworkspace', 'status')
                     ->where('taking_quiz', ACTIVE)
                     ->where('current_quiz_finishes_at', '<=', now())
                     ->get();
@@ -64,7 +64,7 @@ class CleanOverdueQuizzes extends Command
                     'taking_quiz' => NULL,
                 ];
 
-                if ($row->status->code == 'desarrollo') {
+                if ($row->status AND $row->status->code == 'desarrollo') {
 
                     $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
 
