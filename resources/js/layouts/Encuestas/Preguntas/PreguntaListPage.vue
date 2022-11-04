@@ -73,7 +73,7 @@ export default {
                 headers: [
                     {text: "Pregunta", value: "titulo"},
                     {text: "Tipo", value: "tipo_pregunta", align: 'center'},
-                    {text: "Cantidad", value: "cantidad", align: 'center', sortable: false},
+                    {text: "Nº Opciones", value: "cantidad", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
