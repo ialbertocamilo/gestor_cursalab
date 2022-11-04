@@ -576,9 +576,9 @@ class Course extends BaseModel
 
     public function usersSegmented($course_segments, $type = 'get_records')
     {
-        $users = DB::table('criterion_value_user');
         $users_id_course = [];
         foreach ($course_segments as $segment) {
+            $users = DB::table('criterion_value_user');
             $criteria = $segment->values->groupBy('criterion_id');
 
             foreach ($criteria as $criterion_values) {
@@ -605,7 +605,7 @@ class Course extends BaseModel
         return ($type == 'get_records') ? $users_have_course->get() : $users_have_course->count();
     }
 
-    public function getUsersBySegmentation()
+    public function getUsersBySegmentation($type = 'all')
     {
         $this->load('segments.values');
 
@@ -617,7 +617,7 @@ class Course extends BaseModel
 
             $result = User::whereHas('criterion_values', function ($q) use ($segment) {
 
-                $grouped = $segments->values->groupBy('criterion_id');
+                $grouped = $segment->values->groupBy('criterion_id');
 
                 foreach ($grouped as $key => $values) {
 
@@ -633,6 +633,12 @@ class Course extends BaseModel
 
             $users = $users->merge($result);
         }
+
+        if ($type == 'all')
+            return $users;
+
+        if ($type == 'count')
+            return count($users);
 
         return $users;
     }
