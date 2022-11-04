@@ -165,17 +165,17 @@
                                     <v-list-item-title
                                         v-if="prueba.pregunta"
                                         class="text-body-2 prueba-text">
-                                        <small v-html="prueba.pregunta.trim() || prueba.pregunta"></small>
+                                        <small v-html="prueba.pregunta"></small>
                                     </v-list-item-title>
                                     <v-list-item-title
                                         v-if="prueba.respuesta_usuario"
                                         class="text-body-2 prueba-text">
-                                        <small v-html="prueba.respuesta_usuario.trim() || prueba.respuesta_usuario"></small>
+                                        <small v-html="prueba.respuesta_usuario"></small>
                                     </v-list-item-title>
                                     <v-list-item-title
                                         v-if="prueba.respuesta_ok"
                                         class="text-body-2 prueba-text">
-                                        <small v-html="prueba.respuesta_ok.trim() || prueba.respuesta_ok"></small>
+                                        <small v-html="prueba.respuesta_ok"></small>
                                     </v-list-item-title>
                                 </v-list-item>
                             </v-list>
