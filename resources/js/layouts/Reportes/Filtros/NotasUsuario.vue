@@ -215,13 +215,13 @@
 									:key="index"
 								>
 									<v-list-item-title class="text-body-2 prueba-text">
-										{{ prueba.pregunta.trim() }}
+										{{ prueba.pregunta.trim() || prueba.pregunta}}
 									</v-list-item-title>
 									<v-list-item-title class="text-body-2 prueba-text">
-										{{ prueba.respuesta_usuario.trim() }}
+										{{ prueba.respuesta_usuario.trim() || prueba.respuesta_usuario}}
 									</v-list-item-title>
 									<v-list-item-title class="text-body-2 prueba-text">
-										{{ prueba.respuesta_ok.trim() }}
+										{{ prueba.respuesta_ok.trim() || prueba.respuesta_ok}}
 									</v-list-item-title>
 								</v-list-item>
 							</v-list>
