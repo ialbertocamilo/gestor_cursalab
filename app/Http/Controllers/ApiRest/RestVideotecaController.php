@@ -9,21 +9,22 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RestVideotecaController extends Controller
-{
-    public function __construct()
+{ 
+    /* public function __construct()
     {
         $this->middleware('auth.jwt');
         return auth()->shouldUse('api');
         Carbon::setLocale('es');
-    }
+    }*/
 
     public function search(Request $request)
     {
+        //return response()->json($request->all());
         $user = auth()->user();
-        $request->modulo_id = $user->config_id;
+        $request->merge(['workspace_id' => $user->subworkspace->parent_id, 
+                         'modulo_id' => $user->subworkspace_id ]);
 
         $videoteca = Videoteca::search($request, true);
-
         $items = Videoteca::prepareData($videoteca->items());
 
         $videoteca = [
@@ -35,10 +36,10 @@ class RestVideotecaController extends Controller
         return response()->json(compact('videoteca'));
     }
 
-    public function show(Videoteca $videotecaRequest)
+    public function show(Videoteca $videoteca)
     {
         $user = auth()->user();
-        $videoteca = Videoteca::processData($videotecaRequest, ['related_tags']);
+        $videoteca = Videoteca::processData($videoteca, ['related_tags']);
 
         return response()->json(compact('videoteca'));
     }
@@ -55,11 +56,19 @@ class RestVideotecaController extends Controller
     public function getSelects()
     {
         $user = auth()->user();
-        $category_ids = Videoteca::select('category_id')->whereHas('modules', function ($q) use ($user) {
-            $q->where('module_id', $user->config_id);
-        })->where('active',1)->groupBy('category_id')->pluck('category_id');
+
+        $category_ids = Videoteca::select('category_id')
+                                 ->whereHas('modules', function ($q) use ($user) {
+            $q->where('module_id', $user->subworkspace_id);
+        })->where('active',1)
+          ->groupBy('category_id')
+          ->pluck('category_id');
+        
         $data['categorias'] = Taxonomy::whereIn('id', $category_ids)
-        ->where('grupo', 'videoteca')->where('tipo', 'categoria')->get()->pluck('nombre', 'id')->toArray();
+                                      ->where('group', 'videoteca')
+                                      ->where('type', 'categoria')
+                                      ->get()->pluck('name', 'id')->toArray();
+        
         return response()->json(compact('data'));
     }
 
@@ -68,9 +77,9 @@ class RestVideotecaController extends Controller
         $user_id = auth()->user()->id;
 
         $accion_visita = Taxonomy::where('group', 'videoteca')
-                                  ->where('tipo', 'accion')
-                                  ->where('nombre', 'view')
-                                  ->first();
+                                 ->where('type', 'accion')
+                                 ->where('name', 'view')
+                                 ->first();
 //        info("[storeVisit]", [$accion_visita]);
         $row = $videoteca->incrementAction($accion_visita->id, $user_id);
 

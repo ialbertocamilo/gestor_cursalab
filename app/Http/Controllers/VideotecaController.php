@@ -186,6 +186,8 @@ class VideotecaController extends Controller
      */
     public function search(Request $request)
     {
+        $request->merge(['workspace_id' => get_current_workspace()->id ]);
+
         $items = Videoteca::search($request, false, $request->paginate);
         VideotecaResource::collection($items);
 
@@ -309,7 +311,6 @@ class VideotecaController extends Controller
 
         $data = Media::requestUploadFileForId($data, 'media', $data['title'] ?? null);
         $data = Media::requestUploadFileForId($data, 'preview', $data['title'] ?? null);
-
 
         $videoteca = Videoteca::storeRequest($data, $videoteca);
         $msg = 'Videoteca actualizada correctamente.';

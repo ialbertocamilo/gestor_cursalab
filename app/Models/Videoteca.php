@@ -38,22 +38,30 @@ class Videoteca extends Model
         Relationships
 
     --------------------------------------------------------------------------*/
-
-
     public function media()
     {
-        return $this->hasOne(
+        return $this->belongsTo(
             Media::class,
-            'id'
-            //'media_id'
+            'media_id'
         )->select('id', 'title', 'file', 'ext');
+
+        /* return $this->belongsTo(
+            Media::class,
+            'media_id'
+        )->select('id', 'title', 'file', 'ext'); */
     }
 
     public function preview()
     {
-        return $this->hasOne(
+        /*return $this->belongsTo(
             Media::class,
             'id'
+        )->select('id', 'title', 'file', 'ext'); */
+        
+        return $this->belongsTo(
+            Media::class,
+            //'id',
+            'preview_id'
             //'preview_id'
         )->select('id', 'title', 'file', 'ext');
     }
@@ -150,9 +158,11 @@ class Videoteca extends Model
         }
 
         $query = self::with($relationships);
+        $query->where('workspace_id', $request->workspace_id);
 
         if ($request->q)
             $query->where('title', 'like', "%{$request->q}%");
+
 
         if ($request->modulo_id)
             $query->whereHas('modules', function ($q) use ($request) {
