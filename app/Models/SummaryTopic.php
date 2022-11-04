@@ -156,6 +156,10 @@ class SummaryTopic extends Summary
             $attempts_limit = $config['nro_intentos'] ?? 5;
         }
 
+        info('hasNoAttemptsLeft');
+        info($this->attempts);
+        info($attempts_limit);
+
         return $this->attempts >= $attempts_limit;
     }
 

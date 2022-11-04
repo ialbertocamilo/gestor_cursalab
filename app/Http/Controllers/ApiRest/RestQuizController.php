@@ -200,21 +200,31 @@ class RestQuizController extends Controller
 
     public function contador_tema_reseteo(Topic $topic)
     {
-        $topic->load('course');
+        $topic->load('course.schools');
 
-        $row = SummaryTopic::getCurrentRow($topic);
+        $user = auth()->user()->load('subworkspace');
+
+        $row = SummaryTopic::getCurrentRow($topic, $user);
 
         $counter = false;
 
         if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft()) {
+
+            info("Usuario {$user->id} {$topic->id} sin intentos.");
 
             $times = [];
 
             if ($topic->course->reinicios_programado)
                 $times[] = $topic->course->reinicios_programado;
 
-            if (auth()->user()->subworkspace->reinicios_programado)
-                $times[] = auth()->user()->subworkspace->reinicios_programado;
+            // if ($topic->course->reinicios_programado)
+            //     $times[] = $topic->course->reinicios_programado;
+
+            if ($user->subworkspace->reinicios_programado)
+                $times[] = $user->subworkspace->reinicios_programado;
+
+            info('times');
+            info($times);
 
             if (count($times) > 0) {
 
@@ -231,6 +241,12 @@ class RestQuizController extends Controller
                         break;
                     }
                 }
+
+                info('scheduled');
+                info($scheduled);
+
+                info('row->last_time_evaluated_at');
+                info($row->last_time_evaluated_at);
 
                 if ($scheduled and $row->last_time_evaluated_at) {
 
