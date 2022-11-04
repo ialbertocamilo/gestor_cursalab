@@ -34,7 +34,7 @@ class PollQuestionResource extends JsonResource
     public function getOptionsCount()
     {
         if (in_array($this->tipo_pregunta, ['texto', 'califica']))
-            return "-";
+            return "No aplica";
 
         $options = json_decode($this->opciones, true);
 
