@@ -9,6 +9,7 @@ use App\Models\Criterion;
 use App\Models\Media;
 use App\Models\Taxonomy;
 use App\Models\Usuario;
+use App\Models\Workspace;
 use App\Models\UsuarioAccion;
 use App\Models\Videoteca;
 use Faker\Factory as Faker;
@@ -169,9 +170,10 @@ class VideotecaController extends Controller
      */
     public function create(Request $request)
     {
-        $modules = Criterion::getValuesForSelect('module');
-        $categorias = Taxonomy::getDataForSelect('videoteca', 'categoria');
-        $tags = Taxonomy::getDataForSelect('videoteca', 'tag');
+        // $modules = Criterion::getValuesForSelect('module'); 
+        $modules = Workspace::loadSubWorkspaces(['id', 'name as nombre']);
+        $categorias = Taxonomy::getDataForSelectWorkspace('videoteca', 'categoria');
+        $tags = Taxonomy::getDataForSelectWorkspace('videoteca', 'tag');
 
         return $this->success(get_defined_vars());
     }
@@ -262,12 +264,13 @@ class VideotecaController extends Controller
 //        $videoteca->media = $videoteca->media()->pluck('file');
 //        $videoteca->preview = $videoteca->preview->file;
 
-        $modules = Criterion::getValuesForSelect('module');
-        $categorias = Taxonomy::getDataForSelect(
+        // $modules = Criterion::getValuesForSelect('module');
+        $modules = Workspace::loadSubWorkspaces(['id', 'name as nombre']);
+        $categorias = Taxonomy::getDataForSelectWorkspace(
             'videoteca', 'categoria'
         );
 
-        $tags = Taxonomy::getDataForSelect(
+        $tags = Taxonomy::getDataForSelectWorkspace(
             'videoteca', 'tag'
         );
 
@@ -356,7 +359,7 @@ class VideotecaController extends Controller
      */
     public function tagsList(Request $request)
     {
-        $query = Taxonomy::videotecaTags();
+        $query = Taxonomy::videotecaTags( get_current_workspace()->id );
 
         if ($request->q)
             $query->where('name', 'like', "%{$request->q}%");
@@ -410,7 +413,7 @@ class VideotecaController extends Controller
      */
     public function categoriasList(Request $request)
     {
-        $query = Taxonomy::videotecaCategories()
+        $query = Taxonomy::videotecaCategories(get_current_workspace()->id)
                          ->orderBy('created_at', 'DESC');
 
         if ($request->q)
@@ -430,10 +433,12 @@ class VideotecaController extends Controller
     public function categoriasStore(Request $request)
     {
         $data = $request->all();
+        $data['workspace_id'] = get_current_workspace()->id;
         $data['group'] = 'videoteca';
         $data['type'] = 'categoria';
         $data['active'] = 1;
         Taxonomy::create($data);
+
         return $this->success(['msg' => 'Categoria creada correctamente']);
     }
 
@@ -444,14 +449,13 @@ class VideotecaController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function categoriasEdit(Taxonomy $tag, Request $request)
+    public function categoriasEdit(Request $request)
     {
         $data = $request->all();
-        $tag->update($data);
+        Taxonomy::find($request->id)->update($data); //change
+
         return $this->success(['msg' => 'Categoria editada correctamente']);
     }
-
-
 
     // todo: check usage
     public function categorias_create()

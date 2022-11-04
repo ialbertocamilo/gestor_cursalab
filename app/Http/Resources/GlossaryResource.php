@@ -36,7 +36,7 @@ class GlossaryResource extends JsonResource
         foreach($this->modules AS $module)
         {
             $data[] = [
-                'name' => $module->value_text,
+                'name' => $module->name,
                 'image' => space_url($module->logo)
             ];
         }

@@ -102,14 +102,27 @@ class Glossary extends Model
         );
     }
 
-    public function modules()
-    {
+
+    /* public function modules(){
         return $this->belongsToMany(
             CriterionValue::class,
             'glossary_module',
             'glossary_id',
             'module_id'
         );
+
+    }*/
+
+    public function modules()
+    {
+
+        return $this->belongsToMany(
+            Workspace::class,
+            'glossary_module',
+            'glossary_id',
+            'module_id'
+        );
+
     }
 
     public function glossary_module() {
@@ -254,8 +267,7 @@ class Glossary extends Model
 
             $relationships = [
                 'modules' => function ($q) use ($request) {
-                    if ($request->module_id)
-                        $q->where('id', $request->module_id);
+                    if ($request->module_id) $q->where('id', $request->module_id);
                 },
                 'categoria', 'principios_activos', 'contraindicaciones',
                 'interacciones', 'reacciones', 'laboratorio', 'advertencias',

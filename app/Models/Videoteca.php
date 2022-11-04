@@ -14,6 +14,7 @@ class Videoteca extends Model
     protected $table = 'videoteca';
 
     protected $fillable = [
+        'workspace_id',
         'title',
         'description',
         'media_video',
@@ -43,8 +44,8 @@ class Videoteca extends Model
     {
         return $this->hasOne(
             Media::class,
-            'id',
-            'media_id'
+            'id'
+            //'media_id'
         )->select('id', 'title', 'file', 'ext');
     }
 
@@ -52,8 +53,8 @@ class Videoteca extends Model
     {
         return $this->hasOne(
             Media::class,
-            'id',
-            'preview_id'
+            'id'
+            //'preview_id'
         )->select('id', 'title', 'file', 'ext');
     }
 
@@ -172,10 +173,7 @@ class Videoteca extends Model
         if ($request->no_id)
             $query->whereNotIn('id', [$request->no_id]);
 
-
-
         return $query->latest('id')->paginate($paginate);
-
     }
 
     public function incrementAction($type_id, $user_id, $quantity = 1)
@@ -201,6 +199,7 @@ class Videoteca extends Model
 
                 $videoteca->update($data);
             else:
+                $data['workspace_id'] = get_current_workspace()->id;
                 $videoteca = self::create($data);
             endif;
 
@@ -378,11 +377,14 @@ class Videoteca extends Model
         if (is_numeric($value)) {
 
             return Taxonomy::where('group', 'videoteca')
+                            ->where('workspace_id', get_current_workspace()->id)
                             ->where('type', $type)
                             ->where('id', $value)
                             ->first();
         }
 
-        return Taxonomy::getOrCreate('videoteca', $type, $value);
+        // return Taxonomy::getOrCreate('videoteca', $type, $value);
+        return Taxonomy::getOrCreateWithWorkspace('videoteca', $type, $value);
+
     }
 }
