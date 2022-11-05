@@ -71,6 +71,18 @@ class MigrationData2 extends Command
         if ($type === 'checklist_user_data')
             Migration_2::migrateChecklistUserData($bar);
 
+        if  ($type === 'user_actions')
+            Migration_2::migrateUserActionsData($bar);
+
+        if ($type === 'videoteca')
+            Migration_2::migrateVideotecaData($bar);
+
+        if ($type === 'vademecum')
+            Migration_2::migrateVademecumData($bar);
+
+
+
+
         $this->info(" Fin: " . now());
         info(" Fin: " . now());
     }
