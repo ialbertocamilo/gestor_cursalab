@@ -29,6 +29,7 @@ use App\Models\Resumen_x_curso;
 use App\Models\School;
 use App\Models\SummaryCourse;
 use App\Models\SummaryTopic;
+use App\Models\Topic;
 use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\Usuario;
@@ -269,6 +270,8 @@ class UsuarioController extends Controller
 
             $topicId = $request->input('p');
 
+            $topic = Topic::find($topicId);
+
             // Reset topics attempts
 
             SummaryTopic::resetUserTopicsAttempts($user->id, [$topicId]);
@@ -279,6 +282,7 @@ class UsuarioController extends Controller
                 $topicId, $user->id, $admin->id
             );
 
+            SummaryCourse::updateCourseRestartsCount($topic->course_id, $admin->id, $user->id);
 
             return $this->success(['msg' => 'Reinicio por tema exitoso']);
         }
