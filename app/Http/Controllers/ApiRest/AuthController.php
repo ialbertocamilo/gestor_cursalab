@@ -37,8 +37,8 @@ class AuthController extends Controller
             $data['version'] = strip_tags($data['version'] ?? '');
             $credentials1 = $credentials2 = ['password' => $password];
             // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
-            $credentials1['username'] = $userinput;
-            $credentials2['document'] = $userinput;
+            $credentials1['username'] = trim($userinput);
+            $credentials2['document'] = trim($userinput);
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
 
