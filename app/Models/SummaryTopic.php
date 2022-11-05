@@ -100,11 +100,13 @@ class SummaryTopic extends Summary
         if ($scheduleDate)
             $query->where('last_time_evaluated_at', '<=', $scheduleDate);
 
-        $query->update([
-            'attempts' => 0,
-            'last_time_evaluated_at' => Carbon::now()
-            //'fuente' => 'resetm'
-        ]);
+        // $query->update([
+        //     'attempts' => 0,
+        //     'restarts' => DB::raw('restarts+1')
+        //     // 'last_time_evaluated_at' => Carbon::now()
+        //     //'fuente' => 'resetm'
+        // ]);
+        $query->increment('restarts', 1, ['attempts' => 0]);
     }
 
     /**

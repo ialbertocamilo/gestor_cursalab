@@ -101,18 +101,21 @@ class reinicios_programado extends Command
             $nextDateFromNow->second = 59;
 
             // Reset attempts
-
+            $config['nro_intentos'] = 3;
+            if($workspaceId ==14){
+                $config['nro_intentos'] = 2;
+            }
             if ($config) {
 
                 // Reset course attempts
 
-                SummaryCourse::resetFailedCourseAttemptsAllUsers(
-                    $courseId, $config['nro_intentos'], $nextDateFromNow
-                );
+                // SummaryCourse::resetFailedCourseAttemptsAllUsers(
+                //     $courseId, $config['nro_intentos'], $nextDateFromNow
+                // );
 
                 // Update course's resets count
 
-                SummaryCourse::updateCourseRestartsCount($courseId);
+                // SummaryCourse::updateCourseRestartsCount($courseId);
 
                 // Reset topics attempts
 
@@ -120,12 +123,12 @@ class reinicios_programado extends Command
                     $courseId, $config['nro_intentos'], $nextDateFromNow
                 );
 
-                // Update topics' resets count
+                // // Update topics' resets count
 
-                $topicsIds = SummaryCourse::getCourseTopicsIds($courseId);
-                foreach ($topicsIds as $topicId) {
-                    SummaryTopic::updateTopicRestartsCount($topicId);
-                }
+                // $topicsIds = SummaryCourse::getCourseTopicsIds($courseId);
+                // foreach ($topicsIds as $topicId) {
+                //     SummaryTopic::updateTopicRestartsCount($topicId);
+                // }
             }
         }
     }
