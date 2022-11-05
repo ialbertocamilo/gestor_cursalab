@@ -92,7 +92,7 @@ class UsuarioController extends Controller
         $workspace = get_current_workspace();
         $sub_workspaces_id = $workspace?->subworkspaces?->pluck('id');
 
-        $request->merge(['sub_workspaces_id' => $sub_workspaces_id]);
+        $request->merge(['sub_workspaces_id' => $sub_workspaces_id, 'superuser' => auth()->user()->isA('super-user')]);
 
         $users = User::search($request);
 
@@ -236,7 +236,9 @@ class UsuarioController extends Controller
         $topics = SummaryTopic::query()
             ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
             ->where('summary_topics.passed', 0)
-            ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'])
+            // ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'] ?? 3)
+            ->where('summary_topics.attempts', '<>', 0)
+            ->whereNotNull('summary_topics.attempts')
             ->where('summary_topics.user_id', $user->id)
             ->select('topics.id', 'topics.name')
             ->get();

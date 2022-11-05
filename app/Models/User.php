@@ -156,6 +156,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasMany(SummaryTopic::class);
     }
 
+    public function failed_topics()
+    {
+        return $this->hasMany(SummaryTopic::class, 'user_id')
+                    ->where('passed', 0)
+                    ->whereNotNull('attempts')
+                    ->where('attempts', '<>', 0);
+    }
+
     public function relationships()
     {
         return $this->hasMany(UserRelationship::class, 'user_id');
@@ -469,7 +477,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request)
     {
         $query = self::query();
-        $query->with('subworkspace');
+        $query->with('subworkspace')->withCount('failed_topics');
 
         if ($request->q) {
             $query->filterText($request->q);
