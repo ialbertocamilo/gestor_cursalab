@@ -84,10 +84,15 @@ class reinicios_programado extends Command
         // Generate list of courses to be reset
 
         $this->findCoursesToBeReset();
-
+        $courses = $this->coursesWorkspaces;
         // Reset attempts and update reset count
+        $summary_topics_id = SummaryTopic::where('passed',0)->where('attemps','>',1)->whereHas('topic',function($q) use($courses){
+            $q->whereIn('course_id',array_column($courses,'courseId'));
+        })->groupBy('topic_id')->select('topic_id')->pluck('topic_id');
+        $courses_id = Topic::where('id',$summary_topics_id)->where('active',1)->select('course_id')->pluck('course_id');
+        $courses = collect($courses)->where('courseId',$courses_id)->all();
 
-        foreach ($this->coursesWorkspaces as $course) {
+        foreach ($courses as $course) {
 
             $workspaceId = $course['workspaceId'];
             $courseId = $course['courseId'];
