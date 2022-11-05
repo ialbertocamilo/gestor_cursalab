@@ -139,7 +139,10 @@ class SummaryCourse extends Summary
 
         $summaryCourse = $query->first();
 
-        if (!$summaryCourse) return;
+        if (!$summaryCourse) {
+            info("CURSO {$courseId} de USER {$userId} SIN SUMMARYCOURSE");
+            return;
+        }
 
         // Calculate number of restars
 
