@@ -94,6 +94,8 @@ class reinicios_programado extends Command
             $config = $this->getWorkspaceConfiguration($workspaceId);
             $schedule = json_decode($course['scheduledRestarts'], true);
 
+            info("course => {$courseId}");
+
             // Calculate date for the next reset,
             // counting from current date
 
