@@ -672,7 +672,7 @@ class UsuarioController extends Controller
                 ->join('users', 'users.id', '=', 'summary_topics.user_id')
                 ->with('user')
                 ->where('summary_topics.topic_id', $topicId)
-                ->where('summary_topics.source_id')
+                // ->where('summary_topics.source_id')
                 ->where('users.subworkspace_id', $subworkspaceId)
                 ->select('summary_topics.*');
 
