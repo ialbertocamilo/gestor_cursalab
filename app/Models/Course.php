@@ -605,42 +605,47 @@ class Course extends BaseModel
         return ($type == 'get_records') ? $users_have_course->get() : $users_have_course->count();
     }
 
-    public function getUsersBySegmentation($type = 'all')
+    public function getUsersBySegmentation($type = 'count')
     {
         $this->load('segments.values');
 
         if (!$this->hasBeenSegmented()) return [];
 
-        $users = collect();
+        // $users = collect();
+        $users = [];
+
+        $counts = [];
 
         foreach ($this->segments as $key => $segment) {
 
-            $result = User::whereHas('criterion_values', function ($q) use ($segment) {
+            $query = User::select('id');
+            // $clause = $key == 0 ? 'where' : 'orWhere';
+
+            // $query->where(function($q) use ($segment) {
 
                 $grouped = $segment->values->groupBy('criterion_id');
+                
+                foreach ($grouped as $values) {
 
-                foreach ($grouped as $key => $values) {
+                    $query->whereHas('criterion_values', function ($qu) use ($values) {
 
-                    $ids = $values->pluck('criterion_value_id');
+                        $ids = $values->pluck('criterion_value_id');
 
-                    $q->whereIn('id', $ids);
+                        $qu->whereIn('id', $ids);
+                    });
                 }
-            })
-                ->when($users, function ($q) use ($users) {
-                    $q->whereNotIn('id', $users->pluck('id'));
-                })
-                ->get();
+            // });
+            
+            // $result = $query->get()->pluck('id')->toArray();
 
-            $users = $users->merge($result);
+            // $users[$key] = $result;
+            // $counts[$key] = count($result);
+            $counts[$key] = $query->count();
         }
 
-        if ($type == 'all')
-            return $users;
-
-        if ($type == 'count')
-            return count($users);
-
-        return $users;
+        info($users);
+        info($counts);
+        // return $query->$type();
     }
 
     public function getCourseTagsToUCByUser($course, $user)

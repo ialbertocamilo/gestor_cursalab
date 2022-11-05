@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('type_id')->nullable()->constrained('taxonomies');
 
             $table->nullableMorphs('model');
-            $table->integer('score')->nullable();
+            $table->integer('score')->nullable()->default(0);
 
             $table->timestamps();
             $table->softDeletes();

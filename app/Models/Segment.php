@@ -515,7 +515,10 @@ class Segment extends BaseModel
     {
         $row = $model::find($model_id)->load('segments');
 
-        return $row->usersSegmented($row->segments, 'count');
-        // $users_count_2 = $row->getUsersBySegmentation('count');
+        $users = $row->getUsersBySegmentation();
+
+        // $users = $row->usersSegmented($row->segments, 'count');
+
+        return $users;
     }
 }
