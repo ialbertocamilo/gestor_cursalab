@@ -12,6 +12,7 @@ use App\Models\School;
 use App\Models\SummaryCourse;
 use App\Models\SummaryTopic;
 use App\Models\Workspace;
+use App\Models\Topic;
 use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -77,6 +78,8 @@ class reinicios_programado extends Command
 
     private function reinicios_programado_v2(){
 
+        $this->info(" Inicio: " . now());
+
         // Initialize workspaces collection
 
         $this->workspaces = Workspace::all();
@@ -86,20 +89,23 @@ class reinicios_programado extends Command
         $this->findCoursesToBeReset();
         $courses = $this->coursesWorkspaces;
         // Reset attempts and update reset count
-        $summary_topics_id = SummaryTopic::where('passed',0)->where('attemps','>',1)->whereHas('topic',function($q) use($courses){
+        $summary_topics_id = SummaryTopic::where('passed',0)->where('attempts','>',1)->whereHas('topic',function($q) use($courses){
             $q->whereIn('course_id',array_column($courses,'courseId'));
         })->groupBy('topic_id')->select('topic_id')->pluck('topic_id');
-        $courses_id = Topic::where('id',$summary_topics_id)->where('active',1)->select('course_id')->pluck('course_id');
-        $courses = collect($courses)->where('courseId',$courses_id)->all();
+        $courses_id = Topic::whereIn('id',$summary_topics_id)->where('active',1)->select('course_id')->pluck('course_id');
+        // info($courses_id);
+        $_courses = collect($courses)->whereIn('courseId',$courses_id)->all();
 
-        foreach ($courses as $course) {
+        // info($_courses);
+
+        foreach ($_courses as $course) {
 
             $workspaceId = $course['workspaceId'];
             $courseId = $course['courseId'];
             $config = $this->getWorkspaceConfiguration($workspaceId);
             $schedule = json_decode($course['scheduledRestarts'], true);
 
-            info("course => {$courseId}");
+            // info("course => {$courseId}");
 
             // Calculate date for the next reset,
             // counting from current date
@@ -138,6 +144,8 @@ class reinicios_programado extends Command
                 // }
             }
         }
+
+        $this->info(" Fin: " . now());
     }
 
     /**
