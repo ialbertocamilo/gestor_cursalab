@@ -103,7 +103,8 @@ class AuthController extends Controller
         // }
 
         if (!$user->active)
-            return $this->error("Usuario inactivo.", http_code: 401);
+            return $this->error('Tu cuenta se encuentra inactiva.
+            Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
         $user->load('criterion_values:id,value_text');
         $user->updateUserDeviceVersion($data);
