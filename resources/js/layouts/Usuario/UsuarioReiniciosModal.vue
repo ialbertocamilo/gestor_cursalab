@@ -253,11 +253,12 @@ export default {
                         if (action == 'reset_total') {
                             this.hideLoader()
                             vue.closeModal()
-                            vue.$emit('onReinicioTotal')
                         } else {
                             this.loadData(vue.resource)
                             this.hideLoader()
                         }
+                        
+                        vue.$emit('onReinicioTotal')
                     })
             }else{
                 this.hideLoader()
