@@ -424,7 +424,7 @@ class Glossary extends Model
 
         $carreras = [];
         foreach($modulos as $modulo) {
-
+            // $stack = []
             foreach ($criterios as $key => $criterio) {
                 $categories = $stack_categories[$modulo->id][$criterio->id] ?? [];
                 
