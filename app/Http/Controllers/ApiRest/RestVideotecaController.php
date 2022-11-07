@@ -25,9 +25,7 @@ class RestVideotecaController extends Controller
                          'modulo_id' => $user->subworkspace_id ]);
 
         $videoteca = Videoteca::search($request, true);
-
-        return response()->json($videoteca);
-        
+        //return response()->json($videoteca);
         $items = Videoteca::prepareData($videoteca->items());
 
         $videoteca = [
