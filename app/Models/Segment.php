@@ -202,9 +202,10 @@ class Segment extends BaseModel
         }
 
 
-        $users_count = Segment::usersReached($request->model_type, $request->model_id);
+        // $users_count = Segment::usersReached($request->model_type, $request->model_id);
 
-        $message = "Segmentación actualizada correctamente. {$users_count} usuarios alcanzados.";
+        // $message = "Segmentación actualizada correctamente. {$users_count} usuarios alcanzados.";
+        $message = "Segmentación actualizada correctamente.";
 
         cache_clear_model(Course::class);
 
@@ -515,10 +516,11 @@ class Segment extends BaseModel
     {
         $row = $model::find($model_id)->load('segments');
 
-        $users = $row->getUsersBySegmentation();
+        // $users = $row->getUsersBySegmentations();
+        $totals = $row->getUsersBySegmentation();
 
         // $users = $row->usersSegmented($row->segments, 'count');
 
-        return $users;
+        return $totals;
     }
 }
