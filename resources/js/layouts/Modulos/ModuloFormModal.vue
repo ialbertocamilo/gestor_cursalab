@@ -185,11 +185,10 @@
                     <!--                        </small>-->
 
                     <!--                    </v-col>-->
-                    <v-col cols="12">
+                    <!-- <v-col cols="12">
                         <DefaultModalSection
                             title="Programación de reinicios"
                         >
-                            <!-- tooltip="Tooltip" -->
                             <template slot="content">
                                 <v-row justify="center">
                                     <v-col cols="3" class="d-flex justify-content-center align-items-center">
@@ -235,7 +234,7 @@
                                 </div>
                             </template>
                         </DefaultModalSection>
-                    </v-col>
+                    </v-col> -->
                 </v-row>
                 <v-row>
 
