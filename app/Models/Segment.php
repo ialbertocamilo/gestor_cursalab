@@ -202,7 +202,7 @@ class Segment extends BaseModel
         }
 
 
-        $users_count = Segment::usersReached($request->model_type, $request->model_id);
+//        $users_count = Segment::usersReached($request->model_type, $request->model_id);
 
         $message = "Segmentación actualizada correctamente. {$users_count} usuarios alcanzados.";
 

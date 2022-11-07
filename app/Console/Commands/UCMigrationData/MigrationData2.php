@@ -80,7 +80,8 @@ class MigrationData2 extends Command
         if ($type === 'vademecum')
             Migration_2::migrateVademecumData($bar);
 
-
+        if  ($type === 'glosario')
+            Migration_2::migrateGlosarioData($bar);
 
 
         $this->info(" Fin: " . now());

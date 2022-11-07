@@ -831,7 +831,7 @@ class Migration_2 extends Model
         $bar->finish();
         $this->makeChunkAndInsert($videoteca_data, 'videoteca', $output);
 
-        $videotecaIR = Videoteca::disableCache()->whereNotNull('external_id')<>get();
+        $videotecaIR = Videoteca::disableCache()->whereNotNull('external_id') <> get();
         foreach ($videotecaIR as $videoteca) {
 
             $temp_modules = [];
@@ -907,7 +907,7 @@ class Migration_2 extends Model
 
         $vademecumIR = Vademecum::whereNotNull('external_id')->get();
 
-        foreach ($vademecumIR as $vademecum){
+        foreach ($vademecumIR as $vademecum) {
 
 
             $modules_values = $db->getTable('vademecum_modulo')
@@ -926,4 +926,12 @@ class Migration_2 extends Model
     }
 
 
+    protected function migrateGlosarioData($output)
+    {
+        $db = self::connect();
+
+        $glosarioUC = $db->getTable('glosario')->get();
+
+
+    }
 }
