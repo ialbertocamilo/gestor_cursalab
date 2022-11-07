@@ -222,17 +222,17 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-<!--                <v-tab-item v-if="workspaceId > 0">-->
-<!--                    <v-card flat>-->
-<!--                        <v-card-text>-->
-<!--                            <NotasCurso-->
-<!--                                :workspaceId="workspaceId"-->
-<!--                                :modules="modules"-->
-<!--                                :reportsBaseUrl="reportsBaseUrl"-->
-<!--                                @emitir-reporte="crearReporte"/>-->
-<!--                        </v-card-text>-->
-<!--                    </v-card>-->
-<!--                </v-tab-item>-->
+               <v-tab-item v-if="workspaceId > 0">
+                   <v-card flat>
+                       <v-card-text>
+                           <NotasCurso
+                               :workspaceId="workspaceId"
+                               :modules="modules"
+                               :reportsBaseUrl="reportsBaseUrl"
+                               @emitir-reporte="crearReporte"/>
+                       </v-card-text>
+                   </v-card>
+               </v-tab-item>
 
                 <v-tab-item>
                     <v-card flat>
