@@ -29,20 +29,21 @@ use App\Models\Resumen_x_curso;
 use App\Models\Usuario_version;
 use App\Models\UsuariosActivos;
 use App\Models\UsuariosMasivos;
+use App\Imports\FirstPageImport;
 use App\Imports\CursosSubirImport;
-use App\Models\Curricula_criterio;
 
+use App\Models\Curricula_criterio;
 use App\Models\Matricula_criterio;
 use App\Models\UsuariosDesactivos;
 use App\Models\Encuestas_respuesta;
+
 use App\Models\Massive\UserMassive;
-
 use App\Exports\ExportReporteBD2019;
+
 use App\Exports\UserMassiveTemplate;
-
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\MigracionPerfilImport;
 
+use App\Imports\MigracionPerfilImport;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\UsuarioController;
 use App\Imports\UsuariosFarmaHistorialImport;
@@ -83,7 +84,8 @@ class MasivoController extends Controller
             'number_socket' => $request->get('number_socket') ?? null
         ];
         $import = new UserMassive($data);
-        Excel::import($import, $request->file('file'));
+        Excel::import(new FirstPageImport($import), $request->file('file'));
+        
         $headers = $import->excelHeaders;
         return $this->success([
             'message' => 'Usuarios creados correctamente.',
@@ -103,7 +105,7 @@ class MasivoController extends Controller
         $import = new ChangeStateUserMassive($data);
         $import->identificator = 'document';
         $import->state_user_massive = 1;
-        Excel::import($import, $request->file('file'));
+        Excel::import(new FirstPageImport($import), $request->file('file'));
         return $this->success([
             'message' => 'Usuarios activados correctamente.',
             'headers' => $import->getStaticHeader(true,true),
@@ -122,7 +124,7 @@ class MasivoController extends Controller
         $import = new ChangeStateUserMassive($data);
         $import->identificator = 'document';
         $import->state_user_massive = 0;
-        Excel::import($import, $request->file('file'));
+        Excel::import(new FirstPageImport($import), $request->file('file'));
         return $this->success([
             'message' => 'Usuarios inactivados correctamente.',
             'headers' => $import->getStaticHeader(false,true),
