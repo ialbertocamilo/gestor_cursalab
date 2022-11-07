@@ -25,7 +25,7 @@ TABS
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">-->
+                <v-tab class="justify-content-start py-7">
                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                    <span class="pt-2">
                        Avance de currícula
