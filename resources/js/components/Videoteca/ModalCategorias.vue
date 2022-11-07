@@ -177,6 +177,9 @@ export default {
     methods: {
         saveCategoria() {
             let vue = this
+
+            if(!vue.newCategoria.name.trim().length) return;
+
             vue.$http.post(`/videoteca/categorias`, vue.newCategoria)
                 .then(({data}) => {
                     vue.showSnackbar(vue.snackBar, true, data.data.msg)
@@ -187,6 +190,8 @@ export default {
         },
         editCategoria(tag) {
             let vue = this
+            if(!tag.name.trim().length) return;
+
             vue.$http.put(`/videoteca/categorias/${tag.id}/update`, tag)
                 .then(({data}) => {
                     vue.showSnackbar(vue.snackBar, true, data.data.msg)

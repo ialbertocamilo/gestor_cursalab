@@ -324,7 +324,7 @@ class Videoteca extends Model
 
         if ($user)
             $query->whereHas('modules', function ($q) use ($user) {
-                $q->where('id', $user->config_id);
+                $q->where('id', $user->subworkspace_id);
             });
 
         $result = $query->paginate($paginate);

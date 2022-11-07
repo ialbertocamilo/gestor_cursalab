@@ -52,8 +52,11 @@
                         <DefaultRichText
                             v-model="resource.description"
                             label="Descripción"
+                            @stateLength="checkDescription = $event"
                         />
                     </v-col>
+
+
                 </v-row>
 
                 <v-row justify="space-around">
@@ -220,6 +223,7 @@ export default {
                 title: this.getRules(['required', 'max:100']),
                 description: this.getRules(['required', 'max:280']),
             },
+            checkDescription: false,
             media_type_selected: this.resource ? this.resource.media_type : null,
             media_types: [
                 {text: 'Youtube', value: 'youtube'},
@@ -277,6 +281,9 @@ export default {
             this.showLoader()
 
             const validateForm = vue.validateForm('videotecaForm')
+
+            //val description
+            if(vue.checkDescription) return this.hideLoader();
 
             if (validateForm) {
                 let base = `${vue.options.base_endpoint}`
