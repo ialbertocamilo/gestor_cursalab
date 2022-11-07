@@ -2,16 +2,20 @@
 
 namespace App\Imports;
 
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class FirstPageImport implements ToCollection
+class FirstPageImport implements WithMultipleSheets 
 {
-    /**
-    * @param Collection $collection
-    */
-    public function collection(Collection $collection)
+    public $model;
+
+    public function __construct($model){
+        $this->model = $model;
+    }
+
+    public function sheets(): array
     {
-        //
+        return [
+            0 => $this->model,
+        ];
     }
 }
