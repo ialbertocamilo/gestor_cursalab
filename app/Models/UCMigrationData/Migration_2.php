@@ -799,17 +799,23 @@ class Migration_2 extends Model
             $resource = $model::where('external_id', $usuario_accion->model_id)->first();
 
             $user = User::where('external_id', $usuario_accion->user_id)->first();
+            $type = Taxonomy::where('external_id_es', $usuario_accion->type_id)->first();
 
-            if (!$user || !$resource) {
-                info("Mo se encontro el USER :: {$usuario_accion->user_id} -  RESOURCE :: {$usuario_accion->model_id}");
+            if (!$user || !$resource || !$type) {
+                info("Mo se encontro el USER :: {$usuario_accion->user_id} -  RESOURCE :: {$usuario_accion->model_id} - TYPE :: {$usuario_accion->type_id}");
                 continue;
             }
 
             $user_actions_data[] = [
                 'user_id' => $user->id,
+                'type_id' => $type->id,
                 'model_type' => $model,
                 'model_id' => $resource->id,
-                'score' => $usuario_accion->score
+                'score' => $usuario_accion->score,
+
+                'created_at' => $usuario_accion->created_at,
+                'updated_at' => $usuario_accion->updated_at,
+                'deleted_at' => $usuario_accion->deleted_at,
             ];
 
         }
