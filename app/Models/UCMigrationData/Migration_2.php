@@ -857,7 +857,8 @@ class Migration_2 extends Model
                 ->where('videoteca_id', $videoteca->external_id)
                 ->get();
             foreach ($videoteca_modulo as $row) {
-                $module_value = self::MODULOS_CRITERION_VALUE[$row->module_id] ?? false;
+                $module_value = self::MODULOS_EQUIVALENCIA[$row->module_id] ?? false;
+//                $module_value = self::MODULOS_CRITERION_VALUE[$row->module_id] ?? false;
 
                 if ($module_value) $temp_modules[] = $module_value;
             }
