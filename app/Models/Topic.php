@@ -133,7 +133,15 @@ class Topic extends BaseModel
             else :
                 $tema = self::create($data);
             endif;
-
+            if ($data['topic_requirement_id']){
+                Requirement::updateOrCreate(
+                    ['model_type' => Topic::class, 'model_id' => $tema->id,],
+                    ['requirement_type' => Topic::class, 'requirement_id' => $data['topic_requirement_id']]
+                );
+            }
+            else{
+                $tema->requirements()->delete();
+            }
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
                 $medias = array();
@@ -535,17 +543,17 @@ class Topic extends BaseModel
             }
         }
 
-        $topic_requirement = $topic->requirement()->first();
+        $topic_requirement = $topic->requirements()->first();
 
         if (!$topic_requirement) {
             $available_topic = true;
         } else {
             $summary_requirement_topic = SummaryTopic::with('status')
                 ->where('user_id', $user->id)
-                ->where('topic_id', $topic_requirement->id)
+                ->where('topic_id', $topic_requirement->requirement_id)
                 ->first();
 
-            $activity_requirement = in_array($summary_requirement_topic?->status->code, ['aprobado', 'realizado', 'revisado']);
+            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
             $test_requirement = $summary_requirement_topic?->result == 1;
 
             if ($activity_requirement || $test_requirement)
@@ -604,14 +612,14 @@ class Topic extends BaseModel
     {
         $topic_grade = null;
         $available_topic = true;
-        $topic_requirement = $topic->requirement;
+        $topic_requirement = $topic->requirements()->first();
 
         if ($topic_requirement) :
             $requirement_summary = SummaryTopic::with('status:id,code')
-                ->where('topic_id', $topic_requirement->id)
+                ->where('topic_id', $topic_requirement->requirement_id)
                 ->where('user_id', $user->id)->first();
 
-            $available_topic = $requirement_summary && in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
+            $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
         $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
@@ -620,7 +628,9 @@ class Topic extends BaseModel
             $topic_grade = $summary_topic->grade;
 
         $topic_status = $summary_topic?->status?->code ?? 'por-iniciar';
-
+        if(!$available_topic){
+            $topic_status = 'bloqueado';
+        }
 
         return [
             'available' => $available_topic,
