@@ -3,8 +3,9 @@
         <!-- Resumen del reporte -->
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el registro de visitas a los títulos de la Videoteca sasd.
+                Descarga el registro de visitas a los títulos de la Videoteca.
             </template>
+         
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
                 titulo="Grupo sistema"
@@ -26,8 +27,8 @@
         </ResumenExpand>
         <!-- Formulario del reporte -->
         <form class="row col-md-8 col-xl-5" @submit.prevent="ExportarVideoteca">
-            <!-- Grupos -->
-<!--            <div class="col-12">
+            <!-- Grupos 
+            <div class="col-12">
                 <b-form-text text-variant="muted">Videoteca</b-form-text>
                 <v-select
                     attach
@@ -37,9 +38,9 @@
                     multiple
                     hide-details="false"
                     v-model="videotecaSelected"
-                    :items="VideotecaList"
+                    :items="modules"
                     item-value="id"
-                    item-text="nombre"
+                    item-text="name"
                     label="Selecciona uno de la lista"
                     :background-color="!videotecaSelected ? '' : 'light-blue lighten-5'"
                 ></v-select>
@@ -61,26 +62,29 @@ import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 export default {
     components: { ResumenExpand, ListItem },
-    props: ["VideotecaList", "API_REPORTES", "API_FILTROS"],
-    data() {
-        return {
-            videotecaSelected: ""
-        };
+    props: {
+        workspaceId:{ type: Number, required: true },
+        reportsBaseUrl: { type: String, required: true }
     },
     methods: {
         ExportarVideoteca() {
             this.showLoader()
+
             let params = {
-                videotecaSelected: this.videotecaSelected
+                workspaceId: this.workspaceId
             };
+
             axios
-                .post(this.API_REPORTES + "videoteca", params)
+                .post(`${this.reportsBaseUrl}/exportar/videoteca`, params)
                 .then((res) => {
+                    console.log(res);
+
+                    /*
                     if (!res.data.error) this.$emit("emitir-reporte", res);
                     else {
                         alert("Se ha encontrado el siguiente error : " + res.data.error);
                         this.hideLoader()
-                    }
+                    }*/
                 })
                 .catch((error) => {
                     console.log(error);
@@ -91,7 +95,8 @@ export default {
         }
     },
     created() {
-        this.videotecaSelected = this.VideotecaList.map((el) => el.id);
+        //this.videotecaSelected = this.VideotecaList.map((el) => el.id);
+        //this.videotecaSelected = this.modules.map((el) => el.id);
     }
 };
 </script>

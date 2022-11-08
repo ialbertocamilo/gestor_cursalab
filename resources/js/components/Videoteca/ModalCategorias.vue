@@ -190,7 +190,7 @@ export default {
         },
         editCategoria(tag) {
             let vue = this
-            if(!tag.name.trim().length) return;
+            if(!tag.name.trim().length) return vue.getData();
 
             vue.$http.put(`/videoteca/categorias/${tag.id}/update`, tag)
                 .then(({data}) => {
