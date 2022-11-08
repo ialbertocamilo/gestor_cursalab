@@ -686,19 +686,25 @@ class Migration_2 extends Model
         // entrenadores_usuarios
         $entrenadores_usuarios_UC = $db->getTable('entrenadores_usuarios')->get();
         $trainer_user_data = [];
+        $bar = $output->createProgressBar($entrenadores_usuarios_UC->count());
+        $bar->start();
+
         foreach ($entrenadores_usuarios_UC as $row) {
+            $bar->advance();
             $trainer = User::where('external_id', $row->entrenador_id)->first();
             $student = User::where('external_id', $row->usuario_id)->first();
 
             if (!$trainer || !$student) {
-                $trainer_user_data[] = [
-                    'trainer_id' => $trainer->id,
-                    'user_id' => $student->id,
-                    'active' => $row->estado
-                ];
+                continue;
             }
+            $trainer_user_data[] = [
+                'trainer_id' => $trainer->id,
+                'user_id' => $student->id,
+                'active' => $row->estado
+            ];
         }
 
+        $bar->finish();
         $this->makeChunkAndInsert($trainer_user_data, 'trainer_user', $output);
     }
 
