@@ -37,10 +37,10 @@ class Glossary extends Model
     ];
 
     const GRUPOS = [
-        'principio_activo' => 4,
-        'contraindicacion' => 5,
-        'interaccion' => 6,
-        'reaccion' => 7,
+        'principio_activo' => 509,
+        'contraindicacion' => 510,
+        'interaccion' => 511,
+        'reaccion' => 512,
     ];
 
     /*
@@ -406,19 +406,19 @@ class Glossary extends Model
     protected function getCareersCategory($modulos, $code = 'career') {
         $carreras_module = Carrera::with('glosario_categorias')->get();
 
-        $criterios = CriterionValue::query() 
+        $criterios = CriterionValue::query()
                                    ->whereRelation('criterion', 'code', $code)
                                    ->where('active', ACTIVE)
                                    ->select('id', "value_text as nombre")
                                    ->get();
                                    //->limit(5)->get();
-        
+
         $stack_categories = [];
         foreach ($carreras_module as $cm_module) {
             if(!$cm_module->glosario_categoria_id) {
-                $stack_categories[$cm_module->module_id][$cm_module->carrera_id] = []; 
+                $stack_categories[$cm_module->module_id][$cm_module->carrera_id] = [];
             }else {
-                $stack_categories[$cm_module->module_id][$cm_module->carrera_id][]['id'] = $cm_module->glosario_categoria_id; 
+                $stack_categories[$cm_module->module_id][$cm_module->carrera_id][]['id'] = $cm_module->glosario_categoria_id;
             }
         }
 
@@ -427,7 +427,7 @@ class Glossary extends Model
             // $stack = []
             foreach ($criterios as $key => $criterio) {
                 $categories = $stack_categories[$modulo->id][$criterio->id] ?? [];
-                
+
                 $stack[$key]['id'] = $criterio->id;
                 $stack[$key]['nombre'] = $criterio->nombre;
                 $stack[$key]['glosario_categorias'] = $categories;
@@ -439,12 +439,12 @@ class Glossary extends Model
     }
 
 
-    protected function insertCareerCategory($module_id, $carrera_id, $data) 
+    protected function insertCareerCategory($module_id, $carrera_id, $data)
     {
         foreach ($data as $key => ['id' => $index]) {
 
             $instance = new Carrera;
-            
+
             $instance->module_id = $module_id;
             $instance->carrera_id = $carrera_id;
             $instance->glosario_categoria_id = $index;
@@ -453,7 +453,7 @@ class Glossary extends Model
         }
     }
 
-    protected function deleteCareerCategory($module_id, $carrera_id) 
+    protected function deleteCareerCategory($module_id, $carrera_id)
     {
         return Carrera::where('module_id', $module_id)
                       ->where('carrera_id', $carrera_id)
@@ -472,7 +472,7 @@ class Glossary extends Model
         return Carrera::where('module_id', $module_id)
                       ->where('carrera_id', $carrera_id)
                       ->update(['glosario_categoria_id' => NULL]);
-    } 
+    }
 
     protected function storeCarreerCategories($data)
     {
@@ -486,9 +486,9 @@ class Glossary extends Model
             foreach($modulos_carreras as $module_id => $carreras) {
                 // $module_id = module_id
                 foreach ($carreras as $key => [ 'id' => $carrera_id,
-                                                'glosario_categorias' => $glosario_categorias]) 
+                                                'glosario_categorias' => $glosario_categorias])
                 {
-                    $check_categories = empty($glosario_categorias); 
+                    $check_categories = empty($glosario_categorias);
                     $check_available = $this->checkRowIsAvailable($module_id, $carrera_id);
 
                     #update insert dinamic
@@ -506,7 +506,7 @@ class Glossary extends Model
                     } else {
                         $this->insertCareerCategory($module_id, $carrera_id, $glosario_categorias);
                     }
-            
+
                 }
             }
 

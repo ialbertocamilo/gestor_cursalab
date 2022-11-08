@@ -246,6 +246,17 @@ class Videoteca extends Model
         return $data;
     }
 
+    protected function processTags($tags) {
+        $data = [];
+        foreach ($tags as $key => $tag) {
+            $data[$key]['id'] = $tag->id;
+            $data[$key]['code'] = $tag->code;
+            $data[$key]['name'] = $tag->name;
+        }
+
+        return $data;
+    }
+
     protected function processData(Videoteca $data, $with): array
     {
         $processedData = [
@@ -262,7 +273,8 @@ class Videoteca extends Model
                             ? $data['media_video']
                             : $data['media']['file']
             ],
-            'tags' => $data['tags'],
+            //'tags' => $data['tags'],
+            'tags' => $this->processTags($data['tags']),
             'active' => $data['active']
         ];
 
