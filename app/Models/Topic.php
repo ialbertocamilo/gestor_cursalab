@@ -545,7 +545,7 @@ class Topic extends BaseModel
                 ->where('topic_id', $topic_requirement->id)
                 ->first();
 
-            $activity_requirement = in_array($summary_requirement_topic?->status->code, ['aprobado', 'realizado', 'revisado']);
+            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
             $test_requirement = $summary_requirement_topic?->result == 1;
 
             if (!$activity_requirement || $activity_requirement || $test_requirement)
