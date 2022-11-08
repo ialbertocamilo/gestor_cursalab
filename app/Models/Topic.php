@@ -535,7 +535,7 @@ class Topic extends BaseModel
             }
         }
 
-        $topic_requirement = $topic->requirement()->first();
+        $topic_requirement = $topic->requirements()->first();
 
         if (!$topic_requirement) {
             $available_topic = true;
@@ -548,7 +548,7 @@ class Topic extends BaseModel
             $activity_requirement = in_array($summary_requirement_topic?->status->code, ['aprobado', 'realizado', 'revisado']);
             $test_requirement = $summary_requirement_topic?->result == 1;
 
-            if ($activity_requirement || $test_requirement)
+            if (!$activity_requirement || $activity_requirement || $test_requirement)
                 $available_topic = true;
         }
 
