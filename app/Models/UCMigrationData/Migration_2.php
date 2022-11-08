@@ -819,7 +819,7 @@ class Migration_2 extends Model
 
             $media = Media::where('external_id', $videoteca->media_id)->first();
             $preview = Media::where('external_id', $videoteca->preview_id)->first();
-
+            $uc_workspace = $this->uc_workspace;
             if (!$category) {
                 info("La categoria :: {$videoteca->category_id} no se ha migrado");
                 continue;
@@ -827,6 +827,7 @@ class Migration_2 extends Model
 
             $videoteca_data[] = [
 
+                'workspace_id' => $uc_workspace->id,
                 'external_id' => $videoteca->id,
 
                 'title' => $videoteca->title,
@@ -907,7 +908,7 @@ class Migration_2 extends Model
                 'external_id' => $vademecum->id,
 
                 'name' => $vademecum->nombre,
-                'media_id' => $vademecum->media_id,
+                'media_id' => $media->id,
                 'category_id' => $category->id,
                 'subcategory_id' => $subcategory?->id,
 
