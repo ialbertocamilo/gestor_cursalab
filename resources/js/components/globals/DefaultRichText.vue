@@ -109,12 +109,19 @@ export default {
             }
 
             // check length 
-            if(value.length > vue.maxLength) {
-                vue.emitLengthState(true);
-            } else {
+            if(value) {
+                if(value.length > vue.maxLength) {
+                    vue.emitLengthState(true)
+                } else {
+                    vue.emitLengthState(false)
+                    vue.$emit('input', value || null)
+                }
+            }else {
                 vue.emitLengthState(false);
                 vue.$emit('input', value || null)
             }
+
+
         },
         onClear() {
             let vue = this

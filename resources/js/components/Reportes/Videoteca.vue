@@ -3,7 +3,7 @@
         <!-- Resumen del reporte -->
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el registro de visitas a los títulos de la Videoteca.
+                Descarga el registro de visitas a los títulos de la Videoteca sasd.
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
