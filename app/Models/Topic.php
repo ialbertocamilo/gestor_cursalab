@@ -608,7 +608,7 @@ class Topic extends BaseModel
 
         if ($topic_requirement) :
             $requirement_summary = SummaryTopic::with('status:id,code')
-                ->where('topic_id', $topic_requirement->id)
+                ->where('topic_id', $topic_requirement->requirement_id)
                 ->where('user_id', $user->id)->first();
 
             $available_topic = $requirement_summary && in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
