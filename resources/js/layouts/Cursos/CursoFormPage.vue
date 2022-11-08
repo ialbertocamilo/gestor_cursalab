@@ -127,7 +127,7 @@
                             >
                                 <template slot="content">
                                     <v-row justify="center">
-                                     
+
                                         <v-col cols="6">
                                             <DefaultInput
                                                 label="Nota mínima aprobatoria"
@@ -205,9 +205,18 @@
                     </v-row>
                     <v-row>
                         <v-col cols="2">
+                            <DefaultToggle
+                                v-model="resource.show_certification_date"
+                                type="show_certification_date"
+                                label="Fecha en diplomas"/>
+                        </v-col>
+<!--                    </v-row>-->
+<!--                    <v-row>-->
+                        <v-col cols="2">
                             <DefaultToggle v-model="resource.active"/>
                         </v-col>
                     </v-row>
+
 
                 </v-form>
             </v-card-text>
@@ -234,7 +243,7 @@ const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id',
     'description', 'requisito_id', 'lista_escuelas',
-    'duration', 'investment'
+    'duration', 'investment', 'show_certification_date'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -260,6 +269,7 @@ export default {
                 file_plantilla_diploma: null,
                 config_id: this.modulo_id,
                 categoria_id: this.categoria_id,
+                show_certification_date: false,
                 active: true,
                 requisito_id: null,
                 type_id: null,

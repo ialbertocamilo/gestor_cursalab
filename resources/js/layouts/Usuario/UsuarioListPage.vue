@@ -153,6 +153,16 @@ export default {
                     //     route_type: 'external'
                     // },
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
+                    
+                    {
+                        text: "Reiniciar",
+                        icon: 'fas fa-history',
+                        type: 'action',
+                        method_name: 'reset',
+                        show_condition: 'pruebas_desaprobadas',
+                        count: 'failed_topics_count',
+                    },
+
                     {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
                 ],
                 more_actions: [
@@ -160,13 +170,6 @@ export default {
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
-                    },
-                    {
-                        text: "Reiniciar",
-                        icon: 'fas fa-history',
-                        type: 'action',
-                        method_name: 'reset',
-                        show_condition: 'pruebas_desaprobadas'
                     },
                 ]
             },

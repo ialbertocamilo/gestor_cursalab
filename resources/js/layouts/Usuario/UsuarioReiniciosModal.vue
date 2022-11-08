@@ -32,7 +32,7 @@
                           <v-tab class="justify-content-start">
                             <v-icon left>mdi mdi-history</v-icon> Reinicio por tema
                           </v-tab>
-<!--
+<!-- 
                           <v-tab class="justify-content-start">
                             <v-icon left>mdi mdi-history</v-icon> Reinicio por curso
                           </v-tab>
@@ -40,7 +40,7 @@
                           <v-tab class="justify-content-start">
                             <v-icon left> mdi mdi-history</v-icon> Reinicio total
                           </v-tab>
--->
+ -->
                           <v-tab-item >
                             <v-card flat class="ml-5">
                               <v-card-text class="pr-0 pt-1">
@@ -253,11 +253,12 @@ export default {
                         if (action == 'reset_total') {
                             this.hideLoader()
                             vue.closeModal()
-                            vue.$emit('onReinicioTotal')
                         } else {
                             this.loadData(vue.resource)
                             this.hideLoader()
                         }
+                        
+                        vue.$emit('onReinicioTotal')
                     })
             }else{
                 this.hideLoader()

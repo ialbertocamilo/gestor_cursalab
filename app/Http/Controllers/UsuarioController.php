@@ -29,6 +29,7 @@ use App\Models\Resumen_x_curso;
 use App\Models\School;
 use App\Models\SummaryCourse;
 use App\Models\SummaryTopic;
+use App\Models\Topic;
 use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\Usuario;
@@ -92,7 +93,7 @@ class UsuarioController extends Controller
         $workspace = get_current_workspace();
         $sub_workspaces_id = $workspace?->subworkspaces?->pluck('id');
 
-        $request->merge(['sub_workspaces_id' => $sub_workspaces_id]);
+        $request->merge(['sub_workspaces_id' => $sub_workspaces_id, 'superuser' => auth()->user()->isA('super-user')]);
 
         $users = User::search($request);
 
@@ -236,7 +237,9 @@ class UsuarioController extends Controller
         $topics = SummaryTopic::query()
             ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
             ->where('summary_topics.passed', 0)
-            ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'])
+            // ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'] ?? 3)
+            ->where('summary_topics.attempts', '<>', 0)
+            ->whereNotNull('summary_topics.attempts')
             ->where('summary_topics.user_id', $user->id)
             ->select('topics.id', 'topics.name')
             ->get();
@@ -267,6 +270,8 @@ class UsuarioController extends Controller
 
             $topicId = $request->input('p');
 
+            $topic = Topic::find($topicId);
+
             // Reset topics attempts
 
             SummaryTopic::resetUserTopicsAttempts($user->id, [$topicId]);
@@ -277,6 +282,7 @@ class UsuarioController extends Controller
                 $topicId, $user->id, $admin->id
             );
 
+            SummaryCourse::updateCourseRestartsCount($topic->course_id, $admin->id, $user->id);
 
             return $this->success(['msg' => 'Reinicio por tema exitoso']);
         }
@@ -648,7 +654,7 @@ class UsuarioController extends Controller
                 ->join('users', 'users.id', '=', 'summary_topics.user_id')
                 ->with('user')
                 ->where('summary_topics.topic_id', $topicId)
-                ->where('summary_topics.source_id')
+                // ->where('summary_topics.source_id')
                 ->where('users.subworkspace_id', $subworkspaceId)
                 ->select('summary_topics.*');
 

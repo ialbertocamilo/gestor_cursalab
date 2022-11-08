@@ -400,20 +400,20 @@ export default {
                             "reports-TEMPORAL_INACTIVO"
                         ]
                     },
-                    {
-                        title: "Aulas Virtuales",
-                        icon: "fas fa-download",
-                        path: "/exportar/conferencias",
-                        subpaths: ["exportar/conferencias"],
-                        selected: false,
-                        permission: "conferencias",
-                        role: [
-                            "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO",
-                            "reports-TEMPORAL_INACTIVO"
-                        ]
-                    },
+                    // {
+                    //     title: "Aulas Virtuales",
+                    //     icon: "fas fa-download",
+                    //     path: "/exportar/conferencias",
+                    //     subpaths: ["exportar/conferencias"],
+                    //     selected: false,
+                    //     permission: "conferencias",
+                    //     role: [
+                    //         "super-user",
+                    //         "admin-TEMPORAL_INACTIVO",
+                    //         "trainer-TEMPORAL_INACTIVO",
+                    //         "reports-TEMPORAL_INACTIVO"
+                    //     ]
+                    // },
                     {
                         title: "Encuestas",
                         icon: "fas fa-poll",

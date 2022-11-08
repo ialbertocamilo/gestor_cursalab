@@ -17,7 +17,7 @@
         flex-direction:column; 
         height:100%;
     }
-    footer{
+ /*   footer{
         margin-top: 50px;
         background: #1a2033;
         padding: 30px 0;
@@ -25,7 +25,7 @@
         font-size: 14px;
         clear: both;
         position: relative;
-    }
+    }*/
     .main-style{
         padding:1.8rem 1.4rem;
         width:80%;
@@ -49,7 +49,7 @@
     }
   </style>
   <body>
-        <header class="masthead mb-auto mt-3 ml-3 ">
+        <header class="masthead ssmb-auto mt-3 mb-5 ml-3 text-center">
           <div class="container-fluid">
               <!--Mods logo-->
               <div id="logo">
@@ -59,20 +59,20 @@
               </div>
           </div>
         </header>
-        <main role="main" class="container justify-content-center main-style">
+        <main role="main" class="container justify-content-center main-style text-center">
             <div class="text-center">
-                <h2 style="font-size:1.5rem">Actualiza tu app de Universidad Corporativa</h2>
+                <h2 style="font-size:1.5rem">Actualiza tu APP</h2>
             </div>
-            <div style="margin-top:2rem">
+            <div style="margin-top:3rem">
                 <p>Escoge la opción que corresponda a tu teléfono para ir a la tienda de aplicaciones.</p>
             </div>
             <div>
                 <h5>Android</h5>
                 <p>Si tu telefono es un android corresponde descargar una aplicación desde 
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     PlayStore. 
                   </a>
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     <img style="width: 40px;" src="/img/playstore.png" class="img-thumbnail ml-1">
                   </a>
                 </p>
@@ -80,24 +80,24 @@
             <div>
                 <h5>Huawei</h5>
                 <p>Si tu telefono es un Huawei moderno y cuenta solo con App Gallery, actualiza tu app desde 
-                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C103425579">
+                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C106822677">
                     App Gallery.
                   </a>
-                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C103425579">
+                  <a target="_blank" href="https://appgallery.huawei.com/#/app/C106822677">
                     <img style="width: 40px;" src="/img/app_galery.png" class="img-thumbnail ml-2">
                   </a>
                 </p>
                 <p>Si tu telefono es un Huawei y no cuenta con App Gallery, actualiza tu app desde 
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     PlayStore. 
                   </a>
-                  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.amauta.app.inkafarma">
+                  <a target="_blank" href="https://play.google.com/store/apps/details?id=io.cursalab.weconnect&hl=es_PE&gl=US">
                     <img style="width: 40px;" src="/img/playstore.png" class="img-thumbnail ml-1">
                   </a>
             </div>
-            <div>
+            {{-- <div>
                 <p>
-                    Si ninguna de estas opciones no se adecua a tu teléfono móvil, contáctate con soporte al whatsapp 
+                    Si ninguna de estas opciones se adecua a tu teléfono móvil, contáctate con soporte al whatsapp 
                       <a target="_blank" href="https://wa.me/51960169962?text=Necesito%20ayuda%20con%20la%20actualización%20de%20mi%20aplicación.">
                         960-169-962 
                       </a>
@@ -105,11 +105,11 @@
                         <img style="width: 40px;" src="/img/whatsapp.png" class="img-thumbnail ml-1"> 
                       </a> de Lunes a Viernes, de 9am a 6pm
                 </p>
-            </div>
+            </div> --}}
         </main>
       <footer id="footer" style="margin-top: 7vh;" >
         <div class="container-fluid">
-          <div class="sub_footer row">
+         {{--  <div class="sub_footer row">
             <div class="copyright col-lg-6 col-md-6 mr-lg-auto text-center ">
               <h5 class="mt-0">Contáctanos</h5>
               <ul class="contacts">
@@ -131,11 +131,10 @@
               </p>
             </div>
           </div>
-          <!--/row-->	
           <hr>
           <div class="text-center">
             <small>© Plataforma de propiedad de La Media Digital Lab.</small>
-          </div>		
+          </div>	 --}}	
         </div>
       </footer>
   </body>

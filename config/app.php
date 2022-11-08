@@ -24,6 +24,17 @@ return [
         'android' => env('APP_VERSION_ANDROID'),
     ],
 
+    'notifications' => [
+        'showModalM1' => env('SHOW_MODAL_M1'),
+        'showCloseButtonM1' => env('SHOW_CLOSE_BUTTON_M1'),
+        'showModalM2' => env('SHOW_MODAL_M2'),
+        'showCloseButtonM2' => env('SHOW_CLOSE_BUTTON_M2'),
+        'showModalM3' => env('SHOW_MODAL_M3'),
+        'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
+        'showMessageM4' => env('SHOW_MESSAGE_M4'),
+        'showIosLink' => env('SHOW_IOS_LINK'),
+    ],
+
     // Evaluation Quiz Config
 
     'quizzes' => [

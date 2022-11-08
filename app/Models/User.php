@@ -156,6 +156,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasMany(SummaryTopic::class);
     }
 
+    public function failed_topics()
+    {
+        return $this->hasMany(SummaryTopic::class, 'user_id')
+                    ->where('passed', 0)
+                    ->whereNotNull('attempts')
+                    ->where('attempts', '<>', 0);
+    }
+
     public function relationships()
     {
         return $this->hasMany(UserRelationship::class, 'user_id');
@@ -469,7 +477,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request)
     {
         $query = self::query();
-        $query->with('subworkspace');
+        $query->with('subworkspace')->withCount('failed_topics');
 
         if ($request->q) {
             $query->filterText($request->q);
@@ -493,7 +501,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true)
+    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses= true)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
@@ -503,7 +511,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
         // TODO: Agregar segmentacion directa
-        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses);
+        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
 
         return collect($all_courses)->unique()->values();
     }
@@ -636,14 +644,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function setCoursesWithDirectSegmentation($user, &$all_courses)
+    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses)
     {
         $user->loadMissing('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
 
         $course_segmentations = Course::with([
-            'segments.values.criterion_value',
+            'segments.values.criterion_value.criterion',
+//            'segments' => [
+//                'values.criterion_value',
+//                'criterion'
+//            ],
             'requirements',
             'schools' => function ($query) {
                 $query->where('active', ACTIVE);
@@ -664,6 +676,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $workspace->id)
+            ->when(!$withFreeCourses, function ($q){
+                $q->whereRelation('type', 'code', '<>', 'free');
+            })
             ->where('active', ACTIVE)
             ->get();
 

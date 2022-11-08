@@ -2,16 +2,18 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Criterio;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Curso;
+use App\Models\Topic;
 use App\Models\Posteo;
 use App\Models\Prueba;
 use App\Models\Visita;
 use App\Models\Abconfig;
+use App\Models\Criterio;
 use App\Models\Criterion;
 use App\Models\Matricula;
+use App\Models\Requirement;
 use App\Models\UsuarioCurso;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
@@ -59,12 +61,27 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_matricula();
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
-        $this->restoreCriterionDocument();
-
+        // $this->restoreCriterionDocument();
+        $this->restoreRequirements();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
-
+    public function restoreRequirements(){
+        $temas = Topic::whereNotNull('topic_requirement_id')->get();
+        $_bar = $this->output->createProgressBar($temas->count());
+        $_bar->start();
+        foreach ($temas as $tema) {
+            $requirement = $tema->requirements()->first();
+            if(!$requirement){
+                Requirement::updateOrCreate(
+                    ['model_type' => Topic::class, 'model_id' => $tema->id,],
+                    ['requirement_type' => Topic::class, 'requirement_id' => $tema->topic_requirement_id]
+                );
+            }
+            $_bar->advance();
+        }
+        $_bar->finish();
+    }
     public function restoreCriterionDocument()
     {
         $user_id = $this->argument("user_id");
