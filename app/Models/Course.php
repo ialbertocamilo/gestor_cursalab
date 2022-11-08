@@ -550,7 +550,7 @@ class Course extends BaseModel
                 ->where('course_id', $course_requirement->requirement_id)
                 ->where('user_id', $user->id)->first();
 
-            if ($requirement_summary && $requirement_summary->status->code != 'aprobado')
+            if (!$requirement_summary || ($requirement_summary && $requirement_summary->status->code != 'aprobado'))
                 return ['average_grade' => 0, 'status' => 'bloqueado'];
         }
 
