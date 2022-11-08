@@ -542,13 +542,13 @@ class Topic extends BaseModel
         } else {
             $summary_requirement_topic = SummaryTopic::with('status')
                 ->where('user_id', $user->id)
-                ->where('topic_id', $topic_requirement->id)
+                ->where('topic_id', $topic_requirement->requirement_id)
                 ->first();
 
             $activity_requirement = in_array($summary_requirement_topic?->status->code, ['aprobado', 'realizado', 'revisado']);
             $test_requirement = $summary_requirement_topic?->result == 1;
 
-            if (!$activity_requirement || $activity_requirement || $test_requirement)
+            if ($activity_requirement || $test_requirement)
                 $available_topic = true;
         }
 
