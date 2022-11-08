@@ -6,6 +6,7 @@ use App\Models\Block;
 use App\Models\CheckList;
 use App\Models\Course;
 use App\Models\CriterionValue;
+use App\Models\Glossary;
 use App\Models\Media;
 use App\Models\MediaTema;
 use App\Models\Poll;
@@ -930,8 +931,166 @@ class Migration_2 extends Model
     {
         $db = self::connect();
 
-        $glosarioUC = $db->getTable('glosario')->get();
+        $db->getTable('glosarios')
+            ->chunkById(2500, function ($chunked) use ($output) {
+            $bar = $output->createProgressBar($chunked->count());
+            $bar->start();
+            $glossary_data = [];
 
+            foreach ($chunked as $glosario) {
+                $bar->advance();
 
+                $taxonomies = Taxonomy::whereIn('external_id_es', [
+                    $glosario->categoria_id,
+                    $glosario->jerarquia_id,
+                    $glosario->laboratorio_id,
+                    $glosario->condicion_de_venta_id,
+                    $glosario->via_de_administracion_id,
+                    $glosario->grupo_farmacologico_id,
+                    $glosario->forma_farmaceutica_id,
+                    $glosario->dosis_adulto_id,
+                    $glosario->dosis_nino_id,
+                    $glosario->recomendacion_de_administracion_id,
+//                $glosario->contraindicacion_id,
+//                $glosario->interacciones_frecuentes_id,
+//                $glosario->reacciones_frecuentes_id,
+                    $glosario->advertencias_id,
+                ])->get();
+
+                $categoria_id = $taxonomies->where('external_id_es', $glosario->categoria_id)->first();
+                $laboratorio_id = $taxonomies->where('external_id_es', $glosario->laboratorio_id)->first();
+                $condicion_de_venta_id = $taxonomies->where('external_id_es', $glosario->condicion_de_venta_id)->first();
+                $via_de_administracion_id = $taxonomies->where('external_id_es', $glosario->via_de_administracion_id)->first();
+                $jerarquia_id = $taxonomies->where('external_id_es', $glosario->jerarquia_id)->first();
+                $grupo_farmacologico_id = $taxonomies->where('external_id_es', $glosario->grupo_farmacologico_id)->first();
+                $forma_farmaceutica_id = $taxonomies->where('external_id_es', $glosario->forma_farmaceutica_id)->first();
+                $dosis_adulto_id = $taxonomies->where('external_id_es', $glosario->dosis_adulto_id)->first();
+                $dosis_nino_id = $taxonomies->where('external_id_es', $glosario->dosis_nino_id)->first();
+                $recomendacion_de_administracion_id = $taxonomies->where('external_id_es', $glosario->recomendacion_de_administracion_id)->first();
+                $advertencias_id = $taxonomies->where('external_id_es', $glosario->advertencias_id)->first();
+
+//            $contraindicacion_id = $taxonomies->where('external_id_es', $glosario->contraindicacion_id)->first();
+//            $interacciones_frecuentes_id = $taxonomies->where('external_id_es', $glosario->interacciones_frecuentes_id)->first();
+//            $reacciones_frecuentes_id = $taxonomies->where('external_id_es', $glosario->reacciones_frecuentes_id)->first();
+
+                $glossary_data[] = [
+                    'external_id' => $glosario->id,
+
+                    'name' => $glosario->nombre,
+
+                    'categoria_id' => $categoria_id?->id,
+                    'jerarquia_id' => $jerarquia_id?->id,
+                    'laboratorio_id' => $laboratorio_id?->id,
+                    'condicion_de_venta_id' => $condicion_de_venta_id?->id,
+                    'via_de_administracion_id' => $via_de_administracion_id?->id,
+                    'grupo_farmacologico_id' => $grupo_farmacologico_id?->id,
+                    'forma_farmaceutica_id' => $forma_farmaceutica_id?->id,
+                    'dosis_adulto_id' => $dosis_adulto_id?->id,
+                    'dosis_nino_id' => $dosis_nino_id?->id,
+                    'recomendacion_de_administracion_id' => $recomendacion_de_administracion_id?->id,
+                    'advertencias_id' => $advertencias_id?->id,
+//                'contraindicacion_id' => $contraindicacion_id?->id,
+//                'interacciones_frecuentes_id' => $interacciones_frecuentes_id?->id,
+//                'reacciones_frecuentes_id' => $reacciones_frecuentes_id?->id,
+
+                    'active' => $glosario->estado,
+
+                    'created_at' => $glosario->created_at,
+                    'updated_at' => $glosario->updated_at,
+                    'deleted_at' => $glosario->deleted_at,
+                ];
+            }
+
+            $bar->finish();
+
+            $this->makeChunkAndInsert($glossary_data, 'glossaries', $output);
+        });
+
+        $carrera_values = CriterionValue::with('parents')
+            ->whereRelation('criterion', 'code', 'career')
+            ->get();
+
+        $glosario_taxonomia_UC = $db->getTable('glosario_taxonomia')->get();
+        $glosario_modulo_UC = $db->getTable('glosario_modulo')->get();
+        $carrera_glosario_categoria_UC = $db->getTable('carrera_glosario_categoria')
+            ->join('carreras', 'carreras.id', 'carrera_glosario_categoria.carrera_id')
+            ->get();
+
+        $glossary_taxonomy_data = [];
+        $glossary_module_data = [];
+        $carrera_glosario_categoria_data = [];
+
+        $bar = $output->createProgressBar($glosario_taxonomia_UC->count());
+        $bar->start();
+        foreach ($glosario_taxonomia_UC as $row) {
+            $bar->advance();
+
+            $glossary = Glossary::where('external_id', $row->glosario_id)->first();
+            $taxonomy = Taxonomy::where('external_id_es', $row->taxonomia_id)->first();
+            $glossary_group = Taxonomy::where('external_id_es', $row->glosario_grupo_id)->first();
+
+            if (!$glossary || !$taxonomy || !$glossary_group) {
+                info("GLOSARIO ID :: {$row->glosario_id} - TAXONOMY ID :: {$row->taxonomia_id} - GLOSSARY GROUP ID :: {$row->glosario_grupo_id} ");
+                continue;
+            }
+
+            $glossary_taxonomy_data[] = [
+                'glossary_id' => $glossary->id,
+                'taxonomy_id' => $taxonomy->id,
+                'glossary_group_id' => $glossary_group->id,
+            ];
+
+        }
+        $bar->finish();
+        $this->makeChunkAndInsert($glossary_taxonomy_data, 'glossary_taxonomy', $output);
+
+        $bar = $output->createProgressBar($glosario_modulo_UC->count());
+        $bar->start();
+        foreach ($glosario_modulo_UC as $row) {
+            $bar->advance();
+
+            $glossary = Glossary::where('external_id', $row->glosario_id)->first();
+            $module_id = self::MODULOS_EQUIVALENCIA[$row->modulo_id] ?? false;
+            $code = $row->codigo;
+
+            if (!$glossary || !$module_id) {
+                info("GLOSARIO ID :: {$row->glosario_id} - MODULE ID :: {$row->modulo_id}");
+                continue;
+            }
+
+            $glossary_module_data[] = [
+                'glossary_id' => $glossary->id,
+                'module_id' => $module_id,
+                'code' => $code,
+            ];
+
+        }
+        $bar->finish();
+        $this->makeChunkAndInsert($glossary_module_data, 'glossary_module', $output);
+
+        $bar = $output->createProgressBar($glosario_modulo_UC->count());
+        $bar->start();
+        foreach ($carrera_glosario_categoria_UC as $row) {
+            $bar->advance();
+
+            $carrera = $carrera_values->where('value_text', $row->nombre)->first();
+            $glosario_categoria = Taxonomy::where('external_id_es', $row->glosario_categoria_id)->first();
+            $module_id = self::MODULOS_EQUIVALENCIA[$row->config_id] ?? false;
+
+            if (!$module_id || !$glosario_categoria || !$carrera) {
+                info("carrera glossario categoria error => ");
+                info($row->carrera_id);
+                continue;
+            }
+
+            $carrera_glosario_categoria_data[] = [
+                'module_id' => $module_id,
+                'carrera_id' => $carrera->id,
+                'glosario_categoria_id' => $glosario_categoria->id
+            ];
+
+        }
+        $bar->finish();
+        $this->makeChunkAndInsert($carrera_glosario_categoria_data, 'carrera_glosario_categoria', $output);
     }
 }

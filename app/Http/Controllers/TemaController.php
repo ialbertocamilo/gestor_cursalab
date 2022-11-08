@@ -74,7 +74,8 @@ class TemaController extends Controller
 
         $form_selects = $this->getFormSelects($school, $course, $topic, true);
         $topic->tipo_ev = $topic->hide_tipo_ev;
-
+        $requirement = $topic->requirements()->first();
+        $requirement && $topic->topic_requirement_id =  $requirement->requirement_id;
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],
