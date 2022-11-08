@@ -17,6 +17,10 @@ class SummaryCourse extends Summary
         'completed', 'restarts', 'restarter_id', 'certification_issued_at',
     ];
 
+    protected $casts = [
+        'certification_issued_at' => 'datetime'
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class);
