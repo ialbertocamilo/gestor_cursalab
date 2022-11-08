@@ -604,7 +604,7 @@ class Topic extends BaseModel
     {
         $topic_grade = null;
         $available_topic = true;
-        $topic_requirement = $topic->requirement;
+        $topic_requirement = $topic->requirements()->first();
 
         if ($topic_requirement) :
             $requirement_summary = SummaryTopic::with('status:id,code')
