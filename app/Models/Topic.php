@@ -553,7 +553,7 @@ class Topic extends BaseModel
                 ->where('topic_id', $topic_requirement->requirement_id)
                 ->first();
 
-            $activity_requirement = in_array($summary_requirement_topic?->status->code, ['aprobado', 'realizado', 'revisado']);
+            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
             $test_requirement = $summary_requirement_topic?->result == 1;
 
             if ($activity_requirement || $test_requirement)
@@ -619,7 +619,7 @@ class Topic extends BaseModel
                 ->where('topic_id', $topic_requirement->requirement_id)
                 ->where('user_id', $user->id)->first();
 
-            $available_topic = $requirement_summary && in_array($requirement_summary->status->code, ['aprobado', 'realizado', 'revisado']);
+            $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
         $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
