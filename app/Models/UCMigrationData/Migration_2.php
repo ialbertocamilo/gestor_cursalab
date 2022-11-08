@@ -683,6 +683,23 @@ class Migration_2 extends Model
             $checklist->courses()->sync($courses_id);
         }
 
+        // entrenadores_usuarios
+        $entrenadores_usuarios_UC = $db->getTable('entrenadores_usuarios')->get();
+        $trainer_user_data = [];
+        foreach ($entrenadores_usuarios_UC as $row) {
+            $trainer = User::where('external_id', $row->entrenador_id)->first();
+            $student = User::where('external_id', $row->usuario_id)->first();
+
+            if (!$trainer || !$student) {
+                $trainer_user_data[] = [
+                    'trainer_id' => $trainer->id,
+                    'user_id' => $student->id,
+                    'active' => $row->estado
+                ];
+            }
+        }
+
+        $this->makeChunkAndInsert($trainer_user_data, 'trainer_user', $output);
     }
 
     protected function migrateChecklistUserData($output)
@@ -951,78 +968,78 @@ class Migration_2 extends Model
 
         $db->getTable('glosarios')
             ->chunkById(2500, function ($chunked) use ($output) {
-            $bar = $output->createProgressBar($chunked->count());
-            $bar->start();
-            $glossary_data = [];
+                $bar = $output->createProgressBar($chunked->count());
+                $bar->start();
+                $glossary_data = [];
 
-            foreach ($chunked as $glosario) {
-                $bar->advance();
+                foreach ($chunked as $glosario) {
+                    $bar->advance();
 
-                $taxonomies = Taxonomy::whereIn('external_id_es', [
-                    $glosario->categoria_id,
-                    $glosario->jerarquia_id,
-                    $glosario->laboratorio_id,
-                    $glosario->condicion_de_venta_id,
-                    $glosario->via_de_administracion_id,
-                    $glosario->grupo_farmacologico_id,
-                    $glosario->forma_farmaceutica_id,
-                    $glosario->dosis_adulto_id,
-                    $glosario->dosis_nino_id,
-                    $glosario->recomendacion_de_administracion_id,
+                    $taxonomies = Taxonomy::whereIn('external_id_es', [
+                        $glosario->categoria_id,
+                        $glosario->jerarquia_id,
+                        $glosario->laboratorio_id,
+                        $glosario->condicion_de_venta_id,
+                        $glosario->via_de_administracion_id,
+                        $glosario->grupo_farmacologico_id,
+                        $glosario->forma_farmaceutica_id,
+                        $glosario->dosis_adulto_id,
+                        $glosario->dosis_nino_id,
+                        $glosario->recomendacion_de_administracion_id,
 //                $glosario->contraindicacion_id,
 //                $glosario->interacciones_frecuentes_id,
 //                $glosario->reacciones_frecuentes_id,
-                    $glosario->advertencias_id,
-                ])->get();
+                        $glosario->advertencias_id,
+                    ])->get();
 
-                $categoria_id = $taxonomies->where('external_id_es', $glosario->categoria_id)->first();
-                $laboratorio_id = $taxonomies->where('external_id_es', $glosario->laboratorio_id)->first();
-                $condicion_de_venta_id = $taxonomies->where('external_id_es', $glosario->condicion_de_venta_id)->first();
-                $via_de_administracion_id = $taxonomies->where('external_id_es', $glosario->via_de_administracion_id)->first();
-                $jerarquia_id = $taxonomies->where('external_id_es', $glosario->jerarquia_id)->first();
-                $grupo_farmacologico_id = $taxonomies->where('external_id_es', $glosario->grupo_farmacologico_id)->first();
-                $forma_farmaceutica_id = $taxonomies->where('external_id_es', $glosario->forma_farmaceutica_id)->first();
-                $dosis_adulto_id = $taxonomies->where('external_id_es', $glosario->dosis_adulto_id)->first();
-                $dosis_nino_id = $taxonomies->where('external_id_es', $glosario->dosis_nino_id)->first();
-                $recomendacion_de_administracion_id = $taxonomies->where('external_id_es', $glosario->recomendacion_de_administracion_id)->first();
-                $advertencias_id = $taxonomies->where('external_id_es', $glosario->advertencias_id)->first();
+                    $categoria_id = $taxonomies->where('external_id_es', $glosario->categoria_id)->first();
+                    $laboratorio_id = $taxonomies->where('external_id_es', $glosario->laboratorio_id)->first();
+                    $condicion_de_venta_id = $taxonomies->where('external_id_es', $glosario->condicion_de_venta_id)->first();
+                    $via_de_administracion_id = $taxonomies->where('external_id_es', $glosario->via_de_administracion_id)->first();
+                    $jerarquia_id = $taxonomies->where('external_id_es', $glosario->jerarquia_id)->first();
+                    $grupo_farmacologico_id = $taxonomies->where('external_id_es', $glosario->grupo_farmacologico_id)->first();
+                    $forma_farmaceutica_id = $taxonomies->where('external_id_es', $glosario->forma_farmaceutica_id)->first();
+                    $dosis_adulto_id = $taxonomies->where('external_id_es', $glosario->dosis_adulto_id)->first();
+                    $dosis_nino_id = $taxonomies->where('external_id_es', $glosario->dosis_nino_id)->first();
+                    $recomendacion_de_administracion_id = $taxonomies->where('external_id_es', $glosario->recomendacion_de_administracion_id)->first();
+                    $advertencias_id = $taxonomies->where('external_id_es', $glosario->advertencias_id)->first();
 
 //            $contraindicacion_id = $taxonomies->where('external_id_es', $glosario->contraindicacion_id)->first();
 //            $interacciones_frecuentes_id = $taxonomies->where('external_id_es', $glosario->interacciones_frecuentes_id)->first();
 //            $reacciones_frecuentes_id = $taxonomies->where('external_id_es', $glosario->reacciones_frecuentes_id)->first();
 
-                $glossary_data[] = [
-                    'external_id' => $glosario->id,
+                    $glossary_data[] = [
+                        'external_id' => $glosario->id,
 
-                    'name' => $glosario->nombre,
+                        'name' => $glosario->nombre,
 
-                    'categoria_id' => $categoria_id?->id,
-                    'jerarquia_id' => $jerarquia_id?->id,
-                    'laboratorio_id' => $laboratorio_id?->id,
-                    'condicion_de_venta_id' => $condicion_de_venta_id?->id,
-                    'via_de_administracion_id' => $via_de_administracion_id?->id,
-                    'grupo_farmacologico_id' => $grupo_farmacologico_id?->id,
-                    'forma_farmaceutica_id' => $forma_farmaceutica_id?->id,
-                    'dosis_adulto_id' => $dosis_adulto_id?->id,
-                    'dosis_nino_id' => $dosis_nino_id?->id,
-                    'recomendacion_de_administracion_id' => $recomendacion_de_administracion_id?->id,
-                    'advertencias_id' => $advertencias_id?->id,
+                        'categoria_id' => $categoria_id?->id,
+                        'jerarquia_id' => $jerarquia_id?->id,
+                        'laboratorio_id' => $laboratorio_id?->id,
+                        'condicion_de_venta_id' => $condicion_de_venta_id?->id,
+                        'via_de_administracion_id' => $via_de_administracion_id?->id,
+                        'grupo_farmacologico_id' => $grupo_farmacologico_id?->id,
+                        'forma_farmaceutica_id' => $forma_farmaceutica_id?->id,
+                        'dosis_adulto_id' => $dosis_adulto_id?->id,
+                        'dosis_nino_id' => $dosis_nino_id?->id,
+                        'recomendacion_de_administracion_id' => $recomendacion_de_administracion_id?->id,
+                        'advertencias_id' => $advertencias_id?->id,
 //                'contraindicacion_id' => $contraindicacion_id?->id,
 //                'interacciones_frecuentes_id' => $interacciones_frecuentes_id?->id,
 //                'reacciones_frecuentes_id' => $reacciones_frecuentes_id?->id,
 
-                    'active' => $glosario->estado,
+                        'active' => $glosario->estado,
 
-                    'created_at' => $glosario->created_at,
-                    'updated_at' => $glosario->updated_at,
-                    'deleted_at' => $glosario->deleted_at,
-                ];
-            }
+                        'created_at' => $glosario->created_at,
+                        'updated_at' => $glosario->updated_at,
+                        'deleted_at' => $glosario->deleted_at,
+                    ];
+                }
 
-            $bar->finish();
+                $bar->finish();
 
-            $this->makeChunkAndInsert($glossary_data, 'glossaries', $output);
-        });
+                $this->makeChunkAndInsert($glossary_data, 'glossaries', $output);
+            });
 
         $carrera_values = CriterionValue::with('parents')
             ->whereRelation('criterion', 'code', 'career')
