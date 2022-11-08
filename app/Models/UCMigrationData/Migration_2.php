@@ -848,7 +848,7 @@ class Migration_2 extends Model
         $bar->finish();
         $this->makeChunkAndInsert($videoteca_data, 'videoteca', $output);
 
-        $videotecaIR = Videoteca::disableCache()->whereNotNull('external_id') <> get();
+        $videotecaIR = Videoteca::disableCache()->whereNotNull('external_id')->get();
         foreach ($videotecaIR as $videoteca) {
 
             $temp_modules = [];
