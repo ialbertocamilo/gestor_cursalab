@@ -608,6 +608,22 @@ class Migration_2 extends Model
     protected function migrateChecklistData($output)
     {
         $db = self::connect();
+        Taxonomy::firstOrCreate([
+            'group' => 'checklist',
+            'type' => 'type',
+            'code' => 'user_trainer',
+            'name' => 'Usuario a Entrenador',
+            'active' => 1,
+            'position' => 1,
+        ]);
+        Taxonomy::firstOrCreate([
+            'group' => 'checklist',
+            'type' => 'type',
+            'code' => 'trainer_user',
+            'name' => 'Entrenador a Usuario',
+            'active' => 1,
+            'position' => 2,
+        ]);
 
         $checklist_items_type = Taxonomy::getData('checklist', 'type')->get();
 
