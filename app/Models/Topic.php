@@ -620,7 +620,6 @@ class Topic extends BaseModel
             $topic_grade = $summary_topic->grade;
 
         $topic_status = $summary_topic?->status?->code ?? 'por-iniciar';
-
         if(!$available_topic){
             $topic_status = 'bloqueado';
         }
