@@ -284,47 +284,23 @@ class UsuarioController extends Controller
         return $this->error('No se pudo completar el reinicio');
     }
 
-    public function reset_x_curso(Usuario $usuario, Request $request)
+    public function reset_x_curso(User $user, Request $request)
     {
-        if ($request->has('c')) {
-            $curso_id = $request->input('c');
+        $admin = auth()->user();
+        $course = Course::find($request->c);
 
-            $pruebas = \DB::select(\DB::raw("SELECT p.id FROM pruebas p
-                                                    INNER JOIN posteos t ON t.id = p.posteo_id
-                                                    INNER JOIN cursos c ON c.id = t.curso_id
-                                                    WHERE p.usuario_id = " . $usuario->id . "
-                                                    AND c.id = " . $curso_id . "
-                                                    "));
-            //AND p.resultado = 0
+        if ($course) {
 
-            // $rptas = $usuario->rpta_pruebas()->whereIn('id', collect($prueba_reinicio)->pluck('id'))->delete();
+            $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
-            $prueba_reinicio = Prueba::whereIn('id', collect($pruebas)->pluck('id'))
-                ->update([
-                    'intentos' => 0,
-                    // 'rptas_ok' => NULL,
-                    // 'rptas_fail' => NULL,
-                    // 'nota' => NULL,
-                    //  'resultado' => 0,
-                    //  'usu_rptas' => NULL,
-                    'fuente' => 'reset']);
+            $summary_topics = SummaryTopic::where('user_id', $user->id)
+                        ->where('passed', '<>', 1)
+                        ->whereRelation('topic', 'course_id', $course->id)
+                        ->get();
 
-            // Registrar reinicios
-            $user = \Auth::user();
-            $res = Reinicio::where('usuario_id', $usuario->id)->where('curso_id', $curso_id)->where('tipo', 'por_curso')->first();
-            if (!$res) {
-                $dip = new Reinicio;
-                $dip->tipo = 'por_curso';
-                $dip->usuario_id = $usuario->id;
-                $dip->curso_id = $curso_id;
-                $dip->admin_id = $user->id;
-                $dip->acumulado = 1;
-                $dip->save();
-            } else {
-                $res->acumulado = $res->acumulado + 1;
-                $res->save();
-            }
-            // Fin registro reinicios
+            $summary_topics->increment('restarts', 1, ['attempts' => 0, 'restarter_id' => $admin->id]);
+
+            $course->increment('restarts', 1, ['restarter_id' => $admin->id]);
 
             return $this->success(['msg' => 'Reinicio por curso exitoso']);
         }
