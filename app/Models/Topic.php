@@ -628,4 +628,54 @@ class Topic extends BaseModel
             'status' => $topic_status,
         ];
     }
+
+    protected function getCounter($topic)
+    {
+        $topic->load('course.schools');
+
+        $user = auth()->user()->load('subworkspace');
+
+        $row = SummaryTopic::getCurrentRow($topic, $user);
+
+        $counter = false;
+
+        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft()) {
+
+            $times = [];
+
+            if ($topic->course->reinicios_programado)
+                $times[] = $topic->course->reinicios_programado;
+
+            // if ($topic->course->reinicios_programado)
+            //     $times[] = $topic->course->reinicios_programado;
+
+            if ($user->subworkspace->reinicios_programado)
+                $times[] = $user->subworkspace->reinicios_programado;
+
+            if (count($times) > 0) {
+
+                $scheduled = false;
+                $minutes = 0;
+
+                foreach ($times as $time) {
+
+                    if ($time['activado']) {
+
+                        $scheduled = true;
+                        $minutes = $time['tiempo_en_minutos'];
+
+                        break;
+                    }
+                }
+
+                if ($scheduled and $row->last_time_evaluated_at) {
+
+                    $finishes_at = $row->last_time_evaluated_at->addMinutes($minutes);
+                    $counter = $finishes_at->diff(now())->format('%y/%m/%d %H:%i:%s');
+                }
+            }
+        }
+
+        return $counter;
+    }
 }
