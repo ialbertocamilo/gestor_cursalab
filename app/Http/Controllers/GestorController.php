@@ -49,6 +49,7 @@ class GestorController extends Controller
             $data = $this->getDiplomaCursoData($user_id, $course_id);
             return view('ver_certificado', compact('data'));
         } catch (\Exception $e) {
+            info($e);
             abort(404);
         }
     }
@@ -65,7 +66,7 @@ class GestorController extends Controller
 
     private function getDiplomaCursoData($user_id, $course_id)
     {
-        $user = User::select('id','name', 'surname', 'lastname')->where('id', $user_id)->first();
+        $user = User::with('subworkspace')->select('id','name', 'surname', 'lastname', 'subworkspace_id')->where('id', $user_id)->first();
         if (!$user) abort(404);
 
         $course = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')->where('id', $course_id)->first();

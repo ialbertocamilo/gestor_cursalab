@@ -96,15 +96,19 @@ class SummaryTopic extends Summary
         $query = SummaryTopic::whereIn('topic_id', $topicsIds)
             ->where('status_id', $desaprobado->id)
             ->where('attempts', '>=', $attemptsLimit);
-
         if ($scheduleDate)
             $query->where('last_time_evaluated_at', '<=', $scheduleDate);
 
-        $query->update([
-            'attempts' => 0,
-            'last_time_evaluated_at' => Carbon::now()
-            //'fuente' => 'resetm'
-        ]);
+        $count = $query;
+        if($count->first()){
+            $query->increment('restarts', 1, ['attempts' => 0]);
+        }
+        // $query->update([
+        //     'attempts' => 0,
+        //     'restarts' => DB::raw('restarts+1')
+        //     // 'last_time_evaluated_at' => Carbon::now()
+        //     //'fuente' => 'resetm'
+        // ]);
     }
 
     /**

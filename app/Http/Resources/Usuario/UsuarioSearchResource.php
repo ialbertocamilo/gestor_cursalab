@@ -14,7 +14,6 @@ class UsuarioSearchResource extends JsonResource
      */
     public function toArray($request)
     {
-
         return [
             'id' => $this->id,
             'nombre' => $this->fullname,
@@ -23,10 +22,12 @@ class UsuarioSearchResource extends JsonResource
             'document' => $this->document ?? 'Sin documento',
             'module' => $this->resource->subworkspace->name ?? 'No module',
             'active' => !!$this->active,
-//            'pruebas_desaprobadas' => $this->rpta_pruebas_dessaprob($this->config) ? true : false,
+            'failed_topics_count' => $this->failed_topics_count,
+            'pruebas_desaprobadas' => ($request->superuser AND $this->failed_topics_count) ? true : false,
+           // 'pruebas_desaprobadas' => true,
             'reporte_route' => route('exportar.node', ['dni' => $this->dni]),
-            'carrera' => $this->matricula_presente->carrera->nombre ?? '----',
-            'ciclo_actual' => $this->matricula_presente->ciclo->nombre ?? '---',
+            // 'carrera' => $this->matricula_presente->carrera->nombre ?? '----',
+            // 'ciclo_actual' => $this->matricula_presente->ciclo->nombre ?? '---',
         ];
     }
 }

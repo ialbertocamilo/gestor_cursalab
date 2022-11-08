@@ -11,6 +11,12 @@ use Illuminate\Http\Request;
 
 class FirebaseController extends Controller
 {
+    public function notificationValues()
+    {
+        $data = config('app.notifications');
+
+        return response()->json($data);
+    }
 
     public function appVersions()
     {

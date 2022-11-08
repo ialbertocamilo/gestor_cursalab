@@ -11,6 +11,7 @@ use App\Models\Taxonomy;
 use App\Models\Segment;
 
 use App\Models\User;
+use App\Models\Course;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use App\Http\Requests\SegmentRequest;
@@ -39,7 +40,10 @@ class SegmentController extends Controller
 
         $segments = Segment::getSegmentsByModel($criteria, $request->model_type, $request->model_id);
 
-        return $this->success(compact('criteria', 'segments'));
+        // $users_count = Segment::usersReached($request->model_type, $request->model_id);
+        $users_count = 0;
+
+        return $this->success(compact('criteria', 'segments', 'users_count'));
     }
 
     public function create(Request $request)
@@ -194,6 +198,6 @@ class SegmentController extends Controller
                 }
             });
 
-        info(now()->format("Y-m-d H:i:s"));
+        // info(now()->format("Y-m-d H:i:s"));
     }
 }

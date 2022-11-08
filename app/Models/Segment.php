@@ -185,9 +185,7 @@ Segment extends BaseModel
     {
         try {
 
-
             DB::beginTransaction();
-
 
             $this->storeDirectSegmentation($request);
 
@@ -204,7 +202,11 @@ Segment extends BaseModel
             return $this->error($e->getMessage());
         }
 
-        $message = 'Segmentación actualizada correctamente.';
+
+        // $users_count = Segment::usersReached($request->model_type, $request->model_id);
+
+        // $message = "Segmentación actualizada correctamente. {$users_count} usuarios alcanzados.";
+        $message = "Segmentación actualizada correctamente.";
 
         cache_clear_model(Course::class);
 
@@ -509,5 +511,16 @@ Segment extends BaseModel
         return collect(DB::select(DB::raw($query)))
             ->pluck('user_id')
             ->toArray();
+    }
+
+    protected function usersReached($model, $model_id)
+    {
+        $row = $model::find($model_id)->load('segments');
+
+        $users = $row->getUsersBySegmentation();
+
+        // $users = $row->usersSegmented($row->segments, 'count');
+
+        return $users;
     }
 }

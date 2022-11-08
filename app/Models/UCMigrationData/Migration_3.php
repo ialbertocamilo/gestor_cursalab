@@ -28,6 +28,13 @@ class Migration_3 extends Model
         return new OTFConnection($db_uc_data);
     }
 
+    protected function migratePreguntas($output)
+    {
+        info('getPreguntasData');
+        $data = self::getPreguntasData($output);
+        self::insertChunkedData($data, 'questions', $output);
+    }
+
     protected function migrateEncuestas($output)
     {
         info('getEncuestasData');
@@ -102,6 +109,62 @@ class Migration_3 extends Model
         $bar->finish();
 
         $output->newLine();
+    }
+
+    protected function getPreguntasData($output)
+    {
+        $db = self::connect();
+
+        $output->info('init getPreguntasData');
+
+        $preguntas = $db->getTable('preguntas')->get();
+        $types = Taxonomy::getData('question', 'type')->get();
+
+        $data = [];
+
+        $tipos = [
+            'selecciona' => 'select-options',
+            'texto' => 'written-answer',
+        ];
+
+        $bar = $output->createProgressBar(count($preguntas));
+        $bar->start();
+
+        foreach ($preguntas as $key => $pregunta)
+        {
+            $code = $tipos[$pregunta->tipo_pregunta] ?? NULL;
+            $type = $types->where('code', $code)->first();
+            $topic = Topic::disableCache()->where('external_id', $pregunta->post_id)->first();
+
+            if (!$topic) {
+                info("TEMA OLD {$pregunta->post_id} no existe en UC-IR");
+                continue;
+            }
+
+            $data[] = [
+                // 'external_id' => $pregunta->id,
+                'topic_id' => $topic->id,
+                'type_id' => $type->id,
+                'pregunta' => $pregunta->pregunta,
+
+                'rptas_json' => $pregunta->rptas_json,
+                'rpta_ok' => $pregunta->rpta_ok,
+                'active' => $pregunta->estado,
+                'score' => 4,
+                'required' => 0,
+
+                'created_at' => $pregunta->created_at,
+                'updated_at' => $pregunta->updated_at,
+            ];
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+
+        $output->newLine();
+
+        return array_chunk($data, self::CHUNK_LENGTH, true);
     }
 
     protected function getEncuestasData($output)
