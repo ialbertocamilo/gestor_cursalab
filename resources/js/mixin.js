@@ -403,6 +403,16 @@ export default {
                     tempRules.push(tempRule);
                 }
 
+                if (labelRule.indexOf("required-strict") > -1) {
+                    const tempRule = (v) =>  {
+                        if(!v) return 'Campo requerido';
+                        if(!v.trim().length) return 'Campo requerido';
+
+                        return true;
+                    }
+                    tempRules.push(tempRule);
+                }
+
                 if (labelRule.indexOf("max") > -1) {
                     let split = labelRule.split(":");
                     let max = split[1];
