@@ -37,10 +37,10 @@ class Glossary extends Model
     ];
 
     const GRUPOS = [
-        'principio_activo' => 4,
-        'contraindicacion' => 5,
-        'interaccion' => 6,
-        'reaccion' => 7,
+        'principio_activo' => 509,
+        'contraindicacion' => 510,
+        'interaccion' => 511,
+        'reaccion' => 512,
     ];
 
     /*

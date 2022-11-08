@@ -931,7 +931,8 @@ class Migration_2 extends Model
     {
         $db = self::connect();
 
-        $db->getTable('glosarios')->chunkById(2500, function ($chunked) use ($output) {
+        $db->getTable('glosarios')
+            ->chunkById(2500, function ($chunked) use ($output) {
             $bar = $output->createProgressBar($chunked->count());
             $bar->start();
             $glossary_data = [];
@@ -996,6 +997,7 @@ class Migration_2 extends Model
 
                     'created_at' => $glosario->created_at,
                     'updated_at' => $glosario->updated_at,
+                    'deleted_at' => $glosario->deleted_at,
                 ];
             }
 
@@ -1010,7 +1012,9 @@ class Migration_2 extends Model
 
         $glosario_taxonomia_UC = $db->getTable('glosario_taxonomia')->get();
         $glosario_modulo_UC = $db->getTable('glosario_modulo')->get();
-        $carrera_glosario_categoria_UC = $db->getTable('carrera_glosario_categoria')->get();
+        $carrera_glosario_categoria_UC = $db->getTable('carrera_glosario_categoria')
+            ->join('carreras', 'carreras.id', 'carrera_glosario_categoria.carrera_id')
+            ->get();
 
         $glossary_taxonomy_data = [];
         $glossary_module_data = [];
@@ -1069,19 +1073,18 @@ class Migration_2 extends Model
         foreach ($carrera_glosario_categoria_UC as $row) {
             $bar->advance();
 
-            $carrera = $carrera_values->where('external_id', $row->carrera_id)->first();
-            $subworkspace_value_id = $carrera?->parents->first()?->id;
-            $workspace = Workspace::where('criterion_value_id', $subworkspace_value_id)->first();
+            $carrera = $carrera_values->where('value_text', $row->nombre)->first();
             $glosario_categoria = Taxonomy::where('external_id_es', $row->glosario_categoria_id)->first();
+            $module_id = self::MODULOS_EQUIVALENCIA[$row->config_id] ?? false;
 
-            if (!$workspace || !$glosario_categoria || !$carrera) {
+            if (!$module_id || !$glosario_categoria || !$carrera) {
                 info("carrera glossario categoria error => ");
                 info($row->carrera_id);
                 continue;
             }
 
             $carrera_glosario_categoria_data[] = [
-                'module_id' => $workspace->id,
+                'module_id' => $module_id,
                 'carrera_id' => $carrera->id,
                 'glosario_categoria_id' => $glosario_categoria->id
             ];
