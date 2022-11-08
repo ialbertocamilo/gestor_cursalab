@@ -133,7 +133,15 @@ class Topic extends BaseModel
             else :
                 $tema = self::create($data);
             endif;
-
+            if ($data['topic_requirement_id']){
+                Requirement::updateOrCreate(
+                    ['model_type' => Topic::class, 'model_id' => $tema->id,],
+                    ['requirement_type' => Topic::class, 'requirement_id' => $data['topic_requirement_id']]
+                );
+            }
+            else{
+                $tema->requirements()->delete();
+            }
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
                 $medias = array();
