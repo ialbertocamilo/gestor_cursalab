@@ -74,7 +74,7 @@ class GestorController extends Controller
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
-        if (!$summary_course) abort(404);
+        if (!$summary_course?->certification_issued_at) abort(404);
 
         $plantilla_curso = $course->plantilla_diploma != null ? $course->plantilla_diploma : $user->subworkspace->plantilla_diploma;
         $fecha = $summary_course->certification_issued_at;
