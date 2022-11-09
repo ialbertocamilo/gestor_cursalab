@@ -91,7 +91,8 @@ export default {
     },
     methods: {
         async fetchFiltersData () {
-            let url = `${this.$props.reportsBaseUrl}/filtros/job-positions/${this.$props.workspaceId}`
+            // let url = `${this.$props.reportsBaseUrl}/filtros/job-positions/${this.$props.workspaceId}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/workspace/${this.$props.workspaceId}/criterion-values/position_name`
             let response = await axios({
                 url: url,
                 method: 'get'

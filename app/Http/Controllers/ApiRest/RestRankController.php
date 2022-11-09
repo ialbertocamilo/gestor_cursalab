@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Config;
 class RestRankController extends Controller
 {
     /***********************************REDISEÑO******************* */
-    public function ranking_v2($user = null)
+    public function ranking($user = null)
     {
         $user = $user ?? auth()->user();
         $user->load('subworkspace');
@@ -30,31 +30,33 @@ class RestRankController extends Controller
             $response[] = [
                 'label' => 'Área',
                 'ranking' => $this->loadRankingByCriterion($user, 'grupo'),
+//                'ranking' => $this->loadRankingByCriterion($user, 29),
             ];
 
             $response[] = [
                 'label' => 'Sede',
                 'ranking' => $this->loadRankingByCriterion($user, 'botica'),
+//                'ranking' => $this->loadRankingByCriterion($user, 28),
             ];
         endif;
 
+        info("FIN");
         return $this->success($response);
-
     }
 
-    public function ranking()
-    {
-        /**
-         * Retornar los 3 rankings en una sola API
-         */
-        $apiResponse = [];
-        $user = auth()->user();
-        $apiResponse['ranking_global'] = $this->cargarRankingGeneral($user);
-//        $apiResponse['ranking_botica'] = $this->cargarRankingBotica($user->id, $app_user->botica);
-//        $apiResponse['ranking_zona'] = $this->cargarRankingZona($user->id, $app_user->grupo);
-
-        return response()->json($apiResponse, 200);
-    }
+//    public function ranking()
+//    {
+//        /**
+//         * Retornar los 3 rankings en una sola API
+//         */
+//        $apiResponse = [];
+//        $user = auth()->user();
+//        $apiResponse['ranking_global'] = $this->cargarRankingGeneral($user);
+////        $apiResponse['ranking_botica'] = $this->cargarRankingBotica($user->id, $app_user->botica);
+////        $apiResponse['ranking_zona'] = $this->cargarRankingZona($user->id, $app_user->grupo);
+//
+//        return response()->json($apiResponse, 200);
+//    }
     /***********************************REDISEÑO******************* */
     //CARGAR RANKINGS
 
@@ -71,19 +73,26 @@ class RestRankController extends Controller
                 $q->select('id', 'name', 'lastname', 'surname')
                     ->where('subworkspace_id', $user->subworkspace_id);
             })
-            ->select('user_id', 'score', 'last_time_evaluated_at');
+            ->select('summary_users.user_id', 'score', 'last_time_evaluated_at');
 
         if ($criterion_code)
+//            $q_ranking
+//                ->join('users as u', 'u.id', 'summary_users.user_id')
+//                ->join('criterion_value_user as cvu', 'cvu.user_id', 'u.id')
+//                ->join('criterion_values as cv', 'cv.id', 'cvu.criterion_value_id')
+//                ->where('cv.criterion_id', $criterion_code);
             $q_ranking->whereHas(
                 'user.criterion_values',
-                fn($q) => $q->whereRelation('criterion', 'code', $criterion_code)
+                fn($q) => $q
+//                    ->where('criterion_id', $criterion_code)
+                    ->whereRelation('criterion', 'code', $criterion_code)
             );
 
         $temp = $q_ranking->whereRelation('user', 'active', ACTIVE)
             ->whereNotNull('last_time_evaluated_at')
             ->orderBy('score', 'desc')
             ->orderBy('last_time_evaluated_at')
-            ->take(10)
+            ->limit(10)
             ->get();
 
         $i = 0;
