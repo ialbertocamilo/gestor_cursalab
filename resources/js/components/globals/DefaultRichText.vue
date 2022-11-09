@@ -31,6 +31,11 @@
              v-text="'Campo requerido'"
              style="color: #FF5252; font-size: 12px"
         />
+        <div v-if="showAlertLength" 
+             class="v-messages__message mt-2"
+             v-text="`El campo debe tener menos de ${maxLength} caracteres`"
+             style="color: #FF5252; font-size: 12px"
+        />
     </div>
 </template>
 
@@ -64,10 +69,15 @@ export default {
             type: Boolean,
             default: false,
         },
+        maxLength: { 
+            type: Number, 
+            default: 200 
+        }
     },
     data() {
         return {
             localText: null,
+            showAlertLength: false
         }
     },
     created() {
@@ -85,13 +95,33 @@ export default {
         }
     },
     methods: {
+        emitLengthState(st) {
+            let vue = this
+
+            vue.showAlertLength = st;
+            vue.$emit('stateLength', st);
+        },
         updateValue(value) {
             let vue = this
+            
             if (value !== ""){
                 vue.$emit('setVaidateRequired', false)
             }
 
-            vue.$emit('input', value || null)
+            // check length 
+            if(value) {
+                if(value.length > vue.maxLength) {
+                    vue.emitLengthState(true)
+                } else {
+                    vue.emitLengthState(false)
+                    vue.$emit('input', value || null)
+                }
+            }else {
+                vue.emitLengthState(false);
+                vue.$emit('input', value || null)
+            }
+
+
         },
         onClear() {
             let vue = this

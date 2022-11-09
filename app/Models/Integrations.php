@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Models\Massive\ChangeStateUserMassive;
 use App\Http\Resources\UserIntegrationResource;
 use App\Http\Resources\CourseIntegrationResource;
+use App\Http\Resources\UserProgressIntegrationResource;
 use App\Http\Resources\CourseProgressIntegrationResource;
 
 class Integrations extends BaseModel
@@ -29,12 +30,42 @@ class Integrations extends BaseModel
         }])
         ->whereNotNull('subworkspace_id')->select('id','username','fullname','subworkspace_id')
         ->paginate(500);
-        UserIntegrationResource::collection($users);
+        UserProgressIntegrationResource::collection($users);
         $data = self::generateExternalApiPageData($users,'users');
         // $response_paginate
         return  ['data'=>$data,'code'=>200];
     }
-    
+    protected function listUsers($request){
+        $workspace_id = $request->get('workspace_id');
+        $document = $request->get('document');
+
+        if(!$workspace_id && !$document){
+            $message = ($workspace_id) ? 'The field document is required.' : 'The field workspace_id is required';
+            return ['data'=>['message'=>$message],'code'=>'400'];
+        }
+
+        $users = User::
+            select('id','active','subworkspace_id','document','person_number','fullname','name','lastname','surname','username','phone_number','email')
+            ->with(['criterion_values:id,value_text,criterion_id','criterion_values.criterion:id,code']);
+        
+        if($document){
+            $users  = $users->where('document',$document);
+        }  
+        if($workspace_id){
+            $users  = $users->whereHas('subworkspace',function($q) use ($workspace_id){
+                        $q->whereRelation('parent', 'id', $workspace_id);
+                    });
+        }
+          
+        $users  = $users->paginate(500);
+
+        UserIntegrationResource::collection($users);
+
+        $data = self::generateExternalApiPageData($users,'users');
+        
+        return  ['data'=>$data,'code'=>200];
+    }
+
     protected function getCourseProgress($request){
         $course = $request->course;
         $course->load('segments.values');
@@ -62,6 +93,7 @@ class Integrations extends BaseModel
     }
     protected function updateCreateUsers($users,$workspace_id){
         $user_massive = new UserMassive();
+        $user_massive->current_workspace = true;
         $user_massive->current_workspace = Workspace::where('id',$workspace_id)->first();
         $users_collect = collect();
         $static_headers = $user_massive->getStaticHeaders();
@@ -236,4 +268,5 @@ class Integrations extends BaseModel
         }
         return  ['data'=>['errors'=>$error,'message'=>$message],'code'=>$code];
     }
+    
 }

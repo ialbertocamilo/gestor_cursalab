@@ -93,6 +93,7 @@ class Taxonomia extends Model
         if ( ! $taxonomia ) :
 
             $data = [
+                'workspace_id' => get_current_workspace()->id,
                 'grupo' => $group,
                 'tipo' => $type,
                 'nombre' => $name,

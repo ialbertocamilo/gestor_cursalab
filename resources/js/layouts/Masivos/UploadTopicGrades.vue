@@ -140,7 +140,7 @@ export default {
     },
     mounted() {
         this.getInitialData();
-        window.Echo.channel(`upload-topic-grades.${this.user_id}.${number_socket}`).listen('MassiveUploadTopicGradesProgressEvent',result=>{
+        window.Echo.channel(`upload-topic-grades.${this.user_id}.${number_socket}`).listen('MassiveUploadProgressEvent',result=>{
             if(percentLoader){
                 if(result.percent){
                     percentLoader.innerHTML = `${result.percent}%`;
@@ -221,6 +221,11 @@ export default {
                         "Se han encontrado observaciones. Descargar lista de observaciones"
                     );
                     vue.hideLoader();
+                }).catch(err=>{
+                    vue.hideLoader();
+                    if(err.message){
+                        alert(err.message);
+                    }
                 })
         },
         disabledButton() {

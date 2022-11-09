@@ -45,6 +45,7 @@
                                 clearable
                                 dense
                                 v-model="newCategoria.name"
+                                :rules="rules.categoria"
                             />
                         </v-col>
                         <v-col cols="4">
@@ -76,6 +77,7 @@
                                         <template v-slot:input>
                                             <v-text-field
                                                 v-model="categoria.name"
+                                                :rules="rules.categoria"
                                                 label="Edit"
                                                 single-line
                                                 counter
@@ -162,6 +164,10 @@ export default {
                 color: '',
                 text: '',
             },
+
+            rules:{
+                categoria: this.getRules(['required-strict']),
+            },
             categorias: [],
             filter: null,
             deleteItem: null,
@@ -177,6 +183,12 @@ export default {
     methods: {
         saveCategoria() {
             let vue = this
+
+            // validate create categoria
+            const newcategoria = vue.newCategoria.name; 
+            if(!newcategoria) return;
+            if(!newcategoria.trim().length) return;
+
             vue.$http.post(`/videoteca/categorias`, vue.newCategoria)
                 .then(({data}) => {
                     vue.showSnackbar(vue.snackBar, true, data.data.msg)
@@ -187,6 +199,11 @@ export default {
         },
         editCategoria(tag) {
             let vue = this
+
+            // validate edit categoria
+            if(!tag.name) return vue.getData();
+            if(!tag.name.trim().length) return vue.getData();
+
             vue.$http.put(`/videoteca/categorias/${tag.id}/update`, tag)
                 .then(({data}) => {
                     vue.showSnackbar(vue.snackBar, true, data.data.msg)

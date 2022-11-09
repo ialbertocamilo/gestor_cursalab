@@ -133,7 +133,15 @@ class Topic extends BaseModel
             else :
                 $tema = self::create($data);
             endif;
-
+            if ($data['topic_requirement_id']){
+                Requirement::updateOrCreate(
+                    ['model_type' => Topic::class, 'model_id' => $tema->id,],
+                    ['requirement_type' => Topic::class, 'requirement_id' => $data['topic_requirement_id']]
+                );
+            }
+            else{
+                $tema->requirements()->delete();
+            }
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
                 $medias = array();
@@ -436,7 +444,7 @@ class Topic extends BaseModel
         $sub_workspace = $user->subworkspace;
         $mod_eval = $sub_workspace->mod_evaluaciones;
 
-        $max_attempts = (int)$mod_eval['nro_intentos'];
+        $max_attempts = isset($mod_eval['nro_intentos']) ? (int)$mod_eval['nro_intentos'] : 5;
 
         $schools_courses = [];
 
@@ -629,5 +637,55 @@ class Topic extends BaseModel
             'grade' => $topic_grade,
             'status' => $topic_status,
         ];
+    }
+
+    protected function getCounter($topic)
+    {
+        $topic->load('course.schools');
+
+        $user = auth()->user()->load('subworkspace');
+
+        $row = SummaryTopic::getCurrentRow($topic, $user);
+
+        $counter = false;
+
+        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft()) {
+
+            $times = [];
+
+            if ($topic->course->reinicios_programado)
+                $times[] = $topic->course->reinicios_programado;
+
+            // if ($topic->course->reinicios_programado)
+            //     $times[] = $topic->course->reinicios_programado;
+
+            if ($user->subworkspace->reinicios_programado)
+                $times[] = $user->subworkspace->reinicios_programado;
+
+            if (count($times) > 0) {
+
+                $scheduled = false;
+                $minutes = 0;
+
+                foreach ($times as $time) {
+
+                    if ($time['activado']) {
+
+                        $scheduled = true;
+                        $minutes = $time['tiempo_en_minutos'];
+
+                        break;
+                    }
+                }
+
+                if ($scheduled and $row->last_time_evaluated_at) {
+
+                    $finishes_at = $row->last_time_evaluated_at->addMinutes($minutes);
+                    $counter = $finishes_at->diff(now())->format('%y/%m/%d %H:%i:%s');
+                }
+            }
+        }
+
+        return $counter;
     }
 }

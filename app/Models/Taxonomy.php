@@ -108,6 +108,25 @@ class Taxonomy extends Model
             ->get(['name', 'id', 'code', 'name as nombre']);
     }
 
+    protected function getDataForSelectAttrs(string $groupName, string $typeName, array $attributes)
+    {
+        return Taxonomy::where('type', $typeName)
+            ->where('group', $groupName)
+            ->where('active', 1)
+            ->orderBy('name', 'ASC')
+            ->get($attributes);
+    }
+
+    protected function getDataForSelectWorkspace(string $groupName, string $typeName)
+    {
+        return Taxonomy::where('workspace_id', get_current_workspace()->id)
+            ->where('group', $groupName)
+            ->where('type', $typeName)
+            ->where('active', 1)
+            ->orderBy('name', 'ASC')
+            ->get(['name', 'id', 'code', 'name as nombre']);
+    }
+
     /**
      * Load Vademecum categories
      *
@@ -145,9 +164,10 @@ class Taxonomy extends Model
      *
      * @return Builder
      */
-    protected function videotecaTags()
+    protected function videotecaTags($workspaceId)
     {
         return Taxonomy::query()
+                        ->where('workspace_id', $workspaceId)
                         ->where('group', 'videoteca')
                         ->where('type', 'tag')
                         ->where('active', ACTIVE);
@@ -158,9 +178,10 @@ class Taxonomy extends Model
      *
      * @return Builder
      */
-    protected function videotecaCategories() {
+    protected function videotecaCategories($workspaceId) {
 
         return Taxonomy::query()
+                        ->where('workspace_id', $workspaceId)
                         ->where('group', 'videoteca')
                         ->where('type', 'categoria')
                         ->where('active', ACTIVE);
@@ -351,6 +372,33 @@ class Taxonomy extends Model
         if ( ! $taxonomy ) :
 
             $data = [
+                'group' => $group,
+                'type' => $type,
+                'name' => $name,
+                'active' => 1,
+            ];
+
+            $taxonomy = Taxonomy::create($data);
+
+        endif;
+
+        return $taxonomy;
+    }
+
+    protected function getOrCreateWithWorkspace($group, $type, $name)
+    {
+        $name = trim($name);
+
+        $taxonomy = Taxonomy::where('group', $group)
+                             ->where('workspace_id', get_current_workspace()->id)
+                             ->where('type', $type)
+                             ->where('name', $name)
+                             ->first();
+
+        if ( ! $taxonomy ) :
+
+            $data = [
+                'workspace_id' => get_current_workspace()->id,
                 'group' => $group,
                 'type' => $type,
                 'name' => $name,

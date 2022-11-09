@@ -120,6 +120,11 @@ export default {
                             link:'/documentation-api/progress',
                         },
                         {
+                            icon:'mdi-account',
+                            title:'Listado de usuarios',
+                            link:'/documentation-api/users',
+                        },
+                        {
                             icon:'mdi-book',
                             title:'Listado de cursos',
                             link:'/documentation-api/courses',

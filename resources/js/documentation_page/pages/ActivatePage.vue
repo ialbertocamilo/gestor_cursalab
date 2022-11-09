@@ -107,7 +107,6 @@ code:
     "amount_errors": "Cantida|d de errores encontrados en la petición.",
     "processed_data": "Cantidad de datos procesados obtenidos de la petición",
     "errors":"Listado de errores"{
-        "type": "",
         "message": "Mensaje del error",
         "value": "El valor enviado en la petición"
     },

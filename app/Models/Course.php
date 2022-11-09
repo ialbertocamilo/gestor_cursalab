@@ -12,11 +12,12 @@ class Course extends BaseModel
         'assessable', 'freely_eligible', 'type_id',
         'position', 'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
+        'show_certification_date'
     ];
 
     protected $casts = [
         'mod_evaluaciones' => 'array',
-        'scheduled_restarts' => 'array',
+        'show_certification_date' => 'boolean',
     ];
 
     public function schools()
