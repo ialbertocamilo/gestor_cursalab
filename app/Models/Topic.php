@@ -653,8 +653,8 @@ class Topic extends BaseModel
 
             $times = [];
 
-            if ($topic->course->reinicios_programado)
-                $times[] = $topic->course->reinicios_programado;
+            if ($topic->course->scheduled_restarts)
+                $times[] = $topic->course->scheduled_restarts;
 
             // if ($topic->course->reinicios_programado)
             //     $times[] = $topic->course->reinicios_programado;
