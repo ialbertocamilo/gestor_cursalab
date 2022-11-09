@@ -655,7 +655,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses)
     {
-        $user->loadMissing('subworkspace.parent');
+        $user->load('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
 
