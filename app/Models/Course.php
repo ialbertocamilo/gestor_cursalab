@@ -17,6 +17,7 @@ class Course extends BaseModel
 
     protected $casts = [
         'mod_evaluaciones' => 'array',
+        'scheduled_restarts' => 'array',
         'show_certification_date' => 'boolean',
     ];
 
@@ -625,7 +626,7 @@ class Course extends BaseModel
             // $query->where(function($q) use ($segment) {
 
                 $grouped = $segment->values->groupBy('criterion_id');
-                
+
                 foreach ($grouped as $values) {
 
                     $query->whereHas('criterion_values', function ($qu) use ($values) {
@@ -636,7 +637,7 @@ class Course extends BaseModel
                     });
                 }
             // });
-            
+
             // $result = $query->get()->pluck('id')->toArray();
 
             // $users[$key] = $result;
