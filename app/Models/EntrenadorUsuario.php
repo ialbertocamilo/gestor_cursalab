@@ -12,6 +12,7 @@ class EntrenadorUsuario extends Model
 
     protected $fillable = ['trainer_id', 'user_id', 'active'];
     public $timestamps = false;
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -41,7 +42,9 @@ class EntrenadorUsuario extends Model
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
-        $queryEntrenadores = User::whereIs('trainer');
+//        $queryEntrenadores = User::whereIs('trainer');
+        $queryEntrenadores = User::whereRelation('subworkspace', 'parent_id', $data['workspace_id'])
+            ->whereHas('students');
 
         // $queryEntrenadores = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR);
         if (!empty($filtro) || $filtro == null)
