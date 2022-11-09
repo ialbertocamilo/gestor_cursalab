@@ -11,6 +11,7 @@ class Videoteca extends BaseModel
     protected $table = 'videoteca';
 
     protected $fillable = [
+        'workspace_id',
         'title',
         'description',
         'media_video',
@@ -34,23 +35,31 @@ class Videoteca extends BaseModel
         Relationships
 
     --------------------------------------------------------------------------*/
-
-
     public function media()
     {
-        return $this->hasOne(
+        return $this->belongsTo(
             Media::class,
-            'id',
             'media_id'
         )->select('id', 'title', 'file', 'ext');
+
+        /* return $this->belongsTo(
+            Media::class,
+            'media_id'
+        )->select('id', 'title', 'file', 'ext'); */
     }
 
     public function preview()
     {
-        return $this->hasOne(
+        /*return $this->belongsTo(
             Media::class,
-            'id',
+            'id'
+        )->select('id', 'title', 'file', 'ext'); */
+        
+        return $this->belongsTo(
+            Media::class,
+            //'id',
             'preview_id'
+            //'preview_id'
         )->select('id', 'title', 'file', 'ext');
     }
 
@@ -146,9 +155,11 @@ class Videoteca extends BaseModel
         }
 
         $query = self::with($relationships);
+        $query->where('workspace_id', $request->workspace_id);
 
         if ($request->q)
             $query->where('title', 'like', "%{$request->q}%");
+
 
         if ($request->modulo_id)
             $query->whereHas('modules', function ($q) use ($request) {
@@ -169,10 +180,7 @@ class Videoteca extends BaseModel
         if ($request->no_id)
             $query->whereNotIn('id', [$request->no_id]);
 
-
-
         return $query->latest('id')->paginate($paginate);
-
     }
 
     public function incrementAction($type_id, $user_id, $quantity = 1)
@@ -198,6 +206,7 @@ class Videoteca extends BaseModel
 
                 $videoteca->update($data);
             else:
+                $data['workspace_id'] = get_current_workspace()->id;
                 $videoteca = self::create($data);
             endif;
 
@@ -234,6 +243,17 @@ class Videoteca extends BaseModel
         return $data;
     }
 
+    protected function processTags($tags) {
+        $data = [];
+        foreach ($tags as $key => $tag) {
+            $data[$key]['id'] = $tag->id;
+            $data[$key]['code'] = $tag->code;
+            $data[$key]['name'] = $tag->name;
+        }
+
+        return $data;
+    }
+
     protected function processData(Videoteca $data, $with): array
     {
         $processedData = [
@@ -250,7 +270,8 @@ class Videoteca extends BaseModel
                             ? $data['media_video']
                             : $data['media']['file']
             ],
-            'tags' => $data['tags'],
+            //'tags' => $data['tags'],
+            'tags' => $this->processTags($data['tags']),
             'active' => $data['active']
         ];
 
@@ -312,7 +333,7 @@ class Videoteca extends BaseModel
 
         if ($user)
             $query->whereHas('modules', function ($q) use ($user) {
-                $q->where('id', $user->config_id);
+                $q->where('id', $user->subworkspace_id);
             });
 
         $result = $query->paginate($paginate);
@@ -375,11 +396,14 @@ class Videoteca extends BaseModel
         if (is_numeric($value)) {
 
             return Taxonomy::where('group', 'videoteca')
+                            ->where('workspace_id', get_current_workspace()->id)
                             ->where('type', $type)
                             ->where('id', $value)
                             ->first();
         }
 
-        return Taxonomy::getOrCreate('videoteca', $type, $value);
+        // return Taxonomy::getOrCreate('videoteca', $type, $value);
+        return Taxonomy::getOrCreateWithWorkspace('videoteca', $type, $value);
+
     }
 }

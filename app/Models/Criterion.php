@@ -45,6 +45,7 @@ class Criterion extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'field_id');
     }
 
+    # modules by code
     protected function getValuesForSelect($criterion_code)
     {
         $current_workspace = get_current_workspace();
@@ -58,21 +59,6 @@ class Criterion extends BaseModel
             ->where('active', ACTIVE)
             ->select('id', "$column_name as nombre")
             ->get();
-    }
-
-
-
-    protected function getValuesByCode($criterion_code)
-    {
-        $current_workspace = get_current_workspace();
-        $criterion = Criterion::with('field_type')->where('code', $criterion_code)->first();
-        $column_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
-
-        return CriterionValue::query()
-            ->whereRelation('criterion', 'code', $criterion_code)
-            ->select('id', 'value_text as nombre')
-            ->where('active', ACTIVE)
-            ->limit(5)->get();
     }
 
     protected function search($request)

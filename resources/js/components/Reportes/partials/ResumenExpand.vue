@@ -7,16 +7,15 @@
             <slot name="resumen"></slot>
         </v-alert>
         <v-dialog v-model="dialog" width="700">
+
             <template v-slot:activator="{ on, attrs }">
-<!--                <v-btn-->
-<!--                    color="indigo lighten-5 text-muted text-inherit font-weight-bold btn-resumen absolute"-->
-<!--                    absolute-->
-<!--                    v-bind="attrs"-->
-<!--                    v-on="on"-->
-<!--                >-->
-<!--                    Ver detalles-->
-<!--                    <v-icon class="pl-2 text-muted"> mdi-information </v-icon>-->
-<!--                </v-btn>-->
+                <v-btn color="indigo lighten-5 text-muted text-inherit font-weight-bold btn-resumen absolute" 
+                        absolute
+                        v-bind="attrs"
+                        v-on="on">
+                    Ver detalles
+                    <v-icon class="pl-2 text-muted"> mdi-information </v-icon>
+                </v-btn>
             </template>
 
             <v-card>

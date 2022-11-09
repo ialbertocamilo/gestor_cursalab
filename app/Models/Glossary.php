@@ -102,14 +102,27 @@ class Glossary extends Model
         );
     }
 
-    public function modules()
-    {
+
+    /* public function modules(){
         return $this->belongsToMany(
             CriterionValue::class,
             'glossary_module',
             'glossary_id',
             'module_id'
         );
+
+    }*/
+
+    public function modules()
+    {
+
+        return $this->belongsToMany(
+            Workspace::class,
+            'glossary_module',
+            'glossary_id',
+            'module_id'
+        );
+
     }
 
     public function glossary_module() {
@@ -254,8 +267,7 @@ class Glossary extends Model
 
             $relationships = [
                 'modules' => function ($q) use ($request) {
-                    if ($request->module_id)
-                        $q->where('id', $request->module_id);
+                    if ($request->module_id) $q->where('id', $request->module_id);
                 },
                 'categoria', 'principios_activos', 'contraindicaciones',
                 'interacciones', 'reacciones', 'laboratorio', 'advertencias',
@@ -385,17 +397,122 @@ class Glossary extends Model
         return ['status' => 'success', 'message' => $message];
     }
 
+    protected function getValuesModule()
+    {
+        return Workspace::loadSubWorkspaces(['id', 'name as nombre']);
+    }
+
+
+    protected function getCareersCategory($modulos, $code = 'career') {
+        $carreras_module = Carrera::with('glosario_categorias')->get();
+
+        $criterios = CriterionValue::query()
+                                   ->whereRelation('criterion', 'code', $code)
+                                   ->where('active', ACTIVE)
+                                   ->select('id', "value_text as nombre")
+                                   ->get();
+                                   //->limit(5)->get();
+
+        $stack_categories = [];
+        foreach ($carreras_module as $cm_module) {
+            if(!$cm_module->glosario_categoria_id) {
+                $stack_categories[$cm_module->module_id][$cm_module->carrera_id] = [];
+            }else {
+                $stack_categories[$cm_module->module_id][$cm_module->carrera_id][]['id'] = $cm_module->glosario_categoria_id;
+            }
+        }
+
+        $carreras = [];
+        foreach($modulos as $modulo) {
+            // $stack = []
+            foreach ($criterios as $key => $criterio) {
+                $categories = $stack_categories[$modulo->id][$criterio->id] ?? [];
+
+                $stack[$key]['id'] = $criterio->id;
+                $stack[$key]['nombre'] = $criterio->nombre;
+                $stack[$key]['glosario_categorias'] = $categories;
+            }
+            $carreras[$modulo->id] = $stack;
+        }
+
+        return $carreras;
+    }
+
+
+    protected function insertCareerCategory($module_id, $carrera_id, $data)
+    {
+        foreach ($data as $key => ['id' => $index]) {
+
+            $instance = new Carrera;
+
+            $instance->module_id = $module_id;
+            $instance->carrera_id = $carrera_id;
+            $instance->glosario_categoria_id = $index;
+
+            $instance->save();
+        }
+    }
+
+    protected function deleteCareerCategory($module_id, $carrera_id)
+    {
+        return Carrera::where('module_id', $module_id)
+                      ->where('carrera_id', $carrera_id)
+                      ->delete();
+    }
+
+    protected function checkRowIsAvailable($module_id, $carrera_id)
+    {
+        return Carrera::where('module_id', $module_id)
+                      ->where('carrera_id', $carrera_id)
+                      ->count();
+    }
+
+    protected function setNullCategories($module_id, $carrera_id) {
+
+        return Carrera::where('module_id', $module_id)
+                      ->where('carrera_id', $carrera_id)
+                      ->update(['glosario_categoria_id' => NULL]);
+    }
+
     protected function storeCarreerCategories($data)
     {
         try {
 
             $message = 'Registros actualizados correctamente';
-
             DB::beginTransaction();
 
-            foreach ($data['modulos_carreras'] as $modulo_id => $carreras)
+            ['modulos_carreras' => $modulos_carreras] = $data;
+
+            foreach($modulos_carreras as $module_id => $carreras) {
+                // $module_id = module_id
+                foreach ($carreras as $key => [ 'id' => $carrera_id,
+                                                'glosario_categorias' => $glosario_categorias])
+                {
+                    $check_categories = empty($glosario_categorias);
+                    $check_available = $this->checkRowIsAvailable($module_id, $carrera_id);
+
+                    #update insert dinamic
+                    if($check_available) {
+
+                        if($check_categories) {
+                            $this->deleteCareerCategory($module_id, $carrera_id);
+                        }
+
+                        if(!$check_categories) {
+                            $this->deleteCareerCategory($module_id, $carrera_id);
+                            $this->insertCareerCategory($module_id, $carrera_id, $glosario_categorias);
+                        }
+
+                    } else {
+                        $this->insertCareerCategory($module_id, $carrera_id, $glosario_categorias);
+                    }
+
+                }
+            }
+
+            /*foreach ($data['modulos_carreras'] as $modulo_id => $carreras)
             {
-                foreach($carreras AS $carrera)
+                foreach($carreras as $carrera)
                 {
                     $model = Carrera::find($carrera['id']);
 
@@ -403,8 +520,9 @@ class Glossary extends Model
                     // $categorias = !empty($row['glosario_categoria_id']) ? $row['glosario_categoria_id'] : [];
 
                     $model->glosario_categorias()->sync($categorias);
+
                 }
-            }
+            }*/
 
             DB::commit();
 
@@ -526,26 +644,28 @@ class Glossary extends Model
 
         foreach ($glossaries as $key => $row)
         {
-            $modulo = $row->modulos->first();
+            $modulo = $row->modules->first();
 
             $data[$key]['name'] = $row->name;
-            $data[$key]['codigo'] = $modulo->pivot->codigo ?? '';
+            # code glosario
+            # $data[$key]['codigo'] = $modulo->pivot->codigo ?? '';
+            $data[$key]['codigo'] = $row->code ?? '';
 
-            $data[$key]['categoria'] = $row->categoria->nombre ?? '';
-            $data[$key]['jerarquia'] = $row->jerarquia->nombre ?? '';
-            $data[$key]['laboratorio'] = $row->laboratorio->nombre ?? '';
-            $data[$key]['advertencia'] = $row->advertencias->nombre ?? '';
-            $data[$key]['condicion_de_venta'] = $row->condicion_de_venta->nombre ?? '';
-            $data[$key]['via_de_administracion'] = $row->via_de_administracion->nombre ?? '';
-            $data[$key]['grupo_farmacologico'] = $row->grupo_farmacologico->nombre ?? '';
-            $data[$key]['dosis_adulto'] = $row->dosis_adulto->nombre ?? '';
-            $data[$key]['dosis_nino'] = $row->dosis_nino->nombre ?? '';
-            $data[$key]['recomendacion_de_administracion'] = $row->recomendacion_de_administracion->nombre ?? '';
+            $data[$key]['categoria'] = $row->categoria->name ?? '';
+            $data[$key]['jerarquia'] = $row->jerarquia->name ?? '';
+            $data[$key]['laboratorio'] = $row->laboratorio->name ?? '';
+            $data[$key]['advertencia'] = $row->advertencias->name ?? '';
+            $data[$key]['condicion_de_venta'] = $row->condicion_de_venta->name ?? '';
+            $data[$key]['via_de_administracion'] = $row->via_de_administracion->name ?? '';
+            $data[$key]['grupo_farmacologico'] = $row->grupo_farmacologico->name ?? '';
+            $data[$key]['dosis_adulto'] = $row->dosis_adulto->name ?? '';
+            $data[$key]['dosis_nino'] = $row->dosis_nino->name ?? '';
+            $data[$key]['recomendacion_de_administracion'] = $row->recomendacion_de_administracion->name ?? '';
 
-            $data[$key]['principios_activos'] = $row->principios_activos->pluck('nombre')->toArray();
-            $data[$key]['contraindicaciones'] = $row->contraindicaciones->pluck('nombre')->toArray();
-            $data[$key]['reacciones'] = $row->reacciones->pluck('nombre')->toArray();
-            $data[$key]['interacciones'] = $row->interacciones->pluck('nombre')->toArray();
+            $data[$key]['principios_activos'] = $row->principios_activos->pluck('name')->toArray();
+            $data[$key]['contraindicaciones'] = $row->contraindicaciones->pluck('name')->toArray();
+            $data[$key]['reacciones'] = $row->reacciones->pluck('name')->toArray();
+            $data[$key]['interacciones'] = $row->interacciones->pluck('name')->toArray();
         }
 
         $result['data'] = $data;
@@ -556,7 +676,8 @@ class Glossary extends Model
     protected function getModulesWithCode($glossaryModules)
     {
 
-        $modules = Criterion::getValuesForSelect('module');
+        // $modules = Criterion::getValuesForSelect('module');
+        $modules = $this->getValuesModule();
 
         $glossaryModules = $glossaryModules->toArray();
         foreach ($glossaryModules as $module) {

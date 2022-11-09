@@ -31,20 +31,20 @@ class VideotecaStoreRequest extends FormRequest
 
 
             'media_type' => 'nullable',
-            'modules' => 'nullable',
+            'modules' => 'required',
             'tags' => 'nullable',
             'media_video' => 'nullable',
 
-            // 'media' => 'nullable',
-            // 'media_id' => 'nullable',
-
-            // 'preview' => 'nullable',
-            // 'preview_id' => 'nullable',
-
             'media' => 'nullable',
-            'file_media' => 'nullable',
+            'media_id' => 'nullable',
 
             'preview' => 'nullable',
+            'preview_id' => 'nullable',
+
+            //'media' => 'nullable',
+            'file_media' => 'nullable',
+
+            //'preview' => 'nullable',
             'file_preview' => 'nullable',
 
         ];
@@ -54,8 +54,8 @@ class VideotecaStoreRequest extends FormRequest
     {
         $data = [];
 
-        if ( ! $this->has('estado') )
-            $data['estado'] = false;
+        if ( ! $this->has('active') )
+            $data['active'] = false;
 
         return $this->merge($data)->all();
     }

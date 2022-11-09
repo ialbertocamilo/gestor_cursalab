@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Http\Resources\SegmentSearchUsersResource;
 use DB;
 
-class Segment extends BaseModel
+class
+Segment extends BaseModel
 {
     protected $fillable = [
         'name', 'model_id', 'model_type', 'active', 'type_id', 'code_id'

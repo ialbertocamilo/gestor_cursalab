@@ -38,7 +38,8 @@ class GlossaryController extends Controller
      */
     public function getListSelects()
     {
-        $modules = Criterion::getValuesForSelect('module');
+        // $modules = Glossary::getValuesForSelect('module');
+        $modules = Glossary::getValuesModule();
         $categories = Taxonomy::getDataForSelect('glosario', 'categoria');
         $laboratorios = Taxonomy::getDataForSelect('glosario', 'laboratorio');
         $principios_activos = Taxonomy::getDataForSelect('glosario', 'principio_activo');
@@ -56,8 +57,8 @@ class GlossaryController extends Controller
     public function create()
     {
         $selects = $this->getSelectsForForm();
-        //$modulos = Glossary::getModulesWithCode();
-        $modulos =  Criterion::getValuesForSelect('module');
+        $modulos = Glossary::getValuesModule();
+        // $modulos =  Criterion::getValuesForSelect('module');
 
         return $this->success(get_defined_vars());
     }
@@ -95,7 +96,8 @@ class GlossaryController extends Controller
         if (count($glossaryModule) > 0) {
             $modulos = Glossary::getModulesWithCode($glossary->glossary_module);
         } else {
-            $modulos = Criterion::getValuesForSelect('module');
+            // $modulos = Criterion::getValuesForSelect('module');
+            $modulos = Glossary::getValuesModule();
         }
 
         return $this->success(get_defined_vars());
@@ -196,7 +198,8 @@ class GlossaryController extends Controller
      */
     public function import()
     {
-        $modulos = Criterion::getValuesForSelect('module');
+        //$modulos = Criterion::getValuesForSelect('module');
+        $modulos = Glossary::getValuesModule();
         $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
 
         return $this->success(get_defined_vars());
@@ -215,42 +218,16 @@ class GlossaryController extends Controller
 
     public function carreerCategories()
     {
-        $modulos = Criterion::getValuesForSelect('module');
+        // $modulos = Criterion::getValuesForSelect('module');
+        $modulos = Glossary::getValuesModule();
         $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
-        $st_carreras = Criterion::getValuesByCode('position_name');
+        $carreras = Glossary::getCareersCategory($modulos);
 
-        // $categorias = Taxonomy::getDataForSelect('glosario', 'categoria');
-
-        // $carreras = Criterion::getCriteriaFromWorkspace(25);
-        // $criterios = CriterionValue::getCriteriaFromWorkspace(25);
-        // $carreras = Workspace::find(25)->criterionWorkspace;
-
-        // $carreras = CriterionValue::whereRelation('criterion', 'code', 'career')
-        //                             ->select('id', 'value_text as nombre')
-        //                             ->where('active', ACTIVE)
-        //                             ->get();
-
-
-        $carreras = [];
-
-        foreach ($modulos as $modulo) {
-            foreach($st_carreras as $carrera) {
-                $carrera->glosario_categorias = $categorias;
-            }
-            $carreras[$modulo->id] = $st_carreras;
-        }
-
-       // $carreras = Carrera::with('glosario_categorias:id,nombre')
-       //                    ->where('estado', 1)
-       //                    ->get(['id', 'config_id', 'nombre']);
-
-       return $this->success(compact('modulos','categorias','carreras'));
+        return $this->success(compact('modulos','categorias','carreras'));
     }
 
     public function carreerCategoriesStore(Request $request)
     {
-        return $request->all();
-
         return Glossary::storeCarreerCategories($request->all());
     }
 

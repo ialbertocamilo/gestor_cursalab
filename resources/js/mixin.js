@@ -39,10 +39,39 @@ export default {
             ],
             mixin_extensiones: extensiones,
             mixin_default_media_images: default_media_images,
-            abc: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "U", "V", "W", "X", "Y", "Z",],
+            abc: [
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S","T","U", "V", "W", "X", "Y", "Z","AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AU", "AV", "AW", "AX", "AY", "AZ",
+            ],
         }
     },
+    // 25
     methods: {
+        descargarExcelwithValuesInArray({headers,values,comments,filename}){
+            //values like array's of array [["name","lastname","email"],["aldo","lopez","aldo@gmail.com"]["pepe","perez","pepe@gmail.com"]]
+            if (window.confirm('Se han encontrado observaciones. ¿Desea descargar lista de observaciones?')) {
+                values.unshift(headers);
+                const data = XLSX.utils.aoa_to_sheet(values);
+                //set comments
+                for (const comment of comments) {
+                    let cell = data[comment.cell_name];
+                    if(cell){
+                        console.log(cell);
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern:'darkVertical',
+                            fgColor:{argb:'006080'}
+                        };
+                        if(!cell.c) cell.c = [];
+                        cell.c.hidden = true;
+                        cell.c.push({a:"SheetJS", t:comment.message});
+                        
+                    }
+                }
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, data, filename);
+                XLSX.writeFile(workbook, `${filename}.xlsx`);
+            }
+        },
         descargarExcelFromArray(headers, values, array, filename, confirm_text,confirm=false) {
             if ((confirm) || window.confirm(confirm_text)) {
                 let data = XLSX.utils.json_to_sheet(array, {
@@ -371,6 +400,16 @@ export default {
             arrayRules.forEach((labelRule) => {
                 if (labelRule.indexOf("required") > -1) {
                     const tempRule = (v) => !!v || "Campo requerido";
+                    tempRules.push(tempRule);
+                }
+
+                if (labelRule.indexOf("required-strict") > -1) {
+                    const tempRule = (v) =>  {
+                        if(!v) return 'Campo requerido';
+                        if(!v.trim().length) return 'Campo requerido';
+
+                        return true;
+                    }
                     tempRules.push(tempRule);
                 }
 

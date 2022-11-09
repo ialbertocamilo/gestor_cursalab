@@ -269,17 +269,14 @@ function removeUCModuleNameFromCourseName($course_name): string
 {
     $name = $course_name;
 
-    if (str_contains($course_name, "Capacitación Mifarma - ")){
-        $name = substr($course_name, 23);
-    }
+    if (str_contains($course_name, "Capacitación Mifarma - "))
+        $name = str_replace("Capacitación Mifarma - ", "", $course_name);
 
-    if (str_contains($course_name, "Capacitación Inkafarma - ")){
-        $name = substr($course_name, 25);
-    }
+    if (str_contains($course_name, "Capacitación Inkafarma - "))
+        $name = str_replace("Capacitación Inkafarma - ", "", $course_name);
 
-    if (str_contains($course_name, "Capacitación Farmacias Peruanas - ")){
-        $name = substr($course_name, 34);
-    }
+    if (str_contains($course_name, "Capacitación Farmacias Peruanas - "))
+        $name = str_replace("Capacitación Farmacias Peruanas - ", "", $course_name);
 
     return $name;
 }

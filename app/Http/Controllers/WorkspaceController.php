@@ -198,10 +198,17 @@ class WorkspaceController extends Controller
             $item->active = false;
         });
 
-        $side_menu = Taxonomy::where('group', 'system')->where('type', 'side_menu')
-            ->select('id', 'name')
-            ->where('active', ACTIVE)
-            ->get();
+        $side_menu = Taxonomy::select('id', 'name')
+                             ->where('group', 'system')
+                             ->where('type', 'side_menu')
+                             ->where('active', ACTIVE);
+
+        #=== visible glossary only for FP ===
+        $jump_menu = (get_current_workspace()->id !== 25);
+        if($jump_menu) $side_menu->whereNotIn('name', ['Glosario']);
+        #=== visible glossary only for FP ===
+        
+        $side_menu = $side_menu->get();
 
         $side_menu->each(function ($item) {
             $item->active = false;
