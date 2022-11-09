@@ -27,7 +27,7 @@ class SummaryUser extends Summary
     protected function updateUserData($user = null)
     {
         $user = $user ?? auth()->user();
-        $courses_id = $user->getCurrentCourses()->pluck('id');
+        $courses_id = $user->getCurrentCourses(withFreeCourses : false)->pluck('id');
         $count_courses_assigned = count($courses_id);
 //        info($courses_id);
 //        info("COUNT COURSES ASSIGNED :: ". $count_courses_assigned);
