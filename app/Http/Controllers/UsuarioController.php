@@ -178,7 +178,7 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
-        $data['subworkspace_id'] = get_current_workspace()?->id;
+        // $data['subworkspace_id'] = get_current_workspace()?->id;
 
         User::storeRequest($data);
 
@@ -189,7 +189,7 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
-        $data['subworkspace_id'] = get_current_workspace()?->id;
+        // $data['subworkspace_id'] = get_current_workspace()?->id;
 //        info($data);
         User::storeRequest($data, $user);
 
