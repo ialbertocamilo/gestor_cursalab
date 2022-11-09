@@ -2,7 +2,7 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
         <v-card-title>
-            Reinicios Masivos
+            Intentos Masivos
         </v-card-title>
     </v-card>
 

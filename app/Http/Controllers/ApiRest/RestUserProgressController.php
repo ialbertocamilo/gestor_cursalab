@@ -23,13 +23,19 @@ class RestUserProgressController extends Controller
 //        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
         $completed_courses = $summary_user ?
             $user->summary_courses()
-                ->whereHas('course', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
-                ->whereRelation('status', 'code', 'aprobado')->count()
+                ->whereHas('course', fn($q) => $q
+//                    ->whereRelation('type', 'code', '<>', 'free')
+                    ->whereIn('id', $assigned_courses->pluck('id'))
+                )
+                ->whereRelation('status', 'code', 'aprobado')
+                ->count()
             : 0;
         $pending_courses = $assigned_courses->count() - $completed_courses;
         $disapproved_courses = $summary_user ?
             $user->summary_courses()
-                ->whereHas('course', fn($q) => $q->whereIn('id', $assigned_courses->pluck('id')))
+                ->whereHas('course', fn($q) => $q
+//                    ->whereRelation('type', 'code', '<>', 'free')
+                    ->whereIn('id', $assigned_courses->pluck('id')))
                 ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
 
@@ -38,7 +44,9 @@ class RestUserProgressController extends Controller
 
 
         $response['summary_user'] = [
-            'asignados' => $assigned_courses->count(),
+            'asignados' => $assigned_courses
+//                ->where('type.code', '<>', 'free')
+                ->count(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
             'pendientes' => $pending_courses,
@@ -70,7 +78,7 @@ class RestUserProgressController extends Controller
 
             // UC
             $school_name = $school->name;
-            if ($workspace_id === 25){
+            if ($workspace_id === 25) {
                 $school_name = removeUCModuleNameFromCourseName($school_name);
             }
 
@@ -146,7 +154,9 @@ class RestUserProgressController extends Controller
         foreach ($courses as $course) {
             // UC rule
             $course_name = $course->name;
-            if ($workspace_id === 25){
+            $tags = [];
+            if ($workspace_id === 25) {
+                $tags = $course->getCourseTagsToUCByUser($course, $user);
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
 
@@ -175,9 +185,12 @@ class RestUserProgressController extends Controller
                 'nota' => $course_status['average_grade'],
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
+                'tags' => $tags,
                 'temas' => $temp_topics
             ];
         }
+        $columns = array_column($school_courses, 'name');
+        array_multisort($columns, SORT_ASC, $school_courses);
 
         return $school_courses;
 //        return $this->success(['courses' => $school_courses]);

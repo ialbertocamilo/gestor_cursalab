@@ -37,8 +37,8 @@ class AuthController extends Controller
             $data['version'] = strip_tags($data['version'] ?? '');
             $credentials1 = $credentials2 = ['password' => $password];
             // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
-            $credentials1['username'] = $userinput;
-            $credentials2['document'] = $userinput;
+            $credentials1['username'] = trim($userinput);
+            $credentials2['document'] = trim($userinput);
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
 
@@ -92,18 +92,19 @@ class AuthController extends Controller
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
-        // $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
+        $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
-        if ($user->subworkspace_id == 29 AND $user->external_id) {
+        // if ($user->subworkspace_id == 29 AND $user->external_id) {
 
-            // return $this->error("Usuario inactivo temporalmente. Migración en progreso.", http_code: 401);
-            return $this->error(
-                config('errors.maintenance_ucfp'), 503
-            );
-        }
+        //     // return $this->error("Usuario inactivo temporalmente. Migración en progreso.", http_code: 401);
+        //     return $this->error(
+        //         config('errors.maintenance_ucfp'), 503
+        //     );
+        // }
 
         if (!$user->active)
-            return $this->error("Usuario inactivo.", http_code: 401);
+            return $this->error('Tu cuenta se encuentra inactiva.
+            Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
         $user->load('criterion_values:id,value_text');
         $user->updateUserDeviceVersion($data);
@@ -133,6 +134,11 @@ class AuthController extends Controller
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
         }
 
+        $ciclo_actual = null;
+        if ($user->subworkspace->parent_id == 25){
+            $ciclo_actual = $user->getActiveCycle()?->value_text;
+        }
+
         $user_data = [
             "id" => $user->id,
             "dni" => $user->document,
@@ -144,7 +150,8 @@ class AuthController extends Controller
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
             'workspace' => $workspace_data,
-            'can_be_host' => $can_be_host
+            'can_be_host' => $can_be_host,
+            'ciclo_actual' => $ciclo_actual
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo

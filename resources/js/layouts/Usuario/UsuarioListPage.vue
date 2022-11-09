@@ -145,28 +145,31 @@ export default {
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
-                    // {
-                    //     text: "Reporte",
-                    //     type: 'route',
-                    //     icon: 'mdi mdi-file-document-multiple',
-                    //     route: 'reporte_route',
-                    //     route_type: 'external'
-                    // },
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
-                    {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
-                ],
-                more_actions: [
-                    {   text: "Actualizar Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
-                    },
+                    
                     {
                         text: "Reiniciar",
                         icon: 'fas fa-history',
                         type: 'action',
                         method_name: 'reset',
-                        show_condition: 'pruebas_desaprobadas'
+                        show_condition: 'pruebas_desaprobadas',
+                        count: 'failed_topics_count',
+                    },
+
+                    {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
+                ],
+                more_actions: [
+                    {
+                        text: "Reporte",
+                        type: 'route',
+                        icon: 'mdi mdi-file-document-multiple',
+                        route: 'reporte_route',
+                        route_type: 'external'
+                    },
+                    {   text: "Actualizar Estado",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
                     },
                 ]
             },

@@ -150,7 +150,7 @@ class CursosController extends Controller
 
         $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
-        $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
+//        $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
 
         $response_curso = Course::storeRequest($data, $course);
         $response = [

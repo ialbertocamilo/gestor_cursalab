@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UsuarioAyudaResource;
 use App\Models\Criterion;
 use App\Models\Ticket;
+use App\Models\Workspace;
 use App\Models\UsuarioAyuda;
 use App\Notifications\UsuarioAyudaNotification;
 use Illuminate\Http\JsonResponse;
@@ -35,7 +36,8 @@ class UsuarioAyudaController extends Controller
      */
     public function getListSelects()
     {
-        $modulos = Criterion::getValuesForSelect('module');
+        $modulos = Workspace::loadSubWorkspaces(['id', 'name as nombre']);
+        // $modulos = Criterion::getValuesForSelect('module');
         $estados = config('data.soporte-estados');
 
         return $this->success(get_defined_vars());

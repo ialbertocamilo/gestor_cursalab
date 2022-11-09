@@ -12,6 +12,7 @@ use App\Models\School;
 use App\Models\SummaryCourse;
 use App\Models\SummaryTopic;
 use App\Models\Workspace;
+use App\Models\Topic;
 use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -77,6 +78,8 @@ class reinicios_programado extends Command
 
     private function reinicios_programado_v2(){
 
+        $this->info(" Inicio: " . now());
+
         // Initialize workspaces collection
 
         $this->workspaces = Workspace::all();
@@ -84,15 +87,25 @@ class reinicios_programado extends Command
         // Generate list of courses to be reset
 
         $this->findCoursesToBeReset();
-
+        $courses = $this->coursesWorkspaces;
         // Reset attempts and update reset count
+        $summary_topics_id = SummaryTopic::where('passed',0)->where('attempts','>',1)->whereHas('topic',function($q) use($courses){
+            $q->whereIn('course_id',array_column($courses,'courseId'));
+        })->groupBy('topic_id')->select('topic_id')->pluck('topic_id');
+        $courses_id = Topic::whereIn('id',$summary_topics_id)->where('active',1)->select('course_id')->pluck('course_id');
+        // info($courses_id);
+        $_courses = collect($courses)->whereIn('courseId',$courses_id)->all();
 
-        foreach ($this->coursesWorkspaces as $course) {
+        // info($_courses);
+
+        foreach ($_courses as $course) {
 
             $workspaceId = $course['workspaceId'];
             $courseId = $course['courseId'];
             $config = $this->getWorkspaceConfiguration($workspaceId);
             $schedule = json_decode($course['scheduledRestarts'], true);
+
+            // info("course => {$courseId}");
 
             // Calculate date for the next reset,
             // counting from current date
@@ -101,18 +114,21 @@ class reinicios_programado extends Command
             $nextDateFromNow->second = 59;
 
             // Reset attempts
-
+            $config['nro_intentos'] = 3;
+            if($workspaceId ==14){
+                $config['nro_intentos'] = 2;
+            }
             if ($config) {
 
                 // Reset course attempts
 
-                SummaryCourse::resetFailedCourseAttemptsAllUsers(
-                    $courseId, $config['nro_intentos'], $nextDateFromNow
-                );
+                // SummaryCourse::resetFailedCourseAttemptsAllUsers(
+                //     $courseId, $config['nro_intentos'], $nextDateFromNow
+                // );
 
                 // Update course's resets count
 
-                SummaryCourse::updateCourseRestartsCount($courseId);
+                // SummaryCourse::updateCourseRestartsCount($courseId);
 
                 // Reset topics attempts
 
@@ -120,14 +136,16 @@ class reinicios_programado extends Command
                     $courseId, $config['nro_intentos'], $nextDateFromNow
                 );
 
-                // Update topics' resets count
+                // // Update topics' resets count
 
-                $topicsIds = SummaryCourse::getCourseTopicsIds($courseId);
-                foreach ($topicsIds as $topicId) {
-                    SummaryTopic::updateTopicRestartsCount($topicId);
-                }
+                // $topicsIds = SummaryCourse::getCourseTopicsIds($courseId);
+                // foreach ($topicsIds as $topicId) {
+                //     SummaryTopic::updateTopicRestartsCount($topicId);
+                // }
             }
         }
+
+        $this->info(" Fin: " . now());
     }
 
     /**

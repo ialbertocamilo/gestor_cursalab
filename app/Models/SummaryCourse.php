@@ -17,6 +17,10 @@ class SummaryCourse extends Summary
         'completed', 'restarts', 'restarter_id', 'certification_issued_at',
     ];
 
+    protected $casts = [
+        'certification_issued_at' => 'datetime'
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -139,7 +143,10 @@ class SummaryCourse extends Summary
 
         $summaryCourse = $query->first();
 
-        if (!$summaryCourse) return;
+        if (!$summaryCourse) {
+            info("CURSO {$courseId} de USER {$userId} SIN SUMMARYCOURSE");
+            return;
+        }
 
         // Calculate number of restars
 

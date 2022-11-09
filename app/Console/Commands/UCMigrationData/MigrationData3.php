@@ -38,6 +38,9 @@ class MigrationData3 extends Command
 
         $output = $this->output;
 
+        if ($type == 'questions')
+            Migration_3::migratePreguntas($output);
+
         if ($type == 'polls')
             Migration_3::migrateEncuestas($output);
 

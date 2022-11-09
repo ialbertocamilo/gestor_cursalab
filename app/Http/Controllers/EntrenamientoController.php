@@ -113,6 +113,8 @@ class EntrenamientoController extends Controller
 
     public function search(Request $request)
     {
+        $workspace = get_current_workspace();
+        $request->mergeIfMissing(['workspace_id' => $workspace?->id]);
         $data = EntrenadorUsuario::gridEntrenadores($request->all());
 
         // $data = $apiResponse['options'];

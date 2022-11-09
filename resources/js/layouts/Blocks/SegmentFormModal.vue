@@ -7,7 +7,7 @@
         :persistent="true"
     >
         <template v-slot:content>
-            <v-form ref="segmentForm" class="--mb-15">
+            <v-form ref="segmentForm" class="---mb-6">
                 <DefaultErrors :errors="errors"/>
 
                 <v-tabs
@@ -49,6 +49,7 @@
                                     light
                                     v-model="steps"
                                     hide-delimiters
+                                    class="---mb-6"
                                 >
                                     <v-carousel-item
                                         v-for="(row, i) in segments"
@@ -70,6 +71,10 @@
                                                 :options="options"
                                                 @borrar_segment="borrarBloque"
                                             />
+
+                                            <!-- <v-divider class="mx-12"/>
+
+                                            <p class="text-center">Usuarios alcanzados: <strong>{{ total[i] || 0 }}</strong></p> -->
 
                                         </v-sheet>
                                     </v-carousel-item>
@@ -140,6 +145,8 @@ export default {
         return {
             tabs: null,
             steps: 0,
+            // total: 0,
+            total: [],
 
             errors: [],
             showConfigTokens: false,
@@ -270,6 +277,7 @@ export default {
                     };
                 }
                 vue.criteria = _data.criteria;
+                vue.total = _data.users_count;
             });
 
             return 0;

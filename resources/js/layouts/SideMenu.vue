@@ -114,6 +114,16 @@ const SUB_ITEM_GLOSARY =  { title:"Glosario",
                             role:[ "super-user", "admin", "content-manager", "trainer" ]
                           };
 
+const SUB_ITEM_VADEMECUM = {
+                            title:"Vademécum",
+                            icon:"fas fa-file-invoice",
+                            path:"/vademecum",
+                            subpaths:["vademecum"],
+                            selected:false,
+                            permission:"vademecum",
+                            role:["super-user","admin-TEST","content-manager-TEST","trainer-TEST"]
+                        };
+
 export default {
     data: () => ({
         logoIsLoaded: true,
@@ -326,15 +336,7 @@ export default {
                             "trainer"
                         ]
                     },
-                    // {
-                    //     title:"Vademécum",
-                    //     icon:"fas fa-file-invoice",
-                    //     path:"/vademecum",
-                    //     subpaths:["vademecum"],
-                    //     selected:false,
-                    //     permission:"vademecum",
-                    //     role:["super-user","admin","content-manager","trainer"]
-                    // },
+                    
                     {
                          title:"Videoteca",
                          icon:"fas fa-caret-square-right",
@@ -400,20 +402,20 @@ export default {
                             "reports-TEMPORAL_INACTIVO"
                         ]
                     },
-                    {
-                        title: "Aulas Virtuales",
-                        icon: "fas fa-download",
-                        path: "/exportar/conferencias",
-                        subpaths: ["exportar/conferencias"],
-                        selected: false,
-                        permission: "conferencias",
-                        role: [
-                            "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO",
-                            "reports-TEMPORAL_INACTIVO"
-                        ]
-                    },
+                    // {
+                    //     title: "Aulas Virtuales",
+                    //     icon: "fas fa-download",
+                    //     path: "/exportar/conferencias",
+                    //     subpaths: ["exportar/conferencias"],
+                    //     selected: false,
+                    //     permission: "conferencias",
+                    //     role: [
+                    //         "super-user",
+                    //         "admin-TEMPORAL_INACTIVO",
+                    //         "trainer-TEMPORAL_INACTIVO",
+                    //         "reports-TEMPORAL_INACTIVO"
+                    //     ]
+                    // },
                     {
                         title: "Encuestas",
                         icon: "fas fa-poll",
@@ -446,7 +448,7 @@ export default {
                         role: ["super-user", "admin"]
                     },
                     {
-                        title: "Reinicio de usuarios",
+                        title: "Intentos masivos",
                         icon: "fas fa-redo-alt",
                         path: "/masivo/usuarios/index_reinicios",
                         subpaths: ["masivo/usuarios"],
@@ -503,7 +505,7 @@ export default {
                         subpaths: ["formulario-ayuda"],
                         selected: false,
                         role: ["super-user"]
-                    }
+                    },
                     // {
                     //     title:"Ayuda",
                     //     icon:"fas fa-hands-helping",
@@ -512,14 +514,14 @@ export default {
                     //     selected:false,
                     //     permission:"ayuda.index"
                     // },
-                    // {
-                    //     title:"Soporte",
-                    //     icon:"fas fa-headset",
-                    //     path:"/soporte",
-                    //     subpaths:["soporte"],
-                    //     selected:false,
-                    //     permission:"usuarios_ayuda.show"
-                    // },
+                    {
+                        title:"Soporte",
+                        icon:"fas fa-headset",
+                        path:"/soporte",
+                        subpaths:["soporte"],
+                        selected:false,
+                        role: ["super-user"]
+                    },
                 ]
             }
         ]
@@ -614,6 +616,7 @@ export default {
                 const { session:{ workspace } } = data;
                 if(workspace.id === 25) {
                   vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
+                  vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 }
                 //=== only for "Farmacias Peruanas"
 

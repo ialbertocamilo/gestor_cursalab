@@ -280,8 +280,13 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
+                            <!--<Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
                                        :API_REPORTES="API_REPORTES"
+                                       @emitir-reporte="crearReporte"/>-->
+                            
+                            <Vademecum :workspaceId="workspaceId"
+                                       :modules="modules" 
+                                       :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
@@ -290,8 +295,11 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Videoteca :VideotecaList="VideotecaList" :API_FILTROS="API_FILTROS"
+                            <!--<Videoteca :VideotecaList="VideotecaList" :API_FILTROS="API_FILTROS"
                                        :API_REPORTES="API_REPORTES"
+                                       @emitir-reporte="crearReporte"/>-->
+                            <Videoteca :workspaceId="workspaceId"
+                                       :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
