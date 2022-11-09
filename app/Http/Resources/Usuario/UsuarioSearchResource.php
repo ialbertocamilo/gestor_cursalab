@@ -25,7 +25,7 @@ class UsuarioSearchResource extends JsonResource
             'failed_topics_count' => $this->failed_topics_count,
             'pruebas_desaprobadas' => ($request->superuser AND $this->failed_topics_count) ? true : false,
            // 'pruebas_desaprobadas' => true,
-            'reporte_route' => route('exportar.node', ['dni' => $this->dni]),
+            'reporte_route' => route('exportar.node', ['dni' => $this->document]),
             // 'carrera' => $this->matricula_presente->carrera->nombre ?? '----',
             // 'ciclo_actual' => $this->matricula_presente->ciclo->nombre ?? '---',
         ];

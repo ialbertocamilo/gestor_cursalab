@@ -203,15 +203,36 @@
                             </DefaultModalSection>
                         </v-col>
                     </v-row>
-                    <v-row>
-                        <v-col cols="2">
-                            <DefaultToggle
-                                v-model="resource.show_certification_date"
-                                type="show_certification_date"
-                                label="Fecha en diplomas"/>
+
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Configuración de diploma"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+                                        <v-col cols="6" class="d-flex justify-content-center align-items-center">
+                                            <DefaultToggle
+                                                v-model="resource.show_certification_date"
+                                                active-label="Mostrar fecha en diploma"
+                                                inactive-label="No mostrar fecha en diploma"
+                                                 />
+                                        </v-col>
+
+                                        <v-col cols="6">
+                                           * El diploma incluirá la fecha en la que el usuario aprobó el curso.
+                                           <br>
+                                           * Ejemplo: 02 de Enero del 2022
+                                        </v-col>
+                                        
+                                    </v-row>
+                                   
+                                </template>
+                            </DefaultModalSection>
                         </v-col>
-<!--                    </v-row>-->
-<!--                    <v-row>-->
+                    </v-row>
+
+                    <v-row>
                         <v-col cols="2">
                             <DefaultToggle v-model="resource.active"/>
                         </v-col>

@@ -74,7 +74,7 @@
 
                                             <!-- <v-divider class="mx-12"/>
 
-                                            <p class="text-center">Usuarios alcanzados: <strong>{{ total }}</strong></p> -->
+                                            <p class="text-center">Usuarios alcanzados: <strong>{{ total[i] || 0 }}</strong></p> -->
 
                                         </v-sheet>
                                     </v-carousel-item>
@@ -145,7 +145,8 @@ export default {
         return {
             tabs: null,
             steps: 0,
-            total: 0,
+            // total: 0,
+            total: [],
 
             errors: [],
             showConfigTokens: false,
