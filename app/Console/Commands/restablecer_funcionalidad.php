@@ -14,6 +14,7 @@ use App\Models\Criterio;
 use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\Requirement;
+use App\Models\SummaryUser;
 use App\Models\UsuarioCurso;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
@@ -62,9 +63,24 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
         // $this->restoreCriterionDocument();
-        $this->restoreRequirements();
+        // $this->restoreRequirements();
+        $this->restoreSummaries();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+
+    public function restoreSummaries(){
+        $i = 'Fin';
+        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])->chunkById(2500, function ($users_chunked)use($i){
+            $this->info($i);
+            $_bar = $this->output->createProgressBar($users_chunked->count());
+            $_bar->start();
+            foreach ($users_chunked as $user) {
+                SummaryUser::updateUserData($user);
+                $_bar->advance();
+            }
+            $_bar->finish();
+        }); 
     }
     public function restoreRequirements(){
         $temas = Topic::whereNotNull('topic_requirement_id')->get();
