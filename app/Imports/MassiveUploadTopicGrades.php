@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\User;
 use App\Models\Topic;
 use App\Models\Course;
+use App\Models\Massive;
 use App\Models\Summary;
 use App\Models\Taxonomy;
 use App\Models\SummaryUser;
@@ -13,11 +14,11 @@ use App\Models\SummaryCourse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Events\MassiveUploadProgressEvent;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use App\Events\MassiveUploadTopicGradesProgressEvent;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
-class MassiveUploadTopicGrades implements ToCollection
+class MassiveUploadTopicGrades extends Massive implements ToCollection
 {
     /**
      * @param Collection $collection
@@ -44,6 +45,9 @@ class MassiveUploadTopicGrades implements ToCollection
 
     public function collection(Collection $excelData)
     {
+        //Don't count the header in the constraint, verifyConstraintMassive <- function extends from class Massive
+        $this->verifyConstraintMassive('upload_topic_grades_massive',count($excelData) - 1);
+
         //   Comment para hacer merge
         $count = count($excelData);
         $this->course = Course::find($this->course_id);
@@ -69,7 +73,7 @@ class MassiveUploadTopicGrades implements ToCollection
             $currente_percent = round(($i/$count)*100);
             if(($currente_percent==0 ||($currente_percent % 5) == 0) && !in_array($currente_percent,$percent_sent)){
                 $percent_sent[] = $currente_percent;
-                event(new MassiveUploadTopicGradesProgressEvent($currente_percent,$this->number_socket));
+                event(new MassiveUploadProgressEvent($currente_percent,$this->number_socket));
             }
             $document_user = $excelData[$i][0];
             $grade = $excelData[$i][1];

@@ -114,6 +114,16 @@ const SUB_ITEM_GLOSARY =  { title:"Glosario",
                             role:[ "super-user", "admin", "content-manager", "trainer" ]
                           };
 
+const SUB_ITEM_VADEMECUM = {
+                            title:"Vademécum",
+                            icon:"fas fa-file-invoice",
+                            path:"/vademecum",
+                            subpaths:["vademecum"],
+                            selected:false,
+                            permission:"vademecum",
+                            role:["super-user","admin-TEST","content-manager-TEST","trainer-TEST"]
+                        };
+
 export default {
     data: () => ({
         logoIsLoaded: true,
@@ -325,25 +335,17 @@ export default {
                             "content-manager",
                             "trainer"
                         ]
-                    }
-                    // {
-                    //     title:"Vademécum",
-                    //     icon:"fas fa-file-invoice",
-                    //     path:"/vademecum",
-                    //     subpaths:["vademecum"],
-                    //     selected:false,
-                    //     permission:"vademecum",
-                    //     role:["super-user","admin","content-manager","trainer"]
-                    // },
-                    // {
-                    //     title:"Videoteca",
-                    //     icon:"fas fa-caret-square-right",
-                    //     path:"/videoteca/list",
-                    //     subpaths:["videoteca"],
-                    //     selected:false,
-                    //     permission:"videoteca",
-                    //     role:["super-user","admin","content-manager","trainer"]
-                    // },
+                    },
+                    
+                    {
+                         title:"Videoteca",
+                         icon:"fas fa-caret-square-right",
+                         path:"/videoteca/list",
+                         subpaths:["videoteca"],
+                         selected:false,
+                         permission:"videoteca",
+                         role:["super-user","admin","content-manager","trainer"]
+                     },
                 ]
             },
             {
@@ -446,7 +448,7 @@ export default {
                         role: ["super-user", "admin"]
                     },
                     {
-                        title: "Reinicio de usuarios",
+                        title: "Intentos masivos",
                         icon: "fas fa-redo-alt",
                         path: "/masivo/usuarios/index_reinicios",
                         subpaths: ["masivo/usuarios"],
@@ -503,7 +505,7 @@ export default {
                         subpaths: ["formulario-ayuda"],
                         selected: false,
                         role: ["super-user"]
-                    }
+                    },
                     // {
                     //     title:"Ayuda",
                     //     icon:"fas fa-hands-helping",
@@ -512,14 +514,14 @@ export default {
                     //     selected:false,
                     //     permission:"ayuda.index"
                     // },
-                    // {
-                    //     title:"Soporte",
-                    //     icon:"fas fa-headset",
-                    //     path:"/soporte",
-                    //     subpaths:["soporte"],
-                    //     selected:false,
-                    //     permission:"usuarios_ayuda.show"
-                    // },
+                    {
+                        title:"Soporte",
+                        icon:"fas fa-headset",
+                        path:"/soporte",
+                        subpaths:["soporte"],
+                        selected:false,
+                        role: ["super-user"]
+                    },
                 ]
             }
         ]
@@ -614,6 +616,7 @@ export default {
                 const { session:{ workspace } } = data;
                 if(workspace.id === 25) {
                   vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
+                  vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 }
                 //=== only for "Farmacias Peruanas"
 

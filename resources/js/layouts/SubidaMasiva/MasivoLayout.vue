@@ -35,9 +35,9 @@
                         </div>
                     </v-col>
                 </v-row>
-                <mUsuarios :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" :q_error="0" @update_q_error="onUpdate_q_error" />
-                <ActivarUsuarios :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" :q_error="0" />
-                <InactivarUsuarios :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" :q_error="0" />
+                <mUsuarios :number_socket="number_socket" :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg" @download-excel-observations="downloadExcelObservations" />
+                <ActivarUsuarios :number_socket="number_socket" :key="2" v-show="process_id==2" @emitir-alert="show_alert_msg" />
+                <InactivarUsuarios :number_socket="number_socket" :key="3" v-show="process_id==3" @emitir-alert="show_alert_msg" />
             </v-card-text>
         </v-card>
     </section>
@@ -46,12 +46,17 @@
 import mUsuarios from "../../components/SubidaMasiva/usuarios/SubidaUsuarios.vue";
 import ActivarUsuarios from "../../components/SubidaMasiva/activar/ActivarUsuarios.vue";
 import InactivarUsuarios from "../../components/SubidaMasiva/desactivar/DesactivarUsuarios.vue"
-
-
+const percentLoader = document.getElementById('percentLoader');
 export default {
   components:{ mUsuarios,ActivarUsuarios,InactivarUsuarios },
+  props:{
+    user_id:{
+        required:true
+    }
+  },    
   data() {
     return {
+      number_socket:Math.floor(Math.random(6)*1000000),
       info_error:0,
       overlay: true,
       s_alert:false,
@@ -63,11 +68,19 @@ export default {
           {id:1,nombre:'Creación/Actualización de usuarios',url_template:'/masivos/download-template-user'},
           {id:2,nombre:'Activar Usuarios',url_template:'/templates/Plantilla_activar_usuarios.xlsx'},
           {id:3,nombre:'Desactivar(Cesar) usuarios',url_template:'/templates/Plantilla_cesar_usuarios.xlsx'},
-        //   {id:4,nombre:'Actualización de usuarios',url_template:''},
-        //   {id:5,nombre:'Subida de cursos',url_template:''},
+        //   {id:4,nombre:'Subida de cursos',url_template:''},
       ],
     };
   },
+  mounted(){
+        window.Echo.channel(`upload-massive.${this.user_id}.${this.number_socket}`).listen('MassiveUploadProgressEvent',result=>{
+            if(percentLoader){
+                if(result.percent){
+                    percentLoader.innerHTML = `${result.percent}%`;
+                }
+            }
+        })
+    },
   methods:{
       show_alert_msg(message){
             this.s_alert=true;
@@ -79,26 +92,24 @@ export default {
             this.msg_alert = '';
             vue.url_template = vue.list_massive_processes.find(mp=>mp.id==vue.process_id).url_template;
       },
-      onUpdate_q_error(obj){
-          switch (obj.tipo) {
-                case 'usuarios':
-                  this.info_error.q_err_usu += obj.q_error;
-                  break;
-                case 'cesados':
-                  this.info_error.q_err_desct_usu += obj.q_error;
-                  break;
-                case 'activos':
-                    this.info_error.q_err_activ_usu += obj.q_error;
-                break;
-                case 'cursos':
-                    this.info_error.q_err_cur_tem_eva += obj.q_error;
-                break;
-                case 'carreras':
-                    this.info_error.q_err_cambio += obj.q_error;
-                break;
-              default:
-                  break;
-          }
+      downloadExcelObservations({errores,headers}){
+        let vue = this;
+        const values = errores.map(error => error.row.map(row => row || ''));
+        let comments = [];
+        errores.forEach((error,index)=>{
+            error.errors_index.forEach((error_index) => {
+                comments.push({
+                    cell_name:`${this.abc[error_index.index]}${index+2}`,
+                    message:error_index.message
+                });
+            });
+        });
+        vue.descargarExcelwithValuesInArray({
+            headers,
+            values,
+            comments,
+            filename:"No procesados_" + Math.floor(Math.random() * 1000),
+        });
       }
   }
 }

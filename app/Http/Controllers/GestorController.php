@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\SummaryCourse;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use DB;
 use App\Models\Prueba;
@@ -68,16 +69,25 @@ class GestorController extends Controller
         $user = User::with('subworkspace')->select('id','name', 'surname', 'lastname', 'subworkspace_id')->where('id', $user_id)->first();
         if (!$user) abort(404);
 
-        $course = Course::select('id', 'name', 'plantilla_diploma')->where('id', $course_id)->first();
+        $course = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')->where('id', $course_id)->first();
         if (!$course) abort(404);
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
-        if (!$summary_course) abort(404);
+        if (!$summary_course?->certification_issued_at) abort(404);
 
         $plantilla_curso = $course->plantilla_diploma != null ? $course->plantilla_diploma : $user->subworkspace->plantilla_diploma;
+        $fecha = $summary_course->certification_issued_at;
         $base64 = $this->parse_image($plantilla_curso);
-        return array('video' => $course->name, 'usuario' => $user->fullname, 'fecha' => $summary_course->certification_issued_at, 'image' => $base64);
+
+        return array(
+            'show_certification_date' => $course->show_certification_date,
+//            'video' => $course->name,
+            'video' => removeUCModuleNameFromCourseName($course->name),
+            'usuario' => $user->fullname,
+            'fecha' => $fecha,
+            'image' => $base64,
+        );
     }
 
     private function getDiplomaEscuelaData($usuario_id, $categoria_id)

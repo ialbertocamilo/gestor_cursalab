@@ -25,12 +25,12 @@ TABS
                     </span>
                 </v-tab>
 
-<!--                <v-tab class="justify-content-start py-7">-->
-<!--                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>-->
-<!--                    <span class="pt-2">-->
-<!--                        Avance de currícula-->
-<!--                    </span>-->
-<!--                </v-tab>-->
+                <v-tab class="justify-content-start py-7">
+                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                   <span class="pt-2">
+                       Avance de currícula
+                   </span>
+                </v-tab>
 <!--
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-certificate</v-icon>
@@ -60,12 +60,12 @@ TABS
                     </span>
                 </v-tab>
 
-<!--                <v-tab class="justify-content-start py-7">-->
-<!--                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>-->
-<!--                    <span class="pt-2">-->
-<!--                        Notas por curso-->
-<!--                    </span>-->
-<!--                </v-tab>-->
+               <v-tab class="justify-content-start py-7">
+                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                   <span class="pt-2">
+                       Notas por curso
+                   </span>
+               </v-tab>
 
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-book-outline</v-icon>
@@ -94,7 +94,7 @@ TABS
                         Usuario Uploads
                     </span>
                 </v-tab>
-<!--
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -108,7 +108,7 @@ TABS
                         Videoteca
                     </span>
                 </v-tab>
--->
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-playlist-check</v-icon>
                     <span class="pt-2">
@@ -166,17 +166,17 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-<!--                <v-tab-item>-->
-<!--                    <v-card flat>-->
-<!--                        <v-card-text>-->
-<!--                            <AvanceCurricula-->
-<!--                                :workspaceId="workspaceId"-->
-<!--                                :modules="modules"-->
-<!--                                :reportsBaseUrl="reportsBaseUrl"-->
-<!--                                @emitir-reporte="crearReporte"/>-->
-<!--                        </v-card-text>-->
-<!--                    </v-card>-->
-<!--                </v-tab-item>-->
+               <v-tab-item>
+                   <v-card flat>
+                       <v-card-text>
+                           <AvanceCurricula
+                               :workspaceId="workspaceId"
+                               :modules="modules"
+                               :reportsBaseUrl="reportsBaseUrl"
+                               @emitir-reporte="crearReporte"/>
+                       </v-card-text>
+                   </v-card>
+               </v-tab-item>
                 <!--
                 <v-tab-item>
                     <v-card flat>
@@ -222,17 +222,17 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-<!--                <v-tab-item v-if="workspaceId > 0">-->
-<!--                    <v-card flat>-->
-<!--                        <v-card-text>-->
-<!--                            <NotasCurso-->
-<!--                                :workspaceId="workspaceId"-->
-<!--                                :modules="modules"-->
-<!--                                :reportsBaseUrl="reportsBaseUrl"-->
-<!--                                @emitir-reporte="crearReporte"/>-->
-<!--                        </v-card-text>-->
-<!--                    </v-card>-->
-<!--                </v-tab-item>-->
+               <v-tab-item v-if="workspaceId > 0">
+                   <v-card flat>
+                       <v-card-text>
+                           <NotasCurso
+                               :workspaceId="workspaceId"
+                               :modules="modules"
+                               :reportsBaseUrl="reportsBaseUrl"
+                               @emitir-reporte="crearReporte"/>
+                       </v-card-text>
+                   </v-card>
+               </v-tab-item>
 
                 <v-tab-item>
                     <v-card flat>
@@ -276,12 +276,17 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-<!--
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
+                            <!--<Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
                                        :API_REPORTES="API_REPORTES"
+                                       @emitir-reporte="crearReporte"/>-->
+                            
+                            <Vademecum :workspaceId="workspaceId"
+                                       :modules="modules" 
+                                       :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
@@ -290,13 +295,16 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Videoteca :VideotecaList="VideotecaList" :API_FILTROS="API_FILTROS"
+                            <!--<Videoteca :VideotecaList="VideotecaList" :API_FILTROS="API_FILTROS"
                                        :API_REPORTES="API_REPORTES"
+                                       @emitir-reporte="crearReporte"/>-->
+                            <Videoteca :workspaceId="workspaceId"
+                                       :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
--->
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>

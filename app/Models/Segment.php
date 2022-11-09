@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Http\Resources\SegmentSearchUsersResource;
 use DB;
 
-class Segment extends BaseModel
+class
+Segment extends BaseModel
 {
     protected $fillable = [
         'name', 'model_id', 'model_type', 'active', 'type_id', 'code_id'
@@ -516,10 +517,11 @@ class Segment extends BaseModel
     {
         $row = $model::find($model_id)->load('segments');
 
-        $users = $row->getUsersBySegmentation();
+        // $users = $row->getUsersBySegmentations();
+        $totals = $row->getUsersBySegmentation();
 
         // $users = $row->usersSegmented($row->segments, 'count');
 
-        return $users;
+        return $totals;
     }
 }

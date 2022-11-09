@@ -4,9 +4,9 @@ namespace App\Listeners;
 
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Events\MassiveUploadTopicGradesProgressEvent;
+use App\Events\MassiveUploadProgressEvent;
 
-class MassiveUploadTopicGradesProgressListener
+class MassiveUploadProgressListener
 {
     /**
      * Create the event listener.
@@ -24,7 +24,7 @@ class MassiveUploadTopicGradesProgressListener
      * @param  object  $event
      * @return void
      */
-    public function handle(MassiveUploadTopicGradesProgressEvent $event)
+    public function handle(MassiveUploadProgressEvent $event)
     {
         //
     }

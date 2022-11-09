@@ -12,11 +12,13 @@ class Course extends BaseModel
         'assessable', 'freely_eligible', 'type_id',
         'position', 'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
+        'show_certification_date'
     ];
 
     protected $casts = [
         'mod_evaluaciones' => 'array',
         'scheduled_restarts' => 'array',
+        'show_certification_date' => 'boolean',
     ];
 
     public function schools()
@@ -81,7 +83,7 @@ class Course extends BaseModel
 
     public function setActiveAttribute($value)
     {
-        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
+        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
     }
 
     public function scopeActive($q, $active)
@@ -621,31 +623,79 @@ class Course extends BaseModel
             $query = User::select('id');
             // $clause = $key == 0 ? 'where' : 'orWhere';
 
-            // $query->where(function($q) use ($segment) {
+            $grouped = $segment->values->groupBy('criterion_id');
+            
+            foreach ($grouped as $idx => $values) {
+
+                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
+
+                    $ids = $values->pluck('criterion_value_id');
+
+                    $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                        ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
+                });
+            }
+
+
+            // info($query->toSql());
+            $counts[$key] = $query->count();
+
+            // $result = $query->get()->pluck('id')->toArray();
+            // $users[$key] = $result;
+            // $counts[$key] = count($result);
+        }
+
+        // info($users);
+        info($counts);
+
+        return $counts;
+        // return $query->$type();
+    }
+
+    public function getUsersBySegmentations($type = 'count')
+    {
+        $this->load('segments.values');
+
+        if (!$this->hasBeenSegmented()) return [];
+
+        // $users = collect();
+        $users = [];
+
+        $counts = [];
+
+        $query = User::select('id');
+
+        foreach ($this->segments as $key => $segment) {
+
+            $clause = $key == 0 ? 'where' : 'orWhere';
+            $query->$clause(function($q) use ($segment, $key) {
 
                 $grouped = $segment->values->groupBy('criterion_id');
                 
-                foreach ($grouped as $values) {
+                foreach ($grouped as $i => $values) {
 
-                    $query->whereHas('criterion_values', function ($qu) use ($values) {
+                    $idx = $key . '_' . $i;
+
+                    info($idx);
+
+                    $q->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
 
                         $ids = $values->pluck('criterion_value_id');
 
-                        $qu->whereIn('id', $ids);
+                        info($ids);
+
+                        $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                            ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
                     });
                 }
-            // });
-            
-            // $result = $query->get()->pluck('id')->toArray();
-
-            // $users[$key] = $result;
-            // $counts[$key] = count($result);
-            $counts[$key] = $query->count();
+            });
         }
 
-        info($users);
-        info($counts);
-        // return $query->$type();
+        // info($counts);
+        $a =  $query->$type();
+
+        // info($query->toSql());
+        return $a;
     }
 
     public function getCourseTagsToUCByUser($course, $user)
