@@ -386,7 +386,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     unset($data['password']);
                 }
                 $user->update($data);
-
+                SummaryUser::updateUserData($user);
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
