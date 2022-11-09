@@ -87,6 +87,7 @@ class RestRankController extends Controller
             ->get();
 
         $i = 0;
+        $current = false;
         foreach ($temp as $rank) {
             $i++;
 
