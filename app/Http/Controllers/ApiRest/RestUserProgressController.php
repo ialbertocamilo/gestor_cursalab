@@ -182,6 +182,7 @@ class RestUserProgressController extends Controller
                 'id' => $course->id,
 //                'name' => $course->name,
                 'name' => $course_name,
+                'position' => $course->position,
                 'nota' => $course_status['average_grade'],
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
@@ -189,7 +190,7 @@ class RestUserProgressController extends Controller
                 'temas' => $temp_topics
             ];
         }
-        $columns = array_column($school_courses, 'name');
+        $columns = array_column($school_courses, 'position');
         array_multisort($columns, SORT_ASC, $school_courses);
 
         return $school_courses;
