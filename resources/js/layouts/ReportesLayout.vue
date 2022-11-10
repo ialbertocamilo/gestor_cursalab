@@ -25,7 +25,7 @@ TABS
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" v-if="isAdminInWorkspace()">
+                <v-tab class="justify-content-start py-7" v-if="isAdmin()">
                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                    <span class="pt-2">
                        Avance de currícula
@@ -60,7 +60,7 @@ TABS
                     </span>
                 </v-tab>
 
-               <v-tab class="justify-content-start py-7" v-if="isAdminInWorkspace()">
+               <v-tab class="justify-content-start py-7" v-if="isAdmin()">
                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                    <span class="pt-2">
                        Notas por curso
@@ -222,7 +222,7 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item>
+               <v-tab-item v-if="workspaceId > 0">
                    <v-card flat>
                        <v-card-text>
                            <NotasCurso
@@ -466,7 +466,7 @@ export default {
             this.admins = response2.data.admins
         }
         ,
-        isAdminInWorkspace(){
+        isAdmin(){
             let isAdmin = false;
             let vue = this;
 
