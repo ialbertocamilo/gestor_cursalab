@@ -16,6 +16,7 @@ use App\Models\Matricula;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
 use App\Models\UsuarioCurso;
+use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -64,12 +65,27 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValues();
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
-        $this->restoreSummaries();
+        // $this->restoreSummayUser();
+        $this->restoreSummaryCourse();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
+    // 45671352
+    public function restoreSummaryCourse(){
+        User::select('id','subworkspace_id')->whereIn('document',[45671352])->get()->map(function($user){
+            $courses = $user->getCurrentCourses();
+            $_bar = $this->output->createProgressBar($courses->count());
+            $_bar->start();
+            foreach ($courses as $course) {
+                SummaryCourse::updateUserData($course, $user, false);
+                $_bar->advance();
+            }
+            $_bar->finish();
+        });
 
-    public function restoreSummaries(){
+
+    }
+    public function restoreSummayUser(){
         $i = 'Fin';
         User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])
             ->where('active',1)
