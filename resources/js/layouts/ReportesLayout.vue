@@ -25,7 +25,7 @@ TABS
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" v-if="isAdminInWorkspace()">
                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                    <span class="pt-2">
                        Avance de currícula
@@ -60,7 +60,7 @@ TABS
                     </span>
                 </v-tab>
 
-               <v-tab class="justify-content-start py-7">
+               <v-tab class="justify-content-start py-7" v-if="isAdminInWorkspace()">
                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                    <span class="pt-2">
                        Notas por curso
@@ -415,14 +415,32 @@ export default {
             // URL DE LAS APIS
             API_FILTROS: process.env.MIX_API_FILTROS,
             API_REPORTES: process.env.MIX_API_REPORTES,
+            userSession:{},
+            superUserRoleId : 1,
+            configRoleId: 2,
+            adminRoleId : 3
         };
     },
     mounted () {
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData()
+        this.loadSession();
     }
     ,
     methods: {
+        async loadSession() {
+
+            let vue = this;
+
+            // Load session data
+            vue.workspacesAdmin = [];
+            let url = `/usuarios/session`
+            await this.$http
+            .get(url)
+            .then(({data}) => {
+                vue.userSession = data;
+            });
+        },
         async fetchData() {
 
             // Fetch current session workspace
@@ -448,6 +466,25 @@ export default {
             this.admins = response2.data.admins
         }
         ,
+        isAdminInWorkspace(){
+            let isAdmin = false;
+            let vue = this;
+
+            if (!vue.userSession.user) return isAdmin;
+
+            vue.userSession
+                .user
+                .roles.forEach(r => {
+                let isAdminOrSuper = (
+                    r.role_id === vue.superUserRoleId
+                );
+                if (isAdminOrSuper) {
+                    isAdmin = true;
+                }
+            })
+
+            return isAdmin;
+        },
         async crearReporte(res) {
 
             if (!res.data.ruta_descarga) return
