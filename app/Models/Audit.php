@@ -86,26 +86,33 @@ class Audit extends Ledger
         $total = $modified = [];
 
         if ( $this->isBasicEvent() ) {
-            // obtener modelo
-            $model = $this->extract();
 
-            // traer relaciones
-            $model->loadDefaultRelationships();
+            try {
+                
+                // obtener modelo
+                $model = $this->extract();
 
-            $relationships = $model->defaultRelationships;
-            // info('getModelProceessed relationships');
-            // info($relationships);
+                // traer relaciones
+                $model->loadDefaultRelationships();
 
-            // asignar valores al id (ejm status_id recibe data de status)
-            $data = $this->prepareData($model);
+                $relationships = $model->defaultRelationships;
+                // info('getModelProceessed relationships');
+                // info($relationships);
 
-            // remover relaciones (ejm status) => array except relations
-            $total = Arr::except($data, $relationships ?? []);
+                // asignar valores al id (ejm status_id recibe data de status)
+                $data = $this->prepareData($model);
 
-            // separar solo modificados => array only modified
-            $modifiedFields = $this->getModifiedFieldsFiltered();
+                // remover relaciones (ejm status) => array except relations
+                $total = Arr::except($data, $relationships ?? []);
 
-            $modified = Arr::only($total, $modifiedFields);
+                // separar solo modificados => array only modified
+                $modifiedFields = $this->getModifiedFieldsFiltered();
+
+                $modified = Arr::only($total, $modifiedFields);
+
+            } catch (\Exception $e) {
+                info($e);
+            }
         }
 
         return compact('total', 'modified');

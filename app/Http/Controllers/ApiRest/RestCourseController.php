@@ -107,25 +107,44 @@ class RestCourseController extends Controller
 
         $user_courses_id = $user->getCurrentCourses()->pluck('id');
 
-
         $certificates = SummaryCourse::with('course:id,name')
             ->where('user_id', $user->id)
             ->whereIn('course_id', $user_courses_id)
             ->whereNotNull('certification_issued_at')
             ->get();
+            
         $temp = [];
 
         foreach ($certificates as $certificate) {
             $temp[] = [
                 'course_id' => $certificate->course_id,
                 'name' => $certificate->course->name,
+                'accepted' => $certificate->certification_accepted_at ? true : false,
+                'issued_at' =>  $certificate->certification_issued_at->format('d/m/Y'),
                 'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
                 'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
             ];
         }
 
-
         return $this->success(['data' => $temp]);
+    }
+
+    public function acceptCertification(Course $course)
+    {
+        $user = auth()->user();
+
+        $row = SummaryCourse::getCurrentRow($course, $user);
+
+        $data = ['error' => true, 'data' => ['message' => 'No encontrado']];
+
+        if ($row AND $row->certification_issued_at) {
+            
+            $row->update(['certification_accepted_at' => now()]);
+            
+            $data = ['error' => false, 'data' => ['message' => 'Aceptado']];
+        }
+
+        return $data;
     }
 
 
