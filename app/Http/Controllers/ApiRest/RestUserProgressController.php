@@ -45,7 +45,7 @@ class RestUserProgressController extends Controller
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses
-               ->where('type.code', '<>', 'free')
+                ->where('type.code', '<>', 'free')
                 ->count(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
@@ -213,6 +213,7 @@ class RestUserProgressController extends Controller
         } else {
             $school_courses = $school_courses->sortBy([
                 ['position', 'asc'],
+                ['name', 'asc'],
             ]);
         }
 
