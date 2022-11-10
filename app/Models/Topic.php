@@ -19,7 +19,7 @@ class Topic extends BaseModel
 
     public function setActiveAttribute($value)
     {
-        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
+        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
     }
 
     public function setAssessableAttribute($value)

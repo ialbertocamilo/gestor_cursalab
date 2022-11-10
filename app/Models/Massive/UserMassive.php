@@ -61,6 +61,7 @@ class UserMassive extends Massive implements ToCollection {
        
         //Get headers
         $headers = $this->process_header($rows[0],$criteria);
+        info($rows[0]);
         $rows->shift();
         $this->process_user($rows,$headers,$criteria);
     }
@@ -68,6 +69,7 @@ class UserMassive extends Massive implements ToCollection {
         $count_users = count($users);
         $counter = 0;
         foreach ($users as $user) {
+            info($user);
             $percent=round(($counter/$count_users)*100);
             $this->sendEchoPercentEvent($percent,$this->name_socket,$this->percent_sent) && $this->percent_sent[]=$percent;
             $counter++;
