@@ -131,19 +131,47 @@ import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 
+
+
+
 export default {
     components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal},
+    props: {
+        workspace_id: {
+            type: Number|String,
+            required: true
+        },
+        // show_meeting_section: {
+        //     type: String,
+        //     required: true
+        // }
+
+    },
     data() {
+
+        let headers = [
+            {text: "Nombres y Apellidos", value: "name"},
+            {text: "Módulo", value: "module", sortable: false},
+            {text: "Documento", value: "document", align: 'left', sortable: false},
+            {text: "Opciones", value: "actions", align: 'center', sortable: false},
+        ];
+
+        if (this.workspace_id == 25) {
+            headers = [
+                {text: "Nombres y Apellidos", value: "name"},
+                {text: "Módulo", value: "module", sortable: false},
+                {text: "Carrera", value: "career", sortable: false},
+                {text: "Ciclo", value: "cycle", sortable: false},
+                {text: "Documento", value: "document", align: 'left', sortable: false},
+                {text: "Opciones", value: "actions", align: 'center', sortable: false},
+            ];
+        }
+
         return {
             dataTable: {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
-                headers: [
-                    {text: "Nombres y Apellidos", value: "name"},
-                    {text: "Módulo", value: "module"},
-                    {text: "Documento", value: "document", align: 'left', sortable: false},
-                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
-                ],
+                headers: headers,
                 actions: [
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
                     
