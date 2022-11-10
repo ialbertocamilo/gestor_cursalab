@@ -45,7 +45,7 @@ class RestUserProgressController extends Controller
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses
-               ->where('type.code', '<>', 'free')
+                ->where('type.code', '<>', 'free')
                 ->count(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
@@ -187,12 +187,21 @@ class RestUserProgressController extends Controller
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
                 'tags' => $tags,
+                'tag_ciclo' => $tags[0] ?? null,
                 'temas' => $temp_topics
             ];
         }
-        $columns = array_column($school_courses, 'position');
-        array_multisort($columns, SORT_ASC, $school_courses);
+        $positions = array_column($school_courses, 'position');
 
+        if ($workspace_id === 25) {
+            $tag_ciclos = array_column($school_courses, 'tag_ciclo');
+            array_multisort(
+                $positions, SORT_ASC,
+                $tag_ciclos, SORT_ASC,
+                $school_courses);
+        } else {
+            array_multisort($positions, SORT_ASC, $school_courses);
+        }
         return $school_courses;
 //        return $this->success(['courses' => $school_courses]);
     }
