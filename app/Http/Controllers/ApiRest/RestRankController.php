@@ -47,11 +47,12 @@ class RestRankController extends Controller
         return $this->success($response);
     }
 
-    public function rankingByCriterionCode($type = null)
+    public function rankingByCriterionCode($type)
     {
         $user = auth()->user();
+        $user->load('subworkspace');
 
-        $ranking = $this->loadRankingByCriterion($user, $type ?: null);
+        $ranking = $this->loadRankingByCriterion($user, $type);
 
         return $this->success($ranking);
     }
