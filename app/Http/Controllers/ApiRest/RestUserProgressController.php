@@ -17,14 +17,14 @@ class RestUserProgressController extends Controller
         $user = auth()->user();
         $user->load('summary', 'summary_courses');
 
-        $assigned_courses = $user->getCurrentCourses( withFreeCourses : false);
+        $assigned_courses = $user->getCurrentCourses();
         $summary_user = $user->summary;
 
 //        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
         $completed_courses = $summary_user ?
             $user->summary_courses()
                 ->whereHas('course', fn($q) => $q
-//                    ->whereRelation('type', 'code', '<>', 'free')
+                    ->whereRelation('type', 'code', '<>', 'free')
                     ->whereIn('id', $assigned_courses->pluck('id'))
                 )
                 ->whereRelation('status', 'code', 'aprobado')
@@ -34,18 +34,18 @@ class RestUserProgressController extends Controller
         $disapproved_courses = $summary_user ?
             $user->summary_courses()
                 ->whereHas('course', fn($q) => $q
-//                    ->whereRelation('type', 'code', '<>', 'free')
+                    ->whereRelation('type', 'code', '<>', 'free')
                     ->whereIn('id', $assigned_courses->pluck('id')))
                 ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
 
-        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->count()) * 100) : 0;
+        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->where('type.code', '<>', 'free')->count()) * 100) : 0;
         $general_percentage = min($general_percentage, 100);
 
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses
-//                ->where('type.code', '<>', 'free')
+               ->where('type.code', '<>', 'free')
                 ->count(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
