@@ -210,6 +210,10 @@ class RestUserProgressController extends Controller
                 ['tag_ciclo', 'asc'],
                 ['position', 'asc'],
             ]);
+        } else {
+            $school_courses = $school_courses->sortBy([
+                ['position', 'asc'],
+            ]);
         }
 
         return $school_courses->values()->all();
