@@ -16,47 +16,59 @@ use Illuminate\Support\Facades\Config;
 class RestRankController extends Controller
 {
     /***********************************REDISEÑO******************* */
-    public function ranking($user = null)
+    public function ranking_v2()
     {
-        $user = $user ?? auth()->user();
+        $user = auth()->user();
         $user->load('subworkspace');
 
-//        $response[] = [
-//            'label' => 'General',
-//            'ranking' => $this->loadRankingByCriterion($user),
-//        ];
+        $response[] = [
+            'label' => 'General',
+            'ranking' => $this->loadRankingByCriterion($user),
+        ];
 
         if ($user->subworkspace->parent_id === 25):
-//            $response[] = [
-//                'label' => 'Área',
+            $response[] = [
+                'label' => 'Área',
+                'code' => 'grupo',
+                'ranking' => [],
 //                'ranking' => $this->loadRankingByCriterion($user, 'grupo'),
-////                'ranking' => $this->loadRankingByCriterion($user, 29),
-//            ];
+//                'ranking' => $this->loadRankingByCriterion($user, 29),
+            ];
 
             $response[] = [
                 'label' => 'Sede',
-                'ranking' => $this->loadRankingByCriterion($user, 'botica'),
+                'code' => 'botica',
+                'ranking' => [],
+//                'ranking' => $this->loadRankingByCriterion($user, 'botica'),
 //                'ranking' => $this->loadRankingByCriterion($user, 28),
             ];
         endif;
 
-        info("FIN");
         return $this->success($response);
     }
 
-//    public function ranking()
-//    {
-//        /**
-//         * Retornar los 3 rankings en una sola API
-//         */
-//        $apiResponse = [];
-//        $user = auth()->user();
-//        $apiResponse['ranking_global'] = $this->cargarRankingGeneral($user);
-////        $apiResponse['ranking_botica'] = $this->cargarRankingBotica($user->id, $app_user->botica);
-////        $apiResponse['ranking_zona'] = $this->cargarRankingZona($user->id, $app_user->grupo);
-//
-//        return response()->json($apiResponse, 200);
-//    }
+    public function rankingByCriterionCode($type = null)
+    {
+        $user = auth()->user();
+
+        $ranking = $this->loadRankingByCriterion($user, $type ?: null);
+
+        return $this->success($ranking);
+    }
+
+    public function ranking()
+    {
+        /**
+         * Retornar los 3 rankings en una sola API
+         */
+        $apiResponse = [];
+        $user = auth()->user();
+        $apiResponse['ranking_global'] = $this->cargarRankingGeneral($user);
+//        $apiResponse['ranking_botica'] = $this->cargarRankingBotica($user->id, $app_user->botica);
+//        $apiResponse['ranking_zona'] = $this->cargarRankingZona($user->id, $app_user->grupo);
+
+        return response()->json($apiResponse, 200);
+    }
     /***********************************REDISEÑO******************* */
     //CARGAR RANKINGS
 
