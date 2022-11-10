@@ -45,7 +45,7 @@ class RestUserProgressController extends Controller
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses
-               ->where('type.code', '<>', 'free')
+                ->where('type.code', '<>', 'free')
                 ->count(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
@@ -149,7 +149,8 @@ class RestUserProgressController extends Controller
 
         $course_status_arr = config('courses.status');
         $topic_status_arr = config('topics.status');
-        $school_courses = [];
+//        $school_courses = [];
+        $school_courses = collect();
 //        foreach ($data_school as $school_id => $course) {
         foreach ($courses as $course) {
             // UC rule
@@ -178,21 +179,45 @@ class RestUserProgressController extends Controller
                 ];
             }
 
-            $school_courses[] = [
+//            $school_courses[] = [
+//                'id' => $course->id,
+//                'name' => $course_name,
+//                'position' => $course->position,
+//                'nota' => $course_status['average_grade'],
+//                'estado' => $course_status['status'],
+//                'estado_str' => $course_status_arr[$course_status['status']],
+//                'tags' => $tags,
+//                'tag_ciclo' => $tags[0] ?? null,
+//                'temas' => $temp_topics
+//            ];
+            $school_courses->push([
                 'id' => $course->id,
-//                'name' => $course->name,
                 'name' => $course_name,
+                'position' => $course->position,
                 'nota' => $course_status['average_grade'],
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
                 'tags' => $tags,
+                'tag_ciclo' => $tags[0] ?? null,
                 'temas' => $temp_topics
-            ];
+            ]);
         }
-        $columns = array_column($school_courses, 'name');
-        array_multisort($columns, SORT_ASC, $school_courses);
+//        $columns = array_column($school_courses, 'position');
+//        array_multisort($school_courses, $columns, SORT_ASC);
 
-        return $school_courses;
+        if ($workspace_id === 25) {
+            $school_courses = $school_courses->sortBy([
+                ['tag_ciclo', 'asc'],
+                ['position', 'asc'],
+            ]);
+        } else {
+            $school_courses = $school_courses->sortBy([
+                ['position', 'asc'],
+            ]);
+        }
+
+        return $school_courses->values()->all();
+//        return $school_courses;
 //        return $this->success(['courses' => $school_courses]);
     }
 }
