@@ -222,7 +222,7 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item v-if="workspaceId > 0">
+               <v-tab-item>
                    <v-card flat>
                        <v-card-text>
                            <NotasCurso
