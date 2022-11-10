@@ -881,7 +881,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
 //        CriterionValue::whereRelation('parents.criterion', 'code', 'grupo')->toSql();
 //        CriterionValue::whereHas('parents', fn($q) => $q->whereRelation('criterion', 'code', 'grupo')->where('id', 180740))->count();
-        CriterionValue::whereRelation('criterion', 'code', 'grupo')->whereHas('parents', fn($q) => $q->where('id', 26))->count();
+//        CriterionValue::whereRelation('criterion', 'code', 'grupo')->whereHas('parents', fn($q) => $q->where('id', 26))->count();
         return [
             'position' => $ranks_before_user->count(),
             'last_time_evaluated_at' => $row?->last_time_evaluated_at,
