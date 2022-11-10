@@ -39,7 +39,7 @@ class RestUserProgressController extends Controller
                 ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
 
-        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->count()) * 100) : 0;
+        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->where('type.code', '<>', 'free')->count()) * 100) : 0;
         $general_percentage = min($general_percentage, 100);
 
 
