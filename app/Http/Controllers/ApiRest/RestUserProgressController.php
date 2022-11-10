@@ -213,6 +213,7 @@ class RestUserProgressController extends Controller
         } else {
             $school_courses = $school_courses->sortBy([
                 ['position', 'asc'],
+                ['name', 'asc'],
             ]);
         }
 
