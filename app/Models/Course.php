@@ -646,7 +646,7 @@ class Course extends BaseModel
         }
 
         // info($users);
-        info($counts);
+        // info($counts);
 
         return $counts;
         // return $query->$type();
