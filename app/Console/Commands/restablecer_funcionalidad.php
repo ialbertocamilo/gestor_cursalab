@@ -71,7 +71,9 @@ class restablecer_funcionalidad extends Command
 
     public function restoreSummaries(){
         $i = 'Fin';
-        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])->chunkById(2500, function ($users_chunked)use($i){
+        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])
+            ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
+            ->chunkById(2500, function ($users_chunked)use($i){
             $this->info($i);
             $_bar = $this->output->createProgressBar($users_chunked->count());
             $_bar->start();
