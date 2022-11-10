@@ -166,7 +166,7 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item>
+               <v-tab-item v-if="isAdmin()">
                    <v-card flat>
                        <v-card-text>
                            <AvanceCurricula
@@ -222,7 +222,7 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item v-if="workspaceId > 0">
+               <v-tab-item v-if="isAdmin()">
                    <v-card flat>
                        <v-card-text>
                            <NotasCurso
@@ -423,26 +423,29 @@ export default {
     },
     mounted () {
         this.reportsBaseUrl = this.getReportsBaseUrl()
-        this.fetchData()
-        this.loadSession();
+        this.fetchData();
     }
     ,
     methods: {
-        async loadSession() {
-
+        isAdmin () {
+            let isAdmin = false;
             let vue = this;
+            if (!vue.userSession.user) return isAdmin;
+            vue.userSession
+                .user
+                .roles.forEach(r => {
+                let isAdminOrSuper = (
+                    r.role_id === vue.superUserRoleId
+                );
+                if (isAdminOrSuper) {
+                    isAdmin = true;
+                }
+            })
 
-            // Load session data
-            vue.workspacesAdmin = [];
-            let url = `/usuarios/session`
-            await this.$http
-            .get(url)
-            .then(({data}) => {
-                vue.userSession = data;
-            });
+            return isAdmin;
         },
         async fetchData() {
-
+            let vue = this;
             // Fetch current session workspace
 
             let url = `../usuarios/session`
@@ -450,7 +453,7 @@ export default {
                 url: url,
                 method: 'get'
             })
-
+            vue.userSession = response.data;
             this.workspaceId = response.data.session.workspace.id
 
             // Fetch modules and admins
@@ -466,25 +469,6 @@ export default {
             this.admins = response2.data.admins
         }
         ,
-        isAdmin(){
-            let isAdmin = false;
-            let vue = this;
-
-            if (!vue.userSession.user) return isAdmin;
-
-            vue.userSession
-                .user
-                .roles.forEach(r => {
-                let isAdminOrSuper = (
-                    r.role_id === vue.superUserRoleId
-                );
-                if (isAdminOrSuper) {
-                    isAdmin = true;
-                }
-            })
-
-            return isAdmin;
-        },
         async crearReporte(res) {
 
             if (!res.data.ruta_descarga) return
