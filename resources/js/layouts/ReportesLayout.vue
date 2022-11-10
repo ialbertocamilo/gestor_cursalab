@@ -283,9 +283,9 @@ TABS CONTENT
                             <!--<Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
                                        :API_REPORTES="API_REPORTES"
                                        @emitir-reporte="crearReporte"/>-->
-                            
+
                             <Vademecum :workspaceId="workspaceId"
-                                       :modules="modules" 
+                                       :modules="modules"
                                        :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
@@ -516,7 +516,7 @@ color: #ffffff !important;
 }
 
 .v-label {
-    display: contents !important;
+    /*display: contents !important;*/
 }
 
 .info-icon {

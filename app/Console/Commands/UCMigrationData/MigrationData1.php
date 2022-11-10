@@ -96,6 +96,12 @@ class MigrationData1 extends Command
             info("\n fix_type_courses FIXED");
         }
 
+        if ($type === 'fix_boticas_relation'){
+            Migration_1::fixBoticaRelations($bar);
+            $this->info("\n fix_boticas_relation FIXED");
+            info("\n fix_boticas_relation FIXED");
+        }
+
 
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());

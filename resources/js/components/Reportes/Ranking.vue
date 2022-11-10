@@ -23,15 +23,25 @@
         <form @submit.prevent="exportNotasCurso" class="row">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select v-model="modulo" class="form-control">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                <DefaultSelect
+                    dense
+                    v-model="modulo"
+                    :items="modules"
+                    label="Módulo"
+                    item-text="name"
+                    item-value="id"
+                    placeholder="Seleccione un Módulo"
+                    @change="getAreas"
+                />
+<!--                <b-form-text text-variant="muted">Módulo</b-form-text>-->
+<!--                <select v-model="modulo" class="form-control">-->
+<!--                    <option value>- [Todos] -</option>-->
+<!--                    <option v-for="(item, index) in modules"-->
+<!--                            :key="index"-->
+<!--                            :value="item.id">-->
+<!--                        {{ item.name }}-->
+<!--                    </option>-->
+<!--                </select>-->
             </div>
             <v-divider class="col-12 mb-0 p-0"></v-divider>
             <!-- Fechas -->
@@ -47,16 +57,39 @@
             <v-divider class="col-12 mb-5 p-0"></v-divider>
             <!-- Job positions -->
             <div class="col-lg-6 col-xl-4 mb-3">
-                <b-form-text text-variant="muted">Puesto</b-form-text>
-                <select v-model="jobPosition" class="form-control"
-                        :disabled="!jobPositions[0]">
-                    <option value>- Todos -</option>
-                    <option v-for="(item, index) in jobPositions"
-                            :key="index"
-                            :value="item.name">
-                        {{ item.name }}
-                    </option>
-                </select>
+                <DefaultSelect
+                    dense
+                    v-model="area"
+                    :items="areas"
+                    label="Área"
+                    item-text="name"
+                    item-value="id"
+                    placeholder="Seleccione una o mas Áreas"
+                    @change="getSedes"
+                    :disabled="!modulo"
+                />
+            </div>
+            <div class="col-lg-6 col-xl-4 mb-3">
+                <DefaultSelect
+                    dense
+                    v-model="sede"
+                    :items="sedes"
+                    label="Sedes"
+                    item-text="name"
+                    item-value="id"
+                    placeholder="Seleccione una o mas Sedes"
+                    :disabled="!area || !modulo"
+                />
+<!--                <b-form-text text-variant="muted">Sede</b-form-text>-->
+<!--                <select v-model="sede" class="form-control"-->
+<!--                        :disabled="!sedes[0] || !area">-->
+<!--                    <option value>- Todos -</option>-->
+<!--                    <option v-for="(item, index) in sedes"-->
+<!--                            :key="index"-->
+<!--                            :value="item.name">-->
+<!--                        {{ item.name }}-->
+<!--                    </option>-->
+<!--                </select>-->
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
             <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
@@ -81,24 +114,35 @@ export default {
     },
     data() {
         return {
-            jobPositions: [],
-            modulo: '',
-            jobPosition: ''
+            areas: [],
+            sedes: [],
+            modulo: null,
+            area: [],
+            sede: []
         }
     },
     mounted() {
-        this.fetchFiltersData()
+        // this.fetchFiltersData()
     },
     methods: {
         async fetchFiltersData () {
             // let url = `${this.$props.reportsBaseUrl}/filtros/job-positions/${this.$props.workspaceId}`
-            let url = `${this.$props.reportsBaseUrl}/filtros/workspace/${this.$props.workspaceId}/criterion-values/position_name`
+            let url = `${this.$props.reportsBaseUrl}/filtros/workspace/${this.$props.workspaceId}/sub-workspace/${this.modulo}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
             })
 
-            this.jobPositions = response.data
+            this.areas = response.data
+        },
+        async getSedes(){
+            let url = `${this.$props.reportsBaseUrl}/filtros/workspace/${this.$props.workspaceId}/criterion-values/botica/${this.area}`;
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            this.areas = response.data
         },
         async exportNotasCurso() {
 
@@ -119,7 +163,8 @@ export default {
                     data: {
                         workspaceId: this.workspaceId,
                         modulos: this.modulo ? [this.modulo] : [],
-                        jobPosition: this.jobPosition,
+                        areas: this.area,
+                        sede: this.sede,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos
                     }
@@ -147,9 +192,9 @@ export default {
 }
 </script>
 <style>
-.v-label {
-    display: contents !important;
-}
+/*.v-label {*/
+/*    display: contents !important;*/
+/*}*/
 .v-list-item__subtitle{
     white-space: normal !important;
 }

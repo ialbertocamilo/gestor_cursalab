@@ -21,17 +21,17 @@ class RestRankController extends Controller
         $user = $user ?? auth()->user();
         $user->load('subworkspace');
 
-        $response[] = [
-            'label' => 'General',
-            'ranking' => $this->loadRankingByCriterion($user),
-        ];
+//        $response[] = [
+//            'label' => 'General',
+//            'ranking' => $this->loadRankingByCriterion($user),
+//        ];
 
         if ($user->subworkspace->parent_id === 25):
-            $response[] = [
-                'label' => 'Área',
-                'ranking' => $this->loadRankingByCriterion($user, 'grupo'),
-//                'ranking' => $this->loadRankingByCriterion($user, 29),
-            ];
+//            $response[] = [
+//                'label' => 'Área',
+//                'ranking' => $this->loadRankingByCriterion($user, 'grupo'),
+////                'ranking' => $this->loadRankingByCriterion($user, 29),
+//            ];
 
             $response[] = [
                 'label' => 'Sede',
