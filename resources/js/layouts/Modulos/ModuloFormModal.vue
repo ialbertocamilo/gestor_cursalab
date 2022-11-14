@@ -143,6 +143,43 @@
                         </DefaultModalSection>
                     </v-col>
                 </v-row>
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSection
+                            title="Soporte"
+                        >
+                            <!-- tooltip="Tooltip" -->
+                            <template slot="content">
+                                <v-row justify="center">
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Correo de contacto"
+                                            v-model="resource.contact_email"
+                                            :rules="rules.contact_email"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Teléfono de contacto"
+                                            v-model="resource.contact_phone"
+                                            :rules="rules.contact_phone"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Horario de atención"
+                                            v-model="resource.contact_schedule"
+                                            :rules="rules.contact_schedule"
+                                            dense
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
                 <v-row justify="space-around">
                     <!--                    <v-col cols="3">-->
                     <!--                        <DefaultFormLabel-->
@@ -361,6 +398,7 @@ export default {
                 vue.getActiveOnly(formData)
                 vue.getJSONReinicioProgramado(formData)
                 vue.getJSONEvaluaciones(formData)
+                vue.getJSONSoporte(formData)
                 vue.$http.post(url, formData)
                     .then(({data}) => {
                         vue.closeModal()
@@ -383,6 +421,17 @@ export default {
                     formData.append('app_menu[]', el.id)
             })
             return 1
+        },
+        getJSONSoporte(formData) {
+            let vue = this
+
+            const data = {
+                contact_phone: vue.resource.contact_phone,
+                contact_email: vue.resource.contact_email,
+                contact_schedule: vue.resource.contact_schedule,
+            }
+            let json = JSON.stringify(data)
+            formData.append('contact_support', json)
         },
         getJSONEvaluaciones(formData) {
             let vue = this
