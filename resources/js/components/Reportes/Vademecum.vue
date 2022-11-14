@@ -11,7 +11,13 @@
 				subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
 			/>
 			<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
-			<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
+
+			<!-- this only for FP -->
+			<div v-show="workspaceId === 25">
+				<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
+			</div>
+			<!-- this only for FP -->
+			
 			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
 			<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
 			<list-item titulo="Vademecum" subtitulo="Nombre del documento Vademecum (SCORM)" />
@@ -29,7 +35,7 @@
 			<!-- Grupos -->
 			<div class="col-12">
 				<b-form-text text-variant="muted">Vademecum</b-form-text>
-				<v-select
+				<!--<v-select
 					attach
 					solo
 					chips
@@ -42,7 +48,23 @@
 					item-text="nombre"
 					label="Selecciona uno de la lista"
 					:background-color="!vademecumSelected ? '' : 'light-blue lighten-5'"
+				></v-select>-->
+
+				<v-select
+					attach
+					solo
+					chips
+					clearable
+					multiple
+					hide-details="false"
+					v-model="vademecumSelected"
+					:items="vademecumList"
+					item-value="id"
+					item-text="name"
+					label="Selecciona uno de la lista"
+					:background-color="!vademecumSelected ? '' : 'light-blue lighten-5'"
 				></v-select>
+
 			</div>
 
 			<div class="col-sm-12 mb-3 mt-4">
@@ -57,11 +79,17 @@
 	</v-main>
 </template>
 <script>
+
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
+
 export default {
 	components: { ResumenExpand, ListItem },
-	props: ["VademecumList", "API_REPORTES", "API_FILTROS"],
+	props: {
+		workspaceId: { type: Number },
+		vademecumList: { type: Array },
+		reportsBaseUrl: { type: String }
+	},
 	data() {
 		return {
 			vademecumSelected: []
@@ -70,24 +98,30 @@ export default {
 	methods: {
 		ExportarVademecum() {
 			this.showLoader()
+
 			let params = {
-				vademecumSelected: this.vademecumSelected
+				workspaceId: this.workspaceId,
+				vademecumsSelected: this.vademecumSelected
 			};
 			axios
-				.post(this.API_REPORTES + "vademecum", params)
+				.post(`${this.reportsBaseUrl}/exportar/vademecum`, params)
 				.then((res) => {
-					if (!res.data.error) this.$emit("emitir-reporte", res);
-					else {
-						alert("Se ha encontrado el siguiente error : " + res.data.error);
-						this.hideLoader()
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-					console.log(error.message);
-					alert("Se ha encontrado el siguiente error : " + error);
-					this.hideLoader()
-				});
+                    
+                    if (res.data.alert) {
+                        this.showAlert(res.data.alert, 'warning');
+                    } else {
+                        this.$emit("emitir-reporte", res);
+                    }
+                    this.hideLoader();
+
+                }, (err) => {
+                    console.log(err);
+                    console.log(err.message);
+
+                    alert("Se ha encontrado el siguiente error : " + err);
+                    
+                    this.hideLoader();
+                });
 		}
 	},
 	created() {
