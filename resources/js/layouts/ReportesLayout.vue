@@ -285,7 +285,7 @@ TABS CONTENT
                                        @emitir-reporte="crearReporte"/>-->
 
                             <Vademecum :workspaceId="workspaceId"
-                                       :modules="modules"
+                                       :vademecumList="VademecumList" 
                                        :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
@@ -467,8 +467,10 @@ export default {
 
             this.modules = response2.data.modules
             this.admins = response2.data.admins
-        }
-        ,
+            this.VademecumList = response2.data.vademecums
+
+            console.log(response2.data.vademecums);
+        },
         async crearReporte(res) {
 
             if (!res.data.ruta_descarga) return
@@ -499,7 +501,6 @@ export default {
         // this.Modulos = res.data.modulos;
         // this.Admins = res.data.users;
         // this.$store.commit("setUser", res.data.user[0]);
-        // this.VademecumList = res.data.vademecums;
     }
 };
 </script>
