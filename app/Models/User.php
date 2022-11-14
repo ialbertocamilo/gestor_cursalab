@@ -874,12 +874,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query = SummaryUser::query()
             ->whereRelation('user', 'subworkspace_id', $user->subworkspace_id);
 
-        if ($criterion_code)
+        if ($criterion_code):
             $query->whereHas(
                 'user.criterion_values',
                 fn($q) => $q->whereRelation('criterion', 'code', $criterion_code)
             );
-
+        endif;
 
         $ranks_before_user = $query->whereRelation('user', 'active', ACTIVE)
             ->whereNotNull('last_time_evaluated_at')
@@ -890,9 +890,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $row = $ranks_before_user->where('user_id', $user->id)->first();
 
-//        CriterionValue::whereRelation('parents.criterion', 'code', 'grupo')->toSql();
-//        CriterionValue::whereHas('parents', fn($q) => $q->whereRelation('criterion', 'code', 'grupo')->where('id', 180740))->count();
-//        CriterionValue::whereRelation('criterion', 'code', 'grupo')->whereHas('parents', fn($q) => $q->where('id', 26))->count();
         return [
             'position' => $ranks_before_user->count(),
             'last_time_evaluated_at' => $row?->last_time_evaluated_at,

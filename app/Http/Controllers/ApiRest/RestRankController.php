@@ -47,7 +47,7 @@ class RestRankController extends Controller
         return $this->success($response);
     }
 
-    public function rankingByCriterionCode($type)
+    public function rankingByCriterionCode($type = null)
     {
         $user = auth()->user();
         $user->load('subworkspace');
@@ -88,18 +88,13 @@ class RestRankController extends Controller
             })
             ->select('summary_users.user_id', 'score', 'last_time_evaluated_at');
 
-        if ($criterion_code)
-//            $q_ranking
-//                ->join('users as u', 'u.id', 'summary_users.user_id')
-//                ->join('criterion_value_user as cvu', 'cvu.user_id', 'u.id')
-//                ->join('criterion_values as cv', 'cv.id', 'cvu.criterion_value_id')
-//                ->where('cv.criterion_id', $criterion_code);
+        if ($criterion_code):
             $q_ranking->whereHas(
                 'user.criterion_values',
                 fn($q) => $q
-//                    ->where('criterion_id', $criterion_code)
                     ->whereRelation('criterion', 'code', $criterion_code)
             );
+        endif;
 
         $temp = $q_ranking->whereRelation('user', 'active', ACTIVE)
             ->whereNotNull('last_time_evaluated_at')
@@ -120,7 +115,8 @@ class RestRankController extends Controller
                 'nombre' => $rank->user->fullname,
                 'rank' => $rank->score,
                 'current' => $current,
-                'last_ev' => $rank->last_time_evaluated_at
+                'last_ev' => $rank->last_time_evaluated_at,
+                'position' => $i,
             ];
         }
 
@@ -129,7 +125,8 @@ class RestRankController extends Controller
                 'usuario_id' => $user->id,
                 'nombre' => $user->fullname,
                 'rank' => $user_score_ranking,
-                'last_ev' => $user_last_time_evaluated_at
+                'last_ev' => $user_last_time_evaluated_at,
+                'position' => $user_position_ranking
             ];
 
         return $ranking;
@@ -233,4 +230,6 @@ class RestRankController extends Controller
             'position' => $position
         ];
     }
+
+
 }
