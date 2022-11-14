@@ -40,6 +40,11 @@
                         style="border: 1px #f3f3f3 solid; border-radius: 15px"
                     >
                         <v-col cols="4">
+                            <v-form
+                                ref="formModalCategoria"
+                                v-model="formModalCategoria"
+                                lazy-validation
+                            >
                             <DefaultInput
                                 :label="`Nombre`"
                                 clearable
@@ -47,6 +52,8 @@
                                 v-model="newCategoria.name"
                                 :rules="rules.categoria"
                             />
+
+                            </v-form>
                         </v-col>
                         <v-col cols="4">
                             <DefaultButton
@@ -155,6 +162,7 @@ export default {
     },
     data() {
         return {
+            formModalCategoria: true,
             crearCategoria: false,
             newCategoria: {
                 name: null,
@@ -195,6 +203,8 @@ export default {
                     vue.getData()
                     vue.newCategoria.name = null
                     vue.crearCategoria = false
+
+                    this.$refs.formModalCategoria.resetValidation();
                 })
         },
         editCategoria(tag) {
@@ -212,6 +222,7 @@ export default {
         },
         onClose() {
             let vue = this
+            this.$refs.formModalCategoria.resetValidation();
             vue.$emit(`onClose`)
         },
         getData() {
