@@ -518,7 +518,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $query->orderBy($field, $sort)->orderBy('id', $sort);
 
-        return $query->paginate($request->rowsPerPage);
+        return $query->paginate($request->paginate);
+        // return $query->paginate($request->rowsPerPage);
     }
 
     public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true)
