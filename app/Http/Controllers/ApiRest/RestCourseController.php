@@ -115,7 +115,7 @@ class RestCourseController extends Controller
 
         if ($request->q)
             $query->whereHas('course', function($q) use ($request) {
-                $q->where('name', 'like', "%{$request->q}");
+                $q->where('name', 'like', "%{$request->q}%");
             });
 
         if ($request->type == 'accepted')
