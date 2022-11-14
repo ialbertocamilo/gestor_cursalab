@@ -72,7 +72,7 @@ class Error extends Model
         $notifier = $user->name;
 
         if ($platform_code == 'app')
-            $notifier = $user->name . ' (' . $user->dni . ')';
+            $notifier = $user->name . ' (' . $user->document . ')';
 
         return $notifier;
     }

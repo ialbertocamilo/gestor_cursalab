@@ -517,10 +517,11 @@ Segment extends BaseModel
     {
         $row = $model::find($model_id)->load('segments');
 
-        $users = $row->getUsersBySegmentation();
+        // $users = $row->getUsersBySegmentations();
+        $totals = $row->getUsersBySegmentation();
 
         // $users = $row->usersSegmented($row->segments, 'count');
 
-        return $users;
+        return $totals;
     }
 }

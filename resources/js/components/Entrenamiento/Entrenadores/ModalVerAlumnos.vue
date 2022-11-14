@@ -101,7 +101,7 @@
                 >
                     <v-col cols="12" md="2" lg="2" class="d-flex justify-start"> DNI</v-col>
                     <v-col cols="12" md="4" lg="4" class="d-flex justify-start"> Nombres y Apellidos</v-col>
-                    <v-col cols="12" md="2" lg="2" class="d-flex justify-start"> Workspace</v-col>
+                    <v-col cols="12" md="2" lg="2" class="d-flex justify-start"> Módulo</v-col>
                     <v-col cols="12" :md="isMaster? '2' : '4'" :lg="isMaster ? '2' : '4'" class="d-flex justify-center">
                         Estado
                     </v-col>

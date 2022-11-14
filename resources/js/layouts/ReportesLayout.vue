@@ -222,7 +222,7 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item v-if="workspaceId > 0">
+               <v-tab-item>
                    <v-card flat>
                        <v-card-text>
                            <NotasCurso
@@ -283,7 +283,7 @@ TABS CONTENT
                             <!--<Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
                                        :API_REPORTES="API_REPORTES"
                                        @emitir-reporte="crearReporte"/>-->
-                            
+
                             <Vademecum :workspaceId="workspaceId"
                                        :vademecumList="VademecumList" 
                                        :reportsBaseUrl="reportsBaseUrl"
@@ -415,16 +415,37 @@ export default {
             // URL DE LAS APIS
             API_FILTROS: process.env.MIX_API_FILTROS,
             API_REPORTES: process.env.MIX_API_REPORTES,
+            userSession:{},
+            superUserRoleId : 1,
+            configRoleId: 2,
+            adminRoleId : 3
         };
     },
     mounted () {
         this.reportsBaseUrl = this.getReportsBaseUrl()
-        this.fetchData()
+        this.fetchData();
     }
     ,
     methods: {
-        async fetchData() {
+        isAdmin () {
+            let isAdmin = false;
+            let vue = this;
+            if (!vue.userSession.user) return isAdmin;
+            vue.userSession
+                .user
+                .roles.forEach(r => {
+                let isAdminOrSuper = (
+                    r.role_id === vue.superUserRoleId
+                );
+                if (isAdminOrSuper) {
+                    isAdmin = true;
+                }
+            })
 
+            return isAdmin;
+        },
+        async fetchData() {
+            let vue = this;
             // Fetch current session workspace
 
             let url = `../usuarios/session`
@@ -432,7 +453,7 @@ export default {
                 url: url,
                 method: 'get'
             })
-
+            vue.userSession = response.data;
             this.workspaceId = response.data.session.workspace.id
 
             // Fetch modules and admins
@@ -517,7 +538,7 @@ color: #ffffff !important;
 }
 
 .v-label {
-    display: contents !important;
+    /*display: contents !important;*/
 }
 
 .info-icon {

@@ -19,7 +19,7 @@ class Topic extends BaseModel
 
     public function setActiveAttribute($value)
     {
-        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
+        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
     }
 
     public function setAssessableAttribute($value)
@@ -659,8 +659,8 @@ class Topic extends BaseModel
             // if ($topic->course->reinicios_programado)
             //     $times[] = $topic->course->reinicios_programado;
 
-            if ($user->subworkspace->reinicios_programado)
-                $times[] = $user->subworkspace->reinicios_programado;
+            // if ($user->subworkspace->reinicios_programado)
+            //     $times[] = $user->subworkspace->reinicios_programado;
 
             if (count($times) > 0) {
 

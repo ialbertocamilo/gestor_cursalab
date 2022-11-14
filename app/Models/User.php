@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\UCMigrationData\Migration_1;
 use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -168,9 +169,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function failed_topics()
     {
         return $this->hasMany(SummaryTopic::class, 'user_id')
-                    ->where('passed', 0)
-                    ->whereNotNull('attempts')
-                    ->where('attempts', '<>', 0);
+            ->where('passed', 0)
+            ->whereNotNull('attempts')
+            ->where('attempts', '<>', 0);
     }
 
     public function relationships()
@@ -395,7 +396,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     unset($data['password']);
                 }
                 $user->update($data);
-
+                SummaryUser::updateUserData($user);
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
@@ -486,7 +487,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request)
     {
         $query = self::query();
-        $query->with('subworkspace')->withCount('failed_topics');
+
+        $with = ['subworkspace'];
+
+        if (get_current_workspace()->id == 25) {
+
+            $with = ['subworkspace', 'criterion_values' => function($q) {
+                $q->whereIn('criterion_id', [40, 41]);
+            }];
+        }
+
+        $query->with($with)->withCount('failed_topics');
 
         if ($request->q) {
             $query->filterText($request->q);
@@ -510,7 +521,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $query->paginate($request->rowsPerPage);
     }
 
-    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses= true)
+    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
@@ -685,7 +696,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $workspace->id)
-            ->when(!$withFreeCourses, function ($q){
+            ->when(!$withFreeCourses, function ($q) {
                 $q->whereRelation('type', 'code', '<>', 'free');
             })
             ->where('active', ACTIVE)
@@ -849,5 +860,42 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
 
         return $valid_segment;
+    }
+
+    public function load_ranking_data($criterion_code = null)
+    {
+        $user = $this;
+
+        $summary_user = SummaryUser::getCurrentRow($user);
+
+        if (!$summary_user) return null;
+
+        $query = SummaryUser::query()
+            ->whereRelation('user', 'subworkspace_id', $user->subworkspace_id);
+
+        if ($criterion_code)
+            $query->whereHas(
+                'user.criterion_values',
+                fn($q) => $q->whereRelation('criterion', 'code', $criterion_code)
+            );
+
+
+        $ranks_before_user = $query->whereRelation('user', 'active', ACTIVE)
+            ->whereNotNull('last_time_evaluated_at')
+            ->where('score', '>=', $summary_user->score ?? 0)
+            ->orderBy('score', 'desc')
+            ->orderBy('last_time_evaluated_at')
+            ->get();
+
+        $row = $ranks_before_user->where('user_id', $user->id)->first();
+
+//        CriterionValue::whereRelation('parents.criterion', 'code', 'grupo')->toSql();
+//        CriterionValue::whereHas('parents', fn($q) => $q->whereRelation('criterion', 'code', 'grupo')->where('id', 180740))->count();
+//        CriterionValue::whereRelation('criterion', 'code', 'grupo')->whereHas('parents', fn($q) => $q->where('id', 26))->count();
+        return [
+            'position' => $ranks_before_user->count(),
+            'last_time_evaluated_at' => $row?->last_time_evaluated_at,
+            'score' => $row?->score
+        ];
     }
 }

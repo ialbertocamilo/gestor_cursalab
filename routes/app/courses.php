@@ -12,7 +12,7 @@ Route::controller(RestCourseController::class)->group(function() {
 
     Route::get('/diplomas', 'getCertificates');
 
-    Route::get('/diplomas', 'getCertificates');
+    Route::post('/aceptar-diploma/{course}', 'acceptCertification');
 
 
 });

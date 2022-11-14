@@ -18,7 +18,8 @@ class Workspace extends BaseModel
         'plantilla_diploma',
         'codigo_matricula',
         'mod_evaluaciones',
-        'reinicios_programado'
+        'reinicios_programado',
+        'contact_support',
     ];
 
     public function sluggable(): array
@@ -35,6 +36,7 @@ class Workspace extends BaseModel
     protected $casts = [
         'mod_evaluaciones' => 'array',
         'reinicios_programado' => 'array',
+        'contact_support' => 'array',
     ];
 
     public function segments()

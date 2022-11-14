@@ -14,6 +14,8 @@ class UsuarioSearchResource extends JsonResource
      */
     public function toArray($request)
     {
+        // info($this->criterion_values);
+
         return [
             'id' => $this->id,
             'nombre' => $this->fullname,
@@ -25,9 +27,11 @@ class UsuarioSearchResource extends JsonResource
             'failed_topics_count' => $this->failed_topics_count,
             'pruebas_desaprobadas' => ($request->superuser AND $this->failed_topics_count) ? true : false,
            // 'pruebas_desaprobadas' => true,
-            'reporte_route' => route('exportar.node', ['dni' => $this->dni]),
-            // 'carrera' => $this->matricula_presente->carrera->nombre ?? '----',
-            // 'ciclo_actual' => $this->matricula_presente->ciclo->nombre ?? '---',
+            'reporte_route' => route('exportar.node', ['dni' => $this->document]),
+
+
+            'career' => $this->criterion_values->where('criterion_id', 41)->first()->value_text ?? '----',
+            'cycle' => $this->criterion_values->where('criterion_id', 40)->sortBy('position')->last()->value_text ?? '---',
         ];
     }
 }
