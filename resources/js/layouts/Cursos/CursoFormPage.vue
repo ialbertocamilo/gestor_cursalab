@@ -49,7 +49,7 @@
 
                     </v-row>
                     <v-row>
-                        <v-col cols="6">
+                        <v-col cols="4">
                             <DefaultAutocomplete
                                 dense
                                 label="Requisito"
@@ -68,7 +68,7 @@
                                 </template>
                             </DefaultAutocomplete>
                         </v-col>
-                        <v-col cols="6">
+                        <v-col cols="4">
                             <DefaultAutocomplete
                                 show-required
                                 :rules="rules.types"
@@ -78,6 +78,16 @@
                                 :items="selects.types"
                                 item-text="name"
                                 item-value="id"
+                            />
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultInput
+                                dense
+                                label="Orden"
+                                placeholder="Orden"
+                                v-model="resource.position"
+                                :rules="rules.position"
+                                show-required
                             />
                         </v-col>
                     </v-row>
@@ -100,6 +110,7 @@
                                 v-model="resource.investment"
                             />
                         </v-col>
+                        
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="6">
@@ -309,7 +320,7 @@ export default {
                 name: this.getRules(['required', 'max:120']),
                 lista_escuelas: this.getRules(['required']),
                 types: this.getRules(['required']),
-                position: this.getRules(['required', 'number']),
+                position: this.getRules(['number']),
                 // nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
                 // nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
             },

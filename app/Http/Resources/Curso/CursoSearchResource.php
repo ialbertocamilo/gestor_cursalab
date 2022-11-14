@@ -30,6 +30,8 @@ class CursoSearchResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'orden' => $this->position,
+            // 'position' => $this->position,
             'nombre' => $this->name,
             'schools' => implode(',', $schools),
             'image' => FileService::generateUrl($this->imagen),

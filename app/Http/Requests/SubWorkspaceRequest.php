@@ -30,6 +30,7 @@ class SubWorkspaceRequest extends FormRequest
             'active' => 'nullable',
             'mod_evaluaciones' => 'required',
             'reinicios_programado' => 'nullable',
+            'contact_support' => 'nullable',
             // 'reinicios_programado' => 'required',
             'app_menu' => 'nullable',
 
@@ -46,6 +47,7 @@ class SubWorkspaceRequest extends FormRequest
     {
         $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
         $data['mod_evaluaciones'] = $this->mod_evaluaciones ? json_decode($this->mod_evaluaciones, true) : [];
+        $data['contact_support'] = $this->contact_support ? json_decode($this->contact_support, true) : [];
 
         return $this->merge($data)->all();
     }

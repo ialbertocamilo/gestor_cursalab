@@ -162,7 +162,8 @@
             width="60vw"
             :ref="modalOptions.ref"
             :options="modalOptions"
-            @onCancel="closeFormModal(modalOptions); getData()"
+            @onCancel="closeFormModal(modalOptions);"
+            @onConfirm="getData"
         />
         <MultimediaUpdateModal
             width="60vw"
@@ -276,9 +277,10 @@ export default {
                 ref: 'MultimediaDetailModal',
                 open: false,
                 base_endpoint: '/multimedia',
-                cancelLabel: 'Eliminar',
-                confirmLabel: 'Cerrar',
+                cancelLabel: 'Cerrar',
+                confirmLabel: 'Eliminar',
                 resource: 'Multimedia',
+                showCloseIcon: true,
             },
             modalUpdateMultimedia: {
                 ref: 'MultimediaUpdateModal',

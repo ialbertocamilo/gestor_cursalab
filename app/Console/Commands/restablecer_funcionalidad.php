@@ -14,7 +14,9 @@ use App\Models\Criterio;
 use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\Requirement;
+use App\Models\SummaryUser;
 use App\Models\UsuarioCurso;
+use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -62,9 +64,42 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
         // $this->restoreCriterionDocument();
-        $this->restoreRequirements();
+        // $this->restoreRequirements();
+        // $this->restoreSummayUser();
+        $this->restoreSummaryCourse();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    // 45671352
+    public function restoreSummaryCourse(){
+        User::select('id','subworkspace_id')->whereIn('document',[45671352])->get()->map(function($user){
+            $courses = $user->getCurrentCourses();
+            $_bar = $this->output->createProgressBar($courses->count());
+            $_bar->start();
+            foreach ($courses as $course) {
+                SummaryCourse::updateUserData($course, $user, false);
+                $_bar->advance();
+            }
+            $_bar->finish();
+        });
+
+
+    }
+    public function restoreSummayUser(){
+        $i = 'Fin';
+        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])
+            ->where('active',1)
+            ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
+            ->chunkById(2500, function ($users_chunked)use($i){
+            $this->info($i);
+            $_bar = $this->output->createProgressBar($users_chunked->count());
+            $_bar->start();
+            foreach ($users_chunked as $user) {
+                SummaryUser::updateUserData($user);
+                $_bar->advance();
+            }
+            $_bar->finish();
+        }); 
     }
     public function restoreRequirements(){
         $temas = Topic::whereNotNull('topic_requirement_id')->get();
