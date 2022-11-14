@@ -19,7 +19,7 @@ class Topic extends BaseModel
 
     public function setActiveAttribute($value)
     {
-        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
+        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
     }
 
     public function setAssessableAttribute($value)
@@ -202,7 +202,7 @@ class Topic extends BaseModel
 
         // Validar que sea el último tema activo y que se va a desactivar,
         // eso haría que se desactive el curso, validar si ese curso es requisito de otro e impedir que se desactive el tema
-        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic);
+        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic,$data);
         if ($last_topic_active_and_required_course['ok']) $validations->push($last_topic_active_and_required_course);
 
 
@@ -254,7 +254,7 @@ class Topic extends BaseModel
         return $temp;
     }
 
-    public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic)
+    public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic,$data)
     {
         $course_requirements = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
             $query->where('id', $topic->course->id);
@@ -265,7 +265,7 @@ class Topic extends BaseModel
         $is_required_course = $course_requirements->count() > 0;
 
         $last_active_topic = Topic::where('course_id', $topic->course_id)->where('active', 1)->get();
-        $is_last_active_topic = ($last_active_topic->count() === 1 && $topic->active);
+        $is_last_active_topic = ($last_active_topic->count() === 1 && !$data['active']);
 
         $temp['ok'] = ($is_last_active_topic && $is_required_course);
 
@@ -385,7 +385,7 @@ class Topic extends BaseModel
 
         // Validar que sea el último tema activo y que se va a desactivar,
         // eso haría que se desactive el curso, validar si ese curso es requisito de otro e impedir que se desactive el tema
-        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic);
+        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic,$data);
         if ($last_topic_active_and_required_course['ok']) $validations->push($last_topic_active_and_required_course);
 
 
@@ -659,8 +659,8 @@ class Topic extends BaseModel
             // if ($topic->course->reinicios_programado)
             //     $times[] = $topic->course->reinicios_programado;
 
-            if ($user->subworkspace->reinicios_programado)
-                $times[] = $user->subworkspace->reinicios_programado;
+            // if ($user->subworkspace->reinicios_programado)
+            //     $times[] = $user->subworkspace->reinicios_programado;
 
             if (count($times) > 0) {
 
