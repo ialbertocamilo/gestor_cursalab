@@ -23,14 +23,17 @@
                      <b-form-text text-variant="muted">Módulo</b-form-text>
                      <DefaultSelect
                         v-model="filters.modulo"
-                        :items="Modulos"
+                        :items="modules"
                         label=""
-                        item-text="etapa"
+                        item-text="name"
                         item-value="id"
                         dense
                         @onChange="moduloChange"
                         multiple
                     />
+                    <!--
+                        item-text="name"
+                    -->
                  </div>
                  <!-- Escuela -->
                  <div class="col-md-6 mb-3">
@@ -115,6 +118,10 @@ import EstadoFiltro from "./partials/EstadoFiltro.vue";
 export default {
 	components: { EstadoFiltro, ResumenExpand, ListItem },
 	props: {
+        modules:{ type: Array, required: true },
+        workspaceId:{ type: Number, required: true },
+        reportsBaseUrl:{ type: String, required: true },
+
 		Modulos: Array,
 		API_FILTROS: "",
 		API_REPORTES: ""

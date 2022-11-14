@@ -6,20 +6,26 @@
 				Descarga el registro de visitas a los documentos Vademecum.
 			</template>
 			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-			<list-item
-				titulo="Grupo sistema"
-				subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
-			/>
-			<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
 
 			<!-- this only for FP -->
 			<div v-show="workspaceId === 25">
+				<list-item
+					titulo="Grupo sistema"
+					subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
+				/>
+				<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
 				<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
 			</div>
 			<!-- this only for FP -->
 			
 			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-			<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+
+			<!-- this only for FP -->
+			<div v-show="workspaceId === 25">
+				<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+			</div>
+			<!-- this only for FP -->
+			
 			<list-item titulo="Vademecum" subtitulo="Nombre del documento Vademecum (SCORM)" />
 			<list-item
 				titulo="Visitas"
