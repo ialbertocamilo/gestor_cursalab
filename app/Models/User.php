@@ -864,9 +864,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('user', 'subworkspace_id', $user->subworkspace_id);
 
         if ($criterion_code):
+            $user_criterion_value = $user->criterion_values()
+                ->whereRelation('criterion', 'code', $criterion_code)
+                ->first();
+
             $query->whereHas(
                 'user.criterion_values',
-                fn($q) => $q->whereRelation('criterion', 'code', $criterion_code)
+                fn($q) => $q
+                    ->where('id', $user_criterion_value->id)
             );
         endif;
 
