@@ -79,7 +79,7 @@ class EscuelaController extends Controller
         // $validate = Categoria::validateEscuelaEliminar($school);
 
         if ($school->courses()->count() > 0)
-            return $this->error('La escuela tiene cursos activos.', 422, [['La escuela tiene cursos activos.']]);
+            return $this->error('La escuela tiene cursos.', 422, [['Para eliminar la escuela no debe tener cursos.']]);
 
         $school->delete();
 
