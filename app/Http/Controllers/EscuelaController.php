@@ -74,16 +74,14 @@ class EscuelaController extends Controller
         return $this->success(compact('school', 'msg'));
     }
 
-    public function destroyEscuela(School $categoria)
+    public function destroyEscuela(School $school)
     {
-        $validate = Categoria::validateEscuelaEliminar($categoria);
+        // $validate = Categoria::validateEscuelaEliminar($school);
 
-        if (!$validate['validate'])
-            return $this->success(compact('validate'), 422);
+        if ($school->courses()->count() > 0)
+            return $this->error('La escuela tiene cursos activos.', 422, [['La escuela tiene cursos activos.']]);
 
-        dd($validate);
-        return;
-        $categoria->delete();
+        $school->delete();
 
         return $this->success(['msg' => 'Escuela eliminada correctamente.']);
     }

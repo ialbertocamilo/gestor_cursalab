@@ -21,7 +21,7 @@ Route::controller(EscuelaController::class)->group(function () {
     Route::get('/search/{school}', 'searchCategoria')->name('escuelas.searchEscuela');
     Route::get('/form-selects', 'getFormSelects')->name('escuelas.formSelects');
 
-    Route::delete('/{categoria}', 'destroyEscuela')->name('escuelas.destroyEscuela');
+    Route::delete('/{school}/destroy', 'destroyEscuela')->name('escuelas.destroyEscuela');
 
     Route::put('/{categoria}/status', 'updateStatus');
 });
