@@ -89,10 +89,14 @@ class RestRankController extends Controller
             ->select('summary_users.user_id', 'score', 'last_time_evaluated_at');
 
         if ($criterion_code):
+            $user_criterion_value = $user->criterion_values()
+                ->whereRelation('criterion', 'code', $criterion_code)
+                ->first();
+
             $q_ranking->whereHas(
                 'user.criterion_values',
                 fn($q) => $q
-                    ->whereRelation('criterion', 'code', $criterion_code)
+                    ->where('id', $user_criterion_value->id)
             );
         endif;
 
@@ -108,7 +112,8 @@ class RestRankController extends Controller
         foreach ($temp as $rank) {
             $i++;
 
-            $current = $i == $user_position_ranking;
+            if (!$current)
+                $current = $i == $user_position_ranking;
 
             $ranking[] = [
                 'usuario_id' => $rank->user->id,
@@ -120,7 +125,7 @@ class RestRankController extends Controller
             ];
         }
 
-        if (!$current && $user_position_ranking && count($temp) === 10)
+        if (!$current && $user_position_ranking && (count($ranking) === 10)):
             $ranking[] = [
                 'usuario_id' => $user->id,
                 'nombre' => $user->fullname,
@@ -128,6 +133,7 @@ class RestRankController extends Controller
                 'last_ev' => $user_last_time_evaluated_at,
                 'position' => $user_position_ranking
             ];
+        endif;
 
         return $ranking;
     }
