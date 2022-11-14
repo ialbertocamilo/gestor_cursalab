@@ -469,7 +469,7 @@ export default {
             this.admins = response2.data.admins
             this.VademecumList = response2.data.vademecums
 
-            console.log(response2.data.vademecums);
+            // console.log(response2.data);
         },
         async crearReporte(res) {
 

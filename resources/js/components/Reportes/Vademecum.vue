@@ -86,9 +86,9 @@ import ResumenExpand from "./partials/ResumenExpand.vue";
 export default {
 	components: { ResumenExpand, ListItem },
 	props: {
-		workspaceId: { type: Number },
+		workspaceId: { type: Number, required: true },
 		vademecumList: { type: Array },
-		reportsBaseUrl: { type: String }
+		reportsBaseUrl: { type: String , required: true }
 	},
 	data() {
 		return {
