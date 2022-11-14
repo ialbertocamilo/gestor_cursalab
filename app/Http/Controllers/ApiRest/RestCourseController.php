@@ -106,6 +106,9 @@ class RestCourseController extends Controller
     {
         $user = auth()->user();
 
+        info('getCertificates');
+        info($request->all());
+
         $user_courses_id = $user->getCurrentCourses()->pluck('id');
 
         $query = SummaryCourse::with('course:id,name')
