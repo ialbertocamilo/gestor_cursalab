@@ -486,7 +486,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request)
     {
         $query = self::query();
-        $query->with('subworkspace')->withCount('failed_topics');
+
+        $with = ['subworkspace'];
+
+        if (get_current_workspace()->id == 25) {
+
+            $with = ['subworkspace', 'criterion_values' => function($q) {
+                $q->whereIn('criterion_id', [40, 41]);
+            }];
+        }
+
+        $query->with($with)->withCount('failed_topics');
 
         if ($request->q) {
             $query->filterText($request->q);

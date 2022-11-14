@@ -21,6 +21,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             //Message in Slack
+            info($th);
             Error::storeAndNotificateException($th, request());
             return response()->json(
                 ['message'=>'Server error.']
@@ -33,6 +34,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -45,6 +47,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -56,6 +59,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -65,6 +69,7 @@ class IntegrationsController extends Controller
         try {
             $response = Integrations::listUsers($request);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
+            info($th);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
             return response()->json(
@@ -78,6 +83,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -89,6 +95,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -100,6 +107,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -111,6 +119,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -122,6 +131,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -133,6 +143,7 @@ class IntegrationsController extends Controller
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());
+            info($th);
             return response()->json(
                 ['message'=>'Server error.']
             ,500);
@@ -141,6 +152,7 @@ class IntegrationsController extends Controller
     public function activateUsers(StateUserRequest $request){
         try{
             $response = Integrations::activateUsers($request->all());
+            info($th);
             return response()->json(['data'=>$response['data']], $response['code'] ? $response['code'] : 500);
         } catch (\Throwable $th) {
             Error::storeAndNotificateException($th, request());

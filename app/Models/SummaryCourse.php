@@ -14,11 +14,12 @@ class SummaryCourse extends Summary
         'last_time_evaluated_at', 'user_id', 'course_id', 'status_id', 'assigned', 'attempts',
         'views', 'advanced_percentage', 'grade_average', 'passed', 'taken', 'reviewed', 'failed',
         'old_admin_id',
-        'completed', 'restarts', 'restarter_id', 'certification_issued_at',
+        'completed', 'restarts', 'restarter_id', 'certification_issued_at', 'certification_accepted_at',
     ];
 
     protected $casts = [
-        'certification_issued_at' => 'datetime'
+        'certification_issued_at' => 'datetime',
+        'certification_accepted_at' => 'datetime',
     ];
 
     public function course()

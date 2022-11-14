@@ -144,6 +144,7 @@ export default {
                 endpoint: `${route_school}/cursos/search`,
                 ref: 'cursosTable',
                 headers: [
+                    {text: "Orden", value: "orden", align: 'center'},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
