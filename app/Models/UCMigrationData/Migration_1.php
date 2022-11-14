@@ -1254,4 +1254,36 @@ class Migration_1 extends Model
 
     }
 
+    protected function fixBoticaRelations($output)
+    {
+        $grupo_values = CriterionValue::whereRelation('criterion', 'code', 'grupo')->get();
+        $botica_values = CriterionValue::whereRelation('criterion', 'code', 'botica')->get();
+        $uc_workspace = $this->uc_workspace;
+        $db = self::connect();
+        $boticasUC = $db->getTable('boticas')
+            ->select(
+                'id',
+                'nombre',
+                'criterio_id',
+                'codigo_local',
+                'created_at',
+                'updated_at'
+            )
+            ->get();
+
+        $bar = $output->createProgressBar($boticasUC->count());
+        $bar->start();
+        foreach ($boticasUC as $boticaUC) {
+            $bar->advance();
+            $grupo = $grupo_values->where('external_id', $boticaUC->criterio_id)->first();
+            $botica = $botica_values->where('external_id', $boticaUC->id)->first();
+
+            if ($grupo && $botica):
+                $botica->parents()->sync([$grupo->id]);
+                $botica->workspaces()->sync([$uc_workspace->id]);
+            endif;
+        }
+        $bar->finish();
+    }
+
 }
