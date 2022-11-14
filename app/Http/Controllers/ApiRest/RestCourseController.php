@@ -11,6 +11,7 @@ use App\Models\SummaryCourse;
 use App\Models\Taxonomy;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class RestCourseController extends Controller
 {
@@ -101,17 +102,29 @@ class RestCourseController extends Controller
     }
 
 
-    public function getCertificates()
+    public function getCertificates(Request $request)
     {
         $user = auth()->user();
 
         $user_courses_id = $user->getCurrentCourses()->pluck('id');
 
-        $certificates = SummaryCourse::with('course:id,name')
+        $query = SummaryCourse::with('course:id,name')
             ->where('user_id', $user->id)
             ->whereIn('course_id', $user_courses_id)
-            ->whereNotNull('certification_issued_at')
-            ->get();
+            ->whereNotNull('certification_issued_at');
+
+        if ($request->q)
+            $query->whereHas('course', function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->q}%");
+            });
+
+        if ($request->type == 'accepted')
+            $query->whereNotNull('certification_accepted_at');
+
+        if ($request->type == 'pending')
+            $query->whereNull('certification_accepted_at');
+
+        $certificates = $query->get();
             
         $temp = [];
 

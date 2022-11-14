@@ -63,7 +63,7 @@ class RestReportesSupervisores extends Controller
             'supervisorId' => $supervisorWithSegment['user']->id,
             'workspaceId' => $workspaceId,
             'reportes' => [
-                'supervisores_avance_curricula' => 'Reporte de avance de curricula',
+                'supervisores_avance_curricula' => 'Reporte de avance de currícula',
                 'supervisores_notas' => 'Reporte de notas'
             ],
 
