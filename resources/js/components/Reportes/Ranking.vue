@@ -57,37 +57,39 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <!-- Job positions -->
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <DefaultSelect
-                    dense
-                    multiple
-                    :show-select-all="false"
-                    v-model="area"
-                    :items="areas"
-                    label="Área"
-                    item-text="name"
-                    item-value="id"
-                    placeholder="Seleccione una o mas Áreas"
-                    @onChange="getSedes"
-                    :disabled="!modulo"
-                />
-            </div>
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <DefaultSelect
-                    dense
-                    multiple
-                    v-model="sede"
-                    :items="sedes"
-                    label="Sedes"
-                    item-text="name"
-                    item-value="id"
-                    placeholder="Seleccione una o mas Sedes"
-                    :disabled="!area || !modulo"
-                />
-            </div>
-            <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+            <!-- Area y sedes -->
+            <template v-if="workspaceId == 25">
+                <div class="col-lg-6 col-xl-4 mb-3">
+                    <DefaultSelect
+                        dense
+                        multiple
+                        :show-select-all="false"
+                        v-model="area"
+                        :items="areas"
+                        label="Área"
+                        item-text="name"
+                        item-value="id"
+                        placeholder="Seleccione una o mas Áreas"
+                        @onChange="getSedes"
+                        :disabled="!modulo"
+                    />
+                </div>
+                <div class="col-lg-6 col-xl-4 mb-3">
+                    <DefaultSelect
+                        dense
+                        multiple
+                        v-model="sede"
+                        :items="sedes"
+                        label="Sedes"
+                        item-text="name"
+                        item-value="id"
+                        placeholder="Seleccione una o mas Sedes"
+                        :disabled="!area || !modulo"
+                    />
+                </div>
+                <v-divider class="col-12 mb-5 p-0"></v-divider>
+            </template>
+                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                 <i class="fas fa-download"></i>
                 <span>Descargar</span>
             </button>
