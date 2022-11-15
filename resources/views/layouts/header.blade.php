@@ -28,10 +28,10 @@
     <!-- Google fonts  -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
     <!-- theme stylesheet-->
-    <link rel="stylesheet" href="{{ asset('css/style.default.css?v=' . date('YmdH') ) }}" id="theme-stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/style.default.css?v=' . date('Y-W') ) }}" id="theme-stylesheet">
     <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="{{ asset('css/custom.css?v='.date('Ymd').'-2') }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css?v='.date('Ymd').'-1') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css?v='.date('Y-W')) }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css?v='.date('Y-W')) }}">
     <!-- Favicon-->
     <link rel="shortcut icon" href="{{ asset('img/favicon.png')}}">
     <!-- Tweaks for older IEs--><!--[if lt IE 9]>
