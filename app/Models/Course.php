@@ -585,11 +585,11 @@ class Course extends BaseModel
     public static function probar(){
         $course = Course::find('1212');
         $fun_1 = $course->getUsersBySegmentation('count');
-        info('Función 1');
-        info($fun_1);
+        print_r('Función 1: ');
+        print_r($fun_1);
         $fun_2 = $course->usersSegmented($course->segments, $type = 'count');
-        info('Función 2');
-        info($fun_2);
+        print_r('Función 2: ');
+        print_r($fun_2);
     }
     public function usersSegmented($course_segments, $type = 'get_records')
     {
