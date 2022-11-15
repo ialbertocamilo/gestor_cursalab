@@ -35,19 +35,20 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @delete="deleteEscuela($event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar escuela')"
                 @duplicate="openDuplicarModal($event)"
             />
+                <!-- @delete="deleteEscuela($event)" -->
 
-            <DialogConfirm
+           <!--  <DialogConfirm
                 v-model="modalDeleteOptions.open"
                 width="450px"
                 title="Eliminar Escuela"
                 subtitle="¿Está seguro de eliminar la escuela?"
                 @onConfirm="confirmDelete"
                 @onCancel="modalDeleteOptions.open = false"
-            />
+            /> -->
 
             <EscuelaValidacionesModal
                 width="50vw"
@@ -68,6 +69,14 @@
                 :modalCursosDuplicar="modalCursosDuplicar"
                 @onCancel='closeFormModalDuplicarCursos'
             />
+
+            <DefaultDeleteModal
+                :options="modalDeleteOptions"
+                :ref="modalDeleteOptions.ref"
+                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalDeleteOptions)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -79,10 +88,11 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import EscuelaValidacionesModal from "./EscuelaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DuplicarCursos from './DuplicarCursos';
+import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
     props: ['workspace_id', 'workspace_name'],
-    components: {EscuelaFormModal, EscuelaValidacionesModal, DialogConfirm, DefaultStatusModal, DuplicarCursos},
+    components: {EscuelaFormModal, EscuelaValidacionesModal, DialogConfirm, DefaultStatusModal, DuplicarCursos, DefaultDeleteModal},
     data() {
         let vue = this
         return {
@@ -117,12 +127,13 @@ export default {
                     //     type: 'action',
                     //     method_name: 'duplicate'
                     // },
-                    // {
-                    //     text: "Eliminar",
-                    //     icon: 'far fa-trash-alt',
-                    //     type: 'action',
-                    //     method_name: 'delete'
-                    // },
+                    {
+                        text: "Eliminar",
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        show_condition: 'has_no_courses',
+                        method_name: 'delete'
+                    },
                     // {
                     //     text: "Actualizar Estado",
                     //     icon: 'fa fa-circle',
@@ -132,7 +143,11 @@ export default {
                 ],
             },
             modalDeleteOptions: {
+                ref: 'EscuelaDeleteModal',
                 open: false,
+                base_endpoint: '/escuelas',
+                contentText: '¿Desea eliminar esta escuela?',
+                endpoint: '',
             },
             selects: {
                 modules: []
@@ -185,10 +200,10 @@ export default {
         activity() {
             console.log('activity')
         },
-        deleteEscuela(tema) {
-            let vue = this
-            vue.delete_model = tema
-            vue.modalDeleteOptions.open = true
+        deleteEscuela(school) {
+            // let vue = this
+            // vue.delete_model = school
+            // vue.modalDeleteOptions.open = true
         },
         async cleanModalEscuelasValidaciones() {
             let vue = this
@@ -198,22 +213,23 @@ export default {
         },
         confirmDelete() {
             let vue = this
-            let url = `/modulos/${vue.workspace_id}/escuelas/${vue.delete_model.id}`
+            // let url = `/modulos/${vue.workspace_id}/escuelas/${vue.delete_model.id}`
+            // let url = `/escuelas/${vue.delete_model.id}`
 
-            vue.$http.delete(url)
-                .then(({data}) => {
-                    vue.showAlert(data.data.msg)
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters)
-                    vue.delete_model = null
-                    vue.modalDeleteOptions.open = false
-                })
-                .catch(async ({data}) => {
-                    await vue.cleanModalEscuelasValidaciones()
-                    vue.loadingActionBtn = false
-                    vue.modalEscuelasValidaciones.hideConfirmBtn = true
-                    vue.modalEscuelasValidaciones.cancelLabel = 'Entendido'
-                    await vue.openFormModal(vue.modalEscuelasValidaciones, data, data.type, data.title)
-                })
+            // vue.$http.delete(url)
+            //     .then(({data}) => {
+            //         vue.showAlert(data.data.msg)
+            //         vue.refreshDefaultTable(vue.dataTable, vue.filters)
+            //         vue.delete_model = null
+            //         vue.modalDeleteOptions.open = false
+            //     })
+            //     .catch(async ({data}) => {
+            //         await vue.cleanModalEscuelasValidaciones()
+            //         vue.loadingActionBtn = false
+            //         vue.modalEscuelasValidaciones.hideConfirmBtn = true
+            //         vue.modalEscuelasValidaciones.cancelLabel = 'Entendido'
+            //         await vue.openFormModal(vue.modalEscuelasValidaciones, data, data.type, data.title)
+            //     })
         },
         openDuplicarModal(event) {
             let vue = this;
