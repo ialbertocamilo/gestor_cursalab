@@ -582,12 +582,20 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
-
+    public static function probar(){
+        $course = Course::find('1212');
+        $fun_1 = $course->getUsersBySegmentation('count');
+        info('Función 1');
+        info($fun_1);
+        $fun_2 = $course->usersSegmented($course->segments, $type = 'count');
+        info('Función 2');
+        info($fun_2);
+    }
     public function usersSegmented($course_segments, $type = 'get_records')
     {
         $users_id_course = [];
         foreach ($course_segments as $segment) {
-            $users = DB::table('criterion_value_user');
+            $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             $criteria = $segment->values->groupBy('criterion_id');
 
             foreach ($criteria as $criterion_values) {
@@ -596,7 +604,7 @@ class Course extends BaseModel
                     $q->whereIn('criterion_value_id', $criterion_values);
                 });
             }
-            $users_id = $users->groupBy('user_id')->select('user_id', DB::raw('count(user_id) as count_group_user_id'))
+            $users_id = $users->groupBy('user_id')->groupBy('criterion_values.criterion_id')->select('user_id', DB::raw('count(user_id) as count_group_user_id'))
                 ->having('count_group_user_id', '=', count($criteria))->pluck('user_id')->toArray();
             $users_id_course = array_merge($users_id_course, $users_id);
         }
@@ -646,7 +654,7 @@ class Course extends BaseModel
 
             // info($query->toSql());
             $counts[$key] = $query->count();
-
+            
             // $result = $query->get()->pluck('id')->toArray();
             // $users[$key] = $result;
             // $counts[$key] = count($result);
