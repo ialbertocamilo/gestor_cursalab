@@ -484,7 +484,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return BaseModel::successResponse();
     }
 
-    protected function search($request)
+    protected function search($request, $withAdvancedFilters = false)
     {
         $query = self::query();
         $query->with('subworkspace')->withCount('failed_topics');
