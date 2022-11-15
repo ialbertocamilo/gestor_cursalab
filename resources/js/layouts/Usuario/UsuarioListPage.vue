@@ -1,25 +1,25 @@
 <template>
     <section class="section-list ">
-<!--        <DefaultFilter-->
-<!--            v-model="open_advanced_filter"-->
-<!--            @filter="advanced_filter(dataTable, filters, 1)"-->
-<!--            @cleanFilters="clearObject(filters)"-->
-<!--            :disabled-confirm-btn="isValuesObjectEmpty(filters)"-->
-<!--        >-->
-<!--            <template v-slot:content>-->
-<!--                <v-row>-->
-<!--                    <v-col cols="12">-->
-<!--                        <DefaultSelect-->
-<!--                            clearable-->
-<!--                            :items="selects.sub_workspaces"-->
-<!--                            v-model="filters.subworkspace_id"-->
-<!--                            label="Módulos"-->
-<!--                            item-text="name"-->
-<!--                        />-->
-<!--                    </v-col>-->
-<!--                </v-row>-->
-<!--            </template>-->
-<!--        </DefaultFilter>-->
+        <DefaultFilter
+            v-model="open_advanced_filter"
+            @filter="advanced_filter(dataTable, filters, 1)"
+            @cleanFilters="clearObject(filters)"
+            :disabled-confirm-btn="isValuesObjectEmpty(filters)"
+        >
+            <template v-slot:content>
+                <v-row>
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            :items="selects.sub_workspaces"
+                            v-model="filters.subworkspace_id"
+                            label="Módulos"
+                            item-text="name"
+                        />
+                    </v-col>
+                </v-row>
+            </template>
+        </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Usuarios
@@ -66,12 +66,13 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-<!--                    <v-col cols="3" class="d-flex justify-content-end">-->
-<!--                        <DefaultButton-->
-<!--                            label="Ver Filtros"-->
-<!--                            icon="mdi-filter"-->
-<!--                            @click="open_advanced_filter = !open_advanced_filter"/>-->
-<!--                    </v-col>-->
+                    <v-col cols="3" />
+                    <v-col cols="3" class="d-flex justify-end">
+                        <DefaultButton
+                            label="Ver Filtros"
+                            icon="mdi-filter"
+                            @click="open_advanced_filter = !open_advanced_filter"/>
+                    </v-col>
                 </v-row>
             </v-card-text>
 
@@ -146,7 +147,7 @@ export default {
                 ],
                 actions: [
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
-                    
+
                     {
                         text: "Reiniciar",
                         icon: 'fas fa-history',

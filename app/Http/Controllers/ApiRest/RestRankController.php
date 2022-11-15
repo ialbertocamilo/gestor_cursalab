@@ -108,12 +108,14 @@ class RestRankController extends Controller
             ->get();
 
         $i = 0;
-        $current = false;
+        $current_user = false;
         foreach ($temp as $rank) {
             $i++;
 
-            if (!$current)
-                $current = $i == $user_position_ranking;
+            $current = $i == $user_position_ranking;
+
+            if(!$current_user)
+                $current_user = $i == $user_position_ranking;
 
             $ranking[] = [
                 'usuario_id' => $rank->user->id,
@@ -125,7 +127,7 @@ class RestRankController extends Controller
             ];
         }
 
-        if (!$current && $user_position_ranking && (count($ranking) === 10)):
+        if (!$current_user && $user_position_ranking && (count($ranking) === 10)):
             $ranking[] = [
                 'usuario_id' => $user->id,
                 'nombre' => $user->fullname,
