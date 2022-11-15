@@ -24,6 +24,7 @@ class EscuelaSearchResource extends JsonResource
             'image' => FileService::generateUrl($this->imagen),
             'active' => $this->active,
             'orden' => $this->position,
+            'position' => $this->position,
 
             'modalidad' => $modalidades[$this->modalidad] ?? '',
 

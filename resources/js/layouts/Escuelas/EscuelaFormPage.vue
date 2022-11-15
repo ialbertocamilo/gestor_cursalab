@@ -22,6 +22,16 @@
                                 counter="120"
                             />
                         </v-col>
+                        <v-col cols="6">
+                            <DefaultInput
+                                dense
+                                label="Orden"
+                                placeholder="Orden"
+                                v-model="resource.position"
+                                :rules="rules.position"
+                                show-required
+                            />
+                        </v-col>
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="6">
@@ -130,6 +140,7 @@ export default {
                 modalidad: null,
                 config_id: this.modulo_id,
                 name: null,
+                position: null,
                 nombre_ciclo_0: null,
                 imagen: null,
                 plantilla_diploma:null,
@@ -146,7 +157,7 @@ export default {
             rules: {
                 name: this.getRules(['required', 'max:120']),
                 modalidad: this.getRules(['required']),
-                position: this.getRules(['required', 'number']),
+                position: this.getRules(['number']),
             },
             selects: {
                 modalidad: [
