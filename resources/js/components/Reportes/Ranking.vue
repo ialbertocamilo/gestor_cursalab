@@ -5,20 +5,22 @@
             <template v-slot:resumen>
                 Ranking de todos los usuarios de la plataforma ordenados por puntaje obtenido
             </template>
-            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
-            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
-            <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
-            <list-item titulo="Puntaje (P)" subtitulo="Puntaje total del usuario" />
-            <list-item titulo="Cantidad completados (CC)" subtitulo="Cursos completados" />
-            <list-item titulo="Nota promedio (NP)" subtitulo="Nota promedio de todos los cursos completados por el usuario" />
-            <list-item titulo="Intentos (I)" subtitulo="Cantidad total de intentos del usuario" />
-            <list-item titulo="Última Evaluación" subtitulo="Fecha de última de evaluación generada por el usuario" />
-            <v-divider />
-            <list-item titulo="Fórmula para calcular el puntaje" subtitulo=" P = (CC*150 + NP*100) - I*0.5" />
-            <list-item titulo="Nota" subtitulo="En caso de empate, la ultima evaluación definará el orden; es decir el usuario que ha resuelto primero su última evaluación tendrá una mejor posición con respecto a los demás usuarios con el mismo puntaje" />
+            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario"/>
+            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario"/>
+            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario"/>
+            <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales"/>
+            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra"/>
+            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra"/>
+            <list-item titulo="Puntaje (P)" subtitulo="Puntaje total del usuario"/>
+            <list-item titulo="Cantidad completados (CC)" subtitulo="Cursos completados"/>
+            <list-item titulo="Nota promedio (NP)"
+                       subtitulo="Nota promedio de todos los cursos completados por el usuario"/>
+            <list-item titulo="Intentos (I)" subtitulo="Cantidad total de intentos del usuario"/>
+            <list-item titulo="Última Evaluación" subtitulo="Fecha de última de evaluación generada por el usuario"/>
+            <v-divider/>
+            <list-item titulo="Fórmula para calcular el puntaje" subtitulo=" P = (CC*150 + NP*100) - I*0.5"/>
+            <list-item titulo="Nota"
+                       subtitulo="En caso de empate, la ultima evaluación definará el orden; es decir el usuario que ha resuelto primero su última evaluación tendrá una mejor posición con respecto a los demás usuarios con el mismo puntaje"/>
         </ResumenExpand>
         <form @submit.prevent="exportNotasCurso" class="row">
             <!-- Modulo -->
@@ -31,17 +33,17 @@
                     item-text="name"
                     item-value="id"
                     placeholder="Seleccione un Módulo"
-                    @change="getAreas"
+                    @onChange="fetchFiltersData"
                 />
-<!--                <b-form-text text-variant="muted">Módulo</b-form-text>-->
-<!--                <select v-model="modulo" class="form-control">-->
-<!--                    <option value>- [Todos] -</option>-->
-<!--                    <option v-for="(item, index) in modules"-->
-<!--                            :key="index"-->
-<!--                            :value="item.id">-->
-<!--                        {{ item.name }}-->
-<!--                    </option>-->
-<!--                </select>-->
+                <!--                <b-form-text text-variant="muted">Módulo</b-form-text>-->
+                <!--                <select v-model="modulo" class="form-control">-->
+                <!--                    <option value>- [Todos] -</option>-->
+                <!--                    <option v-for="(item, index) in modules"-->
+                <!--                            :key="index"-->
+                <!--                            :value="item.id">-->
+                <!--                        {{ item.name }}-->
+                <!--                    </option>-->
+                <!--                </select>-->
             </div>
             <v-divider class="col-12 mb-0 p-0"></v-divider>
             <!-- Fechas -->
@@ -49,50 +51,45 @@
                 <!-- Filtros secundarios -->
                 <div class="col-8 px-0">
                     <!-- Filtros Checkboxs -->
-                <EstadoFiltro
-                    ref="EstadoFiltroComponent"
-                    @emitir-cambio="" />
+                    <EstadoFiltro
+                        ref="EstadoFiltroComponent"
+                        @emitir-cambio=""/>
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <!-- Job positions -->
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <DefaultSelect
-                    dense
-                    v-model="area"
-                    :items="areas"
-                    label="Área"
-                    item-text="name"
-                    item-value="id"
-                    placeholder="Seleccione una o mas Áreas"
-                    @change="getSedes"
-                    :disabled="!modulo"
-                />
-            </div>
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <DefaultSelect
-                    dense
-                    v-model="sede"
-                    :items="sedes"
-                    label="Sedes"
-                    item-text="name"
-                    item-value="id"
-                    placeholder="Seleccione una o mas Sedes"
-                    :disabled="!area || !modulo"
-                />
-<!--                <b-form-text text-variant="muted">Sede</b-form-text>-->
-<!--                <select v-model="sede" class="form-control"-->
-<!--                        :disabled="!sedes[0] || !area">-->
-<!--                    <option value>- Todos -</option>-->
-<!--                    <option v-for="(item, index) in sedes"-->
-<!--                            :key="index"-->
-<!--                            :value="item.name">-->
-<!--                        {{ item.name }}-->
-<!--                    </option>-->
-<!--                </select>-->
-            </div>
-            <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+            <!-- Area y sedes -->
+            <template v-if="workspaceId == 25">
+                <div class="col-lg-6 col-xl-4 mb-3">
+                    <DefaultSelect
+                        dense
+                        multiple
+                        :show-select-all="false"
+                        v-model="area"
+                        :items="areas"
+                        label="Área"
+                        item-text="name"
+                        item-value="id"
+                        placeholder="Seleccione una o mas Áreas"
+                        @onChange="getSedes"
+                        :disabled="!modulo"
+                    />
+                </div>
+                <div class="col-lg-6 col-xl-4 mb-3">
+                    <DefaultSelect
+                        dense
+                        multiple
+                        v-model="sede"
+                        :items="sedes"
+                        label="Sedes"
+                        item-text="name"
+                        item-value="id"
+                        placeholder="Seleccione una o mas Sedes"
+                        :disabled="!area || !modulo"
+                    />
+                </div>
+                <v-divider class="col-12 mb-5 p-0"></v-divider>
+            </template>
+                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                 <i class="fas fa-download"></i>
                 <span>Descargar</span>
             </button>
@@ -106,7 +103,7 @@ import ListItem from "./partials/ListItem.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand ,ListItem},
+    components: {EstadoFiltro, ResumenExpand, ListItem},
     props: {
         workspaceId: 0,
         modules: Array,
@@ -125,9 +122,9 @@ export default {
         // this.fetchFiltersData()
     },
     methods: {
-        async fetchFiltersData () {
+        async fetchFiltersData() {
             // let url = `${this.$props.reportsBaseUrl}/filtros/job-positions/${this.$props.workspaceId}`
-            let url = `${this.$props.reportsBaseUrl}/filtros/workspace/${this.$props.workspaceId}/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -135,14 +132,23 @@ export default {
 
             this.areas = response.data
         },
-        async getSedes(){
-            let url = `${this.$props.reportsBaseUrl}/filtros/workspace/${this.$props.workspaceId}/criterion-values/botica/${this.area}`;
-            let response = await axios({
-                url: url,
-                method: 'get'
-            })
+        async getSedes() {
+            let vue = this;
 
-            this.areas = response.data
+            if (this.area.length === 0) return;
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/criterion-values/botica`;
+
+            const data = {
+                parentsIds: this.area
+            };
+
+            vue.$http.post(url, data)
+                .then(({data}) => {
+
+                    this.sedes = data
+
+                })
         },
         async exportNotasCurso() {
 
@@ -164,7 +170,7 @@ export default {
                         workspaceId: this.workspaceId,
                         modulos: this.modulo ? [this.modulo] : [],
                         areas: this.area,
-                        sede: this.sede,
+                        sedes: this.sede,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos
                     }
@@ -195,7 +201,7 @@ export default {
 /*.v-label {*/
 /*    display: contents !important;*/
 /*}*/
-.v-list-item__subtitle{
+.v-list-item__subtitle {
     white-space: normal !important;
 }
 </style>
