@@ -66,9 +66,37 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
-        $this->restoreSummaryCourse();
+        // $this->restoreSummaryCourse();
+        $this->restore_summary_course();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restore_summary_course(){
+        SummaryTopic::select('id','topic_id','user_id')->where('source_id',4623)->with('topic')->chunkById(8000, function ($summary_topic){
+            $this->info('Inicio restore course');
+            $_bar = $this->output->createProgressBar($summary_topic->count());
+            $_bar->start();
+            $users = User::whereIn('id',$summary_topic->pluck('user_id'))->get();
+            foreach ($summary_topic as $summary) {
+                $user = $users->where('id',$summary->user_id)->first();
+                if($user && isset($summary->topic->course_id)){
+                    $course = Course::where('id',$summary->topic->course_id)->first();
+                    SummaryCourse::getCurrentRowOrCreate($course, $user);
+                    SummaryCourse::updateUserData($course, $user, true);
+                }
+                $_bar->advance();
+            }
+            $this->info('Fin restore course');
+            $_bar->finish();
+            $this->info('Inicio restore user');
+            $_bar = $this->output->createProgressBar($users->count());
+            foreach ($users as $user) {
+                SummaryUser::updateUserData($user);
+                $_bar->advance();
+            }
+            $this->info('Fin restore user');
+            $_bar->finish();
+        }); 
     }
     // 45671352
     public function restoreSummaryCourse(){
