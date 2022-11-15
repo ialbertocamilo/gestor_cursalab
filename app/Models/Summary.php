@@ -141,7 +141,10 @@ class Summary extends BaseModel
         // $course->load('segments.values');
         // $users_id_segmented = $course->usersSegmented($course->segments,'users_id');
         $users_id_segmented  = ($users_id) ? $users_id :SummaryCourse::where('course_id',$course->id)->pluck('user_id');
-        self::setSummaryUpdates($users_id_segmented,[$course->id]);
+        $chunk_users = array_chunk($users_id_segmented,80);
+        foreach ($chunk_users as $users) {
+            self::setSummaryUpdates($users,[$course->id]);
+        }
     }
     protected function setSummaryUpdates($user_ids, $course_ids = null)
     {
