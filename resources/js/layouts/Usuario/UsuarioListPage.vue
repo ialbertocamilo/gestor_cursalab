@@ -20,7 +20,7 @@
 
                     <v-col cols="12">
                         <DefaultSelect
-                            clearable dense
+                            clearable
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
@@ -32,15 +32,15 @@
                     <template v-for="(value, selectKey, index) in selects">
 
                         <v-col cols="12"
-                               v-if="!['sub_workspaces'].includes(selectKey) && criteria_template[index-1]">
+                               v-if="!['sub_workspaces', 'active'].includes(selectKey) && criteria_template[index-2]">
 
                             <DefaultInputDate
-                                v-if="criteria_template[index-1].field_type.code === 'date'"
+                                v-if="criteria_template[index-2].field_type.code === 'date'"
                                 clearable
                                 :referenceComponent="'modalDateFilter1'"
                                 :options="{ open: false, }"
                                 v-model="filters[selectKey]"
-                                :label="criteria_template[index-1].name"
+                                :label="criteria_template[index-2].name"
                             />
 
                             <DefaultAutocomplete
@@ -48,9 +48,9 @@
                                 clearable
                                 :items="value"
                                 v-model="filters[selectKey]"
-                                :label="criteria_template[index-1].name"
+                                :label="criteria_template[index-2].name"
                                 item-text="name"
-                                :multiple="criteria_template[index-1].multiple"
+                                :multiple="criteria_template[index-2].multiple"
                                 :show-select-all="false"
                             />
                         </v-col>
