@@ -74,42 +74,45 @@ class restablecer_funcionalidad extends Command
         info(" \n Fin: " . now());
     }
     public function restore_summary_course(){
-        User::select('id','subworkspace_id')->whereIn('document',[71342592])->get()->map(function($user){
-            $current_courses = $user->getCurrentCourses();
-            $_bar = $this->output->createProgressBar($current_courses->count());
+        // User::select('id','subworkspace_id')->whereIn('document',[71342592])->get()->map(function($user){
+        //     $current_courses = $user->getCurrentCourses();
+        //     $_bar = $this->output->createProgressBar($current_courses->count());
+        //     $_bar->start();
+        //     foreach ($current_courses as $course) {
+        //         SummaryCourse::updateUserData($course, $user, true);
+        //         $_bar->advance();
+        //     }
+        //     SummaryUser::updateUserData($user);
+        //     $_bar->finish();
+        // });
+        SummaryTopic::select('id','topic_id','user_id')->where('passed',0)->where('status_id',4573)->with('topic')->chunkById(8000, function ($summary_topic){
+            $this->info('Inicio restore course');
+            $_bar = $this->output->createProgressBar($summary_topic->count());
             $_bar->start();
-            foreach ($current_courses as $course) {
-                SummaryCourse::updateUserData($course, $user, true);
+            $users = User::whereIn('id',$summary_topic->pluck('user_id'))->get();
+            foreach ($summary_topic as $summary) {
+                $user = $users->where('id',$summary->user_id)->first();
+                if($user && isset($summary->topic->course_id)){
+                    $course = Course::where('id',$summary->topic->course_id)->first();
+                    SummaryCourse::getCurrentRowOrCreate($course, $user);
+                    SummaryCourse::updateUserData($course, $user, true);
+                }
+                $_bar->advance();
+                SummaryTopic::where('id',$summary_topic->id)->update([
+                    'passed'=>1
+                ]);
+            }
+            $this->info('Fin restore course');
+            $_bar->finish();
+            $this->info('Inicio restore user');
+            $_bar = $this->output->createProgressBar($users->count());
+            foreach ($users as $user) {
+                SummaryUser::updateUserData($user);
                 $_bar->advance();
             }
-            SummaryUser::updateUserData($user);
+            $this->info('Fin restore user');
             $_bar->finish();
-        });
-        // SummaryTopic::select('id','topic_id','user_id')->where('source_id',4623)->with('topic')->chunkById(8000, function ($summary_topic){
-        //     $this->info('Inicio restore course');
-        //     $_bar = $this->output->createProgressBar($summary_topic->count());
-        //     $_bar->start();
-        //     $users = User::whereIn('id',$summary_topic->pluck('user_id'))->get();
-        //     foreach ($summary_topic as $summary) {
-        //         $user = $users->where('id',$summary->user_id)->first();
-        //         if($user && isset($summary->topic->course_id)){
-        //             $course = Course::where('id',$summary->topic->course_id)->first();
-        //             SummaryCourse::getCurrentRowOrCreate($course, $user);
-        //             SummaryCourse::updateUserData($course, $user, true);
-        //         }
-        //         $_bar->advance();
-        //     }
-        //     $this->info('Fin restore course');
-        //     $_bar->finish();
-        //     $this->info('Inicio restore user');
-        //     $_bar = $this->output->createProgressBar($users->count());
-        //     foreach ($users as $user) {
-        //         SummaryUser::updateUserData($user);
-        //         $_bar->advance();
-        //     }
-        //     $this->info('Fin restore user');
-        //     $_bar->finish();
-        // }); 
+        }); 
     }
     // 45671352
     public function restoreSummaryCourse(){
