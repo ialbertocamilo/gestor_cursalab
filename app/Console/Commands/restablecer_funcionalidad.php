@@ -85,7 +85,10 @@ class restablecer_funcionalidad extends Command
         //     SummaryUser::updateUserData($user);
         //     $_bar->finish();
         // });
-        SummaryTopic::select('id','topic_id','user_id')->where('passed',0)->where('status_id',4573)->with('topic')->chunkById(8000, function ($summary_topic){
+        SummaryTopic::select('id','topic_id','user_id')
+            ->whereBetween('updated_at',['2022-11-16 12:08:00','2022-16-11 15:00:00'])
+            // ->where('passed',0)->where('status_id',4573)
+            ->with('topic')->chunkById(8000, function ($summary_topic){
             $this->info('Inicio restore course');
             $_bar = $this->output->createProgressBar($summary_topic->count());
             $_bar->start();
@@ -98,9 +101,9 @@ class restablecer_funcionalidad extends Command
                     SummaryCourse::updateUserData($course, $user, true);
                 }
                 $_bar->advance();
-                SummaryTopic::where('id',$summary->id)->update([
-                    'passed'=>1
-                ]);
+                // SummaryTopic::where('id',$summary->id)->update([
+                //     'passed'=>1
+                // ]);
             }
             $this->info('Fin restore course');
             $_bar->finish();
