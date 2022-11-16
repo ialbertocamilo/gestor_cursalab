@@ -125,6 +125,7 @@ class UsuarioController extends Controller
 
         $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
             ->with('field_type:id,name,code')
+            ->where('is_default', INACTIVE)
             ->whereIn('id', $criteria_workspace->pluck('id'))
             ->orderBy('name')
             ->get();
