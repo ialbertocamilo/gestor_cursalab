@@ -96,15 +96,15 @@ class restablecer_funcionalidad extends Command
             $users = User::whereIn('id',$summary_topic->pluck('user_id'))->get();
             foreach ($summary_topic as $summary) {
                 $user = $users->where('id',$summary->user_id)->first();
+                SummaryTopic::where('id',$summary->id)->update([
+                    'passed'=>1
+                ]);
                 if($user && isset($summary->topic->course_id)){
                     $course = Course::where('id',$summary->topic->course_id)->first();
                     SummaryCourse::getCurrentRowOrCreate($course, $user);
                     SummaryCourse::updateUserData($course, $user, true);
                 }
                 $_bar->advance();
-                // SummaryTopic::where('id',$summary->id)->update([
-                //     'passed'=>1
-                // ]);
             }
             $this->info('Fin restore course');
             $_bar->finish();
