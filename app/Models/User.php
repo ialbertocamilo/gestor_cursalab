@@ -484,7 +484,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return BaseModel::successResponse();
     }
 
-    protected function search($request)
+    protected function search($request, $withAdvancedFilters = false)
     {
         $query = self::query();
 
@@ -512,6 +512,34 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($request->sub_workspaces_id)
             $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
 
+        if ($withAdvancedFilters):
+            $workspace = get_current_workspace();
+
+            $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
+                ->with('field_type:id,name,code')
+                ->whereRelation('workspaces', 'id', $workspace->id)
+                ->orderBy('name')
+                ->get();
+
+            foreach ($criteria_template as $criterion) {
+
+                if ($request->has($criterion->code)) {
+                    $code = $criterion->code;
+                    $data = $request->$code;
+
+                    $query->whereHas('criterion_values', function ($q) use ($code, $data) {
+                        $q->whereRelation('criterion', 'code', $code);
+                        if (is_array($data)) {
+//                            $q->whereIn('id', $data);
+                            foreach ($data as $criterion_value_id)
+                                $q->orWhere('id', $criterion_value_id);
+                        } else
+                            $q->where('id', $data);
+                    });
+
+                }
+            }
+        endif;
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->descending == 'true' ? 'DESC' : 'ASC';

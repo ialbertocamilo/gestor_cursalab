@@ -95,7 +95,7 @@ class UsuarioController extends Controller
 
         $request->merge(['sub_workspaces_id' => $sub_workspaces_id, 'superuser' => auth()->user()->isA('super-user')]);
 
-        $users = User::search($request);
+        $users = User::search($request, withAdvancedFilters: true);
 
         UsuarioSearchResource::collection($users);
 
@@ -106,9 +106,34 @@ class UsuarioController extends Controller
     {
         $workspace = get_current_workspace();
 
-        $sub_workspaces = Workspace::where('parent_id', $workspace?->id)->get();
+        $sub_workspaces = Workspace::where('parent_id', $workspace?->id)
+            ->select('id', 'name')->get();
 
-        return $this->success(['sub_workspaces' => $sub_workspaces]);
+        $criteria_workspace = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
+            ->with([
+                'field_type:id,name,code',
+                'values' => function ($q) use ($workspace) {
+                    $q
+                        ->select('id', 'criterion_id', 'value_date', 'value_text as name')
+                        ->whereRelation('workspaces', 'id', $workspace->id);
+                }
+            ])
+            ->where('is_default', INACTIVE)
+            ->whereRelation('workspaces', 'id', $workspace->id)
+            ->orderBy('name')
+            ->get();
+
+        $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
+            ->with('field_type:id,name,code')
+            ->whereIn('id', $criteria_workspace->pluck('id'))
+            ->orderBy('name')
+            ->get();
+
+        return $this->success([
+            'sub_workspaces' => $sub_workspaces,
+            'criteria_workspace' => $criteria_workspace,
+            'criteria_template' => $criteria_template
+        ]);
     }
 
     public function edit(User $user)
@@ -300,9 +325,9 @@ class UsuarioController extends Controller
             $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
             $summary_topics = SummaryTopic::where('user_id', $user->id)
-                        ->where('passed', '<>', 1)
-                        ->whereRelation('topic', 'course_id', $course->id)
-                        ->get();
+                ->where('passed', '<>', 1)
+                ->whereRelation('topic', 'course_id', $course->id)
+                ->get();
 
             $summary_topics->increment('restarts', 1, ['attempts' => 0, 'restarter_id' => $admin->id]);
 
@@ -643,7 +668,7 @@ class UsuarioController extends Controller
                 // Add conditions to filter "desaprobados" only
 
                 $query->where('summary_courses.status_id', $desaprobado->id)
-                      ->where('summary_courses.attempts', '>=', $attempts);
+                    ->where('summary_courses.attempts', '>=', $attempts);
             }
 
             $users = $query->orderBy('summary_courses.grade_average')->get();
@@ -669,7 +694,7 @@ class UsuarioController extends Controller
                 // Add conditions to filter "desaprobados" only
 
                 $query->where('summary_topics.status_id', $desaprobado->id)
-                      ->where('summary_topics.attempts', '>=', $attempts);
+                    ->where('summary_topics.attempts', '>=', $attempts);
             }
 
             $users = $query->orderBy('summary_topics.grade')->get();
