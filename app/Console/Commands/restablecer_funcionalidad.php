@@ -86,9 +86,9 @@ class restablecer_funcionalidad extends Command
         //     $_bar->finish();
         // });
         SummaryTopic::select('id','topic_id','user_id')
-            ->where('updated_at','>','2022-11-16 12:08:00')
-            ->where('source_id',4623)
-            // ->where('passed',0)->where('status_id',4573)
+            // ->where('updated_at','>','2022-11-16 12:08:00')
+            // ->where('source_id',4623)
+            ->where('passed',0)->where('status_id',4573)
             ->with('topic')->chunkById(8000, function ($summary_topic){
             $this->info('Inicio restore course');
             $_bar = $this->output->createProgressBar($summary_topic->count());
