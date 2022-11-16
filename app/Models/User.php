@@ -518,27 +518,43 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
                 ->with('field_type:id,name,code')
                 ->whereRelation('workspaces', 'id', $workspace->id)
+                ->where('is_default', INACTIVE)
                 ->orderBy('name')
                 ->get();
 
-            foreach ($criteria_template as $criterion) {
+//            info($criteria_template->pluck('code')->toArray());
+            $query->where(function ($q) use ($criteria_template, $request) {
 
-                if ($request->has($criterion->code)) {
-                    $code = $criterion->code;
-                    $data = $request->$code;
+                foreach ($criteria_template as $i => $criterion) {
+                    $idx = $i;
+//                    info("IDX {$idx}");
+                    if ($request->has($criterion->code)) {
+                        $code = $criterion->code;
+                        $request_data = $request->$code;
 
-                    $query->whereHas('criterion_values', function ($q) use ($code, $data) {
-                        $q->whereRelation('criterion', 'code', $code);
-                        if (is_array($data)) {
-//                            $q->whereIn('id', $data);
-                            foreach ($data as $criterion_value_id)
-                                $q->orWhere('id', $criterion_value_id);
-                        } else
-                            $q->where('id', $data);
-                    });
+//                    $query->whereHas('criterion_values', function ($q) use ($code, $data) {
+//                        $q->whereRelation('criterion', 'code', $code);
+//                        if (is_array($data)) {
+////                            $q->whereIn('id', $data);
+//                            foreach ($data as $criterion_value_id)
+//                  K              $q->orWhere('id', $criterion_value_id);
+//                        } else
+//                            $q->where('id', $data);
+//                    });
 
+                        $q->join("criterion_value_user as cvu{$idx}", function ($join) use ($request_data, $idx) {
+
+                            $request_data = is_array($request_data) ? $request_data : [$request_data];
+//                            info($request_data);
+
+                            $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                                ->whereIn("cvu{$idx}" . '.criterion_value_id', $request_data);
+                        });
+
+                    }
                 }
-            }
+            });
+
         endif;
 
         $field = $request->sortBy ?? 'created_at';
