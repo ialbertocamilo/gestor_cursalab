@@ -7,22 +7,28 @@
              <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
              <list-item titulo="Apellidos y nombres, DNI" subtitulo="Datos personales" />
              <list-item titulo="Estado(Usuario)" subtitulo="Estado del usuario (Activo - Inactivo)" />
-             <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
-             <list-item titulo="ESCUELA" subtitulo="Nombre de la escuela" />
+
+             <!--list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" /-->
+             
+             <list-item titulo="Escuela" subtitulo="Nombre de la escuela" />
              <list-item titulo="Estado(escuela)" subtitulo="Estado de la escuela (Activo - Inactivo)" />
-             <list-item titulo="DENTRO DE CURRÍCULA" subtitulo="Sí el curso esta dentro de la currícula (Sí - No)" />
-             <list-item titulo="CURSO" subtitulo="Nombre del curso" />
+             <!--list-item titulo="DENTRO DE CURRÍCULA" subtitulo="Sí el curso esta dentro de la currícula (Sí - No)" /-->
+             
+             <list-item titulo="Curso" subtitulo="Nombre del curso" />
              <list-item titulo="Estado(curso)" subtitulo="Estado de la curso (Activo - Inactivo)" />
-             <list-item titulo="FECHA EN LA QUE OBTUVO EL DIPLOMA" subtitulo="Fecha del diploma (día-mes-año)" />
-             <list-item titulo="LINK VER DIPLOMA" subtitulo="Enlace para ver el diploma" />
-             <list-item titulo="LINK DESCARGA DIPLOMA" subtitulo="Enlace para descargar el diploma" />
+             <list-item titulo="Tipo de curso" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
+
+             <list-item titulo="Fecha en la que obtuvo el diploma" subtitulo="Fecha del diploma (día-mes-año)" />
+             <list-item titulo="Fecha de aceptación del usuario" subtitulo="Fecha del diploma (día-mes-año)" />
+             <list-item titulo="Link ver diploma" subtitulo="Enlace para ver el diploma" />
+             <list-item titulo="Link descarga diploma" subtitulo="Enlace para descargar el diploma" />
         </ResumenExpand>
         <form @submit.prevent="_exportDiplomas" class="row col-12">
         <!-- Modulo -->
             <div class="col-md-6 mb-3">
                 <b-form-text text-variant="muted">Módulo</b-form-text>
                     
-                <v-select
+                <!--v-select
                     attach
                     solo
                     chips
@@ -35,7 +41,17 @@
                     item-text="name"
                     label="- [Todos] -"
                     :background-color="!filters.module ? '' : 'light-blue lighten-5'"
-                ></v-select>
+                ></v-select-->
+
+                <DefaultAutocomplete
+                    v-model="filters.module"
+                    :items="modules"
+                    label=""
+                    item-text="name"
+                    item-value="id"
+                    dense
+                    multiple
+                />
 
                 <!--DefaultSelect
                     v-model="filters.modulo"
@@ -52,7 +68,31 @@
             <div class="col-md-6 mb-3">
                 <b-form-text text-variant="muted">Escuela</b-form-text>
                 
-                <select
+
+                 <!--DefaultAutocomplete
+                    :disabled="!Escuelas[0]"
+                    v-model="filters.escuela"
+                    :items="Escuelas"
+                    label="Seleccione una escuela"
+                    item-text="nombre"
+                    item-value="id"
+                    dense
+                    @onChange="escuelaChange"
+                    multiple
+                /-->
+                <DefaultAutocomplete
+                    :disabled="!schools[0]"
+                    v-model="filters.school"
+                    :items="schools"
+                    label=""
+                    item-text="name"
+                    item-value="id"
+                    dense
+                    multiple
+                    @onChange="schoolsChange"
+                />
+
+                <!--select
                     v-model="filters.school"
                     class="form-control"
                     :disabled="!schools[0]"
@@ -64,7 +104,7 @@
                             :value="item.id">
                         {{ item.name }}
                     </option>
-                </select>
+                </select-->
                 <!--DefaultAutocomplete
                     :disabled="!Escuelas[0]"
                     v-model="filters.escuela"
@@ -82,7 +122,18 @@
             <div class="col-md-6 mb-3">
                 <b-form-text text-variant="muted">Curso</b-form-text>
                 
-                <select
+                <DefaultAutocomplete
+                    :disabled="!courses[0]"
+                    v-model="filters.course"
+                    :items="courses"
+                    label=""
+                    item-text="name"
+                    item-value="id"
+                    dense
+                    multiple
+                />
+
+                <!--select
                     v-model="filters.course"
                     class="form-control"
                     :disabled="!courses[0]"
@@ -93,7 +144,8 @@
                             :value="item.id">
                         {{ item.name }}
                     </option>
-                </select>
+                </select-->
+
                 <!--DefaultAutocomplete
                     :disabled="!Cursos[0]"
                     v-model="filters.curso"
@@ -115,29 +167,17 @@
                     v-model="filters.fecha"
                     label="seleccione una fecha"
                 /-->
-                <b-form-text text-variant="muted">Fecha de emisión:</b-form-text>
                 
-                <div class="input-group">
-                    <input
-                        type="date"
-                        autocomplete="off"
-                        class="datepicker form-control hasDatepicker"
-                        v-model="filters.date"
-                    />
-                    <b-form-datepicker
-                        v-model="filters.date"
-                        button-only
-                        button-variant="light"
-                        locale="es-PE"
-                        aria-controls="date-start"
-                        today-button
-                        right
-                        label-today-button="Hoy"
-                        reset-button
-                        label-reset-button="Reiniciar"
-                        selected-variant="danger"
-                    ></b-form-datepicker>
-                </div>
+                <b-form-text text-variant="muted">Fecha de emisión:</b-form-text>
+                 <DefaultInputDate
+                    clearable
+                    dense
+                    range
+                    :referenceComponent="'modalDateFilter1'"
+                    :options="modalDateFilter1"
+                    v-model="filters.date"
+                    label=""
+                />
             </div>
             <v-row>
                 <div class="col-lg-4 col-md-6">
@@ -165,10 +205,7 @@
              <v-divider class="col-12 mb-5 p-0"></v-divider>
              <div class="col-sm-6 mb-3">
                 <div class="col-sm-8 pl-0">
-                    
-                    <!--button :disabled="filters.module.length == 0" type="submit" class="btn btn-md btn-primary btn-block text-light"-->
-
-                    <button :disabled="availableButtonexport" type="submit" class="btn btn-md btn-primary btn-block text-light">
+                    <button :disabled="!(filters.module.length)" type="submit" class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar </span>
                     </button>
@@ -199,9 +236,9 @@ export default {
 			cursos_libres:false,
             filters:{
                 module: [],
-                school: '',
-                course: '',
-                date: null
+                school: [],
+                course: [],
+                date: []
 
                 //fecha: null
                 // modulo: [],
@@ -213,19 +250,6 @@ export default {
             },
 		};
 	},
-    computed:{ 
-        _availableButtonexport() {
-            const vue = this;
-            return (vue.filters.module).length;
-        },
-        availableButtonexport() {
-            const vue = this;
-            const { module, school, course, date } = vue.filters; //readonly
-
-            return module.length && 
-                   school && course && !date;
-        }
-    },
 	methods: {
 		exportDiplomas() {
             const vue = this;
@@ -291,6 +315,7 @@ export default {
             const reqPayload = {
                 //data
                 data : {
+                    workspaceId: vue.workspaceId,
                     modules: vue.filters.module,
                     school: vue.filters.school,
                     course: vue.filters.course,
@@ -306,7 +331,7 @@ export default {
 
             axios.post(`${vue.reportsBaseUrl}/exportar/diplomas`, reqPayload)
                 .then((res) => {
-
+                    //console.log(res);
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
@@ -327,8 +352,8 @@ export default {
             const estado_escuela_filtro = vue.$refs.EstadoEscuelaFiltroComponent;
 
             // clean data
-            vue.filters.course = '';
-            vue.filters.school = '';
+            vue.filters.course = [];
+            vue.filters.school = [];
             vue.courses = [];
             vue.schools = [];
 
@@ -348,15 +373,16 @@ export default {
             const vue = this;
             const estado_curso_filtro = vue.$refs.EstadoCursoFiltroComponent;
 
-            //check schoolId 
-            if(!vue.filters.school) return;
-
             //clean data
-            vue.filters.course = '';
+            vue.filters.course = [];
             vue.courses = [];
 
+            //check schoolId 
+            if(!vue.filters.school.length) return;
+
+
             const reqPayload = {
-                schoolId: vue.filters.school,
+                schoolIds: vue.filters.school,
                 active: estado_curso_filtro.UsuariosActivos, // by 1
                 inactive:  estado_curso_filtro.UsuariosInactivos // by 0
             };
@@ -426,6 +452,7 @@ export default {
 	},
     mounted() {
         const vue = this;
+        console.log('mounted Diplomas')
         vue.schoolsInit();// schools by workpaceId
     }
 };
