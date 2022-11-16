@@ -610,44 +610,29 @@ class Course extends BaseModel
     public function getUsersBySegmentation($type = 'count')
     {
         $this->load('segments.values');
-
         if (!$this->hasBeenSegmented()) return [];
-
         // $users = collect();
         $users = [];
-
         $counts = [];
-
         foreach ($this->segments as $key => $segment) {
-
-            $query = User::select('id');
+            $query = User::select('id')->where('active',1);
             // $clause = $key == 0 ? 'where' : 'orWhere';
-
             $grouped = $segment->values->groupBy('criterion_id');
-
             foreach ($grouped as $idx => $values) {
-
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
-
                     $ids = $values->pluck('criterion_value_id');
-
                     $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
                         ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
                 });
             }
-
-
             // info($query->toSql());
             $counts[$key] = $query->count();
-
             // $result = $query->get()->pluck('id')->toArray();
             // $users[$key] = $result;
             // $counts[$key] = count($result);
         }
-
         // info($users);
-        info($counts);
-
+        // info($counts);
         return $counts;
         // return $query->$type();
     }
@@ -673,7 +658,7 @@ class Course extends BaseModel
                 $grouped = $segment->values->groupBy('criterion_id');
 
                 foreach ($grouped as $i => $values) {
-
+                    $idx = $key . '_' . $i;
 
                     info($idx);
 
