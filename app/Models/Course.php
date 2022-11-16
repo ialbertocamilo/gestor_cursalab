@@ -582,31 +582,42 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
-    public static function probar(){
-        $course = Course::find('1212');
-        $fun_1 = $course->getUsersBySegmentation('count');
-        print_r('Función 1: ');
-        print_r($fun_1);
-        $fun_2 = $course->usersSegmented($course->segments, $type = 'count');
-        print_r('Función 2: ');
-        print_r($fun_2);
-    }
+    // public static function probar(){
+    //     $course = Course::find('265');
+    //     $fun_1 = $course->getUsersBySegmentation('count');
+    //     print_r('Función 1: ');
+    //     print_r($fun_1);
+    //     $fun_2 = $course->usersSegmented($course->segments, $type = 'count');
+    //     print_r('Función 2: ');
+    //     print_r($fun_2);
+    // }
     public function usersSegmented($course_segments, $type = 'get_records')
     {
         $users_id_course = [];
-        foreach ($course_segments as $segment) {
-            $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
-            $criteria = $segment->values->groupBy('criterion_id');
-
-            foreach ($criteria as $criterion_values) {
-                $criterion_values = $criterion_values->pluck('criterion_value_id');
-                $users->orWhere(function ($q) use ($criterion_values) {
-                    $q->whereIn('criterion_value_id', $criterion_values);
+        foreach ($course_segments as $key => $segment) {
+            $query = User::select('id')->where('active',1);
+            $grouped = $segment->values->groupBy('criterion_id');
+            foreach ($grouped as $idx => $values) {
+                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
+                    $ids = $values->pluck('criterion_value_id');
+                    $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                        ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
                 });
             }
-            $users_id = $users->groupBy('user_id')->groupBy('criterion_values.criterion_id')->select('user_id', DB::raw('count(user_id) as count_group_user_id'))
-                ->having('count_group_user_id', '=', count($criteria))->pluck('user_id')->toArray();
-            $users_id_course = array_merge($users_id_course, $users_id);
+            // $counts[$key] = $query->count();
+            $users_id_course = array_merge($users_id_course,$query->pluck('id')->toArray());
+            // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
+            // $criteria = $segment->values->groupBy('criterion_id');
+
+            // foreach ($criteria as $criterion_values) {
+            //     $criterion_values = $criterion_values->pluck('criterion_value_id');
+            //     $users->orWhere(function ($q) use ($criterion_values) {
+            //         $q->whereIn('criterion_value_id', $criterion_values);
+            //     });
+            // }
+            // $users_id = $users->groupBy('user_id')->groupBy('criterion_values.criterion_id')->select('user_id', DB::raw('count(user_id) as count_group_user_id'))
+            //     ->having('count_group_user_id', '=', count($criteria))->pluck('user_id')->toArray();
+            // $users_id_course = array_merge($users_id_course, $users_id);
         }
         if ($type == 'users_id') {
             return $users_id_course;
@@ -634,6 +645,7 @@ class Course extends BaseModel
         $counts = [];
 
         foreach ($this->segments as $key => $segment) {
+
             $query = User::select('id')->where('active',1);
             // $clause = $key == 0 ? 'where' : 'orWhere';
 
