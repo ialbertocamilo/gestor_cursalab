@@ -18,6 +18,17 @@
                         />
                     </v-col>
 
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col>
+
                     <template v-for="(value, selectKey, index) in selects">
 
                         <v-col cols="12"

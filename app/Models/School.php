@@ -46,6 +46,12 @@ class School extends BaseModel
         if ($request->q)
             $escuelas->where('name', 'like', "%$request->q%");
 
+        if ($request->active == 1)
+            $escuelas->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $escuelas->where('active', '<>', ACTIVE);
+
         // if (!is_null($request->sortBy)) {
         //     $field = $request->sortBy ?? 'created_at';
         //     $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
