@@ -499,18 +499,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $query->with($with)->withCount('failed_topics');
 
-        if ($request->q) {
-            $query->filterText($request->q);
-        }
-        if ($request->workspace_id) {
-            $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
-        }
-
-        if ($request->subworkspace_id)
-            $query->where('subworkspace_id', $request->subworkspace_id);
-
-        if ($request->sub_workspaces_id)
-            $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+//        if ($request->q) {
+//            $query->filterText($request->q);
+//        }
+//        if ($request->workspace_id) {
+//            $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
+//        }
+//
+//        if ($request->subworkspace_id)
+//            $query->where('subworkspace_id', $request->subworkspace_id);
+//
+//        if ($request->sub_workspaces_id)
+//            $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
 
         if ($withAdvancedFilters):
             $workspace = get_current_workspace();
@@ -523,12 +523,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->get();
 
 //            info($criteria_template->pluck('code')->toArray());
+            $query->where(function ($q) use ($criteria_template, $request) {
 
-            foreach ($criteria_template as $criterion) {
-
-                if ($request->has($criterion->code)) {
-                    $code = $criterion->code;
-                    $request_data = $request->$code;
+                foreach ($criteria_template as $i => $criterion) {
+                    $idx = $i;
+//                    info("IDX {$idx}");
+                    if ($request->has($criterion->code)) {
+                        $code = $criterion->code;
+                        $request_data = $request->$code;
 
 //                    $query->whereHas('criterion_values', function ($q) use ($code, $data) {
 //                        $q->whereRelation('criterion', 'code', $code);
@@ -540,19 +542,19 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //                            $q->where('id', $data);
 //                    });
 
-                    $query->where(function ($q) use ($request_data){
-                        $q->join("criterion_value_user as cvu", function ($join) use ($request_data) {
+                        $q->join("criterion_value_user as cvu{$idx}", function ($join) use ($request_data, $idx) {
 
-                            $request_data = is_array($request_data) ? $request_data: [$request_data];
-                            info($request_data);
+                            $request_data = is_array($request_data) ? $request_data : [$request_data];
+//                            info($request_data);
 
-                            $join->on('users.id', '=', "cvu" . '.user_id')
-                                ->whereIn("cvu" . '.criterion_value_id', $request_data);
+                            $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                                ->whereIn("cvu{$idx}" . '.criterion_value_id', $request_data);
                         });
-                    });
 
+                    }
                 }
-            }
+            });
+
         endif;
 
         $field = $request->sortBy ?? 'created_at';
