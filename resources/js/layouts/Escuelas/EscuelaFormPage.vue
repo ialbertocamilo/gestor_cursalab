@@ -22,7 +22,7 @@
                                 counter="120"
                             />
                         </v-col>
-                        <v-col cols="6">
+                        <!-- <v-col cols="6">
                             <DefaultInput
                                 dense
                                 label="Orden"
@@ -31,7 +31,7 @@
                                 :rules="rules.position"
                                 show-required
                             />
-                        </v-col>
+                        </v-col> -->
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="6">

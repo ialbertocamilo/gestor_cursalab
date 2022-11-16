@@ -103,8 +103,7 @@ export default {
                 endpoint: '/escuelas/search',
                 ref: 'escuelasTable',
                 headers: [
-                    // {text: "Orden", value: "orden", align: 'center'},
-                    {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
+                    // {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombres", value: "name"},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
