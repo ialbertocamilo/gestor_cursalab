@@ -289,8 +289,9 @@ export default {
 
                     if (resource)
                         vue.resource = data.data.usuario
+
+                    return 0;
                 })
-            return 0;
         },
         loadSelects() {
             let vue = this

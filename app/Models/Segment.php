@@ -61,7 +61,8 @@ Segment extends BaseModel
                     $q
                         ->select('id', 'criterion_id', 'value_boolean', 'value_date', 'value_text')
                         ->whereRelation('workspaces', 'id', $workspace->id);
-                    //                        ->whereRelation('type', 'code', '<>', 'date');
+//                        ->whereRelation('workspaces', 'id', $workspace->id)
+//                        ->whereRelation('criterion.field_type', 'code', '<>', 'date');
                 }
             ])
             ->whereHas('workspaces', function ($q) use ($workspace) {
@@ -212,6 +213,7 @@ Segment extends BaseModel
 
         return $this->success(['msg' => $message], $message);
     }
+
     private function updateSegmentToLaunchObeserver($data)
     {
         $segments_id = array_column($data->segments, 'id');
@@ -220,6 +222,7 @@ Segment extends BaseModel
             'updated_at' => now()
         ]);
     }
+
     public function storeDirectSegmentation($data)
     {
         $segments_id = array_column($data->segments, 'id');
