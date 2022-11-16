@@ -19,6 +19,7 @@ class Criterion extends BaseModel
     ];
 
     protected $casts = [
+        'multiple' => 'boolean',
         'required' => 'boolean',
         'show_in_segmentation' => 'boolean',
     ];
@@ -64,7 +65,7 @@ class Criterion extends BaseModel
     protected function search($request)
     {
         // $criterion_values_id = CriterionValue::whereRelation('workspaces', 'id', $request->workspace_id)->pluck('id')->toArray();
-        
+
         $query = self::withCount([
             'values' => function ($q) use ($request) {
                 if ($request->workspace_id)

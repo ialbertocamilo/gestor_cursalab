@@ -165,7 +165,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                         'status_id' => $status->id,
                         'source_id' => $this->source->id,
 
-                        'passed' => $grade > $min_grade,
+                        'passed' => $grade >= $min_grade,
                         'grade' => $grade,
 
                         'views' => $views,
