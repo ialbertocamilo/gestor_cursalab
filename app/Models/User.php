@@ -511,29 +511,25 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->orderBy('name')
                 ->get();
 
-            $temp = [];
-
             foreach ($criteria_template as $criterion) {
 
                 if ($request->has($criterion->code)) {
                     $code = $criterion->code;
                     $data = $request->$code;
-                    $temp[] = $data;
 
                     $query->whereHas('criterion_values', function ($q) use ($code, $data) {
                         $q->whereRelation('criterion', 'code', $code);
-                        if (is_array($data))
-                            $q->whereIn('id', $data);
-                        else
+                        if (is_array($data)) {
+//                            $q->whereIn('id', $data);
+                            foreach ($data as $criterion_value_id)
+                                $q->orWhere('id', $criterion_value_id);
+                        } else
                             $q->where('id', $data);
                     });
 
                 }
             }
         endif;
-
-        info("FILTROS AVANZADOS");
-        info($temp);
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
