@@ -634,8 +634,7 @@ class Course extends BaseModel
         $counts = [];
 
         foreach ($this->segments as $key => $segment) {
-
-            $query = User::select('id');
+            $query = User::select('id')->where('active',1);
             // $clause = $key == 0 ? 'where' : 'orWhere';
 
             $grouped = $segment->values->groupBy('criterion_id');
@@ -654,7 +653,7 @@ class Course extends BaseModel
 
             // info($query->toSql());
             $counts[$key] = $query->count();
-            
+
             // $result = $query->get()->pluck('id')->toArray();
             // $users[$key] = $result;
             // $counts[$key] = count($result);
