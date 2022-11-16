@@ -14,9 +14,9 @@
              <list-item titulo="Estado(escuela)" subtitulo="Estado de la escuela (Activo - Inactivo)" />
              <!--list-item titulo="DENTRO DE CURRÍCULA" subtitulo="Sí el curso esta dentro de la currícula (Sí - No)" /-->
              
+             <list-item titulo="Tipo de curso" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
              <list-item titulo="Curso" subtitulo="Nombre del curso" />
              <list-item titulo="Estado(curso)" subtitulo="Estado de la curso (Activo - Inactivo)" />
-             <list-item titulo="Tipo de curso" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
 
              <list-item titulo="Fecha en la que obtuvo el diploma" subtitulo="Fecha del diploma (día-mes-año)" />
              <list-item titulo="Fecha de aceptación del usuario" subtitulo="Fecha del diploma (día-mes-año)" />
