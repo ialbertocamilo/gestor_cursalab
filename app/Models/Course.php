@@ -671,7 +671,7 @@ class Course extends BaseModel
 
             // info($query->toSql());
             $counts[$key] = $query->count();
-
+            
             // $result = $query->get()->pluck('id')->toArray();
             // $users[$key] = $result;
             // $counts[$key] = count($result);

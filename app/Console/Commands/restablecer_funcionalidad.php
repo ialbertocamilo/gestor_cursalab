@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Curso;
 use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
 use App\Models\Visita;
@@ -15,6 +16,7 @@ use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
+use App\Models\SummaryTopic;
 use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
@@ -66,9 +68,55 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
-        $this->restoreSummaryCourse();
+        // $this->restoreSummaryCourse();
+        $this->restore_summary_course();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restore_summary_course(){
+        // User::select('id','subworkspace_id')->whereIn('document',[71342592])->get()->map(function($user){
+        //     $current_courses = $user->getCurrentCourses();
+        //     $_bar = $this->output->createProgressBar($current_courses->count());
+        //     $_bar->start();
+        //     foreach ($current_courses as $course) {
+        //         SummaryCourse::updateUserData($course, $user, true);
+        //         $_bar->advance();
+        //     }
+        //     SummaryUser::updateUserData($user);
+        //     $_bar->finish();
+        // });
+        SummaryTopic::select('id','topic_id','user_id')
+            // ->where('updated_at','>','2022-11-16 12:08:00')
+            // ->where('source_id',4623)
+            ->where('passed',0)->where('status_id',4573)
+            ->with('topic')->chunkById(8000, function ($summary_topic){
+            $this->info('Inicio restore course');
+            $_bar = $this->output->createProgressBar($summary_topic->count());
+            $_bar->start();
+            $users = User::whereIn('id',$summary_topic->pluck('user_id'))->get();
+            foreach ($summary_topic as $summary) {
+                $user = $users->where('id',$summary->user_id)->first();
+                SummaryTopic::where('id',$summary->id)->update([
+                    'passed'=>1
+                ]);
+                if($user && isset($summary->topic->course_id)){
+                    $course = Course::where('id',$summary->topic->course_id)->first();
+                    SummaryCourse::getCurrentRowOrCreate($course, $user);
+                    SummaryCourse::updateUserData($course, $user, true);
+                }
+                $_bar->advance();
+            }
+            $this->info('Fin restore course');
+            $_bar->finish();
+            $this->info('Inicio restore user');
+            $_bar = $this->output->createProgressBar($users->count());
+            foreach ($users as $user) {
+                SummaryUser::updateUserData($user);
+                $_bar->advance();
+            }
+            $this->info('Fin restore user');
+            $_bar->finish();
+        }); 
     }
     // 45671352
     public function restoreSummaryCourse(){
