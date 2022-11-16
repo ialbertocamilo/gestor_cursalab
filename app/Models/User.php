@@ -489,18 +489,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query = self::query();
         $query->with('subworkspace')->withCount('failed_topics');
 
-//        if ($request->q) {
-//            $query->filterText($request->q);
-//        }
-//        if ($request->workspace_id) {
-//            $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
-//        }
-//
-//        if ($request->subworkspace_id)
-//            $query->where('subworkspace_id', $request->subworkspace_id);
-//
-//        if ($request->sub_workspaces_id)
-//            $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+        if ($request->q) {
+            $query->filterText($request->q);
+        }
+        if ($request->workspace_id) {
+            $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
+        }
+
+        if ($request->subworkspace_id)
+            $query->where('subworkspace_id', $request->subworkspace_id);
+
+        if ($request->sub_workspaces_id)
+            $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
 
         if ($withAdvancedFilters):
             $workspace = get_current_workspace();
