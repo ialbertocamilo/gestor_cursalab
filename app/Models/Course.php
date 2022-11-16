@@ -582,15 +582,15 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
-    // public static function probar(){
-    //     $course = Course::find('265');
-    //     $fun_1 = $course->getUsersBySegmentation('count');
-    //     print_r('Función 1: ');
-    //     print_r($fun_1);
-    //     $fun_2 = $course->usersSegmented($course->segments, $type = 'count');
-    //     print_r('Función 2: ');
-    //     print_r($fun_2);
-    // }
+    public static function probar(){
+        $course = Course::find('265');
+        $fun_1 = $course->getUsersBySegmentation('count');
+        print_r('Función 1: ');
+        print_r($fun_1);
+        $fun_2 = $course->usersSegmented($course->segments, $type = 'count');
+        print_r('Función 2: ');
+        print_r($fun_2);
+    }
     public function usersSegmented($course_segments, $type = 'get_records')
     {
         $users_id_course = [];
@@ -605,6 +605,7 @@ class Course extends BaseModel
                 });
             }
             // $counts[$key] = $query->count();
+            dd($query->toSql());
             $users_id_course = array_merge($users_id_course,$query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');

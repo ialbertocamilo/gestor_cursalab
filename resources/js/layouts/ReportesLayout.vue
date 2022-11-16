@@ -67,6 +67,12 @@ TABS
                    </span>
                </v-tab>
 
+               <v-tab class="justify-content-start py-7">
+                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                   <span class="pt-2">
+                       Segmentación
+                   </span>
+               </v-tab>
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
@@ -234,6 +240,18 @@ TABS CONTENT
                    </v-card>
                </v-tab-item>
 
+               <v-tab-item>
+                   <v-card flat>
+                       <v-card-text>
+                           <Segmentacion
+                               :workspaceId="workspaceId"
+                               :modules="modules"
+                               :reportsBaseUrl="reportsBaseUrl"
+                               @emitir-reporte="crearReporte"/>
+                       </v-card-text>
+                   </v-card>
+               </v-tab-item>
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -378,7 +396,7 @@ import ChecklistDetallado from "../components/Reportes/ChecklistDetallado.vue";
 import ChecklistGeneral from "../components/Reportes/ChecklistGeneral.vue";
 import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
-
+import Segmentacion from '../components/Reportes/Segmentacion.vue'
 export default {
     components: {
         NotasUsuario,
@@ -398,7 +416,8 @@ export default {
         ChecklistGeneral,
         Ranking,
         Meetings,
-        Diploma
+        Diploma,
+        Segmentacion
     },
     data() {
         return {

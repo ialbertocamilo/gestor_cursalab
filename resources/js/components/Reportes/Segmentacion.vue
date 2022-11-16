@@ -4,7 +4,7 @@
 
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el avance de los cursos segmentados y desarrollados, hasta el momento, por los usuarios.
+                Descarga la segmentación de un curso.
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
@@ -44,22 +44,9 @@
         </ResumenExpand>
 
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportNotasCurso" class="row">
-            <!-- Modulo -->
-            <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select v-model="modulo"
-                        class="form-control">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
+        <form @submit.prevent="exportSegmentacion" class="row">
             <!-- Escuela -->
-            <div class="col-sm-4 mb-3">
+            <div class="col-sm-6 mb-3">
                 <b-form-text text-variant="muted">Escuela</b-form-text>
                 <select
                     v-model="escuela"
@@ -76,7 +63,7 @@
                 </select>
             </div>
             <!-- Curso -->
-            <div class="col-sm-4 mb-3">
+            <div class="col-sm-6 mb-3">
                 <b-form-text text-variant="muted">Curso</b-form-text>
                 <select v-model="curso"
                         class="form-control"
@@ -89,95 +76,13 @@
                     </option>
                 </select>
             </div>
-            <v-divider class="col-12 mb-0 p-0"></v-divider>
-
-            <!-- Filtros secundarios -->
-            <div class="col-12 d-flex">
-                <!-- Filtros Checkboxs -->
-                <div class="col-12 px-0">
-                    <EstadoFiltro ref="EstadoFiltroComponent" />
-                    <v-divider class="col-12 p-0 m-0"></v-divider>
-                    <div class="col">
-                        <small class="form-text text-muted text-bold">
-                            Resultado del Curso :
-                        </small>
-                        <div class="d-flex mt-2">
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
-                                <v-checkbox
-                                    class="my-0 mr-2"
-                                    label="Completados"
-                                    color="success"
-                                    v-model="aprobados"
-                                    hide-details="false"
-                                />
-                                <div
-                                    tooltip="Resultados promedio de temas del curso iguales o superiores a la nota mínima aprobatoria asignada al curso."
-                                    tooltip-position="top"
-                                >
-                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                                </div>
-                            </div>
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
-                                <v-checkbox
-                                    class="my-0 mr-2"
-                                    label="Encuesta pendiente"
-                                    color="primary"
-                                    v-model="encuestaPendiente"
-                                    hide-details="false"
-                                />
-                                <div
-                                    tooltip="Estado luego de aprobar evaluación del curso pero con encuesta pendiente."
-                                    tooltip-position="top"
-                                >
-                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                                </div>
-                            </div>
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
-                                <v-checkbox
-                                    class="my-0 mr-2"
-                                    label="En desarrollo"
-                                    color="red"
-                                    v-model="desarrollo"
-                                    hide-details="false"
-                                />
-                                <div
-                                    tooltip="El colaborador aún no obtiene todas las calificaciones de los temas del curso aprobadas. Puede que las tenga desaprobadas pero con intentos restantes disponibles."
-                                    tooltip-position="top"
-                                >
-                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                                </div>
-                            </div>
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
-                                <v-checkbox
-                                    class="my-0 mr-2"
-                                    label="Desaprobados"
-                                    color="warning"
-                                    v-model="desaprobados"
-                                    hide-details="false"
-                                />
-                                <div
-                                    tooltip="Tras agotar todos los intentos de temas del curso y obtener resultados inferiores a la nota mínima aprobatoria asignada al tema, se considera desaprobación."
-                                    tooltip-position="top"
-                                >
-                                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <CheckValidar ref="checkValidacion" />
-                </div>
-                <!--          Fechas          -->
-<!--                <div class="col-4 ml-auto">-->
-<!--                    <FechaFiltro ref="FechasFiltros" />-->
-<!--                </div>-->
+            <div class="row col-sm-12 mb-3 ml-1">
+                <button type="submit"
+                        class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                    <i class="fas fa-download"></i>
+                    <span>Descargar</span>
+                </button>
             </div>
-            <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <button type="submit"
-                    class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-                <i class="fas fa-download"></i>
-                <span>Descargar</span>
-            </button>
         </form>
     </v-main>
 </template>
@@ -201,16 +106,9 @@ export default {
         return {
             schools: [],
             courses: [],
-
             //
-            modulo: "",
             escuela: "",
             curso: "",
-            //
-            aprobados: true,
-            desaprobados: true,
-            encuestaPendiente: true,
-            desarrollo: true
         };
     }
     ,
@@ -237,17 +135,14 @@ export default {
 
         }
         ,
-        async exportNotasCurso() {
+        async exportSegmentacion() {
 
             // show loading spinner
 
             this.showLoader()
-
-            let UFC = this.$refs.EstadoFiltroComponent;
-
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/segmentation`
             try {
                 let response = await axios({
                     url: urlReport,
@@ -257,20 +152,10 @@ export default {
                         modulos: this.modulo ? [this.modulo] : [],
                         escuelas: this.escuela ? [this.escuela] : [],
                         cursos: this.curso ? [this.curso] : [],
-
-                        UsuariosActivos: UFC.UsuariosActivos,
-                        UsuariosInactivos: UFC.UsuariosInactivos,
-
-                        aprobados: this.aprobados,
-                        desaprobados: this.desaprobados,
-                        desarrollo: this.desarrollo,
-                        encuestaPendiente : this.encuestaPendiente
                     }
                 })
-
                 // When there are no results notify user,
                 // download report otherwise
-
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
@@ -281,9 +166,7 @@ export default {
             } catch (ex) {
                 console.log(ex.message)
             }
-
             // Hide loading spinner
-
             this.hideLoader()
         }
         ,
