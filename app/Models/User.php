@@ -502,6 +502,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($request->q)
             $query->filterText($request->q);
 
+        if ($request->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
         if ($request->workspace_id)
             $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
 

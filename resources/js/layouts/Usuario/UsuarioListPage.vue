@@ -95,7 +95,16 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="3"/>
+                    <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col>
                     <v-col cols="3" class="d-flex justify-end">
                         <DefaultButton
                             label="Ver Filtros"
@@ -234,10 +243,21 @@ export default {
             },
             selects: {
                 sub_workspaces: [],
+                statuses: [
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
+                // statuses: [
+                //     null => 'Todos',
+                //     1 => 'Activos',
+                //     0 => 'Inactivos',
+                // ],
             },
             filters: {
                 q: '',
                 subworkspace_id: null,
+                active: null,
             },
             criteria_template: [],
             modalOptions: {
