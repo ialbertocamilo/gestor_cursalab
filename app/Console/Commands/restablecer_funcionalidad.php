@@ -98,7 +98,7 @@ class restablecer_funcionalidad extends Command
                     SummaryCourse::updateUserData($course, $user, true);
                 }
                 $_bar->advance();
-                SummaryTopic::where('id',$summary_topic->id)->update([
+                SummaryTopic::where('id',$summary->id)->update([
                     'passed'=>1
                 ]);
             }
