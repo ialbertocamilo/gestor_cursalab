@@ -22,7 +22,18 @@
 
                         <v-col cols="12"
                                v-if="!['sub_workspaces'].includes(selectKey) && criteria_template[index-1]">
+
+                            <DefaultInputDate
+                                v-if="criteria_template[index-1].field_type.code === 'date'"
+                                clearable
+                                :referenceComponent="'modalDateFilter1'"
+                                :options="{ open: false, }"
+                                v-model="filters[selectKey]"
+                                :label="criteria_template[index-1].name"
+                            />
+
                             <DefaultAutocomplete
+                                v-else
                                 clearable
                                 :items="value"
                                 v-model="filters[selectKey]"
