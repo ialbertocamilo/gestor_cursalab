@@ -624,7 +624,7 @@ class Course extends BaseModel
             // $clause = $key == 0 ? 'where' : 'orWhere';
 
             $grouped = $segment->values->groupBy('criterion_id');
-            
+
             foreach ($grouped as $idx => $values) {
 
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
@@ -671,10 +671,9 @@ class Course extends BaseModel
             $query->$clause(function($q) use ($segment, $key) {
 
                 $grouped = $segment->values->groupBy('criterion_id');
-                
+
                 foreach ($grouped as $i => $values) {
 
-                    $idx = $key . '_' . $i;
 
                     info($idx);
 
