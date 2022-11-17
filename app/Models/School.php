@@ -52,19 +52,19 @@ class School extends BaseModel
         if ($request->active == 2)
             $escuelas->where('active', '<>', ACTIVE);
 
-        // if (!is_null($request->sortBy)) {
-        //     $field = $request->sortBy ?? 'created_at';
-        //     $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+        if (!is_null($request->sortBy)) {
+            $field = $request->sortBy ?? 'created_at';
+            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        //     $escuelas->orderBy($field, $sort);
-        // } else {
-        //     $escuelas->orderBy('created_at', 'DESC');
-        // }
+            $escuelas->orderBy($field, $sort);
+        } else {
+            $escuelas->orderBy('created_at', 'DESC');
+        }
 
-        $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
+        // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
 
-        $field = $field ?? 'position';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+        // $field = $field ?? 'position';
+        // $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $escuelas->orderBy($field, $sort);
 
