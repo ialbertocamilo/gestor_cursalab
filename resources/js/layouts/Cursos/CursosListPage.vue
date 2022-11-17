@@ -23,7 +23,7 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
-                    <v-col cols="4">
+                    <v-col cols="3">
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
@@ -31,6 +31,17 @@
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
+                        />
+                    </v-col>
+
+                    <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
                         />
                     </v-col>
 
@@ -200,11 +211,16 @@ export default {
                 ]
             },
             selects: {
-                modules: []
+                modules: [],
+                statuses: [
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
             },
             filters: {
                 q: '',
-                // module: null,
+                active: null,
                 // category: null
             },
 

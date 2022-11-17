@@ -79,6 +79,12 @@ class Announcement extends BaseModel
             return $q->whereIn('criterion_value_id', $modules);
         });
 
+        if ($data->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($data->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
 
         // Set sorting values
         if (!is_null($data->sortBy)) {

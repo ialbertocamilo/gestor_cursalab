@@ -112,7 +112,7 @@ if (isset($fullScreen)) {
 
 @section('js')
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v=' . date('Ymd') . '-2') }}"></script>
+    <script src="{{ asset('js/app.js?v=' . date('Y-W')) }}"></script>
 
     @stack('libraries')
 

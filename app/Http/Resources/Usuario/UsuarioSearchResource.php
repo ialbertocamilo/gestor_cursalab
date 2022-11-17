@@ -25,7 +25,8 @@ class UsuarioSearchResource extends JsonResource
             'module' => $this->resource->subworkspace->name ?? 'No module',
             'active' => !!$this->active,
             'failed_topics_count' => $this->failed_topics_count,
-            'pruebas_desaprobadas' => ($request->superuser AND $this->failed_topics_count) ? true : false,
+            'pruebas_desaprobadas' => $this->failed_topics_count ? true : false,
+            // 'pruebas_desaprobadas' => ($request->superuser AND $this->failed_topics_count) ? true : false,
            // 'pruebas_desaprobadas' => true,
             'reporte_route' => route('exportar.node', ['dni' => $this->document]),
 

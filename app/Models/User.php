@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\UCMigrationData\Migration_1;
 use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -168,9 +169,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function failed_topics()
     {
         return $this->hasMany(SummaryTopic::class, 'user_id')
-                    ->where('passed', 0)
-                    ->whereNotNull('attempts')
-                    ->where('attempts', '<>', 0);
+            ->where('passed', 0)
+            ->whereNotNull('attempts')
+            ->where('attempts', '<>', 0);
     }
 
     public function relationships()
@@ -483,7 +484,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return BaseModel::successResponse();
     }
 
-    protected function search($request)
+    protected function search($request, $withAdvancedFilters = false)
     {
         $query = self::query();
 
@@ -498,12 +499,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $query->with($with)->withCount('failed_topics');
 
-        if ($request->q) {
+        if ($request->q)
             $query->filterText($request->q);
-        }
-        if ($request->workspace_id) {
+
+        if ($request->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
+        if ($request->workspace_id)
             $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
-        }
 
         if ($request->subworkspace_id)
             $query->where('subworkspace_id', $request->subworkspace_id);
@@ -511,16 +517,45 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($request->sub_workspaces_id)
             $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
 
+        if ($withAdvancedFilters):
+            $workspace = get_current_workspace();
+
+            $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
+                ->with('field_type:id,name,code')
+                ->whereRelation('workspaces', 'id', $workspace->id)
+                ->where('is_default', INACTIVE)
+                ->orderBy('name')
+                ->get();
+
+            foreach ($criteria_template as $i => $criterion) {
+                $idx = $i;
+
+                if ($request->has($criterion->code)) {
+                    $code = $criterion->code;
+                    $request_data = $request->$code;
+
+                    $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($request_data, $idx) {
+
+                        $request_data = is_array($request_data) ? $request_data : [$request_data];
+
+                        $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                            ->whereIn("cvu{$idx}" . '.criterion_value_id', $request_data);
+                    });
+
+                }
+            }
+        endif;
 
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
 
         $query->orderBy($field, $sort)->orderBy('id', $sort);
 
-        return $query->paginate($request->rowsPerPage);
+        return $query->paginate($request->paginate);
+        // return $query->paginate($request->rowsPerPage);
     }
 
-    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses= true)
+    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
@@ -695,7 +730,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $workspace->id)
-            ->when(!$withFreeCourses, function ($q){
+            ->when(!$withFreeCourses, function ($q) {
                 $q->whereRelation('type', 'code', '<>', 'free');
             })
             ->where('active', ACTIVE)
@@ -859,5 +894,44 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
 
         return $valid_segment;
+    }
+
+    public function load_ranking_data($criterion_code = null)
+    {
+        $user = $this;
+
+        $summary_user = SummaryUser::getCurrentRow($user);
+
+        if (!$summary_user) return null;
+
+        $query = SummaryUser::query()
+            ->whereRelation('user', 'subworkspace_id', $user->subworkspace_id);
+
+        if ($criterion_code):
+            $user_criterion_value = $user->criterion_values()
+                ->whereRelation('criterion', 'code', $criterion_code)
+                ->first();
+
+            $query->whereHas(
+                'user.criterion_values',
+                fn($q) => $q
+                    ->where('id', $user_criterion_value->id)
+            );
+        endif;
+
+        $ranks_before_user = $query->whereRelation('user', 'active', ACTIVE)
+            ->whereNotNull('last_time_evaluated_at')
+            ->where('score', '>=', $summary_user->score ?? 0)
+            ->orderBy('score', 'desc')
+            ->orderBy('last_time_evaluated_at')
+            ->get();
+
+        $row = $ranks_before_user->where('user_id', $user->id)->first();
+
+        return [
+            'position' => $ranks_before_user->count(),
+            'last_time_evaluated_at' => $row?->last_time_evaluated_at,
+            'score' => $row?->score
+        ];
     }
 }

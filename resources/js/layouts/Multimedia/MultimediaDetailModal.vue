@@ -3,8 +3,8 @@
         <DefaultDialog
             :options="options"
             :width="width"
-            @onCancel="confirmModal"
-            @onConfirm="closeModal"
+            @onCancel="closeModal"
+            @onConfirm="confirmModal"
         >
             <template v-slot:content>
                 <v-row>

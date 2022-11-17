@@ -16,6 +16,47 @@ use Illuminate\Support\Facades\Config;
 class RestRankController extends Controller
 {
     /***********************************REDISEÑO******************* */
+    public function ranking_v2()
+    {
+        $user = auth()->user();
+        $user->load('subworkspace');
+
+        $response[] = [
+            'label' => 'General',
+            'ranking' => $this->loadRankingByCriterion($user),
+        ];
+
+        if ($user->subworkspace->parent_id === 25):
+            $response[] = [
+                'label' => 'Área',
+                'code' => 'grupo',
+                'ranking' => [],
+//                'ranking' => $this->loadRankingByCriterion($user, 'grupo'),
+//                'ranking' => $this->loadRankingByCriterion($user, 29),
+            ];
+
+            $response[] = [
+                'label' => 'Sede',
+                'code' => 'botica',
+                'ranking' => [],
+//                'ranking' => $this->loadRankingByCriterion($user, 'botica'),
+//                'ranking' => $this->loadRankingByCriterion($user, 28),
+            ];
+        endif;
+
+        return $this->success($response);
+    }
+
+    public function rankingByCriterionCode($type = null)
+    {
+        $user = auth()->user();
+        $user->load('subworkspace');
+
+        $ranking = $this->loadRankingByCriterion($user, $type);
+
+        return $this->success($ranking);
+    }
+
     public function ranking()
     {
         /**
@@ -31,6 +72,74 @@ class RestRankController extends Controller
     }
     /***********************************REDISEÑO******************* */
     //CARGAR RANKINGS
+
+    public function loadRankingByCriterion($user, $criterion_code = null)
+    {
+        $ranking = [];
+        $user_ranking_data = $user->load_ranking_data($criterion_code);
+        $user_position_ranking = $user_ranking_data['position'];
+        $user_score_ranking = $user_ranking_data['score'];
+        $user_last_time_evaluated_at = $user_ranking_data['last_time_evaluated_at'];
+
+        $q_ranking = SummaryUser::query()
+            ->withWhereHas('user', function ($q) use ($user) {
+                $q->select('id', 'name', 'lastname', 'surname')
+                    ->where('subworkspace_id', $user->subworkspace_id);
+            })
+            ->select('summary_users.user_id', 'score', 'last_time_evaluated_at');
+
+        if ($criterion_code):
+            $user_criterion_value = $user->criterion_values()
+                ->whereRelation('criterion', 'code', $criterion_code)
+                ->first();
+
+            $q_ranking->whereHas(
+                'user.criterion_values',
+                fn($q) => $q
+                    ->where('id', $user_criterion_value->id)
+            );
+        endif;
+
+        $temp = $q_ranking->whereRelation('user', 'active', ACTIVE)
+            ->whereNotNull('last_time_evaluated_at')
+            ->orderBy('score', 'desc')
+            ->orderBy('last_time_evaluated_at')
+            ->limit(10)
+            ->get();
+
+        $i = 0;
+        $current_user = false;
+        foreach ($temp as $rank) {
+            $i++;
+
+            $current = $i == $user_position_ranking;
+
+            if(!$current_user)
+                $current_user = $i == $user_position_ranking;
+
+            $ranking[] = [
+                'usuario_id' => $rank->user->id,
+                'nombre' => $rank->user->fullname,
+                'rank' => $rank->score,
+                'current' => $current,
+                'last_ev' => $rank->last_time_evaluated_at,
+                'position' => $i,
+            ];
+        }
+
+        if (!$current_user && $user_position_ranking && (count($ranking) === 10)):
+            $ranking[] = [
+                'usuario_id' => $user->id,
+                'nombre' => $user->fullname,
+                'rank' => $user_score_ranking,
+                'last_ev' => $user_last_time_evaluated_at,
+                'position' => $user_position_ranking
+            ];
+        endif;
+
+        return $ranking;
+    }
+
     public function cargarRankingBotica($user_id = null, $botica = null)
     {
         return $this->cargar_ranking($user_id, 'usuarios.botica', $botica);
@@ -129,4 +238,6 @@ class RestRankController extends Controller
             'position' => $position
         ];
     }
+
+
 }

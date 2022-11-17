@@ -1,25 +1,65 @@
 <template>
     <section class="section-list ">
-<!--        <DefaultFilter-->
-<!--            v-model="open_advanced_filter"-->
-<!--            @filter="advanced_filter(dataTable, filters, 1)"-->
-<!--            @cleanFilters="clearObject(filters)"-->
-<!--            :disabled-confirm-btn="isValuesObjectEmpty(filters)"-->
-<!--        >-->
-<!--            <template v-slot:content>-->
-<!--                <v-row>-->
-<!--                    <v-col cols="12">-->
-<!--                        <DefaultSelect-->
-<!--                            clearable-->
-<!--                            :items="selects.sub_workspaces"-->
-<!--                            v-model="filters.subworkspace_id"-->
-<!--                            label="Módulos"-->
-<!--                            item-text="name"-->
-<!--                        />-->
-<!--                    </v-col>-->
-<!--                </v-row>-->
-<!--            </template>-->
-<!--        </DefaultFilter>-->
+        <DefaultFilter
+            v-model="open_advanced_filter"
+            @filter="advanced_filter(dataTable, filters, 1)"
+            @cleanFilters="clearObject(filters)"
+            :disabled-confirm-btn="isValuesObjectEmpty(filters)"
+        >
+            <template v-slot:content>
+                <v-row>
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            :items="selects.sub_workspaces"
+                            v-model="filters.subworkspace_id"
+                            label="Módulos"
+                            item-text="name"
+                        />
+                    </v-col>
+
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col>
+
+                    <template v-for="(value, selectKey, index) in selects">
+
+                        <v-col cols="12"
+                               v-if="!['sub_workspaces', 'active'].includes(selectKey) && criteria_template[index-2]">
+
+                            <DefaultInputDate
+                                v-if="criteria_template[index-2].field_type.code === 'date'"
+                                clearable
+                                :referenceComponent="'modalDateFilter1'"
+                                :options="{ open: false, }"
+                                v-model="filters[selectKey]"
+                                :label="criteria_template[index-2].name"
+                            />
+
+                            <DefaultAutocomplete
+                                v-else
+                                clearable
+                                :items="value"
+                                v-model="filters[selectKey]"
+                                :label="criteria_template[index-2].name"
+                                item-text="name"
+                                :multiple="criteria_template[index-2].multiple"
+                                :show-select-all="false"
+                            />
+                        </v-col>
+
+                    </template>
+
+                </v-row>
+            </template>
+        </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Usuarios
@@ -36,16 +76,16 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
-<!--                    <v-col cols="3">-->
-<!--                        <DefaultSelect-->
-<!--                            clearable dense-->
-<!--                            :items="selects.workspaces"-->
-<!--                            v-model="filters.workspace_id"-->
-<!--                            label="Workspace"-->
-<!--                            @onChange="refreshDefaultTable(dataTable, filters, 1)"-->
-<!--                            item-text="name"-->
-<!--                        />-->
-<!--                    </v-col>-->
+                    <!--                    <v-col cols="3">-->
+                    <!--                        <DefaultSelect-->
+                    <!--                            clearable dense-->
+                    <!--                            :items="selects.workspaces"-->
+                    <!--                            v-model="filters.workspace_id"-->
+                    <!--                            label="Workspace"-->
+                    <!--                            @onChange="refreshDefaultTable(dataTable, filters, 1)"-->
+                    <!--                            item-text="name"-->
+                    <!--                        />-->
+                    <!--                    </v-col>-->
                     <v-col cols="3">
                         <DefaultSelect
                             clearable dense
@@ -66,12 +106,22 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-<!--                    <v-col cols="3" class="d-flex justify-content-end">-->
-<!--                        <DefaultButton-->
-<!--                            label="Ver Filtros"-->
-<!--                            icon="mdi-filter"-->
-<!--                            @click="open_advanced_filter = !open_advanced_filter"/>-->
-<!--                    </v-col>-->
+                    <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col>
+                    <v-col cols="3" class="d-flex justify-end">
+                        <DefaultButton
+                            label="Ver Filtros"
+                            icon="mdi-filter"
+                            @click="open_advanced_filter = !open_advanced_filter"/>
+                    </v-col>
                 </v-row>
             </v-card-text>
 
@@ -174,7 +224,7 @@ export default {
                 headers: headers,
                 actions: [
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
-                    
+
                     {
                         text: "Reiniciar",
                         icon: 'fas fa-history',
@@ -194,7 +244,8 @@ export default {
                         route: 'reporte_route',
                         route_type: 'external'
                     },
-                    {   text: "Actualizar Estado",
+                    {
+                        text: "Actualizar Estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
@@ -203,17 +254,23 @@ export default {
             },
             selects: {
                 sub_workspaces: [],
-                workspaces: [],
-                carreras: [],
-                ciclos: [],
+                statuses: [
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
+                // statuses: [
+                //     null => 'Todos',
+                //     1 => 'Activos',
+                //     0 => 'Inactivos',
+                // ],
             },
             filters: {
                 q: '',
                 subworkspace_id: null,
-                workspace_id: null,
-                carrera: null,
-                ciclos: []
+                active: null,
             },
+            criteria_template: [],
             modalOptions: {
                 ref: 'UsuarioFormModal',
                 open: false,
@@ -262,19 +319,30 @@ export default {
             let uri = window.location.search.substring(1);
             let params = new URLSearchParams(uri);
             let param_subworkspace = params.get("subworkspace_id");
-            console.log("PARAM:: ", param_subworkspace)
 
             const url = `/usuarios/get-list-selects`
             vue.$http.get(url)
                 .then(({data}) => {
 
-                    vue.selects.sub_workspaces = data.data.sub_workspaces
-                    vue.filters.subworkspace_id = parseInt(param_subworkspace)
+                    vue.selects.sub_workspaces = data.data.sub_workspaces;
+                    vue.filters.subworkspace_id = parseInt(param_subworkspace);
+                    vue.criteria_template = data.data.criteria_template;
+
+                    data.data.criteria_workspace.forEach(criteria => {
+
+                        const new_select_obj = {[criteria.code]: criteria.values,};
+                        vue.selects = Object.assign({}, vue.selects, new_select_obj);
+
+                        const value = criteria.multiple ? [] : null;
+                        const new_filter_obj = {[criteria.code]: value};
+                        vue.filters = Object.assign({}, vue.filters, new_filter_obj);
+
+                    });
 
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
 
         },

@@ -31,14 +31,14 @@ TABS
                        Avance de currícula
                    </span>
                 </v-tab>
-<!--
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-certificate</v-icon>
                     <span class="pt-2">
                         Diplomas
                     </span>
                 </v-tab>
--->
+
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
@@ -177,16 +177,24 @@ TABS CONTENT
                        </v-card-text>
                    </v-card>
                </v-tab-item>
-                <!--
+                
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Diploma :Modulos="Modulos" :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                             @emitir-reporte="crearReporte"/>
+                             <!--Diploma 
+                                :Modulos="Modulos" 
+                                :API_FILTROS="API_FILTROS" 
+                                :API_REPORTES="API_REPORTES"
+                                @emitir-reporte="crearReporte" /-->
+                            <Diploma 
+                                :workspaceId="workspaceId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @emitir-reporte="crearReporte" />
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                -->
+                
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -283,9 +291,9 @@ TABS CONTENT
                             <!--<Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
                                        :API_REPORTES="API_REPORTES"
                                        @emitir-reporte="crearReporte"/>-->
-                            
+
                             <Vademecum :workspaceId="workspaceId"
-                                       :modules="modules" 
+                                       :vademecumList="VademecumList" 
                                        :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
@@ -467,8 +475,10 @@ export default {
 
             this.modules = response2.data.modules
             this.admins = response2.data.admins
-        }
-        ,
+            this.VademecumList = response2.data.vademecums
+
+            // console.log(response2.data);
+        },
         async crearReporte(res) {
 
             if (!res.data.ruta_descarga) return
@@ -499,7 +509,6 @@ export default {
         // this.Modulos = res.data.modulos;
         // this.Admins = res.data.users;
         // this.$store.commit("setUser", res.data.user[0]);
-        // this.VademecumList = res.data.vademecums;
     }
 };
 </script>
@@ -537,7 +546,7 @@ color: #ffffff !important;
 }
 
 .v-label {
-    display: contents !important;
+    /*display: contents !important;*/
 }
 
 .info-icon {

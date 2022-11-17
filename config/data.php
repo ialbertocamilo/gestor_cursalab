@@ -124,4 +124,8 @@ return [
         ['id' => 'PRO', 'nombre' => 'PRO'],
         ['id' => 'BUSINESS', 'nombre' => 'BUSINESS'],
     ],
+
+    'filters' => [
+        'certificates' => ['all' => 'Todos', 'accepted' => 'Aceptados', 'pending' => 'Pendientes'],
+    ],
 ];

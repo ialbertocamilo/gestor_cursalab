@@ -24,11 +24,14 @@ class EscuelaSearchResource extends JsonResource
             'image' => FileService::generateUrl($this->imagen),
             'active' => $this->active,
             'orden' => $this->position,
+            'position' => $this->position,
 
             'modalidad' => $modalidades[$this->modalidad] ?? '',
 
             'edit_route' =>  route('escuelas.edit', [$this->id]),
             'cursos_count' => $this->courses_count,
+            'has_no_courses' => $this->courses_count == 0,
+            // 'has_no_courses' => true,
 
             'cursos_route' => route('cursos.list', [$this->id]),
         ];
