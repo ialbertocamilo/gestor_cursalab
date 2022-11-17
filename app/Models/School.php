@@ -66,7 +66,7 @@ class School extends BaseModel
         // $field = $field ?? 'position';
         // $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $escuelas->orderBy($field, $sort);
+        // $escuelas->orderBy($field, $sort);
 
         return $escuelas->paginate($request->paginate);
     }
