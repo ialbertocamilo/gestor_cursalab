@@ -102,7 +102,7 @@ code:
 `
 {
     "data": {
-        "courses": [
+        "users": [
             {
                 "active": "Estado del usuario: Activo(true) , Inactivo(false)",
                 "document": "Identificador del usuario",
