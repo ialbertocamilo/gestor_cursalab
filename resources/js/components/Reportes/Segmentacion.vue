@@ -6,41 +6,21 @@
             <template v-slot:resumen>
                 Descarga la segmentación de un curso.
             </template>
-            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-            <list-item
-                titulo="Grupo sistema"
-                subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
-            />
-            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
-            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
-            <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
-            <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
+            <list-item titulo="Email, Documento, Apellidos y nombres" subtitulo="Datos personales" />
             <list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
             <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
-            <list-item titulo="Última sesión" subtitulo="Fecha de la última sesión en la plataforma" />
-            <list-item titulo="Visitas por curso" subtitulo="Cantidad de visitas al curso" />
             <list-item
-                titulo="Nota promedio"
+                titulo="PROMEDIO"
                 subtitulo="El promedio de las notas de los temas evaluables dentro del curso"
             />
-            <list-item titulo="Temas asignados" subtitulo="Cantidad de temas asignados al curso" />
-            <list-item titulo="Temas completados" subtitulo="Cantidad de temas completados del curso" />
             <list-item
-                titulo="Porcentaje"
+                titulo="AVANCE(%)"
                 subtitulo="Porcentaje del curso (cantidad de temas completados sobre la cantidad de temas asignados)"
             />
             <list-item
-                titulo="Resultado"
+                titulo="RESULTADO CURSO"
                 subtitulo="Resultado de cada curso, considerando la nota mínima aprobatoria configurada"
             />
-            <list-item titulo="Última visita" subtitulo="Fecha de la última visita realizada al curso" />
-            <list-item
-                titulo="Estado del curso"
-                subtitulo="Representa si el curso esta activo/inactivo en la plataforma"
-            />
-            <list-item titulo="Ciclo del curso" subtitulo="Ciclo/Ciclos al que pertenece el curso" />
         </ResumenExpand>
 
         <!-- Formulario del reporte -->

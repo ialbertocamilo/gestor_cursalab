@@ -68,7 +68,7 @@ TABS
                </v-tab>
 
                <v-tab class="justify-content-start py-7">
-                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                   <v-icon left>fa fa-square</v-icon>
                    <span class="pt-2">
                        Segmentación
                    </span>
