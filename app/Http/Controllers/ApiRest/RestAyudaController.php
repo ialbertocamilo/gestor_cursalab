@@ -83,17 +83,17 @@ class RestAyudaController extends Controller
 
             $id = Ticket::insertGetId($data);
             $response = array('error' => false, 'data' => ['ticket' => $id]);
-            $data_email = array(
-                'nombre' => $name,
-                'empresa' => $workspace_name,
-                'dni' => $dni,
-                'telefono' => $phone,
-                'detalle' => $details
-            );
-            $emails = ['kevin@cursalab.io', 'rodrigo@cursalab.io'];
-            foreach ($emails as $email_to) {
-                Mail::to($email_to)->send(new SendEmailSupportLogin($data_email));
-            }
+            // $data_email = array(
+            //     'nombre' => $name,
+            //     'empresa' => $workspace_name,
+            //     'dni' => $dni,
+            //     'telefono' => $phone,
+            //     'detalle' => $details
+            // );
+            // $emails = ['kevin@cursalab.io', 'rodrigo@cursalab.io'];
+            // foreach ($emails as $email_to) {
+            //     Mail::to($email_to)->send(new SendEmailSupportLogin($data_email));
+            // }
         }
         return response()->json(compact('response'));
     }

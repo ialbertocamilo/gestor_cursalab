@@ -71,7 +71,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
         'user_relations',
-        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at',
+        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at','is_updating'
     ];
 
     protected $with = ['roles', 'abilities'];

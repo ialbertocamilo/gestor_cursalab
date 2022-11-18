@@ -27,21 +27,29 @@ class RestRankController extends Controller
         ];
 
         if ($user->subworkspace->parent_id === 25):
-            $response[] = [
-                'label' => 'Área',
-                'code' => 'grupo',
-                'ranking' => [],
+            $user_grupo_value = $user->criterion_values()
+                ->whereRelation('criterion', 'code', 'grupo')
+                ->first();
+            if ($user_grupo_value)
+                $response[] = [
+                    'label' => 'Área',
+                    'code' => 'grupo',
+                    'ranking' => [],
 //                'ranking' => $this->loadRankingByCriterion($user, 'grupo'),
 //                'ranking' => $this->loadRankingByCriterion($user, 29),
-            ];
+                ];
 
-            $response[] = [
-                'label' => 'Sede',
-                'code' => 'botica',
-                'ranking' => [],
+            $user_botica_value = $user->criterion_values()
+                ->whereRelation('criterion', 'code', 'botica')
+                ->first();
+            if ($user_botica_value)
+                $response[] = [
+                    'label' => 'Sede',
+                    'code' => 'botica',
+                    'ranking' => [],
 //                'ranking' => $this->loadRankingByCriterion($user, 'botica'),
 //                'ranking' => $this->loadRankingByCriterion($user, 28),
-            ];
+                ];
         endif;
 
         return $this->success($response);
@@ -114,7 +122,7 @@ class RestRankController extends Controller
 
             $current = $i == $user_position_ranking;
 
-            if(!$current_user)
+            if (!$current_user)
                 $current_user = $i == $user_position_ranking;
 
             $ranking[] = [
