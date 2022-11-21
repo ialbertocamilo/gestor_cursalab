@@ -110,7 +110,7 @@ class AuthController extends Controller
         $user->updateUserDeviceVersion($data);
         $user->updateLastUserLogin($data);
 
-        $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma')
+        $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma', 'contact_support')
             ->where('id', $user->subworkspace_id)
             ->first();
 
@@ -151,7 +151,7 @@ class AuthController extends Controller
             'module' => $user->subworkspace,
             'workspace' => $workspace_data,
             'can_be_host' => $can_be_host,
-            'ciclo_actual' => $ciclo_actual
+            'ciclo_actual' => $ciclo_actual,
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo
@@ -166,6 +166,7 @@ class AuthController extends Controller
 
         $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
         $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
+        $config_data->filters = config('data.filters');
 
         return response()->json([
             'access_token' => $token,

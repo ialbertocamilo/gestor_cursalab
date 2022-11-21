@@ -6,4 +6,8 @@ Route::controller(RestRankController::class)->group(function() {
 
     Route::get('/', 'ranking');
 
+    Route::get('/v2', 'ranking_v2');
+
+    Route::get('/criterion-code/{type}', 'rankingByCriterionCode');
+
 });

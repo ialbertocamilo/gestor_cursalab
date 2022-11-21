@@ -7,14 +7,26 @@
             </template>
          
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-            <list-item
-                titulo="Grupo sistema"
-                subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
-            />
-            <list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
-            <list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
+            <!-- this only for FP -->
+            <div v-show="workspaceId === 25">
+
+                <list-item
+                    titulo="Grupo sistema"
+                    subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
+                />
+                <list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
+                <list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
+            </div>
+            <!-- this only for FP -->
+            
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-            <list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+
+            <!-- this only for FP -->
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+            </div>
+            <!-- this only for FP -->
+
             <list-item titulo="Videoteca" subtitulo="Nombre del título en la Videoteca" />
             <list-item
                 titulo="Visitas"
@@ -77,20 +89,21 @@ export default {
             axios
                 .post(`${this.reportsBaseUrl}/exportar/videoteca`, params)
                 .then((res) => {
-                    console.log(res);
+                    
+                    if (res.data.alert) {
+                        this.showAlert(res.data.alert, 'warning');
+                    } else {
+                        this.$emit("emitir-reporte", res);
+                    }
+                    this.hideLoader();
 
-                    /*
-                    if (!res.data.error) this.$emit("emitir-reporte", res);
-                    else {
-                        alert("Se ha encontrado el siguiente error : " + res.data.error);
-                        this.hideLoader()
-                    }*/
-                })
-                .catch((error) => {
-                    console.log(error);
-                    console.log(error.message);
-                    alert("Se ha encontrado el siguiente error : " + error);
-                    this.hideLoader()
+                }, (err) => {
+                    console.log(err);
+                    console.log(err.message);
+
+                    alert("Se ha encontrado el siguiente error : " + err);
+                    
+                    this.hideLoader();
                 });
         }
     },

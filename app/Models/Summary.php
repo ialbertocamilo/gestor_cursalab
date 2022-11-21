@@ -151,6 +151,7 @@ class Summary extends BaseModel
         $data = [
             'summary_user_update' => true,
             'required_update_at' => now(),
+            'is_updating'=>0
         ];
 
         if ($course_ids) {

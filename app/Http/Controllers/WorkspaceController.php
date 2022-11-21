@@ -180,6 +180,11 @@ class WorkspaceController extends Controller
         $subworkspace->nota_aprobatoria = $evaluacion['nota_aprobatoria'] ?? NULL;
         $subworkspace->nro_intentos = $evaluacion['nro_intentos'] ?? NULL;
 
+        $contact_support = $subworkspace->contact_support;
+        $subworkspace->contact_phone = $contact_support['contact_phone'] ?? NULL;
+        $subworkspace->contact_email = $contact_support['contact_email'] ?? NULL;
+        $subworkspace->contact_schedule = $contact_support['contact_schedule'] ?? NULL;
+
         return $this->success([
             'modulo' => $subworkspace,
             'main_menu' => $formSelects['main_menu'],
