@@ -59,7 +59,7 @@ const base_url = '${base_url}';
 var axios = require('axios');
 var config = {
     method: 'get',
-    url: base_url+'/integrations/criterions',
+    url: base_url+'/integrations/criteria',
     headers: { 
         'secretKey': 'f*hdj[!GbdZQ4{#zKlot', 
         'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
