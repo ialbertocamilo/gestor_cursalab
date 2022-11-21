@@ -58,6 +58,12 @@ class RestRankController extends Controller
     public function rankingByCriterionCode($type = null)
     {
         $user = auth()->user();
+        $user_criterion_value = $user->criterion_values()
+            ->whereRelation('criterion', 'code', $type)
+            ->first();
+
+        if (!$user_criterion_value) return $this->success([]);
+
         $user->load('subworkspace');
 
         $ranking = $this->loadRankingByCriterion($user, $type);
