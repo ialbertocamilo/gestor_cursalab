@@ -555,7 +555,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // return $query->paginate($request->rowsPerPage);
     }
 
-    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true, $soft = false, $only_ids = false)
+    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true, $withRelations = 'default', $only_ids = false)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
@@ -565,7 +565,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
         // TODO: Agregar segmentacion directa
-        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $soft);
+        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $withRelations);
 
         return $only_ids
             ? array_unique(array_column($all_courses, 'id'))
@@ -700,61 +700,66 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    private function getCourseSegmentationQuery()
+    private function getUserCourseQuery($withRelations)
     {
-        return Course::with([
-            'segments.values.criterion_value.criterion',
-            'requirements',
-            'schools' => function ($query) {
-                $query->where('active', ACTIVE);
-            },
-            'topics' => [
-                'evaluation_type',
-                'requirements',
-                'medias.type'
+        $relations = match ($withRelations) {
+            'soft' => [
+                'segments' => function ($q) {
+                    $q
+                        ->select('id', 'model_id')
+                        ->with('values', function ($q) {
+                            $q->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+                                ->with('criterion_value', function ($q) {
+                                    $q->select('id', 'value_text', 'value_date', 'value_boolean')
+                                        ->with('criterion', function ($q) {
+                                            $q->select('id', 'name', 'code');
+                                        });
+                                });
+                        });
+                },
             ],
-            'polls.questions',
-            'topics.evaluation_type'
-        ]);
+            'user-progress' => [
+                'segments' => function ($q) {
+                    $q
+                        ->select('id', 'model_id')
+                        ->with('values', function ($q) {
+                            $q->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+                                ->with('criterion_value', function ($q) {
+                                    $q->select('id', 'value_text', 'value_date', 'value_boolean')
+                                        ->with('criterion', function ($q) {
+                                            $q->select('id', 'name', 'code');
+                                        });
+                                });
+                        });
+                },
+                'type:id,code'
+            ],
+            default => [
+                'segments.values.criterion_value.criterion',
+                'requirements',
+                'schools' => function ($query) {
+                    $query->where('active', ACTIVE);
+                },
+                'topics' => [
+                    'evaluation_type',
+                    'requirements',
+                    'medias.type'
+                ],
+                'polls.questions',
+//                'topics.evaluation_type'
+            ]
+        };
+
+        return Course::with($relations);
     }
 
-    public function getSoftCourseSegmentationQuery()
-    {
-//        return Course::with([
-//            'segments.values.criterion_value.criterion',
-//            'schools' => function ($query) {
-//                $query->where('active', ACTIVE);
-//            },
-//        ]);
-
-        return Course::with([
-            'segments' => function ($q) {
-                $q
-                    ->select('id', 'model_id')
-                    ->with('values', function ($q) {
-                        $q->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
-                            ->with('criterion_value', function ($q) {
-                                $q->select('id', 'value_text', 'value_date', 'value_boolean')
-                                    ->with('criterion', function ($q) {
-                                        $q->select('id', 'name', 'code');
-                                    });
-                            });
-                    });
-            },
-           // 'segments.values.criterion_value.criterion',
-        ]);
-
-    }
-
-    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $soft)
+    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $withRelations)
     {
         $user->loadMissing('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
 
-        $query = $soft
-            ? $this->getSoftCourseSegmentationQuery()
-            : $this->getCourseSegmentationQuery();
+        $query = $this->getUserCourseQuery($withRelations);
 
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
