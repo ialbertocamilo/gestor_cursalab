@@ -28,33 +28,31 @@
             <!-- Escuela -->
             <div class="col-sm-6 mb-3">
                 <b-form-text text-variant="muted">Escuela</b-form-text>
-                <select
-                    v-model="escuela"
-                    class="form-control"
+                <DefaultAutocomplete
                     :disabled="!schools[0]"
-                    @change="escuelaChange"
-                >
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in schools"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                    v-model="filters.school"
+                    :items="schools"
+                    label=""
+                    item-text="name"
+                    item-value="id"
+                    dense
+                    multiple
+                    @onChange="schoolsChange"
+                />
             </div>
             <!-- Curso -->
             <div class="col-sm-6 mb-3">
                 <b-form-text text-variant="muted">Curso</b-form-text>
-                <select v-model="curso"
-                        class="form-control"
-                        :disabled="!courses[0]">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in courses"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                <DefaultAutocomplete
+                    :disabled="!courses[0]"
+                    v-model="filters.course"
+                    :items="courses"
+                    label=""
+                    item-text="name"
+                    item-value="id"
+                    dense
+                    multiple
+                />
             </div>
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
@@ -87,8 +85,10 @@ export default {
             schools: [],
             courses: [],
             //
-            escuela: "",
-            curso: "",
+            filters:{
+                school: [],
+                course: [],
+            },
         };
     }
     ,
@@ -130,8 +130,8 @@ export default {
                     data: {
                         workspaceId: this.workspaceId,
                         modulos: this.modulo ? [this.modulo] : [],
-                        escuelas: this.escuela ? [this.escuela] : [],
-                        cursos: this.curso ? [this.curso] : [],
+                        escuelas: this.filters.school,
+                        cursos: this.filters.course,
                     }
                 })
                 // When there are no results notify user,
@@ -154,21 +154,27 @@ export default {
          * Fetch courses
          * @returns {Promise<boolean>}
          */
-        async escuelaChange() {
-            this.curso = null;
-            this.tema = null;
-            this.courses = [];
-            this.topics = [];
+         schoolsChange() {
+            const vue = this;
+            //clean data
+            vue.filters.course = [];
+            vue.courses = [];
 
-            if (!this.escuela) return false;
+            //check schoolId 
+            if(!vue.filters.school.length) return;
 
-            this.cursos_libres =false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
-            let res = await axios({
-                url,
-                method: 'get'
-            });
-            this.courses = res.data;
+            const reqPayload = {
+                schoolIds: vue.filters.school,
+                active:1,
+                inactive:0
+            };
+
+            axios.post(`${vue.reportsBaseUrl}/filtros/school/courses/states`, reqPayload).then((res) => {
+
+                const { data } = res;
+                vue.courses = data;
+
+            }, (err) => console.log(err));
         },
     }
 }
