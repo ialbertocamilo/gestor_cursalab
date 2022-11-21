@@ -611,7 +611,7 @@ class Course extends BaseModel
                 });
             }
             // $counts[$key] = $query->count();
-            dd($query->toSql());
+//            dd($query->toSql());
             $users_id_course = array_merge($users_id_course,$query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');
@@ -672,7 +672,7 @@ class Course extends BaseModel
 
             // info($query->toSql());
             $counts[$key] = $query->count();
-            
+
             // $result = $query->get()->pluck('id')->toArray();
             // $users[$key] = $result;
             // $counts[$key] = count($result);
