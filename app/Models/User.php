@@ -559,10 +559,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
-        $programs = collect();
+//        $programs = collect();
         $all_courses = [];
 
-        if ($with_programs) $this->setProgramCourses($user, $all_courses);
+//        if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
         // TODO: Agregar segmentacion directa
         if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $withRelations);
@@ -700,55 +700,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    private function getUserCourseQuery($withRelations)
+    private function getUserCourseSegmentationQuery($withRelations, $user)
     {
-        $relations = match ($withRelations) {
-            'soft' => [
-                'segments' => function ($q) {
-                    $q
-                        ->select('id', 'model_id')
-                        ->with('values', function ($q) {
-                            $q->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
-                                ->with('criterion_value', function ($q) {
-                                    $q->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                });
-                        });
-                },
-            ],
-            'user-progress' => [
-                'segments' => function ($q) {
-                    $q
-                        ->select('id', 'model_id')
-                        ->with('values', function ($q) {
-                            $q->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
-                                ->with('criterion_value', function ($q) {
-                                    $q->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                });
-                        });
-                },
-                'type:id,code'
-            ],
-            default => [
-                'segments.values.criterion_value.criterion',
+        $user = $this;
+
+        $default = [
+            'segments.values.criterion_value.criterion',
+            'requirements',
+            'schools' => function ($query) {
+                $query->where('active', ACTIVE);
+            },
+            'topics' => [
+                'evaluation_type',
                 'requirements',
-                'schools' => function ($query) {
-                    $query->where('active', ACTIVE);
-                },
-                'topics' => [
-                    'evaluation_type',
-                    'requirements',
-                    'medias.type'
-                ],
-                'polls.questions',
-//                'topics.evaluation_type'
-            ]
-        };
+                'medias.type'
+            ],
+            'polls.questions',
+            'summaries' => function ($q) use($user) {
+                $q->where('user_id', $user->id);
+            }
+        ];
+
+        $relations = config("courses.user-courses-query.$withRelations", $default);
 
         return Course::with($relations);
     }
@@ -759,7 +732,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $workspace = $user->subworkspace->parent;
 
-        $query = $this->getUserCourseQuery($withRelations);
+        $query = $this->getUserCourseSegmentationQuery($withRelations);
 
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
@@ -793,7 +766,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 //                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
                 if ($valid_segment) :
+
+                    $course = $course->getCourseCompatibilityByUser($user);
+
                     $all_courses[] = $course;
+
                     break;
                 endif;
             }
