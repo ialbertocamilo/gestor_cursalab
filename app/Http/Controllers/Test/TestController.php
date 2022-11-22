@@ -9,6 +9,7 @@ use App\Models\School;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
+use Illuminate\Support\Benchmark;
 
 class TestController extends Controller
 {
@@ -78,5 +79,15 @@ class TestController extends Controller
         }
 
         return $this->success($programs);
+    }
+
+    public function compareUserGetCurrentCourses()
+    {
+        $user = User::where('document', 45095593)->first();
+
+        Benchmark::dd([
+            'heavy' => fn() => $user->getCurrentCourses(),
+            'soft' => fn() => $user->getCurrentCourses(soft:true)
+        ]);
     }
 }
