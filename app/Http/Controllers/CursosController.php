@@ -58,7 +58,9 @@ class CursosController extends Controller
 
         $req_cursos = $query->get();
 
-        $escuelas = School::all()->map(function ($school, $key) {
+        $escuelas = School::
+            whereRelation('workspaces', 'workspace_id', $workspace->id)
+            ->get()->map(function ($school, $key) {
             $suffix = !$school->active ? " [Inactivo]" : "";
             $school->name = $school->name . "{$suffix}";
             return $school;
