@@ -81,6 +81,11 @@ class Course extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
 
+    public function compatibilities()
+    {
+        return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
+    }
+
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
