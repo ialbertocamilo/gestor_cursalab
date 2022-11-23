@@ -51,7 +51,7 @@ class RestCourseController extends Controller
         $info = $data['data'];
 
         foreach ($info as $value_data) {
-            if (!is_null($value_data) && $value_data['tipo'] == 'multiple') {
+            if (!is_null($value_data) && ($value_data['tipo'] == 'multiple' || $value_data['tipo'] == 'opcion-multiple') ) {
                 $multiple = array();
                 $ddd = array_count_values($value_data['respuesta']);
                 if (!is_null($ddd)) {
@@ -90,6 +90,9 @@ class RestCourseController extends Controller
                 $query3 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], trim($value_data['respuesta']));
             }
             if (!is_null($value_data) && $value_data['tipo'] == 'simple') {
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'opcion-simple') {
                 $query4 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
             }
         }

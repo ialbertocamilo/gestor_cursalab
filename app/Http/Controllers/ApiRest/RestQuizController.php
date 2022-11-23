@@ -8,6 +8,7 @@ use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
+use App\Http\Requests\QuizzAnswerStoreRequest;
 use App\Models\SummaryCourse;
 use App\Models\Announcement;
 use App\Models\SummaryTopic;
@@ -272,5 +273,72 @@ class RestQuizController extends Controller
         }
 
         return $this->success(['polls' => $temp]);
+    }
+
+    public function getFreeQuestions(Poll $poll) {
+
+        $questions = $poll->questions()->with('type:id,code')
+                     ->where('active', ACTIVE)
+                     ->select('id', 'poll_id', 'titulo', 'type_id', 'opciones')
+                     ->get();
+
+        return $this->success(compact('questions'));
+    }
+
+    public function saveFreeAnswers(QuizzAnswerStoreRequest $request) {
+        $data = $request->validated();
+
+        $user = auth()->user();
+        $poll = Poll::find($data['enc_id']);
+        $info = $data['data'];
+
+        foreach ($info as $value_data) {
+            if (!is_null($value_data) && ($value_data['tipo'] == 'multiple' || $value_data['tipo'] == 'opcion-multiple') ) {
+                $multiple = array();
+                $ddd = array_count_values($value_data['respuesta']);
+                if (!is_null($ddd)) {
+                    foreach ($ddd as $key => $value) {
+                        if ($value % 2 != 0) {
+                            array_push($multiple, $key);
+                        }
+                    }
+                }
+                $query1 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'califica') {
+                $multiple = array();
+                $array_respuestas = $value_data['respuesta'];
+                $ddd = array_count_values(array_column($array_respuestas, 'preg_cal'));
+                $ttt = array();
+                if (!is_null($array_respuestas) && count($array_respuestas) > 0) {
+                    foreach ($array_respuestas as $key => $value) {
+                        if (!is_null($value)) {
+                            foreach ($ddd as $key2 => $val2) {
+                                if ($key2 == $value->preg_cal) {
+                                    $ttt[$value->preg_cal] = $value;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!is_null($ttt) && count($ttt) > 0) {
+                    foreach ($ttt as $elemento) {
+                        array_push($multiple, $elemento);
+                    }
+                }
+                $query2 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'texto') {
+                $query3 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], trim($value_data['respuesta']));
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'simple') {
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'opcion-simple') {
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
+            }
+        }
+
+        return $this->success(['msg' => 'Encuesta guardada.']);
     }
 }

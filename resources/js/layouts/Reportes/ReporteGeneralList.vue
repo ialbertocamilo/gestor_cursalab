@@ -22,7 +22,7 @@
               </v-tab>
 
               <v-tab class="justify-content-start py-9">
-                <v-icon left>mdi-refresh</v-icon> Reinicios
+                <v-icon left>mdi-refresh</v-icon> Intentos
               </v-tab>
 
               <v-tab class="justify-content-start py-9">

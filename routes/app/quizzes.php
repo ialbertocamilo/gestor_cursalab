@@ -22,5 +22,8 @@ Route::controller(RestQuizController::class)->group(function() {
     Route::get('preguntas_rptas_usuario/{topic}', 'preguntasRptasUsuario');
 
     Route::get('lista_enc_libres', 'getFreePolls');
+    Route::get('preguntas_enc_libre/{poll}', 'getFreeQuestions');
+    
+    Route::post('guardar_enc_libre_id','saveFreeAnswers');
 
 });
