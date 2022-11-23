@@ -164,10 +164,14 @@ class Course extends BaseModel
             $data['scheduled_restarts'] = $data['reinicios_programado'];
 
             if ($course) :
+
                 $course->update($data);
+
             else :
+
                 $course = self::create($data);
                 $course->workspaces()->sync([$workspace->id]);
+
             endif;
 
             if ($data['requisito_id']) :
@@ -784,25 +788,68 @@ class Course extends BaseModel
         return $tags;
     }
 
+    public function updateOnModifyingCompatibility()
+    {
+        $course = $this;
+        $course->loadMissing('compatibilities');
+
+        if ($course->compatibilities->count() === 0) return;
+
+        $course->loadMissing('segments');
+
+        $courses_to_update[] = $course->id;
+        $users_to_update = $course->usersSsegmented($course->segments, type: 'users_id');
+
+        foreach ($course->compatibilities as $compatibility_course) {
+            $compatibility_course->loadMissing('segments');
+
+            $users_to_update = array_merge(
+                $users_to_update,
+                $compatibility_course->usersSegmented($compatibility_course->segments, type: 'users_id'),
+            );
+            $courses_to_update[] = $compatibility_course->id;
+        }
+
+        $users_to_update = array_unique($users_to_update);
+        $users_to_update = SummaryCourse::whereIn('user_id', $users_to_update)
+            ->whereIn('course_id', $courses_to_update)
+            ->whereNull('grade_average')
+            ->pluck('user_id');
+
+
+        $chunk_users = array_chunk($users_to_update, 80);
+        foreach ($chunk_users as $chunked_users) {
+            SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update);
+        }
+
+//            SummaryUser::setSummaryUpdates($users_to_update, $courses_to_update);
+
+    }
+
+
     public function getCourseCompatibilityByUser($user): Course
     {
         $course = $this;
-        $course_compatibilities = $course->compatibilities();
 
-        if ($course_compatibilities->count() === 0) return $course;
+        $summary_course = $course->summaries->first();
 
-        $compatible_course = $course->summaries
-            ->whereIn('course_id', $course_compatibilities->pluck('id'))
-            ->sortBy('grade_average', 'DESC')
+        if (!$summary_course) return $course;
+
+        if ($course->compatibilities->count() === 0) return $course;
+
+        $compatible_summary_course = SummaryCourse::with('course')
+            ->where('user_id', $user->id)
+            ->whereIn('course_id', $course->compatibilities()->pluck('id'))
             ->first();
 
-        if ($compatible_course):
+        if ($compatible_summary_course):
 
-            $compatible_course->validates = $course;
+            $compatible_summary_course->course->validates = $course;
+
+            return $compatible_summary_course->course;
 
         endif;
 
-
-        return $compatible_course ?: $course;
+        return $course;
     }
 }
