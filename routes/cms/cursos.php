@@ -27,6 +27,9 @@ Route::controller(CursosController::class)->group(function() {
 
 	Route::put('/{course}/status', 'updateStatus');
 
+	Route::get('/{course}/compatibilities', 'getCompatibilities');
+	Route::put('/{course}/compatibilities/update', 'updateCompatibilities');
+
 });
 
 // CURSOS

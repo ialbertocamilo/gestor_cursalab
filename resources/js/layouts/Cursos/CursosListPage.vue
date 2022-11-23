@@ -52,9 +52,10 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del Curso - ${$event.name}`)"
-                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
-                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
+                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del curso - ${$event.name}`)"
+                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover curso')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del curso - ${$event.name}`)"
+                @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
 
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
@@ -122,6 +123,14 @@
                 @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
             />
 
+            <CompatibilityFormModal
+                :options="modalFormCompatibilityOptions"
+                width="55vw"
+                :ref="modalFormCompatibilityOptions.ref"
+                @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
+                @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -132,6 +141,7 @@ import MoverCursoModal from "./MoverCursoModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
+import CompatibilityFormModal from "./CompatibilityFormModal";
 
 export default {
     components: {
@@ -140,7 +150,8 @@ export default {
         DialogConfirm,
         'CourseValidationsDelete': CursoValidacionesModal,
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
-        SegmentFormModal
+        SegmentFormModal,
+        CompatibilityFormModal
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -203,6 +214,13 @@ export default {
                 ],
                 more_actions: [
                     {
+                        text: "Compatibles",
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'compatibilities_count',
+                        method_name: 'compatibility'
+                    },
+                    {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
                         type: 'action',
@@ -239,6 +257,15 @@ export default {
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
                 resource: 'segmentación',
+            },
+
+            modalFormCompatibilityOptions: {
+                ref: 'CompatibilityFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: '/compatibilities',
+                confirmLabel: 'Guardar',
+                resource: 'compatibilidad',
             },
 
             deleteConfirmationDialog: {

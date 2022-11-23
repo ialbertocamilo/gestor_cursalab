@@ -185,6 +185,8 @@ class Course extends BaseModel
 
             $course->schools()->sync($data['escuelas']);
 
+            $course->compatibilities()->sync($data['compatibilities'] ?? []);
+
             // Generate code when is not defined
 
             if (!$course->code) {

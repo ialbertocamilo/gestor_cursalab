@@ -286,6 +286,13 @@ class CursosController extends Controller
         return redirect()->route('categorias.cursos', [$curso->categoria->config->id, $curso->categoria->id])->with('info', 'Eliminado Correctamente');
     }
 
+    public function getCompatibilities(Course $course)
+    {
+        $compatibiliites = $course->compatibilities;
+
+        return $this->success(compact('compatibiliites'));
+    }
+
     // public function moverCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso, MoverCursoRequest $request)
     // {
     //     $data = $request->validated();
