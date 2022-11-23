@@ -93,7 +93,7 @@ class RestCourseController extends Controller
                 $query4 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
             }
             if (!is_null($value_data) && $value_data['tipo'] == 'opcion-simple') {
-                $query4 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
             }
         }
 
