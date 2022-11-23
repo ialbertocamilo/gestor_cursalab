@@ -595,7 +595,9 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
-    public static function probar(){
+
+    public static function probar()
+    {
         $course = Course::find('265');
         $fun_1 = $course->getUsersBySegmentation('count');
         print_r('Función 1: ');
@@ -604,11 +606,12 @@ class Course extends BaseModel
         print_r('Función 2: ');
         print_r($fun_2);
     }
+
     public function usersSegmented($course_segments, $type = 'get_records')
     {
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
-            $query = User::select('id')->where('active',1);
+            $query = User::select('id')->where('active', 1);
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
@@ -619,7 +622,7 @@ class Course extends BaseModel
             }
             // $counts[$key] = $query->count();
 //            dd($query->toSql());
-            $users_id_course = array_merge($users_id_course,$query->pluck('id')->toArray());
+            $users_id_course = array_merge($users_id_course, $query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');
 
@@ -660,7 +663,7 @@ class Course extends BaseModel
 
         foreach ($this->segments as $key => $segment) {
 
-            $query = User::select('id')->where('active',1);
+            $query = User::select('id')->where('active', 1);
             // $clause = $key == 0 ? 'where' : 'orWhere';
 
             $grouped = $segment->values->groupBy('criterion_id');
@@ -708,7 +711,7 @@ class Course extends BaseModel
         foreach ($this->segments as $key => $segment) {
 
             $clause = $key == 0 ? 'where' : 'orWhere';
-            $query->$clause(function($q) use ($segment, $key) {
+            $query->$clause(function ($q) use ($segment, $key) {
 
                 $grouped = $segment->values->groupBy('criterion_id');
 
@@ -731,7 +734,7 @@ class Course extends BaseModel
         }
 
         // info($counts);
-        $a =  $query->$type();
+        $a = $query->$type();
 
         // info($query->toSql());
         return $a;
@@ -781,5 +784,27 @@ class Course extends BaseModel
         }
 
         return $tags;
+    }
+
+    public function getCourseCompatibilityByUser($user): Course
+    {
+        $course = $this;
+        $course_compatibilities = $course->compatibilities();
+
+        if ($course_compatibilities->count() === 0) return $course;
+
+        $compatible_course = $course->summaries
+            ->whereIn('course_id', $course_compatibilities->pluck('id'))
+            ->sortBy('grade_average', 'DESC')
+            ->first();
+
+        if ($compatible_course):
+
+            $compatible_course->validates = $course;
+
+        endif;
+
+
+        return $compatible_course ?: $course;
     }
 }

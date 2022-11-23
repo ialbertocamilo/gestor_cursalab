@@ -71,7 +71,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
         'user_relations',
-        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at','is_updating'
+        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating'
     ];
 
     protected $with = ['roles', 'abilities'];
@@ -492,7 +492,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if (get_current_workspace()->id == 25) {
 
-            $with = ['subworkspace', 'criterion_values' => function($q) {
+            $with = ['subworkspace', 'criterion_values' => function ($q) {
                 $q->whereIn('criterion_id', [40, 41]);
             }];
         }
@@ -555,19 +555,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // return $query->paginate($request->rowsPerPage);
     }
 
-    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true)
+    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true, $withRelations = 'default', $only_ids = false)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
-        $programs = collect();
+//        $programs = collect();
         $all_courses = [];
 
-        if ($with_programs) $this->setProgramCourses($user, $all_courses);
+//        if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
         // TODO: Agregar segmentacion directa
-        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
+        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $withRelations);
 
-        return collect($all_courses)->unique()->values();
+        return $only_ids
+            ? array_unique(array_column($all_courses, 'id'))
+            : collect($all_courses)->unique()->values();
     }
 
     public function setProgramCourses($user, &$all_courses)
@@ -698,18 +700,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses)
+    private function getUserCourseSegmentationQuery($withRelations, $user)
     {
-        $user->loadMissing('subworkspace.parent');
+        $user = $this;
 
-        $workspace = $user->subworkspace->parent;
-
-        $course_segmentations = Course::with([
+        $default = [
             'segments.values.criterion_value.criterion',
-//            'segments' => [
-//                'values.criterion_value',
-//                'criterion'
-//            ],
             'requirements',
             'schools' => function ($query) {
                 $query->where('active', ACTIVE);
@@ -720,13 +716,25 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 'medias.type'
             ],
             'polls.questions',
-            'topics.evaluation_type'
-        ])
-            //            ->whereHas('topics', function ($q) {
-            //                $q->where('active', ACTIVE);
-            //            })
-            //            ->whereHas('segments', fn($query) => $query->where('active', ACTIVE))
-            ->whereRelation('schools', 'active', ACTIVE)
+            'summaries' => function ($q) use($user) {
+                $q->where('user_id', $user->id);
+            }
+        ];
+
+        $relations = config("courses.user-courses-query.$withRelations", $default);
+
+        return Course::with($relations);
+    }
+
+    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $withRelations)
+    {
+        $user->loadMissing('subworkspace.parent');
+
+        $workspace = $user->subworkspace->parent;
+
+        $query = $this->getUserCourseSegmentationQuery($withRelations);
+
+        $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
             ->whereRelation('workspaces', 'id', $workspace->id)
@@ -758,7 +766,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 //                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
                 if ($valid_segment) :
+
+                    $course = $course->getCourseCompatibilityByUser($user);
+
                     $all_courses[] = $course;
+
                     break;
                 endif;
             }
