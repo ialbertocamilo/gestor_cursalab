@@ -791,33 +791,43 @@ class Course extends BaseModel
     public function updateOnModifyingCompatibility()
     {
         $course = $this;
-        $course->loadMissing('compatibilities');
+        $course->loadMissing('compatibilities.segments');
 
         if ($course->compatibilities->count() === 0) return;
 
         $course->loadMissing('segments');
 
         $courses_to_update[] = $course->id;
-        $users_to_update = $course->usersSsegmented($course->segments, type: 'users_id');
+//        $temp_segments = collect();
+
+//        foreach ($course->segments as $segment) $temp_segments->push($segment);
+        $users_segmented = Course::usersSegmented($course->segments, type: 'users_id');
 
         foreach ($course->compatibilities as $compatibility_course) {
-            $compatibility_course->loadMissing('segments');
+//            $compatibility_course->loadMissing('segments');
 
-            $users_to_update = array_merge(
-                $users_to_update,
-                $compatibility_course->usersSegmented($compatibility_course->segments, type: 'users_id'),
+            $users_segmented = array_merge(
+                $users_segmented,
+                Course::usersSegmented($compatibility_course->segments, type: 'users_id'),
             );
+//            foreach ($compatibility_course->segments as $segment) $temp_segments->push($segment);
+
             $courses_to_update[] = $compatibility_course->id;
         }
 
-        $users_to_update = array_unique($users_to_update);
-        $users_to_update = SummaryCourse::whereIn('user_id', $users_to_update)
-            ->whereIn('course_id', $courses_to_update)
-            ->whereNull('grade_average')
-            ->pluck('user_id');
+//        $users_segmented = Course::usersSegmented($temp_segments, type: 'users_id');
+        // TODO: review how to reduce the number of users to update
+        $users_segmented = array_unique($users_segmented);
+//        $users_to_update = SummaryCourse::whereIn('user_id', $users_segmented)
+//            ->whereIn('course_id', $courses_to_update)
+//            ->whereNull('grade_average')
+//            ->pluck('user_id');
 
-
-        $chunk_users = array_chunk($users_to_update, 80);
+        info("USERS TO UPDATE");
+        info(implode(',', $users_segmented));
+        info("COURSES TO UPDATE");
+        info(implode(',', $courses_to_update));
+        $chunk_users = array_chunk($users_segmented, 80);
         foreach ($chunk_users as $chunked_users) {
             SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update);
         }
