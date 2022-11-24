@@ -529,9 +529,9 @@ class Course extends BaseModel
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewed;
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
-                if (($course_progress_percentage == 100 || $course_progress_percentage == 100.00) && $summary_course->status->code == 'aprobado') :
+                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
-                elseif (($course_progress_percentage == 100 || $course_progress_percentage == 100.00) && $summary_course->status->code == 'enc_pend') :
+                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
                     $status = 'enc_pend';
                 elseif ($summary_course->status?->code == 'desaprobado') :
                     $status = 'desaprobado';
@@ -543,7 +543,7 @@ class Course extends BaseModel
                         $enabled_poll = true;
                 endif;
 
-                if ($course_progress_percentage == 100 || $course_progress_percentage == 100.00)
+                if ($course_progress_percentage == 100)
                     $enabled_poll = true;
             }
         }
