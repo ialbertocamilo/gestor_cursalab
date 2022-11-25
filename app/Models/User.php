@@ -718,7 +718,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'polls.questions',
             'summaries' => function ($q) use($user) {
                 $q->where('user_id', $user->id);
-            }
+            },
+            'compatibilities'
         ];
 
         $relations = config("courses.user-courses-query.$withRelations", $default);

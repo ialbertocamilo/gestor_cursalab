@@ -164,10 +164,14 @@ class Course extends BaseModel
             $data['scheduled_restarts'] = $data['reinicios_programado'];
 
             if ($course) :
+
                 $course->update($data);
+
             else :
+
                 $course = self::create($data);
                 $course->workspaces()->sync([$workspace->id]);
+
             endif;
 
             if ($data['requisito_id']) :
@@ -786,25 +790,78 @@ class Course extends BaseModel
         return $tags;
     }
 
+    public function updateOnModifyingCompatibility()
+    {
+        $course = $this;
+        $course->loadMissing('compatibilities.segments');
+
+        if ($course->compatibilities->count() === 0) return;
+
+        $course->loadMissing('segments');
+
+        $courses_to_update[] = $course->id;
+//        $temp_segments = collect();
+
+//        foreach ($course->segments as $segment) $temp_segments->push($segment);
+        $users_segmented = Course::usersSegmented($course->segments, type: 'users_id');
+
+        foreach ($course->compatibilities as $compatibility_course) {
+//            $compatibility_course->loadMissing('segments');
+
+            $users_segmented = array_merge(
+                $users_segmented,
+                Course::usersSegmented($compatibility_course->segments, type: 'users_id'),
+            );
+//            foreach ($compatibility_course->segments as $segment) $temp_segments->push($segment);
+
+            $courses_to_update[] = $compatibility_course->id;
+        }
+
+//        $users_segmented = Course::usersSegmented($temp_segments, type: 'users_id');
+        // TODO: review how to reduce the number of users to update
+        $users_segmented = array_unique($users_segmented);
+//        $users_to_update = SummaryCourse::whereIn('user_id', $users_segmented)
+//            ->whereIn('course_id', $courses_to_update)
+//            ->whereNull('grade_average')
+//            ->pluck('user_id');
+
+        info("USERS TO UPDATE");
+        info(implode(',', $users_segmented));
+        info("COURSES TO UPDATE");
+        info(implode(',', $courses_to_update));
+        $chunk_users = array_chunk($users_segmented, 80);
+        foreach ($chunk_users as $chunked_users) {
+            SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update);
+        }
+
+//            SummaryUser::setSummaryUpdates($users_to_update, $courses_to_update);
+
+    }
+
+
     public function getCourseCompatibilityByUser($user): Course
     {
         $course = $this;
-        $course_compatibilities = $course->compatibilities();
 
-        if ($course_compatibilities->count() === 0) return $course;
+        $summary_course = $course->summaries->first();
 
-        $compatible_course = $course->summaries
-            ->whereIn('course_id', $course_compatibilities->pluck('id'))
-            ->sortBy('grade_average', 'DESC')
+        if (!$summary_course) return $course;
+
+        if ($course->compatibilities->count() === 0) return $course;
+
+        $compatible_summary_course = SummaryCourse::with('course')
+            ->where('user_id', $user->id)
+            ->whereIn('course_id', $course->compatibilities()->pluck('id'))
             ->first();
 
-        if ($compatible_course):
+        if ($compatible_summary_course):
 
-            $compatible_course->validates = $course;
+            $compatible_summary_course->course->validates = $course;
+
+            return $compatible_summary_course->course;
 
         endif;
 
-
-        return $compatible_course ?: $course;
+        return $course;
     }
 }
