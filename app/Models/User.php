@@ -569,7 +569,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
 //        if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
-        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
+        if ($with_direct_segmentation)
+            $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
 
         if ($only_ids)
             return array_unique(array_column($all_courses, 'id'));
@@ -720,7 +721,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $workspace = $user->subworkspace->parent;
 
-        $query = $this->getUserCourseSegmentationQuery('soft', $user);
+        $query = $this->getUserCourseSegmentationQuery('soft');
 
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
