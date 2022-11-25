@@ -840,16 +840,18 @@ class Course extends BaseModel
     public function getCourseCompatibilityByUser($user): Course
     {
         $course = $this;
+//        dd($course->compatibilities);
 
         $summary_course = $course->summaries->first();
 
-        if (!$summary_course) return $course;
+        if ($summary_course) return $course;
 
         if ($course->compatibilities->count() === 0) return $course;
 
-        $compatible_summary_course = SummaryCourse::with('course')
+        $compatible_summary_course = SummaryCourse::with('course:id')
             ->where('user_id', $user->id)
             ->whereIn('course_id', $course->compatibilities()->pluck('id'))
+            ->orderBy('grade_average', 'DESC')
             ->first();
 
         if ($compatible_summary_course):
