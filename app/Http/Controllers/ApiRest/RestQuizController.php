@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 use App\Http\Requests\QuizzAnswerStoreRequest;
+
 use App\Models\SummaryCourse;
 use App\Models\Announcement;
 use App\Models\SummaryTopic;
@@ -308,14 +309,15 @@ class RestQuizController extends Controller
             if (!is_null($value_data) && $value_data['tipo'] == 'califica') {
                 $multiple = array();
                 $array_respuestas = $value_data['respuesta'];
-                $ddd = array_count_values(array_column($array_respuestas, 'preg_cal'));
+                $ddd = array_count_values(array_column($array_respuestas, 'resp_cal'));
                 $ttt = array();
                 if (!is_null($array_respuestas) && count($array_respuestas) > 0) {
                     foreach ($array_respuestas as $key => $value) {
                         if (!is_null($value)) {
                             foreach ($ddd as $key2 => $val2) {
-                                if ($key2 == $value->preg_cal) {
-                                    $ttt[$value->preg_cal] = $value;
+                                if ($key2 == $value['resp_cal']) {
+                                    $value['preg_cal'] = "Califica";
+                                    $ttt[$value['resp_cal']] = $value;
                                 }
                             }
                         }
