@@ -569,7 +569,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
 //        if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
-        // TODO: Agregar segmentacion directa
         if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
 
         if ($only_ids)
