@@ -189,7 +189,7 @@ class Course extends BaseModel
 
             $course->schools()->sync($data['escuelas']);
 
-            $course->compatibilities()->sync($data['compatibilities'] ?? []);
+            // $course->compatibilities()->sync($data['compatibilities'] ?? []);
 
             // Generate code when is not defined
 
@@ -861,6 +861,13 @@ class Course extends BaseModel
             return $compatible_summary_course->course;
 
         endif;
+
+        return $course;
+    }
+
+    protected function storeCompatibilityRequest($course, $data = [])
+    {
+        $course->compatibilities()->sync($data['compatibilities'] ?? []);
 
         return $course;
     }

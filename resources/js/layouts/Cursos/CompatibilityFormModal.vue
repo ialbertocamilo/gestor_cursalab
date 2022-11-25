@@ -9,8 +9,29 @@
         <template v-slot:content>
             <v-form ref="compatibilityForm" class="---mb-6">
                 <DefaultErrors :errors="errors"/>
-         
+
+                <v-row>
+                    <v-col cols="12">
+                            <!-- :rules="rules.lista_escuelas" -->
+                        <DefaultAutocomplete
+                            dense
+                            label="Cursos compatibles"
+                            v-model="resource.compatibilities"
+                            :items="courses"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :show-select-all="false"
+                            :count-show-values="6"
+                        />
+                    </v-col>
+                </v-row>
+     
             </v-form>
+
+            <div  class="d-flex justify-content-center py-10">
+                <v-img max-width="350" class="text-center" src="/img/guides/visits.svg"></v-img>
+            </div>
         </template>
     </DefaultDialog>
 </template>
@@ -19,13 +40,6 @@
 
 const fields = [
     "name",
-    "email",
-    "username",
-    "password",
-    "key",
-    "secret",
-    "token",
-    "active"
 ];
 
 // import Segment from "./Segment";
@@ -47,36 +61,18 @@ export default {
             type: String,
             default: null
         },
-        // tabs_title:{
-        //     type: String,
-        //     default: 'Segmentación'
-        // },
-        // limitOne: {
-        //     type:Boolean,
-        //     default:false
-        // }
     },
     data() {
         return {
-            tabs: null,
-            steps: 0,
-            // total: 0,
-            total: [],
-
             errors: [],
-            showConfigTokens: false,
             resourceDefault: {
-                id: null,
-                name: null
+                compatibilities: []
             },
-            // resource: {},
-            segments: [],
-            segment_by_document: null,
-            criteria: [],
 
-            rules: {
-                // name: this.getRules(['required', 'max:255']),
-            }
+            resource: {compatibilities: []},
+            // resource: {},
+            courses: [],
+            // compatibilities: [],
         };
     },
     methods: {
@@ -89,32 +85,12 @@ export default {
 
             // vue.$refs["SegmentByDocument"].resetFields();
         },
+
         resetValidation() {
             let vue = this;
             vue.$refs.compatibilityForm.resetValidation();
         },
-        // getNewSegment(type_code) {
-        //     return {
-        //         id: `new-segment-${Date.now()}`,
-        //         type_code,
-        //         criteria_selected: []
-        //     };
-        // },
-        // async addSegmentation(type_code) {
-        //     let vue = this;
-        //     vue.segments.push(this.getNewSegment(type_code));
 
-        //     vue.steps = vue.segments.length - 1;
-        // },
-        // borrarBloque(segment) {
-        //     let vue = this;
-        //     // const isNewSegment = segment.id.search("new") !== -1;
-        //     // if (vue.segments.length === 1 && !isNewSegment) return;
-
-        //     vue.segments = vue.segments.filter((obj, idx) => {
-        //         return obj.id != segment.id;
-        //     });
-        // },
         confirmModal() {
             let vue = this;
 
@@ -126,25 +102,20 @@ export default {
             const edit = vue.options.action === "edit";
 
             let base = `${vue.options.base_endpoint}`;
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
-            // let url = `${base}/store`;
+            let url = `${base}/${vue.resource.id}/compatibilities/update`;
 
-            let method = edit ? 'PUT' : 'POST';
-            // let method = "POST";
+            let method = 'PUT';
 
             // if (validateForm && validateSelectedModules) {
             if (validateForm) {
                 // let formData = vue.getMultipartFormData(method, vue.segments, fields);
                 let formData = JSON.stringify({
-                    model_type: vue.model_type,
-                    model_id: vue.resource.id,
-                    code: vue.code,
-                    segments: vue.segments,
-                    segment_by_document: vue.segment_by_document
+                    _method: method,
+                    compatibilities: vue.resource.compatibilities,
                 });
 
                 vue.$http
-                    .post(url, formData)
+                    .put(url, formData)
                     .then(({data}) => {
                         vue.$emit("onConfirm");
                         vue.closeModal();
@@ -172,13 +143,13 @@ export default {
             vue.resource = resource;
 
             let base = `${vue.options.base_endpoint}`;
-            let url = resource
-                ? `${base}/${resource.id}/edit`
-                : `${base}/create`;
+            let url =  `${base}/${resource.id}/compatibilities`
 
             await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
 
+                vue.resource.compatibilities = _data.compatibilities
+                vue.courses = _data.courses
             });
 
             return 0;

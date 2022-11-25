@@ -288,9 +288,28 @@ class CursosController extends Controller
 
     public function getCompatibilities(Course $course)
     {
-        $compatibiliites = $course->compatibilities;
+        $workspace = get_current_workspace();
+        $compatibilities = $course->compatibilities;
+        $courses = Course::select('id', 'name')
+                        ->whereRelation('workspaces', 'id', $workspace->id)
+                        ->where('id', '<>', $course->id)
+                        ->get();
 
-        return $this->success(compact('compatibiliites'));
+        return $this->success(compact('compatibilities', 'courses'));
+    }
+
+    public function updateCompatibilities(Course $course, Request $request)
+    {
+        $data = $request->all();
+
+        Course::storeCompatibilityRequest($course, $data);
+
+        $response = [
+            // 'curso' => $course,
+            'msg' => 'Compatibilidad de curso actualizado correctamente.',
+        ];
+
+        return $this->success($response);
     }
 
     // public function moverCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso, MoverCursoRequest $request)

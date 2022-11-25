@@ -263,7 +263,7 @@ export default {
                 ref: 'CompatibilityFormModal',
                 open: false,
                 persistent: true,
-                base_endpoint: '/compatibilities',
+                base_endpoint: '/cursos',
                 confirmLabel: 'Guardar',
                 resource: 'compatibilidad',
             },
