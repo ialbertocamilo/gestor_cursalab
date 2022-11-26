@@ -37,8 +37,23 @@ return [
             'compatibilities:id'
         ],
         'user-progress' => [
+            'segments' => function ($q) {
+                $q
+                    ->select('id', 'model_id')
+                    ->with('values', function ($q) {
+                        $q->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+                            ->with('criterion_value', function ($q) {
+                                $q->select('id', 'value_text', 'value_date', 'value_boolean')
+                                    ->with('criterion', function ($q) {
+                                        $q->select('id', 'name', 'code');
+                                    });
+                            });
+                    });
+            },
             'summaries' => function ($q) {
-                $q->where('user_id', auth()->user()->id);
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', auth()->user()->id);
             },
 
             'schools' => function ($query) {
@@ -51,17 +66,26 @@ return [
             'topics' => function ($q) {
                 $q->with([
                     'evaluation_type:id,code',
-                    'requirements:id',
-//                    'summaries' => function($q){
-//                        $q
-//                            ->with('status:id,name,code')
-//                            ->where('user_id', auth()->user()->id);
-//                    }
+//                    'requirements:id,requirement_id',
+                    'requirements.summaries_topics' => function ($q) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', auth()->user()->id);
+                    },
+                    'summaries' => function ($q) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', auth()->user()->id);
+                    }
                 ]);
 //                    ->select('id', 'course_id', 'name', 'type_evaluation_id');
             },
 
-            'requirements',
+            'requirements.summaries_course' => function ($q) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', auth()->user()->id);
+            },
         ],
 
         'default' => [
@@ -76,7 +100,7 @@ return [
                 'medias.type'
             ],
             'polls.questions',
-            'summaries' => function ($q){
+            'summaries' => function ($q) {
                 $q->where('user_id', auth()->user()->id);
             },
             'compatibilities'

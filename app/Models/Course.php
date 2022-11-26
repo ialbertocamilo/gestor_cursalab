@@ -498,17 +498,22 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
+        $status_approved = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+        $status_enc_pend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
+        $status_desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+
         $requirement_course = $course->requirements->first();
 //        info("REQUISITO DEL CURSO {$course->name}");
 //        info($requirement_course);
         // info("requirement_course");
         // info($requirement_course);
         if ($requirement_course) {
-            $summary_requirement_course = SummaryCourse::with('course')
-                ->where('user_id', $user->id)
-                ->where('course_id', $requirement_course->requirement_id)
-                ->whereRelation('status', 'code', '=', 'aprobado')
-                ->first();
+//            $summary_requirement_course = SummaryCourse::with('course')
+//                ->where('user_id', $user->id)
+//                ->where('course_id', $requirement_course->requirement_id)
+//                ->whereRelation('status', 'code', '=', 'aprobado')
+//                ->first();
+            $summary_requirement_course = $requirement_course->summaries_course->first();
             //            info("requirement_course");
             //            info($summary_requirement_course);
             if (!$summary_requirement_course) {
@@ -532,17 +537,21 @@ class Course extends BaseModel
             }
 
             // $summary_course = $course->summaryByUser($user->id);
-            $summary_course = SummaryCourse::getCurrentRow($course, $user);
+//            $summary_course = SummaryCourse::getCurrentRow($course, $user);
+            $summary_course = $course->summaries->first();
 
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewed;
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
-                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
+                if ($course_progress_percentage == 100 && $summary_course->status_id == $status_approved->id) :
+//                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
-                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
+                elseif ($course_progress_percentage == 100 && $summary_course->status_id == $status_enc_pend->id) :
+//                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
                     $status = 'enc_pend';
-                elseif ($summary_course->status?->code == 'desaprobado') :
+//                elseif ($summary_course->status?->code == 'desaprobado') :
+                elseif ($summary_course->status_id == $status_desaprobado->id) :
                     $status = 'desaprobado';
                     $enabled_poll = true;
                 else :
@@ -575,15 +584,17 @@ class Course extends BaseModel
     {
         $course_requirement = $course->requirements->first();
         if ($course_requirement) {
-            $requirement_summary = SummaryCourse::with('status:id,code')
-                ->where('course_id', $course_requirement->requirement_id)
-                ->where('user_id', $user->id)->first();
+//            $requirement_summary_course = SummaryCourse::with('status:id,code')
+//                ->where('course_id', $course_requirement->requirement_id)
+//                ->where('user_id', $user->id)->first();
+            $requirement_summary_course = $course_requirement->summaries_course->first();
 
-            if (!$requirement_summary || ($requirement_summary && $requirement_summary->status->code != 'aprobado'))
+            if (!$requirement_summary_course || ($requirement_summary_course && $requirement_summary_course->status->code != 'aprobado'))
                 return ['average_grade' => 0, 'status' => 'bloqueado'];
         }
 
-        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
+//        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
+        $summary_course = $course->summaries->first();
 
         $grade_average = $summary_course ? floatval($summary_course->grade_average) : 0;
         $grade_average = $summary_course ?
