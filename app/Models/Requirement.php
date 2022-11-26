@@ -28,6 +28,16 @@ class Requirement extends BaseModel
         return $this->morphTo();
     }
 
+    public function summaries_course()
+    {
+        return $this->hasMany(SummaryCourse::class, 'course_id', 'requirement_id');
+    }
+
+    public function summaries_topics()
+    {
+        return $this->hasMany(SummaryTopic::class, 'topic_id', 'requirement_id');
+    }
+
     protected function storeRequest($data, $requirement = null)
     {
         try {

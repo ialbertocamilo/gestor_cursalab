@@ -31,6 +31,10 @@ return [
                             });
                     });
             },
+            'summaries' => function ($q) {
+                $q->where('user_id', auth()->user()->id);
+            },
+            'compatibilities:id'
         ],
         'user-progress' => [
             'segments' => function ($q) {
@@ -46,7 +50,60 @@ return [
                             });
                     });
             },
-            'type:id,code'
+            'summaries' => function ($q) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', auth()->user()->id);
+            },
+
+            'schools' => function ($query) {
+                $query
+                    ->select('id', 'imagen', 'name', 'position')
+                    ->where('active', ACTIVE);
+            },
+            'type:id,code',
+
+            'topics' => function ($q) {
+                $q->with([
+                    'evaluation_type:id,code',
+//                    'requirements:id,requirement_id',
+                    'requirements.summaries_topics' => function ($q) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', auth()->user()->id);
+                    },
+                    'summaries' => function ($q) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', auth()->user()->id);
+                    }
+                ]);
+//                    ->select('id', 'course_id', 'name', 'type_evaluation_id');
+            },
+
+            'requirements.summaries_course' => function ($q) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', auth()->user()->id);
+            },
         ],
+
+        'default' => [
+            'segments.values.criterion_value.criterion',
+            'requirements',
+            'schools' => function ($query) {
+                $query->where('active', ACTIVE);
+            },
+            'topics' => [
+                'evaluation_type',
+                'requirements',
+                'medias.type'
+            ],
+            'polls.questions',
+            'summaries' => function ($q) {
+                $q->where('user_id', auth()->user()->id);
+            },
+            'compatibilities'
+        ]
     ]
 ];

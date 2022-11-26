@@ -555,21 +555,29 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // return $query->paginate($request->rowsPerPage);
     }
 
-    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true, $withRelations = 'default', $only_ids = false)
+    public function getCurrentCourses(
+        $with_programs = true,
+        $with_direct_segmentation = true,
+        $withFreeCourses = true,
+        $withRelations = 'default',
+        $only_ids = false)
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
-//        $programs = collect();
+
         $all_courses = [];
 
 //        if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
-        // TODO: Agregar segmentacion directa
-        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $withRelations);
+        if ($with_direct_segmentation)
+            $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
 
-        return $only_ids
-            ? array_unique(array_column($all_courses, 'id'))
-            : collect($all_courses)->unique()->values();
+        if ($only_ids)
+            return array_unique(array_column($all_courses, 'id'));
+
+        $query = $this->getUserCourseSegmentationQuery($withRelations);
+
+        return $query->whereIn('id', array_column($all_courses, 'id'))->get();
     }
 
     public function setProgramCourses($user, &$all_courses)
@@ -700,40 +708,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    private function getUserCourseSegmentationQuery($withRelations, $user)
+    private function getUserCourseSegmentationQuery($withRelations)
     {
-        $user = $this;
-
-        $default = [
-            'segments.values.criterion_value.criterion',
-            'requirements',
-            'schools' => function ($query) {
-                $query->where('active', ACTIVE);
-            },
-            'topics' => [
-                'evaluation_type',
-                'requirements',
-                'medias.type'
-            ],
-            'polls.questions',
-            'summaries' => function ($q) use($user) {
-                $q->where('user_id', $user->id);
-            },
-            'compatibilities'
-        ];
-
-        $relations = config("courses.user-courses-query.$withRelations", $default);
+        $relations = config("courses.user-courses-query.$withRelations");
 
         return Course::with($relations);
     }
 
-    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $withRelations)
+    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses)
     {
         $user->loadMissing('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
 
-        $query = $this->getUserCourseSegmentationQuery($withRelations);
+        $query = $this->getUserCourseSegmentationQuery('soft');
 
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
@@ -745,13 +733,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('active', ACTIVE)
             ->get();
 
-        //        info("COUNT COURSES :: {$course_segmentations->count()}");
-
-        //        $user_criteria = $user->criterion_values->groupBy('criterion_id');
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
         $user->active_cycle = $user->getActiveCycle();
-
-        //        $workspace_criteria = Criterion::whereRelation('workspaces', 'id', $workspace_id)->get();
 
         foreach ($course_segmentations as $course) {
 
