@@ -66,11 +66,13 @@ return [
                     'evaluation_type:id,code',
                     'requirements.summaries_topics' => function ($q) {
                         $q
+                            // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
                             ->with('status:id,name,code')
                             ->where('user_id', auth()->user()->id);
                     },
                     'summaries' => function ($q) {
                         $q
+                            // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
                             ->with('status:id,name,code')
                             ->where('user_id', auth()->user()->id);
                     }

@@ -25,6 +25,8 @@ class SummaryTopic extends Summary
         'last_time_evaluated_at',
     ];
 
+    // protected $hidden = ['answers'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
