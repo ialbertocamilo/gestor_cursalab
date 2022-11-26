@@ -55,18 +55,15 @@ return [
                     ->with('status:id,name,code')
                     ->where('user_id', auth()->user()->id);
             },
-
             'schools' => function ($query) {
                 $query
                     ->select('id', 'imagen', 'name', 'position')
                     ->where('active', ACTIVE);
             },
             'type:id,code',
-
             'topics' => function ($q) {
                 $q->with([
                     'evaluation_type:id,code',
-//                    'requirements:id,requirement_id',
                     'requirements.summaries_topics' => function ($q) {
                         $q
                             ->with('status:id,name,code')
@@ -78,9 +75,7 @@ return [
                             ->where('user_id', auth()->user()->id);
                     }
                 ]);
-//                    ->select('id', 'course_id', 'name', 'type_evaluation_id');
             },
-
             'requirements.summaries_course' => function ($q) {
                 $q
                     ->with('status:id,name,code')
