@@ -115,8 +115,8 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::whereHas('workspaces', function ($t) use ($workspace) {
-                $t->where('workspace_id', $workspace->id);
-            });
+            $t->where('workspace_id', $workspace->id);
+        });
 
         if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
@@ -534,8 +534,16 @@ class Course extends BaseModel
                     ->where('course_id', $course->id)
                     ->where('user_id', $user->id)->count();
 
+//                $poll_questions_answers = collect();
+//
+//                foreach ($poll->questions as $question)
+//                    foreach ($question as $answers)
+//                        $poll_questions_answers->push($answers);
+
                 //                info($poll_questions_answers);
-                if ($poll_questions_answers) $solved_poll = true;
+//                if ($poll_questions_answers->count() > 0)
+                if ($poll_questions_answers)
+                    $solved_poll = true;
             }
 
             // $summary_course = $course->summaryByUser($user->id);
@@ -547,10 +555,10 @@ class Course extends BaseModel
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
                 if ($course_progress_percentage == 100 && $summary_course->status_id == $status_approved->id) :
-//                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
+//                if ($course_progress_percentage == 100 && $summary_course->status?->code == 'aprobado') :
                     $status = 'completado';
                 elseif ($course_progress_percentage == 100 && $summary_course->status_id == $status_enc_pend->id) :
-//                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
+//                elseif ($course_progress_percentage == 100 && $summary_course->status?->code == 'enc_pend') :
                     $status = 'enc_pend';
 //                elseif ($summary_course->status?->code == 'desaprobado') :
                 elseif ($summary_course->status_id == $status_desaprobado->id) :

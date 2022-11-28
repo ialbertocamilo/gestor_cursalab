@@ -739,10 +739,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
+//                dd($segment->values->first());
 
-                //                $valid_rule = $this->validateUCCyclesRule($segment, $user);
-                //
-                //                if (!$valid_rule) continue;
+//                $valid_rule = $this->validateUCCyclesRule($segment, $user);
+//
+//                if (!$valid_rule) continue;
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
@@ -751,7 +752,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                 if ($valid_segment) :
 
-                    $course = $course->getCourseCompatibilityByUser($user);
+                    if ($user->subworkspace->parent_id === 25)
+                        $course = $course->getCourseCompatibilityByUser($user);
 
                     $all_courses[] = $course;
 
@@ -764,14 +766,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function validateUCCyclesRule(Segment $segment, $user): bool
     {
-        $workspace = $user->subworkspace->parent;
+//        $workspace = $user->subworkspace->parent;
 
-        if ($workspace->slug !== 'farmacias-peruanas') return true;
+//        if ($workspace->slug !== 'farmacias-peruanas') return true;
+        if ($user->subworkspace->parent_id != 25) return true;
 
         $cycle_criterion = Criterion::where('code', 'cycle')->first();
         $cycle_0 = CriterionValue::whereRelation('criterion', 'code', 'cycle')
             ->where('value_text', 'Ciclo 0')->first();
+
+//        dd($segment->values->first());
         $has_criterion_cycle = $segment->values->where('criterion_id', $cycle_criterion->id)->count() > 0;
+//        $has_criterion_cycle = $segment->values->where('criterion.code', 'cycle')->count() > 0;
 
         //        $criterion_values = CriterionValue::whereIn(
         //            'id', $segment->values->where('criterion_id', $cycle_criterion->id)->pluck('criterion_value_id'))
