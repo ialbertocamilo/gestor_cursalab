@@ -184,6 +184,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->morphMany(Segment::class, 'model');
     }
 
+    public function pollQuestionAnswers()
+    {
+
+    }
+
     public function scopeOnlyAppUser($q)
     {
         $q->whereNotNull('subworkspace_id');
@@ -736,14 +741,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
         $user->active_cycle = $user->getActiveCycle();
 
+        $UC_rules_data = [
+            'criterion_cycle' => Criterion::where('code', 'cycle')->first(),
+            'cycle_0_value' => CriterionValue::whereRelation('criterion', 'code', 'cycle')
+                ->where('value_text', 'Ciclo 0')->first()
+        ];
+
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
 //                dd($segment->values->first());
 
-//                $valid_rule = $this->validateUCCyclesRule($segment, $user);
-//
-//                if (!$valid_rule) continue;
+                $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
+
+                if (!$valid_rule) continue;
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
@@ -764,38 +775,22 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         unset($user->active_cycle);
     }
 
-    public function validateUCCyclesRule(Segment $segment, $user): bool
+    public function validateUCCyclesRule(Segment $segment, $user, $UC_rules_data): bool
     {
-//        $workspace = $user->subworkspace->parent;
-
-//        if ($workspace->slug !== 'farmacias-peruanas') return true;
         if ($user->subworkspace->parent_id != 25) return true;
 
-        $cycle_criterion = Criterion::where('code', 'cycle')->first();
-        $cycle_0 = CriterionValue::whereRelation('criterion', 'code', 'cycle')
-            ->where('value_text', 'Ciclo 0')->first();
+        $cycle_criterion = $UC_rules_data['criterion_cycle'];
+        $cycle_0 = $UC_rules_data['cycle_0_value'];
 
-//        dd($segment->values->first());
         $has_criterion_cycle = $segment->values->where('criterion_id', $cycle_criterion->id)->count() > 0;
-//        $has_criterion_cycle = $segment->values->where('criterion.code', 'cycle')->count() > 0;
-
-        //        $criterion_values = CriterionValue::whereIn(
-        //            'id', $segment->values->where('criterion_id', $cycle_criterion->id)->pluck('criterion_value_id'))
-        //            ->pluck('value_text');
-        //        info("CRITERIOS CICLOS DEL SEGMENTO :: {$criterion_values}");
 
         if (!$has_criterion_cycle) return true;
 
-        //        $user_active_cycle = $user->getActiveCycle();
         $user_active_cycle = $user->active_cycle;
-        //        info("CICLO ACTIVO :: {$user_active_cycle->value_text}");
         if (!$user_active_cycle) return false;
 
         $user_active_cycle_Ciclo_0 = $user_active_cycle->value_text === 'Ciclo 0';
         $segment_has_Ciclo_0 = $segment->values->where('criterion_value_id', $cycle_0->id);
-
-        //        info(strval($user_active_cycle_Ciclo_0));
-        //        info($segment_has_Ciclo_0->toArray() );
 
         if (
             (!$user_active_cycle_Ciclo_0 && $segment_has_Ciclo_0->count() === 1)

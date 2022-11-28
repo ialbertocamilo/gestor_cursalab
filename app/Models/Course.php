@@ -373,9 +373,16 @@ class Course extends BaseModel
             ->where('user_id', $user->id)
             ->get();
 
+        $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
+            ->whereIn('course_id', $user_courses->pluck('id'))
+            ->where('user_id', $user->id)
+            ->groupBy('course_id')
+            ->get();
+
         $data = [];
 
         foreach ($schools as $school_id => $courses) {
+
             $school = $courses->first()->schools->where('id', $school_id)->first();
             $school_courses = [];
             $school_completed = 0;
@@ -386,6 +393,7 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
+                $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
                 $last_topic = null;
                 $course_status = self::getCourseStatusByUser($user, $course);
@@ -500,9 +508,13 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
-        $status_approved = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
-        $status_enc_pend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
-        $status_desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+//        $status_approved = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+//        $status_enc_pend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
+//        $status_desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+        $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
+        $status_approved = $statuses->where('code', 'aprobado')->first();
+        $status_enc_pend = $statuses->where('code', 'enc_pend')->first();
+        $status_desaprobado = $statuses->where('code', 'desaprobado')->first();
 
         $requirement_course = $course->requirements->first();
 //        info("REQUISITO DEL CURSO {$course->name}");
@@ -530,11 +542,9 @@ class Course extends BaseModel
                 $poll_id = $poll->id;
                 $available_poll = true;
 
-                $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
-                    ->where('course_id', $course->id)
-                    ->where('user_id', $user->id)->count();
+//                $poll_questions_answers = $course->poll_question_answers_count;
 
-//                $poll_questions_answers = collect();
+//                $poll_questions_answers = collect()
 //
 //                foreach ($poll->questions as $question)
 //                    foreach ($question as $answers)
@@ -542,7 +552,7 @@ class Course extends BaseModel
 
                 //                info($poll_questions_answers);
 //                if ($poll_questions_answers->count() > 0)
-                if ($poll_questions_answers)
+                if ($course->poll_question_answers_count)
                     $solved_poll = true;
             }
 

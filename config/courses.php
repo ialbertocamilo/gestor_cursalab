@@ -20,15 +20,20 @@ return [
         'soft' => [
             'segments' => function ($q) {
                 $q
+                    ->where('active', ACTIVE)
                     ->select('id', 'model_id')
                     ->with('values', function ($q) {
-                        $q->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+                        $q
                             ->with('criterion_value', function ($q) {
-                                $q->select('id', 'value_text', 'value_date', 'value_boolean')
+                                $q
+                                    ->where('active', ACTIVE)
+                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
                                     ->with('criterion', function ($q) {
                                         $q->select('id', 'name', 'code');
                                     });
-                            });
+                            })
+                            ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+
                     });
             },
             'summaries' => function ($q) {
@@ -43,22 +48,14 @@ return [
                     ->select('id', 'model_id')
                     ->with('values', function ($q) {
                         $q
-                            ->with([
-                                'criterion' => function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'code');
-                                },
-                                'criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                }
-                            ])
-                            ->where('active', ACTIVE)
+                            ->with('criterion_value', function ($q) {
+                                $q
+                                    ->where('active', ACTIVE)
+                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                    ->with('criterion', function ($q) {
+                                        $q->select('id', 'name', 'code');
+                                    });
+                            })
                             ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
 
                     });
@@ -104,18 +101,16 @@ return [
                     ->select('id', 'model_id')
                     ->with('values', function ($q) {
                         $q
-                            ->where('active', ACTIVE)
-                            ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
                             ->with('criterion_value', function ($q) {
                                 $q
                                     ->where('active', ACTIVE)
                                     ->select('id', 'value_text', 'value_date', 'value_boolean')
                                     ->with('criterion', function ($q) {
-                                        $q
-                                            ->where('active', ACTIVE)
-                                            ->select('id', 'name', 'code');
+                                        $q->select('id', 'name', 'code');
                                     });
-                            });
+                            })
+                            ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+
                     });
             },
             'summaries' => function ($q) {
@@ -124,19 +119,8 @@ return [
                     ->where('user_id', auth()->user()->id);
             },
             'polls',
-//            'polls' => function ($q) {
-//                $q
-//                    ->where('active', ACTIVE)
-//                    ->with('questions', function ($q) {
-//                        $q
-//                            ->where('active', ACTIVE)
-//                            ->with('answers', function ($q) {
-//                                $q->where('user_id', auth()->user()->id);
-//                            });
-//                    });
-//            },
-            'schools' => function ($query) {
-                $query
+            'schools' => function ($q) {
+                $q
                     ->select('id', 'imagen', 'name', 'position')
                     ->where('active', ACTIVE);
             },

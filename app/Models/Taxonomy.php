@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\CustomAudit;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +15,7 @@ class Taxonomy extends Model
 {
 
     use SoftDeletes;
+    use Cachable;
 
     // protected $rememberFor = WEEK_MINUTES;
 
