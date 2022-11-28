@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\SummaryCourse;
-use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
 use DB;
-use App\Models\Prueba;
-use App\Models\Categoria;
-use App\Models\Posteo;
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Curso;
-use App\Models\Usuario;
-use App\Models\Usuario_vigencia;
 use App\Models\Grupo;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Course;
+use App\Models\Posteo;
+use App\Models\Prueba;
+use App\Models\Usuario;
+use App\Models\Categoria;
+use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
+use App\Services\FileService;
+use App\Models\Usuario_vigencia;
 use App\Exports\EncuestaxgypExport;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class GestorController extends Controller
 {
@@ -76,9 +77,20 @@ class GestorController extends Controller
 
         if (!$summary_course?->certification_issued_at) abort(404);
 
-        $plantilla_curso = $course->plantilla_diploma != null ? $course->plantilla_diploma : $user->subworkspace->plantilla_diploma;
+        $template_certification = '';
+        if($course->plantilla_diploma){
+            $template_certification = $course->plantilla_diploma;
+        }
+        if(!$template_certification){
+            $school = $course->schools()->first();
+            ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma; 
+        }
+        if(!$template_certification && $user->subworkspace->plantilla_diploma){
+            $template_certification = $user->subworkspace->plantilla_diploma;
+        }
+        // $plantilla_curso = $course->plantilla_diploma != null ? $course->plantilla_diploma : $user->subworkspace->plantilla_diploma;
         $fecha = $summary_course->certification_issued_at;
-        $base64 = $this->parse_image($plantilla_curso);
+        $base64 = $this->parse_image($template_certification);
 
         return array(
             'show_certification_date' => $course->show_certification_date,
@@ -110,6 +122,9 @@ class GestorController extends Controller
 
     private function parse_image($plantilla)
     {
+        if(!str_contains($plantilla,'http')){
+            $plantilla =  FileService::generateUrl($plantilla);
+        }
         $type = pathinfo($plantilla, PATHINFO_EXTENSION);
         $image = file_get_contents(get_media_url($plantilla));
         return 'data:image/' . $type . ';base64,' . base64_encode($image);
