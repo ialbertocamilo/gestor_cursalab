@@ -336,7 +336,7 @@ export default {
                             "trainer"
                         ]
                     },
-                    
+
                     {
                          title:"Videoteca",
                          icon:"fas fa-caret-square-right",
@@ -362,9 +362,9 @@ export default {
                         permission: "entrenadores",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO"
+                            "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     },
                     {
@@ -376,9 +376,9 @@ export default {
                         permission: "checklist",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO"
+                            "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     }
                 ]
