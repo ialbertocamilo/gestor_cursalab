@@ -218,7 +218,8 @@ export default {
                         icon: 'fa fa-square',
                         type: 'action',
                         count: 'compatibilities_count',
-                        method_name: 'compatibility'
+                        method_name: 'compatibility',
+                        show_condition: 'compatibility_available'
                     },
                     {
                         text: "Eliminar",

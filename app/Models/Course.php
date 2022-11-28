@@ -115,8 +115,8 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::whereHas('workspaces', function ($t) use ($workspace) {
-            $t->where('workspace_id', $workspace->id);
-        });
+                $t->where('workspace_id', $workspace->id);
+            });
 
         if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
@@ -124,7 +124,7 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments']);
+        $q->withCount(['topics', 'polls', 'segments', 'compatibilities']);
 
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
