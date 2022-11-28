@@ -47,15 +47,25 @@ setlocale(LC_TIME, 'es_PE.UTF-8');
 <script>
     function screenshot() {
         const curso_nombre = document.getElementById('curso_nombre').value.replace(/\s/g, '_').toLowerCase();
-        html2canvas(document.body, {
-            allowTaint: true,
-            useCORS: true,
-            logging: true,
-        }).then(function (canvas) {
-            canvas.toBlob(function (blob) {
-                saveAs(blob, "diploma_" + curso_nombre + ".png");
+        // html2canvas(document.body, {
+        //     allowTaint: true,
+        //     useCORS: true,
+        //     logging: true,
+        // }).then(function (canvas) {
+        //     canvas.toBlob(function (blob) {
+        //         saveAs(blob, "diploma_" + curso_nombre + ".png");
+        //     });
+        // });
+        setTimeout(function () {
+            window.scrollTo(0,0)
+            var html2Obj = html2canvas(certi, { width: certi.offsetWidth, height: certi.offsetHeight }).then(function(canvas) {
+                const a = document.createElement("a");
+                document.body.appendChild(a);
+                a.href = canvas.toDataURL();
+                a.download = "diploma_"+curso_nombre+".png";
+                a.click();			
             });
-        });
+        }, 1000);
     }
 
     window.onload = function () {
