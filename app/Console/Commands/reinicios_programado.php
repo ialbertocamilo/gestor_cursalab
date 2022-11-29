@@ -118,6 +118,9 @@ class reinicios_programado extends Command
             if($workspaceId ==14){
                 $config['nro_intentos'] = 2;
             }
+            if($course['mod_evaluaciones']){
+                $config = json_decode($course['mod_evaluaciones'], true);
+            }
             if ($config) {
 
                 // Reset course attempts
@@ -131,7 +134,7 @@ class reinicios_programado extends Command
                 // SummaryCourse::updateCourseRestartsCount($courseId);
 
                 // Reset topics attempts
-
+                
                 SummaryCourse::resetCourseTopicsAttemptsAllUsers(
                     $courseId, $config['nro_intentos'], $nextDateFromNow
                 );
@@ -250,6 +253,7 @@ class reinicios_programado extends Command
                 $this->coursesIds[] = $course->id;
                 $this->coursesWorkspaces[] = [
                     'courseId' => $course->id,
+                    'mod_evaluaciones' => $course->mod_evaluaciones,
                     'workspaceId' => $workspaceId ?? $course->workspace_id,
                     'scheduledRestarts' => $scheduleRestarts ?? $course->scheduled_restarts
                 ];

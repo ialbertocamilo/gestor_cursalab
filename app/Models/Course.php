@@ -349,7 +349,15 @@ class Course extends BaseModel
         $temp['list'] = $list;
         return $temp;
     }
-
+    protected function getModEval($course){
+        //variable course can be course instance or course_id
+        if($course instanceof Course && !isset($course->mod_evaluaciones) && isset($course->id)){
+            $course = Course::select('mod_evaluaciones')->where('id',$course->id)->first();
+        }else if(is_int($course)){
+            $course = Course::select('mod_evaluaciones')->where('id',$course)->first();
+        }
+        return isset($course->mod_evaluaciones) ? $course->mod_evaluaciones : null;
+    }
     protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
         // $workspace_id = auth()->user()->subworkspace->parent_id;
