@@ -120,7 +120,7 @@
                                             dense
                                         />
                                     </v-col> -->
-                                    <v-col cols="6">
+                                    <!-- <v-col cols="6">
                                         <DefaultInput
                                             label="Nota mínima aprobatoria"
                                             v-model="resource.nota_aprobatoria"
@@ -137,7 +137,7 @@
                                             show-required
                                             dense
                                         />
-                                    </v-col>
+                                    </v-col> -->
                                 </v-row>
                             </template>
                         </DefaultModalSection>
