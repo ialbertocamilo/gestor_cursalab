@@ -14,6 +14,7 @@ use App\Models\Abconfig;
 use App\Models\Criterio;
 use App\Models\Criterion;
 use App\Models\Matricula;
+use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
 use App\Models\SummaryTopic;
@@ -69,10 +70,18 @@ class restablecer_funcionalidad extends Command
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
-        $this->restore_summary_course();
+        // $this->restore_summary_course();
+        $this->setModEvalInCourse();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
+    // public function setModEvalInCourse(){
+    //     $subworkspaces = Workspace::whereNotNull('parent_id')->get();
+    //     foreach ($subworkspaces as $subworkspace) {
+    //         $courses = Db::table('course_workspace')->where('workspace');
+    //         dd($subworkspace->mod_evaluaciones);
+    //     }        
+    // }
     public function restore_summary_course(){
         // User::select('id','subworkspace_id')->whereIn('document',[71342592])->get()->map(function($user){
         //     $current_courses = $user->getCurrentCourses();
