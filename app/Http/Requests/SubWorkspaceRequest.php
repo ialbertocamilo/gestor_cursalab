@@ -28,7 +28,7 @@ class SubWorkspaceRequest extends FormRequest
 
             'codigo_matricula' => 'required',
             'active' => 'nullable',
-            'mod_evaluaciones' => 'required',
+            // 'mod_evaluaciones' => 'required',
             'reinicios_programado' => 'nullable',
             'contact_support' => 'nullable',
             // 'reinicios_programado' => 'required',

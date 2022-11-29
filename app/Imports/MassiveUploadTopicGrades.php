@@ -68,6 +68,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             ->get();
         $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'get_records');
         $percent_sent = [];
+        $course_settings =Course::getModEval($this->course);
         for ($i = 1; $i < $count; $i++) {
             // info('Inicio');
             $currente_percent = round(($i/$count)*100);
@@ -117,19 +118,18 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             //     continue;
             // }
 
-            $sub_workspace_settings = $user->getSubworkspaceSetting('mod_evaluaciones');
             
 //            info("TOPICS ID::");
 //            info($topics->pluck('id')->toArray());
-            $this->uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData[$i]);
+            $this->uploadTopicGrades($course_settings, $user, $topics, $excelData[$i]);
             // info('Inicio');
         }
         Summary::updateUsersByCourse($this->course,$this->updated_users_id);
     }
 
-    public function uploadTopicGrades($sub_workspace_settings, $user, $topics, $excelData)
+    public function uploadTopicGrades($course_settings, $user, $topics, $excelData)
     {
-        $min_grade = $sub_workspace_settings['nota_aprobatoria'];
+        $min_grade = $course_settings['nota_aprobatoria'];
 
         $grade = $excelData[1];
 

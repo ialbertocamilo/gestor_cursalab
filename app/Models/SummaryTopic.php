@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use App\Models\Course;
 
 class SummaryTopic extends Summary
 {
@@ -151,13 +152,14 @@ class SummaryTopic extends Summary
         return ! $this->passed;
     }
 
-    public function hasNoAttemptsLeft($attempts_limit = null, $user = null)
+    public function hasNoAttemptsLeft($attempts_limit = null, $course)
     {
         if (!$attempts_limit)
         {
-            $user = $user ?? auth()->user();
-            $config = $user->getSubworkspaceSetting('mod_evaluaciones');
-            $attempts_limit = $config['nro_intentos'] ?? 5;
+            // $user = $user ?? auth()->user();
+            // $config = $user->getSubworkspaceSetting('mod_evaluaciones');
+            $attempts_limit = Course::getModEval($course,'nro_intentos') ?? 5;
+            // $attempts_limit = $mod_eval['nro_intentos'] ?? 5;
         }
 
         return $this->attempts >= $attempts_limit;
@@ -168,10 +170,11 @@ class SummaryTopic extends Summary
         return ($correct_answers == 0) ? 0 : ((20 / ($correct_answers + $failed_answers)) * $correct_answers);
     }
 
-    protected function hasPassed($new_grade, $passing_grade = NULL)
+    protected function hasPassed($new_grade, $passing_grade = NULL,$course)
     {
         if (!$passing_grade)
-            $passing_grade = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'nota_aprobatoria');
+            // $passing_grade = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'nota_aprobatoria');
+            $passing_grade = Course::getModEval($course,'nota_aprobatoria');
 
         return $new_grade >= $passing_grade;
     }

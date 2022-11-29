@@ -349,12 +349,16 @@ class Course extends BaseModel
         $temp['list'] = $list;
         return $temp;
     }
-    protected function getModEval($course){
+    protected function getModEval($course,$value){
+        // $value could be nro_intentos,nota_aprobatoria
         //variable course can be course instance or course_id
         if($course instanceof Course && !isset($course->mod_evaluaciones) && isset($course->id)){
             $course = Course::select('mod_evaluaciones')->where('id',$course->id)->first();
         }else if(is_int($course)){
             $course = Course::select('mod_evaluaciones')->where('id',$course)->first();
+        }
+        if($value){
+            return isset($course->mod_evaluaciones[$value]) ? $course->mod_evaluaciones[$value] : null;
         }
         return isset($course->mod_evaluaciones) ? $course->mod_evaluaciones : null;
     }

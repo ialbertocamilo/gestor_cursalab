@@ -33,7 +33,7 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::getCurrentRow($topic);
 
-        if ($row->hasNoAttemptsLeft())
+        if ($row->hasNoAttemptsLeft(null,$topic->course))
             return response()->json(['error' => true, 'msg' => 'Sin intentos restantes.'], 200);
 
         if (!$row)
@@ -43,7 +43,7 @@ class RestQuizController extends Controller
 
         $new_grade = $correct_answers_score;
         // $new_grade = SummaryTopic::calculateGrade($correct_answers, $failed_answers);
-        $passed = SummaryTopic::hasPassed($new_grade);
+        $passed = SummaryTopic::hasPassed($new_grade,null,$topic->course);
 
         $data_ev = [
             'attempts' => $row->attempts + 1,
@@ -125,7 +125,7 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::setStartQuizData($topic);
 
-        if ($row->hasNoAttemptsLeft())
+        if ($row->hasNoAttemptsLeft(null,$topic->course))
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
         if ($row->isOutOfTimeForQuiz())

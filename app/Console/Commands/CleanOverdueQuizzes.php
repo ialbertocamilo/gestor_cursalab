@@ -52,7 +52,7 @@ class CleanOverdueQuizzes extends Command
 
             try {
 
-                if ($row->hasNoAttemptsLeft(null, $row->user)) continue;
+                if ($row->hasNoAttemptsLeft(null, $row->topic->course_id)) continue;
 
                 $total_questions = Question::where('topic_id', $row->topic_id)->count();
 

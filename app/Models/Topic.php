@@ -649,7 +649,7 @@ class Topic extends BaseModel
 
         $counter = false;
 
-        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft()) {
+        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft(null,$topic->course)) {
 
             $times = [];
 

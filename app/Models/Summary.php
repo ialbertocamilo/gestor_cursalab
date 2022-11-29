@@ -31,7 +31,8 @@ class Summary extends BaseModel
 
             if ($model instanceof Topic) {
 
-                $config_quiz = $user->subworspace->mod_evaluaciones;
+                // $config_quiz = $user->subworspace->mod_evaluaciones;
+                $config_quiz = Course::getModEval($model->course_id);
 
                 if ($row->attempts >= $config_quiz['nro_intentos'])
                     return false;

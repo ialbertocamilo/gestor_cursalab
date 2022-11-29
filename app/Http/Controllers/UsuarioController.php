@@ -257,8 +257,8 @@ class UsuarioController extends Controller
     public function reset(User $user): JsonResponse
     {
 
-        $subworkspace = Workspace::find($user->subworkspace_id);
-        $mod_eval = $subworkspace->mod_evaluaciones;
+        // $subworkspace = Workspace::find($user->subworkspace_id);
+        // $mod_eval = $subworkspace->mod_evaluaciones;
 
         $topics = SummaryTopic::query()
             ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
@@ -630,8 +630,9 @@ class UsuarioController extends Controller
 
         // Load workspace configuration
 
-        $subworkspace = Workspace::find($subworkspaceId);
-        $mod_eval = $subworkspace->mod_evaluaciones;
+        // $subworkspace = Workspace::find($subworkspaceId);
+        // $mod_eval = $subworkspace->mod_evaluaciones;
+        $mod_eval = Course::getModEval($curso);
 
         $data = $this->validarDetallesReinicioIntentosMasivo(
             $curso, $tema, $subworkspaceId, $tipo, $mod_eval
@@ -725,9 +726,9 @@ class UsuarioController extends Controller
 
         // Load workspace's "evaluaciones" configuration
 
-        $subworkspace = Workspace::find($subworkspaceId);
-        $mod_eval = $subworkspace->mod_evaluaciones;
-
+        // $subworkspace = Workspace::find($subworkspaceId);
+        // $mod_eval = $subworkspace->mod_evaluaciones;
+        $mod_eval = Course::getModEval($courseId);
         if ($topicId == null) {
 
             $curso = Curso::where('id', $courseId)->first();
