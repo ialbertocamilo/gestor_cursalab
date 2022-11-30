@@ -121,7 +121,7 @@ const SUB_ITEM_VADEMECUM = {
                             subpaths:["vademecum"],
                             selected:false,
                             permission:"vademecum",
-                            role:["super-user","admin-TEST","content-manager-TEST","trainer-TEST"]
+                            role:["super-user","admin","content-manager","trainer-TEST"]
                         };
 
 export default {
@@ -520,7 +520,7 @@ export default {
                         path:"/soporte",
                         subpaths:["soporte"],
                         selected:false,
-                        role: ["super-user"]
+                        role: ["super-user", "admin"]
                     },
                 ]
             }
@@ -616,8 +616,9 @@ export default {
                 const { session:{ workspace } } = data;
                 if(workspace.id === 25) {
                   vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
-                  vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 }
+                
+                vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 //=== only for "Farmacias Peruanas"
 
             });

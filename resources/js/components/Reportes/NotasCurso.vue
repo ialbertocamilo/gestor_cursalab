@@ -11,14 +11,27 @@
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
-            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            <!-- this only for FP -->
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            </div>
+            <!-- this only for FP -->
+
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            
+            <!-- this only for FP -->
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+                <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            </div>
+            <!-- this only for FP -->
+
+
             <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
             <list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
             <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
+            <list-item titulo="Tipo de curso" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
             <list-item titulo="Última sesión" subtitulo="Fecha de la última sesión en la plataforma" />
             <list-item titulo="Visitas por curso" subtitulo="Cantidad de visitas al curso" />
             <list-item
@@ -45,64 +58,101 @@
 
         <!-- Formulario del reporte -->
         <form @submit.prevent="exportNotasCurso" class="row">
-            <!-- Modulo -->
-            <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select v-model="modulo"
-                        class="form-control">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
-            <!-- Escuela -->
-            <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Escuela</b-form-text>
-                <select
-                    v-model="escuela"
-                    class="form-control"
-                    :disabled="!schools[0]"
-                    @change="escuelaChange"
-                >
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in schools"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
-            <!-- Curso -->
-            <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Curso</b-form-text>
-                <select v-model="curso"
-                        class="form-control"
-                        :disabled="!courses[0]">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in courses"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+            <div class="col-12">
+                <div class="row px-3">
+                    <!-- Modulo -->
+                    <div class="col-sm-4 mb-3">
+                        <b-form-text text-variant="muted">Módulo</b-form-text>
+                        <select v-model="modulo"
+                                class="form-control"
+                                @change="fetchFiltersAreaData">
+                            <option value>- [Todos] -</option>
+                            <option v-for="(item, index) in modules"
+                                    :key="index"
+                                    :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+
+                        <!--DefaultSelect
+                            dense
+                            v-model="modulo"
+                            :items="modules"
+                            label=""
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione un Módulo"
+                            @onChange="fetchFiltersAreaData"
+                        /-->
+                    </div>
+                    <!-- Escuela -->
+                    <div class="col-sm-4 mb-3">
+                        <b-form-text text-variant="muted">Escuela</b-form-text>
+                        <select
+                            v-model="escuela"
+                            class="form-control"
+                            :disabled="!schools[0]"
+                            @change="escuelaChange"
+                        >
+                            <option value>- [Todos] -</option>
+                            <option v-for="(item, index) in schools"
+                                    :key="index"
+                                    :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <!-- Curso -->
+                    <div class="col-sm-4 mb-3">
+                        <b-form-text text-variant="muted">Curso</b-form-text>
+                        <select v-model="curso"
+                                class="form-control"
+                                :disabled="!courses[0]">
+                            <option value>- [Todos] -</option>
+                            <option v-for="(item, index) in courses"
+                                    :key="index"
+                                    :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <v-divider class="col-12 mb-0 p-0"></v-divider>
-
             <!-- Filtros secundarios -->
-            <div class="col-12 d-flex">
+            <div class="col-12 d-flex pt-0">
                 <!-- Filtros Checkboxs -->
-                <div class="col-12 px-0">
-                    <EstadoFiltro ref="EstadoFiltroComponent" />
+                <div class="col-8 pt-0 px-0">
+                    <EstadoFiltro ref="EstadoFiltroComponent"
+                                  @emitir-cambio="" />
+
+                    <div class="col mb-3 mt-1" v-if="workspaceId === 25">
+                        <b-form-text text-variant="muted">Áreas</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="area"
+                            :items="areas"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona un #Módulo"
+                            :disabled="!modulo"
+                            :background-color="!area ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
+
                     <v-divider class="col-12 p-0 m-0"></v-divider>
                     <div class="col">
                         <small class="form-text text-muted text-bold">
                             Resultado del Curso :
                         </small>
-                        <div class="d-flex mt-2">
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                        <div class="form-row mt-2">
+                            <div class="col-6 mr-auto d-flex align-center">
                                 <v-checkbox
                                     class="my-0 mr-2"
                                     label="Completados"
@@ -117,7 +167,7 @@
                                     <v-icon class="info-icon">mdi-information-outline</v-icon>
                                 </div>
                             </div>
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                            <div class="col-6 mr-auto d-flex align-center">
                                 <v-checkbox
                                     class="my-0 mr-2"
                                     label="Encuesta pendiente"
@@ -132,7 +182,7 @@
                                     <v-icon class="info-icon">mdi-information-outline</v-icon>
                                 </div>
                             </div>
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                            <div class="col-6 mr-auto d-flex align-center">
                                 <v-checkbox
                                     class="my-0 mr-2"
                                     label="En desarrollo"
@@ -147,7 +197,7 @@
                                     <v-icon class="info-icon">mdi-information-outline</v-icon>
                                 </div>
                             </div>
-                            <div class="col-3 p-0 mr-auto d-flex align-center">
+                            <div class="col-6 mr-auto d-flex align-center">
                                 <v-checkbox
                                     class="my-0 mr-2"
                                     label="Desaprobados"
@@ -165,19 +215,40 @@
                         </div>
                     </div>
 
+                    <div class="col">
+                        <small class="form-text text-muted text-bold">
+                            Tipo de Cursos
+                        </small>
+                        <div class="d-flex mt-2">
+                            <v-checkbox
+                                class="my-0 mr-2"
+                                label="Cursos Libres"
+                                color="primary"
+                                v-model="tipocurso"
+                                hide-details="false"
+                            />
+                            <div
+                                tooltip="Al marcar, el reporte generado sera solo con cursos libres."
+                                tooltip-position="top"
+                            >
+                                <v-icon class="info-icon">mdi-information-outline</v-icon>
+                            </div>
+                        </div>
+                    </div>
                     <CheckValidar ref="checkValidacion" />
                 </div>
-                <!--          Fechas          -->
-<!--                <div class="col-4 ml-auto">-->
-<!--                    <FechaFiltro ref="FechasFiltros" />-->
-<!--                </div>-->
+                <!-- Fechas -->
+                <div class="col-4 ml-auto">
+                    <FechaFiltro ref="FechasFiltros" />
+                </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <button type="submit"
-                    class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-                <i class="fas fa-download"></i>
-                <span>Descargar</span>
-            </button>
+            <div class="col-12 px-6">
+                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                    <i class="fas fa-download"></i>
+                    <span>Descargar</span>
+                </button>
+            </div>
         </form>
     </v-main>
 </template>
@@ -201,32 +272,23 @@ export default {
         return {
             schools: [],
             courses: [],
-
+            areas: [],
             //
-            modulo: "",
+            modulo: "", 
             escuela: "",
             curso: "",
+            area: [],
             //
             aprobados: true,
+            tipocurso: false,
             desaprobados: true,
             encuestaPendiente: true,
             desarrollo: true
         };
-    }
-    ,
-    mounted() {
-        this.fetchFiltersData()
-    }
-    ,
+    },
     methods: {
-        /**
-         *
-         * @returns {Promise<void>}
-         */
         async fetchFiltersData () {
-
             // Fetch schools
-
             let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}`
             let responseSchools = await axios({
                 url: urlSchools,
@@ -234,9 +296,7 @@ export default {
             })
 
             this.schools = responseSchools.data
-
-        }
-        ,
+        },
         async exportNotasCurso() {
 
             // show loading spinner
@@ -244,6 +304,7 @@ export default {
             this.showLoader()
 
             let UFC = this.$refs.EstadoFiltroComponent;
+            let DATES = this.$refs.FechasFiltros;
 
             // Perform request to generate report
 
@@ -257,6 +318,7 @@ export default {
                         modulos: this.modulo ? [this.modulo] : [],
                         escuelas: this.escuela ? [this.escuela] : [],
                         cursos: this.curso ? [this.curso] : [],
+                        areas: this.area,
 
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
@@ -264,6 +326,10 @@ export default {
                         aprobados: this.aprobados,
                         desaprobados: this.desaprobados,
                         desarrollo: this.desarrollo,
+                        tipocurso: this.tipocurso,
+
+                        start: DATES.start,
+                        end: DATES.end,
                         encuestaPendiente : this.encuestaPendiente
                     }
                 })
@@ -285,12 +351,21 @@ export default {
             // Hide loading spinner
 
             this.hideLoader()
-        }
-        ,
-        /**
-         * Fetch courses
-         * @returns {Promise<boolean>}
-         */
+        },
+        async fetchFiltersAreaData() {
+            if(!this.modulo) {
+                this.areas = [];
+                return;
+            }
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            this.areas = response.data
+        },
         async escuelaChange() {
             this.curso = null;
             this.tema = null;
@@ -306,7 +381,10 @@ export default {
                 method: 'get'
             });
             this.courses = res.data;
-        },
+        }
+    },
+    mounted() {
+        this.fetchFiltersData();
     }
 }
 
