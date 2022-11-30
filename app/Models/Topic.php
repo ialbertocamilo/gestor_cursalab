@@ -511,7 +511,8 @@ class Topic extends BaseModel
                     $topics->count(),
                 'temas_completados' => $course_status['completed_topics'],
                 'porcentaje' => $course_status['progress_percentage'],
-                'temas' => $topics_data
+                'temas' => $topics_data,
+                'mod_evaluaciones'=>$course->mod_evaluaciones
             ];
         }
 

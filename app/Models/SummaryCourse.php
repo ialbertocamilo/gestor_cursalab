@@ -179,7 +179,7 @@ class SummaryCourse extends Summary
         $passed = $taken = $reviewed = $failed = 0;
 
         // $max_attempts = $user->getSubworkspaceSetting('mod_evaluaciones', 'nro_intentos');
-        $max_attempts = Course::getModEval($courseId,'nro_intentos');
+        $max_attempts = Course::getModEval($course->id,'nro_intentos');
         $rows = SummaryTopic::with('status')
             ->whereIn('topic_id', $active_topics->pluck('id'))
             ->where('user_id', $user->id)
