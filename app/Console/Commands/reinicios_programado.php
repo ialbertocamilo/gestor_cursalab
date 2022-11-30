@@ -138,7 +138,7 @@ class reinicios_programado extends Command
                 // Reset topics attempts
                 
                 SummaryCourse::resetCourseTopicsAttemptsAllUsers(
-                    $courseId, $mod_eval->nro_intentos, $nextDateFromNow
+                    $courseId, $mod_eval['nro_intentos'], $nextDateFromNow
                 );
 
                 // // Update topics' resets count
