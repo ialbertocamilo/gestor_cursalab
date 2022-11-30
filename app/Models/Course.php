@@ -349,7 +349,7 @@ class Course extends BaseModel
         $temp['list'] = $list;
         return $temp;
     }
-    protected function getModEval($course,$value){
+    protected function getModEval($course,$value=''){
         // $value could be nro_intentos,nota_aprobatoria
         //variable course can be course instance or course_id
         if($course instanceof Course && !isset($course->mod_evaluaciones) && isset($course->id)){

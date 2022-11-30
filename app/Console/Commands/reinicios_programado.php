@@ -252,10 +252,11 @@ class reinicios_programado extends Command
         foreach ($courses as $course) {
 
             if (!in_array($course->id, $this->coursesIds)) {
+
                 $this->coursesIds[] = $course->id;
                 $this->coursesWorkspaces[] = [
-                    'courseId' =>  Course::getModEval($course),
-                    'mod_evaluaciones' => $mod_evaluaciones ,
+                    'courseId' => $course->id,
+                    'mod_evaluaciones' => Course::getModEval($course->id) ,
                     'workspaceId' => $workspaceId ?? $course->workspace_id,
                     'scheduledRestarts' => $scheduleRestarts ?? $course->scheduled_restarts
                 ];
