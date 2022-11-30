@@ -883,6 +883,7 @@ class Course extends BaseModel
             ->where('user_id', $user->id)
             ->whereIn('course_id', $course->compatibilities()->pluck('id'))
             ->orderBy('grade_average', 'DESC')
+            ->whereRelation('status', 'code', 'aprobado')
             ->first();
 
         if ($compatible_summary_course):
