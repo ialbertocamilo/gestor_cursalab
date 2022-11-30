@@ -254,7 +254,7 @@ class reinicios_programado extends Command
                 $this->coursesIds[] = $course->id;
                 $this->coursesWorkspaces[] = [
                     'courseId' => $course->id,
-                    'mod_evaluaciones' => $course->mod_evaluaciones,
+                    'mod_evaluaciones' => ($course->mod_evaluaciones) ? json_decode($course->mod_evaluaciones) : null ,
                     'workspaceId' => $workspaceId ?? $course->workspace_id,
                     'scheduledRestarts' => $scheduleRestarts ?? $course->scheduled_restarts
                 ];
