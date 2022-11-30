@@ -3,16 +3,17 @@
 namespace App\Console\Commands;
 
 use App\Models\Curso;
+use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\School;
 use App\Models\Abconfig;
 use App\Models\Reinicio;
 use App\Models\Categoria;
-use App\Models\School;
-use App\Models\SummaryCourse;
-use App\Models\SummaryTopic;
 use App\Models\Workspace;
-use App\Models\Topic;
+use App\Models\SummaryTopic;
+use App\Models\SummaryCourse;
 use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -251,11 +252,9 @@ class reinicios_programado extends Command
         foreach ($courses as $course) {
 
             if (!in_array($course->id, $this->coursesIds)) {
-                $mod_evaluaciones = !is_array($course->mod_evaluaciones) ? json_decode($course->mod_evaluaciones) : $course->mod_evaluaciones;
-
                 $this->coursesIds[] = $course->id;
                 $this->coursesWorkspaces[] = [
-                    'courseId' => $course->id,
+                    'courseId' =>  Course::getModEval($course),
                     'mod_evaluaciones' => $mod_evaluaciones ,
                     'workspaceId' => $workspaceId ?? $course->workspace_id,
                     'scheduledRestarts' => $scheduleRestarts ?? $course->scheduled_restarts
