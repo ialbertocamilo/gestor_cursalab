@@ -279,8 +279,8 @@ export default {
                 lista_escuelas: this.getRules(['required']),
                 types: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
-                // nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
-                // nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
+                nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
+                nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
             },
             selects: {
                 requisito_id: [],
