@@ -49,7 +49,8 @@ class CursoSearchResource extends JsonResource
             'edit_route' => $route_edit,
             'temas_route' => $route_topics,
 
-            'compatibilities_count' => $this->compatibilities_count,
+            'compatibilities_count' => $this->compatibilities_a_count + $this->compatibilities_b_count,
+            // 'compatibilities_count' => 1,
             'compatibility_available' => true,
         ];
     }

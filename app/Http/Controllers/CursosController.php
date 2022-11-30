@@ -289,7 +289,7 @@ class CursosController extends Controller
     public function getCompatibilities(Course $course)
     {
         $workspace = get_current_workspace();
-        $compatibilities = $course->compatibilities;
+        $compatibilities = $course->getCompatibilities();
         $courses = Course::select('id', 'name')
                         ->whereRelation('workspaces', 'id', $workspace->id)
                         ->where('id', '<>', $course->id)

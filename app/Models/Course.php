@@ -81,9 +81,26 @@ class Course extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
 
-    public function compatibilities()
+    public function compatibilities_a()
     {
         return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
+    }
+
+    public function compatibilities_b()
+    {
+        return $this->belongsToMany(Course::class, 'compatibilities', 'course_b_id', 'course_a_id');
+    }
+
+    public function getCompatibilities()
+    {
+        // return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
+        // info('this->compatibilities_a');
+        // info($this->compatibilities_a);
+
+        // info('this->compatibilities_b');
+        // info($this->compatibilities_b);
+
+        return $this->compatibilities_a->merge($this->compatibilities_b);
     }
 
     public function setActiveAttribute($value)
@@ -124,7 +141,7 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments', 'compatibilities']);
+        $q->withCount(['topics', 'polls', 'segments', 'compatibilities_a', 'compatibilities_b']);
 
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
@@ -899,7 +916,8 @@ class Course extends BaseModel
 
     protected function storeCompatibilityRequest($course, $data = [])
     {
-        $course->compatibilities()->sync($data['compatibilities'] ?? []);
+        $course->compatibilities_b()->sync([]);
+        $course->compatibilities_a()->sync($data['compatibilities'] ?? []);
 
         return $course;
     }
