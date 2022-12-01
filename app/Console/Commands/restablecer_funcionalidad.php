@@ -85,9 +85,16 @@ class restablecer_funcionalidad extends Command
         $_bar = $this->output->createProgressBar(count($users));
         $_bar->start();
         foreach ($users as $user) {
-            User::where('document',$user['document'])->update([
-                'surname'=>$user['surname']
-            ]);
+            try {
+                DB::beginTransaction();
+                User::where('document',$user['document'])->update([
+                    'surname'=>$user['surname']
+                ]);
+                DB::commit();
+                //code...
+            } catch (\Throwable $th) {
+                DB::rollBack();
+            }
             $_bar->advance();
         }
         $_bar->finish();
