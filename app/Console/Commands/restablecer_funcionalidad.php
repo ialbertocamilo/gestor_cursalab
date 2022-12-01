@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Carbon\Carbon;
+use App\Models\Poll;
 use App\Models\User;
 use App\Models\Curso;
 use App\Models\Topic;
@@ -22,6 +23,7 @@ use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
+use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
@@ -71,10 +73,86 @@ class restablecer_funcionalidad extends Command
         // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
-        $this->setModEvalInCourse();
+        // $this->restores_poll_answers();
+        $this->restore_attempts();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
+    public function restore_attempts(){
+        $workspaces = Workspace::whereNull('parent_id')->get();
+        foreach ($workspaces as $workspace) {
+            $mod_eval = $this->getModEval($workspace->name);            
+            Course::whereHas('workspaces',function($q) use ($workspace){
+                $q->where('workspace_id',$workspace->id);
+            })->update([
+                'mod_evaluaciones'=>$mod_eval
+            ]);
+        }
+    }
+    protected function getModEval($name): array
+    {
+        return match ($name) {
+            'Farmacias Peruanas' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Super Food Holding Perú' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Real Plaza' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Tiendas Peruanas' => ['nro_intentos'=>"2" ,'nota_aprobatoria'=>"14"],
+            'Homecenters Peruanos' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"18"],
+            'Financiera Oh' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Química Suiza' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Intercorp Retail' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+        };
+    }
+    public function restores_poll_answers(){
+        $polls = Poll::with('questions')
+        ->whereIn('id',[1,7,14,17,18,21,25,27,28,29])
+        ->get();
+        foreach ($polls as $key => $poll) {
+            $questions_id = $poll->questions->where('type_id',4563)->pluck('id');
+            foreach ($questions_id as $question_id) {
+                $polls_answers = PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->where('poll_question_id',$question_id)->get();
+                $percent_random = rand(40,50);;
+                if($polls_answers->count() > 0){
+                    $firs_slice =   $this->array_percentage($polls_answers->toArray(),$percent_random);
+                    $second_slice = $this->array_percentage($firs_slice[1],100-$percent_random);
+                    $percent_50 = $firs_slice[0]; 
+                    $percent_30 = $second_slice[0]; 
+                    $percent_20 = $second_slice[1];
+                    info($percent_50);
+                    info($percent_30);
+                    info($percent_20);
+                    // [{"resp_cal":5,"preg_cal":"Califica"}]
+                    PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->whereIn('id',array_column($percent_50,'id'))
+                                ->update([
+                                    'respuestas' => '[{"resp_cal":5,"preg_cal":"Califica"}]'
+                                ]);
+                    PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->whereIn('id',array_column($percent_30,'id'))
+                                ->update([
+                                    'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
+                                ]);
+
+                    PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->whereIn('id',array_column($percent_20,'id'))
+                                ->update([
+                                    'respuestas' => '[{"resp_cal":3,"preg_cal":"Califica"}]'
+                                ]);
+                }
+            }
+        }
+    }
+    function array_percentage($array, $percentage) {
+        $count = count($array);
+        $percent = ceil($count*$percentage/100);
+        $result = array_slice($array, 0, $percent);
+        $result2 = array_slice($array, $percent, count($array)+1);
+        return [$result,$result2];
+    }
+        // $this->setModEvalInCourse();
+    //     $this->info("\n Fin: " . now());
+    //     info(" \n Fin: " . now());
+    // }
     // public function setModEvalInCourse(){
     //     $subworkspaces = Workspace::whereNotNull('parent_id')->get();
     //     foreach ($subworkspaces as $subworkspace) {
