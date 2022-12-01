@@ -74,9 +74,23 @@ class restablecer_funcionalidad extends Command
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
-        $this->restore_attempts();
+        $this->restore_surname();
+        // $this->restore_attempts();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restore_surname(){
+        $path = public_path() . "/json/surnames.json"; // ie: /var/www/laravel/public/json/filename.json
+        $users = json_decode(file_get_contents($path), true);
+        $_bar = $this->output->createProgressBar(count($users));
+        $_bar->start();
+        foreach ($users as $user) {
+            User::where('document',$user['document'])->update([
+                'surname'=>$user['surname']
+            ]);
+            $_bar->advance();
+        }
+        $_bar->finish();
     }
     public function restore_attempts(){
         $workspaces = Workspace::whereNull('parent_id')->get();
