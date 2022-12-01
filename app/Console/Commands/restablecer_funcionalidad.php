@@ -93,6 +93,7 @@ class restablecer_funcionalidad extends Command
                 DB::commit();
                 //code...
             } catch (\Throwable $th) {
+                $this->info('error',$user['document']);
                 DB::rollBack();
             }
             $_bar->advance();
