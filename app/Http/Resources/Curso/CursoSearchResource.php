@@ -42,6 +42,7 @@ class CursoSearchResource extends JsonResource
             'active' => $this->active,
             'config_id' => '',
             'type' => $this->type->name ?? 'No definido',
+            'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : '-',
 
             'custom_curso_nombre' => '',
 

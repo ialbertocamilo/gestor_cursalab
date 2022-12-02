@@ -36,6 +36,18 @@
                             item-text="name"
                         />
                     </v-col>
+                    <v-col cols="3">
+                        <DefaultInputDate
+                            clearable
+                            dense
+                            range
+                            :referenceComponent="'modalDateFilter1'"
+                            :options="modalDateFilter1"
+                            v-model="filters.dates"
+                            label="Fecha de creación"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
             <!-- </v-card> -->
@@ -116,6 +128,7 @@ export default {
                     // {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombres", value: "name"},
+                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -196,6 +209,9 @@ export default {
                 categoria_id: 0,
                 dialog: false,
                 ref: 'CursosDuplicarModal',
+            },
+            modalDateFilter1: {
+                open: false,
             },
         }
     },

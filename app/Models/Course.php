@@ -133,6 +133,15 @@ class Course extends BaseModel
         if ($request->active == 2)
             $q->where('active', '<>', ACTIVE);
 
+        if ($request->dates) {
+
+            if (isset($request->dates[0]))
+                $q->whereDate('created_at', '>=', $request->dates[0]);
+
+            if (isset($request->dates[1]))
+                $q->whereDate('created_at', '<=', $request->dates[1]);
+        }
+
         // if (!is_null($request->sortBy)) {
         //     $field = $request->sortBy ?? 'position';
         //     $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
