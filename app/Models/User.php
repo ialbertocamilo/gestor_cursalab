@@ -385,7 +385,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    protected function storeRequest($data, $user = null, $update_password = true)
+    protected function storeRequest($data, $user = null, $update_password = true,$from_massive=false)
     {
         try {
 
@@ -396,7 +396,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     unset($data['password']);
                 }
                 $user->update($data);
-                SummaryUser::updateUserData($user);
+                if(!$from_massive){
+                    SummaryUser::updateUserData($user);
+                }
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:

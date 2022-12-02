@@ -101,7 +101,7 @@ class UserMassive extends Massive implements ToCollection {
             if(!$data_user['has_error']){
                 //Insert user and criteria
                 $user = User::where('document',$data_user['user']['document'])->first();
-                User::storeRequest($data_user['user'],$user,false);
+                User::storeRequest($data_user['user'],$user,false,true);
                 $this->processed_users ++;
             }else{
                 //set errors
