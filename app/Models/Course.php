@@ -119,10 +119,13 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments']);
+        $q->withCount(['topics', 'polls', 'segments', 'type']);
 
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
+
+        if ($request->type)
+            $q->where('type_id', $request->type);
 
         if ($request->active == 1)
             $q->where('active', ACTIVE);

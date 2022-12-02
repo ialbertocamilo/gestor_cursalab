@@ -41,6 +41,7 @@ class CursoSearchResource extends JsonResource
             'segments_count' => $this->segments_count,
             'active' => $this->active,
             'config_id' => '',
+            'type' => $this->type->name ?? 'No definido',
 
             'custom_curso_nombre' => '',
 
