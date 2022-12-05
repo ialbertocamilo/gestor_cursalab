@@ -82,7 +82,19 @@
                         </v-col>
                     </v-row>
                     <v-row justify="center">
-                        <v-col cols="6">
+                        <v-col cols="4">
+                            <DefaultInput
+                                dense
+                                type="number"
+                                label="Orden"
+                                placeholder="Orden"
+                                v-model="resource.position"
+                            />
+                                <!-- :rules="rules.position" -->
+                                <!-- show-required -->
+    
+                        </v-col>
+                        <v-col cols="4">
                             <DefaultInput
                                 numbersOnly
                                 dense
@@ -91,7 +103,7 @@
                                 v-model="resource.duration"
                             />
                         </v-col>
-                        <v-col cols="6">
+                        <v-col cols="4">
                             <DefaultInput
                                 numbersOnly
                                 dense
@@ -203,6 +215,35 @@
                             </DefaultModalSection>
                         </v-col>
                     </v-row>
+
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Configuración de diploma"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+                                        <v-col cols="6" class="d-flex justify-content-center align-items-center">
+                                            <DefaultToggle
+                                                v-model="resource.show_certification_date"
+                                                active-label="Mostrar fecha en diploma"
+                                                inactive-label="No mostrar fecha en diploma"
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="6">
+                                            * El diploma incluirá la fecha en la que el usuario aprobó el curso.
+                                            <br>
+                                            * Ejemplo: 02 de Enero del 2022
+                                        </v-col>
+
+                                    </v-row>
+
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+
                     <v-row>
                         <v-col cols="2">
                             <DefaultToggle v-model="resource.active"/>
@@ -224,7 +265,10 @@
                 :options="courseValidationModal"
                 :resource="resource"
                 @onCancel="closeFormModal(courseValidationModal)"
-                @onConfirm="confirmValidationModal(courseValidationModal, base_endpoint, confirmModal(false))"
+                @onConfirm="confirmValidationModal(
+                    courseValidationModal,
+                    `${base_endpoint}?${addParamsToURL(base_endpoint, getAllUrlParams(url))}`,
+                    confirmModal(false))"
             />
         </v-card>
     </section>
@@ -243,13 +287,19 @@ export default {
     components: {CursoValidacionesModal},
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
-        let route_school = (this.categoria_id !== '')
+        const route_school = (this.categoria_id !== '')
             ? `/escuelas/${this.categoria_id}`
             : ``;
 
+        let base_endpoint_temp = `${route_school}/cursos`;
+
+
+
         return {
+            url: window.location.search,
             errors: [],
-            base_endpoint: `${route_school}/cursos`,
+            // base_endpoint: base_endpoint_temp,
+            base_endpoint: base_endpoint_temp,
             resourceDefault: {
                 name: null,
                 description: null,
@@ -340,7 +390,15 @@ export default {
     methods: {
         closeModal() {
             let vue = this
-            window.location.href = vue.base_endpoint;
+
+            let params = this.getAllUrlParams(window.location.search);
+            let temp = `${this.addParamsToURL(vue.base_endpoint, params)}`;
+            temp = `${vue.base_endpoint}?${temp}`;
+
+            // console.log(temp);
+            // return;
+
+            window.location.href = temp;
         },
         confirmModal(validateForm = true) {
             let vue = this

@@ -109,14 +109,41 @@ class Course extends BaseModel
     {
         $workspace = get_current_workspace();
 
-        $q = Course::whereHas('workspaces', function ($t) use ($workspace) {
-            $t->where('workspace_id', $workspace->id);
-        });
+        $q = Course::query()
+            ->with('segments.values', function ($q) {
+                $q
+                    ->withWhereHas('criterion_value', function ($q) {
+                        $q
+                            ->select('id', 'value_text', 'criterion_id')
+                            ->whereRelation('criterion', 'code', 'module');
+                    })
+                    ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+                    ->whereRelation('criterion', 'code', 'module');
+            })
+            ->whereHas('workspaces', function ($t) use ($workspace) {
+                $t->where('workspace_id', $workspace->id);
+            });
 
         if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->where('school_id', $request->school_id);
             });
+        }
+
+        if ($request->schools) {
+            $q->whereHas('schools', function ($t) use ($request) {
+                $t->whereIn('school_id', $request->schools);
+            });
+        }
+
+        if ($request->segmented_module) {
+
+            $module_value = $request->segmented_module;
+
+            $q->whereHas('segments.values', function ($q) use ($module_value) {
+                $q->where('criterion_value_id', $module_value);
+            });
+
         }
 
         $q->withCount(['topics', 'polls', 'segments', 'type']);
@@ -132,15 +159,6 @@ class Course extends BaseModel
 
         if ($request->active == 2)
             $q->where('active', '<>', ACTIVE);
-
-        if ($request->dates) {
-
-            if (isset($request->dates[0]))
-                $q->whereDate('created_at', '>=', $request->dates[0]);
-
-            if (isset($request->dates[1]))
-                $q->whereDate('created_at', '<=', $request->dates[1]);
-        }
 
         // if (!is_null($request->sortBy)) {
         //     $field = $request->sortBy ?? 'position';
@@ -625,7 +643,7 @@ class Course extends BaseModel
     {
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
-            $query = User::select('id')->where('active',1);
+            $query = User::select('id')->where('active', 1);
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
@@ -635,8 +653,7 @@ class Course extends BaseModel
                 });
             }
             // $counts[$key] = $query->count();
-//            dd($query->toSql());
-            $users_id_course = array_merge($users_id_course,$query->pluck('id')->toArray());
+            $users_id_course = array_merge($users_id_course, $query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');
 
@@ -725,7 +742,7 @@ class Course extends BaseModel
         foreach ($this->segments as $key => $segment) {
 
             $clause = $key == 0 ? 'where' : 'orWhere';
-            $query->$clause(function($q) use ($segment, $key) {
+            $query->$clause(function ($q) use ($segment, $key) {
 
                 $grouped = $segment->values->groupBy('criterion_id');
 
@@ -748,7 +765,7 @@ class Course extends BaseModel
         }
 
         // info($counts);
-        $a =  $query->$type();
+        $a = $query->$type();
 
         // info($query->toSql());
         return $a;
