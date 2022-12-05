@@ -37,11 +37,35 @@
                     <v-col cols="3">
                         <DefaultSelect
                             clearable dense
-                            :items="selects.statuses"
-                            v-model="filters.active"
-                            label="Estado"
+                            :items="selects.types"
+                            v-model="filters.type"
+                            label="Tipo de curso"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
+                        />
+                    </v-col>
+
+                    <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado de curso"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col>
+
+                    <v-col cols="3">
+                        <DefaultInputDate
+                            clearable
+                            dense
+                            range
+                            :referenceComponent="'modalDateFilter1'"
+                            :options="modalDateFilter1"
+                            v-model="filters.dates"
+                            label="Fecha de creación"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
 
@@ -158,6 +182,8 @@ export default {
                     {text: "Orden", value: "orden", align: 'center'},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
+                    {text: "Tipo", value: "type", sortable: false},
+                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -169,24 +195,11 @@ export default {
                         route: 'temas_route'
                     },
                     {
-                        text: "Encuesta",
-                        icon: 'mdi mdi-poll',
-                        type: 'action',
-                        count: 'encuesta_count',
-                        method_name: 'encuesta'
-                    },
-                    {
                         text: "Segmentación",
                         icon: 'fa fa-square',
                         type: 'action',
                         count: 'segments_count',
                         method_name: 'segmentation'
-                    },
-                    {
-                        text: "Actualizar Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
                     },
                     {
                         text: "Editar",
@@ -203,6 +216,19 @@ export default {
                 ],
                 more_actions: [
                     {
+                        text: "Encuesta",
+                        icon: 'mdi mdi-poll',
+                        type: 'action',
+                        count: 'encuesta_count',
+                        method_name: 'encuesta'
+                    },
+                    {
+                        text: "Actualizar Estado",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
+                    },
+                    {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
                         type: 'action',
@@ -212,6 +238,7 @@ export default {
             },
             selects: {
                 modules: [],
+                types: [],
                 statuses: [
                     {id: null, name: 'Todos'},
                     {id: 1, name: 'Activos'},
@@ -221,6 +248,7 @@ export default {
             filters: {
                 q: '',
                 active: null,
+                type: null,
                 // category: null
             },
 
@@ -282,6 +310,10 @@ export default {
                 open: false,
                 base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
             },
+
+            modalDateFilter1: {
+                open: false,
+            },
         }
     },
     mounted() {
@@ -289,15 +321,19 @@ export default {
 
         vue.filters.module = vue.modulo_id
         vue.filters.category = vue.escuela_id
+
+        vue.getSelects()
     },
     methods: {
         getSelects() {
             let vue = this
-            const url = `/escuelas/get-selects`
+            const url = `/cursos/get-selects`
             vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.modules = data.data.modules
-                    vue.modalOptions.selects.modules = data.data.modules
+                    // vue.selects.modules = data.data.modules
+                    vue.selects.types = data.data.types
+                    // vue.modalOptions.selects.modules = data.data.modules
+                    vue.modalOptions.selects.types = data.data.types
                 })
         },
         activity() {

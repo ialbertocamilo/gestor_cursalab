@@ -119,16 +119,28 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments']);
+        $q->withCount(['topics', 'polls', 'segments', 'type']);
 
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
+
+        if ($request->type)
+            $q->where('type_id', $request->type);
 
         if ($request->active == 1)
             $q->where('active', ACTIVE);
 
         if ($request->active == 2)
             $q->where('active', '<>', ACTIVE);
+
+        if ($request->dates) {
+
+            if (isset($request->dates[0]))
+                $q->whereDate('created_at', '>=', $request->dates[0]);
+
+            if (isset($request->dates[1]))
+                $q->whereDate('created_at', '<=', $request->dates[1]);
+        }
 
         // if (!is_null($request->sortBy)) {
         //     $field = $request->sortBy ?? 'position';

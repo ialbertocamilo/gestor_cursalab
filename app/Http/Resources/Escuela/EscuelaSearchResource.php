@@ -33,6 +33,8 @@ class EscuelaSearchResource extends JsonResource
             'has_no_courses' => $this->courses_count == 0,
             // 'has_no_courses' => true,
 
+            'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : '-',
+
             'cursos_route' => route('cursos.list', [$this->id]),
         ];
     }
