@@ -604,6 +604,7 @@ class UsuarioController extends Controller
     {
         $cursos = Curso::join('course_school', 'course_school.course_id', '=', 'courses.id')
             ->where('course_school.school_id', $school_id)
+            ->whereNotNull('courses.deleted_at')
             ->where('courses.active', ACTIVE)
             ->select('courses.*')
             ->get();
