@@ -66,7 +66,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 });
             })
             ->get();
-        $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'get_records');
+        $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'users_id');
         $percent_sent = [];
         $course_settings =Course::getModEval($this->course);
         for ($i = 1; $i < $count; $i++) {
@@ -108,7 +108,9 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             }
 
             // $assigned_courses = $user->getCurrentCourses();
-            $user_has_course = $usersSegmented->where('id',$user->id)->first();
+            // $user_has_course = $usersSegmented->where('id',$user->id)->first();
+            $user_has_course = array_search($user->id,$usersSegmented);
+
             if(!$user_has_course){
                 $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
                 continue;
