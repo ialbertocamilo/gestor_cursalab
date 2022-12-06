@@ -124,7 +124,10 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             $this->uploadTopicGrades($course_settings, $user, $topics, $excelData[$i]);
             // info('Inicio');
         }
-        Summary::updateUsersByCourse($this->course,$this->updated_users_id);
+        $users_chunks = array_chunk($this->updated_users_id,100);
+        foreach ($users_chunks as $users) {
+            Summary::updateUsersByCourse($this->course,$users);
+        }
     }
 
     public function uploadTopicGrades($course_settings, $user, $topics, $excelData)
