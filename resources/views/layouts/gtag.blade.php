@@ -1,11 +1,10 @@
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-VXJJDN1725"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TBVL8PVKBD"></script>
 <script>
 
 var host = window.location.hostname;
-// console.log(host)
 
-if( host == "gestor.universidadcorporativafp.com.pe" )
+if( host == "gestiona.inretail.cursalab.io" )
 {
 	window.dataLayer = window.dataLayer || [];
 	function gtag(){dataLayer.push(arguments);}
@@ -13,13 +12,13 @@ if( host == "gestor.universidadcorporativafp.com.pe" )
 
 	@if( auth()->check() )
 
-  	gtag('config', 'G-VXJJDN1725', {
+  	gtag('config', 'G-TBVL8PVKBD', {
   		'user_id': "{{ auth()->user()->id }}"
 	});
 
 	@else
 
-	gtag('config', 'G-VXJJDN1725');
+	gtag('config', 'G-TBVL8PVKBD');
 
 	@endif
 }
