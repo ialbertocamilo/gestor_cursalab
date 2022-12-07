@@ -63,7 +63,7 @@
                     <strong>Contacto</strong>
                 </v-col>
                 <v-col cols="8" class="d-flex justify-content-center">
-                    <a target="_blank" :href="`https://wa.me/51${resource.contact}?text=Hola,te%20hablamos%20de%20cursalab`">{{resource.contact}}</a> <v-icon small color="green" class="ml-2 pb-2">fab fa-whatsapp</v-icon>
+                    <a target="_blank" :href="`https://wa.me/51${resource.contact}?text=¡Hola!,%20Vimos%20tu%20solicitud%20enviada%20desde%20la%20plataforma%20de%20capacitación`">{{resource.contact}}</a> <v-icon small color="green" class="ml-2 pb-2">fab fa-whatsapp</v-icon>
                 </v-col>
             </v-row>
             <v-row justify="space-around">
