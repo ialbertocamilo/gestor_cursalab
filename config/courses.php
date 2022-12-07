@@ -166,7 +166,6 @@ return [
             'summaries' => function ($q) {
                 $q->where('user_id', auth()->user()->id);
             },
-            'compatibilities'
         ]
     ]
 ];

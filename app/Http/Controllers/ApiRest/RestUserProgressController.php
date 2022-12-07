@@ -108,11 +108,9 @@ class RestUserProgressController extends Controller
         $school_percentage = 0;
         $assigned_courses_by_school = $courses->count();
 
-//        $course_completed_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
-//        $course_completed_taxonomy = Taxonomy::where('group', 'course')->where('type', 'user-status')->where('code', 'aprobado')->first();
-        $course_completed_taxonomy = 4568;
+        $course_completed_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
         $summary_courses = $user->summary_courses->whereIn('course_id', $courses->pluck('id'));
-        $completed_courses = $summary_courses->where('status_id', $course_completed_taxonomy)->count();
+        $completed_courses = $summary_courses->where('status_id', $course_completed_taxonomy->id)->count();
 
         if ($completed_courses > 0 && $completed_courses >= $assigned_courses_by_school) {
             $status = 'aprobado';
