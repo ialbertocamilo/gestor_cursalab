@@ -889,6 +889,7 @@ class Course extends BaseModel
     {
         $course = $this;
 //        dd($course->compatibilities);
+        $course->compatibilities = $course->getCompatibilities();
 
         $summary_course = $course->summaries->first();
 
@@ -898,7 +899,7 @@ class Course extends BaseModel
 
         $compatible_summary_course = SummaryCourse::with('course:id')
             ->where('user_id', $user->id)
-            ->whereIn('course_id', $course->compatibilities()->pluck('id'))
+            ->whereIn('course_id', $course->compatibilities->pluck('id'))
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->first();

@@ -39,7 +39,8 @@ return [
             'summaries' => function ($q) {
                 $q->where('user_id', auth()->user()->id);
             },
-            'compatibilities:id'
+            'compatibilities_a:id',
+            'compatibilities_b:id',
         ],
         'user-progress' => [
             'segments' => function ($q) {
