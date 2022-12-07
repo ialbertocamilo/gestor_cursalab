@@ -4,6 +4,12 @@
 
 var host = window.location.hostname;
 
+// console.log('document.location.pathname')
+// console.log(document.location.pathname)
+
+// console.log('document.location')
+// console.log(document.location)
+
 if( host == "gestiona.inretail.cursalab.io" )
 {
 	window.dataLayer = window.dataLayer || [];
