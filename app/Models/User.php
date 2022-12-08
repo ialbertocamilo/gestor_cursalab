@@ -404,6 +404,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 else:
                     $user_document = CriterionValue::whereRelation('criterion', 'code', 'document')
                         ->where('value_text', $old_document)->first();
+                    if(!$user_document){
+                        $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $old_document);
+                    }
                 endif;
             else :
                 $user = self::create($data);
