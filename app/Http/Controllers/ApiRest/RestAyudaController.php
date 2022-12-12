@@ -34,6 +34,8 @@ class RestAyudaController extends Controller
                 'detail' => $detalle,
                 'contact' => $contacto,
                 'workspace_id' => $user->subworkspace?->parent_id,
+                'dni'=>$user->dni,
+                'name'=>$user->name
             ));
             // $modulo = Abconfig::where('id', $user->config_id)->select('etapa')->first();
             // $mensaje = '*_Nueva incidencia:_* \n Empresa: Universidad Corporativa \n Módulo: ' . $modulo->etapa . ' \n DNI : ' . $user->dni . ' \n Ticket: #' . $id . ' \n Motivo : ' . $motivo . ' \n Enlace: ' . env('URL_GESTOR') . 'usuario_ayuda/index?id=' . $id;
