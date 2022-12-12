@@ -315,6 +315,12 @@ class UserMassive extends Massive implements ToCollection
     private function validateLimitAllowedUsers(): bool
     {
         $current_workspace = get_current_workspace();
+
+        $workspace_limit = $current_workspace->getLimitAllowedUsers();
+
+        if (!$workspace_limit)
+            return true;
+
         $sub_workspaces_names = $current_workspace->subworkspaces->pluck('name')
             ->map(fn($value) => mb_strtolower($value))
             ->toArray();
@@ -358,7 +364,7 @@ class UserMassive extends Massive implements ToCollection
         $workspace_limit = $current_workspace->getLimitAllowedUsers();
         $validation = ($users_active_count + ($users_to_activate_count - $users_to_inactivate_count) + $users_to_create_activated_count) <= $workspace_limit;
 
-//        dd(compact('users_active_count', 'users_to_activate_count', 'users_to_create_activated', 'workspace_limit', 'validation'));
+        dd(compact('users_active_count', 'users_to_activate_count', 'users_to_create_activated', 'workspace_limit', 'validation'));
 //        return false;
         return $validation;
     }
