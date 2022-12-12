@@ -33,7 +33,7 @@ class RestAyudaController extends Controller
                 $motivo = $pregunta->title ?? '';
             }
             $id = Ticket::insertGetId(array(
-                'user_id' => $usuario_id,
+                'user_id' => $user->id,
                 'reason' => $motivo,
                 'detail' => $detalle,
                 'contact' => $contacto,
