@@ -87,7 +87,7 @@ export default {
                 headers: [
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombres", value: "name"},
-                    {text: "Activos / Total", value: "active_users"},
+                    {text: "Activos / Total", value: "active_users", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
