@@ -12,6 +12,7 @@ use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\SegmentValue;
+use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
 

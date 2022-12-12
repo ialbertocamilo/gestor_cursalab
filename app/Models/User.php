@@ -184,9 +184,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->morphMany(Segment::class, 'model');
     }
 
-    public function scopeOnlyAppUser($q)
+    public function scopeOnlyClientUsers($q)
     {
-        $q->whereNotNull('subworkspace_id');
+        $q
+            ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']))
+            ->whereNotNull('subworkspace_id');
     }
 
     public function scopeFilterText($q, $filter)

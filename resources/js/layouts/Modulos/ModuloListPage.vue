@@ -2,8 +2,8 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-<!--                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>-->
-                    Módulos
+                <!--                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>-->
+                Módulos
                 <v-spacer/>
                 <!--                <DefaultActivityButton-->
                 <!--                    :label="'Actividad'"-->
@@ -16,7 +16,7 @@
         <!--        FILTROS-->
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
-                <v-row class="justify-content-start">
+                <v-row class="justify-content-between">
                     <!--         <v-col cols="4">
                                 <DefaultSelect clearable dense
                                                :items="selects.modules"
@@ -34,6 +34,13 @@
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                         />
+                    </v-col>
+                    <v-col cols="4">
+                        <v-card class="mr-10 " elevation="0">
+                            <v-card-text style="text-align:end;">
+                                <span style="font-weight:bolder;" v-text="`Total de usuarios activos: ${active_users_count} / ${limit_allowed_users || '-'}`"></span>
+                            </v-card-text>
+                        </v-card>
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -69,6 +76,8 @@ export default {
     components: {ModuloFormModal},
     data() {
         return {
+            active_users_count: '-',
+            limit_allowed_users: '-',
             breadcrumbs: [
                 {title: 'Módulos', text: null, disabled: true, href: 'null'},
             ],
@@ -78,6 +87,7 @@ export default {
                 headers: [
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombres", value: "name"},
+                    {text: "Activos / Total", value: "active_users"},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -96,13 +106,6 @@ export default {
                         route: 'users_route',
                         count: 'users_count'
                     },
-                    // {
-                    //     text: "Carreras",
-                    //     icon: 'fas fa-th-large',
-                    //     type: 'route',
-                    //     route: 'carreras_route',
-                    //     count: 'carreras_count'
-                    // },
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
@@ -110,14 +113,6 @@ export default {
                         method_name: 'edit'
                     },
                 ],
-                // more_actions: [
-                //     {
-                //         text: "Actividad",
-                //         icon: 'fas fa-file',
-                //         type: 'action',
-                //         method_name: 'activity'
-                //     },
-                // ]
             },
             selects: {
                 modules: []
@@ -149,6 +144,7 @@ export default {
                 endpoint: ''
             },
         }
+
     },
     mounted() {
         let vue = this
@@ -159,12 +155,13 @@ export default {
     methods: {
         getSelects() {
             let vue = this
-            // const url = `/modulos/get-selects`
-            // vue.$http.get(url)
-            //     .then(({data}) => {
-            //         vue.selects.modules = data.data.modules
-            //         vue.modalOptions.selects.modules = data.data.modules
-            //     })
+            const url = `/modulos/get-list-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    const {limit_allowed_users, active_users_count} = data.data;
+                    vue.active_users_count = active_users_count
+                    vue.limit_allowed_users = limit_allowed_users
+                })
         },
         reset(user) {
             let vue = this

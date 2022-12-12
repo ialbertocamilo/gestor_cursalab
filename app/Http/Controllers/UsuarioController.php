@@ -562,6 +562,14 @@ class UsuarioController extends Controller
         // info(!$user->active);
         $status = ($user->active == 1) ? 0 : 1;
 
+        $current_workspace = get_current_workspace();
+
+        if ($status && !$current_workspace->verifyLimitAllowedUsers()){
+            $error_msg = config('errors.limit-errors.limit-user-allowed');
+
+            return $this->error($error_msg, 422);
+        }
+
         $user->update(['active' => $status]);
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);

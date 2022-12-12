@@ -29,7 +29,7 @@ class getUsuariosFromExcelImport implements ToCollection
         $usuarios = User::whereIn('document', $usuarios_ids->all())
             ->select('id', 'document', 'name', 'lastname', 'surname')
             ->whereRelation('subworkspace', 'parent_id', $workspace->id)
-            ->onlyAppUser()
+            ->onlyClientUsers()
             ->get();
 
         $diff = $usuarios_ids->diff($usuarios->pluck('document')->all());
