@@ -60,9 +60,9 @@
                         <br><br>
                         Para realizar la carga puedes:
                         <ul>
-                            <li>Desactiva usuarios en la plataforma.</li>
-                            <li>Reduce la cantidad de usuarios activos en tu excel.</li>
-                            <li><strong>Contáctanos y amplia tu plan de usuarios.</strong></li>
+                            <li>Desactivar usuarios en la plataforma.</li>
+                            <li>Reducir la cantidad de usuarios activos en tu excel.</li>
+                            <li><strong>Contáctarnos y ampliar tu plan de usuarios.</strong></li>
                         </ul>
                     </template>
                 </DefaultDialog>
