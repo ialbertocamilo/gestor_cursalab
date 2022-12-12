@@ -293,7 +293,10 @@ class Workspace extends BaseModel
 
     protected function searchSubWorkspace($request)
     {
-        $query = self::withCount(['users']);
+        $query = self::withCount([
+            'users',
+            'users as active_users_count' => fn($q) => $q->where('active', ACTIVE)
+        ]);
 
         $query->whereNotNull('parent_id');
 

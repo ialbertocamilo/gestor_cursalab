@@ -493,7 +493,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     protected function search($request, $withAdvancedFilters = false)
     {
-        $query = self::query();
+        $query = self::onlyClientUsers();
+        if (auth()->user()->isA('super-user')){
+            $query = self::query();
+        }
 
         $with = ['subworkspace'];
 
