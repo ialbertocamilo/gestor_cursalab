@@ -46,6 +46,28 @@
                             @onSelect="setFile($event, resource,'logo_negativo')"/>
                     </v-col>
                 </v-row>
+
+                <v-row justify="space-around" v-if="is_superuser">
+                    <v-col cols="12">
+                        <DefaultModalSection
+                            title="Límite de Usuarios"
+                        >
+                            <template v-slot:content>
+
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        label="Límite"
+                                        v-model="limit_allowed_users"
+                                        type="number"
+                                        min="0"
+                                        clearable
+                                    />
+                                </v-col>
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
                 <v-row>
                     <v-col>
                         <v-subheader class="mt-4 px-0">
@@ -138,6 +160,7 @@ export default {
     // data: () => ({
     data(){
         return {
+            is_superuser: false,
         mensajes: mensajes,
         errors: []
         ,
@@ -157,8 +180,10 @@ export default {
             logo_negativo: '',
             selected_criteria: {}
         }
+
         ,
-        resource: {}
+            limit_allowed_users: null,
+            resource: {}
         ,
         defaultCriteria: []
         ,
@@ -221,6 +246,9 @@ export default {
                     'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
                 );
 
+                vue.setLimitUsersAllowed(formData);
+
+
                 // Submit data to be saved
 
                 vue.$http
@@ -243,6 +271,14 @@ export default {
             }
         }
         ,
+
+        setLimitUsersAllowed(formData) {
+            let vue = this;
+            if (vue.limit_allowed_users) {
+                formData.append('limit_allowed_users_type', 'by_workspace');
+                formData.append('limit_allowed_users_limit', vue.limit_allowed_users);
+            }
+        },
         /**
          * Load data from server
          */
@@ -277,6 +313,8 @@ export default {
                             c.id, data.data.criteria_workspace
                         );
                     });
+
+                    vue.limit_allowed_users = data.data.limit_allowed_users;
 
                 })
         }

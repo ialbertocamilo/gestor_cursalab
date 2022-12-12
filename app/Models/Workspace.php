@@ -20,6 +20,7 @@ class Workspace extends BaseModel
         'mod_evaluaciones',
         'reinicios_programado',
         'contact_support',
+        'limit_allowed_users'
     ];
 
     public function sluggable(): array
@@ -37,6 +38,7 @@ class Workspace extends BaseModel
         'mod_evaluaciones' => 'array',
         'reinicios_programado' => 'array',
         'contact_support' => 'array',
+        'limit_allowed_users' => 'array'
     ];
 
     public function segments()
@@ -317,7 +319,7 @@ class Workspace extends BaseModel
             DB::beginTransaction();
 
             if ($subworkspace){
-                
+
                 $subworkspace->update($data);
                 if($subworkspace->wasChanged('name')){
                     CriterionValue::where('id',$subworkspace->criterion_value_id)->update([
@@ -373,6 +375,58 @@ class Workspace extends BaseModel
         }
 
         return $data;
+    }
+
+    public function getSettingsLimitAllowedUser()
+    {
+        $workspace = $this;
+
+        $workspace = $workspace->fresh();
+
+        return $workspace->limit_allowed_users;
+    }
+
+    public function getLimitAllowedUsers($sub_workspace_id = null): mixed
+    {
+        $workspace = $this;
+        $constraint = $workspace->getSettingsLimitAllowedUser();
+
+        if (!$constraint) return null;
+
+        $key = $sub_workspace_id ?
+            array_search($sub_workspace_id, array_column($constraint['sub_workspaces'], 'sub_workspace_id'))
+            : null;
+
+        return match ($constraint['type']) {
+            'by_workspace' => $constraint['quantity'],
+            'by_sub_workspace' => $constraint['sub_workspaces'][$key],
+            default => null
+        };
+    }
+
+    public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
+    {
+        $workspace = $this;
+
+        $workspace_constraint = $workspace->getSettingsLimitAllowedUser();
+
+        if (!$workspace_constraint) return true;
+
+        $workspace_limit = $workspace->getLimitAllowedUsers();
+
+        $q_current_active_users = User::onlyClientUsers()
+            ->where('active', ACTIVE);
+
+        if ($workspace_constraint['type'] === 'by_workspace')
+            $q_current_active_users->whereRelation('subworkspace', 'parent_id', $workspace->id);
+
+        if ($workspace_constraint['type'] === 'by_sub_workspace' && $sub_workspace_id)
+            $q_current_active_users->where('subworkspace_id', $sub_workspace_id);
+
+        $current_active_users_count = $q_current_active_users->count();
+
+//        dd($current_active_users_count, $workspace_limit);
+        return $current_active_users_count < $workspace_limit;
     }
 
     #test functions

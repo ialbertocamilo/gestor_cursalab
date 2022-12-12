@@ -89,6 +89,10 @@ class WorkspaceController extends Controller
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
 
+        $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
+
+        $workspace['is_superuser'] = auth()->user()->isA('super-user');
+
         return $this->success($workspace);
     }
 
@@ -107,6 +111,18 @@ class WorkspaceController extends Controller
 
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
+
+        // Set constraint: limit allowed users
+
+        if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
+
+            $constraint_user['type'] = $data['limit_allowed_users_type'];
+            $constraint_user['quantity'] = intval($data['limit_allowed_users_limit']);
+
+            $data['limit_allowed_users'] = $constraint_user;
+        else:
+            $data['limit_allowed_users'] = null;
+        endif;
 
         // Update record in database
 
@@ -141,6 +157,17 @@ class WorkspaceController extends Controller
         SubWorkspaceResource::collection($subworkspaces);
 
         return $this->success($subworkspaces);
+    }
+
+    public function getListSubworkspaceSelects()
+    {
+        $current_workspace = get_current_workspace();
+
+        $active_users_count = User::onlyClientUsers()->whereRelation('subworkspace', 'parent_id', $current_workspace->id)
+            ->where('active', ACTIVE)->count();
+        $limit_allowed_users = $current_workspace->getLimitAllowedUsers();
+
+        return $this->success(compact('active_users_count', 'limit_allowed_users'));
     }
 
     public function destroy(Workspace $subworkspace)
@@ -212,7 +239,7 @@ class WorkspaceController extends Controller
         $jump_menu = (get_current_workspace()->id !== 25);
         if($jump_menu) $side_menu->whereNotIn('name', ['Glosario']);
         #=== visible glossary only for FP ===
-        
+
         $side_menu = $side_menu->get();
 
         $side_menu->each(function ($item) {
