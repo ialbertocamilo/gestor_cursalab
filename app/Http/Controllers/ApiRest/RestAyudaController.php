@@ -34,7 +34,7 @@ class RestAyudaController extends Controller
                 'detail' => $detalle,
                 'contact' => $contacto,
                 'workspace_id' => $user->subworkspace?->parent_id,
-                'dni'=>$user->dni,
+                'dni'=>$user->document,
                 'name'=>$user->name
             ));
             // $modulo = Abconfig::where('id', $user->config_id)->select('etapa')->first();
