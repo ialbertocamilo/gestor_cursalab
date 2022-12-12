@@ -28,6 +28,10 @@ class RestAyudaController extends Controller
         if (is_null($usuario_id) || is_null($motivo)) {
             $data = array('error' => true, 'error_msg' => 'No se recibieron datos', 'data' => null);
         } else {
+            if(is_integer($motivo)){
+                $pregunta = Post::select('title')->where('id',$motivo)->first();
+                $motivo = $pregunta->title;
+            }
             $id = Ticket::insertGetId(array(
                 'user_id' => $usuario_id,
                 'reason' => $motivo,
