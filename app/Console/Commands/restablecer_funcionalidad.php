@@ -2,14 +2,17 @@
 
 namespace App\Console\Commands;
 
+use Faker\Factory as Faker;
 use Carbon\Carbon;
 use App\Models\Poll;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Curso;
 use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\Ticket;
 use App\Models\Visita;
 use App\Models\Abconfig;
 use App\Models\Criterio;
@@ -74,10 +77,36 @@ class restablecer_funcionalidad extends Command
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
-        $this->restore_surname();
+        // $this->restore_surname();
+        $this->restore_tickets();
         // $this->restore_attempts();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restore_tickets(){
+        $tickets = Ticket::whereNull('workspace_id')->orWhere('workspace_id',0)->get();
+        $faker = Faker::create('es_ES');
+        foreach ($tickets as $ticket) {
+            
+            if(strlen($ticket->reason) == 1){
+                $pregunta = Post::select('title')->where('id',$ticket->reason)->first();
+                $ticket->reason = $pregunta->title ?? '';
+            }
+            
+            if(is_null($ticket->created_at)){
+                $date = $faker->dateTimeBetween('-30 days', '+0 days');
+                $dateFormat = $date->format('Y-m-d H:m:s');
+                $ticket->created_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
+                $ticket->updated_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
+            }
+            
+            if(is_null($ticket->workspace_id) || $ticket->workspace_id==0){
+                $user = User::where('id',$ticket->user_id)->first();
+                $ticket->workspace_id = $user->subworkspace?->parent_id;
+            }
+            $ticket->save();
+        }
+        dd(count($tickets));
     }
     public function restore_surname(){
         $path = public_path() . "/json/surnames.json"; // ie: /var/www/laravel/public/json/filename.json
