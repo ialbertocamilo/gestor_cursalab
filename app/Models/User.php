@@ -187,8 +187,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function scopeOnlyClientUsers($q)
     {
         $q
-            ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']))
-            ->whereNotNull('subworkspace_id');
+            ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']));
+//            ->whereNotNull('subworkspace_id');
     }
 
     public function scopeFilterText($q, $filter)
