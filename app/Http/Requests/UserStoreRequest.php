@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\VerifyLimitAllowedUsers;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserStoreRequest extends FormRequest
@@ -41,6 +42,8 @@ class UserStoreRequest extends FormRequest
 
             'criterion_list_final' => 'nullable',
             'criterion_list' => 'nullable',
+
+            'active' => [new VerifyLimitAllowedUsers($this->method())],
         ];
 
         return $rules;

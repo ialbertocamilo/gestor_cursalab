@@ -184,9 +184,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->morphMany(Segment::class, 'model');
     }
 
-    public function scopeOnlyAppUser($q)
+    public function scopeOnlyClientUsers($q)
     {
-        $q->whereNotNull('subworkspace_id');
+        $q
+            ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']));
+//            ->whereNotNull('subworkspace_id');
     }
 
     public function scopeFilterText($q, $filter)
@@ -409,6 +411,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     }
                 endif;
             else :
+                $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
+
                 $user = self::create($data);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
@@ -491,7 +495,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     protected function search($request, $withAdvancedFilters = false)
     {
-        $query = self::query();
+        $query = self::onlyClientUsers();
+        if (auth()->user()->isA('super-user')){
+            $query = self::query();
+        }
 
         $with = ['subworkspace'];
 

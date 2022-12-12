@@ -124,6 +124,12 @@
                     </v-col>
                 </v-row>
 
+                <v-row>
+                    <v-col cols="2">
+                        <DefaultToggle v-model="resource.active"/>
+                    </v-col>
+                </v-row>
+
             </v-form>
         </template>
     </DefaultDialog>
@@ -161,6 +167,7 @@ export default {
 
                 criterion_list: {},
                 criterion_list_final: {},
+                active: true,
             },
             resource: {},
             selects: {},
