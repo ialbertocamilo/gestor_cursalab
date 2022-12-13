@@ -20,7 +20,8 @@ class Post extends BaseModel
         'section_id',
         'category_id',
         'user_id',
-        'active'
+        'active',
+        'check_text_area',
     ];
 
     /*
@@ -38,7 +39,15 @@ class Post extends BaseModel
             $value === '1'
         );
     }
-
+    public function setCheckTextAreaAttribute($value)
+    {
+        $this->attributes['check_text_area'] = (
+            $value==='true' OR
+            $value === true OR
+            $value === 1 OR
+            $value === '1'
+        );
+    }
     /*
 
         Methods
