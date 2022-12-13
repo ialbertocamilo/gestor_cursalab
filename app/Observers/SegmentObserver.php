@@ -29,7 +29,7 @@ class SegmentObserver
      */
     public function updated(Segment $segment)
     {
-        if($segment->wasChange('updated_at') && $segment->model()->first()->active){
+        if($segment->wasChanged('updated_at') && $segment->model()->first()->active){
             Summary::updateUsersByCourse($segment->model()->first());
         }
     }

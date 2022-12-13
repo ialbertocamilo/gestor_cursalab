@@ -217,10 +217,17 @@ Segment extends BaseModel
     private function updateSegmentToLaunchObeserver($data)
     {
         $segments_id = array_column($data->segments, 'id');
-        info($segments_id);
-        self::whereIn('id', $segments_id)->update([
-            'updated_at' => now()
-        ]);
+//        info($segments_id);
+//        self::whereIn('id', $segments_id)->update([
+//            'updated_at' => now()
+//        ]);
+        $segments = self::whereIn('id', $segments_id)->get();
+        foreach ($segments as $segment) {
+            $segment->update([
+                'name' => $segment->name."-".rand(1,100),
+                'updated_at' => now()
+            ]);
+        }
     }
 
     public function storeDirectSegmentation($data)

@@ -43,19 +43,20 @@ class UpdateSummariesData extends Command
     public function handle()
     {
         $users = User::disableCache()->select('id')
-        ->where('is_updating',0)
-        ->where(function($q){
-            $q->whereNotNull('summary_user_update')
-            ->orWhereNotNull('summary_course_update');
-        })
-        ->limit(1000)
-        ->get();
+            ->where('is_updating', 0)
+            ->where(function ($q) {
+                $q->whereNotNull('summary_user_update')
+                    ->orWhereNotNull('summary_course_update');
+            })
+            ->limit(1000)
+            ->get();
 
-        User::whereIn('id',$users->pluck('id'))->update([
-            'is_updating'=>1
+        User::whereIn('id', $users->pluck('id'))->update([
+            'is_updating' => 1
         ]);
 
         $bar = $this->output->createProgressBar($users->count());
+        $this->info("INICIO : ". now());
         $bar->start();
         foreach ($users as $key => $user) {
 
@@ -71,7 +72,7 @@ class UpdateSummariesData extends Command
                     SummaryCourse::getCurrentRowOrCreate($course, $user);
                     SummaryCourse::updateUserData($course, $user, false);
                 }
-            } 
+            }
 
             if ($user->summary_user_update) {
                 SummaryUser::getCurrentRowOrCreate($user, $user);
@@ -89,5 +90,8 @@ class UpdateSummariesData extends Command
             $bar->advance();
         }
         $bar->finish();
+
+        $this->info("FIN : ". now());
+
     }
 }
