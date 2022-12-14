@@ -655,15 +655,15 @@ class Course extends BaseModel
             $query = User::select('id')->where('active', 1);
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
-                $segment_type = $values[0]->criterion_value->criterion->field_type->code;
-                if($segment_type=='date'){
+                $segment_type = Criterion::find($idx);
+                if($segment_type->field_type->code =='date'){
                     $select_date = CriterionValue::select('id')->where(function($q)use($values){
                         foreach ($values as $value) {
                             $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
                             $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
                             $q->orWhereRaw('value_date between "'.$starts_at.'" and "'.$finishes_at.'"');
                         }
-                    })->where('criterion_id',$values[0]->criterion_id)->get();
+                    })->where('criterion_id',$idx)->get();
                     $ids = $select_date->pluck('id');
                 }else{
                     $ids = $values->pluck('criterion_value_id');
