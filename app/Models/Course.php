@@ -639,8 +639,8 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
-    public static function probar(){
-        $course = Course::find('265');
+    public static function probar($course_id){
+        $course = Course::find($course_id);
         $fun_1 = $course->getUsersBySegmentation('count');
         print_r('Función 1: ');
         print_r($fun_1);
@@ -655,8 +655,20 @@ class Course extends BaseModel
             $query = User::select('id')->where('active', 1);
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
-                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
+                $segment_type = $values[0]->criterion_value->criterion->field_type->code;
+                if($segment_type=='date'){
+                    $select_date = CriterionValue::select('id')->where(function($q)use($values){
+                        foreach ($values as $value) {
+                            $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
+                            $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
+                            $q->orWhereRaw('value_date between "'.$starts_at.'" and "'.$finishes_at.'"');
+                        }
+                    })->where('criterion_id',$values[0]->criterion_id)->get();
+                    $ids = $select_date->pluck('id');
+                }else{
                     $ids = $values->pluck('criterion_value_id');
+                }
+                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($ids, $idx) {
                     $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
                         ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
                 });
