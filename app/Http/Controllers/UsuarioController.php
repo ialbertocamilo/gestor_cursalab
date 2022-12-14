@@ -537,7 +537,8 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
-        $courses = $user->getCurrentCourses();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
+//        $courses = Course::whereIn('id', $courses)->get();
 
         return $this->success([
             'user' => [
