@@ -18,7 +18,8 @@ class RestCourseController extends Controller
     public function courses()
     {
         $user = Auth::user();
-        $courses = $user->getCurrentCourses();
+//        $courses = $user->getCurrentCourses();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
 
         $data = Course::getDataToCoursesViewAppByUser($user, $courses);
 
@@ -130,7 +131,7 @@ class RestCourseController extends Controller
             $query->whereNull('certification_accepted_at');
 
         $certificates = $query->get();
-            
+
         $temp = [];
 
         foreach ($certificates as $certificate) {
@@ -156,9 +157,9 @@ class RestCourseController extends Controller
         $data = ['error' => true, 'data' => ['message' => 'No encontrado']];
 
         if ($row AND $row->certification_issued_at) {
-            
+
             $row->update(['certification_accepted_at' => now()]);
-            
+
             $data = ['error' => false, 'data' => ['message' => 'Aceptado']];
         }
 

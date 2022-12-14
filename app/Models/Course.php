@@ -388,19 +388,22 @@ class Course extends BaseModel
         $temp['list'] = $list;
         return $temp;
     }
-    protected function getModEval($course,$value=''){
+
+    protected function getModEval($course, $value = '')
+    {
         // $value could be nro_intentos,nota_aprobatoria
         //variable course can be course instance or course_id
-        if($course instanceof Course && !isset($course->mod_evaluaciones) && isset($course->id)){
-            $course = Course::select('mod_evaluaciones')->where('id',$course->id)->first();
-        }else if(is_int($course)){
-            $course = Course::select('mod_evaluaciones')->where('id',$course)->first();
+        if ($course instanceof Course && !isset($course->mod_evaluaciones) && isset($course->id)) {
+            $course = Course::select('mod_evaluaciones')->where('id', $course->id)->first();
+        } else if (is_int($course)) {
+            $course = Course::select('mod_evaluaciones')->where('id', $course)->first();
         }
-        if($value){
+        if ($value) {
             return isset($course->mod_evaluaciones[$value]) ? $course->mod_evaluaciones[$value] : null;
         }
         return isset($course->mod_evaluaciones) ? $course->mod_evaluaciones : null;
     }
+
     protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
         // $workspace_id = auth()->user()->subworkspace->parent_id;
@@ -411,6 +414,12 @@ class Course extends BaseModel
             $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
         })
             ->where('user_id', $user->id)
+            ->get();
+
+        $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
+            ->whereIn('course_id', $user_courses->pluck('id'))
+            ->where('user_id', $user->id)
+            ->groupBy('course_id')
             ->get();
 
         $data = [];
@@ -426,6 +435,7 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
+                $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
                 $last_topic = null;
                 $course_status = self::getCourseStatusByUser($user, $course);
@@ -540,17 +550,26 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
+//        $status_approved = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
+//        $status_enc_pend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
+//        $status_desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+        $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
+        $status_approved = $statuses->where('code', 'aprobado')->first();
+        $status_enc_pend = $statuses->where('code', 'enc_pend')->first();
+        $status_desaprobado = $statuses->where('code', 'desaprobado')->first();
+
         $requirement_course = $course->requirements->first();
 //        info("REQUISITO DEL CURSO {$course->name}");
 //        info($requirement_course);
         // info("requirement_course");
         // info($requirement_course);
         if ($requirement_course) {
-            $summary_requirement_course = SummaryCourse::with('course')
-                ->where('user_id', $user->id)
-                ->where('course_id', $requirement_course->requirement_id)
-                ->whereRelation('status', 'code', '=', 'aprobado')
-                ->first();
+//            $summary_requirement_course = SummaryCourse::with('course')
+//                ->where('user_id', $user->id)
+//                ->where('course_id', $requirement_course->requirement_id)
+//                ->whereRelation('status', 'code', '=', 'aprobado')
+//                ->first();
+            $summary_requirement_course = $requirement_course->summaries_course->first();
             //            info("requirement_course");
             //            info($summary_requirement_course);
             if (!$summary_requirement_course) {
@@ -565,26 +584,36 @@ class Course extends BaseModel
                 $poll_id = $poll->id;
                 $available_poll = true;
 
-                $poll_questions_answers = PollQuestionAnswer::whereIn('poll_question_id', $poll->questions->pluck('id'))
-                    ->where('course_id', $course->id)
-                    ->where('user_id', $user->id)->count();
+//                $poll_questions_answers = $course->poll_question_answers_count;
+
+//                $poll_questions_answers = collect()
+//
+//                foreach ($poll->questions as $question)
+//                    foreach ($question as $answers)
+//                        $poll_questions_answers->push($answers);
 
                 //                info($poll_questions_answers);
-                if ($poll_questions_answers) $solved_poll = true;
+//                if ($poll_questions_answers->count() > 0)
+                if ($course->poll_question_answers_count)
+                    $solved_poll = true;
             }
 
             // $summary_course = $course->summaryByUser($user->id);
-            $summary_course = SummaryCourse::getCurrentRow($course, $user);
+//            $summary_course = SummaryCourse::getCurrentRow($course, $user);
+            $summary_course = $course->summaries->first();
 
             if ($summary_course) {
                 $completed_topics = $summary_course->passed + $summary_course->taken + $summary_course->reviewed;
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
-                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
+                if ($course_progress_percentage == 100 && $summary_course->status_id == $status_approved->id) :
+//                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
-                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
+                elseif ($course_progress_percentage == 100 && $summary_course->status_id == $status_enc_pend->id) :
+//                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
                     $status = 'enc_pend';
-                elseif ($summary_course->status?->code == 'desaprobado') :
+//                elseif ($summary_course->status?->code == 'desaprobado') :
+                elseif ($summary_course->status_id == $status_desaprobado->id) :
                     $status = 'desaprobado';
                     $enabled_poll = true;
                 else :
@@ -617,15 +646,17 @@ class Course extends BaseModel
     {
         $course_requirement = $course->requirements->first();
         if ($course_requirement) {
-            $requirement_summary = SummaryCourse::with('status:id,code')
-                ->where('course_id', $course_requirement->requirement_id)
-                ->where('user_id', $user->id)->first();
+//            $requirement_summary_course = SummaryCourse::with('status:id,code')
+//                ->where('course_id', $course_requirement->requirement_id)
+//                ->where('user_id', $user->id)->first();
+            $requirement_summary_course = $course_requirement->summaries_course->first();
 
-            if (!$requirement_summary || ($requirement_summary && $requirement_summary->status->code != 'aprobado'))
+            if (!$requirement_summary_course || ($requirement_summary_course && $requirement_summary_course->status->code != 'aprobado'))
                 return ['average_grade' => 0, 'status' => 'bloqueado'];
         }
 
-        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
+//        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
+        $summary_course = $course->summaries->first();
 
         $grade_average = $summary_course ? floatval($summary_course->grade_average) : 0;
         $grade_average = $summary_course ?
@@ -639,7 +670,9 @@ class Course extends BaseModel
     {
         return $this->segments->where('active', ACTIVE)->count();
     }
-    public static function probar($course_id){
+
+    public static function probar($course_id)
+    {
         $course = Course::find($course_id);
         $fun_1 = $course->getUsersBySegmentation('count');
         print_r('Función 1: ');
