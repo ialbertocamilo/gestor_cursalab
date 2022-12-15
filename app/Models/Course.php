@@ -594,7 +594,7 @@ class Course extends BaseModel
 
                 //                info($poll_questions_answers);
 //                if ($poll_questions_answers->count() > 0)
-                if ($course->poll_question_answers_count)
+                if ($course->poll_question_answers_count > 0)
                     $solved_poll = true;
             }
 
