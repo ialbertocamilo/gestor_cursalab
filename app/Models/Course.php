@@ -538,7 +538,7 @@ class Course extends BaseModel
         return $data;
     }
 
-    protected function getCourseStatusByUser(User $user, $course): array
+    protected function getCourseStatusByUser(User $user, Course $course): array
     {
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
@@ -594,6 +594,8 @@ class Course extends BaseModel
 
                 //                info($poll_questions_answers);
 //                if ($poll_questions_answers->count() > 0)
+                info($course);
+                info($user->id);
                 if ($course->poll_question_answers_count > 0){
                     $solved_poll = true;
                 }
