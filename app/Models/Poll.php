@@ -112,6 +112,9 @@ class Poll extends BaseModel
         $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
+        if(!$summary_course){
+            $summary_course = SummaryCourse::getCurrentRowOrCreate($course, $user);
+        }
         //        info("updateSummariesAfterCompletingPoll");
         //        info($summary_course->status_id);
         $summary_course->update(['status_id' => $approved_status_taxonomy?->id, 'advanced_percentage' => '100',]);
