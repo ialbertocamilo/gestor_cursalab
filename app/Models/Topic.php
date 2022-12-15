@@ -451,7 +451,11 @@ class Topic extends BaseModel
         $topic_status_arr = config('topics.status');
 
         $courses = $courses->sortBy('position');
-
+        $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
+                                    ->whereIn('course_id', $user_courses->pluck('id'))
+                                    ->where('user_id', $user->id)
+                                    ->groupBy('course_id')
+                                    ->get();
         foreach ($courses as $course) {
             // UC rule
             $course_name = $course->name;
@@ -459,7 +463,8 @@ class Topic extends BaseModel
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
-
+            $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
+            
             $course_status = Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
 
