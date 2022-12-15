@@ -538,7 +538,7 @@ class Course extends BaseModel
         return $data;
     }
 
-    protected function getCourseStatusByUser(User $user, Course $course): array
+    protected function getCourseStatusByUser(User $user, $course): array
     {
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
