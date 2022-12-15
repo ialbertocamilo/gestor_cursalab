@@ -416,7 +416,7 @@ class Course extends BaseModel
             ->where('user_id', $user->id)
             ->get();
 
-        $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
+        $polls_questions_answers = PollQuestionAnswer::disableCache()->select(DB::raw("COUNT(course_id) as count"), 'course_id')
             ->whereIn('course_id', $user_courses->pluck('id'))
             ->where('user_id', $user->id)
             ->groupBy('course_id')
