@@ -459,7 +459,7 @@ class Topic extends BaseModel
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
-            
+
             $course_status = Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
 
@@ -614,17 +614,20 @@ class Topic extends BaseModel
     {
         $topic_grade = null;
         $available_topic = true;
-        $topic_requirement = $topic->requirements()->first();
+//        $topic_requirement = $topic->requirements()->first();
+        $topic_requirement = $topic->requirements->first();
 
         if ($topic_requirement) :
-            $requirement_summary = SummaryTopic::with('status:id,code')
-                ->where('topic_id', $topic_requirement->requirement_id)
-                ->where('user_id', $user->id)->first();
+//            $requirement_summary = SummaryTopic::with('status:id,code')
+//                ->where('topic_id', $topic_requirement->requirement_id)
+//                ->where('user_id', $user->id)->first();
+            $requirement_summary = $topic_requirement->summaries_topics->first();
 
             $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
-        $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
+//        $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
+        $summary_topic = $topic->summaries->first();
 
         if ($topic->evaluation_type?->code === 'qualified' && $summary_topic)
             $topic_grade = $summary_topic->grade;

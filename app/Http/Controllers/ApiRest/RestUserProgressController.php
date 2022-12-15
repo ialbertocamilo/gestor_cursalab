@@ -17,7 +17,9 @@ class RestUserProgressController extends Controller
         $user = auth()->user();
         $user->load('summary', 'summary_courses');
 
-        $assigned_courses = $user->getCurrentCourses();
+//        $assigned_courses = $user->getCurrentCourses();
+        $assigned_courses = $user->getCurrentCourses(withRelations: 'user-progress');
+
         $summary_user = $user->summary;
 
 //        $completed_courses = $summary_user ? $summary_user->course_completed : 0;

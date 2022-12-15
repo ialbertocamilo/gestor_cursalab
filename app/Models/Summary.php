@@ -122,7 +122,7 @@ class Summary extends BaseModel
 
         if ($model instanceof User) {
 
-            $assigneds = $model->getCurrentCourses()->count();
+            $assigneds = count($model->getCurrentCourses(withFreeCourses: false, withRelations: 'soft', only_ids: true));
             $data['courses_assigned'] = $assigneds;
         }
 
