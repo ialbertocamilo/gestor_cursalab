@@ -416,7 +416,7 @@ class Course extends BaseModel
             ->where('user_id', $user->id)
             ->get();
 
-        $polls_questions_answers = PollQuestionAnswer::disableCache()->select(DB::raw("COUNT(course_id) as count"), 'course_id')
+        $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
             ->whereIn('course_id', $user_courses->pluck('id'))
             ->where('user_id', $user->id)
             ->groupBy('course_id')
@@ -435,10 +435,10 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
-                $poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
+                $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
                 $last_topic = null;
-                $course_status = self::getCourseStatusByUser($user, $course,$poll_question_answers_count);
+                $course_status = self::getCourseStatusByUser($user, $course);
                 if ($course_status['status'] == 'completado') $school_completed++;
 
                 $topics = $course->topics->where('active', ACTIVE);
@@ -538,7 +538,7 @@ class Course extends BaseModel
         return $data;
     }
 
-    protected function getCourseStatusByUser(User $user, Course $course,$poll_question_answers_count): array
+    protected function getCourseStatusByUser(User $user, Course $course): array
     {
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
@@ -594,12 +594,8 @@ class Course extends BaseModel
 
                 //                info($poll_questions_answers);
 //                if ($poll_questions_answers->count() > 0)
-                // info($course);
-                // info($user->id);
-                // if ($course->poll_question_answers_count > 0){
-                if ($poll_question_answers_count > 0){
+                if ($course->poll_question_answers_count)
                     $solved_poll = true;
-                }
             }
 
             // $summary_course = $course->summaryByUser($user->id);
