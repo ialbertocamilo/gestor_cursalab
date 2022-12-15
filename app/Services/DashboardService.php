@@ -164,8 +164,8 @@ class  DashboardService {
                          DB::raw('sum(summary_topics.views) as cant'),
                      ])
                      ->groupBy('fechita')
-                     ->orderBy('fechita')
-                     ->get();
+                     ->orderBy('fechita','desc')
+                     ->limit(30);
                 return $data;
             });
 
@@ -212,8 +212,8 @@ class  DashboardService {
                     DB::raw('count(*) as cant'),
                 ])
                 ->groupBy('fechita')
-                ->orderBy('fechita')
-                ->get();
+                ->orderBy('fechita','desc')
+                ->limit(30);
 
             return $data;
         });
