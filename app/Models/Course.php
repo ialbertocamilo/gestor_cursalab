@@ -435,10 +435,10 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
-                $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
+                $poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
                 $last_topic = null;
-                $course_status = self::getCourseStatusByUser($user, $course);
+                $course_status = self::getCourseStatusByUser($user, $course,$poll_question_answers_count);
                 if ($course_status['status'] == 'completado') $school_completed++;
 
                 $topics = $course->topics->where('active', ACTIVE);
@@ -538,7 +538,7 @@ class Course extends BaseModel
         return $data;
     }
 
-    protected function getCourseStatusByUser(User $user, Course $course): array
+    protected function getCourseStatusByUser(User $user, Course $course,$poll_question_answers_count): array
     {
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
@@ -596,7 +596,8 @@ class Course extends BaseModel
 //                if ($poll_questions_answers->count() > 0)
                 // info($course);
                 // info($user->id);
-                if ($course->poll_question_answers_count > 0){
+                // if ($course->poll_question_answers_count > 0){
+                if ($poll_question_answers_count > 0){
                     $solved_poll = true;
                 }
             }
