@@ -165,7 +165,8 @@ class  DashboardService {
                      ])
                      ->groupBy('fechita')
                      ->orderBy('fechita','desc')
-                     ->limit(30);
+                     ->limit(30)
+                     ->get();
                 return $data;
             });
 
@@ -213,7 +214,8 @@ class  DashboardService {
                 ])
                 ->groupBy('fechita')
                 ->orderBy('fechita','desc')
-                ->limit(30);
+                ->limit(30)
+                ->get();
 
             return $data;
         });
