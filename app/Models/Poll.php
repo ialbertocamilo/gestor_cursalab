@@ -92,9 +92,10 @@ class Poll extends BaseModel
             'xcurso'
         );
         if ($taxonomy) {
-
+            $workspace = get_current_workspace();
             $polls = Poll::where('active', 1)
                 ->where('type_id', $taxonomy->id)
+                ->where('workspace_id', $workspace->id)
                 ->get();
 
             return $polls;
@@ -112,9 +113,9 @@ class Poll extends BaseModel
         $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
-        if(!$summary_course){
-            $summary_course = SummaryCourse::getCurrentRowOrCreate($course, $user);
-        }
+        // if(!$summary_course){
+        //     $summary_course = SummaryCourse::getCurrentRowOrCreate($course, $user);
+        // }
         //        info("updateSummariesAfterCompletingPoll");
         //        info($summary_course->status_id);
         $summary_course->update(['status_id' => $approved_status_taxonomy?->id, 'advanced_percentage' => '100',]);
