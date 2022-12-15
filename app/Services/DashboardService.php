@@ -130,7 +130,9 @@ class  DashboardService {
 
 
         $cache_name = 'visitas_usuarios_por_fecha-v2';
-        $cache_name .= $module_id ? "visitas_usuarios_por_fecha-v2-{$module_id}" : '';
+        if($module_id){
+            $cache_name .= $module_id ? "visitas_usuarios_por_fecha-v2-{$module_id}" : '';
+        }
 
         // List of ids from users to be excluded in query.
         // In the old version of the app, users' careers
@@ -184,7 +186,9 @@ class  DashboardService {
 
 
         $cache_name = 'evaluaciones_por_fecha-v2';
-        $cache_name .= $module_id ? "evaluaciones_por_fecha-v2-{$module_id}" : '';
+        if($module_id){
+            $cache_name .= $module_id ? "evaluaciones_por_fecha-v2-{$module_id}" : '';
+        }
         // List of ids from users to be excluded in query.
         // In the old version of the app, users' careers
         // with the "contar_en_graficos" value were excluded,
