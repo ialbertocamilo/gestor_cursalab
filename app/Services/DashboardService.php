@@ -144,21 +144,21 @@ class  DashboardService {
 
                 $data['time'] = now();
                 $data['data'] = SummaryTopic::query()
-                    ->whereRelation('topic.course.workspaces','id',$workspaceId)
-                    ->whereHas('user',function($q)use($module_id,$user_cursalab){
-                        $q->where('users.type_id','<>',$user_cursalab->id)->when($module_id ?? null, function ($q) use($module_id){
-                            $q->where('users.subworkspace_id',$module_id);
-                        });
-                    })
-                    // ->join('users', 'users.id', '=', 'summary_topics.user_id')
-                    //  ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
-                    //  ->join('courses', 'courses.id', '=', 'topics.course_id')
-                    //  ->join('course_workspace', 'course_workspace.course_id', '=', 'courses.id')
-                    //  ->where('course_workspace.workspace_id', $workspaceId)
-                     ->where(DB::raw('date(summary_topics.created_at)'), '>=', 'curdate() - INTERVAL 20 DAY')
-                    //  ->when($module_id ?? null, function ($q) use($module_id){
-                    //     $q->where('users.subworkspace_id',$module_id);
+                    // ->whereRelation('topic.course.workspaces','id',$workspaceId)
+                    // ->whereHas('user',function($q)use($module_id,$user_cursalab){
+                    //     $q->where('users.type_id','<>',$user_cursalab->id)->when($module_id ?? null, function ($q) use($module_id){
+                    //         $q->where('users.subworkspace_id',$module_id);
+                    //     });
                     // })
+                    ->join('users', 'users.id', '=', 'summary_topics.user_id')
+                     ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
+                     ->join('courses', 'courses.id', '=', 'topics.course_id')
+                     ->join('course_workspace', 'course_workspace.course_id', '=', 'courses.id')
+                     ->where('course_workspace.workspace_id', $workspaceId)
+                     ->where(DB::raw('date(summary_topics.created_at)'), '>=', 'curdate() - INTERVAL 20 DAY')
+                     ->when($module_id ?? null, function ($q) use($module_id){
+                        $q->where('users.subworkspace_id',$module_id);
+                    })
                      ->select([
                          DB::raw('date(summary_topics.created_at) as fechita'),
                          DB::raw('sum(summary_topics.views) as cant'),
