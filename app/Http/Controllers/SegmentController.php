@@ -93,15 +93,15 @@ class SegmentController extends Controller
             ->when($data['filter_text'] ?? null, function ($q) use ($data) {
                 $q->filterText($data['filter_text']);
             })
+            ->when($data['omit_documents'] ?? null, function ($q) use ($data) {
+                $q->whereNotIn('document', $data['omit_documents']);
+            })
             ->when($documents ?? null, function ($q) use ($documents) {
                 $q->whereIn('document', $documents);
             })
             ->select('id', 'name', 'surname', 'lastname', 'document')
-            ->whereRelation('subworkspace', 'parent_id', $workspace?->id);
-            
-        $users = ($request->has('file')) ? $users->get() : $users->limit(50)->get();
-            // ->limit(50)
-            // ->get();
+            ->whereRelation('subworkspace', 'parent_id', $workspace?->id)
+            ->limit(50)->get();
 
         $users = SegmentSearchUsersResource::collection($users);
 
