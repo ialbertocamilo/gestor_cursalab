@@ -149,7 +149,7 @@ export default {
                             "admin",
                             "content-manager",
                             "trainer",
-                            "reports"
+                            "reports",
                         ]
                     },
                     {
@@ -399,7 +399,8 @@ export default {
                             "super-user",
                             "admin",
                             "trainer",
-                            "reports"
+                            "reports",
+                            'only-reports'
                         ]
                     },
                     // {
