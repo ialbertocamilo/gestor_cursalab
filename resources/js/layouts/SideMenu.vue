@@ -398,8 +398,8 @@ export default {
                         role: [
                             "super-user",
                             "admin",
-                            "trainer-TEMPORAL_INACTIVO",
-                            "reports-TEMPORAL_INACTIVO"
+                            "trainer",
+                            "reports"
                         ]
                     },
                     // {

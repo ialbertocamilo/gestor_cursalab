@@ -269,7 +269,7 @@ export default {
                 const state = (!cri_state || !cri_data);
                 let message;
 
-                if(!cri_state) message = `${noexist} en el segmento ${segIndex}, desea continuar.`;
+                if(!cri_state) message = `${noexist} en el segmento ${segIndex}, ¿Desea continuar?`;
                 else if(!cri_data) message = `${nodata} en el segmento ${segIndex}, para continuar.`;
                 else message = null;
 

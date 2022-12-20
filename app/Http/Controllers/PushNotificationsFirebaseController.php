@@ -51,7 +51,8 @@ class PushNotificationsFirebaseController extends Controller
     public function getListSelects()
     {
         $estados = [];
-        $modules = Criterion::getValuesForSelect('module');
+        // $modules = Criterion::getValuesForSelect('module');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id','name as nombre']);
 
         foreach ($modules as $module) {
             $module->modulo_selected = false;

@@ -100,8 +100,9 @@ class SegmentController extends Controller
                 $q->whereIn('document', $documents);
             })
             ->select('id', 'name', 'surname', 'lastname', 'document')
-            ->whereRelation('subworkspace', 'parent_id', $workspace?->id)
-            ->limit(50)->get();
+            ->whereRelation('subworkspace', 'parent_id', $workspace?->id);
+
+        $users = ($request->has('file')) ? $users->get() : $users->limit(50)->get();
 
         $users = SegmentSearchUsersResource::collection($users);
 
