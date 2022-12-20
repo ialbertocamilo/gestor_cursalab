@@ -10,11 +10,18 @@
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
-            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            </div>
+            
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+                <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            </div>
+
             <list-item titulo="DNI (entrenador)" subtitulo="" />
             <list-item titulo="Nombre (entrenador)" subtitulo="" />
             <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
@@ -26,12 +33,13 @@
             <list-item titulo="A quien califica" subtitulo="" />
             <list-item titulo="Estado" subtitulo="" />
         </ResumenExpand>
-        <form @submit.prevent="exportReport" class="row">
+        <form @submit.prevent="exportReport" class="row px-4">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
                 <b-form-text text-variant="muted">Módulo</b-form-text>
                 <select class="form-control"
-                        v-model="modulo">
+                        v-model="modulo"
+                        @change="fetchFiltersAreaData">
                     <option value>- [Todos] -</option>
                     <option v-for="(item, index) in modules"
                             :key="index"
@@ -92,7 +100,7 @@
                 <!-- Filtros secundarios -->
                 <div class="col-8 px-0">
                     <!-- Filtros Checkboxs -->
-                    <EstadoFiltro ref="EstadoFiltroComponent"/>
+                    <EstadoFiltro ref="EstadoFiltroComponent" class="px-0"/>
 
                     <!--          Nuevos filtros         -->
                     <!--
@@ -134,6 +142,26 @@
                             </div>
                         </div>
                     </div> -->
+
+                   <div class="col-12 px-0" v-if="workspaceId === 25">
+                        <b-form-text text-variant="muted">Áreas</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="area"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona una #Módulo"
+                            :disabled="!modulo"
+                            :items="areas"
+                            :background-color="!area ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
                 </div>
                 <!--          Fechas          -->
                 <div class="col-4 ml-auto">
@@ -141,10 +169,14 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <button :disabled="!checklist" type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-                <i class="fas fa-download"></i>
-                <span>Descargar</span>
-            </button>
+            <div class="col-sm-12 mb-3">
+                <div class="col-sm-6 px-0">
+                    <button :disabled="!checklist" type="submit" class="btn btn-md btn-primary btn-block text-light">
+                        <i class="fas fa-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
         </form>
     </v-main>
 </template>
@@ -166,6 +198,7 @@ export default {
         return {
             schools: [],
             courses: [],
+            areas:[],
 
             Checklist: [],
 
@@ -174,6 +207,7 @@ export default {
             loadingCarreras: false,
             loadingCiclos: false,
             //
+            area:[],
             modulo: "",
             escuela: "",
             curso: "",
@@ -215,6 +249,7 @@ export default {
                 modulos: this.modulo ? [+this.modulo] : [],
                 escuela: this.escuela,
                 curso: this.curso,
+                areas: this.area,
                 //
                 grupo: this.grupo,
                 checklist:this.checklist,
@@ -222,7 +257,7 @@ export default {
                 UsuariosActivos: UFC.UsuariosActivos,
                 UsuariosInactivos: UFC.UsuariosInactivos,
                 start: FechaFiltro.start,
-                end: FechaFiltro.end,
+                end: FechaFiltro.end
             }
 
             let url = `${this.$props.reportsBaseUrl}/exportar/checklist_detallado`
@@ -287,6 +322,20 @@ export default {
             let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist/${this.curso}`
             const res = await axios.get(url);
             this.Checklist = res.data;
+        },
+        async fetchFiltersAreaData() {
+            this.areas = [];
+            this.area = [];
+
+            if(!this.modulo) return;
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            this.areas = response.data
         }
     }
 }

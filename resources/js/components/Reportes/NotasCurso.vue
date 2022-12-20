@@ -239,7 +239,9 @@
                 </div>
                 <!-- Fechas -->
                 <div class="col-4 ml-auto">
-                    <FechaFiltro ref="FechasFiltros" />
+                    <FechaFiltro ref="FechasFiltros"   
+                        label-start="Fecha inicial de última actualización" 
+                        label-end="Fecha final de última actualización"/>
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
