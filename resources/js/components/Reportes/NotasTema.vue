@@ -117,7 +117,7 @@
 
             <v-divider class="col-12 mb-0 p-0"></v-divider>
             <!-- Filtros secundarios -->
-            <div class="col-8 pb-0 d-flex">
+            <div class="col-6 pb-0 d-flex">
                 <div class="form-row">
                     <div class="col-12 py-0">
                         <EstadoFiltro ref="EstadoFiltroComponent"
@@ -156,8 +156,10 @@
             </div>
 
             <!-- Fechas -->
-            <div class="col-4">
-                <FechaFiltro ref="FechasFiltros" />
+            <div class="col-6">
+                <FechaFiltro ref="FechasFiltros"   
+                    label-start="Fecha inicial de última actualización" 
+                    label-end="Fecha final de última actualización" />
             </div>
 
             <div class="col-12 pt-0">

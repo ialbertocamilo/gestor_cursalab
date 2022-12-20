@@ -30,8 +30,8 @@
             <div class="col-sm-6 mb-2">
                 <b-form-text text-variant="muted">Administrador</b-form-text>
                 <select v-model="admin" class="form-control">
-                    <option value="">- Seleccionar Administrador -</option>
-                    <option value="ALL">[TODOS]</option>
+                    <option value>- [Todos] -</option>
+                    <!-- <option value="ALL">[TODOS]</option> -->
                     <option v-for="(item, index) in admins"
                             :key="index"
                             :value="item.id">
@@ -39,7 +39,17 @@
                     </option>
                 </select>
             </div>
-            <div class="col-6"></div>
+           <div class="col-sm-6 mb-2">
+                <small class="form-text text-muted">Tipo</small> 
+                <select v-model="tipo" disabled readonly class="form-control">
+                    <option value>- [Todos] -</option> 
+                    <option v-for="(item, index) in tipos"
+                            :key="index"
+                            :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
+            </div>
             <div class="col-sm-6 mb-2">
                 <b-form-text text-variant="muted">Fecha inicial</b-form-text>
                 <div class="input-group">
@@ -99,8 +109,10 @@
 </template>
 
 <script>
+
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
+
 export default {
     components: { ResumenExpand, ListItem },
     props: {
@@ -110,9 +122,11 @@ export default {
     },
     data() {
         return {
-            Tipos: [],
+            tipos: [ {id:'por_tema', name:'Reinicios por temas'}, 
+                     {id:'por_curso', name:'Reinicios por cursos'}, 
+                     {id:'total', name:'Reinicios totales'} ],
             admin: "",
-            tipo: "",
+            tipo: "por_tema",
             start: "",
             end: ""
             // API_URL: process.env.MIX_API_REPORTES,
@@ -136,6 +150,7 @@ export default {
                     data: {
                         workspaceId: this.workspaceId,
                         admin: this.admin,
+                        tipo: this.tipo,
                         start: this.start,
                         end: this.end
                     }

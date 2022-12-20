@@ -99,11 +99,11 @@
 
             <!-- Filtros secundarios -->
             <!-- Filtros Checkboxs -->
-            <div class="col-7 pt-0 px-0">
+            <div class="col-6 pt-0 px-0">
                 <div class="col-12 py-0">
                     <EstadoFiltro ref="EstadoFiltroComponent" @emitir-cambio="" />
                 </div>
-                <div class="col-12 px-5 py-0" v-if="workspaceId === 25">
+                <div class="col-12 pl-5 py-0" v-if="workspaceId === 25">
                     <b-form-text text-variant="muted">Áreas</b-form-text>
                     <v-select
                         attach
@@ -123,8 +123,11 @@
                     </v-select>
                 </div>
             </div>
-            <div class="col-5">
-                <FechaFiltro ref="FechasFiltros" />
+            <div class="col-6">
+                <FechaFiltro ref="FechasFiltros" 
+                    label-start="Fecha inicial de última actualización" 
+                    label-end="Fecha final de última actualización"
+                />
             </div>
             <div class="col-12 py-0">
                 <div class="col py-0">
