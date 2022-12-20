@@ -390,15 +390,7 @@ export default {
     methods: {
         closeModal() {
             let vue = this
-
-            let params = this.getAllUrlParams(window.location.search);
-            let temp = `${this.addParamsToURL(vue.base_endpoint, params)}`;
-            temp = `${vue.base_endpoint}?${temp}`;
-
-            // console.log(temp);
-            // return;
-
-            window.location.href = temp;
+            window.location.href = vue.base_endpoint;
         },
         confirmModal(validateForm = true) {
             let vue = this
