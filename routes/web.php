@@ -108,7 +108,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::prefix('workspaces')->middleware('checkrol:admin')->group(base_path('routes/cms/workspaces.php'));
-    Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/reportes.php'));
+    Route::prefix('/')->middleware(['checkrol:admin,only-reports'])->group(base_path('routes/cms/reportes.php'));
 
     Route::prefix('aulas-virtuales')->middleware('checkrol:admin')->group(base_path('routes/cms/meetings.php'));
 
