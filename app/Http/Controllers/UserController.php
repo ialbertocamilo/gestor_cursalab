@@ -25,7 +25,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $q = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports');
+        $q = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports','only-reports');
 
         if ($request->has('q'))
            $q->filterText($request->q);
