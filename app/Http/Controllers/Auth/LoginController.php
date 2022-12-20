@@ -104,7 +104,7 @@ class LoginController extends Controller
 
             $user = $this->guard()->user();
 
-            if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports') )
+            if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             {
                 if ($request->hasSession()) {
                     $request->session()->put('auth.password_confirmed_at', time());
