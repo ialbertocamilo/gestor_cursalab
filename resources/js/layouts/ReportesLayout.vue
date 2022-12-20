@@ -187,11 +187,6 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                             <!--Diploma 
-                                :Modulos="Modulos" 
-                                :API_FILTROS="API_FILTROS" 
-                                :API_REPORTES="API_REPORTES"
-                                @emitir-reporte="crearReporte" /-->
                             <Diploma 
                                 :workspaceId="workspaceId"
                                 :modules="modules"
@@ -306,10 +301,6 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <!--<Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
-                                       :API_REPORTES="API_REPORTES"
-                                       @emitir-reporte="crearReporte"/>-->
-
                             <Vademecum :workspaceId="workspaceId"
                                        :vademecumList="VademecumList" 
                                        :reportsBaseUrl="reportsBaseUrl"
@@ -321,9 +312,6 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <!--<Videoteca :VideotecaList="VideotecaList" :API_FILTROS="API_FILTROS"
-                                       :API_REPORTES="API_REPORTES"
-                                       @emitir-reporte="crearReporte"/>-->
                             <Videoteca :workspaceId="workspaceId"
                                        :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
