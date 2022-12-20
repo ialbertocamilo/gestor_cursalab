@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Imports\VademecumImport;
+use App\Services\FileService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,7 +18,7 @@ class Vademecum extends Model
     protected $table = 'vademecum';
 
     protected $fillable = [
-        'name', 'category_id', 'subcategory_id', 'media_id', 'active'
+        'name', 'category_id', 'subcategory_id', 'media_id', 'active', 'media_type'
     ];
 
     protected $hidden = [
@@ -278,9 +279,26 @@ class Vademecum extends Model
         $data = [];
 
         foreach ($result['data'] as $key => $row) {
+
+            // In previous versions, the only allowed type was SCORM,
+            // because of that those records has a media but its
+            // media type is null
+
+            $mediaType = $row['media_type'] ?? null;
+            if ($mediaType == null && $row['media'] != null) {
+                $mediaType = 'scorm';
+            }
+
+            $fileUrl = $row['media']['file'] ?? null;
+            if ($mediaType != 'scorm' && isset($row['media']['file'])) {
+                $fileUrl = FileService::generateUrl($row['media']['file']);
+            }
+
             $data[$key]['id'] = $row['id'];
             $data[$key]['name'] = $row['name'];
+            $data[$key]['file'] = $fileUrl;
             $data[$key]['scorm'] = $row['media']['file'] ?? null;
+            $data[$key]['media_type'] = $mediaType;
             $data[$key]['category'] = $row['category']['name'] ?? null;
             $data[$key]['category_id'] = $row['category_id'];
             $data[$key]['subcategory_id'] = $row['subcategory_id'];
