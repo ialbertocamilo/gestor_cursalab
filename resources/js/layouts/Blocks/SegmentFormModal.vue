@@ -89,6 +89,8 @@
                         <SegmentByDocument
                             ref="SegmentByDocument"
                             :segment="segment_by_document"
+
+                            :current-clean="segment_by_document_clean"
                             @addUser="addUser"
                             @deleteUser="deleteUser"
                         />
@@ -96,8 +98,15 @@
                     </v-tab-item>
                 </v-tabs-items>
 
+                <SegmentAlertModal
+                    :options="modalInfoOptions"
+                    :ref="modalInfoOptions.ref"
+                    @onConfirm="continueRegister($event)"
+                    @onCancel="closeFormModal(modalInfoOptions), backRegister()"
+                />
             </v-form>
         </template>
+
     </DefaultDialog>
 </template>
 
@@ -113,12 +122,21 @@ const fields = [
     "active"
 ];
 
+const CustomMessages = {
+    module: {
+        title: 'Advertencia para módulo',
+        noexist: 'No existe el módulo como criterio',
+        nodata: 'Selecciona uno o varios modulos'
+    }
+}
+
 import Segment from "./Segment";
+import SegmentAlertModal from "./SegmentAlertModal";
 import SegmentByDocument from "./SegmentByDocument";
 
 export default {
     components: {
-        Segment, SegmentByDocument
+        Segment, SegmentByDocument, SegmentAlertModal
     },
     props: {
         options: {
@@ -139,7 +157,7 @@ export default {
         limitOne: {
             type:Boolean,
             default:false
-        }
+        },
     },
     data() {
         return {
@@ -159,6 +177,20 @@ export default {
             segment_by_document: null,
             criteria: [],
 
+            modalInfoOptions: {
+                ref: 'SegmentAlertModal',
+                open: false,
+                title: null, 
+                resource:'data',
+                hideConfirmBtn: false,
+                persistent: true,
+                cancelLabel: 'Cerrar'
+            },
+            stackModals: { continues: [],
+                           backers: [] },
+            criteriaIndexModal: 0,
+
+            segment_by_document_clean: false,
             rules: {
                 // name: this.getRules(['required', 'max:255']),
             }
@@ -170,9 +202,17 @@ export default {
             // vue.options.open = false
             vue.resetSelects();
             vue.resetValidation();
-            vue.$emit("onCancel");
 
-            vue.$refs["SegmentByDocument"].resetFields();
+            // alert modal info
+            vue.modalInfoOptions.hideConfirmBtn = false;
+            vue.criteriaIndexModal = 0;
+            vue.stackModals.continues = [];
+            
+            // clean segment_by_document_clean
+            vue.segment_by_document_clean = !vue.segment_by_document_clean;
+
+            vue.$emit("onCancel");
+            // vue.$refs["SegmentByDocument"].resetFields();
         },
         resetValidation() {
             let vue = this;
@@ -200,12 +240,130 @@ export default {
                 return obj.id != segment.id;
             });
         },
+        checkIfExistCriteria(stackSegments, current) {
+            const vue = this;
+            let stackMessage = [];
+
+            //local scope function
+            const VerifyCodeAndValues = (criterians, current) => {
+                let cri_state = false,
+                    cri_data = false;
+
+                for (let i = 0; i < criterians.length; i++) {
+                    const { code, values_selected } = criterians[i];
+                    
+                    if(code === current) {
+                        cri_state = true;  
+                        cri_data = values_selected ? values_selected.length > 0 : false;
+                        break;
+                    }
+                }
+                return { cri_state, cri_data };
+            };
+
+            const SetMessageByCurrent = (customMessage, stateVerify, segIndex) => {
+
+                const { noexist, nodata, title } = customMessage;
+                const { cri_state, cri_data } = stateVerify;
+
+                const state = (!cri_state || !cri_data);
+                let message;
+
+                if(!cri_state) message = `${noexist} en el segmento ${segIndex}, ¿Desea continuar?`;
+                else if(!cri_data) message = `${nodata} en el segmento ${segIndex}, para continuar.`;
+                else message = null;
+
+                return { state, message, title, detail: { cri_data, cri_state } };
+            };
+
+            for (let i = 0; i < stackSegments.length; i++) {
+                const { criteria_selected } = stackSegments[i];
+
+                const stateVerify = VerifyCodeAndValues(criteria_selected, current);
+                const stateMessage = SetMessageByCurrent(CustomMessages[current], stateVerify, i + 1); 
+
+                if(stateMessage.state) stackMessage.push(stateMessage);
+            }
+
+            return stackMessage; 
+        },
+        setAndOpenAlertModal(responseCheck) {
+            const vue = this;
+            const count = responseCheck.length;
+
+            for (let i = 0; i < count; i++) {
+                const responseData = responseCheck[i];
+                const { message, title } = responseData;
+                vue.modalInfoOptions.resource = message;
+                vue.modalInfoOptions.title = title;
+
+                const { cri_state, cri_data } = responseData.detail;
+
+                if(cri_state && !cri_data) vue.modalInfoOptions.hideConfirmBtn = true;
+                else vue.modalInfoOptions.hideConfirmBtn = false;                    
+
+                if(vue.criteriaIndexModal === i) {
+                    vue.criteriaIndexModal = i + 1;
+                    vue.openFormModal(vue.modalInfoOptions, null, null, title);
+                    break;
+                }
+            }
+
+            let continues = [];
+            let backers = [];
+
+            for (let i = 0; i < count; i++) {
+                const responseData = responseCheck[i];
+                const { cri_state, cri_data } = responseData.detail;
+
+                //continues count
+                if(cri_state && !cri_data) backers.push(i);
+                else continues.push(i);
+            }
+
+            vue.stackModals.continues = continues;
+            vue.stackModals.backers = backers;
+        },
+        continueRegister(flag) {
+            const vue = this;
+            vue.confirmModal();
+        },
+        backRegister() {
+            const vue = this;
+            vue.criteriaIndexModal = 0;
+        },
+        showModalCondition(){
+            const vue = this;
+            const responseCheck = vue.checkIfExistCriteria(vue.segments, 'module');
+
+            let state = true;
+            
+            if(responseCheck.length) {
+                if(vue.criteriaIndexModal) {
+                    const continuesCount = vue.stackModals.continues.length;
+
+                    if(vue.criteriaIndexModal === continuesCount){ 
+                        state = true; 
+                    } else {
+                        vue.setAndOpenAlertModal(responseCheck);
+                        state = false;
+                    } 
+                } else {
+                    vue.setAndOpenAlertModal(responseCheck);
+                    state = false;
+                }
+            } 
+
+            return state;
+        },
         confirmModal() {
             let vue = this;
 
             vue.errors = [];
 
             this.showLoader();
+
+            // console.log(vue.options);
 
             const validateForm = vue.validateForm("segmentForm");
             const edit = vue.options.action === "edit";
@@ -217,8 +375,15 @@ export default {
             // let method = edit ? 'PUT' : 'POST';
             let method = "POST";
 
+            // === check criteria and open alert === SEGMENTACION DIRECTA ===
+            if(vue.segments.length && vue.tabs === 0) {
+                const state = vue.showModalCondition();
+                if(!state) return;
+            } 
+            // === check criteria and open alert === SEGMENTACION DIRECTA ===
+
             // if (validateForm && validateSelectedModules) {
-            if (validateForm) {
+           if (validateForm) {
                 // let formData = vue.getMultipartFormData(method, vue.segments, fields);
                 let formData = JSON.stringify({
                     model_type: vue.model_type,
@@ -234,13 +399,14 @@ export default {
                         vue.$emit("onConfirm");
                         vue.closeModal();
                         vue.showAlert(data.data.msg);
+                        
+                        vue.hideLoader();
                     })
                     .catch(error => {
                         if (error && error.errors) vue.errors = error.errors;
+                        vue.hideLoader();
                     });
             }
-
-            this.hideLoader();
         },
         resetSelects() {
             let vue = this;
