@@ -10,11 +10,19 @@
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
-            <list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
-            <list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
+
+            <div v-if="workspaceId === 25">
+                <list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
+                <list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
+            </div>
+
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+
+            <div v-if="workspaceId === 25">
+                <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+                <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            </div>
+
             <list-item
                 titulo="Estado"
                 subtitulo="El estado indica si el usuario está habilitado para usar la plataforma (Activo: Si, Inactivo: No)"
@@ -28,27 +36,136 @@
         <!-- Formulario del reporte -->
         <form class="row" @submit.prevent="exportVisitas">
             <!-- Ya que cuando se usa el axios de laravel, por defecto envia el token -->
-            <div class="col-12 col-lg-8">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select class="form-control"
-                        v-model="modulo"
-                        @change="moduloChange">
-                    <!-- <option value>- Seleccionar Módulo -</option> -->
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+            <div class="col-12">
+                <div class="row px-3">
+                    <div class="col-6 mt-2">
+                        <b-form-text text-variant="muted">Módulo</b-form-text>
+                        <select class="form-control"
+                                v-model="modulo"
+                                @change="fetchFiltersCareerData">
+                            <option v-for="(item, index) in modules"
+                                    :key="index"
+                                    :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-6">
+                        <b-form-text text-variant="muted">Escuelas</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="school"
+                            :items="schools"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona un #Módulo"
+                            @change="fetchFiltersSchoolData"
+                            :disabled="!modulo"
+                            :background-color="!school ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
+
+                    <div class="col-6">
+                        <b-form-text text-variant="muted">Cursos</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="course"
+                            :items="courses"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona una #Escuela"
+                            :disabled="!school.length"
+                            :background-color="!course ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
+                </div>
             </div>
-            <div class="col-12 col-lg-8">
-                <EstadoFiltro ref="EstadoFiltroComponent" @emitir-cambio="moduloChange" />
+            <div class="col-12 col-lg-6 pl-6">
+                <EstadoFiltro ref="EstadoFiltroComponent" class="px-0"
+                                  @emitir-cambio="" />
+
+                <div class="row" v-if="workspaceId === 25">
+                <!-- <div class="row"> -->
+                    <div class="col-12">
+                        <b-form-text text-variant="muted">Carreras</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="career"
+                            :items="careers"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona un #Módulo"
+                            @change="fetchFiltersAreaData"
+                            :disabled="!modulo"
+                            :background-color="!career ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
+                    <div class="col-12">
+                        <b-form-text text-variant="muted">Áreas</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="area"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona una #Carrera"
+                            :disabled="!career.length"
+                            :items="areas"
+                            :background-color="!area ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
+                </div>
+
+                <div class="col p-0">
+                    <small class="form-text text-muted text-bold">
+                        Tipo de Cursos
+                    </small>
+                    <div class="d-flex mt-2">
+                        <v-checkbox
+                            class="my-0 mr-2"
+                            label="Cursos Libres"
+                            color="primary"
+                            v-model="tipocurso"
+                            hide-details="false"
+                        />
+                        <div
+                            tooltip="Al marcar, el reporte generado sera solo con cursos libres."
+                            tooltip-position="top"
+                        >
+                            <v-icon class="info-icon">mdi-information-outline</v-icon>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <v-divider class="col-12 p-0 mt-3"></v-divider>
-            <div class="col-sm-12 mb-3 mt-4">
-                <div class="col-sm-8 pl-0">
+            <v-divider class="col-12 p-0 my-2"></v-divider>
+            <div class="col-sm-12 mb-3">
+                <div class="col-sm-6 pl-2">
                     <button type="submit" class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar</span>
@@ -59,9 +176,11 @@
     </v-main>
 </template>
 <script>
+
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
+
 export default {
     components: { EstadoFiltro, ResumenExpand, ListItem },
     props: {
@@ -71,58 +190,124 @@ export default {
     },
     data() {
         return {
-            Carreras: [],
-            Grupos: [],
+            careers: [],
+            areas: [],
+            career: [],
+            area: [],
+
+            schools: [],
+            courses: [],
+            school:[],
+            course:[],
+
             modulo: "",
-            carrera: "",
-            grupo: "",
+            tipocurso: false,
+
             loadingCarreras: false,
-            loadingGrupos: false,
-            //
-            cursos_libres:false,
+            loadingGrupos: false
         };
     },
     methods: {
         async exportVisitas() {
-
-            this.showLoader()
-            let UFC = this.$refs.EstadoFiltroComponent;
+            const vue = this;
+            vue.showLoader();
+            let UFC = vue.$refs.EstadoFiltroComponent;
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/visitas`
+            let urlReport = `${vue.$props.reportsBaseUrl}/exportar/visitas`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
-                        workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
+                        workspaceId: vue.workspaceId,
+                        modulos: vue.modulo ? [vue.modulo] : [],
                         UsuariosActivos: UFC.UsuariosActivos,
-                        UsuariosInactivos: UFC.UsuariosInactivos
+                        UsuariosInactivos: UFC.UsuariosInactivos,
+                        tipocurso: vue.tipocurso,
+
+                        careers: vue.career,
+                        areas: vue.area,
+
+                        schools: vue.school,
+                        courses: vue.course
                     }
                 })
 
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    // Emit event to parent component
-                    this.$emit('emitir-reporte', response)
-                }
+                if (response.data.alert) vue.showAlert(response.data.alert, 'warning')
+                else vue.$emit('emitir-reporte', response)
 
             } catch (ex) {
                 console.log(ex.message)
             }
 
-            // Hide loading spinner
+            vue.hideLoader()
+        },
+        async fetchFiltersCareerData() {
+            const vue = this;
 
-            this.hideLoader()
+            vue.careers = [];
+            vue.career = [];
+
+            vue.areas = [];
+            vue.area = [];
+
+            if(!vue.modulo) return;
+
+            let url = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo}/criterion-values/career`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            vue.careers = response.data;
+           /* vue.careers = [ { id:2222, name:'Quimico Farmaceutico' },
+                            { id:3333, name:'Tecnico de Farmacia' },
+                            { id:4444, name:'Colaborador de carrera' }
+                          ];*/
+        },
+        async fetchFiltersAreaData() {
+            const vue = this;
+            vue.areas = [];
+            vue.area = [];
+
+            if(!vue.modulo) return;
+
+            let urlAreas = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo}/criterion-values/grupo`
+            let responseAreas = await axios({ url: urlAreas,method: 'get' });
+            vue.areas = responseAreas.data;
+           /* vue.areas = [ { id:1122, name:'Grupo 33' },
+                          { id:3422, name:'Grupo 42' },
+                          { id:7422, name:'Grupo 78' }
+                        ];*/
+        },
+        async fetchFiltersSchoolData() {
+            const vue = this;
+
+            vue.courses = [];
+            vue.course = [];
+
+            if (!vue.school.length) return;
+
+            let urlCourses = `${vue.$props.reportsBaseUrl}/filtros/schools/courses`;
+            let responseCourses = await axios( { url: urlCourses, method: 'post',
+                                                 data: { schoolsIds: vue.school  } } );
+            vue.courses = responseCourses.data;
+        },
+        async fetchFiltersData() {
+            const vue = this;
+
+            let urlSchools = `${vue.$props.reportsBaseUrl}/filtros/schools/${vue.$props.workspaceId}`;
+            let responseSchools = await axios({ url: urlSchools, method: 'get'});
+            vue.schools = responseSchools.data;
         }
+    },
+    mounted() {
+        const vue = this;
+        vue.modulo = vue.modules[0].id; //init module
+        vue.fetchFiltersData();
+        vue.fetchFiltersCareerData();
     }
 };
 </script>
-
-<style></style>
