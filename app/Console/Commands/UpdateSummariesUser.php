@@ -36,7 +36,7 @@ class UpdateSummariesUser extends Command
         $summary_users = SummaryUser::when($documents, function ($q) use($documents){
             $q->whereHas('user',function($q2)use($documents){
             //    $q2->whereIn('document',explode(',',$documents));
-                $q2->whereIn('subworkspace_id',[26,28]);
+                $q2->whereIn('subworkspace_id',[27,29])->where('active',1);
         });
         })->with('user')->get();
 //        $summary_users = SummaryUser::with('user')
