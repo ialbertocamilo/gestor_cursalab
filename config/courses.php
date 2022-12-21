@@ -92,7 +92,7 @@ return [
                         ->where('active', ACTIVE);
                 },
                 'type:id,code',
-                'topics' => function ($q) {
+                'topics' => function ($q) use($user_id){
                     $q->with([
                         'evaluation_type:id,code',
                         'requirements.summaries_topics' => function ($q) use($user_id){
@@ -146,7 +146,7 @@ return [
                         ->where('active', ACTIVE);
                 },
                 'type:id,code',
-                'topics' => function ($q) {
+                'topics' => function ($q) use($user_id){
                     $q
                         ->where('active', ACTIVE)
                         ->with([
