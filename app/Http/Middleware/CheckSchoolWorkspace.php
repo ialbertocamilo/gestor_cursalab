@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use App\Models\School;
 
 class CheckSchoolWorkspace
 
@@ -27,9 +28,16 @@ class CheckSchoolWorkspace
 
         if ($workspace)
         {
-            $workspace->load('schools');
+            $subworkspaces_id = $workspace->subworkspaces->pluck('id');
 
-            $school = $workspace->schools->where('id', $school_id)->first();
+            $schools = School::whereHas('workspaces', function($q) use ($subworkspaces_id) {
+                $q->whereIn('workspace_id', $subworkspaces_id);
+            })
+            ->get();
+            
+            // $workspace->load('schools');
+
+            $school = $schools->where('id', $school_id)->first();
 
             if ($school)  $access = true;
         }

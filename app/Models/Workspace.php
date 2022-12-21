@@ -294,6 +294,7 @@ class Workspace extends BaseModel
     protected function searchSubWorkspace($request)
     {
         $query = self::withCount([
+            'schools',
             'users' => fn($q) => $q->onlyClientUsers(),
             'users as active_users_count' => fn($q) => $q->onlyClientUsers()->where('active', ACTIVE)
         ]);

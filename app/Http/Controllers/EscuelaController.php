@@ -46,7 +46,12 @@ class EscuelaController extends Controller
 
     public function getFormSelects($compactResponse = false)
     {
-        return $compactResponse ? [] : $this->success([]);
+        $workspace = get_current_workspace();
+
+        $modules = Workspace::where('parent_id', $workspace?->id)
+            ->select('id', 'name')->get();
+
+        return $compactResponse ? [] : $this->success(compact('modules'));
     }
 
     public function store(EscuelaStoreUpdateRequest $request)

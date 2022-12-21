@@ -29,6 +29,16 @@
                     <v-col cols="3">
                         <DefaultSelect
                             clearable dense
+                            :items="selects.modules"
+                            v-model="filters.module"
+                            label="Módulo"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col>
+                    <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
@@ -80,17 +90,17 @@
                 :resource="delete_model"
             />
 
-            <DefaultStatusModal
+         <!--    <DefaultStatusModal
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
                 @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalStatusOptions, dataTable, filters)"
-            />
-            <DuplicarCursos
+            /> -->
+          <!--   <DuplicarCursos
                 :ref="modalCursosDuplicar.ref"
                 :modalCursosDuplicar="modalCursosDuplicar"
                 @onCancel='closeFormModalDuplicarCursos'
-            />
+            /> -->
 
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
@@ -117,6 +127,18 @@ export default {
     components: {EscuelaFormModal, EscuelaValidacionesModal, DialogConfirm, DefaultStatusModal, DuplicarCursos, DefaultDeleteModal},
     data() {
         let vue = this
+
+        // let uri = window.location.search.substring(1); 
+        // let params = new URLSearchParams(uri);
+        // let param_module_id = params.get("module_id");
+
+        // if (param_dni)
+        // {
+        //     vue.search = param_dni
+
+        //     this.buscarNotasUsuario()
+        // }
+
         return {
             breadcrumbs: [
                 {title: 'Escuelas', text: null, disabled: true, href: ''},
@@ -198,13 +220,13 @@ export default {
                 resource: 'TemasValidaciones',
             },
             delete_model: null,
-            modalStatusOptions: {
-                ref: 'EscuelaStatusModal',
-                open: false,
-                base_endpoint: '/modulos/' + vue.workspace_id + '/escuelas',
-                contentText: '¿Desea cambiar de estado a este registro?',
-                endpoint: '',
-            },
+            // modalStatusOptions: {
+            //     ref: 'EscuelaStatusModal',
+            //     open: false,
+            //     base_endpoint: '/modulos/' + vue.workspace_id + '/escuelas',
+            //     contentText: '¿Desea cambiar de estado a este registro?',
+            //     endpoint: '',
+            // },
             modalCursosDuplicar: {
                 categoria_id: 0,
                 dialog: false,
@@ -217,17 +239,25 @@ export default {
     },
     mounted() {
         let vue = this
-        // vue.getSelects();
+        vue.getSelects();
 
-        vue.filters.module = vue.workspace_id
+        // vue.filters.module = vue.workspace_id
     },
     methods: {
         getSelects() {
             let vue = this
-            const url = `/escuelas/get-selects`
+            let uri = window.location.search.substring(1); 
+            let params = new URLSearchParams(uri);
+            let param_module_id = params.get("module_id");
+
+            const url = `/escuelas/form-selects`
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.modules = data.data.modules
+
+                    console.log('param_module_id')
+                    console.log(param_module_id)
+                    vue.filters.module = param_module_id
                 })
         },
         activity() {

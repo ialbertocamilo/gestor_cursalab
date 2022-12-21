@@ -35,10 +35,13 @@ class School extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $escuelas = School::whereRelation('workspaces', 'workspace_id', $workspace->id)
-            // whereHas('courses', function ($j) use ($courses) {
-            //     $j->whereIn('course_id', $courses->pluck('id'));
-            // })->
+        $modules_id = $request->module ? [$request->module] : $workspace->subworkspaces->pluck('id')->toArray();
+
+        $escuelas = School::
+            // whereRelation('workspaces', 'workspace_id', $workspace->id)
+            whereHas('workspaces', function ($j) use ($modules_id) {
+                $j->whereIn('workspace_id', $modules_id);
+            })
             ->withCount(['courses' => function ($c) use ($workspace) {
                 $c->whereRelation('workspaces', 'id', $workspace->id);
             }]);
