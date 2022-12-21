@@ -34,7 +34,7 @@ return [
                                             $q->select('id', 'name', 'code');
                                         });
                                 })
-                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+                                ->select('id', 'segment_id','starts_at','finishes_at' ,'criterion_id', 'criterion_value_id');
     
                         });
                 },
@@ -57,7 +57,7 @@ return [
                                             $q->select('id', 'name', 'code');
                                         });
                                 })
-                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+                                ->select('id', 'segment_id','starts_at','finishes_at' , 'criterion_id', 'criterion_value_id');
     
                         });
                 },
@@ -77,7 +77,7 @@ return [
                                             $q->select('id', 'name', 'code');
                                         });
                                 })
-                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+                                ->select('id', 'segment_id', 'criterion_id','starts_at','finishes_at' , 'criterion_value_id');
     
                         });
                 },
@@ -130,7 +130,7 @@ return [
                                             $q->select('id', 'name', 'code');
                                         });
                                 })
-                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+                                ->select('id', 'segment_id', 'criterion_id', 'starts_at','finishes_at' ,'criterion_value_id');
     
                         });
                 },
