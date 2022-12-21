@@ -24,8 +24,8 @@ class SoporteLoginRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => "required|max:255",
-            'workspace_id' => "required",
+            //'name' => "required|max:255",
+            //'workspace_id' => "required",
             'details' => 'required',
             'dni' => 'required|numbers',
             'phone' => 'required|numbers'
