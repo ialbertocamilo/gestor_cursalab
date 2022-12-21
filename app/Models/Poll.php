@@ -121,12 +121,18 @@ class Poll extends BaseModel
         $summary_course->update(['status_id' => $approved_status_taxonomy?->id, 'advanced_percentage' => '100',]);
         //        info($summary_course->status_id);
 
-        $count_approved_courses = SummaryCourse::query()
-            ->whereRelation('course', 'active', ACTIVE)
-            ->whereRelation('status', 'code', 'aprobado')
-            ->whereHas('course.type', fn ($q) => $q->where('code', '<>', 'free'))
-            ->where('user_id', $user->id)
-            ->count();
+        // $count_approved_courses = SummaryCourse::query()
+        //     ->whereRelation('course', 'active', ACTIVE)
+        //     ->whereRelation('status', 'code', 'aprobado')
+        //     ->whereHas('course.type', fn ($q) => $q->where('code', '<>', 'free'))
+        //     ->where('user_id', $user->id)
+        //     ->count();
+        $courses_id = $user->getCurrentCourses(withFreeCourses: false, withRelations: 'summary-user-update', only_ids: true);
+        $count_approved_courses = SummaryCourse::where('user_id', $user->id)
+                    ->whereRelation('status', 'code', 'aprobado')
+                    ->whereRelation('course.type', 'code', '<>', 'free')
+                    ->whereIn('course_id', $courses_id)
+                    ->count();
 
         $general_percent = ($summary_user->courses_assigned > 0) ? (($count_approved_courses / $summary_user->courses_assigned) * 100) : 0;
         $general_percent = min($general_percent, 100);
