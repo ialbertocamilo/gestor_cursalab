@@ -19,7 +19,8 @@ class RestChecklistController extends Controller
         $user = Auth::user();
         $data = [
             'entrenador_dni' => $user->document,
-            'filtro' => $request->filtro
+            'filtro' => $request->filtro,
+            'page' => $request->page ?? null
         ];
         $apiResponse = EntrenadorUsuario::alumnosApi($data);
 

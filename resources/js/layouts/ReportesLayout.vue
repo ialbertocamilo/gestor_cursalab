@@ -19,6 +19,13 @@ TABS
                 </v-tab>
 
                 <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-account</v-icon>
+                    <span class="pt-2">
+                        Historial de usuario
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
@@ -164,6 +171,18 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
+                            <HistorialUsuario
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                :API_REPORTES="API_REPORTES"
+                                @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
                             <Usuarios :workspaceId="workspaceId"
                                       :modules="modules"
                                       :reportsBaseUrl="reportsBaseUrl"
@@ -183,11 +202,11 @@ TABS CONTENT
                        </v-card-text>
                    </v-card>
                </v-tab-item>
-                
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Diploma 
+                            <Diploma
                                 :workspaceId="workspaceId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
@@ -195,7 +214,7 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -302,7 +321,7 @@ TABS CONTENT
                     <v-card flat>
                         <v-card-text>
                             <Vademecum :workspaceId="workspaceId"
-                                       :vademecumList="VademecumList" 
+                                       :vademecumList="VademecumList"
                                        :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
@@ -370,12 +389,16 @@ TABS CONTENT
 </template>
 <script>
 
+
 const FileSaver = require("file-saver");
 const moment = require("moment");
 moment.locale("es");
+
+import {mapState} from "vuex";
 import NotasTema from "../components/Reportes/NotasTema";
 import Diploma from "../components/Reportes/Diploma";
 import NotasUsuario from "../components/Reportes/NotasUsuario";
+import HistorialUsuario from "../components/Reportes/HistorialUsuario";
 import Usuarios from "../components/Reportes/Usuarios";
 import Visitas from "../components/Reportes/Visitas";
 import NotasCurso from "../components/Reportes/NotasCurso";
@@ -386,15 +409,16 @@ import UsuarioUploads from "../components/Reportes/UsuarioUploads";
 import AvanceCurricula from "../components/Reportes/AvanceCurricula";
 import Vademecum from "../components/Reportes/Vademecum.vue";
 import Videoteca from "../components/Reportes/Videoteca.vue";
-import {mapState} from "vuex";
 import TemasNoEvaluables from "../components/Reportes/TemasNoEvaluables.vue";
 import ChecklistDetallado from "../components/Reportes/ChecklistDetallado.vue";
 import ChecklistGeneral from "../components/Reportes/ChecklistGeneral.vue";
 import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
-import Segmentacion from '../components/Reportes/Segmentacion.vue'
+import Segmentacion from '../components/Reportes/Segmentacion.vue';
+
 export default {
     components: {
+        HistorialUsuario,
         NotasUsuario,
         Usuarios,
         Visitas,
