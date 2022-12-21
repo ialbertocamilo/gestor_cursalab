@@ -611,8 +611,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     private function getUserCourseSegmentationQuery($withRelations)
     {
-        $relations = config("courses.user-courses-query.$withRelations");
-
+        // $relations = config("courses.user-courses-query.$withRelations");
+        $user_id =  auth()->user() ?  auth()->user()->id : $this->id;
+        $relations = config("courses.user-courses-query")($withRelations,$user_id);
         return Course::with($relations);
     }
 

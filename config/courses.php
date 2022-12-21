@@ -16,174 +16,178 @@ return [
         "por-iniciar" => "Por iniciar",
         "continuar" => "En desarrollo"
     ],
-    'user-courses-query' => [
-        'soft' => [
-            'segments' => function ($q) {
-                $q
-                    ->where('active', ACTIVE)
-                    ->select('id', 'model_id')
-                    ->with('values', function ($q) {
-                        $q
-                            ->with('criterion_value', function ($q) {
-                                $q
-                                    ->where('active', ACTIVE)
-                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                    ->with('criterion', function ($q) {
-                                        $q->select('id', 'name', 'code');
-                                    });
-                            })
-                            ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+    'user-courses-query' =>function($relation,$user_id){ 
 
-                    });
-            },
-//            'summaries' => function ($q) {
-//                $q->where('user_id', auth()->user()->id);
-//            }
-        ],
-        'summary-user-update' => [
-            'segments' => function ($q) {
-                $q
-                    ->where('active', ACTIVE)
-                    ->select('id', 'model_id')
-                    ->with('values', function ($q) {
-                        $q
-                            ->with('criterion_value', function ($q) {
-                                $q
-                                    ->where('active', ACTIVE)
-                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                    ->with('criterion', function ($q) {
-                                        $q->select('id', 'name', 'code');
-                                    });
-                            })
-                            ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
-
-                    });
-            },
-        ],
-        'user-progress' => [
-            'segments' => function ($q) {
-                $q
-                    ->where('active', ACTIVE)
-                    ->select('id', 'model_id')
-                    ->with('values', function ($q) {
-                        $q
-                            ->with('criterion_value', function ($q) {
-                                $q
-                                    ->where('active', ACTIVE)
-                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                    ->with('criterion', function ($q) {
-                                        $q->select('id', 'name', 'code');
-                                    });
-                            })
-                            ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
-
-                    });
-            },
-            'summaries' => function ($q) {
-                $q
-                    ->with('status:id,name,code')
-                    ->where('user_id', auth()->user()->id);
-            },
-            'schools' => function ($query) {
-                $query
-                    ->select('id', 'imagen', 'name', 'position')
-                    ->where('active', ACTIVE);
-            },
-            'type:id,code',
-            'topics' => function ($q) {
-                $q->with([
-                    'evaluation_type:id,code',
-                    'requirements.summaries_topics' => function ($q) {
-                        $q
-                            // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
-                            ->with('status:id,name,code')
-                            ->where('user_id', auth()->user()->id);
-                    },
-                    'summaries' => function ($q) {
-                        $q
-                            // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
-                            ->with('status:id,name,code')
-                            ->where('user_id', auth()->user()->id);
-                    }
-                ]);
-            },
-            'requirements.summaries_course' => function ($q) {
-                $q
-                    ->with('status:id,name,code')
-                    ->where('user_id', auth()->user()->id);
-            },
-        ],
-        'course-view-app-user' => [
-            'segments' => function ($q) {
-                $q
-                    ->where('active', ACTIVE)
-                    ->select('id', 'model_id')
-                    ->with('values', function ($q) {
-                        $q
-                            ->with('criterion_value', function ($q) {
-                                $q
-                                    ->where('active', ACTIVE)
-                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                    ->with('criterion', function ($q) {
-                                        $q->select('id', 'name', 'code');
-                                    });
-                            })
-                            ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
-
-                    });
-            },
-            'summaries' => function ($q) {
-                $q
-                    ->with('status:id,name,code')
-                    ->where('user_id', auth()->user()->id);
-            },
-            'polls',
-            'schools' => function ($q) {
-                $q
-                    ->select('id', 'imagen', 'name', 'position')
-                    ->where('active', ACTIVE);
-            },
-            'type:id,code',
-            'topics' => function ($q) {
-                $q
-                    ->where('active', ACTIVE)
-                    ->with([
+        return match ($relation) {
+            'soft' => [
+                'segments' => function ($q) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->select('id', 'model_id')
+                        ->with('values', function ($q) {
+                            $q
+                                ->with('criterion_value', function ($q) {
+                                    $q
+                                        ->where('active', ACTIVE)
+                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                        ->with('criterion', function ($q) {
+                                            $q->select('id', 'name', 'code');
+                                        });
+                                })
+                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+    
+                        });
+                },
+    //            'summaries' => function ($q) {
+    //                $q->where('user_id', auth()->user()->id);
+    //            }
+            ],
+            'summary-user-update' => [
+                'segments' => function ($q) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->select('id', 'model_id')
+                        ->with('values', function ($q) {
+                            $q
+                                ->with('criterion_value', function ($q) {
+                                    $q
+                                        ->where('active', ACTIVE)
+                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                        ->with('criterion', function ($q) {
+                                            $q->select('id', 'name', 'code');
+                                        });
+                                })
+                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+    
+                        });
+                },
+            ],
+            'user-progress' => [
+                'segments' => function ($q) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->select('id', 'model_id')
+                        ->with('values', function ($q) {
+                            $q
+                                ->with('criterion_value', function ($q) {
+                                    $q
+                                        ->where('active', ACTIVE)
+                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                        ->with('criterion', function ($q) {
+                                            $q->select('id', 'name', 'code');
+                                        });
+                                })
+                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+    
+                        });
+                },
+                'summaries' => function ($q) use ($user_id){
+                    $q
+                        ->with('status:id,name,code')
+                        ->where('user_id', $user_id);
+                },
+                'schools' => function ($query) {
+                    $query
+                        ->select('id', 'imagen', 'name', 'position')
+                        ->where('active', ACTIVE);
+                },
+                'type:id,code',
+                'topics' => function ($q) {
+                    $q->with([
                         'evaluation_type:id,code',
-                        'requirements.summaries_topics' => function ($q) {
+                        'requirements.summaries_topics' => function ($q) use($user_id){
                             $q
                                 // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
                                 ->with('status:id,name,code')
-                                ->where('user_id', auth()->user()->id);
+                                ->where('user_id', $user_id);
                         },
-                        'summaries' => function ($q) {
+                        'summaries' => function ($q) use($user_id){
                             $q
                                 // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
                                 ->with('status:id,name,code')
-                                ->where('user_id', auth()->user()->id);
+                                ->where('user_id', $user_id);
                         }
                     ]);
-            },
-            'requirements.summaries_course' => function ($q) {
-                $q
-                    ->with('status:id,name,code')
-                    ->where('user_id', auth()->user()->id);
-            },
-        ],
-        'default' => [
-            'segments.values.criterion_value.criterion',
-            'requirements',
-            'schools' => function ($query) {
-                $query->where('active', ACTIVE);
-            },
-            'topics' => [
-                'evaluation_type',
-                'requirements',
-                'medias.type'
+                },
+                'requirements.summaries_course' => function ($q) use($user_id) {
+                    $q
+                        ->with('status:id,name,code')
+                        ->where('user_id', $user_id);
+                },
             ],
-            'polls.questions',
-            'summaries' => function ($q) {
-                $q->where('user_id', auth()->user()->id);
-            },
-        ]
-    ]
+            'course-view-app-user' => [
+                'segments' => function ($q) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->select('id', 'model_id')
+                        ->with('values', function ($q) {
+                            $q
+                                ->with('criterion_value', function ($q) {
+                                    $q
+                                        ->where('active', ACTIVE)
+                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                        ->with('criterion', function ($q) {
+                                            $q->select('id', 'name', 'code');
+                                        });
+                                })
+                                ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id');
+    
+                        });
+                },
+                'summaries' => function ($q) use($user_id){
+                    $q
+                        ->with('status:id,name,code')
+                        ->where('user_id', $user_id);
+                },
+                'polls',
+                'schools' => function ($q) {
+                    $q
+                        ->select('id', 'imagen', 'name', 'position')
+                        ->where('active', ACTIVE);
+                },
+                'type:id,code',
+                'topics' => function ($q) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->with([
+                            'evaluation_type:id,code',
+                            'requirements.summaries_topics' => function ($q) use($user_id) {
+                                $q
+                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->with('status:id,name,code')
+                                    ->where('user_id', $user_id);
+                            },
+                            'summaries' => function ($q) use($user_id) {
+                                $q
+                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->with('status:id,name,code')
+                                    ->where('user_id', $user_id);
+                            }
+                        ]);
+                },
+                'requirements.summaries_course' => function ($q) use($user_id){
+                    $q
+                        ->with('status:id,name,code')
+                        ->where('user_id', $user_id);
+                },
+            ],
+            
+            default => [
+                'segments.values.criterion_value.criterion',
+                'requirements',
+                'schools' => function ($query) {
+                    $query->where('active', ACTIVE);
+                },
+                'topics' => [
+                    'evaluation_type',
+                    'requirements',
+                    'medias.type'
+                ],
+                'polls.questions',
+                'summaries' => function ($q) use($user_id){
+                    $q->where('user_id', $user_id);
+                },
+            ]
+        };
+    }
 ];
