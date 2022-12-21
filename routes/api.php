@@ -85,7 +85,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::get('vademecum/search', [RestVademecumController::class, 'loadUserModuleVademecum']);
     Route::get('vademecum/subcategorias/{categoryId}', [RestVademecumController::class, 'getSubCategorias']);
     Route::post('vademecum/store-visit/{vademecum}', [RestVademecumController::class, 'storeVisit']);
-    Route::get('reports/user-history/{schoolId?}', [RestReportsUsersController::class, 'fetchUserHistory']);
+    Route::get('reports/user-history/{workspaceId?}/{schoolId?}', [RestReportsUsersController::class, 'fetchUserHistory']);
     Route::get('reports/user-history-filters', [RestReportsUsersController::class, 'fetchUserHistoryFilters']);
 });
 

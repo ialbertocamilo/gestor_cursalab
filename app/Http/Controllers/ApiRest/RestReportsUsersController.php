@@ -41,6 +41,7 @@ class RestReportsUsersController extends Controller
         $reportResponse = Http::post($url, [
             'document' => $user->document,
             'schoolId' => $request->schoolId,
+            'workspaceId' => $request->workspaceId,
             'page' => $request->page,
             'search' => $request->search,
             'type' => 'paginated'
