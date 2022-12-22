@@ -184,14 +184,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->morphMany(Segment::class, 'model');
     }
 
-    public function pollQuestionAnswers()
+    public function scopeOnlyClientUsers($q)
     {
-
-    }
-
-    public function scopeOnlyAppUser($q)
-    {
-        $q->whereNotNull('subworkspace_id');
+        $q
+            ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']));
+//            ->whereNotNull('subworkspace_id');
     }
 
     public function scopeFilterText($q, $filter)
@@ -243,7 +240,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setActiveAttribute($value)
     {
-        $this->attributes['active'] = ($value === '1' or $value === 1);
+        $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
     }
 
     public function getCriteria()
@@ -390,7 +387,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    protected function storeRequest($data, $user = null, $update_password = true)
+    protected function storeRequest($data, $user = null, $update_password = true,$from_massive=false)
     {
         try {
 
@@ -401,14 +398,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     unset($data['password']);
                 }
                 $user->update($data);
-                SummaryUser::updateUserData($user);
+                if(!$from_massive){
+                    SummaryUser::updateUserData($user);
+                }
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
                     $user_document = CriterionValue::whereRelation('criterion', 'code', 'document')
                         ->where('value_text', $old_document)->first();
+                    if(!$user_document){
+                        $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $old_document);
+                    }
                 endif;
             else :
+                $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
+
                 $user = self::create($data);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
@@ -491,7 +495,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     protected function search($request, $withAdvancedFilters = false)
     {
-        $query = self::query();
+        $query = self::onlyClientUsers();
+        if (auth()->user()->isA('super-user')){
+            $query = self::query();
+        }
 
         $with = ['subworkspace'];
 
@@ -560,6 +567,23 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // return $query->paginate($request->rowsPerPage);
     }
 
+//    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true, $withRelations = 'default', $only_ids = false)
+//    {
+//        $user = $this;
+//        $user->load('criterion_values:id,value_text,criterion_id');
+////        $programs = collect();
+//        $all_courses = [];
+//
+////        if ($with_programs) $this->setProgramCourses($user, $all_courses);
+//
+//        // TODO: Agregar segmentacion directa
+//        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $withRelations);
+//
+//        return $only_ids
+//            ? array_unique(array_column($all_courses, 'id'))
+//            : collect($all_courses)->unique()->values();
+//    }
+
     public function getCurrentCourses(
         $with_programs = true,
         $with_direct_segmentation = true,
@@ -583,6 +607,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $query = $this->getUserCourseSegmentationQuery($withRelations);
 
         return $query->whereIn('id', array_column($all_courses, 'id'))->get();
+    }
+
+    private function getUserCourseSegmentationQuery($withRelations)
+    {
+        // $relations = config("courses.user-courses-query.$withRelations");
+        $user_id =  auth()->user() ?  auth()->user()->id : $this->id;
+        $relations = config("courses.user-courses-query")($withRelations,$user_id);
+        return Course::with($relations);
     }
 
     public function setProgramCourses($user, &$all_courses)
@@ -739,22 +771,22 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->get();
 
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
-        $user->active_cycle = $user->getActiveCycle();
+//        $user->active_cycle = $user->getActiveCycle();
 
-        $UC_rules_data = [
-            'criterion_cycle' => Criterion::where('code', 'cycle')->first(),
-            'cycle_0_value' => CriterionValue::whereRelation('criterion', 'code', 'cycle')
-                ->where('value_text', 'Ciclo 0')->first()
-        ];
+//        $UC_rules_data = [
+//            'criterion_cycle' => Criterion::where('code', 'cycle')->first(),
+//            'cycle_0_value' => CriterionValue::whereRelation('criterion', 'code', 'cycle')
+//                ->where('value_text', 'Ciclo 0')->first()
+//        ];
 
         foreach ($course_segmentations as $course) {
 
             foreach ($course->segments as $segment) {
 //                dd($segment->values->first());
 
-                $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
-
-                if (!$valid_rule) continue;
+//                $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
+//
+//                if (!$valid_rule) continue;
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
@@ -762,6 +794,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 //                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
                 if ($valid_segment) :
+
+                    // COMPATIBLE VALIDATION
 
                     if ($user->subworkspace->parent_id === 25)
                         $course = $course->getCourseCompatibilityByUser($user);
@@ -774,6 +808,57 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
         unset($user->active_cycle);
     }
+//    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $withRelations)
+//    {
+//        $user->loadMissing('subworkspace.parent');
+//
+//        $workspace = $user->subworkspace->parent;
+//
+//        $query = $this->getUserCourseSegmentationQuery($withRelations, $user);
+//
+//        $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
+//            ->whereRelation('segments', 'active', ACTIVE)
+//            ->whereRelation('topics', 'active', ACTIVE)
+//            ->whereRelation('workspaces', 'id', $workspace->id)
+//            ->when(!$withFreeCourses, function ($q) {
+//                $q->whereRelation('type', 'code', '<>', 'free');
+//            })
+//            ->where('active', ACTIVE)
+//            ->get();
+//
+//        //        info("COUNT COURSES :: {$course_segmentations->count()}");
+//
+//        //        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+//        $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+//        $user->active_cycle = $user->getActiveCycle();
+//
+//        //        $workspace_criteria = Criterion::whereRelation('workspaces', 'id', $workspace_id)->get();
+//
+//        foreach ($course_segmentations as $course) {
+//
+//            foreach ($course->segments as $segment) {
+//
+//                //                $valid_rule = $this->validateUCCyclesRule($segment, $user);
+//                //
+//                //                if (!$valid_rule) continue;
+//
+//                $course_segment_criteria = $segment->values->groupBy('criterion_id');
+//
+//                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+//                //                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
+//
+//                if ($valid_segment) :
+//
+//                    // $course = $course->getCourseCompatibilityByUser($user);
+//
+//                    $all_courses[] = $course;
+//
+//                    break;
+//                endif;
+//            }
+//        }
+//        unset($user->active_cycle);
+//    }
 
     public function validateUCCyclesRule(Segment $segment, $user, $UC_rules_data): bool
     {
@@ -800,7 +885,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return true;
     }
-
     public function updateLastUserLogin()
     {
         $user = $this;

@@ -3,16 +3,17 @@
 namespace App\Console\Commands;
 
 use App\Models\Curso;
+use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\School;
 use App\Models\Abconfig;
 use App\Models\Reinicio;
 use App\Models\Categoria;
-use App\Models\School;
-use App\Models\SummaryCourse;
-use App\Models\SummaryTopic;
 use App\Models\Workspace;
-use App\Models\Topic;
+use App\Models\SummaryTopic;
+use App\Models\SummaryCourse;
 use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -102,7 +103,8 @@ class reinicios_programado extends Command
 
             $workspaceId = $course['workspaceId'];
             $courseId = $course['courseId'];
-            $config = $this->getWorkspaceConfiguration($workspaceId);
+            $mod_eval = $course['mod_evaluaciones'];
+            // $config = $this->getWorkspaceConfiguration($workspaceId);
             $schedule = json_decode($course['scheduledRestarts'], true);
 
             // info("course => {$courseId}");
@@ -114,11 +116,14 @@ class reinicios_programado extends Command
             $nextDateFromNow->second = 59;
 
             // Reset attempts
-            $config['nro_intentos'] = 3;
-            if($workspaceId ==14){
-                $config['nro_intentos'] = 2;
-            }
-            if ($config) {
+            // $config['nro_intentos'] = 3;
+            // if($workspaceId ==14){
+            //     $config['nro_intentos'] = 2;
+            // }
+            // if($course['mod_evaluaciones']){
+            //     $config = json_decode($course['mod_evaluaciones'], true);
+            // }
+            // if ($config) {
 
                 // Reset course attempts
 
@@ -131,9 +136,9 @@ class reinicios_programado extends Command
                 // SummaryCourse::updateCourseRestartsCount($courseId);
 
                 // Reset topics attempts
-
+                
                 SummaryCourse::resetCourseTopicsAttemptsAllUsers(
-                    $courseId, $config['nro_intentos'], $nextDateFromNow
+                    $courseId, $mod_eval['nro_intentos'], $nextDateFromNow
                 );
 
                 // // Update topics' resets count
@@ -142,7 +147,7 @@ class reinicios_programado extends Command
                 // foreach ($topicsIds as $topicId) {
                 //     SummaryTopic::updateTopicRestartsCount($topicId);
                 // }
-            }
+            // }
         }
 
         $this->info(" Fin: " . now());
@@ -247,9 +252,11 @@ class reinicios_programado extends Command
         foreach ($courses as $course) {
 
             if (!in_array($course->id, $this->coursesIds)) {
+
                 $this->coursesIds[] = $course->id;
                 $this->coursesWorkspaces[] = [
                     'courseId' => $course->id,
+                    'mod_evaluaciones' => Course::getModEval($course->id) ,
                     'workspaceId' => $workspaceId ?? $course->workspace_id,
                     'scheduledRestarts' => $scheduleRestarts ?? $course->scheduled_restarts
                 ];

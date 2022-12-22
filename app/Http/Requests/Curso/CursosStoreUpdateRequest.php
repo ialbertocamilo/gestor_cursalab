@@ -32,7 +32,7 @@ class CursosStoreUpdateRequest extends FormRequest
             'requisito_id' => 'nullable',
 
             'reinicios_programado' => 'nullable',
-            'mod_evaluaciones' => 'nullable',
+            'mod_evaluaciones' => 'required',
 
             'lista_escuelas' =>  'required',
 

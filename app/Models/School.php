@@ -52,6 +52,15 @@ class School extends BaseModel
         if ($request->active == 2)
             $escuelas->where('active', '<>', ACTIVE);
 
+        if ($request->dates) {
+
+            if (isset($request->dates[0]))
+                $escuelas->whereDate('created_at', '>=', $request->dates[0]);
+
+            if (isset($request->dates[1]))
+                $escuelas->whereDate('created_at', '<=', $request->dates[1]);
+        }
+
         if (!is_null($request->sortBy)) {
             $field = $request->sortBy ?? 'created_at';
             $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -60,6 +69,7 @@ class School extends BaseModel
         } else {
             $escuelas->orderBy('created_at', 'DESC');
         }
+
 
         // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
 

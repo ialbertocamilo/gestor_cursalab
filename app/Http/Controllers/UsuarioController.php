@@ -257,8 +257,8 @@ class UsuarioController extends Controller
     public function reset(User $user): JsonResponse
     {
 
-        $subworkspace = Workspace::find($user->subworkspace_id);
-        $mod_eval = $subworkspace->mod_evaluaciones;
+        // $subworkspace = Workspace::find($user->subworkspace_id);
+        // $mod_eval = $subworkspace->mod_evaluaciones;
 
         $topics = SummaryTopic::query()
             ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
@@ -537,7 +537,8 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
-        $courses = $user->getCurrentCourses();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
+//        $courses = Course::whereIn('id', $courses)->get();
 
         return $this->success([
             'user' => [
@@ -561,6 +562,14 @@ class UsuarioController extends Controller
     {
         // info(!$user->active);
         $status = ($user->active == 1) ? 0 : 1;
+
+        $current_workspace = get_current_workspace();
+
+        if ($status && !$current_workspace->verifyLimitAllowedUsers()){
+            $error_msg = config('errors.limit-errors.limit-user-allowed');
+
+            return $this->error($error_msg, 422);
+        }
 
         $user->update(['active' => $status]);
 
@@ -604,6 +613,7 @@ class UsuarioController extends Controller
     {
         $cursos = Curso::join('course_school', 'course_school.course_id', '=', 'courses.id')
             ->where('course_school.school_id', $school_id)
+            ->whereNull('courses.deleted_at')
             ->where('courses.active', ACTIVE)
             ->select('courses.*')
             ->get();
@@ -630,8 +640,9 @@ class UsuarioController extends Controller
 
         // Load workspace configuration
 
-        $subworkspace = Workspace::find($subworkspaceId);
-        $mod_eval = $subworkspace->mod_evaluaciones;
+        // $subworkspace = Workspace::find($subworkspaceId);
+        // $mod_eval = $subworkspace->mod_evaluaciones;
+        $mod_eval = Course::getModEval($curso);
 
         $data = $this->validarDetallesReinicioIntentosMasivo(
             $curso, $tema, $subworkspaceId, $tipo, $mod_eval
@@ -725,9 +736,9 @@ class UsuarioController extends Controller
 
         // Load workspace's "evaluaciones" configuration
 
-        $subworkspace = Workspace::find($subworkspaceId);
-        $mod_eval = $subworkspace->mod_evaluaciones;
-
+        // $subworkspace = Workspace::find($subworkspaceId);
+        // $mod_eval = $subworkspace->mod_evaluaciones;
+        $mod_eval = Course::getModEval($courseId);
         if ($topicId == null) {
 
             $curso = Curso::where('id', $courseId)->first();

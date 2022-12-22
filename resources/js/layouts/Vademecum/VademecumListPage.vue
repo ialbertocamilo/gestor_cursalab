@@ -104,7 +104,7 @@ export default {
                 endpoint: '/vademecum/search',
                 ref: 'VademecumTable',
                 headers: [
-                    {text: "Módulos", value: "modules", align: 'left', sortable: false},
+                    {text: "Módulos", value: "images", align: 'left', sortable: false},
                     {text: "Nombre", value: "name"},
                     {text: "Categoría", value: "category_id", align: 'center'},
                     {text: "Sub Categoría", value: "subcategory_id", align: 'center', sortable: false},
@@ -117,6 +117,7 @@ export default {
                         type: 'route',
                         route: 'scorm_route',
                         route_type: 'external',
+                        show_condition: 'has_scorm_route',
                         disable_btn: true
                     },
                     {
@@ -136,8 +137,7 @@ export default {
                         icon: 'far fa-trash-alt',
                         type: 'action',
                         method_name: 'delete'
-                    },
-
+                    }
                 ],
                 more_actions: [
                     // {
@@ -196,13 +196,8 @@ export default {
                     vue.selects.categories = data.data.categories
                 })
         },
-        // reset(user) {
-        //     let vue = this
-        //     vue.consoleObjectTable(user, 'User to Reset')
-        // },
         goToCategorias() {
-            const url = `/vademecum/categorias`
-            window.location.href = url
+            window.location.href = `/vademecum/categorias`
         },
         activity() {
             console.log('activity')

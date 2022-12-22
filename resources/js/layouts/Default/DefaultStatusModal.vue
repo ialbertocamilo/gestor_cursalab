@@ -11,7 +11,7 @@
             <br>
             El registro pasará a estar
             "{{ !resource.active ? 'Activo' : 'Inactivo' }}"
-<!--            {{ !resource.active ? '' : 'y los usuarios asignados no podrán verlo' }}-->
+            <!--            {{ !resource.active ? '' : 'y los usuarios asignados no podrán verlo' }}-->
         </template>
     </DefaultAlertDialog>
 </template>
@@ -46,7 +46,7 @@ export default {
         onConfirm(withValidations = true) {
             let vue = this
 
-            if (vue.customCallback){
+            if (vue.customCallback) {
                 vue.$emit('onConfirm')
                 return;
             }
@@ -67,15 +67,19 @@ export default {
                     vue.showAlert(data.data.msg, data.type)
                     vue.hideLoader()
                 })
-                .catch(({data}) => {
+                .catch((error) => {
+                    if (error.http_code === 422){
+                        vue.showAlert(error.message, 'warning')
+                        vue.$emit('onConfirm', {})
+                    }
                     vue.hideLoader()
-                    vue.$emit('onError', data)
+                    vue.$emit('onError', error.data)
                 })
         },
         loadData(resource) {
             let vue = this
             vue.resource = resource
-            console.log(vue.resource)
+            // console.log(vue.resource)
         }
         ,
         loadSelects() {

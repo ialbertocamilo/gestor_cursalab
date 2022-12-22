@@ -325,4 +325,13 @@ class CursosController extends Controller
     //     return $this->success(['msg' => 'El curso se movió correctamente.']);
     // }
 
+    public function getSelects()
+    {
+        $workspace = get_current_workspace();
+
+        $types = Taxonomy::getSelectData('course', 'type');
+
+        return $this->success(compact('types'));
+    }
+
 }

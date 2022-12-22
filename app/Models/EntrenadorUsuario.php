@@ -128,6 +128,7 @@ class EntrenadorUsuario extends Model
 
         $response['error'] = false;
         $response['data'] = null;
+        $response['pagination'] = [];
 
         $entrenador = $this->validarUsuario($entrenador_dni);
         if ($entrenador['error']) return $entrenador;
@@ -167,6 +168,7 @@ class EntrenadorUsuario extends Model
     {
         $entrenador_dni = $data['entrenador_dni'];
         $filtro = $data['filtro'];
+        $page = $data['page'];
 
         $response['error'] = false;
         $response['alumnos'] = null;
@@ -194,7 +196,22 @@ class EntrenadorUsuario extends Model
                 $query->orWhere('users.document', 'like', "%$filtro%");
             });
         }
-        $dataAlumnos = $queryDataAlumnos->get();
+        if ($page) {
+            $perPage = 50;
+            $pagination = $queryDataAlumnos
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            $response['pagination'] = [
+                'total' => $pagination->total(),
+                'pages' => $pagination->lastPage(),
+                'perPage' => $pagination->perPage(),
+                'page' => $page
+            ];
+
+            $dataAlumnos = collect($pagination->items());
+        } else {
+            $dataAlumnos = $queryDataAlumnos->get();
+        }
 
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
             // $value->makeHidden('matricula_presente');

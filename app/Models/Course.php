@@ -131,9 +131,20 @@ class Course extends BaseModel
     {
         $workspace = get_current_workspace();
 
-        $q = Course::whereHas('workspaces', function ($t) use ($workspace) {
-            $t->where('workspace_id', $workspace->id);
-        });
+        $q = Course::query()
+            ->with('segments.values', function ($q) {
+                $q
+                    ->withWhereHas('criterion_value', function ($q) {
+                        $q
+                            ->select('id', 'value_text', 'criterion_id')
+                            ->whereRelation('criterion', 'code', 'module');
+                    })
+                    ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+                    ->whereRelation('criterion', 'code', 'module');
+            })
+            ->whereHas('workspaces', function ($t) use ($workspace) {
+                $t->where('workspace_id', $workspace->id);
+            });
 
         if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
@@ -141,16 +152,44 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments', 'compatibilities_a', 'compatibilities_b']);
+        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b']);
+
+        if ($request->schools) {
+            $q->whereHas('schools', function ($t) use ($request) {
+                $t->whereIn('school_id', $request->schools);
+            });
+        }
+
+        if ($request->segmented_module) {
+
+            $module_value = $request->segmented_module;
+
+            $q->whereHas('segments.values', function ($q) use ($module_value) {
+                $q->where('criterion_value_id', $module_value);
+            });
+
+        }
 
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
+
+        if ($request->type)
+            $q->where('type_id', $request->type);
 
         if ($request->active == 1)
             $q->where('active', ACTIVE);
 
         if ($request->active == 2)
             $q->where('active', '<>', ACTIVE);
+
+        if ($request->dates) {
+
+            if (isset($request->dates[0]))
+                $q->whereDate('created_at', '>=', $request->dates[0]);
+
+            if (isset($request->dates[1]))
+                $q->whereDate('created_at', '<=', $request->dates[1]);
+        }
 
         // if (!is_null($request->sortBy)) {
         //     $field = $request->sortBy ?? 'position';
@@ -378,6 +417,21 @@ class Course extends BaseModel
         return $temp;
     }
 
+    protected function getModEval($course, $value = '')
+    {
+        // $value could be nro_intentos,nota_aprobatoria
+        //variable course can be course instance or course_id
+        if ($course instanceof Course && !isset($course->mod_evaluaciones) && isset($course->id)) {
+            $course = Course::select('mod_evaluaciones')->where('id', $course->id)->first();
+        } else if (is_int($course)) {
+            $course = Course::select('mod_evaluaciones')->where('id', $course)->first();
+        }
+        if ($value) {
+            return isset($course->mod_evaluaciones[$value]) ? $course->mod_evaluaciones[$value] : null;
+        }
+        return isset($course->mod_evaluaciones) ? $course->mod_evaluaciones : null;
+    }
+
     protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
         // $workspace_id = auth()->user()->subworkspace->parent_id;
@@ -582,10 +636,11 @@ class Course extends BaseModel
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
                 if ($course_progress_percentage == 100 && $summary_course->status_id == $status_approved->id) :
-//                if ($course_progress_percentage == 100 && $summary_course->status?->code == 'aprobado') :
+
+//                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
                 elseif ($course_progress_percentage == 100 && $summary_course->status_id == $status_enc_pend->id) :
-//                elseif ($course_progress_percentage == 100 && $summary_course->status?->code == 'enc_pend') :
+//                elseif ($course_progress_percentage == 100 && $summary_course->status->code == 'enc_pend') :
                     $status = 'enc_pend';
 //                elseif ($summary_course->status?->code == 'desaprobado') :
                 elseif ($summary_course->status_id == $status_desaprobado->id) :
@@ -646,9 +701,9 @@ class Course extends BaseModel
         return $this->segments->where('active', ACTIVE)->count();
     }
 
-    public static function probar()
+    public static function probar($course_id)
     {
-        $course = Course::find('265');
+        $course = Course::find($course_id);
         $fun_1 = $course->getUsersBySegmentation('count');
         print_r('Función 1: ');
         print_r($fun_1);
@@ -664,8 +719,20 @@ class Course extends BaseModel
             $query = User::select('id')->where('active', 1);
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
-                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
+                $segment_type = Criterion::find($idx);
+                if($segment_type->field_type->code =='date'){
+                    $select_date = CriterionValue::select('id')->where(function($q)use($values){
+                        foreach ($values as $value) {
+                            $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
+                            $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
+                            $q->orWhereRaw('value_date between "'.$starts_at.'" and "'.$finishes_at.'"');
+                        }
+                    })->where('criterion_id',$idx)->get();
+                    $ids = $select_date->pluck('id');
+                }else{
                     $ids = $values->pluck('criterion_value_id');
+                }
+                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($ids, $idx) {
                     $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
                         ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
                 });

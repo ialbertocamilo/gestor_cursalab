@@ -29,7 +29,7 @@ class VademecumStoreRequest extends FormRequest
             'name' => "required|max:255|unique:vademecum,name,{$id},id,deleted_at,NULL",
             'category_id' => 'nullable',
             'subcategory_id' => 'nullable',
-
+            'media_type' => 'nullable',
             'media' => 'nullable',
             'file_media' => 'nullable',
             // 'media_id' => 'required|exists:media,id,deleted_at,NULL',

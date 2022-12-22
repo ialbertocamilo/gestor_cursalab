@@ -49,7 +49,7 @@
 
                     </v-row>
                     <v-row>
-                        <v-col cols="4">
+                        <v-col cols="6">
                             <DefaultAutocomplete
                                 dense
                                 label="Requisito"
@@ -68,7 +68,7 @@
                                 </template>
                             </DefaultAutocomplete>
                         </v-col>
-                        <v-col cols="4">
+                        <v-col cols="6">
                             <DefaultAutocomplete
                                 show-required
                                 :rules="rules.types"
@@ -80,19 +80,21 @@
                                 item-value="id"
                             />
                         </v-col>
+                    </v-row>
+                    <v-row justify="center">
                         <v-col cols="4">
                             <DefaultInput
                                 dense
+                                type="number"
                                 label="Orden"
                                 placeholder="Orden"
                                 v-model="resource.position"
-                                :rules="rules.position"
-                                show-required
                             />
+                                <!-- :rules="rules.position" -->
+                                <!-- show-required -->
+    
                         </v-col>
-                    </v-row>
-                    <v-row justify="center">
-                        <v-col cols="6">
+                        <v-col cols="4">
                             <DefaultInput
                                 numbersOnly
                                 dense
@@ -101,7 +103,7 @@
                                 v-model="resource.duration"
                             />
                         </v-col>
-                        <v-col cols="6">
+                        <v-col cols="4">
                             <DefaultInput
                                 numbersOnly
                                 dense
@@ -110,7 +112,6 @@
                                 v-model="resource.investment"
                             />
                         </v-col>
-                        
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="6">
@@ -131,14 +132,14 @@
                         </v-col>
                     </v-row>
 
-                    <!-- <v-row justify="space-around" class="menuable">
+                    <v-row justify="space-around" class="menuable">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Evaluaciones"
                             >
                                 <template slot="content">
                                     <v-row justify="center">
-
+                                     
                                         <v-col cols="6">
                                             <DefaultInput
                                                 label="Nota mínima aprobatoria"
@@ -161,7 +162,7 @@
                                 </template>
                             </DefaultModalSection>
                         </v-col>
-                    </v-row> -->
+                    </v-row>
 
                     <v-row justify="space-around">
                         <v-col cols="12">
@@ -227,17 +228,17 @@
                                                 v-model="resource.show_certification_date"
                                                 active-label="Mostrar fecha en diploma"
                                                 inactive-label="No mostrar fecha en diploma"
-                                                 />
+                                            />
                                         </v-col>
 
                                         <v-col cols="6">
-                                           * El diploma incluirá la fecha en la que el usuario aprobó el curso.
-                                           <br>
-                                           * Ejemplo: 02 de Enero del 2022
+                                            * El diploma incluirá la fecha en la que el usuario aprobó el curso.
+                                            <br>
+                                            * Ejemplo: 02 de Enero del 2022
                                         </v-col>
-                                        
+
                                     </v-row>
-                                   
+
                                 </template>
                             </DefaultModalSection>
                         </v-col>
@@ -248,7 +249,6 @@
                             <DefaultToggle v-model="resource.active"/>
                         </v-col>
                     </v-row>
-
 
                 </v-form>
             </v-card-text>
@@ -265,7 +265,10 @@
                 :options="courseValidationModal"
                 :resource="resource"
                 @onCancel="closeFormModal(courseValidationModal)"
-                @onConfirm="confirmValidationModal(courseValidationModal, base_endpoint, confirmModal(false))"
+                @onConfirm="confirmValidationModal(
+                    courseValidationModal,
+                    `${base_endpoint}?${addParamsToURL(base_endpoint, getAllUrlParams(url))}`,
+                    confirmModal(false))"
             />
         </v-card>
     </section>
@@ -275,7 +278,7 @@ const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id',
     'description', 'requisito_id', 'lista_escuelas',
-    'duration', 'investment', 'show_certification_date'
+    'duration', 'investment'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -284,13 +287,19 @@ export default {
     components: {CursoValidacionesModal},
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
-        let route_school = (this.categoria_id !== '')
+        const route_school = (this.categoria_id !== '')
             ? `/escuelas/${this.categoria_id}`
             : ``;
 
+        let base_endpoint_temp = `${route_school}/cursos`;
+
+
+
         return {
+            url: window.location.search,
             errors: [],
-            base_endpoint: `${route_school}/cursos`,
+            // base_endpoint: base_endpoint_temp,
+            base_endpoint: base_endpoint_temp,
             resourceDefault: {
                 name: null,
                 description: null,
@@ -301,7 +310,6 @@ export default {
                 file_plantilla_diploma: null,
                 config_id: this.modulo_id,
                 categoria_id: this.categoria_id,
-                show_certification_date: false,
                 active: true,
                 requisito_id: null,
                 type_id: null,
@@ -320,9 +328,9 @@ export default {
                 name: this.getRules(['required', 'max:120']),
                 lista_escuelas: this.getRules(['required']),
                 types: this.getRules(['required']),
-                position: this.getRules(['number']),
-                // nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
-                // nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
+                position: this.getRules(['required', 'number']),
+                nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
+                nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
             },
             selects: {
                 requisito_id: [],
@@ -472,6 +480,9 @@ export default {
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.types = response.types
                     if (vue.curso_id !== '') {
+                        response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
+                        response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
+
                         vue.resource = Object.assign({}, response.curso)
                     }
                 })

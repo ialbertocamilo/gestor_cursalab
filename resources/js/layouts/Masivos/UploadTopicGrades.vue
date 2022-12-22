@@ -3,7 +3,7 @@
         <header class="page-header">
             <div class="breadcrumb-holder container-fluid">
                 <v-card-title>
-                    Pruebas Presenciales
+                    Subida de notas
                 </v-card-title>
             </div>
         </header>

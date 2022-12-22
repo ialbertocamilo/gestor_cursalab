@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,6 +16,17 @@ class VademecumResource extends JsonResource
      */
     public function toArray($request)
     {
+
+        if ($this->media != null) {
+            $hasScormRoute =
+                ($this->media_type === 'scorm'  || $this->media_type == null) &&
+                $this->media->file != null;
+            $file = $this->media->file;
+        } else {
+            $hasScormRoute = false;
+            $file = null;
+        }
+
         return [
             'id' => $this->id,
             'name' => clean_html($this->name, 50),
@@ -25,7 +37,8 @@ class VademecumResource extends JsonResource
             'category_id' => $this->category->name ?? 'No definido',
             'subcategory_id' => $this->subcategory->name ?? 'No definido',
 
-            'scorm_route' => $this->media->file ?? '',
+            'scorm_route' => $hasScormRoute ? $file : null,
+            'has_scorm_route' => $hasScormRoute,
 
             'created_at' => $this->created_at->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at->format('d/m/Y g:i a'),
@@ -38,9 +51,13 @@ class VademecumResource extends JsonResource
 
         foreach($this->modules AS $module)
         {
+            $subworkspace = Workspace::findSubworkspaceWithCriterionValueId(
+                $module->id
+            );
+
             $data[] = [
-                'name' => $module->etapa,
-                'image' => space_url($module->logo)
+                'name' => $module->value_text,
+                'image' => $subworkspace ? space_url($subworkspace->logo) : ''
             ];
         }
 

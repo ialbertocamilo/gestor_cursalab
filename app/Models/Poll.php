@@ -92,9 +92,10 @@ class Poll extends BaseModel
             'xcurso'
         );
         if ($taxonomy) {
-
+            $workspace = get_current_workspace();
             $polls = Poll::where('active', 1)
                 ->where('type_id', $taxonomy->id)
+                ->where('workspace_id', $workspace->id)
                 ->get();
 
             return $polls;
@@ -112,17 +113,26 @@ class Poll extends BaseModel
         $approved_status_taxonomy = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
+        // if(!$summary_course){
+        //     $summary_course = SummaryCourse::getCurrentRowOrCreate($course, $user);
+        // }
         //        info("updateSummariesAfterCompletingPoll");
         //        info($summary_course->status_id);
         $summary_course->update(['status_id' => $approved_status_taxonomy?->id, 'advanced_percentage' => '100',]);
         //        info($summary_course->status_id);
 
-        $count_approved_courses = SummaryCourse::query()
-            ->whereRelation('course', 'active', ACTIVE)
-            ->whereRelation('status', 'code', 'aprobado')
-            ->whereHas('course.type', fn ($q) => $q->where('code', '<>', 'free'))
-            ->where('user_id', $user->id)
-            ->count();
+        // $count_approved_courses = SummaryCourse::query()
+        //     ->whereRelation('course', 'active', ACTIVE)
+        //     ->whereRelation('status', 'code', 'aprobado')
+        //     ->whereHas('course.type', fn ($q) => $q->where('code', '<>', 'free'))
+        //     ->where('user_id', $user->id)
+        //     ->count();
+        $courses_id = $user->getCurrentCourses(withFreeCourses: false, withRelations: 'summary-user-update', only_ids: true);
+        $count_approved_courses = SummaryCourse::where('user_id', $user->id)
+                    ->whereRelation('status', 'code', 'aprobado')
+                    ->whereRelation('course.type', 'code', '<>', 'free')
+                    ->whereIn('course_id', $courses_id)
+                    ->count();
 
         $general_percent = ($summary_user->courses_assigned > 0) ? (($count_approved_courses / $summary_user->courses_assigned) * 100) : 0;
         $general_percent = min($general_percent, 100);

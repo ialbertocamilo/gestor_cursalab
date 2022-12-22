@@ -28,11 +28,19 @@ class RestAyudaController extends Controller
         if (is_null($usuario_id) || is_null($motivo)) {
             $data = array('error' => true, 'error_msg' => 'No se recibieron datos', 'data' => null);
         } else {
+            if(strlen($motivo) == 1){
+                $pregunta = Post::select('title')->where('id',$motivo)->first();
+                $motivo = $pregunta->title ?? '';
+            }
             $id = Ticket::insertGetId(array(
-                'user_id' => $usuario_id,
+                'user_id' => $user->id,
                 'reason' => $motivo,
                 'detail' => $detalle,
                 'contact' => $contacto,
+                'workspace_id' => $user->subworkspace?->parent_id,
+                'dni'=>$user->document,
+                'name'=>$user->name,
+                'status' => 'pendiente'
             ));
             // $modulo = Abconfig::where('id', $user->config_id)->select('etapa')->first();
             // $mensaje = '*_Nueva incidencia:_* \n Empresa: Universidad Corporativa \n Módulo: ' . $modulo->etapa . ' \n DNI : ' . $user->dni . ' \n Ticket: #' . $id . ' \n Motivo : ' . $motivo . ' \n Enlace: ' . env('URL_GESTOR') . 'usuario_ayuda/index?id=' . $id;
@@ -43,38 +51,74 @@ class RestAyudaController extends Controller
     }
     public function registra_ayuda_login(SoporteLoginRequest $request)
     {
-        $workspace_id = strip_tags($request->input('workspace_id'));
-        $workspace_name = strip_tags($request->input('workspace_name'));
-        $name = strip_tags($request->input('name'));
         $dni = strip_tags($request->input('dni'));
         $phone = strip_tags($request->input('phone'));
         $details = strip_tags($request->input('details'));
+        $name = null;
+        $workspace_id = null;
 
-        $data = array(
-            'dni' => $dni,
-            'contact' => $phone,
-            'detail' => $details,
-            'workspace_id' => $workspace_id,
-            'name' => $name,
-            'reason' => 'Soporte Login',
-            'status' => 'pendiente',
-            'created_at' => now(),
-            'updated_at' => now()
-        );
+        // Set data to store
 
-        if (is_null($name) || is_null($workspace_id) || is_null($dni) || is_null($phone)) {
-            $response = array('error' => true, 'error_msg' => 'No se recibieron datos', 'data' => null);
+        $user = User::where('document', $dni)->first();
+        if ($user) {
+
+            $name = "$user->name $user->lastname $user->surname";
+
+            // Find workspace from user's subworkspace
+
+            $subworkspace = Workspace::query()
+                ->where('id', $user->subworkspace_id)
+                ->first();
+            $workspace_id = $subworkspace->parent_id;
+
+            $data = [
+                'dni' => $dni,
+                'contact' => $phone,
+                'detail' => $details,
+                'workspace_id' => $workspace_id,
+                'name' => $name,
+                'reason' => 'Soporte Login',
+                'status' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+
+
+        if (!$user) {
+
+            $response = [
+                'error' => true,
+                'error_msg' => 'Tu usuario no está registrado. Contáctate con tu supervisor.',
+                'data' => null
+            ];
+
+        } else if (is_null($name) || is_null($workspace_id) || is_null($dni) || is_null($phone)) {
+
+            $response = [
+                'error' => true,
+                'error_msg' => 'No se recibieron datos',
+                'data' => null
+            ];
+
         } else {
+
             $rol = Role::where('name', 'admin')->first();
-            $admins = AssignedRole::where('role_id', $rol->id)->where('scope', $workspace_id)->where('entity_type', User::class)->get('entity_id');
-            $users = array();
+            $admins = AssignedRole::query()
+                ->where('role_id', $rol->id)
+                ->where('scope', $workspace_id)
+                ->where('entity_type', User::class)
+                ->get('entity_id');
+
+            $users = [];
             if (!is_null($admins)) {
                 foreach ($admins as $adm) {
                     array_push($users, $adm->entity_id . "");
                 }
             }
+
             $send_users = User::whereIn('id', $users)->get('email');
-            $emails = array();
+            $emails = [];
             if (!is_null($send_users)) {
                 foreach ($send_users as $adm) {
                     array_push($emails, $adm->email);
@@ -82,7 +126,7 @@ class RestAyudaController extends Controller
             }
 
             $id = Ticket::insertGetId($data);
-            $response = array('error' => false, 'data' => ['ticket' => $id]);
+            $response = ['error' => false, 'data' => ['ticket' => $id]];
             // $data_email = array(
             //     'nombre' => $name,
             //     'empresa' => $workspace_name,
@@ -95,6 +139,7 @@ class RestAyudaController extends Controller
             //     Mail::to($email_to)->send(new SendEmailSupportLogin($data_email));
             // }
         }
+
         return response()->json(compact('response'));
     }
 

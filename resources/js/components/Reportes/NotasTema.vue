@@ -11,11 +11,17 @@
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
-            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            </div>
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+                <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            </div>
+            
             <list-item
                 titulo="Estado"
                 subtitulo="El estado indica si el usuario está habilitado para usar la plataforma (Activo: Si, Inactivo: No)"
@@ -46,158 +52,226 @@
         </ResumenExpand>
 
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportNotasTema" class="row formu">
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <!-- Modulo -->
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select
-                    v-model="modulo"
-                    class="form-control"
-                >
-                    <option value="">[Todos]</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+        <form @submit.prevent="exportNotasTema" class="row form">
+            <div class="col-12">
+                <div class="row px-3">
+                    <div class="col-lg-6 col-xl-4 mb-3">
+                        <!-- Modulo -->
+                        <b-form-text text-variant="muted">Módulo</b-form-text>
+                        <select
+                            v-model="modulo"
+                            class="form-control"
+                            @change="fetchFiltersAreaData">
+                            <option value="">- [Todos] -</option>
+                            <option v-for="(item, index) in modules"
+                                    :key="index"
+                                    :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <!-- Escuela -->
+                    <div class="col-lg-6 col-xl-4 mb-3">
+                        <b-form-text text-variant="muted">Escuela</b-form-text>
+                        <select
+                            v-model="escuela"
+                            class="form-control"
+                            :disabled="!schools[0]"
+                            @change="escuelaChange"
+                        >
+                            <option value>- [Todos] -</option>
+                            <option v-for="(item, index) in schools"
+                                    :key="index" :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <!-- Curso -->
+                    <div class="col-lg-6 col-xl-4 mb-3">
+                        <b-form-text text-variant="muted">Curso</b-form-text>
+                        <select v-model="curso" class="form-control"
+                                :disabled="!courses[0]"
+                                @change="cursoChange">
+                            <option value>- [Todos] -</option>
+                            <option v-for="(item, index) in courses"
+                                    :key="index"
+                                    :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <!-- Tema -->
+                    <div class="col-lg-6 col-xl-4 mb-3">
+                        <b-form-text text-variant="muted">Tema</b-form-text>
+                        <select v-model="tema" class="form-control"
+                                :disabled="!topics[0]">
+                            <option value>- [Todos] -</option>
+                            <option v-for="(item, index) in topics"
+                                    :key="index" :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            <!-- Escuela -->
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <b-form-text text-variant="muted">Escuela</b-form-text>
-                <select
-                    v-model="escuela"
-                    class="form-control"
-                    :disabled="!schools[0]"
-                    @change="escuelaChange"
-                >
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in schools"
-                            :key="index" :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
-            <!-- Curso -->
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <b-form-text text-variant="muted">Curso</b-form-text>
-                <select v-model="curso" class="form-control"
-                        :disabled="!courses[0]"
-                        @change="cursoChange">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in courses"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
-            <!-- Tema -->
-            <div class="col-lg-6 col-xl-4 mb-3">
-                <b-form-text text-variant="muted">Tema</b-form-text>
-                <select v-model="tema" class="form-control"
-                        :disabled="!topics[0]">
-                    <option value>- Todos -</option>
-                    <option v-for="(item, index) in topics"
-                            :key="index" :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
+
             <v-divider class="col-12 mb-0 p-0"></v-divider>
             <!-- Filtros secundarios -->
-            <div class="col-6 d-flex">
+            <div class="col-6 pb-0 d-flex">
+                <div class="form-row">
+                    <div class="col-12 py-0">
+                        <EstadoFiltro ref="EstadoFiltroComponent"
+                                      @emitir-cambio="" />
+                    </div>
 
-                <EstadoFiltro ref="EstadoFiltroComponent"
-                              @emitir-cambio="" />
+                    <div class="col-12 py-0">
+                        <EstadoFiltro ref="EstadoFiltroTemasComponent"
+                                      title="Estado de temas" 
+                                      tooltip_activos="Temas activos en el reporte"
+                                      tooltip_inactivos="Temas Inactivos en el reporte"
+                                      @emitir-cambio="" />
+                    </div>
 
-                <CheckValidar ref="checkValidacion" />
+                    <div class="col-12 px-3 py-0" v-if="workspaceId === 25">
+                        <b-form-text text-variant="muted">Áreas</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="area"
+                            :items="areas"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona un #Módulo"
+                            :disabled="!modulo"
+                            :background-color="!area ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
+                </div>
+                <!--CheckValidar ref="checkValidacion" /-->
             </div>
 
-            <!--          Fechas          -->
+            <!-- Fechas -->
             <div class="col-6">
-<!--                <FechaFiltro ref="FechasFiltros" />-->
+                <FechaFiltro ref="FechasFiltros"   
+                    label-start="Fecha inicial de última actualización" 
+                    label-end="Fecha final de última actualización" />
             </div>
 
-            <div class="col-12">
-                <small class="text-muted text-bold">Resultado del Tema :</small>
+            <div class="col-12 pt-0">
+                <div class="col">
+                    <small class="text-muted text-bold">Resultado del Tema :</small>
+                </div>
+                <div class="form-row px-3">
+                    <div class="col-3 mr-auto d-flex align-center">
+                        <v-checkbox
+                            class="my-0 mr-2"
+                            label="Revisados"
+                            color="success"
+                            v-model="revisados"
+                            hide-details="false"
+                        />
+                        <div 
+                            tooltip="Resultados de temas del curso revisados."
+                            tooltip-position="top"
+                        >
+                            <v-icon class="info-icon">mdi-information-outline</v-icon>
+                        </div>
+                    </div>
+                    <div class="col-3 mr-auto d-flex align-center">
+                        <v-checkbox
+                            class="my-0 mr-2"
+                            label="Aprobados"
+                            color="success"
+                            v-model="aprobados"
+                            hide-details="false"
+                        />
+                        <div
+                            tooltip="Resultados promedio de temas del curso iguales o superiores a la nota mínima aprobatoria asignada al curso."
+                            tooltip-position="top"
+                        >
+                            <v-icon class="info-icon">mdi-information-outline</v-icon>
+                        </div>
+                    </div>
+                    <div class="col-3 mr-auto d-flex align-center">
+                        <v-checkbox
+                            class="my-0 mr-2"
+                            label="Desaprobados"
+                            color="primary"
+                            v-model="desaprobados"
+                            hide-details="false"
+                        />
+                        <div tooltip="Resultados de temas del curso desaprobados."
+                             tooltip-position="top"
+                        >
+                            <v-icon class="info-icon">mdi-information-outline</v-icon>
+                        </div>
+                    </div>
+                    <div class="col-3 mr-auto d-flex align-center">
+                        <v-checkbox
+                            class="my-0 mr-2"
+                            label="Realizados"
+                            color="red"
+                            v-model="realizados"
+                            hide-details="false"
+                        />
+                        <div tooltip="Resultados de temas del curso realizados."
+                             tooltip-position="top"
+                        >
+                            <v-icon class="info-icon">mdi-information-outline</v-icon>
+                        </div>
+                    </div>
+                    <div class="col-3 mr-auto d-flex align-center">
+                        <v-checkbox
+                            class="my-0 mr-2"
+                            label="Por iniciar"
+                            color="warning"
+                            v-model="porIniciar"
+                            hide-details="false"
+                        />
+                        <div  tooltip="Resultados de temas del curso por iniciar."
+                              tooltip-position="top"
+                        >
+                            <v-icon class="info-icon">mdi-information-outline</v-icon>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-4 p-0 d-flex">
-                <v-checkbox
-                    class="my-0 mr-2"
-                    label="Revisados"
-                    color="success"
-                    v-model="revisados"
-                    hide-details="false"
-                />
-                <div
+            <div class="col-12 py-0">
+                <div class="col py-0">
+                    <small class="form-text text-muted text-bold">
+                        Tipo de Cursos
+                    </small>
+                    <div class="d-flex mt-2">
+                        <v-checkbox
+                            class="my-0 mr-2"
+                            label="Cursos Libres"
+                            color="primary"
+                            v-model="tipocurso"
+                            hide-details="false"
+                        />
+                        <div
+                            tooltip="Al marcar, el reporte generado sera solo con cursos libres."
+                            tooltip-position="top"
+                        >
+                            <v-icon class="info-icon">mdi-information-outline</v-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                >
-                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                </div>
-            </div>
-            <div class="col-4 p-0  d-flex">
-                <v-checkbox
-                    class="my-0 mr-2"
-                    label="Aprobados"
-                    color="success"
-                    v-model="aprobados"
-                    hide-details="false"
-                />
-                <div
-                    tooltip="Resultados promedio de temas del curso iguales o superiores a la nota mínima aprobatoria asignada al curso."
-                    tooltip-position="top"
-                >
-                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                </div>
-            </div>
-            <div class="col-4 p-0  d-flex">
-                <v-checkbox
-                    class="my-0 mr-2"
-                    label="Desaprobados"
-                    color="primary"
-                    v-model="desaprobados"
-                    hide-details="false"
-                />
-                <div
-                >
-                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                </div>
-            </div>
-            <div class="col-4 p-0 mt-3 mb-3 d-flex">
-                <v-checkbox
-                    class="my-0 mr-2"
-                    label="Realizados"
-                    color="red"
-                    v-model="realizados"
-                    hide-details="false"
-                />
-                <div
-                >
-                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                </div>
-            </div>
-            <div class="col-4 p-0 mt-3 mb-3 d-flex">
-                <v-checkbox
-                    class="my-0 mr-2"
-                    label="Por iniciar"
-                    color="warning"
-                    v-model="porIniciar"
-                    hide-details="false"
-                />
-                <div
-                >
-                    <v-icon class="info-icon">mdi-information-outline</v-icon>
-                </div>
-            </div>
+            <v-divider class="col-12 mb-4"></v-divider>
 
-            <v-divider class="col-12 p-0 m-0 mb-4"></v-divider>
-
-            <button type="submit"
-                    class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-                <i class="fas fa-download"></i>
-                <span>Descargar</span>
-            </button>
+          <div class="col-12 px-6">
+                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                    <i class="fas fa-download"></i>
+                    <span>Descargar</span>
+                </button>
+            </div>
         </form>
     </v-main>
 </template>
@@ -231,15 +305,18 @@ export default {
             schools: [],
             courses: [],
             topics: [],
+            areas:[],
 
             modulo: "",
             escuela: "",
             curso: "",
             tema: "",
+            area: [],
 
             //
             revisados: true,
             aprobados: true,
+            tipocurso: false,
             desaprobados: true,
             realizados: true,
             porIniciar: true
@@ -272,7 +349,8 @@ export default {
             this.showLoader()
 
             let UFC = this.$refs.EstadoFiltroComponent;
-            //let fechaFiltro = this.$refs.FechasFiltros;
+            let TEMAS = this.$refs.EstadoFiltroTemasComponent;
+            let DATES = this.$refs.FechasFiltros;
 
             // Perform request to generate report
 
@@ -290,6 +368,14 @@ export default {
 
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
+                        activeTopics: TEMAS.UsuariosActivos,
+                        inactiveTopics: TEMAS.UsuariosInactivos,
+
+                        tipocurso: this.tipocurso,
+
+                        start: DATES.start,
+                        end: DATES.end,
+                        areas: this.area,
 
                         revisados: this.revisados,
                         aprobados: this.aprobados,
@@ -353,7 +439,20 @@ export default {
             });
             this.topics = res.data;
         },
+        async fetchFiltersAreaData() {
+            if(!this.modulo) {
+                this.areas = [];
+                return;
+            }
 
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            this.areas = response.data
+        }
     }
 };
 </script>

@@ -49,8 +49,12 @@ class DashboardController extends Controller
         $cache_name .= $subworkspace_id ? "-modulo-{$subworkspace_id}" : '';
 
         $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
-            function () use ($workspaceId, $subworkspace_id, $modulos) {
-
+            function () use ($workspaceId, $subworkspace_id, $modulos,$current_workspace) {
+                $count_active_users = DashboardService::countActiveUsers($subworkspace_id);
+                if(!$subworkspace_id){
+                    $limit_allowed_users = $current_workspace->getLimitAllowedUsers();
+                    ($limit_allowed_users) && $count_active_users .= '/'.$limit_allowed_users;
+                }
                 $data['time'] = now();
 
                 $data['totales'] = [
@@ -80,7 +84,7 @@ class DashboardController extends Controller
                     'title' => 'Usuarios activos',
                     'icon' => 'mdi-account-group',
                     'color' => '#22B573',
-                    'value' => DashboardService::countActiveUsers($subworkspace_id)
+                    'value' => $count_active_users
                 ],
 
                 'temas_evaluables' => [
@@ -157,9 +161,10 @@ class DashboardController extends Controller
     public function getDataForGraphicVisitasPorfecha()
     {
         $modulo_id = request('modulo_id', NULL);
+        // $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
+        $current_workspace = get_current_workspace();
 
-        $response = Visita::getVisitasPorUsuario($modulo_id);
-
+        $response = DashboardService::loadVisitsByUser($current_workspace->id,$module_id);
         foreach ($response['data'] as $row)
         {
             $data['labels'][] = Carbon::parse($row->fechita)->format('d/m/Y');
@@ -174,10 +179,11 @@ class DashboardController extends Controller
 
     public function getDataForGraphicEvaluacionesPorfecha()
     {
-        $modulo_id = request('modulo_id', NULL);
+        $module_id = request('modulo_id', NULL);
+        // $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
+        $current_workspace = get_current_workspace();
 
-        $response = Prueba::getEvaluacionesPorfecha($modulo_id);
-
+        $response = DashboardService::loadEvaluacionesByDate($current_workspace->id,$module_id);
         foreach ($response['data'] as $row)
         {
             $data['labels'][] = Carbon::parse($row->fechita)->format('d/m/Y');

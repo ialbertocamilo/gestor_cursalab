@@ -17,7 +17,10 @@ class UsuarioAyudaResource extends JsonResource
     {
         $estados = config('constantes.soporte-estados');
         $colors = config('constantes.soporte-estados-colors');
-
+        $image = '';
+        if($this->reason != 'Soporte Login'){
+            $image =  $this->workspace ? ($this->workspace->logo ? space_url($this->workspace->logo) : '') : '';
+        }
         $data = [
             'id' => $this->id,
             'estado' => $estados[$this->status] ?? 'No definido',
@@ -29,10 +32,10 @@ class UsuarioAyudaResource extends JsonResource
             'detail' => $this->detail,
             'dni' => $this->dni ?? '',
             'nombre' => $this->name ?? '',
-            'image' => $this->workspace ? ($this->workspace->logo ? space_url($this->workspace->logo) : '') : '',
+            'image' => $image,
             'info_support' => $this->info_support ?? '',
             'msg_to_user' => $this->msg_to_user ?? '',
-
+            'contact' => $this->contact ?? '',
             'created_at' => $this->created_at?->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at?->format('d/m/Y g:i a'),
         ];
@@ -42,7 +45,6 @@ class UsuarioAyudaResource extends JsonResource
             $data['info_support'] = $this->info_support;
             $data['msg_to_user'] = $this->msg_to_user;
         }
-
         return $data;
     }
 }

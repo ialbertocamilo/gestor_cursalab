@@ -8,6 +8,8 @@ use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
+use App\Http\Requests\QuizzAnswerStoreRequest;
+
 use App\Models\SummaryCourse;
 use App\Models\Announcement;
 use App\Models\SummaryTopic;
@@ -31,7 +33,7 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::getCurrentRow($topic);
 
-        if ($row->hasNoAttemptsLeft())
+        if ($row->hasNoAttemptsLeft(null,$topic->course))
             return response()->json(['error' => true, 'msg' => 'Sin intentos restantes.'], 200);
 
         if (!$row)
@@ -41,7 +43,7 @@ class RestQuizController extends Controller
 
         $new_grade = $correct_answers_score;
         // $new_grade = SummaryTopic::calculateGrade($correct_answers, $failed_answers);
-        $passed = SummaryTopic::hasPassed($new_grade);
+        $passed = SummaryTopic::hasPassed($new_grade,null,$topic->course);
 
         $data_ev = [
             'attempts' => $row->attempts + 1,
@@ -123,7 +125,7 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::setStartQuizData($topic);
 
-        if ($row->hasNoAttemptsLeft())
+        if ($row->hasNoAttemptsLeft(null,$topic->course))
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
         if ($row->isOutOfTimeForQuiz())
@@ -153,8 +155,8 @@ class RestQuizController extends Controller
             'preguntas' => $questions,
             'tipo_evaluacion' => $topic->evaluation_type->code ?? NULL,
             'attempt' => [
-                'started_at' => $row->current_quiz_started_at->format('d/m/Y G:i a'),
-                'finishes_at' => $row->current_quiz_finishes_at->format('d/m/Y G:i a'),
+                'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
+                'finishes_at' => $row->current_quiz_finishes_at->format('Y/m/d H:i'),
                 'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
             ],
         ];
@@ -272,5 +274,73 @@ class RestQuizController extends Controller
         }
 
         return $this->success(['polls' => $temp]);
+    }
+
+    public function getFreeQuestions(Poll $poll) {
+
+        $questions = $poll->questions()->with('type:id,code')
+                     ->where('active', ACTIVE)
+                     ->select('id', 'poll_id', 'titulo', 'type_id', 'opciones')
+                     ->get();
+
+        return $this->success(compact('questions'));
+    }
+
+    public function saveFreeAnswers(QuizzAnswerStoreRequest $request) {
+        $data = $request->validated();
+
+        $user = auth()->user();
+        $poll = Poll::find($data['enc_id']);
+        $info = $data['data'];
+
+        foreach ($info as $value_data) {
+            if (!is_null($value_data) && ($value_data['tipo'] == 'multiple' || $value_data['tipo'] == 'opcion-multiple') ) {
+                $multiple = array();
+                $ddd = array_count_values($value_data['respuesta']);
+                if (!is_null($ddd)) {
+                    foreach ($ddd as $key => $value) {
+                        if ($value % 2 != 0) {
+                            array_push($multiple, $key);
+                        }
+                    }
+                }
+                $query1 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'califica') {
+                $multiple = array();
+                $array_respuestas = $value_data['respuesta'];
+                $ddd = array_count_values(array_column($array_respuestas, 'resp_cal'));
+                $ttt = array();
+                if (!is_null($array_respuestas) && count($array_respuestas) > 0) {
+                    foreach ($array_respuestas as $key => $value) {
+                        if (!is_null($value)) {
+                            foreach ($ddd as $key2 => $val2) {
+                                if ($key2 == $value['resp_cal']) {
+                                    $value['preg_cal'] = "Califica";
+                                    $ttt[$value['resp_cal']] = $value;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!is_null($ttt) && count($ttt) > 0) {
+                    foreach ($ttt as $elemento) {
+                        array_push($multiple, $elemento);
+                    }
+                }
+                $query2 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'texto') {
+                $query3 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], trim($value_data['respuesta']));
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'simple') {
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
+            }
+            if (!is_null($value_data) && $value_data['tipo'] == 'opcion-simple') {
+                $query4 = PollQuestionAnswer::updatePollQuestionAnswers(NULL, $value_data['id'], $user->id, $value_data['tipo'], $value_data['respuesta']);
+            }
+        }
+
+        return $this->success(['msg' => 'Encuesta guardada.']);
     }
 }

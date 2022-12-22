@@ -6,6 +6,7 @@ use App\Http\Controllers\ApiRest\RestController;
 use App\Http\Controllers\ApiRest\RestMeetingController;
 use App\Http\Controllers\ApiRest\RestDataController;
 use App\Http\Controllers\ApiRest\RestReportesSupervisores;
+use App\Http\Controllers\ApiRest\RestReportsUsersController;
 use App\Http\Controllers\ApiRest\RestVademecumController;
 use App\Http\Controllers\Auth\ForgotPasswordApiController;
 use App\Http\Controllers\Auth\ResetPasswordApiController;
@@ -84,14 +85,15 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::get('vademecum/search', [RestVademecumController::class, 'loadUserModuleVademecum']);
     Route::get('vademecum/subcategorias/{categoryId}', [RestVademecumController::class, 'getSubCategorias']);
     Route::post('vademecum/store-visit/{vademecum}', [RestVademecumController::class, 'storeVisit']);
-
+    Route::get('reports/user-history/{workspaceId?}/{schoolId?}', [RestReportsUsersController::class, 'fetchUserHistory']);
+    Route::get('reports/user-history-filters', [RestReportsUsersController::class, 'fetchUserHistoryFilters']);
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::post('registrar_soporte_login', [RestAyudaController::class, 'registra_ayuda_login']);
     Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
     Route::prefix('checklist')->group(base_path('routes/app/checklist.php'));
-    
+
     Route::post('/meetings/zoom/webhook-end-meeting', [RestMeetingController::class, 'zoomWebhookEndMeeting']);
     Route::post('/meetings/{meeting}/finish', [RestMeetingController::class,'finishMeeting']);
 });

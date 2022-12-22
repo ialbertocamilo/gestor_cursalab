@@ -13,7 +13,7 @@ class PushNotification extends Model
 
     protected $fillable = [
         'titulo', 'texto', 'destinatarios', 'creador_id',
-        'id', 'success', 'failure', 'created_at'];
+        'id', 'success', 'failure', 'created_at','workspace_id'];
 
     protected $hidden = [
         'updated_at'
@@ -62,7 +62,7 @@ class PushNotification extends Model
 
     protected static function search($request)
     {
-        $q = self::query();
+        $q = self::query()->where('workspace_id',get_current_workspace()?->id);
 
         if ($request->q) {
             $q->where(function ($q_search) use ($request) {

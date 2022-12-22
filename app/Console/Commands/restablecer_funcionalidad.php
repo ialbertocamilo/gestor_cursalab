@@ -2,18 +2,23 @@
 
 namespace App\Console\Commands;
 
+use Faker\Factory as Faker;
 use Carbon\Carbon;
+use App\Models\Poll;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Curso;
 use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\Ticket;
 use App\Models\Visita;
 use App\Models\Abconfig;
 use App\Models\Criterio;
 use App\Models\Criterion;
 use App\Models\Matricula;
+use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
 use App\Models\SummaryTopic;
@@ -21,6 +26,7 @@ use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
+use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
@@ -69,10 +75,142 @@ class restablecer_funcionalidad extends Command
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
-        $this->restore_summary_course();
+        // $this->restore_summary_course();
+        // $this->restores_poll_answers();
+        // $this->restore_surname();
+        $this->restore_tickets();
+        // $this->restore_attempts();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
+    public function restore_tickets(){
+        $tickets = Ticket::whereNull('workspace_id')->orWhere('workspace_id',0)->get();
+        $faker = Faker::create('es_ES');
+        foreach ($tickets as $ticket) {
+            
+            if(strlen($ticket->reason) == 1){
+                $pregunta = Post::select('title')->where('id',$ticket->reason)->first();
+                $ticket->reason = $pregunta->title ?? '';
+            }
+            
+            if(is_null($ticket->created_at)){
+                $date = $faker->dateTimeBetween('-30 days', '+0 days');
+                $dateFormat = $date->format('Y-m-d H:m:s');
+                $ticket->created_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
+                $ticket->updated_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
+            }
+            
+            if(is_null($ticket->workspace_id) || $ticket->workspace_id==0){
+                $user = User::where('id',$ticket->user_id)->first();
+                $ticket->workspace_id = $user->subworkspace?->parent_id;
+            }
+            $ticket->save();
+        }
+        dd(count($tickets));
+    }
+    public function restore_surname(){
+        $path = public_path() . "/json/surnames.json"; // ie: /var/www/laravel/public/json/filename.json
+        $users = json_decode(file_get_contents($path), true);
+        $_bar = $this->output->createProgressBar(count($users));
+        $_bar->start();
+        foreach ($users as $user) {
+            try {
+                DB::beginTransaction();
+                User::where('document',$user['document'])->update([
+                    'surname'=>$user['surname']
+                ]);
+                DB::commit();
+                //code...
+            } catch (\Throwable $th) {
+                $this->info('error',$user['document']);
+                DB::rollBack();
+            }
+            $_bar->advance();
+        }
+        $_bar->finish();
+    }
+    public function restore_attempts(){
+        $workspaces = Workspace::whereNull('parent_id')->get();
+        foreach ($workspaces as $workspace) {
+            $mod_eval = $this->getModEval($workspace->name);            
+            Course::whereHas('workspaces',function($q) use ($workspace){
+                $q->where('workspace_id',$workspace->id);
+            })->update([
+                'mod_evaluaciones'=>$mod_eval
+            ]);
+        }
+    }
+    protected function getModEval($name): array
+    {
+        return match ($name) {
+            'Farmacias Peruanas' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Super Food Holding Perú' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Real Plaza' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Tiendas Peruanas' => ['nro_intentos'=>"2" ,'nota_aprobatoria'=>"14"],
+            'Homecenters Peruanos' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"18"],
+            'Financiera Oh' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Química Suiza' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+            'Intercorp Retail' => ['nro_intentos'=> "3",'nota_aprobatoria'=>"12"],
+        };
+    }
+    public function restores_poll_answers(){
+        $polls = Poll::with('questions')
+        ->whereIn('id',[1,7,14,17,18,21,25,27,28,29])
+        ->get();
+        foreach ($polls as $key => $poll) {
+            $questions_id = $poll->questions->where('type_id',4563)->pluck('id');
+            foreach ($questions_id as $question_id) {
+                $polls_answers = PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->where('poll_question_id',$question_id)->get();
+                $percent_random = rand(40,50);;
+                if($polls_answers->count() > 0){
+                    $firs_slice =   $this->array_percentage($polls_answers->toArray(),$percent_random);
+                    $second_slice = $this->array_percentage($firs_slice[1],100-$percent_random);
+                    $percent_50 = $firs_slice[0]; 
+                    $percent_30 = $second_slice[0]; 
+                    $percent_20 = $second_slice[1];
+                    info($percent_50);
+                    info($percent_30);
+                    info($percent_20);
+                    // [{"resp_cal":5,"preg_cal":"Califica"}]
+                    PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->whereIn('id',array_column($percent_50,'id'))
+                                ->update([
+                                    'respuestas' => '[{"resp_cal":5,"preg_cal":"Califica"}]'
+                                ]);
+                    PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->whereIn('id',array_column($percent_30,'id'))
+                                ->update([
+                                    'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
+                                ]);
+
+                    PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->whereIn('id',array_column($percent_20,'id'))
+                                ->update([
+                                    'respuestas' => '[{"resp_cal":3,"preg_cal":"Califica"}]'
+                                ]);
+                }
+            }
+        }
+    }
+    function array_percentage($array, $percentage) {
+        $count = count($array);
+        $percent = ceil($count*$percentage/100);
+        $result = array_slice($array, 0, $percent);
+        $result2 = array_slice($array, $percent, count($array)+1);
+        return [$result,$result2];
+    }
+        // $this->setModEvalInCourse();
+    //     $this->info("\n Fin: " . now());
+    //     info(" \n Fin: " . now());
+    // }
+    // public function setModEvalInCourse(){
+    //     $subworkspaces = Workspace::whereNotNull('parent_id')->get();
+    //     foreach ($subworkspaces as $subworkspace) {
+    //         $courses = Db::table('course_workspace')->where('workspace');
+    //         dd($subworkspace->mod_evaluaciones);
+    //     }        
+    // }
     public function restore_summary_course(){
         // User::select('id','subworkspace_id')->whereIn('document',[71342592])->get()->map(function($user){
         //     $current_courses = $user->getCurrentCourses();

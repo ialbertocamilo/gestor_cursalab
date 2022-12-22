@@ -443,21 +443,27 @@ class Topic extends BaseModel
         $sub_workspace = $user->subworkspace;
         $mod_eval = $sub_workspace->mod_evaluaciones;
 
-        $max_attempts = isset($mod_eval['nro_intentos']) ? (int)$mod_eval['nro_intentos'] : 5;
+        // $max_attempts = isset($mod_eval['nro_intentos']) ? (int)$mod_eval['nro_intentos'] : 5;
 
         $schools_courses = [];
 
         $topic_status_arr = config('topics.status');
 
         $courses = $courses->sortBy('position');
-
+        $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
+                                    ->whereIn('course_id', $user_courses->pluck('id'))
+                                    ->where('user_id', $user->id)
+                                    ->groupBy('course_id')
+                                    ->get();
         foreach ($courses as $course) {
             // UC rule
             $course_name = $course->name;
             if ($workspace_id === 25) {
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
-
+            $max_attempts = $course->mod_evaluaciones['nro_intentos'];
+            $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
+            
             $course_status = Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
 
@@ -510,7 +516,8 @@ class Topic extends BaseModel
                     $topics->count(),
                 'temas_completados' => $course_status['completed_topics'],
                 'porcentaje' => $course_status['progress_percentage'],
-                'temas' => $topics_data
+                'temas' => $topics_data,
+                'mod_evaluaciones'=>$course->mod_evaluaciones
             ];
         }
 
@@ -658,7 +665,7 @@ class Topic extends BaseModel
 
         $counter = false;
 
-        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft()) {
+        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft(null,$topic->course)) {
 
             $times = [];
 

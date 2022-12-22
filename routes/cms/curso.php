@@ -6,6 +6,7 @@ Route::controller(CursosController::class)->group(function () {
 
     Route::view('/', 'cursos.segmentation-list')->name('curso.list');
     Route::get('/search', 'search')->name('curso.search');
+    Route::get('/get-selects', 'getSelects');
 
     Route::view('/create', 'cursos.create_edit')->name('curso.createCurso');
     Route::view('/edit/{curso}', 'cursos.create_edit')->name('curso.editCurso');

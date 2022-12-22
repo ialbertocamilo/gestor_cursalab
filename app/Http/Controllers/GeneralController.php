@@ -46,8 +46,12 @@ class GeneralController extends Controller
         // Generates totals array
 
         $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
-            function () use ($workspaceId, $subworkspace_id) {
-
+            function () use ($workspaceId, $subworkspace_id,$current_workspace) {
+            $count_active_users = DashboardService::countActiveUsers($subworkspace_id);
+            if(!$subworkspace_id){
+                $limit_allowed_users = $current_workspace->getLimitAllowedUsers();
+                ($limit_allowed_users) && $count_active_users .= '/'.$limit_allowed_users;
+            }
             $data['time'] = now();
 
             $data['totales'] = [
@@ -77,7 +81,7 @@ class GeneralController extends Controller
                     'title' => 'Usuarios activos',
                     'icon' => 'mdi-account-group',
                     'color' => '#22B573',
-                    'value' => DashboardService::countActiveUsers($subworkspace_id)
+                    'value' => $count_active_users
                 ],
 
                 'temas_evaluables' => [
@@ -106,15 +110,16 @@ class GeneralController extends Controller
             cache()->flush();
 
         $module_id = request('modulo_id', NULL);
-        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
-
-        $response = DashboardService::loadEvaluacionesByDate($workspaceId);
+        // $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
+        $workspace = get_current_workspace();
+        $response = DashboardService::loadEvaluacionesByDate($workspace->id,$module_id);
 
         foreach ($response['data'] as $row) {
             $data['labels'][] = Carbon::parse($row->fechita)
                                       ->format('d/m/Y');
             $data['values'][] = $row->cant;
         }
+        $data['response'] = $response['data'];
         $data['last_update']['time'] = $response['time']->format('d/m/Y g:i:s a');
         $data['last_update']['text'] = $response['time']->diffForHumans();
 
@@ -135,8 +140,10 @@ class GeneralController extends Controller
             cache()->flush();
 
         $module_id = request('modulo_id', NULL);
-        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
-        $response = DashboardService::loadVisitsByUser($workspaceId);
+        // $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
+        $workspace = get_current_workspace();
+
+        $response = DashboardService::loadVisitsByUser($workspace->id,$module_id);
 
         foreach ($response['data'] as $row) {
             $data['labels'][] = Carbon::parse($row->fechita)->format('d/m/Y');
@@ -145,7 +152,6 @@ class GeneralController extends Controller
 
         $data['last_update']['time'] = $response['time']->format('d/m/Y g:i:s a');
         $data['last_update']['text'] = $response['time']->diffForHumans();
-
         return $this->success(compact('data'));
     }
 
@@ -161,9 +167,10 @@ class GeneralController extends Controller
             cache()->flush();
 
         $module_id = request('modulo_id', NULL);
-        $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
+        // $workspaceId = Workspace::getWorkspaceIdFromModule($module_id);
+        $current_workspace = get_current_workspace();
 
-        $response = DashboardService::loadTopBoticas($workspaceId);
+        $response = DashboardService::loadTopBoticas($current_workspace->id);
 
         $result = $response['data']->toArray();
 

@@ -121,7 +121,7 @@ const SUB_ITEM_VADEMECUM = {
                             subpaths:["vademecum"],
                             selected:false,
                             permission:"vademecum",
-                            role:["super-user","admin-TEST","content-manager-TEST","trainer-TEST"]
+                            role:["super-user","admin","content-manager","trainer-TEST"]
                         };
 
 export default {
@@ -149,7 +149,7 @@ export default {
                             "admin",
                             "content-manager",
                             "trainer",
-                            "reports"
+                            "reports",
                         ]
                     },
                     {
@@ -336,7 +336,7 @@ export default {
                             "trainer"
                         ]
                     },
-                    
+
                     {
                          title:"Videoteca",
                          icon:"fas fa-caret-square-right",
@@ -362,9 +362,9 @@ export default {
                         permission: "entrenadores",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO"
+                            "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     },
                     {
@@ -376,9 +376,9 @@ export default {
                         permission: "checklist",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO"
+                            "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     }
                 ]
@@ -398,8 +398,9 @@ export default {
                         role: [
                             "super-user",
                             "admin",
-                            "trainer-TEMPORAL_INACTIVO",
-                            "reports-TEMPORAL_INACTIVO"
+                            "trainer",
+                            "reports",
+                            'only-reports'
                         ]
                     },
                     // {
@@ -520,7 +521,7 @@ export default {
                         path:"/soporte",
                         subpaths:["soporte"],
                         selected:false,
-                        role: ["super-user"]
+                        role: ["super-user", "admin"]
                     },
                 ]
             }
@@ -616,8 +617,9 @@ export default {
                 const { session:{ workspace } } = data;
                 if(workspace.id === 25) {
                   vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
-                  vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 }
+                
+                vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 //=== only for "Farmacias Peruanas"
 
             });

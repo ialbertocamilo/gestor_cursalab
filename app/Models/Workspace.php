@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class Workspace extends BaseModel
         'mod_evaluaciones',
         'reinicios_programado',
         'contact_support',
+        'limit_allowed_users'
     ];
 
     public function sluggable(): array
@@ -37,6 +39,7 @@ class Workspace extends BaseModel
         'mod_evaluaciones' => 'array',
         'reinicios_programado' => 'array',
         'contact_support' => 'array',
+        'limit_allowed_users' => 'array'
     ];
 
     public function segments()
@@ -68,9 +71,9 @@ class Workspace extends BaseModel
     {
         return $this->belongsToMany(
             Criterion::class
-            // 'criterion_workspace',
-            // 'workspace_id',
-            // 'criterion_id'
+        // 'criterion_workspace',
+        // 'workspace_id',
+        // 'criterion_id'
         );
     }
 
@@ -168,8 +171,8 @@ class Workspace extends BaseModel
         $ids = self::loadSubWorkspacesIds($workspaceId);
 
         $count = User::query()
-                    ->whereIn('subworkspace_id', $ids)
-                    ->count();
+            ->whereIn('subworkspace_id', $ids)
+            ->count();
 
         return $count ?? 0;
     }
@@ -187,10 +190,10 @@ class Workspace extends BaseModel
             // Return all workspaces, excluding subworkspaces
 
             return Workspace::query()
-                            ->where('parent_id', null)
-                            ->where('workspaces.active', ACTIVE)
-                            ->where('workspaces.deleted_at', null)
-                            ->select('workspaces.*');
+                ->where('parent_id', null)
+                ->where('workspaces.active', ACTIVE)
+                ->where('workspaces.deleted_at', null)
+                ->select('workspaces.*');
         }
 
 
@@ -209,17 +212,17 @@ class Workspace extends BaseModel
         // access to, according to its role
 
         $workspacesIds = AssignedRole::query()
-                           ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-                           ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
-                           ->whereIn('assigned_roles.role_id', $allowedRoles)
-                           ->where('users.id', $userId)
-                           ->select('assigned_roles.*')
-                           ->pluck('scope');
+            ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+            ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
+            ->whereIn('assigned_roles.role_id', $allowedRoles)
+            ->where('users.id', $userId)
+            ->select('assigned_roles.*')
+            ->pluck('scope');
 
         return Workspace::query()
-                        ->whereIn('id', $workspacesIds)
-                        ->where('workspaces.active', ACTIVE)
-                        ->select('workspaces.*');
+            ->whereIn('id', $workspacesIds)
+            ->where('workspaces.active', ACTIVE)
+            ->select('workspaces.*');
     }
 
     /**
@@ -258,8 +261,8 @@ class Workspace extends BaseModel
     {
 
         return Workspace::where('active', ACTIVE)
-                        ->where('parent_id', $workspaceId)
-                        ->pluck('id');
+            ->where('parent_id', $workspaceId)
+            ->pluck('id');
     }
 
     /**
@@ -273,7 +276,7 @@ class Workspace extends BaseModel
         //$subworkspace = Workspace::find($moduleId);
 
         $subworkspace = Workspace::where('criterion_value_id', $moduleId)
-                                 ->first();
+            ->first();
 
         return $subworkspace->id ?? NULL;
 
@@ -289,9 +292,25 @@ class Workspace extends BaseModel
 //        return $workspace->id ?? NULL;
     }
 
+    /**
+     * Find a subworkspace using its criterion value id
+     *
+     * @param $criterionValueId
+     * @return Builder|Model|object|null
+     */
+    public static function findSubworkspaceWithCriterionValueId($criterionValueId)
+    {
+        return Workspace::query()
+            ->where('criterion_value_id', $criterionValueId)
+            ->first();
+    }
+
     protected function searchSubWorkspace($request)
     {
-        $query = self::withCount(['users']);
+        $query = self::withCount([
+            'users' => fn($q) => $q->onlyClientUsers(),
+            'users as active_users_count' => fn($q) => $q->onlyClientUsers()->where('active', ACTIVE)
+        ]);
 
         $query->whereNotNull('parent_id');
 
@@ -316,15 +335,15 @@ class Workspace extends BaseModel
 
             DB::beginTransaction();
 
-            if ($subworkspace){
-                
+            if ($subworkspace) {
+
                 $subworkspace->update($data);
-                if($subworkspace->wasChanged('name')){
-                    CriterionValue::where('id',$subworkspace->criterion_value_id)->update([
+                if ($subworkspace->wasChanged('name')) {
+                    CriterionValue::where('id', $subworkspace->criterion_value_id)->update([
                         'value_text' => $data['name'],
                     ]);
                 }
-            }else{
+            } else {
 
                 $data['parent_id'] = session('workspace')->id ?? NULL;
 
@@ -375,6 +394,58 @@ class Workspace extends BaseModel
         return $data;
     }
 
+    public function getSettingsLimitAllowedUser()
+    {
+        $workspace = $this;
+
+        $workspace = $workspace->fresh();
+
+        return $workspace->limit_allowed_users;
+    }
+
+    public function getLimitAllowedUsers($sub_workspace_id = null): mixed
+    {
+        $workspace = $this;
+        $constraint = $workspace->getSettingsLimitAllowedUser();
+
+        if (!$constraint) return null;
+
+        $key = $sub_workspace_id ?
+            array_search($sub_workspace_id, array_column($constraint['sub_workspaces'], 'sub_workspace_id'))
+            : null;
+
+        return match ($constraint['type']) {
+            'by_workspace' => $constraint['quantity'],
+            'by_sub_workspace' => $constraint['sub_workspaces'][$key],
+            default => null
+        };
+    }
+
+    public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
+    {
+        $workspace = $this;
+
+        $workspace_constraint = $workspace->getSettingsLimitAllowedUser();
+
+        if (!$workspace_constraint) return true;
+
+        $workspace_limit = $workspace->getLimitAllowedUsers();
+
+        $q_current_active_users = User::onlyClientUsers()
+            ->where('active', ACTIVE);
+
+        if ($workspace_constraint['type'] === 'by_workspace')
+            $q_current_active_users->whereRelation('subworkspace', 'parent_id', $workspace->id);
+
+        if ($workspace_constraint['type'] === 'by_sub_workspace' && $sub_workspace_id)
+            $q_current_active_users->where('subworkspace_id', $sub_workspace_id);
+
+        $current_active_users_count = $q_current_active_users->count();
+
+//        dd($current_active_users_count, $workspace_limit);
+        return $current_active_users_count < $workspace_limit;
+    }
+
     #test functions
     public static function loadSubWorkspaces($attributes)
     {
@@ -382,17 +453,17 @@ class Workspace extends BaseModel
         $workspace = get_current_workspace();
 
         return Workspace::select($attributes)
-                        ->where('active', ACTIVE)
-                        ->where('parent_id', $workspace->id)
-                        ->get();
+            ->where('active', ACTIVE)
+            ->where('parent_id', $workspace->id)
+            ->get();
     }
 
     protected function loadSubWorkspacesSiblings($subworkspace, $attributes)
     {
         return Workspace::select($attributes)
-                        ->where('active', ACTIVE)
-                        ->where('parent_id', $subworkspace->parent_id)
-                        ->get();
+            ->where('active', ACTIVE)
+            ->where('parent_id', $subworkspace->parent_id)
+            ->get();
     }
 
     public function criterion_workspace()

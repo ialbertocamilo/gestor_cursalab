@@ -37,7 +37,7 @@
                             :rules="rules.logo"
                             @onSelect="setFile($event, resource,'logo')"/>
                     </v-col>
-                    <v-col cols="6" >
+                    <v-col cols="6">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogoNegativo"
                             v-model="resource.logo_negativo"
@@ -46,6 +46,28 @@
                             @onSelect="setFile($event, resource,'logo_negativo')"/>
                     </v-col>
                 </v-row>
+
+                <v-row justify="space-around" v-if="is_superuser">
+                    <v-col cols="12">
+                        <DefaultModalSection
+                            title="Límite de Usuarios"
+                        >
+                            <template v-slot:content>
+
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        label="Límite"
+                                        v-model="limit_allowed_users"
+                                        type="number"
+                                        min="0"
+                                        clearable
+                                    />
+                                </v-col>
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
                 <v-row>
                     <v-col>
                         <v-subheader class="mt-4 px-0">
@@ -63,9 +85,12 @@
                             Selecciona los criterios que usa la empresa para segmentar el contenido
                             <v-row>
                                 <v-col cols="12">
-                                    <p class="mb-2 d-flex align-items-start" v-for="(mensaje,index) in mensajes" :key="index">
-                                        <v-icon class="mx-2" style="font-size: 0.60em; color: #22b573; margin-top: 7px;">fas fa-check</v-icon>
-                                        <span>{{mensaje}}</span>
+                                    <p class="mb-2 d-flex align-items-start" v-for="(mensaje,index) in mensajes"
+                                       :key="index">
+                                        <v-icon class="mx-2"
+                                                style="font-size: 0.60em; color: #22b573; margin-top: 7px;">fas fa-check
+                                        </v-icon>
+                                        <span>{{ mensaje }}</span>
                                     </p>
                                 </v-col>
                             </v-row>
@@ -99,7 +124,7 @@
                             v-model="resource.selected_criteria[criterion.id]"
                             :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
                             :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
-                            >
+                        >
                             <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
 
                         </v-checkbox>
@@ -136,39 +161,43 @@ export default {
         width: String
     },
     // data: () => ({
-    data(){
+    data() {
         return {
-        mensajes: mensajes,
-        errors: []
-        ,
-        generateCriterionTitle(criterion) {
+            is_superuser: false,
+            mensajes: mensajes,
+            errors: []
+            ,
+            generateCriterionTitle(criterion) {
 
-            let requiredLabel = criterion.required
-                                ? '(requerido)'
-                                : '(opcional)';
+                let requiredLabel = criterion.required
+                    ? '(requerido)'
+                    : '(opcional)';
 
-            return `${criterion.name} ${requiredLabel}`;
+                return `${criterion.name} ${requiredLabel}`;
+            }
+            ,
+            resourceDefault: {
+                name: '',
+                url_powerbi: '',
+                logo: '',
+                logo_negativo: '',
+                selected_criteria: {}
+            }
+
+            ,
+            limit_allowed_users: null,
+            resource: {}
+            ,
+            defaultCriteria: []
+            ,
+            customCriteria: []
+            ,
+            rules: {
+                name: this.getRules(['required', 'max:255']),
+                logo: this.getRules(['required']),
+            }
         }
-        ,
-        resourceDefault: {
-            name: '',
-            url_powerbi: '',
-            logo: '',
-            logo_negativo: '',
-            selected_criteria: {}
-        }
-        ,
-        resource: {}
-        ,
-        defaultCriteria: []
-        ,
-        customCriteria: []
-        ,
-        rules: {
-            name: this.getRules(['required', 'max:255']),
-            logo: this.getRules(['required']),
-        }
-    }}
+    }
     // })
     ,
     mounted() {
@@ -205,8 +234,8 @@ export default {
 
             let base = `${vue.options.base_endpoint}`;
             let url = vue.resource.id
-                        ? `/${base}/${vue.resource.id}/update`
-                        : `/${base}/store`;
+                ? `/${base}/${vue.resource.id}/update`
+                : `/${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
 
@@ -221,6 +250,9 @@ export default {
                     'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
                 );
 
+                vue.setLimitUsersAllowed(formData);
+
+
                 // Submit data to be saved
 
                 vue.$http
@@ -234,19 +266,27 @@ export default {
                         vue.$emit('onConfirm');
 
                     }).catch((error) => {
-                        this.hideLoader();
-                        if (error && error.errors)
-                            vue.errors = error.errors
-                    })
-            }else{
+                    this.hideLoader();
+                    if (error && error.errors)
+                        vue.errors = error.errors
+                })
+            } else {
                 this.hideLoader();
             }
         }
         ,
+
+        setLimitUsersAllowed(formData) {
+            let vue = this;
+            if (vue.limit_allowed_users) {
+                formData.append('limit_allowed_users_type', 'by_workspace');
+                formData.append('limit_allowed_users_limit', vue.limit_allowed_users);
+            }
+        },
         /**
          * Load data from server
          */
-        loadData (workspace) {
+        loadData(workspace) {
 
             if (!workspace) return;
 
@@ -260,6 +300,8 @@ export default {
             this.$http
                 .get(url)
                 .then(({data}) => {
+
+                    vue.is_superuser = data.data.is_superuser || false;
 
                     vue.resource = Object.assign({}, data.data);
 
@@ -277,6 +319,8 @@ export default {
                             c.id, data.data.criteria_workspace
                         );
                     });
+
+                    vue.limit_allowed_users = data.data.limit_allowed_users;
 
                 })
         }

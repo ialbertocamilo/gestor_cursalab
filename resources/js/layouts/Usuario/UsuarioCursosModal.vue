@@ -7,14 +7,14 @@
         no-padding-card-text
     >
         <template v-slot:content>
-<!--            <v-row justify="space-around" class="mt-5" no-gutters v-if="resource.courses.length>0">-->
+            <!--            <v-row justify="space-around" class="mt-5" no-gutters v-if="resource.courses.length>0">-->
 
-<!--                <v-col cols="12" class="d-flex justify-content-center">-->
-<!--                    <v-chip class="mr-2 my-2" color="primary" label>-->
-<!--                        {{ resource.courses[0].name || '' }}-->
-<!--                    </v-chip>-->
-<!--                </v-col>-->
-<!--            </v-row>-->
+            <!--                <v-col cols="12" class="d-flex justify-content-center">-->
+            <!--                    <v-chip class="mr-2 my-2" color="primary" label>-->
+            <!--                        {{ resource.courses[0].name || '' }}-->
+            <!--                    </v-chip>-->
+            <!--                </v-col>-->
+            <!--            </v-row>-->
             <v-row justify="space-around" class="mt-5 mx-3">
                 <v-col cols="12">
                     <template v-if="resource.schools.length === 0">
@@ -23,36 +23,36 @@
                         </div>
                     </template>
                     <template v-else>
-<!--                        <v-tabs vertical>-->
-<!--                            <v-tab v-for="block in resource.courses[0].blocks" :key="block.id"-->
-<!--                                   class="justify-content-start" :title="block.name">-->
-<!--                                <v-icon left>mdi-school</v-icon>-->
-<!--                                {{ block.name }} ({{ block.courses_count }})-->
-<!--                            </v-tab>-->
+                        <!--                        <v-tabs vertical>-->
+                        <!--                            <v-tab v-for="block in resource.courses[0].blocks" :key="block.id"-->
+                        <!--                                   class="justify-content-start" :title="block.name">-->
+                        <!--                                <v-icon left>mdi-school</v-icon>-->
+                        <!--                                {{ block.name }} ({{ block.courses_count }})-->
+                        <!--                            </v-tab>-->
 
-<!--                            <v-tab-item v-for="block in resource.courses[0].blocks" :key="block.id"-->
-<!--                                        class="ml-10 elevation-1">-->
-<!--                                <v-card flat class="">-->
-<!--                                    <v-card-text>-->
-<!--                                        <v-simple-table class="simple-table">-->
-<!--                                            <template v-slot:default>-->
-<!--                                                <tbody>-->
-<!--                                                <tr v-for="course in block.courses" :key="course.id">-->
-<!--                                                    <td class="px-0 mx-0">-->
-<!--                                                        <v-icon right> mdi-book</v-icon>-->
-<!--                                                    </td>-->
-<!--                                                    <td>{{ course.name }}</td>-->
-<!--                                                </tr>-->
-<!--                                                </tbody>-->
-<!--                                            </template>-->
-<!--                                        </v-simple-table>-->
-<!--                                    </v-card-text>-->
-<!--                                </v-card>-->
-<!--                            </v-tab-item>-->
+                        <!--                            <v-tab-item v-for="block in resource.courses[0].blocks" :key="block.id"-->
+                        <!--                                        class="ml-10 elevation-1">-->
+                        <!--                                <v-card flat class="">-->
+                        <!--                                    <v-card-text>-->
+                        <!--                                        <v-simple-table class="simple-table">-->
+                        <!--                                            <template v-slot:default>-->
+                        <!--                                                <tbody>-->
+                        <!--                                                <tr v-for="course in block.courses" :key="course.id">-->
+                        <!--                                                    <td class="px-0 mx-0">-->
+                        <!--                                                        <v-icon right> mdi-book</v-icon>-->
+                        <!--                                                    </td>-->
+                        <!--                                                    <td>{{ course.name }}</td>-->
+                        <!--                                                </tr>-->
+                        <!--                                                </tbody>-->
+                        <!--                                            </template>-->
+                        <!--                                        </v-simple-table>-->
+                        <!--                                    </v-card-text>-->
+                        <!--                                </v-card>-->
+                        <!--                            </v-tab-item>-->
 
-<!--                        </v-tabs>-->
+                        <!--                        </v-tabs>-->
                         <v-tabs vertical>
-<!--                            <v-tab v-for="school in resource.courses[0].schools" :key="school.id"-->
+                            <!--                            <v-tab v-for="school in resource.courses[0].schools" :key="school.id"-->
                             <v-tab v-for="school in resource.schools" :key="school.id"
                                    class="justify-content-start" :title="school.name">
                                 <v-icon left>mdi-school</v-icon>
@@ -109,6 +109,13 @@ export default {
     methods: {
         closeModal() {
             let vue = this;
+
+            vue.resource = {
+                id: '',
+                fullname: null,
+                schools: [],
+            };
+
             vue.$emit('onCancel')
         },
         confirmModal() {
@@ -120,9 +127,18 @@ export default {
         loadData(resource) {
             let vue = this
             let url = `${vue.options.base_endpoint}/${resource.id}/courses-by-user`
-            vue.$http.get(url).then(({data}) => {
-                vue.resource = data.data.user
-            });
+            vue.showLoader();
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.resource = data.data.user
+
+                    setTimeout(() => {
+                        vue.hideLoader();
+                    }, 1000)
+                })
+                .catch(e => {
+                    vue.hideLoader();
+                });
         },
         loadSelects() {
 

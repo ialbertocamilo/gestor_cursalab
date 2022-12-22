@@ -103,15 +103,14 @@
                         </draggable>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around" class="menuable">
+                <!-- <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSection
                             title="Evaluaciones"
                         >
-                            <!-- tooltip="Tooltip" -->
                             <template slot="content">
                                 <v-row justify="center">
-                                  <!--   <v-col cols="4">
+                                    <v-col cols="4">
                                         <DefaultInput
                                             label="Preguntas por evaluación"
                                             v-model="resource.preg_x_ev"
@@ -119,7 +118,7 @@
                                             show-required
                                             dense
                                         />
-                                    </v-col> -->
+                                    </v-col>
                                     <v-col cols="6">
                                         <DefaultInput
                                             label="Nota mínima aprobatoria"
@@ -142,7 +141,7 @@
                             </template>
                         </DefaultModalSection>
                     </v-col>
-                </v-row>
+                </v-row> -->
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSection
