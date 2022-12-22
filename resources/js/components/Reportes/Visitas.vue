@@ -39,18 +39,23 @@
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-6 mt-2">
-                        <b-form-text text-variant="muted">Módulo</b-form-text>
-                        <select class="form-control"
-                                v-model="modulo"
-                                @change="fetchFiltersCareerData">
-                            <option v-for="(item, index) in modules"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+
+                        <DefaultAutocomplete
+                            dense
+                            v-model="modulo"
+                            :items="modules"
+                            label="Módulo"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los módulos"
+                            @onChange="fetchFiltersCareerData"
+                            :selectionLimit="5"
+                        />
 
                     </div>
+                    <div class="col-6"></div>
 
                     <div class="col-6">
                         <b-form-text text-variant="muted">Escuelas</b-form-text>
@@ -68,7 +73,7 @@
                             item-text="name"
                             label="Selecciona un #Módulo"
                             @change="fetchFiltersSchoolData"
-                            :disabled="!modulo"
+                            :disabled="modulo.length === 0"
                             :background-color="!school ? '' : 'light-blue lighten-5'">
                         </v-select>
                     </div>
@@ -197,10 +202,10 @@ export default {
 
             schools: [],
             courses: [],
-            school:[],
-            course:[],
+            school: [],
+            course: [],
 
-            modulo: "",
+            modulo: [],
             tipocurso: false,
 
             loadingCarreras: false,
@@ -222,7 +227,7 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: vue.workspaceId,
-                        modulos: vue.modulo ? [vue.modulo] : [],
+                        modulos: vue.modulo,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
                         tipocurso: vue.tipocurso,
@@ -253,9 +258,9 @@ export default {
             vue.areas = [];
             vue.area = [];
 
-            if(!vue.modulo) return;
+            if (vue.modulo.length === 0) return;
 
-            let url = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo}/criterion-values/career`
+            let url = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo.join()}/criterion-values/career`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -272,9 +277,9 @@ export default {
             vue.areas = [];
             vue.area = [];
 
-            if(!vue.modulo) return;
+            if (vue.modulo.length === 0) return;
 
-            let urlAreas = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo}/criterion-values/grupo`
+            let urlAreas = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo.join()}/criterion-values/grupo`
             let responseAreas = await axios({ url: urlAreas,method: 'get' });
             vue.areas = responseAreas.data;
            /* vue.areas = [ { id:1122, name:'Grupo 33' },
@@ -288,7 +293,7 @@ export default {
             vue.courses = [];
             vue.course = [];
 
-            if (!vue.school.length) return;
+            if (vue.school.length === 0) return;
 
             let urlCourses = `${vue.$props.reportsBaseUrl}/filtros/schools/courses`;
             let responseCourses = await axios( { url: urlCourses, method: 'post',
@@ -305,7 +310,7 @@ export default {
     },
     mounted() {
         const vue = this;
-        vue.modulo = vue.modules[0].id; //init module
+        //vue.modulo = vue.modules[0].id; //init module
         vue.fetchFiltersData();
         vue.fetchFiltersCareerData();
     }

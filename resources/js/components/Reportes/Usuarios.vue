@@ -14,7 +14,7 @@
             <div v-show="workspaceId === 25">
                 <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
             </div>
-            
+
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y Nombres" subtitulo="Datos personales" />
 
@@ -22,7 +22,7 @@
                 <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
                 <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
             </div>
-            
+
             <list-item
                 titulo="Estado"
                 subtitulo="El estado indica si el usuario está habilitado para usar la plataforma (Activo: Si, Inactivo: No)"
@@ -33,17 +33,21 @@
         <form class="row"
               @submit.prevent="exportUsuariosDW">
             <div class="col-6 px-6">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select class="form-control"
-                        v-model="modulo"
-                        @change="fetchFiltersCareerData">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                  <DefaultAutocomplete
+                    dense
+                    v-model="modulo"
+                    :items="modules"
+                    label="Módulo"
+                    item-text="name"
+                    item-value="id"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione los módulos"
+                    @onChange="fetchFiltersCareerData"
+                    :selectionLimit="5"
+                />
+
+
                 <div class="col-12 px-0 pt-3">
                     <div class="col-12 p-0">
                         <EstadoFiltro ref="EstadoFiltroComponent" class="px-0"
@@ -125,7 +129,7 @@ export default {
 
             career:[],
             area:[],
-            modulo: ''
+            modulo: []
         };
     },
     methods: {
@@ -146,7 +150,7 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
+                        modulos: this.modulo,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
                         careers: this.career,
@@ -179,31 +183,31 @@ export default {
             this.areas = [];
             this.area = [];
 
-            if(!this.modulo) return;
+            if(this.modulo.length === 0) return;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/career`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/career`
             let response = await axios({
                 url: url,
                 method: 'get'
             })
 
             this.careers = response.data;
-           
+
         },
         async fetchFiltersAreaData() {
             this.areas = [];
             this.area = [];
 
-            if(!this.modulo) return;
+            if(this.modulo.length === 0) return;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
             })
 
             this.areas = response.data;
-          
+
 
 
 

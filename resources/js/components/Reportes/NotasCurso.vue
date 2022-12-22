@@ -19,7 +19,7 @@
 
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
-            
+
             <!-- this only for FP -->
             <div v-show="workspaceId === 25">
                 <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
@@ -62,59 +62,52 @@
                 <div class="row px-3">
                     <!-- Modulo -->
                     <div class="col-sm-4 mb-3">
-                        <b-form-text text-variant="muted">Módulo</b-form-text>
-                        <select v-model="modulo"
-                                class="form-control"
-                                @change="fetchFiltersAreaData">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in modules"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
 
-                        <!--DefaultSelect
+                        <DefaultAutocomplete
                             dense
                             v-model="modulo"
                             :items="modules"
-                            label=""
+                            label="Módulo"
                             item-text="name"
                             item-value="id"
-                            placeholder="Seleccione un Módulo"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los módulos"
                             @onChange="fetchFiltersAreaData"
-                        /-->
+                            :selectionLimit="5"
+                        />
                     </div>
                     <!-- Escuela -->
                     <div class="col-sm-4 mb-3">
-                        <b-form-text text-variant="muted">Escuela</b-form-text>
-                        <select
+                        <DefaultAutocomplete
+                            dense
                             v-model="escuela"
-                            class="form-control"
+                            :items="schools"
                             :disabled="!schools[0]"
-                            @change="escuelaChange"
-                        >
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in schools"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                            label="Escuelas"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione las escuelas"
+                            @onChange="escuelaChange"
+                            :selectionLimit="5"
+                        />
                     </div>
                     <!-- Curso -->
                     <div class="col-sm-4 mb-3">
-                        <b-form-text text-variant="muted">Curso</b-form-text>
-                        <select v-model="curso"
-                                class="form-control"
-                                :disabled="!courses[0]">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in courses"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                        <DefaultAutocomplete
+                            dense
+                            v-model="curso"
+                            :items="courses"
+                            :disabled="!courses[0]"
+                            label="Curso"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los cursos"
+                        />
                     </div>
                 </div>
             </div>
@@ -239,8 +232,8 @@
                 </div>
                 <!-- Fechas -->
                 <div class="col-4 ml-auto">
-                    <FechaFiltro ref="FechasFiltros"   
-                        label-start="Fecha inicial de última actualización" 
+                    <FechaFiltro ref="FechasFiltros"
+                        label-start="Fecha inicial de última actualización"
                         label-end="Fecha final de última actualización"/>
                 </div>
             </div>
@@ -276,9 +269,9 @@ export default {
             courses: [],
             areas: [],
             //
-            modulo: "", 
-            escuela: "",
-            curso: "",
+            modulo: [],
+            escuela: [],
+            curso: [],
             area: [],
             //
             aprobados: true,
@@ -317,9 +310,9 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
-                        escuelas: this.escuela ? [this.escuela] : [],
-                        cursos: this.curso ? [this.curso] : [],
+                        modulos: this.modulo,
+                        escuelas: this.escuela,
+                        cursos: this.curso,
                         areas: this.area,
 
                         UsuariosActivos: UFC.UsuariosActivos,
@@ -355,12 +348,12 @@ export default {
             this.hideLoader()
         },
         async fetchFiltersAreaData() {
-            if(!this.modulo) {
+            if (this.modulo.length === 0) {
                 this.areas = [];
                 return;
             }
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -369,15 +362,15 @@ export default {
             this.areas = response.data
         },
         async escuelaChange() {
-            this.curso = null;
-            this.tema = null;
+            this.curso = [];
+            this.tema = [];
             this.courses = [];
             this.topics = [];
 
-            if (!this.escuela) return false;
+            if (this.escuela.length === 0) return false;
 
-            this.cursos_libres =false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
+            this.cursos_libres = false;
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
             let res = await axios({
                 url,
                 method: 'get'
