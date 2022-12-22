@@ -759,3 +759,9 @@ body::-webkit-scrollbar-thumb {
 .tabs-item-detail .v-window__container .v-window-item .v-card{
     margin-top: 25px !important;
 }
+
+// Allow multiline options in selects
+
+.v-select .v-list-item__title {
+    white-space: pre-wrap;
+}
