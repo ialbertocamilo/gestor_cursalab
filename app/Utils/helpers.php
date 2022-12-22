@@ -196,7 +196,7 @@ function catchInfo($title, $message)
 
 function errorExceptionServer($code = '')
 {
-    return response()->json(['message' => 'Ha ocurrido un problema. Inténtalo de nuevo más tarde o contáctate con el equipo de soporte.', 'code' => $code], 400);
+    return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.', 'code' => $code], 400);
 }
 
 
