@@ -82,21 +82,21 @@ class Handler extends ExceptionHandler
                 break;
             }
         }
-        if ($request->wantsJson()) {
-            // Define the response
-            $response = [
-                'message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'
-            ];
-            // Default response of 400
-            $status = 500;
-            // If this exception is an instance of HttpException
-            if ($this->isHttpException($exception)) {
-                // Grab the HTTP status code from the Exception
-                $status = $exception->getStatusCode();
-            }
-            // Return a JSON response with the response array and status code
-            return response()->json($response, $status);
-        }
+        // if ($request->wantsJson()) {
+        //     // Define the response
+        //     $response = [
+        //         'message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'
+        //     ];
+        //     // Default response of 400
+        //     $status = 500;
+        //     // If this exception is an instance of HttpException
+        //     if ($this->isHttpException($exception)) {
+        //         // Grab the HTTP status code from the Exception
+        //         $status = $exception->getStatusCode();
+        //     }
+        //     // Return a JSON response with the response array and status code
+        //     return response()->json($response, $status);
+        // }
         // if ($exception instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
         //     return response()->json(['error' => 'token is expired'], 400);
         // } elseif ($exception instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
