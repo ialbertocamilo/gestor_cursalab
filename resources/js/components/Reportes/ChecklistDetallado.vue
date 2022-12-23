@@ -100,6 +100,7 @@
                 item-text="title"
                 item-value="id"
                 multiple
+                :showSelectAll="false"
                 placeholder="Seleccione los checklists"
                 />
             </div>

@@ -27,31 +27,36 @@
         <form @submit.prevent="exportSegmentacion" class="row">
             <!-- Escuela -->
             <div class="col-sm-6 mb-3">
-                <b-form-text text-variant="muted">Escuela</b-form-text>
+
                 <DefaultAutocomplete
                     :disabled="!schools[0]"
                     v-model="filters.school"
                     :items="schools"
-                    label=""
+                    label="Escuela"
                     item-text="name"
                     item-value="id"
                     dense
                     multiple
                     @onChange="schoolsChange"
+                    placeholder="Seleccione las escuelas"
+                    :maxValuesSelected="5"
+                    :showSelectAll="false"
                 />
             </div>
             <!-- Curso -->
             <div class="col-sm-6 mb-3">
-                <b-form-text text-variant="muted">Curso</b-form-text>
+
                 <DefaultAutocomplete
                     :disabled="!courses[0]"
                     v-model="filters.course"
                     :items="courses"
-                    label=""
+                    label="Curso"
                     item-text="name"
                     item-value="id"
                     dense
-                    multiple
+                    placeholder="Seleccione los cursos"
+                    :showSelectAll="false"
+
                 />
             </div>
             <div class="row col-sm-12 mb-3 ml-1">
@@ -160,7 +165,7 @@ export default {
             vue.filters.course = [];
             vue.courses = [];
 
-            //check schoolId 
+            //check schoolId
             if(!vue.filters.school.length) return;
 
             const reqPayload = {
@@ -182,7 +187,5 @@ export default {
 </script>
 
 <style>
-.v-label {
-    display: contents !important;
-}
+
 </style>

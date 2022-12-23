@@ -99,6 +99,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
+                            :showSelectAll="false"
                             placeholder="Seleccione los temas"
                         />
                     </div>

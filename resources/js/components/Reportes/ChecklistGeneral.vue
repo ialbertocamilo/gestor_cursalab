@@ -44,6 +44,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
                     @onChange="fetchFiltersAreaData"
+                    :maxValuesSelected="5"
                 />
             </div>
 

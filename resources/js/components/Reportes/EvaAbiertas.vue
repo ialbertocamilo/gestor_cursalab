@@ -98,6 +98,7 @@
                             item-value="id"
                             multiple
                             placeholder="Seleccione los temas"
+                            :showSelectAll="false"
                         />
                     </div>
                 </div>

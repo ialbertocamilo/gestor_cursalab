@@ -26,31 +26,17 @@
         <form @submit.prevent="_exportDiplomas" class="row col-12">
         <!-- Modulo -->
             <div class="col-md-6 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-
-                <!--v-select
-                    attach
-                    solo
-                    chips
-                    clearable
-                    multiple
-                    hide-details="false"
+                   <DefaultAutocomplete
                     v-model="filters.module"
                     :items="modules"
-                    item-value="id"
-                    item-text="name"
-                    label="- [Todos] -"
-                    :background-color="!filters.module ? '' : 'light-blue lighten-5'"
-                ></v-select-->
-
-                <DefaultAutocomplete
-                    v-model="filters.module"
-                    :items="modules"
-                    label=""
+                    label="Módulo"
                     item-text="name"
                     item-value="id"
                     dense
                     multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione los módulos"
+                    :maxValuesSelected="5"
                 />
 
                 <!--DefaultSelect
@@ -66,30 +52,20 @@
             </div>
             <!-- Escuela -->
             <div class="col-md-6 mb-3">
-                <b-form-text text-variant="muted">Escuela</b-form-text>
 
-
-                 <!--DefaultAutocomplete
-                    :disabled="!Escuelas[0]"
-                    v-model="filters.escuela"
-                    :items="Escuelas"
-                    label="Seleccione una escuela"
-                    item-text="nombre"
-                    item-value="id"
-                    dense
-                    @onChange="escuelaChange"
-                    multiple
-                /-->
                 <DefaultAutocomplete
                     :disabled="!schools[0]"
                     v-model="filters.school"
                     :items="schools"
-                    label=""
+                    label="Escuela"
                     item-text="name"
                     item-value="id"
                     dense
                     multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione las escuelas"
                     @onChange="schoolsChange"
+                    :maxValuesSelected="5"
                 />
 
                 <!--select
@@ -120,15 +96,15 @@
 
             <!-- Curso -->
             <div class="col-md-6 mb-3">
-                <b-form-text text-variant="muted">Curso</b-form-text>
-
                 <DefaultAutocomplete
                     :disabled="!courses[0]"
                     v-model="filters.course"
                     :items="courses"
-                    label=""
+                    label="Curso"
                     item-text="name"
                     item-value="id"
+                    :showSelectAll="false"
+                    placeholder="Seleccione los cursos"
                     dense
                     multiple
                 />
@@ -158,17 +134,7 @@
                 /-->
             </div>
             <div class="col-md-6 mb-3">
-                <!--DefaultInputDate
-                    clearable
-                    dense
-                    range
-                    :referenceComponent="'modalDateFilter1'"
-                    :options="modalDateFilter1"
-                    v-model="filters.fecha"
-                    label="seleccione una fecha"
-                /-->
 
-                <b-form-text text-variant="muted">Fecha de emisión:</b-form-text>
                  <DefaultInputDate
                     clearable
                     dense
@@ -176,7 +142,7 @@
                     :referenceComponent="'modalDateFilter1'"
                     :options="modalDateFilter1"
                     v-model="filters.date"
-                    label=""
+                    label="Fecha de emisión"
                 />
             </div>
             <v-row>
@@ -222,18 +188,18 @@ import ListItem from "./partials/ListItem.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
 
 export default {
-	components: { EstadoFiltro, ResumenExpand, ListItem },
-	props: {
+    components: { EstadoFiltro, ResumenExpand, ListItem },
+    props: {
         modules:{ type: Array, required: true },
         workspaceId:{ type: Number, required: true },
         reportsBaseUrl:{ type: String, required: true }
-	},
-	data() {
-		return {
-			schools: [],
-			courses: [],
+    },
+    data() {
+        return {
+            schools: [],
+            courses: [],
 
-			cursos_libres:false,
+            cursos_libres:false,
             filters:{
                 module: [],
                 school: [],
@@ -248,29 +214,29 @@ export default {
             modalDateFilter1: {
                 open: false,
             },
-		};
-	},
-	methods: {
-		exportDiplomas() {
+        };
+    },
+    methods: {
+        exportDiplomas() {
             const vue = this;
-			vue.showLoader();
+            vue.showLoader();
 
             let estados_usuario = [];
-			const estado_usuario_filtro = vue.$refs.EstadoUsuarioFiltroComponent;
+            const estado_usuario_filtro = vue.$refs.EstadoUsuarioFiltroComponent;
             (estado_usuario_filtro.UsuariosActivos) && estados_usuario.push(1);
             (estado_usuario_filtro.UsuariosInactivos) && estados_usuario.push(0);
 
             let estados_escuela = [];
-			const estado_escuela_filtro = vue.$refs.EstadoEscuelaFiltroComponent;
+            const estado_escuela_filtro = vue.$refs.EstadoEscuelaFiltroComponent;
             (estado_escuela_filtro.UsuariosActivos) && estados_escuela.push(1);
             (estado_escuela_filtro.UsuariosInactivos) && estados_escuela.push(0);
 
             let estados_curso = [];
-			const estado_curso_filtro = vue.$refs.EstadoCursoFiltroComponent;
+            const estado_curso_filtro = vue.$refs.EstadoCursoFiltroComponent;
             (estado_curso_filtro.UsuariosActivos) && estados_curso.push(1);
             (estado_curso_filtro.UsuariosInactivos) && estados_curso.push(0);
 
-			axios
+            axios
                 .post(`${vue.reportsBaseUrl}/reporte_diplomas`, {
                     modulos_id:vue.filters.modulo,
                     categorias_id:vue.filters.escuela,
@@ -280,20 +246,20 @@ export default {
                     estados_escuela:estados_escuela,
                     estados_curso:estados_curso
                 })
-				.then((res) => {
-					if (!res.data.error) vue.$emit("emitir-reporte", res);
-					else {
-						alert(res.data.error);
-						vue.hideLoader()
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-					console.log(error.message);
-					alert("Se ha encontrado el siguiente error : " + error);
-					vue.hideLoader()
-				});
-		},
+                .then((res) => {
+                    if (!res.data.error) vue.$emit("emitir-reporte", res);
+                    else {
+                        alert(res.data.error);
+                        vue.hideLoader()
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                    console.log(error.message);
+                    alert("Se ha encontrado el siguiente error : " + error);
+                    vue.hideLoader()
+                });
+        },
         _exportDiplomas() {
             const vue = this;
             vue.showLoader();
@@ -394,16 +360,16 @@ export default {
 
             }, (err) => console.log(err));
         },
-		async moduloChange() {
+        async moduloChange() {
             let vue = this;
 
-			vue.filters.escuela = "";
-			vue.filters.curso = "";
-			vue.Escuelas = [];
-			vue.Cursos = [];
+            vue.filters.escuela = "";
+            vue.filters.curso = "";
+            vue.Escuelas = [];
+            vue.Cursos = [];
 
             const estado_escuela_filtro = this.$refs.EstadoEscuelaFiltroComponent;
-			if (!vue.filters.modulo) return false;
+            if (!vue.filters.modulo) return false;
 
             /*let res = await axios.post(`${vue.reportsBaseUrl}filtros/cambia_modulo_multiple_carga_escuela`, {
                 mod: vue.filters.modulo,
@@ -417,9 +383,8 @@ export default {
                 escuela_active : estado_escuela_filtro.UsuariosActivos,
                 escuela_inactive : estado_escuela_filtro.UsuariosInactivos,
             };
-            console.log(requestPayload);
 
-			/*let res = await axios.post(`${vue.reportsBaseUrl}/filtros/cambia_modulo_multiple_carga_escuela`, requestPayload);
+            /*let res = await axios.post(`${vue.reportsBaseUrl}/filtros/cambia_modulo_multiple_carga_escuela`, requestPayload);
 
             console.log(res);
 
@@ -428,28 +393,28 @@ export default {
             if(vue.Escuelas.length == 0){
                 alert('No se encontrarón escuelas.');
             }*/
-		},
-		async escuelaChange() {
+        },
+        async escuelaChange() {
             let vue = this;
-			vue.filters.curso = [];
-			vue.Cursos = [];
+            vue.filters.curso = [];
+            vue.Cursos = [];
 
-			const estado_curso_filtro = this.$refs.EstadoCursoFiltroComponent;
-			if (!vue.filters.escuela) return false;
+            const estado_curso_filtro = this.$refs.EstadoCursoFiltroComponent;
+            if (!vue.filters.escuela) return false;
 
             let res = await axios.post(`${vue.reportsBaseUrl}/cambia_escuela_multiple_carga_curso`, {
-				esc: vue.filters.escuela,
-				mod: vue.filters.modulo,
+                esc: vue.filters.escuela,
+                mod: vue.filters.modulo,
                 curso_active : estado_curso_filtro.UsuariosActivos,
                 curso_inactive : estado_curso_filtro.UsuariosInactivos,
-			});
+            });
 
-			vue.Cursos = res.data;
+            vue.Cursos = res.data;
             if(vue.Cursos.length == 0){
                 alert('No se encontrarón cursos.');
             }
-		},
-	},
+        },
+    },
     mounted() {
         const vue = this;
         console.log('mounted Diplomas')
