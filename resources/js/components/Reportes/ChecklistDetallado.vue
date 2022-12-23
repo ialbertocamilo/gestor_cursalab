@@ -52,7 +52,7 @@
                 :showSelectAll="false"
                 placeholder="Seleccione los módulos"
                 @onChange="fetchFiltersAreaData"
-                :selectionLimit="5"
+                :maxValuesSelected="5"
                 />
             </div>
             <!-- Escuela -->
@@ -69,7 +69,7 @@
                 :showSelectAll="false"
                 placeholder="Seleccione las escuelas"
                 @onChange="escuelaChange"
-                :selectionLimit="5"
+                :maxValuesSelected="5"
                 />
             </div>
             <!-- Curso -->
@@ -348,8 +348,6 @@ export default {
     }
 }
 </script>
-<style>
-.v-label {
-    display: contents !important;
-}
+<style scoped>
+
 </style>

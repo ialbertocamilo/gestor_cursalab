@@ -9,11 +9,11 @@
              <list-item titulo="Estado(Usuario)" subtitulo="Estado del usuario (Activo - Inactivo)" />
 
              <!--list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" /-->
-             
+
              <list-item titulo="Escuela" subtitulo="Nombre de la escuela" />
              <list-item titulo="Estado(escuela)" subtitulo="Estado de la escuela (Activo - Inactivo)" />
              <!--list-item titulo="DENTRO DE CURRÍCULA" subtitulo="Sí el curso esta dentro de la currícula (Sí - No)" /-->
-             
+
              <list-item titulo="Tipo de curso" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
              <list-item titulo="Curso" subtitulo="Nombre del curso" />
              <list-item titulo="Estado(curso)" subtitulo="Estado de la curso (Activo - Inactivo)" />
@@ -27,7 +27,7 @@
         <!-- Modulo -->
             <div class="col-md-6 mb-3">
                 <b-form-text text-variant="muted">Módulo</b-form-text>
-                    
+
                 <!--v-select
                     attach
                     solo
@@ -67,7 +67,7 @@
             <!-- Escuela -->
             <div class="col-md-6 mb-3">
                 <b-form-text text-variant="muted">Escuela</b-form-text>
-                
+
 
                  <!--DefaultAutocomplete
                     :disabled="!Escuelas[0]"
@@ -121,7 +121,7 @@
             <!-- Curso -->
             <div class="col-md-6 mb-3">
                 <b-form-text text-variant="muted">Curso</b-form-text>
-                
+
                 <DefaultAutocomplete
                     :disabled="!courses[0]"
                     v-model="filters.course"
@@ -167,7 +167,7 @@
                     v-model="filters.fecha"
                     label="seleccione una fecha"
                 /-->
-                
+
                 <b-form-text text-variant="muted">Fecha de emisión:</b-form-text>
                  <DefaultInputDate
                     clearable
@@ -184,21 +184,21 @@
                     <EstadoFiltro ref="EstadoUsuarioFiltroComponent"/>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <EstadoFiltro 
-                        ref="EstadoEscuelaFiltroComponent" 
-                        title="Escuelas :" 
+                    <EstadoFiltro
+                        ref="EstadoEscuelaFiltroComponent"
+                        title="Escuelas :"
                         tooltip_activos='Escuelas con el estado activo'
                         tooltip_inactivos='Escuelas con el estado inactivo'
-                        @emitir-cambio="schoolsInit" 
+                        @emitir-cambio="schoolsInit"
                     />
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <EstadoFiltro 
-                        ref="EstadoCursoFiltroComponent" 
-                        title="Cursos :" 
+                    <EstadoFiltro
+                        ref="EstadoCursoFiltroComponent"
+                        title="Cursos :"
                         tooltip_activos='Curso con el estado activo'
                         tooltip_inactivos='Curso con el estado inactivo'
-                        @emitir-cambio="schoolsChange" 
+                        @emitir-cambio="schoolsChange"
                     />
                 </div>
             </v-row>
@@ -308,7 +308,7 @@ export default {
                 return stackTemporal;
             };
 
-            const estados_usuario = pushDataStates(vue.$refs.EstadoUsuarioFiltroComponent); 
+            const estados_usuario = pushDataStates(vue.$refs.EstadoUsuarioFiltroComponent);
             const estados_escuela = pushDataStates(vue.$refs.EstadoEscuelaFiltroComponent);
             const estados_curso = pushDataStates(vue.$refs.EstadoCursoFiltroComponent);
 
@@ -323,8 +323,8 @@ export default {
                 },
                 //states
                 states: {
-                    estados_usuario, 
-                    estados_escuela, 
+                    estados_usuario,
+                    estados_escuela,
                     estados_curso
                 }
             };
@@ -377,7 +377,7 @@ export default {
             vue.filters.course = [];
             vue.courses = [];
 
-            //check schoolId 
+            //check schoolId
             if(!vue.filters.school.length) return;
 
 
@@ -401,7 +401,7 @@ export default {
 			vue.filters.curso = "";
 			vue.Escuelas = [];
 			vue.Cursos = [];
-			
+
             const estado_escuela_filtro = this.$refs.EstadoEscuelaFiltroComponent;
 			if (!vue.filters.modulo) return false;
 
@@ -420,11 +420,11 @@ export default {
             console.log(requestPayload);
 
 			/*let res = await axios.post(`${vue.reportsBaseUrl}/filtros/cambia_modulo_multiple_carga_escuela`, requestPayload);
-			
+
             console.log(res);
 
             this.Escuelas = res.data;
-            
+
             if(vue.Escuelas.length == 0){
                 alert('No se encontrarón escuelas.');
             }*/
@@ -436,7 +436,7 @@ export default {
 
 			const estado_curso_filtro = this.$refs.EstadoCursoFiltroComponent;
 			if (!vue.filters.escuela) return false;
-			
+
             let res = await axios.post(`${vue.reportsBaseUrl}/cambia_escuela_multiple_carga_curso`, {
 				esc: vue.filters.escuela,
 				mod: vue.filters.modulo,
@@ -458,8 +458,6 @@ export default {
 };
 </script>
 
-<style>
-.v-label {
-	display: contents !important;
-}
+<style scoped>
+
 </style>

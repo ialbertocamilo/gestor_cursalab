@@ -62,7 +62,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
                     @onChange="fetchFiltersCareerData"
-                    :selectionLimit="5"
+                    :maxValuesSelected="5"
                 />
 
 

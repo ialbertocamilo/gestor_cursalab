@@ -253,7 +253,5 @@ export default {
 }
 </script>
 <style>
-.v-label {
-    display: contents !important;
-}
+
 </style>

@@ -39,7 +39,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione los administradores"
                     @onChange=""
-                    :selectionLimit="5"
+                    :maxValuesSelected="5"
                 />
             </div>
             <div class="col-6"></div>
