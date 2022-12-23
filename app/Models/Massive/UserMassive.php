@@ -308,7 +308,11 @@ class UserMassive extends Massive implements ToCollection
             $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));
             return $date;
         } catch (\Throwable $th) {
-            return 'invalid date';
+            try {
+                return Carbon::parse(strtotime($fecha))->format('Y-m-d');
+            } catch (\Throwable $th) {
+                return 'invalid date';
+            }
         }
     }
 
