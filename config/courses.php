@@ -42,6 +42,8 @@ return [
     //            'summaries' => function ($q) {
     //                $q->where('user_id', auth()->user()->id);
     //            }
+                'compatibilities_a:id',
+                'compatibilities_b:id',
             ],
             'summary-user-update' => [
                 'segments' => function ($q) {
