@@ -662,28 +662,36 @@ class UsuarioController extends Controller
 
         if ($topicId == null) {
 
-            $query = SummaryCourse::query()
-                ->join('users', 'users.id', '=', 'summary_courses.user_id')
-                ->with('user')
-                ->where('summary_courses.course_id', $courseId)
-                ->where('users.subworkspace_id', $subworkspaceId)
-                ->select('summary_courses.*');
+            // $query = SummaryCourse::query()
+            //     ->join('users', 'users.id', '=', 'summary_courses.user_id')
+            //     ->with('user')
+            //     ->where('summary_courses.course_id', $courseId)
+            //     ->where('users.subworkspace_id', $subworkspaceId)
+            //     ->select('summary_courses.*');
 
             // "Desaprobados" only
-
+            $query = SummaryTopic::query()
+                    ->join('users', 'users.id', '=', 'summary_topics.user_id')
+                    ->with('user')
+                    // ->where('summary_topics.source_id')
+                    ->where('users.subworkspace_id', $subworkspaceId)
+                    ->select('summary_topics.*')
+                    ->whereHas('topic',function($q) use ($courseId){
+                        $q->where('course_id',$courseId)->where('active',ACTIVE);
+                    });
             if ($tipo['id'] == 1) {
 
                 // Get "Desaprobado" status from taxonomies
 
-                $desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
+                $desaprobado = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
 
                 // Add conditions to filter "desaprobados" only
 
-                $query->where('summary_courses.status_id', $desaprobado->id)
-                    ->where('summary_courses.attempts', '>=', $attempts);
+                $query->where('summary_topics.status_id', $desaprobado->id)
+                    ->where('summary_topics.attempts', '>=', $attempts);
             }
 
-            $users = $query->orderBy('summary_courses.grade_average')->get();
+            $users = $query->orderBy('summary_topics.grade')->get();
 
         } else {
 
