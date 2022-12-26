@@ -83,6 +83,31 @@ class Poll extends BaseModel
      *
      * @return void
      */
+    protected function loadSchools($poll_id){
+        $courses_id = DB::table('course_poll')->where('poll_id',$poll_id)->pluck('course_id');
+        if(count($courses_id) == 0){
+            return [];
+        }
+        $scholls =  School::select('id','name')->whereHas('courses',function($q)use ($courses_id){
+            $q->whereIn('id',$courses_id);
+        })->get();
+        return $scholls;
+    }
+    protected function loadCourses($data){
+        $courses_id = DB::table('course_poll')->where('poll_id',$data['poll_id'])->pluck('course_id');
+        $courses =  Course::select('id','name')->whereIn('id',$courses_id)
+        ->whereHas('schools',function($q) use($data){
+            $q->whereIn('school_id',$data['schools']);
+        })->get();
+
+        return $courses;
+    }
+    protected function loadPollReportData($poll_id){
+        $types_pool_questions = PollQuestion::select('t.id','t.code','t.name')
+                            ->join('taxonomies as t','t.id','=','poll_questions.type_id')
+                            ->where('poll_questions.poll_id',$poll_id)->groupBy('code')->get();
+        return compact('types_pool_questions');
+    }
     protected function loadCoursePolls()
     {
 
