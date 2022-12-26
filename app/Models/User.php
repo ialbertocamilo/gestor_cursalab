@@ -792,7 +792,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                     if ($user->subworkspace->parent_id === 25)
                         $course = $course->getCourseCompatibilityByUser($user);
-
+                    
                     $all_courses[] = $course;
 
                     break;

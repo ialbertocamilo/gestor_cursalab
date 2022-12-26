@@ -17,7 +17,7 @@ return [
         "continuar" => "En desarrollo"
     ],
 
-    'user-courses-query' =>function($relation,$user_id){ 
+    'user-courses-query' => function($relation, $user_id) { 
 
         return match ($relation) {
             'soft' => [
@@ -39,9 +39,11 @@ return [
     
                         });
                 },
-    //            'summaries' => function ($q) {
-    //                $q->where('user_id', auth()->user()->id);
-    //            }
+                'summaries' => function ($q) use ($user_id){
+                    $q
+                        ->with('status:id,name,code')
+                        ->where('user_id', $user_id);
+                },
                 'compatibilities_a:id',
                 'compatibilities_b:id',
             ],
