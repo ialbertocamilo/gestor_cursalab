@@ -117,6 +117,8 @@ return [
                         ->with('status:id,name,code')
                         ->where('user_id', $user_id);
                 },
+                'compatibilities_a:id',
+                'compatibilities_b:id',
             ],
             'course-view-app-user' => [
                 'segments' => function ($q) {
@@ -173,6 +175,8 @@ return [
                         ->with('status:id,name,code')
                         ->where('user_id', $user_id);
                 },
+                'compatibilities_a:id',
+                'compatibilities_b:id',
             ],
             
             default => [
@@ -190,6 +194,8 @@ return [
                 'summaries' => function ($q) use($user_id){
                     $q->where('user_id', $user_id);
                 },
+                'compatibilities_a:id',
+                'compatibilities_b:id',
             ]
         };
     }
