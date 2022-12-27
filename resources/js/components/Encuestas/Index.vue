@@ -69,36 +69,26 @@
                     <option v-for="item in Grupos" :key="item.grupo" :value="item.id">{{ item.grupo }}</option>
                   </select>
                 </div> -->
-                <!-- :disabled="!(filters.courses.length > 0) || !(filters.courses.schools > 0)" -->
                 <div class="col-sm-12 mt-4">
-                  <b-button  block variant="primary" @click="searchData()">Consultar</b-button>
+                  <b-button :disabled="!filters.schools[0] || !filters.modules[0]" block variant="primary" @click="searchData()">Consultar</b-button>
                 </div>
               </div>
               <!-- Resumen -->
               <div class="m-5" v-if="poll_searched">
-                <h1 class="text-center">Resumen</h1>
+                <h2 class="text-center">Resumen</h2>
                 <div class="container-fluid">
-                  <!-- <b-table :items="items" responsive striped hover bordered outlined head-variant="dark"></b-table> -->
+                  <b-table :items="items" responsive striped hover bordered outlined head-variant="dark"></b-table>
                   <div>
-                    <h2>Detalle de encuestas</h2>
+                    <h5 v-text="`Total de encuestados: ${resume.count_users}`"></h5>
+                    <h5>Detalle de encuestas</h5>
                     <div class="p-3 row" v-for="(type_poll_question) in types_pool_questions" :key="type_poll_question.id">
                       <div class="col-4" v-text="type_poll_question.name"></div>
                       <div class="col-6">
-                        <!-- <b-button class="ml-2" variant="primary"> <b-icon icon="eye" aria-hidden="true"></b-icon> Ver </b-button> -->
                         <b-button class="ml-2" variant="success"
-                          @click="downloadReportPollQuestion(type_poll_question.id)"
+                          @click="downloadReportPollQuestion(type_poll_question)"
                         >Descargar <b-icon icon="arrow-down-circle" aria-hidden="true"></b-icon> </b-button>
                       </div>
                     </div>
-                    <!-- <div class="p-3 row">
-                    </div>
-                    <div class="p-3 row">
-                      <div class="col-4">Respuestas en texto</div>
-                      <div class="col-6">
-                        <button class="ml-2 btn btn-primary">Ver</button>
-                        <button class="ml-2 btn btn-success">Descargar</button>
-                      </div>
-                    </div> -->
                   </div>
                 </div>
               </div>
@@ -108,6 +98,7 @@
 </template>
 
 <script>
+const FileSaver = require("file-saver");
 export default {
   props: ["Encuestas"],
   data() {
@@ -125,10 +116,11 @@ export default {
           modules:[],
           schools: [],
           courses: [],
-          type_question_id:0,
+          type_poll_question:{},
           courses_id_selected:[],
       },
       poll_searched:false,
+      resume:{},
       types_pool_questions:[]
     };
   },
@@ -153,6 +145,9 @@ export default {
       this.filters.schools = [];
       await axios.get('/resumen_encuesta/schools/'+this.filters.poll.id).then(({data})=>{
         this.schools = data.data.schools;
+        if(this.schools.length==0){
+          this.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
+        }
       })
     }, 
     async loadCourses(){
@@ -163,16 +158,22 @@ export default {
         schools: this.filters.schools
       }).then(({data})=>{
         this.courses = data.data.courses;
+        if(this.courses.length==0){
+          this.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
+        }
       })
     },
     async searchData(){
       this.poll_searched = true;
       this.types_pool_questions = [];
-      await axios.post('/resumen_encuesta/poll-data',{
-        poll_id:this.filters.poll.id,
-        schools: this.filters.schools
-      }).then(({data})=>{
+      this.showLoader();
+      this.filters.courses_id_selected = this.filters.courses.length > 0 ? this.filters.courses : this.courses.map((c)=>c.id) 
+      await axios.post('/resumen_encuesta/poll-data',this.filters).then(({data})=>{
         this.types_pool_questions = data.data.data.types_pool_questions;
+        this.resume = data.data.data.resume;
+        this.hideLoader();
+      }).catch(()=>{
+        this.showtAlertError();
       })
     },  
     async cargarGrupos() {
@@ -184,12 +185,30 @@ export default {
       });
       this.Grupos = res.data;
     },
-    async downloadReportPollQuestion(type_question_id){
-      this.filters.type_question_id = type_question_id;
+    async downloadReportPollQuestion(type_poll_question){
+      this.showLoader();
+      this.filters.type_poll_question = type_poll_question;
       this.filters.courses_id_selected = this.filters.courses.length > 0 ? this.filters.courses : this.courses.map((c)=>c.id) 
-      await axios.post(`${this.reportsBaseUrl}/exportar/poll-questions`,this.filters).then(()=>{
-
+      await axios.post(`${this.reportsBaseUrl}/exportar/poll-questions`,this.filters).then(({data})=>{
+        if(data.alert){
+          this.hideLoader();
+          this.showAlert(data.alert,'warning');
+          return false;
+        }
+        if(data.error){
+          this.showtAlertError();
+        }
+        let urlReporte = `${this.reportsBaseUrl}/${data.ruta_descarga}`
+        // La extension la define el back-end, ya que el quien crea el archivo
+        FileSaver.saveAs(urlReporte, data.new_name)
+        this.hideLoader();
+      }).catch(()=>{
+        this.showtAlertError();
       })
+    },
+    showtAlertError(){
+      this.hideLoader();
+      this.showAlert('Ha ocurrido un problema. Contáctate con el equipo de soporte.','warning');
     }
   },
 };
