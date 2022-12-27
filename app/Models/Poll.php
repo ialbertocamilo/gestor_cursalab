@@ -135,29 +135,29 @@ class Poll extends BaseModel
 
             $user_califica_mb = $questions_response->where('respuestas','5')->count();
             $user_califica_b = $questions_response->where('respuestas','4')->count();
-            $user_califica_R = $questions_response->where('respuestas','3')->count();
-            $user_califica_M = $questions_response->where('respuestas','2')->count();
-            $user_califica_MM = $questions_response->where('respuestas','1')->count();
+            $user_califica_r = $questions_response->where('respuestas','3')->count();
+            $user_califica_m = $questions_response->where('respuestas','2')->count();
+            $user_califica_mm = $questions_response->where('respuestas','1')->count();
 
             $user_califica_tb2 = $user_califica_mb+$user_califica_b;
 
             
-            $percent_califica_mb   = round($user_califica_mb/count($questions_response)*100,2);
-            $percent_califica_b    = round($user_califica_b/count($questions_response)*100,2);
-            $percent_califica_R    = round($user_califica_R/count($questions_response)*100,2);
-            $percent_califica_M    = round($user_califica_M/count($questions_response)*100,2);
-            $percent_califica_MM   = round($user_califica_MM/count($questions_response)*100,2);
-            $percent_user_califica_tb2   = round($user_califica_tb2/count($questions_response)*100,2);
+            $percent_califica_mb   = $user_califica_mb>0 ? round($user_califica_mb/count($questions_response)*100,2) : 0;
+            $percent_califica_b    = $user_califica_b>0 ? round($user_califica_b/count($questions_response)*100,2) : 0;
+            $percent_califica_r    = $user_califica_r>0 ? round($user_califica_r/count($questions_response)*100,2) : 0;
+            $percent_califica_m    = $user_califica_m>0 ? round($user_califica_m/count($questions_response)*100,2) : 0;
+            $percent_califica_mm   = $user_califica_mm>0 ? round($user_califica_mm/count($questions_response)*100,2) : 0;
+            $percent_user_califica_tb2   = $user_califica_tb2>0 ? round($user_califica_tb2/count($questions_response)*100,2) : 0;
 
             return [
                 'titulo'=>$question_type_califica->titulo,
                 'prom' => round($prom,2),
-                'percent_user_califica_tb2'=>$percent_user_califica_tb2,
+                'percent_califica_tb2'=>$percent_user_califica_tb2,
                 'percent_califica_mb' => $percent_califica_mb,
                 'percent_califica_b' => $percent_califica_b,
-                'percent_califica_R' => $percent_califica_R,
-                'percent_califica_M' => $percent_califica_M,
-                'percent_califica_MM' => $percent_califica_MM
+                'percent_califica_r' => $percent_califica_r,
+                'percent_califica_m' => $percent_califica_m,
+                'percent_califica_mm' => $percent_califica_mm
             ];
         });
     }
