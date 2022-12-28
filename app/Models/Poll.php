@@ -104,37 +104,7 @@ class Poll extends BaseModel
                             ->where('poll_questions.poll_id',$filters['poll']['id'])
                             ->whereNull('poll_questions.deleted_at')->get();
         
-        // $calificas = $pool_questions->where('code','califica');
-        // foreach ($calificas as $pool_question) {
-        //     $base_query = DB::table('poll_question_answers as pqa')           
-        //     ->join('users as u','u.id','=','pqa.user_id')
-        //     ->select(DB::raw('count(pqa.id)'))
-        //     ->where('pqa.poll_question_id','=',$pool_question->poll_question_id)
-        //     ->whereIn('pqa.course_id',$filters['courses_id_selected'])
-        //     ->whereIn('u.subworkspace_id',$filters['modules'])
-        //     ->where('u.active',1)
-        //     ->whereNull('u.deleted_at')
-        //     ->when($filters['date']['end'], function ($q) use($filters){
-        //         $q->whereBetween('pqa.created_at', [$filters['date']['start'],$filters['date']['end']]);
-        //     });
-        //     $base_query_mb = $base_query->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',5)->first();
-        // }
-        // $user_to_response_poll = PollQuestionAnswer::
-        //                 select('poll_question_answers.id','poll_question_answers.user_id','poll_question_answers.poll_question_id','poll_question_answers.respuestas')
-        //                 ->whereIn('course_id',$filters['courses_id_selected'])
-        //                 ->whereIn('poll_question_id',$pool_questions->pluck('poll_question_id'))
-        //                 ->join('users as u','u.id','=','poll_question_answers.user_id')
-        //                 ->whereIn('u.subworkspace_id',$filters['modules'])
-        //                 ->where('u.active',1)
-        //                 ->whereNull('u.deleted_at')
-        //                 // ->wherehas('user',function($q)use($filters){
-        //                 //     $q->whereIn('subworkspace_id',$filters['modules'])->where('active',1);
-        //                 // })
-        //                 ->when($filters['date']['end'], function ($q) use($filters){
-        //                     $q->whereBetween('poll_question_answers.created_at', [$filters['date']['start'],$filters['date']['end']]);
-        //                 })
-        //                 ->get();
-        // $questions_type_califica = $this->resumePollQuestionTypeCalifica($pool_questions,$user_to_response_poll);
+        // $questions_type_califica = $this->resumePollQuestionTypeCalifica($pool_questions,$filters);
         $questions_type_califica = $this->resumePollQuestionTypeCalifica_v2($pool_questions,$filters);
 
         // $count_users = $user_to_response_poll->unique('user_id')->count();
@@ -145,10 +115,12 @@ class Poll extends BaseModel
     }
     private function resumePollQuestionTypeCalifica_v2($pool_questions,$filters){
         // SELECT COUNT(id) as total from poll_question_answers where poll_question_id = 52 and JSON_EXTRACT(respuestas,'$[0].resp_cal') = 5 
-        return $pool_questions->where('code','califica')->map(function($pool_question) use ($filters){
+        // return $pool_questions->where('code','califica')->map(function($pool_question) use ($filters){
+        $preguntas = [];
+        $pool_questions_califica = $pool_questions->where('code','califica');
+        foreach ($pool_questions_califica as $pool_question) {
             $base_query = DB::table('poll_question_answers as pqa')           
             ->join('users as u','u.id','=','pqa.user_id')
-            
             ->where('pqa.poll_question_id','=',$pool_question->poll_question_id)
             ->whereIn('pqa.course_id',$filters['courses_id_selected'])
             ->whereIn('u.subworkspace_id',$filters['modules'])
@@ -157,25 +129,32 @@ class Poll extends BaseModel
             ->when($filters['date']['end'], function ($q) use($filters){
                 $q->whereBetween('pqa.created_at', [$filters['date']['start'],$filters['date']['end']]);
             });
-            $prom = $base_query->select(DB::raw("avg(json_extract(respuestas, '$[0].resp_cal')) as count_resp_cal"))
-                        ->whereIn(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),[1,2,3,4,5])->first()?->count_resp_cal ?? 0;
+            $prom_query = clone $base_query;
+            $prom = $prom_query->select(DB::raw("avg(json_extract(respuestas, '$[0].resp_cal')) as count_resp_cal"))
+                        ->whereIn(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),[1,2,3,4,5])->first()->count_resp_cal;
+            
+            $total_query = clone $base_query;
+            $total = $total_query->select(DB::raw('count(pqa.id) as count_resp_cal'))->first()->count_resp_cal;
 
-            $total = $base_query->select(DB::raw('count(pqa.id) as count_resp_cal'))->first()?->count_resp_cal ?? 0;
+            $user_califica_mb_query = clone $base_query;
+            $user_califica_mb = $user_califica_mb_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
+                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',5)->first()->count_resp_cal;
+            
+            $user_califica_b_query = clone $base_query;
+            $user_califica_b = $user_califica_b_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
+                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',4)->first()->count_resp_cal;
+            
+            $user_califica_r_query = clone $base_query;
+            $user_califica_r = $user_califica_r_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
+                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',3)->first()->count_resp_cal;
 
-            $user_califica_mb = $base_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
-                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',5)->first()?->count_resp_cal ?? 0;
+            $user_califica_m_query = clone $base_query;
+            $user_califica_m = $user_califica_m_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
+                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',2)->first()->count_resp_cal;
 
-            $user_califica_b = $base_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
-                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',4)->first()?->count_resp_cal ?? 0;
-
-            $user_califica_r = $base_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
-                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',3)->first()?->count_resp_cal ?? 0;
-
-            $user_califica_m = $base_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
-                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',2)->first()?->count_resp_cal ?? 0;
-
-            $user_califica_mm = $base_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
-                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',1)->first()?->count_resp_cal ?? 0;
+            $user_califica_mm_query = clone $base_query;
+            $user_califica_mm = $user_califica_mm_query->select(DB::raw('count(pqa.id) as count_resp_cal'))
+                                            ->where(DB::raw("json_extract(respuestas, '$[0].resp_cal')"),'=',1)->first()->count_resp_cal;
 
             
             $user_califica_tb2 = $user_califica_mb+$user_califica_b;
@@ -187,7 +166,7 @@ class Poll extends BaseModel
             $percent_califica_mm   = $user_califica_mm>0 ? round($user_califica_mm/$total*100,2) : 0;
             $percent_user_califica_tb2   = $user_califica_tb2>0 ? round($user_califica_tb2/$total*100,2) : 0;
 
-            return [
+            $preguntas[] = [
                 'titulo'=>$pool_question->titulo,
                 'prom' => round($prom,2),
                 'percent_califica_tb2'=>$percent_user_califica_tb2,
@@ -197,9 +176,25 @@ class Poll extends BaseModel
                 'percent_califica_m' => $percent_califica_m,
                 'percent_califica_mm' => $percent_califica_mm
             ];
-        });
+        };
+        return $preguntas;
     }
-    private function resumePollQuestionTypeCalifica($pool_questions,$user_to_response_poll){
+    private function resumePollQuestionTypeCalifica($pool_questions,$filters){
+        $user_to_response_poll = PollQuestionAnswer::
+                select('poll_question_answers.id','poll_question_answers.user_id','poll_question_answers.poll_question_id','poll_question_answers.respuestas')
+                ->whereIn('course_id',$filters['courses_id_selected'])
+                ->whereIn('poll_question_id',$pool_questions->pluck('poll_question_id'))
+                ->join('users as u','u.id','=','poll_question_answers.user_id')
+                ->whereIn('u.subworkspace_id',$filters['modules'])
+                ->where('u.active',1)
+                ->whereNull('u.deleted_at')
+                // ->wherehas('user',function($q)use($filters){
+                //     $q->whereIn('subworkspace_id',$filters['modules'])->where('active',1);
+                // })
+                ->when($filters['date']['end'], function ($q) use($filters){
+                    $q->whereBetween('poll_question_answers.created_at', [$filters['date']['start'],$filters['date']['end']]);
+                })
+                ->get();
         return $pool_questions->where('code','califica')->map(function($question_type_califica) use($user_to_response_poll){
             $questions_response = $user_to_response_poll->where('poll_question_id',$question_type_califica->poll_question_id)
                                                         ->map(function ($user_response) {
