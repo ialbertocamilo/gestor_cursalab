@@ -2,8 +2,7 @@
     <v-main>
         <ResumenExpand>
             <template v-slot:resumen>
-                Consulta el avance del usuario por cada tema desarrollado, dentro de los cursos que tiene
-                asignado.
+                Consulta el historial de avance del usuario.
             </template>
 
             <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" />
