@@ -104,11 +104,19 @@ class Poll extends BaseModel
                             ->where('poll_questions.poll_id',$filters['poll']['id'])
                             ->whereNull('poll_questions.deleted_at')->get();
 
-        $user_to_response_poll = PollQuestionAnswer::select('id','user_id','poll_question_id','respuestas')
+        $user_to_response_poll = PollQuestionAnswer::
+                        select('poll_question_answers.id','poll_question_answers.user_id','poll_question_answers.poll_question_id','poll_question_answers.respuestas')
                         ->whereIn('course_id',$filters['courses_id_selected'])
                         ->whereIn('poll_question_id',$pool_questions->pluck('poll_question_id'))
-                        ->wherehas('user',function($q)use($filters){
-                            $q->whereIn('subworkspace_id',$filters['modules'])->where('active',1);
+                        ->join('users as u','u.id','=','poll_question_answers.user_id')
+                        ->whereIn('u.subworkspace_id',$filters['modules'])
+                        ->where('u.active',1)
+                        ->whereNull('u.deleted_at')
+                        // ->wherehas('user',function($q)use($filters){
+                        //     $q->whereIn('subworkspace_id',$filters['modules'])->where('active',1);
+                        // })
+                        ->when($filters['date']['end'], function ($q) use($filters){
+                            $q->whereBetween('poll_question_answers.created_at', [$filters['date']['start'],$filters['date']['end']]);
                         })
                         ->get();
         $questions_type_califica = $this->resumePollQuestionTypeCalifica($pool_questions,$user_to_response_poll);

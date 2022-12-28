@@ -62,6 +62,13 @@
                         multiple
                     />
                 </div>
+                <div  class="row col-sm-12 mb-3 mx-0 px-0 my-0 py-0" style="justify-content: end;">
+                  <div class="col-sm-6">
+                      <FechaFiltro ref="FechasFiltros"   
+                          label-start="Fecha inicial" 
+                          label-end="Fecha final"/>
+                  </div>
+                </div>
                 <!-- <div class="col-sm-6">
                   <label>Grupo</label>
                   <select v-model="grupo" :disabled="!Grupos[0]" class="form-control">
@@ -131,7 +138,9 @@
 
 <script>
 const FileSaver = require("file-saver");
+import FechaFiltro from "../Reportes/partials/FechaFiltro.vue"
 export default {
+  components:{FechaFiltro},
   props: ["Encuestas"],
   data() {
     return {
@@ -150,6 +159,10 @@ export default {
           courses: [],
           type_poll_question:{},
           courses_id_selected:[],
+          date:{
+            start:null,
+            end:null
+          }
       },
       poll_searched:false,
       resume:{
@@ -202,11 +215,15 @@ export default {
       this.types_pool_questions = [];
       this.showLoader();
       this.filters.courses_id_selected = this.filters.courses.length > 0 ? this.filters.courses : this.courses.map((c)=>c.id) 
+      this.filters.date.start =  this.$refs.FechasFiltros.start;
+      this.filters.date.end =  this.$refs.FechasFiltros.end;
       await axios.post('/resumen_encuesta/poll-data',this.filters).then(({data})=>{
         this.types_pool_questions = data.data.data.types_pool_questions;
         this.resume = data.data.data.resume;
         this.hideLoader();
-      }).catch(()=>{
+      })
+      .catch((er)=>{
+        console.log(er);
         this.showtAlertError();
       })
     },  
@@ -231,6 +248,7 @@ export default {
         }
         if(data.error){
           this.showtAlertError();
+          return false;
         }
         let urlReporte = `${this.reportsBaseUrl}/${data.ruta_descarga}`
         // La extension la define el back-end, ya que el quien crea el archivo
