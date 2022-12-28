@@ -5,7 +5,7 @@
                 Formulario Ayuda APP
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'" @click="activity"/> -->
-                <DefaultModalButton :label="'Ayuda'" @click="openFormModal(modalOptions)"/>
+                <DefaultModalButton :label="'Opción'" @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
