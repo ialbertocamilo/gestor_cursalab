@@ -124,11 +124,11 @@ export default {
         resetValidation() {
 
         },
-        loadData(resource) {
+        async loadData(resource) {
             let vue = this
             let url = `${vue.options.base_endpoint}/${resource.id}/courses-by-user`
             vue.showLoader();
-            vue.$http.get(url)
+            await vue.$http.get(url)
                 .then(({data}) => {
                     vue.resource = data.data.user
 
