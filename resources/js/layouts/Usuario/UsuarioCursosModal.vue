@@ -56,7 +56,7 @@
                             <v-tab v-for="school in resource.schools" :key="school.id"
                                    class="justify-content-start" :title="school.name">
                                 <v-icon left>mdi-school</v-icon>
-                                {{ school.categoria }} ({{ school.cursos.length }})
+                                <span style="white-space: normal;text-align: left;" v-text="`${school.categoria} (${school.cursos.length})`"></span>
                             </v-tab>
 
                             <v-tab-item v-for="schools in resource.schools" :key="schools.id"
@@ -132,9 +132,9 @@ export default {
                 .then(({data}) => {
                     vue.resource = data.data.user
 
+                    vue.hideLoader();
                     setTimeout(() => {
-                        vue.hideLoader();
-                    }, 1000)
+                    }, 3000)
                 })
                 .catch(e => {
                     vue.hideLoader();
