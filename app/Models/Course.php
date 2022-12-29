@@ -964,16 +964,30 @@ class Course extends BaseModel
 
         if ($course->compatibilities->count() === 0) return $course;
 
-        $compatible_summary_course = SummaryCourse::with('course:id')
+        info('USER ID');
+        info($user->id);
+
+        info('course with compatibilities');
+        info($course->id);
+        info($course->compatibilities->pluck('id'));
+
+        $compatible_summary_course = SummaryCourse::with('course:id,name')
             ->where('user_id', $user->id)
             ->whereIn('course_id', $course->compatibilities->pluck('id'))
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->first();
 
+        info('compatible_summary_course');
+        info($compatible_summary_course);
+
         if ($compatible_summary_course):
 
+            info('compatible_summary_course->course');
+            info($compatible_summary_course->course);
+
             $compatible_summary_course->course->validates = $course;
+            info($compatible_summary_course->course);
 
             return $compatible_summary_course->course;
 
