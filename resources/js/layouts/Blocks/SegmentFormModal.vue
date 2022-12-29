@@ -124,9 +124,9 @@ const fields = [
 
 const CustomMessages = {
     module: {
-        title: 'Advertencia para módulo',
-        noexist: 'No existe el módulo como criterio',
-        nodata: 'Selecciona uno o varios modulos'
+        title: 'Advertencia de segmentación',
+        noexist: 'No se ha seleccionado el criterio "módulo"',
+        nodata: 'Selecciona uno o varios módulos'
     }
 }
 
@@ -269,8 +269,8 @@ export default {
                 const state = (!cri_state || !cri_data);
                 let message;
 
-                if(!cri_state) message = `${noexist} en el segmento ${segIndex}, ¿Desea continuar?`;
-                else if(!cri_data) message = `${nodata} en el segmento ${segIndex}, para continuar.`;
+                if(!cri_state) message = `${noexist} en la segmentación ${segIndex}, ¿Desea continuar?`;
+                else if(!cri_data) message = `${nodata} en la segmentación ${segIndex}, para continuar.`;
                 else message = null;
 
                 return { state, message, title, detail: { cri_data, cri_state } };

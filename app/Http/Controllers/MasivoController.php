@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use DB;
+use App\Models\User;
 use App\Models\Ciclo;
 use App\Models\Curso;
+use App\Models\Error;
 use App\Models\Posteo;
 use App\Models\Prueba;
 use App\Models\Visita;
@@ -30,19 +32,19 @@ use App\Models\Usuario_version;
 use App\Models\UsuariosActivos;
 use App\Models\UsuariosMasivos;
 use App\Imports\FirstPageImport;
-use App\Imports\CursosSubirImport;
 
+use App\Imports\CursosSubirImport;
 use App\Models\Curricula_criterio;
 use App\Models\Matricula_criterio;
 use App\Models\UsuariosDesactivos;
+
 use App\Models\Encuestas_respuesta;
-
 use App\Models\Massive\UserMassive;
+
 use App\Exports\ExportReporteBD2019;
-
 use App\Exports\UserMassiveTemplate;
-use Maatwebsite\Excel\Facades\Excel;
 
+use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MigracionPerfilImport;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\UsuarioController;
@@ -79,89 +81,107 @@ class MasivoController extends Controller
 
     public function createUpdateUsers(Request $request)
     {
-        $validator = $this->validateFile($request);
-        if (!$validator) {
-            return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.'], 500);
+        try {
+            //code...
+            $validator = $this->validateFile($request);
+            if (!$validator) {
+                return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.'], 500);
+            }
+            $current_workspace = get_current_workspace();
+    
+            $data = [
+                'number_socket' => $request->get('number_socket') ?? null
+            ];
+            $import = new UserMassive($data);
+            Excel::import(new FirstPageImport($import), $request->file('file'));
+    
+            $headers = $import->excelHeaders;
+    
+            if ($import->error_message):
+    
+                return $this->success([
+                    'workspace_limit' => number_format($current_workspace->getLimitAllowedUsers()),
+                    'users_to_activate' => number_format($import->rows_to_activate)
+                ], $import->error_message, 422);
+    
+            else:
+                return $this->success([
+                    'message' => "Usuarios creados correctamente.",
+                    'headers' => $headers,
+                    'datos_procesados' => $import->processed_users,
+                    'errores' => $import->errors
+                ]);
+            endif;
+        } catch (\Throwable $exception) {
+            Error::storeAndNotificateException($exception, $request);
+            return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'], 500);
         }
-        $current_workspace = get_current_workspace();
-
-        $data = [
-            'number_socket' => $request->get('number_socket') ?? null
-        ];
-        $import = new UserMassive($data);
-        Excel::import(new FirstPageImport($import), $request->file('file'));
-
-        $headers = $import->excelHeaders;
-
-        if ($import->error_message):
-
-            return $this->success([
-                'workspace_limit' => number_format($current_workspace->getLimitAllowedUsers()),
-                'users_to_activate' => number_format($import->rows_to_activate)
-            ], $import->error_message, 422);
-
-        else:
-            return $this->success([
-                'message' => "Usuarios creados correctamente.",
-                'headers' => $headers,
-                'datos_procesados' => $import->processed_users,
-                'errores' => $import->errors
-            ]);
-        endif;
     }
 
     public function activeUsers(Request $request)
     {
-        $validator = $this->validateFile($request);
-        if (!$validator) {
-            return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+        try {
+            //code...
+            $validator = $this->validateFile($request);
+            if (!$validator) {
+                return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+            }
+            $current_workspace = get_current_workspace();
+    
+            $data = [
+                'number_socket' => $request->get('number_socket') ?? null
+            ];
+            $import = new ChangeStateUserMassive($data);
+            $import->identificator = 'document';
+            $import->state_user_massive = 1;
+            Excel::import(new FirstPageImport($import), $request->file('file'));
+    
+            if ($import->error_message):
+    
+                return $this->success([
+                    'workspace_limit' => number_format($current_workspace->getLimitAllowedUsers()),
+                    'users_to_activate' => number_format($import->rows_to_activate)
+                ], $import->error_message, 422);
+    
+            else:
+                return $this->success([
+                    'message' => "Usuarios activados correctamente.",
+                    'headers' => $import->getStaticHeader(true, true),
+                    'datos_procesados' => $import->q_change_status,
+                    'errores' => $import->errors
+                ]);
+            endif;
+        } catch (\Throwable $exception) {
+            Error::storeAndNotificateException($exception, $request);
+            return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'], 500);
         }
-        $current_workspace = get_current_workspace();
-
-        $data = [
-            'number_socket' => $request->get('number_socket') ?? null
-        ];
-        $import = new ChangeStateUserMassive($data);
-        $import->identificator = 'document';
-        $import->state_user_massive = 1;
-        Excel::import(new FirstPageImport($import), $request->file('file'));
-
-        if ($import->error_message):
-
-            return $this->success([
-                'workspace_limit' => number_format($current_workspace->getLimitAllowedUsers()),
-                'users_to_activate' => number_format($import->rows_to_activate)
-            ], $import->error_message, 422);
-
-        else:
-            return $this->success([
-                'message' => "Usuarios activados correctamente.",
-                'headers' => $import->getStaticHeader(true, true),
-                'datos_procesados' => $import->q_change_status,
-                'errores' => $import->errors
-            ]);
-        endif;
     }
 
     public function inactiveUsers(Request $request)
     {
-        $validator = $this->validateFile($request);
-        if (!$validator) {
-            return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+        try {
+            //code...
+            $validator = $this->validateFile($request);
+            if (!$validator) {
+                return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.']);
+            }
+            $data = [
+                'number_socket' => $request->get('number_socket') ?? null
+            ];
+            $import = new ChangeStateUserMassive($data);
+            $import->identificator = 'document';
+            $import->state_user_massive = 0;
+            Excel::import(new FirstPageImport($import), $request->file('file'));
+            return $this->success([
+                'message' => 'Usuarios inactivados correctamente.',
+                'headers' => $import->getStaticHeader(false, true),
+                'datos_procesados' => $import->q_change_status,
+                'errores' => $import->errors
+            ]);
+        } catch (\Throwable $exception) {
+            Error::storeAndNotificateException($exception, $request);
+            return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'], 500);
         }
-        $data = [
-            'number_socket' => $request->get('number_socket') ?? null
-        ];
-        $import = new ChangeStateUserMassive($data);
-        $import->identificator = 'document';
-        $import->state_user_massive = 0;
-        Excel::import(new FirstPageImport($import), $request->file('file'));
-        return $this->success([
-            'message' => 'Usuarios inactivados correctamente.',
-            'headers' => $import->getStaticHeader(false, true),
-            'datos_procesados' => $import->q_change_status,
-            'errores' => $import->errors
-        ]);
     }
 
     private function validateFile($request)

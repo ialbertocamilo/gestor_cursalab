@@ -2,8 +2,7 @@
     <v-main>
         <ResumenExpand>
             <template v-slot:resumen>
-                Consulta el avance del usuario por cada tema desarrollado, dentro de los cursos que tiene
-                asignado.
+                Consulta el historial de avance del usuario.
             </template>
 
             <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" />
@@ -69,7 +68,7 @@
                     <tbody class="text-dark">
                         <tr>
                             <td>{{ Usuario.module.name }}</td>
-                            <td>{{ `${Usuario.user.name} ${Usuario.user.lastname} ${Usuario.user.surname}` }}</td>
+                            <td>{{ `${Usuario.user.name} ${Usuario.user.lastname || ''} ${Usuario.user.surname || ''}` }}</td>
                             <td>{{ Usuario.user.document }}</td>
                         </tr>
                     </tbody>
@@ -86,9 +85,8 @@
                     <v-row class="text-grey font-weight-bold" no-gutters>
                         <v-col class="col-schools_names px-4">Escuelas</v-col>
                         <v-col class="col-course_name px-4">Curso</v-col>
-                        <v-col class="col-topic_name px-4">Tema</v-col>
                         <v-col class="col-grade px-4">Nota</v-col>
-                        <v-col class="col-topic_status px-4">Estado</v-col>
+                        <v-col class="col-course_status px-4">Estado</v-col>
                     </v-row>
                 </v-subheader>
                 <!-- For - Cursos -->
@@ -166,8 +164,7 @@ export default {
         let params = new URLSearchParams(uri);
         let param_dni = params.get("dni");
 
-        if (param_dni)
-        {
+        if (param_dni) {
             vue.search = param_dni
 
             this.buscarNotasUsuario()
@@ -239,6 +236,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Historial usuario',
+                        this.search
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
@@ -251,7 +252,7 @@ export default {
             this.hideLoader()
         },
         titulosCurso(index) {
-            let indexTitulos = ["schools_names","course_name", "topic_name", "grade", "topic_status"];
+            let indexTitulos = ["schools_names","course_name", "grade", "course_status"];
             if (indexTitulos.includes(index)) return true;
         }
     }
@@ -260,26 +261,22 @@ export default {
 <style lang="scss" scoped>
 
     .col-schools_names {
-        flex: 0 0 20%;
-        max-width: 20%;
+        flex: 0 0 30%;
+        max-width: 30%;
     }
 
     .col-course_name {
-        flex: 0 0 20%;
-        max-width: 20%;
-    }
-
-    .col-topic_name {
-        flex: 0 0 20%;
-        max-width: 20%;
+        flex: 0 0 30%;
+        max-width: 30%;
     }
 
     .col-grade {
         flex: 0 0 20%;
         max-width: 20%;
+        text-align: center;
     }
 
-    .col-topic_status {
+    .col-course_status {
         flex: 0 0 20%;
         max-width: 20%;
     }
