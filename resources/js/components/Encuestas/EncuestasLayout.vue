@@ -60,6 +60,7 @@
                         item-value="id"
                         dense
                         multiple
+                        returnObject
                     />
                 </div>
                 <div  class="row col-sm-12 mb-3 mx-0 px-0 my-0 py-0" style="justify-content: end;">
@@ -69,13 +70,6 @@
                           label-end="Fecha final"/>
                   </div>
                 </div>
-                <!-- <div class="col-sm-6">
-                  <label>Grupo</label>
-                  <select v-model="grupo" :disabled="!Grupos[0]" class="form-control">
-                    <option value="">- Selecciona un Grupo -</option>
-                    <option v-for="item in Grupos" :key="item.grupo" :value="item.id">{{ item.grupo }}</option>
-                  </select>
-                </div> -->
                 <div class="col-sm-12 mt-4">
                   <b-button :disabled="!filters.schools[0] || !filters.modules[0]" block variant="primary" @click="searchData()">Consultar</b-button>
                 </div>
@@ -85,40 +79,7 @@
                 <h2 class="text-center">Resumen</h2>
                 <div class="container-fluid">
                   <div>
-                    <div class="my-4">
-                      <h5 v-if="resume.count_users" v-text="`Total de encuestados: ${resume.count_users}`"></h5>
-                      <DefaultSimpleTable v-if="resume.questions_type_califica.length > 0">
-                          <template slot="content">
-                              <thead>
-                                <tr>
-                                    <th>Aspecto Evaluado</th>
-                                    <th>Promedio</th>
-                                    <th>T2B</th>
-                                    <th>MB</th>
-                                    <th>B</th>
-                                    <th>R</th>
-                                    <th>M</th>
-                                    <th>MM</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr
-                                    v-for="(question, index) in resume.questions_type_califica"
-                                    :key="index"
-                                >
-                                    <td class="w-40" v-text="question.titulo"></td>
-                                    <td class="w-10" v-text="question.prom"></td>
-                                    <td class="w-10" v-text="question.percent_califica_tb2+'%'"></td>
-                                    <td class="w-10" v-text="question.percent_califica_mb+'%'"></td>
-                                    <td class="w-10" v-text="question.percent_califica_b+'%'"></td>
-                                    <td class="w-10" v-text="question.percent_califica_r+'%'"></td>
-                                    <td class="w-10" v-text="question.percent_califica_m+'%'"></td>
-                                    <td class="w-10" v-text="question.percent_califica_mm+'%'"></td>
-                                </tr>
-                              </tbody>
-                          </template>
-                      </DefaultSimpleTable>
-                    </div>
+                    <ResumenEncuesta :resume="resume" />
                     <h5>Detalle de encuestas</h5>
                     <div class="p-3 row" v-for="(type_poll_question) in types_pool_questions" :key="type_poll_question.id">
                       <div class="col-4" v-text="type_poll_question.name"></div>
@@ -132,15 +93,61 @@
                 </div>
               </div>
             </v-card-text>
+            <DefaultDialog :options="modalOptions"
+                @onCancel="()=>{}"
+                @onConfirm="()=>{}"
+                :showCardActions="false"
+                :showTitle="false"
+                :width="'70vw'"
+                :noPaddingCardText="true"
+                v-if="download_list.length>0"
+            >
+            <template v-slot:content>
+              <v-card-title>
+                <span class="mb-4">Debido a la gran cantidad de datos seleccionado el reporte se descargará en partes dividido por escuela.</span>
+                <DefaultSimpleTable class="mb-4">
+                    <template slot="content">
+                      <thead>
+                        <tr>
+                            <th>Bloques</th>
+                            <th>Estado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr
+                            v-for="(donwload, index) in download_list"
+                            :key="index"
+                        >
+                            <td class="w-70" v-text="`Bloque ${index+1}: ${donwload.schools}`"></td>
+                            <td class="w-10" v-if="donwload.status=='pending'">
+                              <span class="ml-1">Descargando..</span> 
+                            </td>
+                            <td class="w-10" v-if="donwload.status=='complete'">
+                              <DefaultButton
+                                  label="Descargar"
+                                  @click="download_report(donwload)"
+                              />
+                            </td>
+                            <td class="w-10" v-if="donwload.status=='no_data'">
+                              <span class="ml-1">No se encontraron datos en este bloque.</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </template>
+                </DefaultSimpleTable>
+              </v-card-title>
+            </template>
+          </DefaultDialog>
         </v-card>
   </section>
 </template>
 
 <script>
 const FileSaver = require("file-saver");
-import FechaFiltro from "../Reportes/partials/FechaFiltro.vue"
+import FechaFiltro from "../Reportes/partials/FechaFiltro.vue";
+import ResumenEncuesta from './ResumenEncuesta.vue';
 export default {
-  components:{FechaFiltro},
+  components:{FechaFiltro,ResumenEncuesta},
   props: ["Encuestas"],
   data() {
     return {
@@ -158,7 +165,7 @@ export default {
           schools: [],
           courses: [],
           type_poll_question:{},
-          courses_id_selected:[],
+          courses_selected:[],
           date:{
             start:null,
             end:null
@@ -168,99 +175,165 @@ export default {
       resume:{
         questions_type_califica:[]
       },
-      types_pool_questions:[]
+      types_pool_questions:[],
+      modalOptions: {
+        ref: 'TableDownload',
+        open: true,
+        base_endpoint: '',
+        persistent:true,
+      },
+      download_list:[],
     };
   },
   mounted(){
     this.loadInitialData();
     this.reportsBaseUrl = this.getReportsBaseUrl()
+    // this.showLoader();
   },
   methods: {
     async loadInitialData(){
-      this.poll_searched = false;
-
+      let vue = this;
+      vue.poll_searched = false;
       await axios.get('/resumen_encuesta/initial-data').then(({data})=>{
-        this.polls = data.data.polls;
-        this.modules = data.data.modules;
+        vue.polls = data.data.polls;
+        vue.modules = data.data.modules;
       })
     },
     async loadSchools(){
-      this.poll_searched = false;
-      this.courses = [];
-      this.schools = [];
-      this.filters.courses = [];
-      this.filters.schools = [];
-      await axios.get('/resumen_encuesta/schools/'+this.filters.poll.id).then(({data})=>{
-        this.schools = data.data.schools;
-        if(this.schools.length==0){
-          this.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
+      let vue = this;
+      vue.poll_searched = false;
+      vue.courses = [];
+      vue.schools = [];
+      vue.filters.courses = [];
+      vue.filters.schools = [];
+      await axios.get('/resumen_encuesta/schools/'+vue.filters.poll.id).then(({data})=>{
+        vue.schools = data.data.schools;
+        if(vue.schools.length==0){
+          vue.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
         }
       })
     }, 
     async loadCourses(){
-      this.poll_searched = false;
-      this.filters.courses = [];
+      let vue = this;
+      vue.poll_searched = false;
+      vue.filters.courses = [];
       await axios.post('/resumen_encuesta/courses',{
-        poll_id:this.filters.poll.id,
-        schools: this.filters.schools
+        poll_id:vue.filters.poll.id,
+        schools: vue.filters.schools
       }).then(({data})=>{
-        this.courses = data.data.courses;
-        if(this.courses.length==0){
-          this.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
+        vue.courses = data.data.courses;
+        if(vue.courses.length==0){
+          vue.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
         }
       })
     },
     async searchData(){
-      this.poll_searched = true;
-      this.types_pool_questions = [];
-      this.showLoader();
-      this.filters.courses_id_selected = this.filters.courses.length > 0 ? this.filters.courses : this.courses.map((c)=>c.id) 
-      this.filters.date.start =  this.$refs.FechasFiltros.start;
-      this.filters.date.end =  this.$refs.FechasFiltros.end;
-      await axios.post('/resumen_encuesta/poll-data',this.filters).then(({data})=>{
-        this.types_pool_questions = data.data.data.types_pool_questions;
-        this.resume = data.data.data.resume;
-        this.hideLoader();
+      let vue = this;
+      vue.poll_searched = true;
+      vue.types_pool_questions = [];
+      vue.showLoader();
+      vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses.map(c=>c.id) : vue.courses.map(c=>c.id)
+      vue.filters.date.start =  vue.$refs.FechasFiltros.start;
+      vue.filters.date.end =  vue.$refs.FechasFiltros.end;
+      await axios.post('/resumen_encuesta/poll-data',vue.filters).then(({data})=>{
+        vue.types_pool_questions = data.data.data.types_pool_questions;
+        vue.resume = data.data.data.resume;
+        vue.hideLoader();
       })
       .catch((er)=>{
         console.log(er);
-        this.showtAlertError();
+        vue.showtAlertError();
       })
     },  
     async cargarGrupos() {
-      this.Grupos = [];
-      this.grupo = "";
-      if (!this.curso) return false;
+      let vue = this;
+      vue.Grupos = [];
+      vue.grupo = "";
+      if (!vue.curso) return false;
       var res = await axios.post("cambia_grupo", {
-        curso: this.curso,
+        curso: vue.curso,
       });
-      this.Grupos = res.data;
+      vue.Grupos = res.data;
     },
     async downloadReportPollQuestion(type_poll_question){
-      this.showLoader();
-      this.filters.type_poll_question = type_poll_question;
-      this.filters.courses_id_selected = this.filters.courses.length > 0 ? this.filters.courses : this.courses.map((c)=>c.id) 
-      await axios.post(`${this.reportsBaseUrl}/exportar/poll-questions`,this.filters).then(({data})=>{
+      let vue = this;
+      vue.filters.type_poll_question = type_poll_question;
+      vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses; 
+      const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); 
+      //If the selected schools are greater than 20, the data will be downloaded in parts
+      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,2);
+      if (chunk_courses_by_school.length == 1) {
+        vue.showLoader();
+        await this.downloadReport(vue.filters.courses_selected);
+      }else{
+        for (const array_courses of chunk_courses_by_school){
+          let merge_courses_id = [];
+          let scholls_name = '';
+          for (const courses of array_courses) {
+            merge_courses_id = [...merge_courses_id,...courses.map(c => c.id)];
+            const school = this.schools.find(school => school.id == courses[0].school_id);
+            scholls_name = scholls_name.length == 0 ? school.name : scholls_name+', '+school.name  
+          }
+          this.download_list.push({
+            schools: scholls_name,
+            status:'pending',
+            url:'',
+            new_name:'',
+            courses_id : merge_courses_id 
+          });
+        }
+        this.verify_status_download();
+      }
+    },
+    verify_status_download(){
+      let vue = this;
+      const find_donwload_pending =  vue.download_list.find(dl => dl.status == 'pending');
+      if(find_donwload_pending){
+        this.downloadReport(find_donwload_pending.courses_id);
+      }
+      return true;
+    },  
+    change_status_download(data){
+      let vue = this;
+      const find_index = vue.download_list.findIndex(dl => dl.status == 'pending');
+      let urlReporte = `${vue.reportsBaseUrl}/${data.ruta_descarga}`;
+      vue.download_list[find_index].url=urlReporte;
+      vue.download_list[find_index].new_name = data.new_name;
+      vue.download_list[find_index].status= (data.alert) ? 'no_data' : 'complete';
+      vue.verify_status_download();
+      return true;
+    },  
+    async downloadReport(courses_id){
+      let vue = this;
+      vue.filters.courses_selected = courses_id;
+      await axios.post(`${vue.reportsBaseUrl}/exportar/poll-questions`,vue.filters).then(({data})=>{
+        if(vue.download_list.length>0){
+          this.change_status_download(data);
+          return true;
+        }
         if(data.alert){
-          this.hideLoader();
-          this.showAlert(data.alert,'warning');
+          vue.hideLoader();
+          vue.showAlert(data.alert,'warning');
           return false;
         }
         if(data.error){
-          this.showtAlertError();
+          vue.showtAlertError();
           return false;
         }
-        let urlReporte = `${this.reportsBaseUrl}/${data.ruta_descarga}`
+        let urlReporte = `${vue.reportsBaseUrl}/${data.ruta_descarga}`
         // La extension la define el back-end, ya que el quien crea el archivo
         FileSaver.saveAs(urlReporte, data.new_name)
-        this.hideLoader();
+        vue.hideLoader();
       }).catch(()=>{
-        this.showtAlertError();
-      })
+        vue.showtAlertError();
+      }) 
     },
     showtAlertError(){
       this.hideLoader();
       this.showAlert('Ha ocurrido un problema. Contáctate con el equipo de soporte.','warning');
+    },
+    download_report({url,new_name}){
+      FileSaver.saveAs(url,new_name)
     }
   },
 };

@@ -91,10 +91,13 @@ class Poll extends BaseModel
     }
     protected function loadCourses($data){
         $courses_id = DB::table('course_poll')->where('poll_id',$data['poll_id'])->pluck('course_id');
-        $courses =  Course::select('id','name')->whereIn('id',$courses_id)
-        ->whereHas('schools',function($q) use($data){
-            $q->whereIn('school_id',$data['schools']);
-        })->get();
+        $courses =  Course::select('courses.id','courses.name','cs.school_id')
+                    ->join('course_school as cs','cs.course_id','courses.id')
+                    ->whereIn('id',$courses_id)
+                    ->whereIn('cs.school_id',$data['schools'])->get();
+                    // ->whereHas('schools',function($q) use($data){
+                    //     $q->whereIn('school_id',$data['schools']);
+                    // })->get();
 
         return $courses;
     }
@@ -122,11 +125,11 @@ class Poll extends BaseModel
             $base_query = DB::table('poll_question_answers as pqa')           
             ->join('users as u','u.id','=','pqa.user_id')
             ->where('pqa.poll_question_id','=',$pool_question->poll_question_id)
-            ->whereIn('pqa.course_id',$filters['courses_id_selected'])
+            ->whereIn('pqa.course_id',$filters['courses_selected'])
             ->whereIn('u.subworkspace_id',$filters['modules'])
             ->where('u.active',1)
             ->whereNull('u.deleted_at')
-            ->when($filters['date']['end'], function ($q) use($filters){
+            ->when(isset($filters['date']['end']), function ($q) use($filters){
                 $q->whereBetween('pqa.created_at', [$filters['date']['start'],$filters['date']['end']]);
             });
             $prom_query = clone $base_query;
@@ -182,7 +185,7 @@ class Poll extends BaseModel
     private function resumePollQuestionTypeCalifica($pool_questions,$filters){
         $user_to_response_poll = PollQuestionAnswer::
                 select('poll_question_answers.id','poll_question_answers.user_id','poll_question_answers.poll_question_id','poll_question_answers.respuestas')
-                ->whereIn('course_id',$filters['courses_id_selected'])
+                ->whereIn('course_id',$filters['courses_selected'])
                 ->whereIn('poll_question_id',$pool_questions->pluck('poll_question_id'))
                 ->join('users as u','u.id','=','poll_question_answers.user_id')
                 ->whereIn('u.subworkspace_id',$filters['modules'])
