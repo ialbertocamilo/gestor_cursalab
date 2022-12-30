@@ -232,7 +232,7 @@ export default {
       vue.filters.type_poll_question = type_poll_question;
       vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses; 
       const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); //Function in mixin.js
-      //If the selected schools are greater than 20, the data will be downloaded in parts
+      //If the selected schools are greater than 10, the data will be downloaded in parts
       const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,10);//Function in mixin.js
       if (chunk_courses_by_school.length == 1) {
         vue.showLoader();
@@ -315,10 +315,13 @@ export default {
     },
     saveReport({url,new_name}){
       // La extension la define el back-end, ya que el quien crea el archivo
+      this.showLoader();
       FileSaver.saveAs(url,new_name)
+      this.hideLoader();
     },
     closeModal(){
       this.modalOptions.open = false;
+      this.modalOptions.showCardActions = false;
       this.download_list = [];
     }
   },
