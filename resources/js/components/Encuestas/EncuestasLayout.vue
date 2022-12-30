@@ -205,8 +205,8 @@ export default {
       vue.types_pool_questions = [];
       vue.showLoader();
       vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses.map(c=>c.id) : vue.courses.map(c=>c.id)
-      vue.filters.date.start =  vue.$refs.FechasFiltros.start;
-      vue.filters.date.end =  vue.$refs.FechasFiltros.end;
+      vue.filters.date.start =  vue.parseToDateTime(vue.$refs.FechasFiltros.start,'start');
+      vue.filters.date.end =  vue.parseToDateTime(vue.$refs.FechasFiltros.end,'end');
       await axios.post('/resumen_encuesta/poll-data',vue.filters).then(({data})=>{
         vue.types_pool_questions = data.data.data.types_pool_questions;
         vue.resume = data.data.data.resume;
@@ -217,6 +217,12 @@ export default {
         vue.showtAlertError();
       })
     },  
+    parseToDateTime(date,type){
+      if(!date){
+        return '';
+      }
+      return type == 'start' ? `${date} 00:00:00` : `${date} 23:59:59`;
+    },
     async cargarGrupos() {
       let vue = this;
       vue.Grupos = [];
@@ -286,6 +292,8 @@ export default {
     async callApiReport(courses_id){
       let vue = this;
       vue.filters.courses_selected = courses_id;
+      vue.filters.date.start =  vue.parseToDateTime(vue.$refs.FechasFiltros.start,'start');
+      vue.filters.date.end =  vue.parseToDateTime(vue.$refs.FechasFiltros.end,'end');
       await axios.post(`${vue.reportsBaseUrl}/exportar/poll-questions`,vue.filters).then(({data})=>{
         if(vue.download_list.length>0){
           this.change_status_download(data);
