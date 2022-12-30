@@ -174,6 +174,7 @@ export default {
       vue.schools = [];
       vue.filters.courses = [];
       vue.filters.schools = [];
+     
       await axios.get('/resumen_encuesta/schools/'+vue.filters.poll.id).then(({data})=>{
         vue.schools = data.data.schools;
         if(vue.schools.length==0){
@@ -185,6 +186,9 @@ export default {
       let vue = this;
       vue.poll_searched = false;
       vue.filters.courses = [];
+      if(vue.filters.schools ==0){
+        return true;
+      }
       await axios.post('/resumen_encuesta/courses',{
         poll_id:vue.filters.poll.id,
         schools: vue.filters.schools
@@ -296,10 +300,12 @@ export default {
           vue.showtAlertError();
           return false;
         }
-        let urlReporte = `${vue.reportsBaseUrl}/${data.ruta_descarga}`
-        this.saveReport(urlReporte, data.new_name);
+        data.url = `${vue.reportsBaseUrl}/${data.ruta_descarga}`
+        this.saveReport(data);
         vue.hideLoader();
-      }).catch(()=>{
+      })
+      .catch((e)=>{
+        console.log(e);
         vue.showtAlertError();
       }) 
     },
