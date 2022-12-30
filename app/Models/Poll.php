@@ -108,8 +108,10 @@ class Poll extends BaseModel
                             ->whereNull('poll_questions.deleted_at')->get();
         
         // $questions_type_califica = $this->resumePollQuestionTypeCalifica($pool_questions,$filters);
-        $questions_type_califica = $this->resumePollQuestionTypeCalifica_v2($pool_questions,$filters);
-
+        $questions_type_califica = [];
+        if(get_current_workspace()->id != 25){
+            $questions_type_califica = $this->resumePollQuestionTypeCalifica_v2($pool_questions,$filters);
+        }
         // $count_users = $user_to_response_poll->unique('user_id')->count();
         $count_users = 1;
         $resume = compact('count_users','questions_type_califica');

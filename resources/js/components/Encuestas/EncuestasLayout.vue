@@ -70,8 +70,10 @@
                           label-end="Fecha final"/>
                   </div>
                 </div>
-                <div class="col-sm-12 mt-4">
-                  <b-button :disabled="!filters.schools[0] || !filters.modules[0]" block variant="primary" @click="searchData()">Consultar</b-button>
+                <div class="row col-sm-12 mt-4 m-0 p-0 justify-center">
+                  <div class="col-sm-4">
+                    <b-button :disabled="!filters.schools[0] || !filters.modules[0]" block variant="primary" @click="searchData()">Consultar</b-button>
+                  </div>
                 </div>
               </div>
               <!-- Resumen -->
@@ -93,51 +95,12 @@
                 </div>
               </div>
             </v-card-text>
-            <DefaultDialog :options="modalOptions"
-                @onCancel="()=>{}"
-                @onConfirm="()=>{}"
-                :showCardActions="false"
-                :showTitle="false"
-                :width="'70vw'"
-                :noPaddingCardText="true"
-                v-if="download_list.length>0"
-            >
-            <template v-slot:content>
-              <v-card-title>
-                <span class="mb-4">Debido a la gran cantidad de datos seleccionado el reporte se descargará en partes dividido por escuela.</span>
-                <DefaultSimpleTable class="mb-4">
-                    <template slot="content">
-                      <thead>
-                        <tr>
-                            <th>Bloques</th>
-                            <th>Estado</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr
-                            v-for="(donwload, index) in download_list"
-                            :key="index"
-                        >
-                            <td class="w-70" v-text="`Bloque ${index+1}: ${donwload.schools}`"></td>
-                            <td class="w-10" v-if="donwload.status=='pending'">
-                              <span class="ml-1">Descargando..</span> 
-                            </td>
-                            <td class="w-10" v-if="donwload.status=='complete'">
-                              <DefaultButton
-                                  label="Descargar"
-                                  @click="download_report(donwload)"
-                              />
-                            </td>
-                            <td class="w-10" v-if="donwload.status=='no_data'">
-                              <span class="ml-1">No se encontraron datos en este bloque.</span>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </template>
-                </DefaultSimpleTable>
-              </v-card-title>
-            </template>
-          </DefaultDialog>
+            <ModalBloqueReport 
+              :modalOptions="modalOptions"
+              :download_list="download_list"
+              @saveReport="saveReport"
+              @closeModal="closeModal"
+            />
         </v-card>
   </section>
 </template>
@@ -146,8 +109,10 @@
 const FileSaver = require("file-saver");
 import FechaFiltro from "../Reportes/partials/FechaFiltro.vue";
 import ResumenEncuesta from './ResumenEncuesta.vue';
+import ModalBloqueReport from './ModalBloqueReport.vue';
+
 export default {
-  components:{FechaFiltro,ResumenEncuesta},
+  components:{FechaFiltro,ResumenEncuesta,ModalBloqueReport},
   props: ["Encuestas"],
   data() {
     return {
@@ -177,10 +142,13 @@ export default {
       },
       types_pool_questions:[],
       modalOptions: {
+        title:'Generador de Reportes por bloques',
         ref: 'TableDownload',
         open: true,
         base_endpoint: '',
         persistent:true,
+        showCardActions:false,
+        hideCancelBtn:true
       },
       download_list:[],
     };
@@ -259,37 +227,45 @@ export default {
       let vue = this;
       vue.filters.type_poll_question = type_poll_question;
       vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses; 
-      const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); 
+      const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); //Function in mixin.js
       //If the selected schools are greater than 20, the data will be downloaded in parts
-      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,2);
+      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,10);//Function in mixin.js
       if (chunk_courses_by_school.length == 1) {
         vue.showLoader();
-        await this.downloadReport(vue.filters.courses_selected);
+        await this.callApiReport(vue.filters.courses_selected.map(c => c.id));
       }else{
         for (const array_courses of chunk_courses_by_school){
-          let merge_courses_id = [];
-          let scholls_name = '';
+          let get_all_courses_id = [];
+          const content = 'Contiene '+array_courses.length+' escuela(s).';
+          //message in tooltip (list of name's schools)
+          let schools_name = '';
+          
           for (const courses of array_courses) {
-            merge_courses_id = [...merge_courses_id,...courses.map(c => c.id)];
+            get_all_courses_id = [...get_all_courses_id,...courses.map(c => c.id)];
             const school = this.schools.find(school => school.id == courses[0].school_id);
-            scholls_name = scholls_name.length == 0 ? school.name : scholls_name+', '+school.name  
+            schools_name = schools_name.length == 0 ? school.name : schools_name+', '+school.name  
           }
           this.download_list.push({
-            schools: scholls_name,
+            content,
+            schools: schools_name,
             status:'pending',
             url:'',
             new_name:'',
-            courses_id : merge_courses_id 
+            courses_id : get_all_courses_id 
           });
+          this.modalOptions.open = true;
         }
-        this.verify_status_download();
+        this.verifyStatusDownload();
       }
     },
-    verify_status_download(){
+    verifyStatusDownload(){
       let vue = this;
       const find_donwload_pending =  vue.download_list.find(dl => dl.status == 'pending');
       if(find_donwload_pending){
-        this.downloadReport(find_donwload_pending.courses_id);
+        vue.callApiReport(find_donwload_pending.courses_id);
+      }else{
+        //if all donwload list is complete.
+        vue.modalOptions.showCardActions = true;
       }
       return true;
     },  
@@ -300,10 +276,10 @@ export default {
       vue.download_list[find_index].url=urlReporte;
       vue.download_list[find_index].new_name = data.new_name;
       vue.download_list[find_index].status= (data.alert) ? 'no_data' : 'complete';
-      vue.verify_status_download();
+      vue.verifyStatusDownload();
       return true;
     },  
-    async downloadReport(courses_id){
+    async callApiReport(courses_id){
       let vue = this;
       vue.filters.courses_selected = courses_id;
       await axios.post(`${vue.reportsBaseUrl}/exportar/poll-questions`,vue.filters).then(({data})=>{
@@ -321,8 +297,7 @@ export default {
           return false;
         }
         let urlReporte = `${vue.reportsBaseUrl}/${data.ruta_descarga}`
-        // La extension la define el back-end, ya que el quien crea el archivo
-        FileSaver.saveAs(urlReporte, data.new_name)
+        this.saveReport(urlReporte, data.new_name);
         vue.hideLoader();
       }).catch(()=>{
         vue.showtAlertError();
@@ -332,8 +307,13 @@ export default {
       this.hideLoader();
       this.showAlert('Ha ocurrido un problema. Contáctate con el equipo de soporte.','warning');
     },
-    download_report({url,new_name}){
+    saveReport({url,new_name}){
+      // La extension la define el back-end, ya que el quien crea el archivo
       FileSaver.saveAs(url,new_name)
+    },
+    closeModal(){
+      this.modalOptions.open = false;
+      this.download_list = [];
     }
   },
 };
