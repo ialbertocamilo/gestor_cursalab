@@ -55,6 +55,9 @@ class RestUserProgressController extends Controller
             'porcentaje' => $general_percentage,
         ];
 
+        info('assigned_courses');
+        info($assigned_courses);
+
         $regular_courses = $assigned_courses->where('type.code', 'regular');
         $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular');
         $free_courses = $assigned_courses->where('type.code', 'free');

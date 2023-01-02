@@ -606,7 +606,24 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $query = $this->getUserCourseSegmentationQuery($withRelations);
 
-        return $query->whereIn('id', array_column($all_courses, 'id'))->get();
+        $courses = $query->whereIn('id', array_column($all_courses, 'id'))->get();
+
+        $all_courses = collect($all_courses);
+
+        $compatibles_courses = $query->whereIn('id', array_column($all_courses->where('isValidated', true)->toArray(), 'id'))->get();
+
+        foreach ($courses as $course) {
+            
+
+            if ($course->isValidated) {
+                
+                $_course = $compatibles_courses->where('id', $course->id);
+
+                $course->compatible = $_course->validates;
+            }
+        }
+
+        return $courses;
     }
 
     private function getUserCourseSegmentationQuery($withRelations)

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Course;
+use App\Models\Workspace;
 use Illuminate\Console\Command;
 
 class SetCourseCompatibles extends Command
@@ -31,30 +32,38 @@ class SetCourseCompatibles extends Command
         $workspace_id = $this->argument('workspace');
 
         $all = Course::whereRelation('workspaces', 'id', $workspace_id)
-                    // ->where()
                     ->get();
+
+        $modules = Workspace::where('parent_id', $workspace_id)->get();
+
+        foreach ($all as $course) {
+            
+            foreach ($modules as $module) {
+
+                $course->name = str_replace($module->name . ' - ', '', $course->name);
+            }
+        }
 
         $grouped = $all->groupBy('name');
 
         $bar = $this->output->createProgressBar($grouped->count());
 
         foreach ($grouped as $courses) {
-           
-            if (!$courses->count()) {
+
+            if ($courses->count() == 1) {
 
                 $bar->advance();
 
                 continue;
             }
 
-            $course = $courses->first();
+            $course = $courses->shift();
 
-            $courses_id = $courses->pluck('id')->toArray();
+            $data['compatibilities'] = $courses->pluck('id')->toArray();
 
-            Course::storeCompatibilityRequest($course, $courses_id);
+            Course::storeCompatibilityRequest($course, $data);
 
             $bar->advance();
-
         }
 
         $bar->finish();
