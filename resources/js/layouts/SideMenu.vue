@@ -420,7 +420,7 @@ export default {
                     {
                         title: "Encuestas",
                         icon: "fas fa-poll",
-                        path: "/resumen_encuesta/index",
+                        path: "/resumen_encuesta",
                         subpaths: ["resumen_encuesta"],
                         selected: false,
                         permission: "resumen_encuesta",
