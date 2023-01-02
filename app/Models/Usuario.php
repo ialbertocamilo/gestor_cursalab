@@ -102,7 +102,10 @@ class Usuario extends Model
     {
         return $this->hasOne(Usuario_vigencia::class, 'usuario_id');
     }
-
+    public function criterion_user()
+    {
+        return $this->hasMany(CriterionValueUser::class,'user_id');
+    }
     //
     public function rpta_pruebas()
     {
