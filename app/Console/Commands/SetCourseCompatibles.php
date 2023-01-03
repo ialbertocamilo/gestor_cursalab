@@ -57,11 +57,19 @@ class SetCourseCompatibles extends Command
                 continue;
             }
 
-            $course = $courses->shift();
 
-            $data['compatibilities'] = $courses->pluck('id')->toArray();
+            foreach ($courses as $course) {
+                
+                $data['compatibilities'] = $courses->where('id', '<>', $course->id)->pluck('id')->toArray();
 
-            Course::storeCompatibilityRequest($course, $data);
+                Course::storeCompatibilityRequest($course, $data);
+            }
+
+            // $course = $courses->shift();
+
+            // $data['compatibilities'] = $courses->pluck('id')->toArray();
+
+            // Course::storeCompatibilityRequest($course, $data);
 
             $bar->advance();
         }
