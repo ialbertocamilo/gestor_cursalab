@@ -156,6 +156,11 @@ export default {
                         'Segmentación',
                         this.generateNamesString(this.schools, this.filters.school)
                     )
+                    response.data.selectedFilters = {
+
+                        "Escuelas": this.generateNamesString(this.schools, this.filters.school),
+                        "Cursos": this.generateNamesString(this.courses, this.filters.course),
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 

@@ -99,6 +99,7 @@ export default {
                             'Videoteca',
                             ''
                         )
+                        res.data.selectedFilters = { }
                         this.$emit("emitir-reporte", res);
                     }
                     this.hideLoader();

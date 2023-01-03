@@ -240,6 +240,14 @@ export default {
                         'Checklist general',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    response.data.selectedFilters = {
+                        "Módulos": this.generateNamesString(this.modules, this.modulo),
+                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                        'Fecha inicial': FechaFiltro.start,
+                        'Fecha final': FechaFiltro.end,
+                        "Áreas" : this.generateNamesString(this.areas, this.area)
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 

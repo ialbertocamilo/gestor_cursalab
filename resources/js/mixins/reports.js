@@ -4,16 +4,18 @@ export default {
         /**
          * Generate string with modules names
          *
-         * @param modules
+         * @param collection
          * @param ids
          */
-        generateNamesString(modules, ids) {
+        generateNamesString(collection, ids) {
 
-            if (!modules) return '';
-            if (!ids) return '';
-            if (!ids.length) return '';
 
-            let selectedModules = modules.filter(m => ids.includes(m.id));
+            if (collection.length === 0) return ''
+            if (!ids) return ''
+            if (ids.length === 0) return ''
+
+            let selectedModules = collection.filter(m => ids.includes(m.id));
+
             let names = [];
             selectedModules.forEach(m => names.push(m.name))
 
@@ -27,6 +29,9 @@ export default {
                 name + ' ' +
                 new Date().toISOString().slice(0, 10) +
                 '.xlsx'
+        },
+        yesOrNo(booleanValue) {
+            return booleanValue ? 'Sí' : 'No'
         }
     }
 }

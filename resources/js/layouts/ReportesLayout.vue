@@ -595,6 +595,7 @@ export default {
                     method: 'post',
                     data: {
                         name: this.reportFilename,
+                        downloadUrl: this.reportDownloadUrl,
                         filters: this.selectedFilters
                     }
                 })

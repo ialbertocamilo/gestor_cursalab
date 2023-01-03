@@ -254,8 +254,10 @@ export default {
                     estados_curso:estados_curso
                 })
                 .then((res) => {
-                    if (!res.data.error) vue.$emit("emitir-reporte", res);
-                    else {
+                    if (!res.data.error) {
+
+                        vue.$emit("emitir-reporte", res);
+                    } else {
                         alert(res.data.error);
                         vue.hideLoader()
                     }
@@ -308,11 +310,17 @@ export default {
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
-                        vue.queryStatus("reportes", "descargar_reporte_diplomas");
+
                         res.data.new_name = this.generateFilename(
                             'Diploma',
                             this.generateNamesString(this.modules, this.modulo)
                         )
+                        res.data.selectedFilters = {
+                            "Módulos": this.generateNamesString(this.modules, this.filters.module),
+                            "Escuelas": this.generateNamesString(this.schools, this.filters.school),
+                            "Cursos": this.generateNamesString(this.courses, this.filters.course),
+                            "Fecha de emisión": this.filters.date
+                        }
                         this.$emit("emitir-reporte", res);
                     }
                     this.hideLoader();

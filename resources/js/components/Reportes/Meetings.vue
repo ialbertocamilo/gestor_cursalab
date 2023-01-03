@@ -150,7 +150,10 @@ export default {
                 'Meetings',
                 ''
             )
-
+            res.data.selectedFilters = {
+                'Fecha inicial': this.start,
+                'Fecha final': this.end
+            }
             this.$emit('emitir-reporte', res)
         },
     }

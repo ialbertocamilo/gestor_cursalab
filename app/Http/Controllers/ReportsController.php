@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GeneratedReport;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 
 class ReportsController extends Controller
@@ -12,11 +13,19 @@ class ReportsController extends Controller
 
         $user = auth()->user();
 
-        $generatedReport = new GeneratedReport();
-        $generatedReport->name = $request->name;
-        $generatedReport->admin_id = $user->id;
-        $generatedReport->filters = json_encode($request->filters);
-        $generatedReport->save();
+        // get admin workspace
+
+        $workspaceId = session('workspace')->id;
+
+        // Register report
+
+        GeneratedReport::create([
+            'name' => $request->name,
+            'download_url' => $request->downloadUrl,
+            'admin_id' => $user->id,
+            'workspace_id' => $workspaceId,
+            'filters' => json_encode($request->filters)
+        ]);
 
         return response()->json(['success' => true]);
     }

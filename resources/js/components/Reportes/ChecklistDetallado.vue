@@ -293,6 +293,17 @@ export default {
                         'Checklist detallado',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    response.data.selectedFilters = {
+                        "Módulos": this.generateNamesString(this.modules, this.modulo),
+                        "Escuelas": this.generateNamesString(this.schools, this.school),
+                        "Cursos": this.generateNamesString(this.courses, this.course),
+                        "Checklist": this.generateNamesString(this.Checklist, this.checklist),
+                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                        'Fecha inicial': FechaFiltro.start,
+                        'Fecha final': FechaFiltro.end,
+                        "Áreas" : this.generateNamesString(this.areas, this.area)
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 

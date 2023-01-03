@@ -89,6 +89,10 @@ export default {
                         'Usuarios uploads',
                         ''
                     )
+                    response.data.selectedFilters = {
+                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 

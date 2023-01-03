@@ -200,7 +200,7 @@ export default {
                         'Avance Curricula',
                         this.generateNamesString(this.modules, this.modulo)
                     )
-                    vue.queryStatus("reportes", "descargar_reporte_avance");
+
                     this.$emit('emitir-reporte', response)
                 }
 

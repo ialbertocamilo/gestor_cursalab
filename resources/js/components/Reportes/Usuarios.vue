@@ -175,6 +175,14 @@ export default {
                         this.generateNamesString(this.modules, this.modulo)
                     )
 
+                    response.data.selectedFilters = {
+                        "Módulos" : this.generateNamesString(this.modules, this.modulo),
+                        "Activos" : this.yesOrNo(UFC.UsuariosActivos),
+                        "Inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                        "Carreras" : this.generateNamesString(this.careers, this.career),
+                        "Áreas" : this.generateNamesString(this.areas, this.area),
+                    }
+
                     this.$emit('emitir-reporte', response)
                 }
 

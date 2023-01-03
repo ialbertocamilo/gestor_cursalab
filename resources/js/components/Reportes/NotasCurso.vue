@@ -350,6 +350,25 @@ export default {
                         'Notas por curso',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    response.data.selectedFilters = {
+                        "Módulos": this.generateNamesString(this.modules, this.modulo),
+                        "Escuelas": this.generateNamesString(this.schools, this.school),
+                        "Cursos": this.generateNamesString(this.courses, this.course),
+                        "Temas": this.generateNamesString(this.topics, this.tema),
+                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                        "Temas activos": this.yesOrNo(TEMAS.UsuariosActivos),
+                        "Temas inactivos": this.yesOrNo(TEMAS.UsuariosInactivos),
+                        'Fecha inicial': DATES.start,
+                        'Fecha final': DATES.end,
+                        'Aprobados': this.yesOrNo(this.aprobados),
+                        'Desaprobados': this.yesOrNo(this.desaprobados),
+                        'Desarrollo': this.yesOrNo(this.desarrollo),
+                        'Encuesta pendiente': this.yesOrNo(this.encuestaPendiente),
+
+                        "Áreas" : this.generateNamesString(this.areas, this.area),
+                        "Cursos libres": this.yesOrNo(this.tipocurso)
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 

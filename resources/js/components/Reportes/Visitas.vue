@@ -256,6 +256,16 @@ export default {
                         'Visitas',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    response.data.selectedFilters = {
+                        "Módulos": this.generateNamesString(this.modules, this.modulo),
+                        "Escuelas": this.generateNamesString(this.schools, this.school),
+                        "Cursos": this.generateNamesString(this.courses, this.course),
+                        "Activos" : this.yesOrNo(UFC.UsuariosActivos),
+                        "Inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                        "Carreras" : this.generateNamesString(this.careers, this.career),
+                        "Áreas" : this.generateNamesString(this.areas, this.area),
+                        "Cursos libres": this.yesOrNo(this.tipocurso)
+                    }
                     vue.$emit('emitir-reporte', response)
                 }
 

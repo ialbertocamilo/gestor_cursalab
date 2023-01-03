@@ -200,6 +200,13 @@ export default {
                         'Ranking',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    response.data.selectedFilters = {
+                        "Módulos": this.generateNamesString(this.modules, this.modulo),
+                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                        "Áreas" : this.generateNamesString(this.areas, this.area),
+                        "Sedes" : this.generateNamesString(this.sedes, this.sede)
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 

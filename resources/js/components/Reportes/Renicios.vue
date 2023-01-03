@@ -174,6 +174,11 @@ export default {
                         'Reinicios',
                         this.generateNamesString(this.admins, this.admin)
                     )
+                    response.data.selectedFilters = {
+                        "Administradores": this.generateNamesString(this.admins, this.admin),
+                        'Fecha inicial': this.start,
+                        'Fecha final': this.end
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 
