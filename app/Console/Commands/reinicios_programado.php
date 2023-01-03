@@ -10,6 +10,7 @@ use App\Models\Prueba;
 use App\Models\School;
 use App\Models\Abconfig;
 use App\Models\Reinicio;
+use App\Models\Taxonomy;
 use App\Models\Categoria;
 use App\Models\Workspace;
 use App\Models\SummaryTopic;
