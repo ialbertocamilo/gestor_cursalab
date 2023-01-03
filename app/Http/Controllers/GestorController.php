@@ -67,31 +67,53 @@ class GestorController extends Controller
 
     private function getDiplomaCursoData($user_id, $course_id)
     {
-//        $compatible_id = request()->has('compatible_id') ? request()->compatible_id : null;
 
-        // TODO: Si llega compatible validar que sea su compatible,
-
-        // TODO: Reemplazar los datos de la plantilla con los datos (template plantilla, nombre del curso) del compatible que llegue
-
-        $user = User::with('subworkspace')->select('id','name', 'surname', 'lastname', 'subworkspace_id')->where('id', $user_id)->first();
+        $user = User::with('subworkspace')
+            ->select('id', 'name', 'surname', 'lastname', 'subworkspace_id')
+            ->where('id', $user_id)->first();
         if (!$user) abort(404);
 
-        $course = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')->where('id', $course_id)->first();
+        // D3
+        $course = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+            ->where('id', $course_id)->first();
+
         if (!$course) abort(404);
+
+        if (request()->has('compatible_id')) {
+
+            // C3
+            $compatible_id = request()->compatible_id;
+
+            $course_compatible = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+                ->where('id', $compatible_id)->first();
+
+            if (!$course_compatible) abort(404);
+
+            // TODO: Si llega compatible validar que sea su compatible el curso de la ruta ($course_id)
+            // Compatible de C3
+            $compatible = $course->getCourseCompatibilityByUser($user);
+
+            // D3 !== Compatible de C3
+            if ($course->id !== $compatible->course->id) abort(404);
+
+            $course = $course_compatible;
+        }
+
+        // TODO: Reemplazar los datos de la plantilla con los datos (template plantilla, nombre del curso) del compatible que llegue
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
         if (!$summary_course?->certification_issued_at) abort(404);
 
         $template_certification = '';
-        if($course->plantilla_diploma){
+        if ($course->plantilla_diploma) {
             $template_certification = $course->plantilla_diploma;
         }
-        if(!$template_certification){
+        if (!$template_certification) {
             $school = $course->schools()->first();
             ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma;
         }
-        if(!$template_certification && $user->subworkspace->plantilla_diploma){
+        if (!$template_certification && $user->subworkspace->plantilla_diploma) {
             $template_certification = $user->subworkspace->plantilla_diploma;
         }
 
