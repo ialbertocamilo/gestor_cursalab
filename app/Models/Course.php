@@ -464,6 +464,10 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
+
+                if ($course->compatible)
+                    dd($course);
+
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
                 $last_topic = null;
@@ -720,16 +724,16 @@ class Course extends BaseModel
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
                 $segment_type = Criterion::find($idx);
-                if($segment_type->field_type->code =='date'){
-                    $select_date = CriterionValue::select('id')->where(function($q)use($values){
+                if ($segment_type->field_type->code == 'date') {
+                    $select_date = CriterionValue::select('id')->where(function ($q) use ($values) {
                         foreach ($values as $value) {
                             $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
                             $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
-                            $q->orWhereRaw('value_date between "'.$starts_at.'" and "'.$finishes_at.'"');
+                            $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
                         }
-                    })->where('criterion_id',$idx)->get();
+                    })->where('criterion_id', $idx)->get();
                     $ids = $select_date->pluck('id');
-                }else{
+                } else {
                     $ids = $values->pluck('criterion_value_id');
                 }
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($ids, $idx) {
@@ -873,7 +877,7 @@ class Course extends BaseModel
 
             $temp_segment = null;
             $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
-
+//            dd($course->segments);
             foreach ($course->segments as $segment) {
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
@@ -890,11 +894,13 @@ class Course extends BaseModel
 //            $ciclos_values = $temp_segment->values()->whereRelation('criterion', 'code', 'cycle')->pluck('criterion_value_id');
 //            $ciclos = CriterionValue::whereIn('id', $ciclos_values)->where('value_text', '<>', 'Ciclo 0')->get();
 
-            $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
-                ->whereRelation('criterion', 'code', 'cycle')
-                ->where('value_text', '<>', 'Ciclo 0')
-                ->orderBy('position')
-                ->first();
+            $ciclo = null;
+            if ($temp_segment)
+                $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
+                    ->whereRelation('criterion', 'code', 'cycle')
+                    ->where('value_text', '<>', 'Ciclo 0')
+                    ->orderBy('position')
+                    ->first();
 
             if ($ciclo)
                 $tags = [$ciclo->value_text];
@@ -955,7 +961,6 @@ class Course extends BaseModel
     public function getCourseCompatibilityByUser($user): Course
     {
         $course = $this;
-//        dd($course->compatibilities);
         $course->compatibilities = $course->getCompatibilities();
 
         $summary_course = $course->summaries->first();
@@ -972,6 +977,7 @@ class Course extends BaseModel
         // info($course->compatibilities->pluck('id'));
 
         $compatible_summary_course = SummaryCourse::with('course:id,name')
+            ->whereRelation('course', 'active', ACTIVE)
             ->where('user_id', $user->id)
             ->whereIn('course_id', $course->compatibilities->pluck('id'))
             ->orderBy('grade_average', 'DESC')
@@ -982,6 +988,8 @@ class Course extends BaseModel
         // info($compatible_summary_course);
 
         if ($compatible_summary_course):
+
+//            dd($compatible_summary_course);
 
             // info('compatible_summary_course->course');
             // info($compatible_summary_course->course);

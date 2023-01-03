@@ -608,18 +608,30 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $courses = $query->whereIn('id', array_column($all_courses, 'id'))->get();
 
+//        dd($all_courses[59]);
+        dd(array_search(872, array_column($all_courses, 'id')));
         $all_courses = collect($all_courses);
+        dd($all_courses->where('id', 872)->first());
+
+//        dd(array_column($all_courses->where('isValidated', true)->toArray(), 'id'));
 
         $compatibles_courses = $query->whereIn('id', array_column($all_courses->where('isValidated', true)->toArray(), 'id'))->get();
 
-        foreach ($courses as $course) {
-            
+//        dd($compatibles_courses);
 
-            if ($course->isValidated) {
-                
+        foreach ($courses as $course) {
+
+            $temp_course = $all_courses->where('id', $course->id)->first();
+
+            dd($temp_course, $temp_course->isValidated);
+
+//            if ($course->isValidated) {
+            if ($temp_course->isValidated) {
+
                 $_course = $compatibles_courses->where('id', $course->id);
 
                 $course->compatible = $_course->validates;
+
             }
         }
 
@@ -807,9 +819,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                     // COMPATIBLE VALIDATION
 
-                    if ($user->subworkspace->parent_id === 25)
+                    if ($user->subworkspace->parent_id === 25):
                         $course = $course->getCourseCompatibilityByUser($user);
-                    
+                        if ($course->isValidated)
+                            dd($course);
+                    endif;
+
                     $all_courses[] = $course;
 
                     break;
