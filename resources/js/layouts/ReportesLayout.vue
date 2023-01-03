@@ -564,6 +564,9 @@ export default {
             this.filenameDialog = true;
         },
         async downloadReport() {
+            if(!this.reportFilename.includes('.xlsx')){
+                this.reportFilename = this.reportFilename+'.xlsx';
+            }
             this.showLoader()
 
             try {
