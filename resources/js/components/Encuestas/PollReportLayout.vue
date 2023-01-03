@@ -63,12 +63,24 @@
                         returnObject
                     />
                 </div>
-                <div  class="row col-sm-12 mb-3 mx-0 px-0 my-0 py-0" style="justify-content: end;">
-                  <div class="col-sm-6">
-                      <FechaFiltro ref="FechasFiltros"   
-                          label-start="Fecha inicial" 
-                          label-end="Fecha final"/>
-                  </div>
+                <div class="col-sm-6">
+                  <b-form-text text-variant="muted">Fechas</b-form-text>
+                  <date-picker
+                      confirm
+                      confirm-text="Seleccionar fecha"
+                      attach
+                      v-model="filters.date"
+                      type="date"
+                      range
+                      placeholder="Rango de fecha"
+                      :lang="lang"
+                      @confirm="addFilterDate"
+                      style="width: 100% !important"
+                      value-type="YYYY-MM-DD"
+                  ></date-picker>
+                    <!-- <FechaFiltro ref="FechasFiltros"   
+                        label-start="Fecha inicial" 
+                        label-end="Fecha final"/> -->
                 </div>
                 <div class="row col-sm-12 mt-4 m-0 p-0 justify-center">
                   <div class="col-sm-4">
@@ -110,6 +122,7 @@ const FileSaver = require("file-saver");
 import FechaFiltro from "../Reportes/partials/FechaFiltro.vue";
 import ResumenEncuesta from './ResumenEncuesta.vue';
 import ModalBloqueReport from './ModalBloqueReport.vue';
+import lang from "./../../plugins/lang_datepicker";
 
 export default {
   components:{FechaFiltro,ResumenEncuesta,ModalBloqueReport},
@@ -117,6 +130,7 @@ export default {
   data() {
     return {
       reportsBaseUrl: '',
+      lang: lang,
       polls:[],
       modules:[],
       groups:[],
@@ -331,6 +345,12 @@ export default {
       this.modalOptions.open = false;
       this.modalOptions.showCardActions = false;
       this.download_list = [];
+    },
+    addFilterDate(dates){
+      if(!date[0]){
+        alert('Seleccione un rango de fecha valido.');
+      }
+      console.log(dates);
     }
   },
 };
