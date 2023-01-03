@@ -135,6 +135,9 @@ class RestCourseController extends Controller
         $temp = [];
 
         foreach ($certificates as $certificate) {
+
+
+
             $temp[] = [
                 'course_id' => $certificate->course_id,
                 'name' => $certificate->course->name,
@@ -143,6 +146,8 @@ class RestCourseController extends Controller
                 'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
                 'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
             ];
+
+
         }
 
         return $this->success(['data' => $temp]);

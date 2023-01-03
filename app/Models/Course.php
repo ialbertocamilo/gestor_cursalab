@@ -465,8 +465,8 @@ class Course extends BaseModel
 
             foreach ($courses as $course) {
 
-                if ($course->compatible)
-                    dd($course);
+//                if ($course->compatible)
+//                    dd($course->id, $course->compatible->id);
 
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
@@ -533,7 +533,8 @@ class Course extends BaseModel
                     'temas_completados' => $course_status['completed_topics'],
                     'porcentaje' => $course_status['progress_percentage'],
                     'tags' => $tags,
-                    'ultimo_tema_visto' => $last_topic_reviewed
+                    'ultimo_tema_visto' => $last_topic_reviewed,
+                    'compatible' => $course->compatible?->course ?: null,
                 ];
             }
 
@@ -573,6 +574,9 @@ class Course extends BaseModel
 
     protected function getCourseStatusByUser(User $user, Course $course): array
     {
+//        if ($course->compatible)
+//            dd($course->compatible);
+
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
         $available_course = true;
@@ -583,56 +587,59 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
-//        $status_approved = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
-//        $status_enc_pend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
-//        $status_desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
         $status_approved = $statuses->where('code', 'aprobado')->first();
         $status_enc_pend = $statuses->where('code', 'enc_pend')->first();
         $status_desaprobado = $statuses->where('code', 'desaprobado')->first();
 
         $requirement_course = $course->requirements->first();
-//        info("REQUISITO DEL CURSO {$course->name}");
-//        info($requirement_course);
-        // info("requirement_course");
-        // info($requirement_course);
+
         if ($requirement_course) {
-//            $summary_requirement_course = SummaryCourse::with('course')
-//                ->where('user_id', $user->id)
-//                ->where('course_id', $requirement_course->requirement_id)
-//                ->whereRelation('status', 'code', '=', 'aprobado')
-//                ->first();
+
             $summary_requirement_course = $requirement_course->summaries_course->first();
-            //            info("requirement_course");
-            //            info($summary_requirement_course);
+
             if (!$summary_requirement_course) {
-                $available_course = false;
-                $status = 'bloqueado';
+
+                // TODO: Validar si existe algun curso compatible aprobado del curso requisito
+
+                $compatible_course_req = $requirement_course->model_course->getCourseCompatibilityByUser($user);
+
+                if (!$compatible_course_req):
+                    $available_course = false;
+                    $status = 'bloqueado';
+                endif;
+
             }
         }
         // info($available_course);
         if ($available_course) {
+
+            if ($course->compatible):
+
+                return [
+                    'status' => 'aprobado',
+                    'progress_percentage' => 100,
+                    'available' => true,
+                    'poll_id' => null,
+                    'available_poll' => false,
+                    'enabled_poll' => false,
+                    'solved_poll' => false,
+                    'exists_summary_course' => false,
+                    'assigned_topics' => $course->topics->count(),
+                    'completed_topics' => $course->topics->count(),
+                ];
+
+            endif;
+
             $poll = $course->polls->first();
             if ($poll) {
                 $poll_id = $poll->id;
                 $available_poll = true;
 
-//                $poll_questions_answers = $course->poll_question_answers_count;
-
-//                $poll_questions_answers = collect()
-//
-//                foreach ($poll->questions as $question)
-//                    foreach ($question as $answers)
-//                        $poll_questions_answers->push($answers);
-
-                //                info($poll_questions_answers);
-//                if ($poll_questions_answers->count() > 0)
                 if ($course->poll_question_answers_count)
                     $solved_poll = true;
             }
 
-            // $summary_course = $course->summaryByUser($user->id);
-//            $summary_course = SummaryCourse::getCurrentRow($course, $user);
             $summary_course = $course->summaries->first();
 
             if ($summary_course) {
@@ -944,10 +951,10 @@ class Course extends BaseModel
 //            ->whereNull('grade_average')
 //            ->pluck('user_id');
 
-        info("USERS TO UPDATE");
-        info(implode(',', $users_segmented));
-        info("COURSES TO UPDATE");
-        info(implode(',', $courses_to_update));
+//        info("USERS TO UPDATE");
+//        info(implode(',', $users_segmented));
+//        info("COURSES TO UPDATE");
+//        info(implode(',', $courses_to_update));
         $chunk_users = array_chunk($users_segmented, 80);
         foreach ($chunk_users as $chunked_users) {
             SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update);
@@ -958,23 +965,18 @@ class Course extends BaseModel
     }
 
 
-    public function getCourseCompatibilityByUser($user): Course
+    public function getCourseCompatibilityByUser($user)
     {
+        $compatible_course = null;
+
         $course = $this;
         $course->compatibilities = $course->getCompatibilities();
 
         $summary_course = $course->summaries->first();
 
-        if ($summary_course) return $course;
+        if ($summary_course) return null;
 
-        if ($course->compatibilities->count() === 0) return $course;
-
-        // info('USER ID');
-        // info($user->id);
-
-        // info('course with compatibilities');
-        // info($course->id);
-        // info($course->compatibilities->pluck('id'));
+        if ($course->compatibilities->count() === 0) return null;
 
         $compatible_summary_course = SummaryCourse::with('course:id,name')
             ->whereRelation('course', 'active', ACTIVE)
@@ -984,26 +986,13 @@ class Course extends BaseModel
             ->whereRelation('status', 'code', 'aprobado')
             ->first();
 
-        // info('compatible_summary_course');
-        // info($compatible_summary_course);
-
         if ($compatible_summary_course):
 
-//            dd($compatible_summary_course);
-
-            // info('compatible_summary_course->course');
-            // info($compatible_summary_course->course);
-
-            // $compatible_summary_course->course->validates = $course;
-
-            // return $compatible_summary_course->course;
-
-            $course->isValidated = true;
-            $course->compatible = $compatible_summary_course->course;
+            $compatible_course = $compatible_summary_course;
 
         endif;
 
-        return $course;
+        return $compatible_course;
     }
 
     protected function storeCompatibilityRequest($course, $data = [])

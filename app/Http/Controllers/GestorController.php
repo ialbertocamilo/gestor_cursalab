@@ -67,6 +67,12 @@ class GestorController extends Controller
 
     private function getDiplomaCursoData($user_id, $course_id)
     {
+//        $compatible_id = request()->has('compatible_id') ? request()->compatible_id : null;
+
+        // TODO: Si llega compatible validar que sea su compatible,
+
+        // TODO: Reemplazar los datos de la plantilla con los datos (template plantilla, nombre del curso) del compatible que llegue
+
         $user = User::with('subworkspace')->select('id','name', 'surname', 'lastname', 'subworkspace_id')->where('id', $user_id)->first();
         if (!$user) abort(404);
 
@@ -83,11 +89,12 @@ class GestorController extends Controller
         }
         if(!$template_certification){
             $school = $course->schools()->first();
-            ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma; 
+            ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma;
         }
         if(!$template_certification && $user->subworkspace->plantilla_diploma){
             $template_certification = $user->subworkspace->plantilla_diploma;
         }
+
         // $plantilla_curso = $course->plantilla_diploma != null ? $course->plantilla_diploma : $user->subworkspace->plantilla_diploma;
         $fecha = $summary_course->certification_issued_at;
         $base64 = $this->parse_image($template_certification);
