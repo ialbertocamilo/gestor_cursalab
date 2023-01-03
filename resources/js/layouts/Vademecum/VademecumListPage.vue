@@ -11,7 +11,7 @@
                 <!-- <DefaultActivityButton :label="'Actividad'"
                                        @click="activity"/> -->
                 <DefaultModalButton :label="'Agregar'"
-                                    @click="openFormModal(modalOptions)"/>
+                                    @click="openFormModal(modalOptions,null,null,'Crear Documento')"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
