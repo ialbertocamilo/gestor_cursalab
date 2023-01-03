@@ -174,7 +174,7 @@ export default {
                         'Usuarios',
                         this.generateNamesString(this.modules, this.modulo)
                     )
-                    vue.queryStatus("reportes", "descargar_reporte_usuarios");
+
                     this.$emit('emitir-reporte', response)
                 }
 

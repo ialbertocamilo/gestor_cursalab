@@ -496,10 +496,11 @@ export default {
             configRoleId: 2,
             adminRoleId : 3,
 
+            selectedFilters: {},
             filenameDialog: false,
             reportDownloadUrl: null,
             reportFilename: null
-        };
+        }
     },
     mounted () {
         this.reportsBaseUrl = this.getReportsBaseUrl()
@@ -560,14 +561,18 @@ export default {
             this.reportDownloadUrl = res.data.excludeBaseUrl
                 ? res.data.ruta_descarga
                 : `${this.reportsBaseUrl}/${res.data.ruta_descarga}`
+
+            this.selectedFilters = res.data.selectedFilters;
             this.reportFilename = res.data.new_name;
             this.filenameDialog = true;
+
+
         },
         async downloadReport() {
             this.showLoader()
+            await this.registerGeneratedReport();
 
             try {
-
                 FileSaver.saveAs(
                     this.reportDownloadUrl,
                     this.reportFilename
@@ -579,6 +584,22 @@ export default {
                 console.log(error);
 
                 this.hideLoader()
+            }
+        },
+        async registerGeneratedReport() {
+
+            try {
+                let url = '../reports/generated-report-file';
+                let response = await axios({
+                    url: url,
+                    method: 'post',
+                    data: {
+                        name: this.reportFilename,
+                        filters: this.selectedFilters
+                    }
+                })
+            } catch (error) {
+                console.log(error)
             }
         }
     },
