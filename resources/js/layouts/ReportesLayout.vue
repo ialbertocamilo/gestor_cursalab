@@ -111,7 +111,7 @@ TABS
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
-                        Vademecum
+                        Protocolo y Documentos
                     </span>
                 </v-tab>
 

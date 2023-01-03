@@ -3,44 +3,44 @@
 		<!-- Resumen del reporte -->
 		<ResumenExpand titulo="Resumen del reporte">
 			<template v-slot:resumen>
-				Descarga el registro de visitas a los documentos Vademecum.
+				Descarga el Registro de Visitas a los Protocolos y Documentos (antes Vademécum)
 			</template>
-			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
+			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario." />
 
 			<!-- this only for FP -->
 			<div v-show="workspaceId === 25">
 				<list-item
 					titulo="Grupo sistema"
-					subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
+					subtitulo="Código de grupo (contiene la fecha de subida a la plataforma.)"
 				/>
-				<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
-				<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
+				<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario." />
+				<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario." />
 			</div>
 			<!-- this only for FP -->
 			
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales." />
 
 			<!-- this only for FP -->
 			<div v-show="workspaceId === 25">
-				<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+				<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra." />
 			</div>
 			<!-- this only for FP -->
 			
-			<list-item titulo="Vademecum" subtitulo="Nombre del documento Vademecum (SCORM)" />
+			<list-item titulo="Contenido" subtitulo="Nombre del documento adjunto en la plataforma que puede ver el colaborador." />
 			<list-item
 				titulo="Visitas"
-				subtitulo="Cantidad de veces que el usuario visualiza un documento Vademecum"
+				subtitulo="Cantidad de veces que el usuario visualiza un documento."
 			/>
 			<list-item
 				titulo="Última visita"
-				subtitulo="Fecha de la última visita realizada al Vademecum"
+				subtitulo="Fecha de la última visita realizada al documento."
 			/>
 		</ResumenExpand>
 		<!-- Formulario del reporte -->
 		<form class="row col-md-8 col-xl-5" @submit.prevent="ExportarVademecum">
 			<!-- Grupos -->
 			<div class="col-12">
-				<b-form-text text-variant="muted">Vademecum</b-form-text>
+				<b-form-text text-variant="muted">Contenidos</b-form-text>
 				<!--<v-select
 					attach
 					solo

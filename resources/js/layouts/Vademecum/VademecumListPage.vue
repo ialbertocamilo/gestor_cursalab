@@ -4,13 +4,13 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Vademecum
+                Protocolos y Documentos
                 <v-spacer/>
                 <DefaultActivityButton label="Categorías"
                                        @click="goToCategorias"/>
                 <!-- <DefaultActivityButton :label="'Actividad'"
                                        @click="activity"/> -->
-                <DefaultModalButton :label="'Vademecum'"
+                <DefaultModalButton :label="'Agregar'"
                                     @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
