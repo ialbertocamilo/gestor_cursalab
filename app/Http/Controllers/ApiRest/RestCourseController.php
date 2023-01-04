@@ -12,6 +12,7 @@ use App\Models\Taxonomy;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Monolog\Handler\IFTTTHandler;
 
 class RestCourseController extends Controller
 {
@@ -52,7 +53,7 @@ class RestCourseController extends Controller
         $info = $data['data'];
 
         foreach ($info as $value_data) {
-            if (!is_null($value_data) && ($value_data['tipo'] == 'multiple' || $value_data['tipo'] == 'opcion-multiple') ) {
+            if (!is_null($value_data) && ($value_data['tipo'] == 'multiple' || $value_data['tipo'] == 'opcion-multiple')) {
                 $multiple = array();
                 $ddd = array_count_values($value_data['respuesta']);
                 if (!is_null($ddd)) {
@@ -112,15 +113,27 @@ class RestCourseController extends Controller
     {
         $user = auth()->user();
 
-        $user_courses_id = $user->getCurrentCourses()->pluck('id');
+        $user_courses = $user->getCurrentCourses(response_type: 'courses-unified');
+//        dd($user_courses);
+        $user_courses_id = array_column($user_courses, 'id');
 
-        $query = SummaryCourse::with('course:id,name')
+        $query = SummaryCourse::with([
+            'course' => [
+                'compatibilities_a:id',
+                'compatibilities_b:id',
+                'summaries' => function ($q) use ($user) {
+                    $q
+                        ->with('status:id,name,code')
+                        ->where('user_id', $user->id);
+                },
+            ]
+        ])
             ->where('user_id', $user->id)
             ->whereIn('course_id', $user_courses_id)
             ->whereNotNull('certification_issued_at');
 
         if ($request->q)
-            $query->whereHas('course', function($q) use ($request) {
+            $query->whereHas('course', function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->q}%");
             });
 
@@ -133,18 +146,63 @@ class RestCourseController extends Controller
         $certificates = $query->get();
 
         $temp = [];
+//        info($user_courses_id);
 
-        foreach ($certificates as $certificate) {
+//        dd(
+////            $user_courses,
+////            $original_index = array_search(872, $user_courses_id),
+////                array_filter($user_courses_id, function($value){
+////                    return $value->id == 872;
+////                }),
+//            $user_courses[96]
+//        );
+
+        foreach ($user_courses as $user_course){
+            $certificate = $certificates->where('course_id', $user_course->id)->first();
+
+            if ($certificate)
+                $certificate->compatible_of = $user_course->compatible_of ?? null;
+        }
+
+//        dd($certificates->where('course_id', 872));
 
 
+        foreach ($certificates as $key => $certificate) {
+
+            if ($certificate->compatible_of){
+                $original = $certificate->compatible_of;
+//                dd($original);
+
+                $add = "?original_id={$original->id}";
+
+                $temp[] = [
+
+                    'course_id' => $certificate->course_id,
+                    'name' => $original->name,
+                    'accepted' => $certificate->certification_accepted_at ? true : false,
+                    'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
+                    'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}{$add}",
+                    'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}{$add}",
+
+                    'compatible' => [
+                        'course_id' => $certificate->course->id,
+                        'name' => $certificate->course->name,
+                    ] ,
+                ];
+
+                continue;
+            }
 
             $temp[] = [
+
                 'course_id' => $certificate->course_id,
                 'name' => $certificate->course->name,
                 'accepted' => $certificate->certification_accepted_at ? true : false,
-                'issued_at' =>  $certificate->certification_issued_at->format('d/m/Y'),
+                'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
                 'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
                 'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
+
+                'compatible' => null,
             ];
 
 
@@ -161,7 +219,7 @@ class RestCourseController extends Controller
 
         $data = ['error' => true, 'data' => ['message' => 'No encontrado']];
 
-        if ($row AND $row->certification_issued_at) {
+        if ($row and $row->certification_issued_at) {
 
             $row->update(['certification_accepted_at' => now()]);
 

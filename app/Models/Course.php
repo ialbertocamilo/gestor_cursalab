@@ -988,7 +988,9 @@ class Course extends BaseModel
 
         if ($compatible_summary_course):
 
+            $compatible_summary_course->course->compatible_of = $course;
             $compatible_course = $compatible_summary_course;
+//            dd($compatible_course);
 
         endif;
 

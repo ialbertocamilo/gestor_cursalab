@@ -619,7 +619,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return array_unique(array_column($current_courses, 'id'));
 
 
-
         foreach ($courses as $course) {
 
             $compatible_course = $compatibles_courses[$course->id] ?? false;
@@ -772,7 +771,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $response_type)
     {
-        $all_courses['compatibles'] = [];
+//        $all_courses['compatibles'] = [];
         $user->loadMissing('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
@@ -844,13 +843,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                         endif;
 
-                        $all_courses[] = $compatible ? $compatible->course : $course;
+                        $temp = $compatible ? $compatible->course : $course;
 
+//                        if ($course->id == 1136)
+//                            dd($temp);
+
+                        $all_courses[] = $temp;
+
+                        break;
                     }
 
                 endif;
             }
         }
+//        dd($all_courses);
 
         unset($user->active_cycle);
     }
