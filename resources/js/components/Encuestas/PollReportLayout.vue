@@ -180,8 +180,9 @@ export default {
         open: true,
         base_endpoint: '',
         persistent:true,
-        showCardActions:false,
-        hideCancelBtn:true
+        hideCancelBtn:true,
+        confirmLabel:'Cerrar',
+        loading:true
       },
       dates:null,
       download_list:[],
@@ -273,7 +274,7 @@ export default {
       vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses; 
       const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); //Function in mixin.js
       //If the selected schools are greater than 10, the data will be downloaded in parts
-      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,15);//Function in mixin.js
+      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,2);//Function in mixin.js
       if (chunk_courses_by_school.length == 1) {
         vue.showLoader();
         await this.callApiReport(vue.filters.courses_selected.map(c => c.id));
@@ -310,7 +311,7 @@ export default {
         vue.callApiReport(vue.download_list[find_index_donwload_pending].courses_id);
       }else{
         //if all donwload list is complete.
-        vue.modalOptions.showCardActions = true;
+        vue.modalOptions.loading = false;
       }
       return true;
     },  
@@ -375,7 +376,7 @@ export default {
     },
     closeModal(){
       this.modalOptions.open = false;
-      this.modalOptions.showCardActions = false;
+      this.modalOptions.loading = true;
       this.download_list = [];
     },
     modifyFilterDate(dates){
@@ -393,3 +394,9 @@ export default {
   },
 };
 </script>
+<style>
+.mx-datepicker-btn-confirm{
+  background: #5d5fef !important;
+  color:white !important;
+}
+</style>

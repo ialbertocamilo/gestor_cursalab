@@ -28,6 +28,7 @@
                     :confirm-label="options.confirmLabel"
                     :hide-cancel-btn="options.hideCancelBtn"
                     :hide-confirm-btn="options.hideConfirmBtn"
+                    :loading="options.loading"
                     @cancel="closeModal"
                     @confirm="confirmModal"/>
             </v-card-actions>
