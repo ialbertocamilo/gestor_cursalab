@@ -359,6 +359,12 @@ export default {
       this.hideLoader();
       this.showAlert('Ha ocurrido un problema. Contáctate con el equipo de soporte.','warning');
     },
+    generateFilename(prefix, name) {
+        return prefix + ' ' +
+            name + ' ' +
+            new Date().toISOString().slice(0, 10) +
+            '.xlsx'
+    },
     openModalChangeName(data){
       this.filenameDialog = true;
       this.nameReport = data;
