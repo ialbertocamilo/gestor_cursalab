@@ -361,9 +361,12 @@ export default {
     async saveReport({url,new_name}){
       // La extension la define el back-end, ya que el quien crea el archivo
       this.showLoader();
-      await FileSaver.saveAs(url,new_name);
+      if(!new_name.includes('.xlsx')){
+        new_name = new_name+'.xlsx';
+      }
       this.filenameDialog = false;
       this.nameReport = {};
+      await FileSaver.saveAs(url,new_name);
       this.hideLoader();
     },
     closeModal(){
