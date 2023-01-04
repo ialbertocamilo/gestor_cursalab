@@ -19,13 +19,6 @@ TABS
                 </v-tab>
 
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-account</v-icon>
-                    <span class="pt-2">
-                        Historial de usuario
-                    </span>
-                </v-tab>
-
-                <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
@@ -111,7 +104,7 @@ TABS
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
-                        Vademecum
+                        Protocolo y Documentos
                     </span>
                 </v-tab>
 
@@ -151,6 +144,13 @@ TABS
                     </span>
                 </v-tab>
 
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-account</v-icon>
+                    <span class="pt-2">
+                        Historial de usuario
+                    </span>
+                </v-tab>
+
 <!--
 
 TABS CONTENT
@@ -164,18 +164,6 @@ TABS CONTENT
                                 :workspaceId="workspaceId"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 :API_REPORTES="API_REPORTES"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
-
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <HistorialUsuario
-                                :workspaceId="workspaceId"
-                                :reportsBaseUrl="reportsBaseUrl"
-                                :API_REPORTES="API_REPORTES"
-                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -377,7 +365,20 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Meetings/>
+                            <Meetings
+                                @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <HistorialUsuario
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                :API_REPORTES="API_REPORTES"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -385,6 +386,42 @@ TABS CONTENT
             </v-tabs>
         </v-card>
         <!-- </v-app> -->
+
+
+        <!--
+        Report's filename dialog
+        ======================================== -->
+
+        <v-dialog
+            v-model="filenameDialog"
+            width="600"
+        >
+            <v-card class="p-4">
+                <v-text-field
+                    v-model="reportFilename"
+                    label="Nombre de archivo del reporte"
+                    required
+                ></v-text-field>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <b-button
+                        variant="primary"
+                        block
+                        @click="filenameDialog = false">
+                        Cancelar
+                    </b-button>
+                    <b-button
+                        variant="primary"
+                        block
+                        class="m-0 ml-4"
+                        @click="downloadReport()">
+                        Descargar
+                    </b-button>
+                </v-card-actions>
+
+            </v-card>
+        </v-dialog>
     </v-app>
 </template>
 <script>
@@ -457,7 +494,11 @@ export default {
             userSession:{},
             superUserRoleId : 1,
             configRoleId: 2,
-            adminRoleId : 3
+            adminRoleId : 3,
+
+            filenameDialog: false,
+            reportDownloadUrl: null,
+            reportFilename: null
         };
     },
     mounted () {
@@ -514,21 +555,33 @@ export default {
 
             if (!res.data.ruta_descarga) return
 
+            // Update report name and show filename dialog
+
+            this.reportDownloadUrl = res.data.excludeBaseUrl
+                ? res.data.ruta_descarga
+                : `${this.reportsBaseUrl}/${res.data.ruta_descarga}`
+            this.reportFilename = res.data.new_name;
+            this.filenameDialog = true;
+        },
+        async downloadReport() {
+            if(!this.reportFilename.includes('.xlsx')){
+                this.reportFilename = this.reportFilename+'.xlsx';
+            }
             this.showLoader()
 
             try {
-                let urlReporte = `${this.reportsBaseUrl}/${res.data.ruta_descarga}`
 
-                // La extension la define el back-end, ya que el quien crea el archivo
-
-                FileSaver.saveAs(urlReporte, res.data.new_name)
-
+                FileSaver.saveAs(
+                    this.reportDownloadUrl,
+                    this.reportFilename
+                )
+                this.filenameDialog = false;
+                this.hideLoader()
 
             } catch (error) {
                 console.log(error);
-                // this.hideLoader()
+
                 this.hideLoader()
-                return error;
             }
         }
     },
@@ -584,6 +637,7 @@ color: #ffffff !important;
     color: darkgrey !important;
     font-size: 20px !important;
 }
+
 
 /* Tooltips */
 [tooltip] {
