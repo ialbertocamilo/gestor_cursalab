@@ -328,6 +328,10 @@ export default {
       let vue = this;
       vue.filters.courses_selected = courses_id;
       await axios.post(`${vue.reportsBaseUrl}/exportar/poll-questions`,vue.filters).then(({data})=>{
+        data.new_name = this.generateFilename(
+                    'Reporte-Encuestas',
+                    ''
+                )
         if(vue.download_list.length>0){
           this.change_status_download(data);
           return true;
