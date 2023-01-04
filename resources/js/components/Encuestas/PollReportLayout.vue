@@ -122,8 +122,14 @@
             <ModalBloqueReport 
               :modalOptions="modalOptions"
               :download_list="download_list"
-              @saveReport="saveReport"
+              @saveReport="openModalChangeName"
               @closeModal="closeModal"
+            />
+            <ModalChangeNameReport 
+              :filenameDialog="filenameDialog"
+              :data="nameReport"
+              @saveReport="saveReport"
+              @closeModal="filenameDialog=false"
             />
         </v-card>
   </section>
@@ -135,8 +141,10 @@ import ResumenEncuesta from './ResumenEncuesta.vue';
 import ModalBloqueReport from './ModalBloqueReport.vue';
 import lang from "./../../plugins/lang_datepicker";
 import InfoTable from './InfoTable.vue'
+import ModalChangeNameReport from './ModalChangeNameReport.vue'
+
 export default {
-  components:{ResumenEncuesta,ModalBloqueReport,InfoTable},
+  components:{ResumenEncuesta,ModalBloqueReport,InfoTable,ModalChangeNameReport},
   props: ["Encuestas"],
   data() {
     return {
@@ -177,6 +185,8 @@ export default {
       },
       dates:null,
       download_list:[],
+      filenameDialog:false,
+      nameReport:{}
     };
   },
   mounted(){
@@ -332,7 +342,7 @@ export default {
           return false;
         }
         data.url = `${vue.reportsBaseUrl}/${data.ruta_descarga}`
-        this.saveReport(data);
+        this.openModalChangeName(data);
         vue.hideLoader();
       })
       .catch((e)=>{
@@ -344,10 +354,16 @@ export default {
       this.hideLoader();
       this.showAlert('Ha ocurrido un problema. Contáctate con el equipo de soporte.','warning');
     },
-    saveReport({url,new_name}){
+    openModalChangeName(data){
+      this.filenameDialog = true;
+      this.nameReport = data;
+    },
+    async saveReport({url,new_name}){
       // La extension la define el back-end, ya que el quien crea el archivo
       this.showLoader();
-      FileSaver.saveAs(url,new_name)
+      await FileSaver.saveAs(url,new_name);
+      this.filenameDialog = false;
+      this.nameReport = {};
       this.hideLoader();
     },
     closeModal(){
