@@ -8,57 +8,57 @@
         v-if="download_list.length>0"
     >
     <template v-slot:content>
-        <v-card-title>
-        <span class="mb-4">Debido a la gran cantidad de datos solicitados, tu reporte se está generando por bloques.<b>
-            Por favor no cierres esta ventana hasta completar la carga.
-        </b></span>
-        <DefaultSimpleTable class="mb-4">
+        <v-card-subtitle>
+            <span class="mb-4" style="color: rgba(51, 61, 93, 0.6);">Debido a la gran cantidad de datos solicitados, tu reporte se está generando por bloques.<b>
+                Por favor no cierres esta ventana hasta completar la carga.
+            </b></span>
+        </v-card-subtitle>
+        <InfoTable :headers="['Bloques','Estado de descarga']">
             <template slot="content">
-                <thead>
-                <tr>
-                    <th>Bloques</th>
-                    <th>Estado</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr
-                    v-for="(donwload, index) in download_list"
-                    :key="index"
-                >
-                    <td class="w-70" >
-                        <v-tooltip bottom>
-                        <template v-slot:activator="{ on, attrs }">
-                            <span 
-                                v-bind="attrs"
-                                v-on="on" 
-                                v-text="`Bloque ${index+1}: ${donwload.content}`">
+                <div class="row" v-for="(donwload, index) in download_list" :key="index">
+                    <div class="col-sm-6 d-flex align-center" style="border: 1px solid #EDF1F4;">
+                        <span style="color:#333D5D">
+                            {{ `Bloque ${index+1} contiene` }} <b>{{ donwload.content}}</b>
+                        </span>
+                    </div>
+                    <div class="col-sm-6" style="border: 1px solid #EDF1F4;">
+                        <div class="w-10" v-if="donwload.status=='pending'">
+                            <span style="color:#5458EA">Pendiente</span> 
+                        </div>
+                        <div class="w-10" v-if="donwload.status=='processing'">
+                            <span style="color:#5458EA">Descargando..</span> 
+                        </div>
+                        <div class="w-10 d-flex justify-space-between align-center" v-if="donwload.status=='complete'">
+                            <span style="color:#5458EA">
+                                ¡Listo para descarga!
+                                <v-icon color="#5458EA" small>mdi-checkbox-marked-circle</v-icon>
                             </span>
-                        </template>
-                        <span v-text="donwload.schools"></span>
-                        </v-tooltip>
-                    </td>
-                    <td class="w-10" v-if="donwload.status=='pending'">
-                        <span class="ml-1">Descargando..</span> 
-                    </td>
-                    <td class="w-10" v-if="donwload.status=='complete'">
-                        <DefaultButton
-                            label="Descargar"
-                            @click="saveReport(donwload)"
-                        />
-                    </td>
-                    <td class="w-10" v-if="donwload.status=='no_data'">
-                        <span class="ml-1">No se encontraron datos en este bloque.</span>
-                    </td>
-                </tr>
-                </tbody>
+                            <v-icon 
+                                color="#5458EA"
+                                @click="saveReport(donwload)"
+                              >
+                                mdi-download
+                            </v-icon>
+                        </div>
+                        <div class="w-10" v-if="donwload.status=='no_data'">
+                            <span style="color:#5458EA">No se encontraron datos en este bloque.</span>
+                        </div>
+                    </div>
+                </div>
             </template>
-        </DefaultSimpleTable>
-        </v-card-title>
+        </InfoTable>
+        <v-card-subtitle>
+            <span class="mb-4" style="color: rgba(51, 61, 93, 0.6);">
+                Luego de la descarga de este reporte podrás cerrar la ventana.
+            </span>
+        </v-card-subtitle>
     </template>
     </DefaultDialog>
 </template>
 <script>
+    import InfoTable from './InfoTable.vue';
     export default {
+        components:{InfoTable},
         props:{
             download_list:{
                 type:Array,

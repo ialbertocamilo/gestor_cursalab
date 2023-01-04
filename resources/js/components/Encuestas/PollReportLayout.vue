@@ -36,7 +36,7 @@
                     />
                 </div>
                 <div class="col-sm-6 mb-3">
-                    <b-form-text text-variant="muted">Escuela</b-form-text>
+                    <label text-variant="muted">Escuela</label>
                     <DefaultAutocomplete
                         :disabled="!schools[0]"
                         v-model="filters.schools"
@@ -50,7 +50,7 @@
                     />
                 </div>
                 <div class="col-sm-6 mb-3">
-                    <b-form-text text-variant="muted">Curso</b-form-text>
+                    <label text-variant="muted">Curso</label>
                     <DefaultAutocomplete
                         :disabled="!courses[0]"
                         v-model="filters.courses"
@@ -64,23 +64,21 @@
                     />
                 </div>
                 <div class="col-sm-6">
-                  <b-form-text text-variant="muted">Fechas</b-form-text>
+                  <label text-variant="muted">Fechas</label>
                   <date-picker
                       confirm
                       confirm-text="Seleccionar fecha"
                       attach
-                      v-model="filters.date"
+                      v-model="dates"
                       type="date"
                       range
                       placeholder="Rango de fecha"
                       :lang="lang"
-                      @confirm="addFilterDate"
+                      @confirm="modifyFilterDate"
+                      @clear="deleteFilterDate"
                       style="width: 100% !important"
                       value-type="YYYY-MM-DD"
                   ></date-picker>
-                    <!-- <FechaFiltro ref="FechasFiltros"   
-                        label-start="Fecha inicial" 
-                        label-end="Fecha final"/> -->
                 </div>
                 <div class="row col-sm-12 mt-4 m-0 p-0 justify-center">
                   <div class="col-sm-4">
@@ -90,19 +88,33 @@
               </div>
               <!-- Resumen -->
               <div class="m-5" v-if="poll_searched">
-                <h2 class="text-center">Resumen</h2>
+                <!-- <h2 class="text-center">Resumen</h2> -->
                 <div class="container-fluid">
                   <div>
-                    <ResumenEncuesta :resume="resume" />
-                    <h5>Detalle de encuestas</h5>
-                    <div class="p-3 row" v-for="(type_poll_question) in types_pool_questions" :key="type_poll_question.id">
-                      <div class="col-4" v-text="type_poll_question.name"></div>
-                      <div class="col-6">
-                        <b-button class="ml-2" variant="success"
-                          @click="downloadReportPollQuestion(type_poll_question)"
-                        >Descargar <b-icon icon="arrow-down-circle" aria-hidden="true"></b-icon> </b-button>
-                      </div>
-                    </div>
+                    <!-- <ResumenEncuesta :resume="resume" /> -->
+                    <!-- <h5>Detalle de encuestas</h5> -->
+                    <v-card>
+                      <v-card-title class="default-dialog-title text-bold">Reporte por tipo de pregunta</v-card-title>
+                      <InfoTable :addClass="'py-5 px-10'" :headers="['Tipos de pregunta','Descripción']" class="mb-4">
+                        <template slot="content">
+                          <div class="row" v-for="(type_poll_question) in types_pool_questions" :key="type_poll_question.id">
+                            <div class="col-sm-6 d-flex  justify-space-between align-center" style="border: 1px solid #EDF1F4;">
+                              <div style="color: #5458EA;" v-text="type_poll_question.name"></div>
+                              <v-icon 
+                                color="#5458EA"
+                                @click="downloadReportPollQuestion(type_poll_question)"
+                              >
+                                mdi-download
+                              </v-icon>
+                            </div>
+                            <div class="col-sm-6" style="border: 1px solid #EDF1F4;">
+                              <div v-text="type_poll_question.description">
+                              </div>
+                            </div>
+                          </div>
+                        </template>
+                      </InfoTable>
+                    </v-card>
                   </div>
                 </div>
               </div>
@@ -119,13 +131,12 @@
 
 <script>
 const FileSaver = require("file-saver");
-import FechaFiltro from "../Reportes/partials/FechaFiltro.vue";
 import ResumenEncuesta from './ResumenEncuesta.vue';
 import ModalBloqueReport from './ModalBloqueReport.vue';
 import lang from "./../../plugins/lang_datepicker";
-
+import InfoTable from './InfoTable.vue'
 export default {
-  components:{FechaFiltro,ResumenEncuesta,ModalBloqueReport},
+  components:{ResumenEncuesta,ModalBloqueReport,InfoTable},
   props: ["Encuestas"],
   data() {
     return {
@@ -164,6 +175,7 @@ export default {
         showCardActions:false,
         hideCancelBtn:true
       },
+      dates:null,
       download_list:[],
     };
   },
@@ -219,8 +231,6 @@ export default {
       vue.types_pool_questions = [];
       vue.showLoader();
       vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses.map(c=>c.id) : vue.courses.map(c=>c.id)
-      vue.filters.date.start =  vue.parseToDateTime(vue.$refs.FechasFiltros.start,'start');
-      vue.filters.date.end =  vue.parseToDateTime(vue.$refs.FechasFiltros.end,'end');
       await axios.post('/resumen_encuesta/poll-data',vue.filters).then(({data})=>{
         vue.types_pool_questions = data.data.data.types_pool_questions;
         vue.resume = data.data.data.resume;
@@ -253,14 +263,14 @@ export default {
       vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses; 
       const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); //Function in mixin.js
       //If the selected schools are greater than 10, the data will be downloaded in parts
-      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,10);//Function in mixin.js
+      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,2);//Function in mixin.js
       if (chunk_courses_by_school.length == 1) {
         vue.showLoader();
         await this.callApiReport(vue.filters.courses_selected.map(c => c.id));
       }else{
         for (const array_courses of chunk_courses_by_school){
           let get_all_courses_id = [];
-          const content = 'Contiene '+array_courses.length+' escuela(s).';
+          const content = '('+array_courses.length+')';
           //message in tooltip (list of name's schools)
           let schools_name = '';
           
@@ -284,9 +294,10 @@ export default {
     },
     verifyStatusDownload(){
       let vue = this;
-      const find_donwload_pending =  vue.download_list.find(dl => dl.status == 'pending');
-      if(find_donwload_pending){
-        vue.callApiReport(find_donwload_pending.courses_id);
+      const find_index_donwload_pending =  vue.download_list.findIndex(dl => dl.status == 'pending');
+      if(find_index_donwload_pending > -1){
+        vue.download_list[find_index_donwload_pending].status = 'processing';
+        vue.callApiReport(vue.download_list[find_index_donwload_pending].courses_id);
       }else{
         //if all donwload list is complete.
         vue.modalOptions.showCardActions = true;
@@ -295,7 +306,7 @@ export default {
     },  
     change_status_download(data){
       let vue = this;
-      const find_index = vue.download_list.findIndex(dl => dl.status == 'pending');
+      const find_index = vue.download_list.findIndex(dl => dl.status == 'processing');
       let urlReporte = `${vue.reportsBaseUrl}/${data.ruta_descarga}`;
       vue.download_list[find_index].url=urlReporte;
       vue.download_list[find_index].new_name = data.new_name;
@@ -306,8 +317,6 @@ export default {
     async callApiReport(courses_id){
       let vue = this;
       vue.filters.courses_selected = courses_id;
-      vue.filters.date.start =  vue.parseToDateTime(vue.$refs.FechasFiltros.start,'start');
-      vue.filters.date.end =  vue.parseToDateTime(vue.$refs.FechasFiltros.end,'end');
       await axios.post(`${vue.reportsBaseUrl}/exportar/poll-questions`,vue.filters).then(({data})=>{
         if(vue.download_list.length>0){
           this.change_status_download(data);
@@ -346,14 +355,18 @@ export default {
       this.modalOptions.showCardActions = false;
       this.download_list = [];
     },
-    addFilterDate(dates){
-      if(!date[0]){
-        alert('Seleccione un rango de fecha valido.');
+    modifyFilterDate(dates){
+      if(!dates[0]){
+        return false;
       }
-      console.log(dates);
+      let vue=this;
+      vue.filters.date.start =  vue.parseToDateTime(dates[0],'start');
+      vue.filters.date.end =  vue.parseToDateTime(dates[1],'end');
+    },
+    deleteFilterDate(){
+      this.filters.date.end = null;
+      this.filters.date.start = null;
     }
   },
 };
 </script>
-
-<style></style>
