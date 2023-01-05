@@ -79,15 +79,15 @@ class GestorController extends Controller
 
         if (!$course) abort(404);
 
-        if (request()->has('compatible_id')) {
+        if (request()->has('original_id')) {
 
             // C3
-            $compatible_id = request()->compatible_id;
+            $original_id = request()->original_id;
 
-            $course_compatible = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')
-                ->where('id', $compatible_id)->first();
+            $course_original = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+                ->where('id', $original_id)->first();
 
-            if (!$course_compatible) abort(404);
+            if (!$course_original) abort(404);
 
             // TODO: Si llega compatible validar que sea su compatible el curso de la ruta ($course_id)
             // Compatible de C3
@@ -96,7 +96,7 @@ class GestorController extends Controller
             // D3 !== Compatible de C3
             if ($course->id !== $compatible->course->id) abort(404);
 
-            $course = $course_compatible;
+            $course = $course_original;
         }
 
         // TODO: Reemplazar los datos de la plantilla con los datos (template plantilla, nombre del curso) del compatible que llegue

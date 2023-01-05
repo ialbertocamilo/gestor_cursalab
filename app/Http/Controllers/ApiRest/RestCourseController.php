@@ -156,32 +156,29 @@ class RestCourseController extends Controller
 
         foreach ($user_courses as $user_course) {
 
-            $certificate = $certificates->where('course_id', $user_course->id)->first();
-
-            if ($certificate):
-
-                $certificate->compatible_of = $user_course->compatible_of ?? null;
-
-                continue;
-            endif;
             if ($user_course->compatible):
 
                 $compatible_certificate = $certificates->where('course_id', $user_course->compatible->course_id)->first();
 
-                if ($compatible_certificate)
-                    $compatible_certificate->compatible_of = $user_course;
+                if ($compatible_certificate):
 
+                    $temp_certificate = clone $compatible_certificate;
+
+                    $temp_certificate->compatible_of = $user_course;
+
+                    $certificates->push($temp_certificate);
+
+//                    dd($temp_certificate->compatible_of->name, $compatible_certificate->compatible_of?->name);
+
+                endif;
             endif;
         }
-
-//        dd($certificates->where('course_id', 872));
-
 
         foreach ($certificates as $key => $certificate) {
 
             if ($certificate->compatible_of) {
+
                 $original = $certificate->compatible_of;
-//                dd($original);
 
                 $add = "?original_id={$original->id}";
 
