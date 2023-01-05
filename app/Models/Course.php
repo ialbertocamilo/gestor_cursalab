@@ -534,7 +534,7 @@ class Course extends BaseModel
                     'porcentaje' => $course_status['progress_percentage'],
                     'tags' => $tags,
                     'ultimo_tema_visto' => $last_topic_reviewed,
-                    'compatible' => $course->compatible?->course ?: null,
+                    'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
                 ];
             }
 

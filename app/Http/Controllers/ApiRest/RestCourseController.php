@@ -113,9 +113,15 @@ class RestCourseController extends Controller
     {
         $user = auth()->user();
 
-        $user_courses = $user->getCurrentCourses(response_type: 'courses-unified');
-//        dd($user_courses);
-        $user_courses_id = array_column($user_courses, 'id');
+        $user_courses = $user->getCurrentCourses(withRelations: 'soft');
+//        $user_courses = collect($user->getCurrentCourses(response_type: 'courses-unified'));
+        $user_courses_id = $user_courses->pluck('id');
+        $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
+
+        $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);
+//        dd($all_courses_id);
+
+//        $user_courses_id = array_column($user_courses, 'id');
 
         $query = SummaryCourse::with([
             'course' => [
@@ -129,7 +135,8 @@ class RestCourseController extends Controller
             ]
         ])
             ->where('user_id', $user->id)
-            ->whereIn('course_id', $user_courses_id)
+//            ->whereIn('course_id', $user_courses_id)
+            ->whereIn('course_id', $all_courses_id->toArray())
             ->whereNotNull('certification_issued_at');
 
         if ($request->q)
@@ -146,22 +153,25 @@ class RestCourseController extends Controller
         $certificates = $query->get();
 
         $temp = [];
-//        info($user_courses_id);
 
-//        dd(
-////            $user_courses,
-////            $original_index = array_search(872, $user_courses_id),
-////                array_filter($user_courses_id, function($value){
-////                    return $value->id == 872;
-////                }),
-//            $user_courses[96]
-//        );
+        foreach ($user_courses as $user_course) {
 
-        foreach ($user_courses as $user_course){
             $certificate = $certificates->where('course_id', $user_course->id)->first();
 
-            if ($certificate)
+            if ($certificate):
+
                 $certificate->compatible_of = $user_course->compatible_of ?? null;
+
+                continue;
+            endif;
+            if ($user_course->compatible):
+
+                $compatible_certificate = $certificates->where('course_id', $user_course->compatible->course_id)->first();
+
+                if ($compatible_certificate)
+                    $compatible_certificate->compatible_of = $user_course;
+
+            endif;
         }
 
 //        dd($certificates->where('course_id', 872));
@@ -169,7 +179,7 @@ class RestCourseController extends Controller
 
         foreach ($certificates as $key => $certificate) {
 
-            if ($certificate->compatible_of){
+            if ($certificate->compatible_of) {
                 $original = $certificate->compatible_of;
 //                dd($original);
 
@@ -187,7 +197,7 @@ class RestCourseController extends Controller
                     'compatible' => [
                         'course_id' => $certificate->course->id,
                         'name' => $certificate->course->name,
-                    ] ,
+                    ],
                 ];
 
                 continue;

@@ -607,8 +607,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($response_type === 'courses-unified')
             return $all_courses;
 
-        $current_courses = $all_courses['current_courses'];
-        $compatibles_courses = $all_courses['compatibles'];
+        $current_courses = $all_courses['current_courses'] ?? [];
+        $compatibles_courses = $all_courses['compatibles'] ?? [];
 
         $query = $this->getUserCourseSegmentationQuery($withRelations);
 
