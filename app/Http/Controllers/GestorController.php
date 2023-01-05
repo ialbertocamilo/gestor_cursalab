@@ -86,8 +86,8 @@ class GestorController extends Controller
             ->where('id', $course_id)->first();
 
         if (!$course) abort(404);
-        $course_to_export = $course;
 
+        $course_to_export = $course;
 
         if (request()->has('original_id')) {
             $original_id = request()->original_id;
@@ -99,11 +99,7 @@ class GestorController extends Controller
 
         }
 
-        // TODO: Reemplazar los datos de la plantilla con los datos (template plantilla, nombre del curso) del curso original que llegue
-
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
-
-//        dd($course->name, $course_to_export->name);
 
         if (!$summary_course?->certification_issued_at) abort(404);
 
