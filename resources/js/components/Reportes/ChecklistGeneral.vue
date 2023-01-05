@@ -43,8 +43,8 @@
                     multiple
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
-                    @onChange="fetchFiltersAreaData"
-                    :maxValuesSelected="5"
+                    @onBlur="fetchFiltersAreaData"
+                    :maxValuesSelected="1"
                 />
             </div>
 
@@ -153,7 +153,10 @@
             <v-divider class="col-12 mb-5 p-0"></v-divider>
             <div class="col-sm-12 mb-3">
                 <div class="col-sm-6 px-0">
-                    <button type="submit" class="btn btn-md btn-primary btn-block text-light">
+                    <button
+                        :disabled="modulo.length === 0"
+                        type="submit"
+                        class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar</span>
                     </button>

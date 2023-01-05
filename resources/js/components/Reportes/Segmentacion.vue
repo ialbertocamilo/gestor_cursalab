@@ -39,7 +39,7 @@
                     multiple
                     @onChange="schoolsChange"
                     placeholder="Seleccione las escuelas"
-                    :maxValuesSelected="5"
+                    :maxValuesSelected="10"
                     :showSelectAll="false"
                 />
             </div>
@@ -61,6 +61,7 @@
             </div>
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
+                        :disabled="filters.school.length === 0"
                         class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
                     <span>Descargar</span>

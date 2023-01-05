@@ -48,8 +48,8 @@
                             multiple
                             :showSelectAll="false"
                             placeholder="Seleccione un módulo"
-                            @onChange="fetchFiltersAreaData"
-                            :maxValuesSelected="5"
+                            @onBlur="fetchFiltersAreaData"
+                            :maxValuesSelected="1"
                         />
                     </div>
                     <!-- Escuela -->
@@ -66,7 +66,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione las escuelas"
                             @onChange="escuelaChange"
-                            :maxValuesSelected="5"
+                            :maxValuesSelected="10"
                         />
                     </div>
                     <!-- Curso -->
@@ -162,6 +162,7 @@
             <v-divider class="col-12 mb-5 p-0"></v-divider>
             <div class="col-12 px-6">
                 <button
+                    :disabled="modulo.length === 0 || escuela.length === 0"
                     type="submit"
                     class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>

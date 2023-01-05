@@ -50,8 +50,8 @@
                             multiple
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
-                            @onChange="fetchFiltersCareerData"
-                            :maxValuesSelected="5"
+                            @onBlur="fetchFiltersCareerData"
+                            :maxValuesSelected="1"
                         />
 
                     </div>
@@ -74,6 +74,7 @@
                             label="Selecciona un #Módulo"
                             @change="fetchFiltersSchoolData"
                             :disabled="modulo.length === 0"
+                            :maxValuesSelected="10"
                             :background-color="!school ? '' : 'light-blue lighten-5'">
                         </v-select>
                     </div>
@@ -171,7 +172,10 @@
             <v-divider class="col-12 p-0 my-2"></v-divider>
             <div class="col-sm-12 mb-3">
                 <div class="col-sm-6 pl-2">
-                    <button type="submit" class="btn btn-md btn-primary btn-block text-light">
+                    <button
+                        :disabled="modulo.length === 0"
+                        type="submit"
+                        class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar</span>
                     </button>
@@ -274,10 +278,7 @@ export default {
             })
 
             vue.careers = response.data;
-           /* vue.careers = [ { id:2222, name:'Quimico Farmaceutico' },
-                            { id:3333, name:'Tecnico de Farmacia' },
-                            { id:4444, name:'Colaborador de carrera' }
-                          ];*/
+
         },
         async fetchFiltersAreaData() {
             const vue = this;
@@ -289,10 +290,6 @@ export default {
             let urlAreas = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo.join()}/criterion-values/grupo`
             let responseAreas = await axios({ url: urlAreas,method: 'get' });
             vue.areas = responseAreas.data;
-           /* vue.areas = [ { id:1122, name:'Grupo 33' },
-                          { id:3422, name:'Grupo 42' },
-                          { id:7422, name:'Grupo 78' }
-                        ];*/
         },
         async fetchFiltersSchoolData() {
             const vue = this;

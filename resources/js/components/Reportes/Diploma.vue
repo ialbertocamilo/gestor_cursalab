@@ -33,10 +33,9 @@
                     item-text="name"
                     item-value="id"
                     dense
-                    multiple
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
-                    :maxValuesSelected="5"
+                    :maxValuesSelected="1"
                 />
 
                 <!--DefaultSelect
@@ -65,7 +64,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione las escuelas"
                     @onChange="schoolsChange"
-                    :maxValuesSelected="5"
+                    :maxValuesSelected="10"
                 />
 
                 <!--select
@@ -171,7 +170,10 @@
              <v-divider class="col-12 mb-5 p-0"></v-divider>
              <div class="col-sm-6 mb-3">
                 <div class="col-sm-8 pl-0">
-                    <button :disabled="!(filters.module.length)" type="submit" class="btn btn-md btn-primary btn-block text-light">
+                    <button
+                        :disabled="filters.module.length === 0 || filters.school.length === 0"
+                        type="submit"
+                        class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar </span>
                     </button>

@@ -58,11 +58,10 @@
                     label="Módulo"
                     item-text="name"
                     item-value="id"
-                    multiple
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
-                    @onChange="fetchFiltersCareerData"
-                    :maxValuesSelected="5"
+                    @onBlur="fetchFiltersCareerData"
+                    :maxValuesSelected="1"
                 />
 
 
@@ -117,7 +116,10 @@
             <CheckValidar ref="checkValidacion" />
             <div class="col-sm-12 mb-3 mt-4">
                 <div class="col-sm-6 pl-2">
-                    <button type="submit" class="btn btn-md btn-primary btn-block text-light">
+                    <button
+                        :disabled="modulo.length === 0"
+                        type="submit"
+                        class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar</span>
                     </button>

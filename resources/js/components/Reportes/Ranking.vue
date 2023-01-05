@@ -35,7 +35,8 @@
                     multiple
                     :showSelectAll="false"
                     placeholder="Seleccione un módulo"
-                    @onChange="fetchFiltersData"
+                    @onBlur="fetchFiltersData"
+                    :maxValuesSelected="1"
                 />
                 <!--                <b-form-text text-variant="muted">Módulo</b-form-text>-->
                 <!--                <select v-model="modulo" class="form-control">-->
@@ -91,7 +92,11 @@
                 </div>
                 <v-divider class="col-12 mb-5 p-0"></v-divider>
             </template>
-                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+            <button
+                :disabled="modulo.length === 0"
+                type="submit"
+                class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+
                 <i class="fas fa-download"></i>
                 <span>Descargars</span>
             </button>
@@ -115,7 +120,7 @@ export default {
         return {
             areas: [],
             sedes: [],
-            modulo: null,
+            modulo: [],
             area: [],
             sede: []
         }
