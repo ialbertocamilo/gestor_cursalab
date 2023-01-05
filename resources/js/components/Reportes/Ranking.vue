@@ -25,14 +25,16 @@
         <form @submit.prevent="exportNotasCurso" class="row">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
-                <DefaultSelect
+                <DefaultAutocomplete
                     dense
                     v-model="modulo"
                     :items="modules"
                     label="Módulo"
                     item-text="name"
                     item-value="id"
-                    placeholder="Seleccione un Módulo"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione un módulo"
                     @onChange="fetchFiltersData"
                 />
                 <!--                <b-form-text text-variant="muted">Módulo</b-form-text>-->
@@ -57,7 +59,7 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <!-- Area y sedes -->
+            <!-- Area y sedes (Farmacias peruanas) -->
             <template v-if="workspaceId == 25">
                 <div class="col-lg-6 col-xl-4 mb-3">
                     <DefaultSelect
@@ -91,7 +93,7 @@
             </template>
                 <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                 <i class="fas fa-download"></i>
-                <span>Descargar</span>
+                <span>Descargars</span>
             </button>
         </form>
     </v-main>
@@ -168,7 +170,7 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
+                        modulos: this.modulo ? this.modulo : [],
                         areas: this.area,
                         sedes: this.sede,
                         UsuariosActivos: UFC.UsuariosActivos,

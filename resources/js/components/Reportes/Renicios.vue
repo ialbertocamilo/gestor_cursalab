@@ -28,27 +28,32 @@
               class="row col-xl-10 col-sm-12">
             <!-- Admins -->
             <div class="col-sm-6 mb-2">
-                <b-form-text text-variant="muted">Administrador</b-form-text>
-                <select v-model="admin" class="form-control">
-                    <option value>- [Todos] -</option>
-                    <!-- <option value="ALL">[TODOS]</option> -->
-                    <option v-for="(item, index) in admins"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                  <DefaultAutocomplete
+                    dense
+                    v-model="admin"
+                    :items="admins"
+                    label="Administrador"
+                    item-text="name"
+                    item-value="id"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione los administradores"
+                    @onChange=""
+                    :maxValuesSelected="5"
+                />
             </div>
+            <div class="col-6"></div>
            <div class="col-sm-6 mb-2">
-                <small class="form-text text-muted">Tipo</small> 
+                <small class="form-text text-muted">Tipo</small>
                 <select v-model="tipo" disabled readonly class="form-control">
-                    <option value>- [Todos] -</option> 
+                    <option value>- [Todos] -</option>
                     <option v-for="(item, index) in tipos"
                             :key="index"
                             :value="item.id">
                         {{ item.name }}
                     </option>
                 </select>
+
             </div>
             <div class="col-sm-6 mb-2">
                 <b-form-text text-variant="muted">Fecha inicial</b-form-text>
@@ -122,10 +127,10 @@ export default {
     },
     data() {
         return {
-            tipos: [ {id:'por_tema', name:'Reinicios por temas'}, 
-                     {id:'por_curso', name:'Reinicios por cursos'}, 
+            tipos: [ {id:'por_tema', name:'Reinicios por temas'},
+                     {id:'por_curso', name:'Reinicios por cursos'},
                      {id:'total', name:'Reinicios totales'} ],
-            admin: "",
+            admin: [],
             tipo: "por_tema",
             start: "",
             end: ""

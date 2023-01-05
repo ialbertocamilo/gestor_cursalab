@@ -33,17 +33,19 @@
         <form @submit.prevent="exportReport" class="row px-3">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select class="form-control"
-                        v-model="modulo"
-                        @change="fetchFiltersAreaData">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                <DefaultAutocomplete
+                    dense
+                    v-model="modulo"
+                    :items="modules"
+                    label="Módulo"
+                    item-text="name"
+                    item-value="id"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione los módulos"
+                    @onChange="fetchFiltersAreaData"
+                    :maxValuesSelected="5"
+                />
             </div>
 
             <v-divider class="col-12 mb-0 p-0"></v-divider>
@@ -187,7 +189,7 @@ export default {
             loadingCarreras: false,
             loadingCiclos: false,
             //
-            modulo: "",
+            modulo: [],
             areas:[],
             area:[]
             // escuela: "",
@@ -204,7 +206,7 @@ export default {
             let FechaFiltro = this.$refs.FechasFiltros;
             let params = {
                 workspaceId: this.workspaceId,
-                modulos: this.modulo ? [+this.modulo] : [],
+                modulos: this.modulo,
                 UsuariosActivos: UFC.UsuariosActivos,
                 UsuariosInactivos: UFC.UsuariosInactivos,
                 areas: this.area,
@@ -238,9 +240,9 @@ export default {
             this.areas = [];
             this.area = [];
 
-            if(!this.modulo) return;
+            if(this.modulo.length === 0) return;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo[0]}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -252,7 +254,5 @@ export default {
 }
 </script>
 <style>
-.v-label {
-    display: contents !important;
-}
+
 </style>

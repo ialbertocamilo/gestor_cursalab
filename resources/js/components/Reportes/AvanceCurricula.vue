@@ -50,17 +50,22 @@
         <!-- Formulario del reporte -->
         <form class="row" @submit.prevent="exportUsuariosDW">
             <div class="col-12 col-lg-6 px-6">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select class="form-control"
-                        v-model="modulo"
-                        @change="fetchFiltersCareerData">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+
+                <DefaultAutocomplete
+                    dense
+                    v-model="modulo"
+                    :items="modules"
+                    label="Módulo"
+                    item-text="name"
+                    item-value="id"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione los módulos"
+                    @onChange="fetchFiltersCareerData"
+                    :maxValuesSelected="5"
+                />
+
+
                 <div class="col-12 px-0 pt-3">
                     <EstadoFiltro ref="EstadoFiltroComponent" class="px-0"
                                   @emitir-cambio="" />
@@ -136,7 +141,7 @@ export default {
     },
     data() {
         return {
-            modulo: "",
+            modulo: [],
             carrera: "",
             grupo: "",
             loadingCarreras: false,
@@ -164,7 +169,7 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
+                        modulos: this.modulo,
 
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
@@ -199,9 +204,9 @@ export default {
             this.areas = [];
             this.area = [];
 
-            if(!this.modulo) return;
+            if(this.modulo.length === 0) return;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/career`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/career`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -213,9 +218,9 @@ export default {
             this.areas = [];
             this.area = [];
 
-            if(!this.modulo) return;
+            if(this.modulo.length === 0) return;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
