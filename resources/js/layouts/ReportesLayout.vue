@@ -19,13 +19,6 @@ TABS
                 </v-tab>
 
                 <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-account</v-icon>
-                    <span class="pt-2">
-                        Historial de usuario
-                    </span>
-                </v-tab>
-
-                <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
@@ -151,6 +144,13 @@ TABS
                     </span>
                 </v-tab>
 
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-account</v-icon>
+                    <span class="pt-2">
+                        Historial de usuario
+                    </span>
+                </v-tab>
+
 <!--
 
 TABS CONTENT
@@ -164,18 +164,6 @@ TABS CONTENT
                                 :workspaceId="workspaceId"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 :API_REPORTES="API_REPORTES"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
-
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <HistorialUsuario
-                                :workspaceId="workspaceId"
-                                :reportsBaseUrl="reportsBaseUrl"
-                                :API_REPORTES="API_REPORTES"
-                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -378,6 +366,18 @@ TABS CONTENT
                     <v-card flat>
                         <v-card-text>
                             <Meetings
+                                @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <HistorialUsuario
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                :API_REPORTES="API_REPORTES"
                                 @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>

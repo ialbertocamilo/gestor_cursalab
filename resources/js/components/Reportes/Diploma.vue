@@ -33,6 +33,7 @@
                     item-text="name"
                     item-value="id"
                     dense
+                    multiple
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
                     :maxValuesSelected="1"
