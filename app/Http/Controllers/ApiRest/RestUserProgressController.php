@@ -147,21 +147,12 @@ class RestUserProgressController extends Controller
     {
         $user = auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
-//        $assigned_courses = $user->getCurrentCourses();
-//
-//        $schools = $assigned_courses->groupBy('schools.*.id');
-//
-//        $data_school = $schools[$school->id] ?? null;
-//
-//        if (!$data_school) return $this->success(['courses' => []]);
-
         $course_status_arr = config('courses.status');
         $topic_status_arr = config('topics.status');
-//        $school_courses = [];
         $school_courses = collect();
-//        foreach ($data_school as $school_id => $course) {
+
         foreach ($courses as $course) {
-            // UC rule
+
             $course_name = $course->name;
             $tags = [];
             if ($workspace_id === 25) {
@@ -175,6 +166,21 @@ class RestUserProgressController extends Controller
             $temp_topics = [];
 
             foreach ($active_course_topics as $topic) {
+
+                if($course->compatible):
+
+                    $temp_topics[] = [
+                        'id' => $topic->id,
+                        'name' => $topic->name,
+                        'disponible' => true,
+                        'nota' => null,
+                        'estado' => 'aprobado',
+                        'estado_str' => 'Convalidado',
+                    ];
+
+                    continue;
+                endif;
+
                 $topic_status = Topic::getTopicProgressByUser($user, $topic);
 
                 $temp_topics[] = [
@@ -187,17 +193,24 @@ class RestUserProgressController extends Controller
                 ];
             }
 
-//            $school_courses[] = [
-//                'id' => $course->id,
-//                'name' => $course_name,
-//                'position' => $course->position,
-//                'nota' => $course_status['average_grade'],
-//                'estado' => $course_status['status'],
-//                'estado_str' => $course_status_arr[$course_status['status']],
-//                'tags' => $tags,
-//                'tag_ciclo' => $tags[0] ?? null,
-//                'temas' => $temp_topics
-//            ];
+            if ($course->compatible):
+
+                $school_courses->push([
+                    'id' => $course->id,
+                    'name' => $course_name,
+                    'position' => $course->position,
+                    'nota' => $course->compatible->grade_average,
+                    'estado' => 'aprobado',
+                    'estado_str' => 'Convalidado',
+                    'tags' => $tags,
+                    'tag_ciclo' => $tags[0] ?? null,
+                    'compatible' => $course->compatible?->course->only('id', 'name'),
+                    'temas' => $temp_topics
+                ]);
+
+                continue;
+            endif;
+
             $school_courses->push([
                 'id' => $course->id,
                 'name' => $course_name,
@@ -207,11 +220,10 @@ class RestUserProgressController extends Controller
                 'estado_str' => $course_status_arr[$course_status['status']],
                 'tags' => $tags,
                 'tag_ciclo' => $tags[0] ?? null,
+                'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
                 'temas' => $temp_topics
             ]);
         }
-//        $columns = array_column($school_courses, 'position');
-//        array_multisort($school_courses, $columns, SORT_ASC);
 
         if ($workspace_id === 25) {
             $school_courses = $school_courses->sortBy([
@@ -226,7 +238,5 @@ class RestUserProgressController extends Controller
         }
 
         return $school_courses->values()->all();
-//        return $school_courses;
-//        return $this->success(['courses' => $school_courses]);
     }
 }

@@ -465,9 +465,6 @@ class Course extends BaseModel
 
             foreach ($courses as $course) {
 
-//                if ($course->compatible)
-//                    dd($course->id, $course->compatible->id);
-
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
                 $last_topic = null;

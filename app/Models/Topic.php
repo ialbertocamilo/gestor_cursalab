@@ -451,10 +451,10 @@ class Topic extends BaseModel
 
         $courses = $courses->sortBy('position');
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
-                                    ->whereIn('course_id', $user_courses->pluck('id'))
-                                    ->where('user_id', $user->id)
-                                    ->groupBy('course_id')
-                                    ->get();
+            ->whereIn('course_id', $user_courses->pluck('id'))
+            ->where('user_id', $user->id)
+            ->groupBy('course_id')
+            ->get();
         foreach ($courses as $course) {
             // UC rule
             $course_name = $course->name;
@@ -463,7 +463,7 @@ class Topic extends BaseModel
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
-            
+
             $course_status = Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
 
@@ -517,7 +517,7 @@ class Topic extends BaseModel
                 'temas_completados' => $course_status['completed_topics'],
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
-                'mod_evaluaciones'=>$course->mod_evaluaciones
+                'mod_evaluaciones' => $course->mod_evaluaciones
             ];
         }
 
@@ -625,25 +625,22 @@ class Topic extends BaseModel
     {
         $topic_grade = null;
         $available_topic = true;
-//        $topic_requirement = $topic->requirements()->first();
         $topic_requirement = $topic->requirements->first();
 
         if ($topic_requirement) :
-//            $requirement_summary = SummaryTopic::with('status:id,code')
-//                ->where('topic_id', $topic_requirement->requirement_id)
-//                ->where('user_id', $user->id)->first();
+
             $requirement_summary = $topic_requirement->summaries_topics->first();
 
             $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
-//        $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
         $summary_topic = $topic->summaries->first();
 
         if ($topic->evaluation_type?->code === 'qualified' && $summary_topic)
             $topic_grade = $summary_topic->grade;
 
         $topic_status = $summary_topic?->status?->code ?? 'por-iniciar';
+
         if (!$available_topic) {
             $topic_status = 'bloqueado';
         }
@@ -665,7 +662,7 @@ class Topic extends BaseModel
 
         $counter = false;
 
-        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft(null,$topic->course)) {
+        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft(null, $topic->course)) {
 
             $times = [];
 
