@@ -3,44 +3,44 @@
 		<!-- Resumen del reporte -->
 		<ResumenExpand titulo="Resumen del reporte">
 			<template v-slot:resumen>
-				Descarga el Registro de Visitas a los Protocolos y Documentos (antes Vademécum)
+				Descarga el registro de visitas a los documentos Vademecum.
 			</template>
-			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario." />
+			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
 
 			<!-- this only for FP -->
 			<div v-show="workspaceId === 25">
 				<list-item
 					titulo="Grupo sistema"
-					subtitulo="Código de grupo (contiene la fecha de subida a la plataforma.)"
+					subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
 				/>
-				<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario." />
-				<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario." />
+				<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
+				<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
 			</div>
 			<!-- this only for FP -->
-			
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales." />
+
+			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
 
 			<!-- this only for FP -->
 			<div v-show="workspaceId === 25">
-				<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra." />
+				<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
 			</div>
 			<!-- this only for FP -->
-			
-			<list-item titulo="Contenido" subtitulo="Nombre del documento adjunto en la plataforma que puede ver el colaborador." />
+
+			<list-item titulo="Vademecum" subtitulo="Nombre del documento Vademecum (SCORM)" />
 			<list-item
 				titulo="Visitas"
-				subtitulo="Cantidad de veces que el usuario visualiza un documento."
+				subtitulo="Cantidad de veces que el usuario visualiza un documento Vademecum"
 			/>
 			<list-item
 				titulo="Última visita"
-				subtitulo="Fecha de la última visita realizada al documento."
+				subtitulo="Fecha de la última visita realizada al Vademecum"
 			/>
 		</ResumenExpand>
 		<!-- Formulario del reporte -->
 		<form class="row col-md-8 col-xl-5" @submit.prevent="ExportarVademecum">
 			<!-- Grupos -->
 			<div class="col-12">
-				<b-form-text text-variant="muted">Contenidos</b-form-text>
+				<b-form-text text-variant="muted">Vademecum</b-form-text>
 				<!--<v-select
 					attach
 					solo
@@ -112,10 +112,14 @@ export default {
 			axios
 				.post(`${this.reportsBaseUrl}/exportar/vademecum`, params)
 				.then((res) => {
-                    
+
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
+                        res.data.new_name = this.generateFilename(
+                            'Vademecum',
+                            ''
+                        )
                         this.$emit("emitir-reporte", res);
                     }
                     this.hideLoader();
@@ -125,7 +129,7 @@ export default {
                     console.log(err.message);
 
                     alert("Se ha encontrado el siguiente error : " + err);
-                    
+
                     this.hideLoader();
                 });
 		}

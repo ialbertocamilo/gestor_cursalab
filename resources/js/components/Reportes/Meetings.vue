@@ -136,17 +136,21 @@ export default {
     methods: {
         exportMeetings() {
             let vue = this
-            vue.showLoader()
+
 
             const start = this.start
             const end = this.end
 
-            let url = `/aulas-virtuales/export-general-report?starts_at=${start}&finishes_at=${end}`
-            window.open(url, '_blank');
+            let res = {};
+            res.data = {}
+            res.data.excludeBaseUrl = true
+            res.data.ruta_descarga = `/aulas-virtuales/export-general-report?starts_at=${start}&finishes_at=${end}`
+            res.data.new_name = this.generateFilename(
+                'Meetings',
+                ''
+            )
 
-            setTimeout(() => {
-                vue.hideLoader()
-            }, 2000)
+            this.$emit('emitir-reporte', res)
         },
     }
 };

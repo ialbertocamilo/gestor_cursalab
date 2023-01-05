@@ -240,8 +240,15 @@ export default {
                     }
                 })
 
-                if (response.data.alert) vue.showAlert(response.data.alert, 'warning')
-                else vue.$emit('emitir-reporte', response)
+                if (response.data.alert) {
+                    vue.showAlert(response.data.alert, 'warning')
+                } else {
+                    response.data.new_name = this.generateFilename(
+                        'Visitas',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
+                    vue.$emit('emitir-reporte', response)
+                }
 
             } catch (ex) {
                 console.log(ex.message)

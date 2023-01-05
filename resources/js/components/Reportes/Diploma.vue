@@ -301,6 +301,10 @@ export default {
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
+                        response.data.new_name = this.generateFilename(
+                            'Diploma',
+                            this.generateNamesString(this.modules, this.modulo)
+                        )
                         this.$emit("emitir-reporte", res);
                     }
                     this.hideLoader();
@@ -344,7 +348,7 @@ export default {
             vue.courses = [];
 
             //check schoolId
-            if(!vue.filters.school.length) return;
+            if (!vue.filters.school.length) return;
 
 
             const reqPayload = {

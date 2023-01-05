@@ -287,6 +287,10 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    response.data.new_name = this.generateFilename(
+                        'Temas no evaluables',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     // Emit event to parent component
                     this.$emit('emitir-reporte', response)
                 }

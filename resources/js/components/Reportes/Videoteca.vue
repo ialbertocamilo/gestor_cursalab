@@ -5,7 +5,7 @@
             <template v-slot:resumen>
                 Descarga el registro de visitas a los títulos de la Videoteca.
             </template>
-         
+
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <!-- this only for FP -->
             <div v-show="workspaceId === 25">
@@ -18,7 +18,7 @@
                 <list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
             </div>
             <!-- this only for FP -->
-            
+
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
 
             <!-- this only for FP -->
@@ -39,7 +39,7 @@
         </ResumenExpand>
         <!-- Formulario del reporte -->
         <form class="row col-md-8 col-xl-5" @submit.prevent="ExportarVideoteca">
-            <!-- Grupos 
+            <!-- Grupos
             <div class="col-12">
                 <b-form-text text-variant="muted">Videoteca</b-form-text>
                 <v-select
@@ -89,10 +89,14 @@ export default {
             axios
                 .post(`${this.reportsBaseUrl}/exportar/videoteca`, params)
                 .then((res) => {
-                    
+
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
+                        res.data.new_name = this.generateFilename(
+                            'Videoteca',
+                            ''
+                        )
                         this.$emit("emitir-reporte", res);
                     }
                     this.hideLoader();
@@ -102,7 +106,7 @@ export default {
                     console.log(err.message);
 
                     alert("Se ha encontrado el siguiente error : " + err);
-                    
+
                     this.hideLoader();
                 });
         }

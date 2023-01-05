@@ -145,6 +145,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Segmentación',
+                        this.generateNamesString(this.schools, this.filters.school)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 

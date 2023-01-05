@@ -2,7 +2,8 @@
     <v-main>
         <ResumenExpand>
             <template v-slot:resumen>
-                Consulta el historial de avance del usuario.
+                Consulta el avance del usuario por cada tema desarrollado, dentro de los cursos que tiene
+                asignado.
             </template>
 
             <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" />
@@ -68,7 +69,7 @@
                     <tbody class="text-dark">
                         <tr>
                             <td>{{ Usuario.module.name }}</td>
-                            <td>{{ `${Usuario.user.name} ${Usuario.user.lastname || ''} ${Usuario.user.surname || ''}` }}</td>
+                            <td>{{ `${Usuario.user.name} ${Usuario.user.lastname} ${Usuario.user.surname}` }}</td>
                             <td>{{ Usuario.user.document }}</td>
                         </tr>
                     </tbody>
@@ -261,19 +262,23 @@ export default {
 <style lang="scss" scoped>
 
     .col-schools_names {
-        flex: 0 0 30%;
-        max-width: 30%;
+        flex: 0 0 20%;
+        max-width: 20%;
     }
 
     .col-course_name {
-        flex: 0 0 30%;
-        max-width: 30%;
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+
+    .col-topic_name {
+        flex: 0 0 20%;
+        max-width: 20%;
     }
 
     .col-grade {
         flex: 0 0 20%;
         max-width: 20%;
-        text-align: center;
     }
 
     .col-course_status {

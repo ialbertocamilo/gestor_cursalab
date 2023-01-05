@@ -19,6 +19,13 @@ TABS
                 </v-tab>
 
                 <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-account</v-icon>
+                    <span class="pt-2">
+                        Historial de usuario
+                    </span>
+                </v-tab>
+
+                <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
@@ -104,7 +111,7 @@ TABS
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
-                        Protocolo y Documentos
+                        Vademecum
                     </span>
                 </v-tab>
 
@@ -144,13 +151,6 @@ TABS
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-account</v-icon>
-                    <span class="pt-2">
-                        Historial de usuario
-                    </span>
-                </v-tab>
-
 <!--
 
 TABS CONTENT
@@ -164,6 +164,18 @@ TABS CONTENT
                                 :workspaceId="workspaceId"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 :API_REPORTES="API_REPORTES"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <HistorialUsuario
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                :API_REPORTES="API_REPORTES"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -371,18 +383,6 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <HistorialUsuario
-                                :workspaceId="workspaceId"
-                                :reportsBaseUrl="reportsBaseUrl"
-                                :API_REPORTES="API_REPORTES"
-                                @emitir-reporte="crearReporte"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
-
             </v-tabs>
         </v-card>
         <!-- </v-app> -->
@@ -564,9 +564,6 @@ export default {
             this.filenameDialog = true;
         },
         async downloadReport() {
-            if(!this.reportFilename.includes('.xlsx')){
-                this.reportFilename = this.reportFilename+'.xlsx';
-            }
             this.showLoader()
 
             try {

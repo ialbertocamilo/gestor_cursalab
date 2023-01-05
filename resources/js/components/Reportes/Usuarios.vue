@@ -158,13 +158,19 @@ export default {
                     }
                 })
 
-                // When there are no results notify user,
-                // download report otherwise
+                // When there are no results notify
+                // user, download report otherwise
 
                 if (response.data.alert) {
+
                     this.showAlert(response.data.alert, 'warning')
+
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Usuarios',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
