@@ -973,6 +973,7 @@ class Course extends BaseModel
         $course->compatibilities = $course->getCompatibilities();
 
         $summary_course = $course->summaries->first();
+//        dd($course->compatibilities->pluck('id')->toArray());
 
         if ($summary_course) return null;
 
@@ -981,11 +982,12 @@ class Course extends BaseModel
         $compatible_summary_course = SummaryCourse::with('course:id,name')
             ->whereRelation('course', 'active', ACTIVE)
             ->where('user_id', $user->id)
-            ->whereIn('course_id', $course->compatibilities->pluck('id'))
+            ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->first();
 
+//        dd($compatible_summary_course);
         if ($compatible_summary_course):
 
             $compatible_summary_course->course->compatible_of = $course;

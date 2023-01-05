@@ -48,6 +48,7 @@ class GestorController extends Controller
     {
         try {
             $data = $this->getDiplomaCursoData($user_id, $course_id);
+//            dd($data);
             return view('ver_certificado', compact('data'));
         } catch (\Exception $e) {
             info($e);
@@ -67,50 +68,71 @@ class GestorController extends Controller
 
     private function getDiplomaCursoData($user_id, $course_id)
     {
-
         $user = User::with('subworkspace')
             ->select('id', 'name', 'surname', 'lastname', 'subworkspace_id')
             ->where('id', $user_id)->first();
         if (!$user) abort(404);
 
         // D3
-        $course = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+        $course = Course::with([
+            'compatibilities_a:id',
+            'compatibilities_b:id',
+            'summaries' => function ($q) use ($user_id) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', $user_id);
+            },
+        ])
+            ->select('id', 'name', 'plantilla_diploma', 'show_certification_date')
             ->where('id', $course_id)->first();
 
         if (!$course) abort(404);
+        $course_to_export = $course;
 
         if (request()->has('original_id')) {
 
             // C3
             $original_id = request()->original_id;
 
-            $course_original = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+            $original_course = Course::with([
+                'compatibilities_a:id',
+                'compatibilities_b:id',
+                'summaries' => function ($q) use ($user_id) {
+                    $q
+                        ->with('status:id,name,code')
+                        ->where('user_id', $user_id);
+                },
+            ])
+                ->select('id', 'name', 'plantilla_diploma', 'show_certification_date')
                 ->where('id', $original_id)->first();
 
-            if (!$course_original) abort(404);
-
+            if (!$original_course) abort(404);
             // TODO: Si llega compatible validar que sea su compatible el curso de la ruta ($course_id)
             // Compatible de C3
-            $compatible = $course->getCourseCompatibilityByUser($user);
+            $compatible = $original_course->getCourseCompatibilityByUser($user);
+
+            if (!$compatible) abort(404);
 
             // D3 !== Compatible de C3
             if ($course->id !== $compatible->course->id) abort(404);
 
-            $course = $course_original;
+            $course_to_export = $original_course;
+
         }
 
-        // TODO: Reemplazar los datos de la plantilla con los datos (template plantilla, nombre del curso) del compatible que llegue
+        // TODO: Reemplazar los datos de la plantilla con los datos (template plantilla, nombre del curso) del curso original que llegue
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
         if (!$summary_course?->certification_issued_at) abort(404);
 
         $template_certification = '';
-        if ($course->plantilla_diploma) {
-            $template_certification = $course->plantilla_diploma;
+
+        if ($course_to_export->plantilla_diploma) {
+            $template_certification = $course_to_export->plantilla_diploma;
         }
         if (!$template_certification) {
-            $school = $course->schools()->first();
+            $school = $course_to_export->schools()->first();
             ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma;
         }
         if (!$template_certification && $user->subworkspace->plantilla_diploma) {
@@ -122,9 +144,9 @@ class GestorController extends Controller
         $base64 = $this->parse_image($template_certification);
 
         return array(
-            'show_certification_date' => $course->show_certification_date,
+            'show_certification_date' => $course_to_export->show_certification_date,
 //            'video' => $course->name,
-            'video' => removeUCModuleNameFromCourseName($course->name),
+            'video' => removeUCModuleNameFromCourseName($course_to_export->name),
             'usuario' => $user->fullname,
             'fecha' => $fecha,
             'image' => $base64,
