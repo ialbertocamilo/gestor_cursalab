@@ -19,6 +19,8 @@ class RestUserProgressController extends Controller
 
 //        $assigned_courses = $user->getCurrentCourses();
         $assigned_courses = $user->getCurrentCourses(withRelations: 'user-progress');
+        $user_courses_id = $assigned_courses->whereNull('compatible')->pluck('id');
+        $user_compatibles_courses_count = $assigned_courses->whereNotNull('compatible')->count();
 
         $summary_user = $user->summary;
 
@@ -27,10 +29,11 @@ class RestUserProgressController extends Controller
             $user->summary_courses()
                 ->whereHas('course', fn($q) => $q
                     ->whereRelation('type', 'code', '<>', 'free')
-                    ->whereIn('id', $assigned_courses->pluck('id'))
+//                    ->whereIn('id', $assigned_courses->pluck('id'))
+                    ->whereIn('id', $user_courses_id->toArray())
                 )
                 ->whereRelation('status', 'code', 'aprobado')
-                ->count()
+                ->count() + $user_compatibles_courses_count
             : 0;
         $pending_courses = $assigned_courses->count() - $completed_courses;
         $disapproved_courses = $summary_user ?
@@ -55,8 +58,8 @@ class RestUserProgressController extends Controller
             'porcentaje' => $general_percentage,
         ];
 
-        info('assigned_courses');
-        info($assigned_courses);
+//        info('assigned_courses');
+//        info($assigned_courses);
 
         $regular_courses = $assigned_courses->where('type.code', 'regular');
         $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular');
