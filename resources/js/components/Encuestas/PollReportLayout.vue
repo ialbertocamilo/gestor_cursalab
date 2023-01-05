@@ -142,7 +142,9 @@ import ModalBloqueReport from './ModalBloqueReport.vue';
 import lang from "./../../plugins/lang_datepicker";
 import InfoTable from './InfoTable.vue'
 import ModalChangeNameReport from './ModalChangeNameReport.vue'
-
+const now = new Date().toISOString();
+const date_final = now.slice(0, 10);
+const date_init = (now.slice(0, 4) - 1) +'-' +now.slice(5, 10);
 export default {
   components:{ResumenEncuesta,ModalBloqueReport,InfoTable,ModalChangeNameReport},
   props: ["Encuestas"],
@@ -165,8 +167,8 @@ export default {
           type_poll_question:{},
           courses_selected:[],
           date:{
-            start:null,
-            end:null
+            start:date_init+' 00:00:00',
+            end:date_final+' 23:59:59'
           }
       },
       poll_searched:false,
@@ -184,7 +186,7 @@ export default {
         confirmLabel:'Cerrar',
         loading:true
       },
-      dates:null,
+      dates:[date_init,date_final],
       download_list:[],
       filenameDialog:false,
       nameReport:{}
