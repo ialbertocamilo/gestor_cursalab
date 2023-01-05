@@ -102,16 +102,16 @@ class Poll extends BaseModel
         return $courses;
     }
     protected function loadPollReportData($filters){
-        $pool_questions = PollQuestion::select('t.id','t.code','t.name','poll_questions.id as poll_question_id','poll_questions.titulo')
+        $pool_questions = PollQuestion::select('t.id','t.code','t.name','t.description','poll_questions.id as poll_question_id','poll_questions.titulo')
                             ->join('taxonomies as t','t.id','=','poll_questions.type_id')
                             ->where('poll_questions.poll_id',$filters['poll']['id'])
                             ->whereNull('poll_questions.deleted_at')->get();
         
         // $questions_type_califica = $this->resumePollQuestionTypeCalifica($pool_questions,$filters);
         $questions_type_califica = [];
-        if(get_current_workspace()->id != 25){
-            $questions_type_califica = $this->resumePollQuestionTypeCalifica_v2($pool_questions,$filters);
-        }
+        // if(get_current_workspace()->id != 25){
+        //     $questions_type_califica = $this->resumePollQuestionTypeCalifica_v2($pool_questions,$filters);
+        // }
         // $count_users = $user_to_response_poll->unique('user_id')->count();
         $count_users = 1;
         $resume = compact('count_users','questions_type_califica');
