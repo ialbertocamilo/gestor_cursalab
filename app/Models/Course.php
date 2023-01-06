@@ -357,7 +357,8 @@ class Course extends BaseModel
 
     public function getMessagesOnUpdateStatus($course)
     {
-        $temp['ok'] = ($course->wasChanged('active') or $course->active === 1) and $course->topics->count() > 0;
+//        dd($course->wasChanged('active'), $course->wasChanged('active') && $course->active === 1);
+        $temp['ok'] = ($course->wasChanged('active') and $course->active === 1) and $course->topics->count() > 0;
 
         if (!$temp['ok']) return $temp;
 
