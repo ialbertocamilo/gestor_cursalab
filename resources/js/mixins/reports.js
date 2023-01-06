@@ -9,6 +9,10 @@ export default {
          */
         generateNamesString(modules, ids) {
 
+            if (!modules) return '';
+            if (!ids) return '';
+            if (!ids.length) return '';
+
             let selectedModules = modules.filter(m => ids.includes(m.id));
             let names = [];
             selectedModules.forEach(m => names.push(m.name))
