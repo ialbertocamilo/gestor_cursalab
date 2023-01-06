@@ -304,7 +304,7 @@ export default {
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
-                        response.data.new_name = this.generateFilename(
+                        res.data.new_name = this.generateFilename(
                             'Diploma',
                             this.generateNamesString(this.modules, this.modulo)
                         )
