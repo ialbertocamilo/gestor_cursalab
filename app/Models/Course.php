@@ -1003,4 +1003,23 @@ class Course extends BaseModel
 
         return $course;
     }
+
+    public function hasBeenValidated($user = null)
+    {
+        $user = $user ?? auth()->user();
+
+        $this->load([
+            'summaries' => function ($q) use ($user) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', $user->id);
+            },
+            'compatibilities_a:id',
+            'compatibilities_b:id',
+        ]);
+
+        $compatible = $this->getCourseCompatibilityByUser($user);
+
+        return $compatible ? true : false;
+    }
 }
