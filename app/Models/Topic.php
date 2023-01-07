@@ -456,7 +456,7 @@ class Topic extends BaseModel
             ->groupBy('course_id')
             ->get();
         foreach ($courses as $course) {
-            
+
             // $compatible = $course->getCourseCompatibilityByUser($user);
 
             // UC rule
@@ -484,7 +484,8 @@ class Topic extends BaseModel
                         ? route('media.download.media_topic', [$media->id]) : null;
                 }
 
-                if ($course->compatible) {
+                if (true) {
+                // if ($course->compatible) {
 
                     $topics_data[] = [
                         'id' => $topic->id,
@@ -526,7 +527,8 @@ class Topic extends BaseModel
                 ];
             }
 
-            if ($course->compatible) {
+            if (true) {
+            // if ($course->compatible) {
 
                 $schools_courses[] = [
                     'id' => $course->id,
@@ -550,8 +552,8 @@ class Topic extends BaseModel
                     'temas' => $topics_data,
                     'mod_evaluaciones' => NULL,
                     'compatible' => [
-                        'id' => $course->compatible->course->id,
-                        'name' => $course->compatible->course->name,
+                        'id' => $course->compatible->course->id ?? 'X',
+                        'name' => $course->compatible->course->name ?? 'TEST DEFAULT COMPATIBLE',
                     ],
                 ];
 
