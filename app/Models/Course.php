@@ -223,7 +223,14 @@ class Course extends BaseModel
 
                 $course->update($data);
 
-            else :
+                // TODO: Compatibles: Si se cambia el estado del curso
+                if ($course->wasChanged('active')):
+
+                    $course->updateOnModifyingCompatibility();
+
+                endif;
+
+            else:
 
                 $course = self::create($data);
                 $course->workspaces()->sync([$workspace->id]);
@@ -924,24 +931,18 @@ class Course extends BaseModel
         $course->loadMissing('segments');
 
         $courses_to_update[] = $course->id;
-//        $temp_segments = collect();
 
-//        foreach ($course->segments as $segment) $temp_segments->push($segment);
         $users_segmented = Course::usersSegmented($course->segments, type: 'users_id');
 
         foreach ($course->compatibilities as $compatibility_course) {
-//            $compatibility_course->loadMissing('segments');
 
             $users_segmented = array_merge(
                 $users_segmented,
                 Course::usersSegmented($compatibility_course->segments, type: 'users_id'),
             );
-//            foreach ($compatibility_course->segments as $segment) $temp_segments->push($segment);
-
             $courses_to_update[] = $compatibility_course->id;
         }
 
-//        $users_segmented = Course::usersSegmented($temp_segments, type: 'users_id');
         // TODO: review how to reduce the number of users to update
         $users_segmented = array_unique($users_segmented);
 //        $users_to_update = SummaryCourse::whereIn('user_id', $users_segmented)
@@ -949,17 +950,10 @@ class Course extends BaseModel
 //            ->whereNull('grade_average')
 //            ->pluck('user_id');
 
-//        info("USERS TO UPDATE");
-//        info(implode(',', $users_segmented));
-//        info("COURSES TO UPDATE");
-//        info(implode(',', $courses_to_update));
         $chunk_users = array_chunk($users_segmented, 80);
         foreach ($chunk_users as $chunked_users) {
             SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update);
         }
-
-//            SummaryUser::setSummaryUpdates($users_to_update, $courses_to_update);
-
     }
 
 
@@ -985,12 +979,11 @@ class Course extends BaseModel
             ->whereRelation('status', 'code', 'aprobado')
             ->first();
 
-//        dd($compatible_summary_course);
+
         if ($compatible_summary_course):
 
             $compatible_summary_course->course->compatible_of = $course;
             $compatible_course = $compatible_summary_course;
-//            dd($compatible_course);
 
         endif;
 
@@ -1001,6 +994,9 @@ class Course extends BaseModel
     {
         $course->compatibilities_b()->sync([]);
         $course->compatibilities_a()->sync($data['compatibilities'] ?? []);
+
+        // TODO: Compatibles: Actualizar al modificar los cursos compatibles
+        $course->updateOnModifyingCompatibility();
 
         return $course;
     }

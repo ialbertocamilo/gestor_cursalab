@@ -264,6 +264,17 @@ export default {
                 active: false,
                 items: [
                     {
+                        title: "Cursos",
+                        icon: "mdi mdi-notebook",
+                        path: "/cursos",
+                        subpaths: ["cursos"],
+                        selected: false,
+                        permission: "cursos",
+                        role: [
+                            "super-user",
+                        ]
+                    },
+                    {
                         title: "Escuelas",
                         icon: "fas fa-th-large",
                         path: "/escuelas",
@@ -618,7 +629,7 @@ export default {
                 if(workspace.id === 25) {
                   vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
                 }
-                
+
                 vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 //=== only for "Farmacias Peruanas"
 
