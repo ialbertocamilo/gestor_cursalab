@@ -924,7 +924,9 @@ class Course extends BaseModel
     public function updateOnModifyingCompatibility()
     {
         $course = $this;
-        $course->loadMissing('compatibilities.segments');
+        // $course->loadMissing('compatibilities.segments');
+
+        $course->compatibilities = $course->getCompatibilities();
 
         if ($course->compatibilities->count() === 0) return;
 
