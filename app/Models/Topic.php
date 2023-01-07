@@ -484,8 +484,8 @@ class Topic extends BaseModel
                         ? route('media.download.media_topic', [$media->id]) : null;
                 }
 
-                if (true) {
-                // if ($course->compatible) {
+                // if (true) {
+                if ($course->compatible) {
 
                     $topics_data[] = [
                         'id' => $topic->id,
@@ -527,8 +527,8 @@ class Topic extends BaseModel
                 ];
             }
 
-            if (true) {
-            // if ($course->compatible) {
+            // if (true) {
+            if ($course->compatible) {
 
                 $schools_courses[] = [
                     'id' => $course->id,
