@@ -27,25 +27,62 @@ class SummaryUser extends Summary
     protected function updateUserData($user = null)
     {
         $user = $user ?? auth()->user();
-        $courses_id = $user->getCurrentCourses(
-            withFreeCourses: false,
-            withRelations: 'summary-user-update',
-            only_ids: true,
-            response_type: 'courses-unified');
-        $count_courses_assigned = count($courses_id);
-//        info($courses_id);
-//        info("COUNT COURSES ASSIGNED :: ". $count_courses_assigned);
+//        $courses_id = $user->getCurrentCourses(
+//            withFreeCourses: false,
+//            withRelations: 'summary-user-update',
+//            response_type: 'courses-unified');
+        $user_courses = $user->getCurrentCourses(withRelations: 'soft');
+//        dd($user_courses->pluck('topics.id')->count());
+
+        $user_courses_id = $user_courses->pluck('id');
+        $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
+//        dd($user_courses_id, $user_compatibles_courses_id);
+
+//        $count_courses_assigned = count($user_courses);
+        $count_courses_assigned = $user_courses->count();
 
         $row_user = SummaryUser::getCurrentRow(null, $user);
         if (!$row_user) {
             return true;
         }
-        $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
-            ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))
+
+
+        $res_nota_segmentation = SummaryTopic::select('grade')
+//        $res_nota_segmentation = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
+            ->whereHas('topic',
+                fn($q) => $q->where('active', ACTIVE)
+                    ->whereIn('course_id', $user_courses_id)
+            )
             ->whereRelation('topic', 'assessable', ACTIVE)
             ->whereRelation('topic.evaluation_type', 'code', 'qualified')
             ->where('user_id', $user->id)
-            ->first();
+            ->pluck('grade')
+            ->sum();
+//            ->first();
+
+        $res_nota_compatibles = SummaryTopic::select('grade')
+            ->whereHas('topic',
+                fn($q) => $q->where('active', ACTIVE)
+                    ->whereIn('course_id', $user_compatibles_courses_id)
+            )
+            ->whereRelation('topic', 'assessable', ACTIVE)
+            ->whereRelation('topic.evaluation_type', 'code', 'qualified')
+            ->where('user_id', $user->id)
+            ->pluck('grade')
+            ->sum();
+//            ->first();
+
+//        $res_nota = ($res_nota_segmentation->nota_avg + $res_nota_compatibles->nota_avg) / 2;
+        $res_nota = ($res_nota_segmentation + $res_nota_compatibles) / $user_courses->pluck('topics.id')->count();
+
+        dd($res_nota_segmentation, $res_nota_compatibles, $res_nota);
+
+//        $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
+//            ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))
+//            ->whereRelation('topic', 'assessable', ACTIVE)
+//            ->whereRelation('topic.evaluation_type', 'code', 'qualified')
+//            ->where('user_id', $user->id)
+//            ->first();
 
         $grade_average = round($res_nota->nota_avg, 2);
 
