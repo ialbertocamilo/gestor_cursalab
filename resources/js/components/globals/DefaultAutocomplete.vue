@@ -18,6 +18,7 @@
         :color="color"
         :return-object="returnObject"
         @input="updateValue"
+        @blur="onBlur"
         :no-data-text="noDataText"
         :rules="rules"
     >
@@ -164,6 +165,9 @@ export default {
             let vue = this
             vue.$emit('input', value || null)
             vue.$emit('onChange')
+        },
+        onBlur() {
+            this.$emit('onBlur')
         },
         icon() {
             if (this.selectAll()) return "mdi-close-box";

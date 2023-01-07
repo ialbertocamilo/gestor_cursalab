@@ -39,18 +39,23 @@
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-6 mt-2">
-                        <b-form-text text-variant="muted">Módulo</b-form-text>
-                        <select class="form-control"
-                                v-model="modulo"
-                                @change="fetchFiltersCareerData">
-                            <option v-for="(item, index) in modules"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+
+                        <DefaultAutocomplete
+                            dense
+                            v-model="modulo"
+                            :items="modules"
+                            label="Módulo"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los módulos"
+                            @onBlur="fetchFiltersCareerData"
+                            :maxValuesSelected="1"
+                        />
 
                     </div>
+                    <div class="col-6"></div>
 
                     <div class="col-6">
                         <b-form-text text-variant="muted">Escuelas</b-form-text>
@@ -68,7 +73,8 @@
                             item-text="name"
                             label="Selecciona un #Módulo"
                             @change="fetchFiltersSchoolData"
-                            :disabled="!modulo"
+                            :disabled="modulo.length === 0"
+                            :maxValuesSelected="10"
                             :background-color="!school ? '' : 'light-blue lighten-5'">
                         </v-select>
                     </div>
@@ -166,7 +172,10 @@
             <v-divider class="col-12 p-0 my-2"></v-divider>
             <div class="col-sm-12 mb-3">
                 <div class="col-sm-6 pl-2">
-                    <button type="submit" class="btn btn-md btn-primary btn-block text-light">
+                    <button
+                        :disabled="modulo.length === 0"
+                        type="submit"
+                        class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar</span>
                     </button>
@@ -197,10 +206,10 @@ export default {
 
             schools: [],
             courses: [],
-            school:[],
-            course:[],
+            school: [],
+            course: [],
 
-            modulo: "",
+            modulo: [],
             tipocurso: false,
 
             loadingCarreras: false,
@@ -222,7 +231,7 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: vue.workspaceId,
-                        modulos: vue.modulo ? [vue.modulo] : [],
+                        modulos: vue.modulo,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
                         tipocurso: vue.tipocurso,
@@ -235,8 +244,15 @@ export default {
                     }
                 })
 
-                if (response.data.alert) vue.showAlert(response.data.alert, 'warning')
-                else vue.$emit('emitir-reporte', response)
+                if (response.data.alert) {
+                    vue.showAlert(response.data.alert, 'warning')
+                } else {
+                    response.data.new_name = this.generateFilename(
+                        'Visitas',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
+                    vue.$emit('emitir-reporte', response)
+                }
 
             } catch (ex) {
                 console.log(ex.message)
@@ -253,34 +269,27 @@ export default {
             vue.areas = [];
             vue.area = [];
 
-            if(!vue.modulo) return;
+            if (vue.modulo.length === 0) return;
 
-            let url = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo}/criterion-values/career`
+            let url = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo.join()}/criterion-values/career`
             let response = await axios({
                 url: url,
                 method: 'get'
             })
 
             vue.careers = response.data;
-           /* vue.careers = [ { id:2222, name:'Quimico Farmaceutico' },
-                            { id:3333, name:'Tecnico de Farmacia' },
-                            { id:4444, name:'Colaborador de carrera' }
-                          ];*/
+
         },
         async fetchFiltersAreaData() {
             const vue = this;
             vue.areas = [];
             vue.area = [];
 
-            if(!vue.modulo) return;
+            if (vue.modulo.length === 0) return;
 
-            let urlAreas = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo}/criterion-values/grupo`
+            let urlAreas = `${vue.$props.reportsBaseUrl}/filtros/sub-workspace/${vue.modulo.join()}/criterion-values/grupo`
             let responseAreas = await axios({ url: urlAreas,method: 'get' });
             vue.areas = responseAreas.data;
-           /* vue.areas = [ { id:1122, name:'Grupo 33' },
-                          { id:3422, name:'Grupo 42' },
-                          { id:7422, name:'Grupo 78' }
-                        ];*/
         },
         async fetchFiltersSchoolData() {
             const vue = this;
@@ -288,7 +297,7 @@ export default {
             vue.courses = [];
             vue.course = [];
 
-            if (!vue.school.length) return;
+            if (vue.school.length === 0) return;
 
             let urlCourses = `${vue.$props.reportsBaseUrl}/filtros/schools/courses`;
             let responseCourses = await axios( { url: urlCourses, method: 'post',
@@ -305,7 +314,7 @@ export default {
     },
     mounted() {
         const vue = this;
-        vue.modulo = vue.modules[0].id; //init module
+        //vue.modulo = vue.modules[0].id; //init module
         vue.fetchFiltersData();
         vue.fetchFiltersCareerData();
     }

@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="container-fluid">
     <b-card no-body>
       <Index :Encuestas="encuestas"/>
@@ -20,4 +20,4 @@ export default {
 };
 </script>
 
-<style></style>
+<style></style> -->

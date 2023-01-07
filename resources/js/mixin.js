@@ -705,6 +705,24 @@ export default {
             }
 
             return obj;
-        }
-    }
+        },
+        groupArrayOfObjects(list, key , type = 'get_object'){
+            const new_list = list.reduce((rv, x)=>{
+              (rv[x[key]] = rv[x[key]] || []).push(x);
+              return rv;
+            }, {});
+            if(type == 'get_array'){
+              return Object.keys(new_list).map((key) => new_list[key]);
+            }
+            return new_list;
+        },
+        sliceIntoChunks(arr, chunkSize) {
+            let res = [];
+            for (let i = 0; i < arr.length; i += chunkSize) {
+                const chunk = arr.slice(i, i + chunkSize);
+                res.push(chunk);
+            }
+            return res;
+        },
+    },
 };

@@ -10,6 +10,7 @@ use App\Models\Prueba;
 use App\Models\School;
 use App\Models\Abconfig;
 use App\Models\Reinicio;
+use App\Models\Taxonomy;
 use App\Models\Categoria;
 use App\Models\Workspace;
 use App\Models\SummaryTopic;
@@ -89,8 +90,15 @@ class reinicios_programado extends Command
 
         $this->findCoursesToBeReset();
         $courses = $this->coursesWorkspaces;
+        
         // Reset attempts and update reset count
-        $summary_topics_id = SummaryTopic::where('passed',0)->where('attempts','>',1)->whereHas('topic',function($q) use($courses){
+        $desaprobado = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        //Some users use the quiz attempt but don't finish it, so the summary topic has the status to-start
+        $por_iniciar = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
+        $summary_topics_id = SummaryTopic::
+        // where('passed',0)
+        whereIn('status_id', [$desaprobado->id,$por_iniciar->id])
+        ->where('attempts','>',1)->whereHas('topic',function($q) use($courses){
             $q->whereIn('course_id',array_column($courses,'courseId'));
         })->groupBy('topic_id')->select('topic_id')->pluck('topic_id');
         $courses_id = Topic::whereIn('id',$summary_topics_id)->where('active',1)->select('course_id')->pluck('course_id');

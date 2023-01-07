@@ -115,7 +115,7 @@ const SUB_ITEM_GLOSARY =  { title:"Glosario",
                           };
 
 const SUB_ITEM_VADEMECUM = {
-                            title:"Vademécum",
+                            title:"Protocolos y Documentos",
                             icon:"fas fa-file-invoice",
                             path:"/vademecum",
                             subpaths:["vademecum"],
@@ -431,7 +431,7 @@ export default {
                     {
                         title: "Encuestas",
                         icon: "fas fa-poll",
-                        path: "/resumen_encuesta/index",
+                        path: "/resumen_encuesta",
                         subpaths: ["resumen_encuesta"],
                         selected: false,
                         permission: "resumen_encuesta",

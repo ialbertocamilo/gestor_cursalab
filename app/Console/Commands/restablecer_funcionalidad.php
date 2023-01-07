@@ -76,9 +76,9 @@ class restablecer_funcionalidad extends Command
         // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
-        // $this->restores_poll_answers();
+        $this->restores_poll_answers();
         // $this->restore_surname();
-        $this->restore_tickets();
+        // $this->restore_tickets();
         // $this->restore_attempts();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
@@ -109,22 +109,14 @@ class restablecer_funcionalidad extends Command
         dd(count($tickets));
     }
     public function restore_surname(){
-        $path = public_path() . "/json/surnames.json"; // ie: /var/www/laravel/public/json/filename.json
+        $path = public_path() . "/json/surnames.json"; // ie: /var/www/laravel/app/storage/json/filename.json
         $users = json_decode(file_get_contents($path), true);
         $_bar = $this->output->createProgressBar(count($users));
         $_bar->start();
         foreach ($users as $user) {
-            try {
-                DB::beginTransaction();
-                User::where('document',$user['document'])->update([
-                    'surname'=>$user['surname']
-                ]);
-                DB::commit();
-                //code...
-            } catch (\Throwable $th) {
-                $this->info('error',$user['document']);
-                DB::rollBack();
-            }
+            User::where('document',$user['document'])->update([
+                'surname'=>$user['surname']
+            ]);
             $_bar->advance();
         }
         $_bar->finish();
@@ -132,7 +124,7 @@ class restablecer_funcionalidad extends Command
     public function restore_attempts(){
         $workspaces = Workspace::whereNull('parent_id')->get();
         foreach ($workspaces as $workspace) {
-            $mod_eval = $this->getModEval($workspace->name);            
+            $mod_eval = $this->getModEval($workspace->name);
             Course::whereHas('workspaces',function($q) use ($workspace){
                 $q->where('workspace_id',$workspace->id);
             })->update([
@@ -157,41 +149,48 @@ class restablecer_funcionalidad extends Command
         $polls = Poll::with('questions')
         ->whereIn('id',[1,7,14,17,18,21,25,27,28,29])
         ->get();
+        $_bar = $this->output->createProgressBar(count($polls));
+        $_bar->start();
         foreach ($polls as $key => $poll) {
             $questions_id = $poll->questions->where('type_id',4563)->pluck('id');
+            $this->info($questions_id);
             foreach ($questions_id as $question_id) {
-                $polls_answers = PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->where('poll_question_id',$question_id)->get();
-                $percent_random = rand(40,50);;
-                if($polls_answers->count() > 0){
-                    $firs_slice =   $this->array_percentage($polls_answers->toArray(),$percent_random);
-                    $second_slice = $this->array_percentage($firs_slice[1],100-$percent_random);
-                    $percent_50 = $firs_slice[0]; 
-                    $percent_30 = $second_slice[0]; 
-                    $percent_20 = $second_slice[1];
-                    info($percent_50);
-                    info($percent_30);
-                    info($percent_20);
-                    // [{"resp_cal":5,"preg_cal":"Califica"}]
-                    PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->whereIn('id',array_column($percent_50,'id'))
-                                ->update([
-                                    'respuestas' => '[{"resp_cal":5,"preg_cal":"Califica"}]'
-                                ]);
-                    PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->whereIn('id',array_column($percent_30,'id'))
-                                ->update([
-                                    'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
-                                ]);
-
-                    PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->whereIn('id',array_column($percent_20,'id'))
-                                ->update([
-                                    'respuestas' => '[{"resp_cal":3,"preg_cal":"Califica"}]'
-                                ]);
+                $this->info($question_id);
+                $poll_question_answers = PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->where('poll_question_id',$question_id)->limit(10000)->get();
+                $percent_random = rand(40,50);
+                if($poll_question_answers->count() > 0){
+                    $chunk_poll_question_answers = array_chunk($poll_question_answers->toArray(),500);
+                    foreach ($chunk_poll_question_answers as $polls_answers) {
+                        # code...
+                        $firs_slice =   $this->array_percentage($polls_answers,$percent_random);
+                        $second_slice = $this->array_percentage($firs_slice[1],100-$percent_random);
+                        $percent_50 = $firs_slice[0];
+                        $percent_30 = $second_slice[0];
+                        $percent_20 = $second_slice[1];
+                        // [{"resp_cal":5,"preg_cal":"Califica"}]
+                        PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                    ->whereIn('id',array_column($percent_50,'id'))
+                                    ->update([
+                                        'respuestas' => '[{"resp_cal":5,"preg_cal":"Califica"}]'
+                                    ]);
+                        PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                    ->whereIn('id',array_column($percent_30,'id'))
+                                    ->update([
+                                        'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
+                                    ]);
+    
+                        PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                    ->whereIn('id',array_column($percent_20,'id'))
+                                    ->update([
+                                        'respuestas' => '[{"resp_cal":3,"preg_cal":"Califica"}]'
+                                    ]);
+                    }
                 }
             }
+            $_bar->advance();
         }
+        $_bar->finish();
     }
     function array_percentage($array, $percentage) {
         $count = count($array);
@@ -209,7 +208,7 @@ class restablecer_funcionalidad extends Command
     //     foreach ($subworkspaces as $subworkspace) {
     //         $courses = Db::table('course_workspace')->where('workspace');
     //         dd($subworkspace->mod_evaluaciones);
-    //     }        
+    //     }
     // }
     public function restore_summary_course(){
         // User::select('id','subworkspace_id')->whereIn('document',[71342592])->get()->map(function($user){
@@ -254,7 +253,7 @@ class restablecer_funcionalidad extends Command
             }
             $this->info('Fin restore user');
             $_bar->finish();
-        }); 
+        });
     }
     // 45671352
     public function restoreSummaryCourse(){
@@ -285,7 +284,7 @@ class restablecer_funcionalidad extends Command
                 $_bar->advance();
             }
             $_bar->finish();
-        }); 
+        });
     }
     public function restoreRequirements(){
         $temas = Topic::whereNotNull('topic_requirement_id')->get();

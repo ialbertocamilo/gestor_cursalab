@@ -33,17 +33,19 @@
         <form @submit.prevent="exportReport" class="row px-3">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select class="form-control"
-                        v-model="modulo"
-                        @change="fetchFiltersAreaData">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                <DefaultAutocomplete
+                    dense
+                    v-model="modulo"
+                    :items="modules"
+                    label="Módulo"
+                    item-text="name"
+                    item-value="id"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione los módulos"
+                    @onBlur="fetchFiltersAreaData"
+                    :maxValuesSelected="1"
+                />
             </div>
 
             <v-divider class="col-12 mb-0 p-0"></v-divider>
@@ -151,7 +153,10 @@
             <v-divider class="col-12 mb-5 p-0"></v-divider>
             <div class="col-sm-12 mb-3">
                 <div class="col-sm-6 px-0">
-                    <button type="submit" class="btn btn-md btn-primary btn-block text-light">
+                    <button
+                        :disabled="modulo.length === 0"
+                        type="submit"
+                        class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar</span>
                     </button>
@@ -187,7 +192,7 @@ export default {
             loadingCarreras: false,
             loadingCiclos: false,
             //
-            modulo: "",
+            modulo: [],
             areas:[],
             area:[]
             // escuela: "",
@@ -204,7 +209,7 @@ export default {
             let FechaFiltro = this.$refs.FechasFiltros;
             let params = {
                 workspaceId: this.workspaceId,
-                modulos: this.modulo ? [+this.modulo] : [],
+                modulos: this.modulo,
                 UsuariosActivos: UFC.UsuariosActivos,
                 UsuariosInactivos: UFC.UsuariosInactivos,
                 areas: this.area,
@@ -223,6 +228,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Checklist general',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
@@ -238,9 +247,9 @@ export default {
             this.areas = [];
             this.area = [];
 
-            if(!this.modulo) return;
+            if(this.modulo.length === 0) return;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo[0]}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -252,7 +261,5 @@ export default {
 }
 </script>
 <style>
-.v-label {
-    display: contents !important;
-}
+
 </style>
