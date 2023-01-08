@@ -243,7 +243,8 @@ export default {
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas`
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas_v2`
             try {
                 let response = await axios({
                     url: urlReport,
