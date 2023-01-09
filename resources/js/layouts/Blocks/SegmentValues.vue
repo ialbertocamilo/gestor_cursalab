@@ -61,7 +61,7 @@
 
             <v-col cols="12" md="12" lg="12" class="p-0 px-3 vertical-align">
 
-                <DefaultAutocomplete
+                <DefaultAutocompleteOrder
                     return-object
                     dense
                     :label="criterion.name"
@@ -69,9 +69,9 @@
                     :items="criterion.values"
                     multiple
                     item-text="value_text"
-                    item-id="id"
-                    :count-show-values="4"
-                />
+                    item-id="id" 
+                    :count-show-values="Infinity"
+                    />
 
             </v-col>
         </v-row>

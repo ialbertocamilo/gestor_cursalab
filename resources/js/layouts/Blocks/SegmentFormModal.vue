@@ -124,9 +124,9 @@ const fields = [
 
 const CustomMessages = {
     module: {
-        title: 'Advertencia de segmentación',
-        noexist: 'No se ha seleccionado el criterio "módulo"',
-        nodata: 'Selecciona uno o varios módulos'
+        title: 'Advertencia para módulo',
+        noexist: 'No existe el "módulo" como criterio',
+        nodata: 'Selecciona uno o varios modulos'
     }
 }
 
@@ -411,6 +411,11 @@ export default {
         resetSelects() {
             let vue = this;
             vue.tabs = null;
+
+            //reset selects at blocks
+            for(const segment of vue.segments) {
+                vue.borrarBloque(segment);
+            }
         },
         async loadData(resource) {
             let vue = this;
