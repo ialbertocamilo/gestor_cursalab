@@ -8,6 +8,7 @@ import DefaultDialog from "./components/globals/DefaultDialog";
 import DefaultButton from "./components/globals/DefaultButton";
 import DefaultToggle from "./components/globals/DefaultToggle";
 import DefaultAutocomplete from "./components/globals/DefaultAutocomplete";
+import DefaultAutocompleteOrder from "./components/globals/DefaultAutocompleteOrder";
 import DefaultAlertDialog from "./components/globals/DefaultAlertDialog";
 import DefaultCheckBox from "./components/globals/DefaultCheckBox";
 import DefaultSingleExpansionPanel from "./components/globals/DefaultSingleExpansionPanel";
@@ -44,6 +45,7 @@ export default {
         DefaultButton,
         DefaultToggle,
         DefaultAutocomplete,
+        DefaultAutocompleteOrder,
         DefaultAlertDialog,
         DefaultCheckBox,
         DefaultSingleExpansionPanel,
