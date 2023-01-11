@@ -74,7 +74,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
-                            :maxValuesSelected="1"
+                            :maxValuesSelected="3"
                         />
                     </div>
                     <!-- Escuela -->
@@ -238,6 +238,9 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
+            <div class="col-12">
+               <FiltersNotification></FiltersNotification>
+            </div>
             <div class="col-12 px-6">
                 <button
                     :disabled="modulo.length === 0 || escuela.length === 0"
@@ -258,9 +261,10 @@ import FechaFiltro from "./partials/FechaFiltro.vue"
 import ListItem from "./partials/ListItem.vue"
 import ResumenExpand from "./partials/ResumenExpand.vue"
 import EstadoFiltro from "./partials/EstadoFiltro.vue"
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
         workspaceId: 0,
         modules: Array,

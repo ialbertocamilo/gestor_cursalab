@@ -1,57 +1,62 @@
 <template>
-    <v-autocomplete
-        attach
-        outlined
-        :dense="dense"
-        hide-details="auto"
-        :disabled="disabled"
-        :clearable="clearable"
-        :menu-props="computedMenuProps"
-        v-model="localSelected"
-        :items="items"
-        :multiple="multiple"
-        :show-select-all="showSelectAll"
-        :placeholder="placeholder"
-        :label="label"
-        :item-text="itemText"
-        :item-value="itemValue"
-        :color="color"
-        :return-object="returnObject"
-        @input="updateValue"
-        @blur="onBlur"
-        :no-data-text="noDataText"
-        :rules="rules"
-    >
-        <template v-slot:prepend-item v-if="multiple && showSelectAll">
-            <v-list-item ripple dense @click="toggle">
-                <v-list-item-action>
-                    <v-icon :color="localSelected.length > 0 ? 'indigo darken-4' : ''" v-text="icon()"/>
-                </v-list-item-action>
-                <v-list-item-content>
-                    <v-list-item-title v-text="'Seleccionar todos'"/>
-                </v-list-item-content>
-            </v-list-item>
-            <DefaultDivider/>
-        </template>
-        <template v-slot:item={item} v-if="customItems">
-            <slot name="customItems" :item="item"/>
-        </template>
-        <template v-slot:selection="{ item, index }" v-if="multiple">
-            <div class="pt-1"></div>
-            <v-chip small v-if="index < countShowValues">
-                <span>{{ item[itemText] }}</span>
-            </v-chip>
-            <span
-                v-if="index === countShowValues"
-                class="grey--text text-caption"
-            >
+    <div>
+        <v-autocomplete
+            attach
+            outlined
+            :dense="dense"
+            hide-details="auto"
+            :disabled="disabled"
+            :clearable="clearable"
+            :menu-props="computedMenuProps"
+            v-model="localSelected"
+            :items="items"
+            :multiple="multiple"
+            :show-select-all="showSelectAll"
+            :placeholder="placeholder"
+            :label="label"
+            :item-text="itemText"
+            :item-value="itemValue"
+            :color="color"
+            :return-object="returnObject"
+            @input="updateValue"
+            @blur="onBlur"
+            :no-data-text="noDataText"
+            :rules="rules"
+        >
+            <template v-slot:prepend-item v-if="multiple && showSelectAll">
+                <v-list-item ripple dense @click="toggle">
+                    <v-list-item-action>
+                        <v-icon :color="localSelected.length > 0 ? 'indigo darken-4' : ''" v-text="icon()"/>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title v-text="'Seleccionar todos'"/>
+                    </v-list-item-content>
+                </v-list-item>
+                <DefaultDivider/>
+            </template>
+            <template v-slot:item={item} v-if="customItems">
+                <slot name="customItems" :item="item"/>
+            </template>
+            <template v-slot:selection="{ item, index }" v-if="multiple">
+                <div class="pt-1"></div>
+                <v-chip small v-if="index < countShowValues">
+                    <span>{{ item[itemText] }}</span>
+                </v-chip>
+                <span
+                    v-if="index === countShowValues"
+                    class="grey--text text-caption"
+                >
                 (+{{ localSelected.length - countShowValues }})
             </span>
-        </template>
-        <template v-slot:label v-if="showRequired">
-            {{ label }}<RequiredFieldSymbol/>
-        </template>
-    </v-autocomplete>
+            </template>
+            <template v-slot:label v-if="showRequired">
+                {{ label }}<RequiredFieldSymbol/>
+            </template>
+        </v-autocomplete>
+        <div v-if="multiple && maxValuesSelected > 0">
+            {{ localSelected.length }} de {{ maxValuesSelected }}
+        </div>
+    </div>
 </template>
 
 

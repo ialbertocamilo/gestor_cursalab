@@ -59,6 +59,9 @@
 
                 />
             </div>
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
+            </div>
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
                         :disabled="filters.school.length === 0"
@@ -78,9 +81,10 @@ import FechaFiltro from "./partials/FechaFiltro.vue"
 import ListItem from "./partials/ListItem.vue"
 import ResumenExpand from "./partials/ResumenExpand.vue"
 import EstadoFiltro from "./partials/EstadoFiltro.vue"
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
         workspaceId: 0,
         modules: Array,
