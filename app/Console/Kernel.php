@@ -46,6 +46,8 @@ class Kernel extends ConsoleKernel
         // $schedule->command('account:update-tokens')->monthly();
 
         $schedule->command('errores:eliminar-antiguos')->dailyAt('00:00');
+
+        $schedule->command('report:users-quantity')->dailyAt('23:58');
     }
 
     /**
