@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Faker\Factory as Faker;
 use Carbon\Carbon;
 use App\Models\Poll;
 use App\Models\Post;
@@ -21,11 +20,13 @@ use App\Models\Matricula;
 use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
+use Faker\Factory as Faker;
 use App\Models\SummaryTopic;
 use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
+use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiRest\RestAvanceController;
@@ -76,12 +77,120 @@ class restablecer_funcionalidad extends Command
         // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
-        $this->restores_poll_answers();
+        // $this->restores_poll_answers();
         // $this->restore_surname();
         // $this->restore_tickets();
         // $this->restore_attempts();
+        $this->restore_cycle();
+        $this->restore_prefix();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    //Command to restores cycles
+    public function restore_cycle(){
+        $criterion = Criterion::where('code','cycle')->first();
+        $cycle_values = CriterionValue::select('id',DB::raw('LOWER(value_text) as value_text'))
+        ->where('criterion_id',$criterion->id)->whereIn('value_text',['ciclo 1','ciclo 2','ciclo 3','ciclo 4'])->orderBy('value_text','asc')->get();
+        $insert_criterion_value_user = [];
+        foreach ($cycle_values as $cycle_value) {
+            if($cycle_value->value_text != 'ciclo 1'){
+                $before_cycles_name = $this->getCyclesNames($cycle_value->value_text);
+                $before_cycles_ids = $cycle_values->whereIn('value_text',$before_cycles_name)->pluck('id');
+                $users_cycle = CriterionValueUser::where('criterion_value_id',$cycle_value->id)->get();
+                $this->info('Ciclo: '.$cycle_value->value_text);
+                $_bar = $this->output->createProgressBar(count($users_cycle));
+                $_bar->start();
+                foreach ($users_cycle as $user_cycle) {
+                    foreach ($before_cycles_ids as $cycle_id) {
+                        # code...
+                        $has_cycle = CriterionValueUser::where('criterion_value_id',$cycle_id)->where('user_id',$user_cycle->user_id)->first();
+                        if(!$has_cycle){
+                            $insert_criterion_value_user[] = [
+                                'user_id'=>$user_cycle->user_id,
+                                'criterion_value_id'=>$cycle_id
+                            ];
+                        }
+                    }
+                    $_bar->advance();
+                }
+                $_bar->finish();
+            }
+        }
+        $insert_chunks = array_chunk($insert_criterion_value_user,200);
+        foreach ($insert_chunks as $chunk) {
+            CriterionValueUser::insert($chunk);
+        }
+        cache_clear_model(CriterionValueUser::class);
+    }
+    private function getCyclesNames($cycle_name){
+        return match (strtolower($cycle_name)) {
+            'ciclo 2' => ['ciclo 1'],
+            'ciclo 3' => ['ciclo 1','ciclo 2'],
+            'ciclo 4' => ['ciclo 1','ciclo 2','ciclo 3'],
+            default => $cycle_name
+        };
+    }
+    public function restore_prefix(){//
+        $group_m4 = CriterionValue::where('value_text','like','%M4::%')->get();
+        foreach ($group_m4 as $m4) {
+            $substring = substr($m4->value_text,4);
+            $m4->value_text = 'MF::'.$substring;
+            $m4->update();
+        }
+        $group_m5 = CriterionValue::where('value_text','like','%M5::%')->get();
+        foreach ($group_m5 as $m5) {
+            $substring = substr($m5->value_text,4);
+            $m5->value_text = 'IK::'.$substring;
+            $m5->update();
+        }
+        $group_m6 = CriterionValue::where('value_text','like','%M6::%')->get();
+        foreach ($group_m6 as $m6) {
+            $substring = substr($m6->value_text,4);
+            $m6->value_text = 'FP::'.$substring;
+            $m6->update();
+        }
+
+        $criterion = Criterion::where('code','grupo')->first();
+        $groups_with_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))
+        ->where('criterion_id',$criterion->id)->where(function($q){
+            $q->where('value_text','like','%MF::%')
+            ->orWhere('value_text','like','%IK::%')
+            ->orWhere('value_text','like','%FP::%');
+        })->get();
+        $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)->where(function($q){
+            $q->where('value_text','not like','%MF::%')
+            ->where('value_text','not like','%IK::%')
+            ->where('value_text','not like','%FP::%');
+        })->get();
+        $_bar = $this->output->createProgressBar(count($groups_without_prefix));
+        $_bar->start();
+        $modules = Workspace::where('name','Farmacias Peruanas')->with('subworkspaces')->first();
+        foreach ($groups_without_prefix as $group) {
+            foreach ($modules->subworkspaces as $module) {
+                $prefix = $this->getPrefix($module['name']).'::'.$group->value_text;
+                $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
+                if($group_prefix_equivalent){
+                    DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
+                        $query->select('id')
+                            ->from('users')
+                            ->where('subworkspace_id', $module['id']);
+                    })->where('criterion_value_id',$group->id)->update([
+                        'criterion_value_id'=>$group_prefix_equivalent->id
+                    ]);
+                }
+            }
+            $_bar->advance();
+        }
+        $_bar->finish();
+        cache_clear_model(CriterionValueUser::class);
+    }
+    private function getPrefix($module){
+        return match ($module) {
+            'Mifarma' => 'MF',
+            'Inkafarma' => 'IK',
+            'FAPE Masivos' => 'FP',
+            'Administrativos FAPE' => 'FP',
+        };
     }
     public function restore_tickets(){
         $tickets = Ticket::whereNull('workspace_id')->orWhere('workspace_id',0)->get();
