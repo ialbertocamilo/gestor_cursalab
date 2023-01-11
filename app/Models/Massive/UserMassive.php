@@ -304,8 +304,8 @@ class UserMassive extends Massive implements ToCollection
         return match ($module) {
             'Mifarma' => 'MF',
             'Inkafarma' => 'IK',
-            'FAPE Masivos' => 'FPM',
-            'Administrativos FAPE' => 'FPA',
+            'FAPE Masivos' => 'FP',
+            'Administrativos FAPE' => 'FP',
             default => false
         };
     }
