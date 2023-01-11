@@ -190,7 +190,7 @@ class restablecer_funcionalidad extends Command
         })->get();
         foreach ($groups_without_prefix as $group) {
             foreach ($modules->subworkspaces as $module) {
-                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M4:G','',$group->value_text);
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M4:','',$group->value_text);
                 $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
                 if($group_prefix_equivalent){
                     DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
@@ -208,7 +208,7 @@ class restablecer_funcionalidad extends Command
         ->where('value_text','like','%M5:G%')->get();
         foreach ($groups_without_prefix as $group) {
             foreach ($modules->subworkspaces as $module) {
-                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M5:G','',$group->value_text);
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M5:','',$group->value_text);
                 $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
                 if($group_prefix_equivalent){
                     DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
@@ -226,7 +226,7 @@ class restablecer_funcionalidad extends Command
         ->where('value_text','like','%M6:G%')->get();
         foreach ($groups_without_prefix as $group) {
             foreach ($modules->subworkspaces as $module) {
-                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M6:G','',$group->value_text);
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M6:','',$group->value_text);
                 $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
                 if($group_prefix_equivalent){
                     DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
