@@ -184,13 +184,13 @@ class restablecer_funcionalidad extends Command
         $_bar->finish();
         //anothers prefix
         $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)->where(function($q){
-            $q->orWhere('value_text','like','%M4 : %');
+            $q->orWhere('value_text','like','%M4 :%');
             // ->orWhere('value_text','like','%M5: %')
             // ->orWhere('value_text','like','%M6: %');
         })->get();
         foreach ($groups_without_prefix as $group) {
             foreach ($modules->subworkspaces as $module) {
-                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M4 : ','',$group->value_text);
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M4 :','',$group->value_text);
                 $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
                 if($group_prefix_equivalent){
                     DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
@@ -205,10 +205,10 @@ class restablecer_funcionalidad extends Command
             $_bar->advance();
         }
         $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)
-        ->where('value_text','like','%M5 : %')->get();
+        ->where('value_text','like','%M5 :%')->get();
         foreach ($groups_without_prefix as $group) {
             foreach ($modules->subworkspaces as $module) {
-                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M5 : ','',$group->value_text);
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M5 :','',$group->value_text);
                 $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
                 if($group_prefix_equivalent){
                     DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
@@ -223,10 +223,10 @@ class restablecer_funcionalidad extends Command
             $_bar->advance();
         }
         $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)
-        ->where('value_text','like','%M6 : %')->get();
+        ->where('value_text','like','%M6 :%')->get();
         foreach ($groups_without_prefix as $group) {
             foreach ($modules->subworkspaces as $module) {
-                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M6 : ','',$group->value_text);
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M6 :','',$group->value_text);
                 $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
                 if($group_prefix_equivalent){
                     DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
