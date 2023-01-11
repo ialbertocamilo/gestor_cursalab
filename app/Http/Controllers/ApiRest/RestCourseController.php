@@ -120,24 +120,6 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);
 
-        // $filtered = [];
-
-        // if ( $request->q ) {
-        //     $result = collect($user_courses)->filter(function ($item) use ($request) {
-        //         return false !== stripos($item->name, $request->q);
-        //     });
-
-        //     $filtered = $result->pluck('id')->toArray();
-
-        //     if ($result) {
-        //         foreach ($result as $row) {
-        //             if ($row->compatible) {
-        //                 $filtered[] = $row->compatible->course_id;
-        //             }
-        //         }
-        //     }
-        // }
-
 //        $user_courses_id = array_column($user_courses, 'id');
 
         $query = SummaryCourse::with([
