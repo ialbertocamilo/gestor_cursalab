@@ -280,3 +280,9 @@ function removeUCModuleNameFromCourseName($course_name): string
 
     return $name;
 }
+
+
+function stringContains($string, $q)
+{
+    return false !== stripos($string, $q);
+}

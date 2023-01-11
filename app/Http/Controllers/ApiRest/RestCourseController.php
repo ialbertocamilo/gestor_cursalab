@@ -120,23 +120,23 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);
 
-        $filtered = [];
+        // $filtered = [];
 
-        if ( $request->q ) {
-            $result = collect($user_courses)->filter(function ($item) use ($request) {
-                return false !== stripos($item->name, $request->q);
-            });
+        // if ( $request->q ) {
+        //     $result = collect($user_courses)->filter(function ($item) use ($request) {
+        //         return false !== stripos($item->name, $request->q);
+        //     });
 
-            $filtered = $result->pluck('id')->toArray();
+        //     $filtered = $result->pluck('id')->toArray();
 
-            if ($result) {
-                foreach ($result as $row) {
-                    if ($row->compatible) {
-                        $filtered[] = $row->compatible->course_id;
-                    }
-                }
-            }
-        }
+        //     if ($result) {
+        //         foreach ($result as $row) {
+        //             if ($row->compatible) {
+        //                 $filtered[] = $row->compatible->course_id;
+        //             }
+        //         }
+        //     }
+        // }
 
 //        $user_courses_id = array_column($user_courses, 'id');
 
@@ -155,8 +155,8 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
             ->whereIn('course_id', $user_courses_id)
             ->whereNotNull('certification_issued_at');
 
-        if ($request->q)
-            $query->whereIn('course_id', $filtered);
+        // if ($request->q)
+        //     $query->whereIn('course_id', $filtered);
 
         // if ($request->q)
         //     $query->whereHas('course', function ($q) use ($request) {
@@ -201,6 +201,9 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
                 $add = "?original_id={$original->id}";
 
+                if ($request->q AND !stringContains($original->name, $request->q))
+                    continue;
+
                 $temp[] = [
 
                     'course_id' => $certificate->course_id,
@@ -218,6 +221,9 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
                 continue;
             }
+
+            if ($request->q AND !stringContains($certificate->course->name, $request->q))
+                continue;
 
             $temp[] = [
 
