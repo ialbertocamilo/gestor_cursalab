@@ -81,7 +81,7 @@ class restablecer_funcionalidad extends Command
         // $this->restore_surname();
         // $this->restore_tickets();
         // $this->restore_attempts();
-        $this->restore_cycle();
+        // $this->restore_cycle();
         $this->restore_prefix();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
