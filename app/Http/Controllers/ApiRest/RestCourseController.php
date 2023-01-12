@@ -137,7 +137,7 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
             ]
         ])
             ->where('user_id', $user->id)
-            ->whereIn('course_id', $user_courses_id)
+            ->whereIn('course_id', $all_courses_id->toArray())
             ->whereNotNull('certification_issued_at');
 
         // if ($request->q)
