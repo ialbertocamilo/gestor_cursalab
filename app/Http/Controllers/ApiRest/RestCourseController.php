@@ -120,6 +120,9 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);
 
+        info('all_courses_id');
+        info($all_courses_id);
+
 //        $user_courses_id = array_column($user_courses, 'id');
 
         $query = SummaryCourse::with([
@@ -153,6 +156,8 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         $certificates = $query->get();
 
+        info('certificates');
+        info($certificates);
         $temp = [];
 
         foreach ($user_courses as $user_course) {
