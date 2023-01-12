@@ -177,13 +177,15 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         foreach ($certificates as $key => $certificate) {
 
+            $qs = $request->q ?? NULL;
+
             if ($certificate->compatible_of) {
 
                 $original = $certificate->compatible_of;
 
                 $add = "?original_id={$original->id}";
 
-                if ($request->q AND !stringContains($original->name, $request->q))
+                if ($qs AND !stringContains($original->name, $qs))
                     continue;
 
                 $temp[] = [
@@ -204,7 +206,7 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
                 continue;
             }
 
-            if ($request->q AND !stringContains($certificate->course->name, $request->q))
+            if ($qs AND !stringContains($certificate->course->name, $qs))
                 continue;
 
             $temp[] = [
