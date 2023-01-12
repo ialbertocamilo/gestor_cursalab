@@ -156,10 +156,12 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         $certificates = $query->get();
 
+        info('user->id');
+        info($user->id);
         info('certificates');
-        info($certificates);
         info($certificates->count());
-        
+        info($certificates);
+
         $temp = [];
 
         foreach ($user_courses as $user_course) {
