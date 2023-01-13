@@ -263,17 +263,17 @@ export default {
                 icon: "fas fa-cog",
                 active: false,
                 items: [
-                    {
-                        title: "Cursos",
-                        icon: "mdi mdi-notebook",
-                        path: "/cursos",
-                        subpaths: ["cursos"],
-                        selected: false,
-                        permission: "cursos",
-                        role: [
-                            "super-user",
-                        ]
-                    },
+                    // {
+                    //     title: "Cursos",
+                    //     icon: "mdi mdi-notebook",
+                    //     path: "/cursos",
+                    //     subpaths: ["cursos"],
+                    //     selected: false,
+                    //     permission: "cursos",
+                    //     role: [
+                    //         "super-user",
+                    //     ]
+                    // },
                     {
                         title: "Escuelas",
                         icon: "fas fa-th-large",

@@ -88,7 +88,7 @@ class RestCourseController extends Controller
                         array_push($multiple, $elemento);
                     }
                 }
-$query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
+                $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], json_encode($multiple, JSON_UNESCAPED_UNICODE));
             }
             if (!is_null($value_data) && $value_data['tipo'] == 'texto') {
                 $query3 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data['id'], $user->id, $value_data['tipo'], trim($value_data['respuesta']));
@@ -120,34 +120,12 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);
 
-        info('all_courses_id');
-        info($all_courses_id);
-
 //        $user_courses_id = array_column($user_courses, 'id');
 
         $query = SummaryCourse::query()
-        // with([
-        //     'course' => [
-        //         'compatibilities_a:id',
-        //         'compatibilities_b:id',
-        //         'summaries' => function ($q) use ($user) {
-        //             $q
-        //                 ->with('status:id,name,code')
-        //                 ->where('user_id', $user->id);
-        //         },
-        //     ]
-        // ])
             ->where('user_id', $user->id)
             ->whereIn('course_id', $all_courses_id->toArray())
             ->whereNotNull('certification_issued_at');
-
-        // if ($request->q)
-        //     $query->whereIn('course_id', $filtered);
-
-        // if ($request->q)
-        //     $query->whereHas('course', function ($q) use ($request) {
-        //         $q->where('name', 'like', "%{$request->q}%");
-        //     });
 
         if ($request->type == 'accepted')
             $query->whereNotNull('certification_accepted_at');
@@ -156,12 +134,6 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
             $query->whereNull('certification_accepted_at');
 
         $certificates = $query->get();
-
-        // info('user->id');
-        // info($user->id);
-        // info('certificates');
-        // info($certificates->count());
-        // info($certificates);
 
         $temp = [];
 
