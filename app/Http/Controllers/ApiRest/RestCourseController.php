@@ -125,17 +125,18 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
 //        $user_courses_id = array_column($user_courses, 'id');
 
-        $query = SummaryCourse::with([
-            'course' => [
-                'compatibilities_a:id',
-                'compatibilities_b:id',
-                'summaries' => function ($q) use ($user) {
-                    $q
-                        ->with('status:id,name,code')
-                        ->where('user_id', $user->id);
-                },
-            ]
-        ])
+        $query = SummaryCourse::query()
+        // with([
+        //     'course' => [
+        //         'compatibilities_a:id',
+        //         'compatibilities_b:id',
+        //         'summaries' => function ($q) use ($user) {
+        //             $q
+        //                 ->with('status:id,name,code')
+        //                 ->where('user_id', $user->id);
+        //         },
+        //     ]
+        // ])
             ->where('user_id', $user->id)
             ->whereIn('course_id', $all_courses_id->toArray())
             ->whereNotNull('certification_issued_at');
@@ -156,15 +157,39 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
         $certificates = $query->get();
 
-        info('user->id');
-        info($user->id);
-        info('certificates');
-        info($certificates->count());
-        info($certificates);
+        // info('user->id');
+        // info($user->id);
+        // info('certificates');
+        // info($certificates->count());
+        // info($certificates);
 
         $temp = [];
 
+        $qs = $request->q ?? NULL;
+
         foreach ($user_courses as $user_course) {
+
+            if ($qs AND !stringContains($user_course->name, $qs))
+                continue;
+
+            $certificate = $certificates->where('course_id', $user_course->id)->first();
+
+            if ($certificate) {
+
+                $temp[] = [
+
+                    'course_id' => $certificate->course_id,
+                    'name' => $certificate->course->name,
+                    'accepted' => $certificate->certification_accepted_at ? true : false,
+                    'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
+                    'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
+                    'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
+
+                    'compatible' => null,
+                ];
+
+                continue;
+            }
 
             if ($user_course->compatible):
 
@@ -172,65 +197,25 @@ $query2 = PollQuestionAnswer::updatePollQuestionAnswers($course->id, $value_data
 
                 if ($compatible_certificate):
 
-                    $temp_certificate = clone $compatible_certificate;
+                    $add = "?original_id={$user_course->id}";
 
-                    $temp_certificate->compatible_of = $user_course;
+                    $temp[] = [
 
-                    $certificates->push($temp_certificate);
+                        'course_id' => $compatible_certificate->course_id,
+                        'name' => $user_course->name,
+                        'accepted' => $compatible_certificate->certification_accepted_at ? true : false,
+                        'issued_at' => $compatible_certificate->certification_issued_at->format('d/m/Y'),
+                        'ruta_ver' => "tools/ver_diploma/{$user->id}/{$compatible_certificate->course_id}{$add}",
+                        'ruta_descarga' => "tools/dnc/{$user->id}/{$compatible_certificate->course_id}{$add}",
 
-//                    dd($temp_certificate->compatible_of->name, $compatible_certificate->compatible_of?->name);
+                        'compatible' => [
+                            'course_id' => $compatible_certificate->course->id,
+                            'name' => $compatible_certificate->course->name,
+                        ],
+                    ];
 
                 endif;
             endif;
-        }
-
-        foreach ($certificates as $key => $certificate) {
-
-            $qs = $request->q ?? NULL;
-
-            if ($certificate->compatible_of) {
-
-                $original = $certificate->compatible_of;
-
-                $add = "?original_id={$original->id}";
-
-                if ($qs AND !stringContains($original->name, $qs))
-                    continue;
-
-                $temp[] = [
-
-                    'course_id' => $certificate->course_id,
-                    'name' => $original->name,
-                    'accepted' => $certificate->certification_accepted_at ? true : false,
-                    'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
-                    'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}{$add}",
-                    'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}{$add}",
-
-                    'compatible' => [
-                        'course_id' => $certificate->course->id,
-                        'name' => $certificate->course->name,
-                    ],
-                ];
-
-                continue;
-            }
-
-            if ($qs AND !stringContains($certificate->course->name, $qs))
-                continue;
-
-            $temp[] = [
-
-                'course_id' => $certificate->course_id,
-                'name' => $certificate->course->name,
-                'accepted' => $certificate->certification_accepted_at ? true : false,
-                'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
-                'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
-                'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
-
-                'compatible' => null,
-            ];
-
-
         }
 
         return $this->success(['data' => $temp]);
