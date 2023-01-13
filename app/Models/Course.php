@@ -607,7 +607,20 @@ class Course extends BaseModel
 
                 // TODO: Validar si existe algun curso compatible aprobado del curso requisito
 
-                $compatible_course_req = $requirement_course->model_course->getCourseCompatibilityByUser($user);
+                $req_course = $requirement_course->model_course;
+
+                $req_course->load([
+                    'summaries' => function ($q) use ($user) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', $user->id);
+                    },
+                    'compatibilities_a:id',
+                    'compatibilities_b:id',
+                ]);
+
+                $compatible_course_req = $req_course->getCourseCompatibilityByUser($user);
+                // $compatible_course_req = $requirement_course->model_course->getCourseCompatibilityByUser($user);
 
                 if (!$compatible_course_req):
                     $available_course = false;

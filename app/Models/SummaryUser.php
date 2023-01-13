@@ -134,7 +134,7 @@ class SummaryUser extends Summary
 
     protected function updateUserData($user = null)
     {
-        info('updateUserData');
+        // info('updateUserData');
         $user = $user ?? auth()->user();
         $courses_id = $user->getCurrentCourses(withFreeCourses: false, withRelations: 'summary-user-update', only_ids: true);
         $count_courses_assigned = count($courses_id);
@@ -145,7 +145,7 @@ class SummaryUser extends Summary
         if(!$row_user){
             return true;
         }
-        info('updateUserData two');
+        // info('updateUserData two');
         $res_nota = SummaryTopic::select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
             ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))
             ->whereRelation('topic', 'assessable', ACTIVE)
@@ -182,7 +182,7 @@ class SummaryUser extends Summary
         if($attempts=='' || is_null($attempts)){
             $attempts = 0;
         }
-        info('updateUserData three');
+        // info('updateUserData three');
         $score = User::calculate_rank($passed, $grade_average, $attempts);
 
 //        $tot_com = ($passed > $row_user->courses_assigned) ? $row_user->courses_assigned : $passed;
