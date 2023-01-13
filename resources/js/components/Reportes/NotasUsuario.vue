@@ -101,6 +101,8 @@
                                 <v-list-item-title
                                     v-if="index != 'modalidad'"
                                     v-text="datoCurso"
+                                    v-b-tooltip.hover
+                                    :title="index === 'convalidado_de' ? datoCurso : ''"
                                     class="text-body-2 white-space-normal" />
                                 <!-- MODALIDAD -->
                                 <v-list-item-title
