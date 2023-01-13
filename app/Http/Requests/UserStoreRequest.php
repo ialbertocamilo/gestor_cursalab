@@ -26,14 +26,12 @@ class UserStoreRequest extends FormRequest
     {
         $id = $this->isMethod('post') ? 'NULL' : $this->segment(2);
         $pass = $this->isMethod('post') ? 'required' : 'nullable';
-
         $rules = [
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
             'password' => "{$pass}|max:255",
 
-            'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
             'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
             'username' => 'nullable',
@@ -45,7 +43,9 @@ class UserStoreRequest extends FormRequest
 
             'active' => [new VerifyLimitAllowedUsers($this->method())],
         ];
-
+        if($this->email){
+            $rules['email'] ="required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL" ;
+        }
         return $rules;
     }
 

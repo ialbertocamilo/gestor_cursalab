@@ -25,15 +25,18 @@
         <form @submit.prevent="exportNotasCurso" class="row">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
-                <DefaultSelect
+                <DefaultAutocomplete
                     dense
                     v-model="modulo"
                     :items="modules"
                     label="Módulo"
                     item-text="name"
                     item-value="id"
-                    placeholder="Seleccione un Módulo"
-                    @onChange="fetchFiltersData"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione un módulo"
+                    @onBlur="fetchFiltersData"
+                    :maxValuesSelected="1"
                 />
                 <!--                <b-form-text text-variant="muted">Módulo</b-form-text>-->
                 <!--                <select v-model="modulo" class="form-control">-->
@@ -57,7 +60,7 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <!-- Area y sedes -->
+            <!-- Area y sedes (Farmacias peruanas) -->
             <template v-if="workspaceId == 25">
                 <div class="col-lg-6 col-xl-4 mb-3">
                     <DefaultSelect
@@ -89,9 +92,13 @@
                 </div>
                 <v-divider class="col-12 mb-5 p-0"></v-divider>
             </template>
-                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+            <button
+                :disabled="modulo.length === 0"
+                type="submit"
+                class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+
                 <i class="fas fa-download"></i>
-                <span>Descargar</span>
+                <span>Descargars</span>
             </button>
         </form>
     </v-main>
@@ -113,7 +120,7 @@ export default {
         return {
             areas: [],
             sedes: [],
-            modulo: null,
+            modulo: [],
             area: [],
             sede: []
         }
@@ -168,7 +175,7 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
+                        modulos: this.modulo ? this.modulo : [],
                         areas: this.area,
                         sedes: this.sede,
                         UsuariosActivos: UFC.UsuariosActivos,
@@ -183,6 +190,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Ranking',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 

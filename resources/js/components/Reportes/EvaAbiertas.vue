@@ -38,60 +38,68 @@
                 <div class="row px-3">
                    <!-- Modulo -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <b-form-text text-variant="muted">Módulo</b-form-text>
-                        <select v-model="modulo"
-                                class="form-control"
-                                @change="fetchFiltersAreaData">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in modules"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                       <DefaultAutocomplete
+                            dense
+                            v-model="modulo"
+                            :items="modules"
+                            label="Módulo"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione un módulo"
+                            @onBlur="fetchFiltersAreaData"
+                            :maxValuesSelected="1"
+                        />
                     </div>
                     <!-- Escuela -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <b-form-text text-variant="muted">Escuela</b-form-text>
-                        <select
+                       <DefaultAutocomplete
+                            dense
                             v-model="escuela"
-                            class="form-control"
+                            :items="schools"
                             :disabled="!schools[0]"
-                            @change="escuelaChange"
-                        >
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in schools"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                            label="Escuela"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione las escuelas"
+                            @onChange="escuelaChange"
+                            :maxValuesSelected="10"
+                        />
                     </div>
                     <!-- Curso -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <b-form-text text-variant="muted">Curso</b-form-text>
-                        <select v-model="curso" class="form-control"
-                                :disabled="!courses[0]" @change="cursoChange">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in courses"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                        <DefaultAutocomplete
+                            dense
+                            v-model="curso"
+                            :items="courses"
+                            :disabled="!courses[0]"
+                            label="Curso"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los cursos"
+                            @onChange="cursoChange"
+                        />
                     </div>
                     <!-- Tema -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <b-form-text text-variant="muted">Tema</b-form-text>
-                        <select v-model="tema" class="form-control"
-                                :disabled="!topics[0]">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in topics"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+
+                        <DefaultAutocomplete
+                            dense
+                            v-model="tema"
+                            :items="topics"
+                            :disabled="!topics[0]"
+                            label="Tema"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            placeholder="Seleccione los temas"
+                            :showSelectAll="false"
+                        />
                     </div>
                 </div>
             </div>
@@ -124,8 +132,8 @@
                 </div>
             </div>
             <div class="col-6">
-                <FechaFiltro ref="FechasFiltros" 
-                    label-start="Fecha inicial de última actualización" 
+                <FechaFiltro ref="FechasFiltros"
+                    label-start="Fecha inicial de última actualización"
                     label-end="Fecha final de última actualización"
                 />
             </div>
@@ -153,7 +161,10 @@
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
             <div class="col-12 px-6">
-                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                <button
+                    :disabled="modulo.length === 0 || escuela.length === 0"
+                    type="submit"
+                    class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
                     <span>Descargar</span>
                 </button>
@@ -192,10 +203,10 @@ export default {
             topics: [],
             areas: [],
 
-            modulo: "",
-            escuela: "",
-            curso: "",
-            tema: "",
+            modulo: [],
+            escuela: [],
+            curso: [],
+            tema: [],
             area: [],
             tipocurso: false
         };
@@ -232,17 +243,18 @@ export default {
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas`
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas_v2`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
-                        escuelas: this.escuela ? [this.escuela] : [],
-                        cursos: this.curso ? [this.curso] : [],
-                        temas: this.tema ? [this.tema] : [],
+                        modulos: this.modulo,
+                        escuelas: this.escuela,
+                        cursos: this.curso,
+                        temas: this.tema,
                         areas: this.area,
                         tipocurso: this.tipocurso,
 
@@ -261,6 +273,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Evaluaciones abiertas',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
@@ -277,15 +293,15 @@ export default {
          * @returns {Promise<boolean>}
          */
         async escuelaChange() {
-            this.curso = null;
-            this.tema = null;
+            this.curso = [];
+            this.tema = [];
             this.courses = [];
             this.topics = [];
 
-            if (!this.escuela) return false;
+            if (this.escuela.length === 0) return false
 
             this.cursos_libres =false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
             let res = await axios({
                 url,
                 method: 'get'
@@ -297,24 +313,25 @@ export default {
          * @returns {Promise<boolean>}
          */
         async cursoChange() {
-            this.tema = null;
+            this.tema = [];
             this.topics = [];
-            if (!this.curso) return false;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/topics/${this.curso}`
+            if (this.curso.length === 0) return false
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/topics/${this.curso.join()}`
             let res = await axios({
                 url,
                 method: 'get'
             });
-            this.topics = res.data;
+            this.topics = res.data; console.log(this.topics)
         },
         async fetchFiltersAreaData() {
-            if(!this.modulo) {
+            if (this.modulo.length === 0) {
                 this.areas = [];
                 return;
             }
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'

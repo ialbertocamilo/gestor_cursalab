@@ -27,35 +27,44 @@
         <form @submit.prevent="exportSegmentacion" class="row">
             <!-- Escuela -->
             <div class="col-sm-6 mb-3">
-                <b-form-text text-variant="muted">Escuela</b-form-text>
+
                 <DefaultAutocomplete
                     :disabled="!schools[0]"
                     v-model="filters.school"
                     :items="schools"
-                    label=""
+                    label="Escuela"
                     item-text="name"
                     item-value="id"
                     dense
                     multiple
                     @onChange="schoolsChange"
+                    placeholder="Seleccione las escuelas"
+                    :maxValuesSelected="10"
+                    :showSelectAll="false"
                 />
             </div>
             <!-- Curso -->
             <div class="col-sm-6 mb-3">
-                <b-form-text text-variant="muted">Curso</b-form-text>
+
                 <DefaultAutocomplete
                     :disabled="!courses[0]"
                     v-model="filters.course"
                     :items="courses"
-                    label=""
+                    label="Curso"
                     item-text="name"
                     item-value="id"
                     dense
-                    multiple
+                    placeholder="Seleccione los cursos"
+                    :showSelectAll="false"
+
                 />
+            </div>
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
             </div>
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
+                        :disabled="filters.school.length === 0"
                         class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
                     <span>Descargar</span>
@@ -72,9 +81,10 @@ import FechaFiltro from "./partials/FechaFiltro.vue"
 import ListItem from "./partials/ListItem.vue"
 import ResumenExpand from "./partials/ResumenExpand.vue"
 import EstadoFiltro from "./partials/EstadoFiltro.vue"
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
         workspaceId: 0,
         modules: Array,
@@ -140,6 +150,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Segmentación',
+                        this.generateNamesString(this.schools, this.filters.school)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
@@ -160,7 +174,7 @@ export default {
             vue.filters.course = [];
             vue.courses = [];
 
-            //check schoolId 
+            //check schoolId
             if(!vue.filters.school.length) return;
 
             const reqPayload = {
@@ -182,7 +196,5 @@ export default {
 </script>
 
 <style>
-.v-label {
-    display: contents !important;
-}
+
 </style>

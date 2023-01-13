@@ -254,8 +254,10 @@ class SummaryCourse extends Summary
 
         } else {
 
-            if ($failed >= $assigned)
+            // if ($failed >= $assigned)
+            if((count($topics_qualified)>0) && ($failed >= count($topics_qualified))){
                 $status = 'desaprobado';
+            }
         }
 
 //        info("UPDATE TO ". $status);

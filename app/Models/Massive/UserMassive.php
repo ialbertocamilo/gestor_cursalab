@@ -42,7 +42,7 @@ class UserMassive extends Massive implements ToCollection
         if (is_null($this->current_workspace)) {
             $this->current_workspace = get_current_workspace();
         }
-        $this->subworkspaces = Workspace::select('id', 'criterion_value_id')->where('parent_id', $this->current_workspace->id)->get();
+        $this->subworkspaces = Workspace::select('id','name', 'criterion_value_id')->where('parent_id', $this->current_workspace->id)->get();
         $criteria = Criterion::query()
             ->with('field_type:id,code')
             ->where('code', '<>', 'document')
@@ -79,6 +79,7 @@ class UserMassive extends Massive implements ToCollection
             $data_criteria = collect();
             $headers->each(function ($obj) use ($data_criteria, $data_users, $user) {
                 $value_excel = is_null($user[$obj['index']]) ? '' : trim($user[$obj['index']]);
+                $value_excel = preg_replace('/\s\s+/', ' ', $value_excel);//remove multiple spaces
                 if ($obj['is_criterion']) {
                     $data_criteria->push([
                         'criterion_code' => $obj['criterion_code'],
@@ -188,6 +189,7 @@ class UserMassive extends Massive implements ToCollection
         }
 
         $user['criterion_list'] = [];
+        $user['criterion_list_final'] = [];
         foreach ($data_criteria as $dc) {
             //Validación de requerido
             if (!empty($dc['value_excel'])) {
@@ -208,45 +210,105 @@ class UserMassive extends Massive implements ToCollection
                 // if($criterion->code=='module'){
                 //     $colum_name = 'external_value';
                 // }
-                $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $dc['value_excel'])->first();
-                if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value->id)->first())) {
-                    $has_error = true;
-                    $errors_index[] = [
-                        'index' => $dc['index'],
-                        'message' => ($this->messageInSpanish) ? 'Colocar un módulo existente.' : 'The field ' . $dc['criterion_code'] . ' not exist.'
-                    ];
-                    continue;
+                //group exception is for UCFP only grupo -> M5::Grupo 1
+                if($dc['criterion_code'] == 'grupo' && !str_contains($dc['value_excel'],'::')){
+                    $dc['value_excel'] = $this->getNameWithGroupPrefix($dc['value_excel'],$data_criteria);
                 }
-                if (!$criterion_value) {
-                    // $has_error = true;
-                    // $errors_index[] = $dc['index'];
-                    $criterion_value = new CriterionValue();
-                    $criterion_value[$colum_name] = $dc['value_excel'];
-                    $criterion_value['value_text'] = $dc['value_excel'];
-                    // $criterion_value->value_text = $dc['value_excel']; //Falta cambiar
-                    // $criterion_value->value_boolean = ($code_criterion == 'boolean');
-                    $criterion_value->criterion_id = $criterion->id;
-                    $criterion_value->active = 1;
-                    $criterion_value->save();
-                    // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
+                //cycle exception is for ucpf only
+                if($dc['criterion_code'] == 'cycle'){
+                    $dc['value_excel'] = $this->getCycles($dc['value_excel']);
                 }
-                $workspace_value = DB::table('criterion_value_workspace')->where([
-                    'workspace_id' => $this->current_workspace->id,
-                    'criterion_value_id' => $criterion_value->id
-                ])->first();
-                if (!$workspace_value) {
-                    DB::table('criterion_value_workspace')->insert([
-                        'workspace_id' => $this->current_workspace->id,
-                        'criterion_value_id' => $criterion_value->id
-                    ]);
+                if (is_array($dc['value_excel'])) {
+                    foreach ($dc['value_excel'] as $key => $value_excel) {
+                        $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$value_excel);
+                        $user['criterion_list'][$dc['criterion_code']][] =  $criterion_value['criterion_value']->id;
+                        $user['criterion_list_final'][] =  $criterion_value['criterion_value']->id;
+                    }
+                }else{
+                    $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$dc['value_excel']);
+                    if($criterion_value['has_error']){
+                        $info_error[] = $criterion_value['info_error'];
+                        continue;
+                    }
+                    $user['criterion_list'][$dc['criterion_code']] = $criterion_value['criterion_value']->id;
+                    $user['criterion_list_final'][] =  $criterion_value['criterion_value']->id;
                 }
-                $user['criterion_list'][$dc['criterion_code']] = $criterion_value->id;
             }
         }
-        $user['criterion_list_final'] = $user['criterion_list'];
+        
         return compact('has_error', 'user', 'errors_index');
     }
-
+    private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel){
+        $has_error = false;
+        $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
+        if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value->id)->first())) {
+            $has_error = true;
+            return [
+                'has_error'=>$has_error,
+                'info_error'=>[
+                    'index' => $dc['index'],
+                    'message' => ($this->messageInSpanish) ? 'Colocar un módulo existente.' : 'The field ' . $dc['criterion_code'] . ' not exist.'
+                ],
+            ];
+        }
+        
+        if (!$criterion_value) {
+            // $has_error = true;
+            // $errors_index[] = $dc['index'];
+            $criterion_value = new CriterionValue();
+            $criterion_value[$colum_name] = $value_excel;
+            $criterion_value['value_text'] = $value_excel;
+            // $criterion_value->value_text = $dc['value_excel']; //Falta cambiar
+            // $criterion_value->value_boolean = ($code_criterion == 'boolean');
+            $criterion_value->criterion_id = $criterion->id;
+            $criterion_value->active = 1;
+            $criterion_value->save();
+            // $criterion_value->workspaces()->syncWithoutDetaching([ $this->current_workspace->id]);
+        }
+        $workspace_value = DB::table('criterion_value_workspace')->where([
+            'workspace_id' => $this->current_workspace->id,
+            'criterion_value_id' => $criterion_value->id
+        ])->first();
+        if (!$workspace_value) {
+            DB::table('criterion_value_workspace')->insert([
+                'workspace_id' => $this->current_workspace->id,
+                'criterion_value_id' => $criterion_value->id
+            ]);
+        }
+        return [
+            'has_error'=>$has_error,
+            'criterion_value'=>$criterion_value
+        ];
+    }
+    private function getCycles($cycle_name){
+        return match (strtolower($cycle_name)) {
+            'ciclo 2' => ['ciclo 1','ciclo 2'],
+            'ciclo 3' => ['ciclo 1','ciclo 2','ciclo 3'],
+            'ciclo 4' => ['ciclo 1','ciclo 2','ciclo 3','ciclo 4'],
+            default => $cycle_name
+        };
+    }
+    private function getNameWithGroupPrefix($value_name,$data_criteria){
+        $name_module = $data_criteria->where('criterion_code','module')->first()['value_excel'];
+        if($name_module){
+            $subworkspace = $this->subworkspaces->where('name',$name_module)->first();
+            $prefix = $this->getPrefix($subworkspace?->name);
+            if($prefix){
+                return $prefix.'::'.$value_name;
+            }
+        }
+        return $value_name;
+    }
+    //cambiar prefijos <- M , Ik, FAPE , Admin
+    private function getPrefix($module){
+        return match ($module) {
+            'Mifarma' => 'MF',
+            'Inkafarma' => 'IK',
+            'FAPE Masivos' => 'FP',
+            'Administrativos FAPE' => 'FP',
+            default => false
+        };
+    }
     private function process_header($headers, $criteria)
     {
         $data_excel = collect();

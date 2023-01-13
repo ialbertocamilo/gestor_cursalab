@@ -119,30 +119,13 @@ class RestCourseController extends Controller
         $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
 
         $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);
-//        dd($all_courses_id);
 
 //        $user_courses_id = array_column($user_courses, 'id');
 
-        $query = SummaryCourse::with([
-            'course' => [
-                'compatibilities_a:id',
-                'compatibilities_b:id',
-                'summaries' => function ($q) use ($user) {
-                    $q
-                        ->with('status:id,name,code')
-                        ->where('user_id', $user->id);
-                },
-            ]
-        ])
+        $query = SummaryCourse::query()
             ->where('user_id', $user->id)
-//            ->whereIn('course_id', $user_courses_id)
             ->whereIn('course_id', $all_courses_id->toArray())
             ->whereNotNull('certification_issued_at');
-
-        if ($request->q)
-            $query->whereHas('course', function ($q) use ($request) {
-                $q->where('name', 'like', "%{$request->q}%");
-            });
 
         if ($request->type == 'accepted')
             $query->whereNotNull('certification_accepted_at');
@@ -154,7 +137,31 @@ class RestCourseController extends Controller
 
         $temp = [];
 
+        $qs = $request->q ?? NULL;
+
         foreach ($user_courses as $user_course) {
+
+            if ($qs AND !stringContains($user_course->name, $qs))
+                continue;
+
+            $certificate = $certificates->where('course_id', $user_course->id)->first();
+
+            if ($certificate) {
+
+                $temp[] = [
+
+                    'course_id' => $certificate->course_id,
+                    'name' => $certificate->course->name,
+                    'accepted' => $certificate->certification_accepted_at ? true : false,
+                    'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
+                    'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
+                    'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
+
+                    'compatible' => null,
+                ];
+
+                continue;
+            }
 
             if ($user_course->compatible):
 
@@ -162,57 +169,25 @@ class RestCourseController extends Controller
 
                 if ($compatible_certificate):
 
-                    $temp_certificate = clone $compatible_certificate;
+                    $add = "?original_id={$user_course->id}";
 
-                    $temp_certificate->compatible_of = $user_course;
+                    $temp[] = [
 
-                    $certificates->push($temp_certificate);
+                        'course_id' => $compatible_certificate->course_id,
+                        'name' => $user_course->name,
+                        'accepted' => $compatible_certificate->certification_accepted_at ? true : false,
+                        'issued_at' => $compatible_certificate->certification_issued_at->format('d/m/Y'),
+                        'ruta_ver' => "tools/ver_diploma/{$user->id}/{$compatible_certificate->course_id}{$add}",
+                        'ruta_descarga' => "tools/dnc/{$user->id}/{$compatible_certificate->course_id}{$add}",
 
-//                    dd($temp_certificate->compatible_of->name, $compatible_certificate->compatible_of?->name);
+                        'compatible' => [
+                            'course_id' => $compatible_certificate->course->id,
+                            'name' => $compatible_certificate->course->name,
+                        ],
+                    ];
 
                 endif;
             endif;
-        }
-
-        foreach ($certificates as $key => $certificate) {
-
-            if ($certificate->compatible_of) {
-
-                $original = $certificate->compatible_of;
-
-                $add = "?original_id={$original->id}";
-
-                $temp[] = [
-
-                    'course_id' => $certificate->course_id,
-                    'name' => $original->name,
-                    'accepted' => $certificate->certification_accepted_at ? true : false,
-                    'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
-                    'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}{$add}",
-                    'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}{$add}",
-
-                    'compatible' => [
-                        'course_id' => $certificate->course->id,
-                        'name' => $certificate->course->name,
-                    ],
-                ];
-
-                continue;
-            }
-
-            $temp[] = [
-
-                'course_id' => $certificate->course_id,
-                'name' => $certificate->course->name,
-                'accepted' => $certificate->certification_accepted_at ? true : false,
-                'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
-                'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
-                'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
-
-                'compatible' => null,
-            ];
-
-
         }
 
         return $this->success(['data' => $temp]);

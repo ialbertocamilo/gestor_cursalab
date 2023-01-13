@@ -17,7 +17,7 @@
 				<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
 			</div>
 			<!-- this only for FP -->
-			
+
 			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
 
 			<!-- this only for FP -->
@@ -25,7 +25,7 @@
 				<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
 			</div>
 			<!-- this only for FP -->
-			
+
 			<list-item titulo="Vademecum" subtitulo="Nombre del documento Vademecum (SCORM)" />
 			<list-item
 				titulo="Visitas"
@@ -112,10 +112,14 @@ export default {
 			axios
 				.post(`${this.reportsBaseUrl}/exportar/vademecum`, params)
 				.then((res) => {
-                    
+
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
+                        res.data.new_name = this.generateFilename(
+                            'Vademecum',
+                            ''
+                        )
                         this.$emit("emitir-reporte", res);
                     }
                     this.hideLoader();
@@ -125,7 +129,7 @@ export default {
                     console.log(err.message);
 
                     alert("Se ha encontrado el siguiente error : " + err);
-                    
+
                     this.hideLoader();
                 });
 		}

@@ -456,6 +456,9 @@ class Topic extends BaseModel
             ->groupBy('course_id')
             ->get();
         foreach ($courses as $course) {
+
+            // $compatible = $course->getCourseCompatibilityByUser($user);
+
             // UC rule
             $course_name = $course->name;
             if ($workspace_id === 25) {
@@ -464,20 +467,47 @@ class Topic extends BaseModel
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
 
-            $course_status = Course::getCourseStatusByUser($user, $course);
+            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
 
             $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
 
+            $topics_count = $topics->count();
+
             foreach ($topics as $topic) {
-                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
+                
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
                     $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
                         ? route('media.download.media_topic', [$media->id]) : null;
                 }
+
+                // if (true) {
+                if ($course->compatible) {
+
+                    $topics_data[] = [
+                        'id' => $topic->id,
+                        'nombre' => $topic->name,
+                        'requisito_id' => NULL,
+                        'imagen' => $topic->imagen,
+                        'contenido' => $topic->content,
+                        'media' => $media_topics,
+                        'evaluable' => 'no',
+                        'tipo_ev' => NULL,
+                        'nota' => '-',
+                        'disponible' => true,
+                        'intentos_restantes' => '-',
+                        'estado_tema' => 'aprobado',
+                        'estado_tema_str' => 'Convalidado',
+                        'compatible' => true,
+                    ];
+
+                    continue;
+                }
+
+                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
                 $topics_data[] = [
                     'id' => $topic->id,
@@ -497,6 +527,39 @@ class Topic extends BaseModel
                 ];
             }
 
+            // if (true) {
+            if ($course->compatible) {
+
+                $schools_courses[] = [
+                    'id' => $course->id,
+                    'nombre' => $course_name,
+                    'descripcion' => $course->description,
+                    'imagen' => $course->imagen,
+                    'requisito_id' => NULL,
+                    'c_evaluable' => 'no',
+                    'disponible' => true,
+                    'status' => 'aprobado',
+
+                    'encuesta' => false,
+                    'encuesta_habilitada' => false,
+                    'encuesta_resuelta' => false,
+                    'encuesta_id' => null,
+
+                    'temas_asignados' => $topics_count,
+                    'temas_completados' => $topics_count,
+
+                    'porcentaje' => '100.00',
+                    'temas' => $topics_data,
+                    'mod_evaluaciones' => NULL,
+                    'compatible' => [
+                        'id' => $course->compatible->course->id ?? 'X',
+                        'name' => $course->compatible->course->name ?? 'TEST DEFAULT COMPATIBLE',
+                    ],
+                ];
+
+                continue;
+            }
+
             $schools_courses[] = [
                 'id' => $course->id,
 //                'nombre' => $course->name,
@@ -513,7 +576,7 @@ class Topic extends BaseModel
                 'encuesta_id' => $course_status['poll_id'],
                 'temas_asignados' => $course_status['exists_summary_course'] ?
                     $course_status['assigned_topics'] :
-                    $topics->count(),
+                    $topics_count,
                 'temas_completados' => $course_status['completed_topics'],
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,

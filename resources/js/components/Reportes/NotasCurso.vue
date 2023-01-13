@@ -19,7 +19,7 @@
 
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
-            
+
             <!-- this only for FP -->
             <div v-show="workspaceId === 25">
                 <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
@@ -62,59 +62,52 @@
                 <div class="row px-3">
                     <!-- Modulo -->
                     <div class="col-sm-4 mb-3">
-                        <b-form-text text-variant="muted">Módulo</b-form-text>
-                        <select v-model="modulo"
-                                class="form-control"
-                                @change="fetchFiltersAreaData">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in modules"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
 
-                        <!--DefaultSelect
+                        <DefaultAutocomplete
                             dense
                             v-model="modulo"
                             :items="modules"
-                            label=""
+                            label="Módulo"
                             item-text="name"
                             item-value="id"
-                            placeholder="Seleccione un Módulo"
-                            @onChange="fetchFiltersAreaData"
-                        /-->
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los módulos"
+                            @onBlur="fetchFiltersAreaData"
+                            :maxValuesSelected="3"
+                        />
                     </div>
                     <!-- Escuela -->
                     <div class="col-sm-4 mb-3">
-                        <b-form-text text-variant="muted">Escuela</b-form-text>
-                        <select
+                        <DefaultAutocomplete
+                            dense
                             v-model="escuela"
-                            class="form-control"
+                            :items="schools"
                             :disabled="!schools[0]"
-                            @change="escuelaChange"
-                        >
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in schools"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                            label="Escuelas"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione las escuelas"
+                            @onChange="escuelaChange"
+                            :maxValuesSelected="10"
+                        />
                     </div>
                     <!-- Curso -->
                     <div class="col-sm-4 mb-3">
-                        <b-form-text text-variant="muted">Curso</b-form-text>
-                        <select v-model="curso"
-                                class="form-control"
-                                :disabled="!courses[0]">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in courses"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                        <DefaultAutocomplete
+                            dense
+                            v-model="curso"
+                            :items="courses"
+                            :disabled="!courses[0]"
+                            label="Curso"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los cursos"
+                        />
                     </div>
                 </div>
             </div>
@@ -239,14 +232,20 @@
                 </div>
                 <!-- Fechas -->
                 <div class="col-4 ml-auto">
-                    <FechaFiltro ref="FechasFiltros"   
-                        label-start="Fecha inicial de última actualización" 
+                    <FechaFiltro ref="FechasFiltros"
+                        label-start="Fecha inicial de última actualización"
                         label-end="Fecha final de última actualización"/>
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
+            <div class="col-12">
+               <FiltersNotification></FiltersNotification>
+            </div>
             <div class="col-12 px-6">
-                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                <button
+                    :disabled="modulo.length === 0 || escuela.length === 0"
+                    type="submit"
+                    class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
                     <span>Descargar</span>
                 </button>
@@ -262,9 +261,10 @@ import FechaFiltro from "./partials/FechaFiltro.vue"
 import ListItem from "./partials/ListItem.vue"
 import ResumenExpand from "./partials/ResumenExpand.vue"
 import EstadoFiltro from "./partials/EstadoFiltro.vue"
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
         workspaceId: 0,
         modules: Array,
@@ -276,9 +276,9 @@ export default {
             courses: [],
             areas: [],
             //
-            modulo: "", 
-            escuela: "",
-            curso: "",
+            modulo: [],
+            escuela: [],
+            curso: [],
             area: [],
             //
             aprobados: true,
@@ -317,9 +317,9 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
-                        escuelas: this.escuela ? [this.escuela] : [],
-                        cursos: this.curso ? [this.curso] : [],
+                        modulos: this.modulo,
+                        escuelas: this.escuela,
+                        cursos: this.curso,
                         areas: this.area,
 
                         UsuariosActivos: UFC.UsuariosActivos,
@@ -343,6 +343,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Notas por curso',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
@@ -355,12 +359,12 @@ export default {
             this.hideLoader()
         },
         async fetchFiltersAreaData() {
-            if(!this.modulo) {
+            if (this.modulo.length === 0) {
                 this.areas = [];
                 return;
             }
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -369,15 +373,15 @@ export default {
             this.areas = response.data
         },
         async escuelaChange() {
-            this.curso = null;
-            this.tema = null;
+            this.curso = [];
+            this.tema = [];
             this.courses = [];
             this.topics = [];
 
-            if (!this.escuela) return false;
+            if (this.escuela.length === 0) return false;
 
-            this.cursos_libres =false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
+            this.cursos_libres = false;
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
             let res = await axios({
                 url,
                 method: 'get'
@@ -393,7 +397,5 @@ export default {
 </script>
 
 <style>
-.v-label {
-    display: contents !important;
-}
+
 </style>

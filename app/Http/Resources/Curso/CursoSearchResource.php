@@ -25,7 +25,7 @@ class CursoSearchResource extends JsonResource
 
         $schools = $this->schools->pluck('name')->toArray();
 
-        info($this->compatibilities_count);
+        // info($this->compatibilities_count);
 
         return [
             'id' => $this->id,
@@ -53,7 +53,7 @@ class CursoSearchResource extends JsonResource
 
             'compatibilities_count' => $this->compatibilities_a_count + $this->compatibilities_b_count,
             // 'compatibilities_count' => 1,
-            'compatibility_available' => true,
+            'compatibility_available' => get_current_workspace()->id == 25,
         ];
     }
 }

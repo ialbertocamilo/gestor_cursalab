@@ -116,4 +116,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('importar-notas')->middleware('checkrol:admin')->group(base_path('routes/cms/importar-notas.php'));
 
     Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
+
+    Route::prefix('resumen_encuesta')->middleware('checkrol:admin')->group(base_path('routes/cms/resumen_encuesta.php'));
+
 });

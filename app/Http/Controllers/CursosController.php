@@ -172,8 +172,12 @@ class CursosController extends Controller
                 return $this->success(compact('validations'), 'Ocurrió un error', 422);
         endif;
 
+        // TODO: Compatibles: Actualizar si se elimina el curso
+        $course->updateOnModifyingCompatibility();
+
         $course->delete();
         $course->requirements()->delete();
+
 
         $response = [
             'curso' => $course,
@@ -196,6 +200,13 @@ class CursosController extends Controller
 
         $course->active = $update_status_to;
         $course->save();
+
+        // TODO: Compatibles: Actualizar si se modifica el estado del curso
+        if ($course->wasChanged('active')):
+
+            $course->updateOnModifyingCompatibility();
+
+        endif;
 
         $response = [
             'curso' => $course,
