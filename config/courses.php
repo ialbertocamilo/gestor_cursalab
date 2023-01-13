@@ -203,11 +203,31 @@ return [
                 'schools' => function ($query) {
                     $query->where('active', ACTIVE);
                 },
-                'topics' => [
-                    'evaluation_type',
-                    'requirements',
-                    'medias.type'
-                ],
+                // 'topics' => [
+                //     'evaluation_type',
+                //     'requirements',
+                //     'medias.type'
+                // ],
+                'topics' => function ($q) use ($user_id) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->with([
+                            'medias.type',
+                            'evaluation_type:id,code',
+                            'requirements.summaries_topics' => function ($q) use ($user_id) {
+                                $q
+                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->with('status:id,name,code')
+                                    ->where('user_id', $user_id);
+                            },
+                            'summaries' => function ($q) use ($user_id) {
+                                $q
+                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->with('status:id,name,code')
+                                    ->where('user_id', $user_id);
+                            }
+                        ]);
+                },
                 'polls.questions',
                 'summaries' => function ($q) use ($user_id) {
                     $q->where('user_id', $user_id);
