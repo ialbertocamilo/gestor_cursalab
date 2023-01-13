@@ -437,10 +437,10 @@ export default {
                         permission: "resumen_encuesta",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO",
-                            "reports-TEMPORAL_INACTIVO"
+                            "admin",
+                            "trainer",
+                            "reports",
+                            'only-reports'
                         ]
                     }
                 ]
