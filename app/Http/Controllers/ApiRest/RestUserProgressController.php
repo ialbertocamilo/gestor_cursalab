@@ -81,8 +81,10 @@ class RestUserProgressController extends Controller
         $data = [];
         foreach ($schools as $school_id => $courses) {
             $school = $courses->first()->schools->where('id', $school_id)->first();
-            $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
             $courses_data = $this->getSchoolProgress($courses);
+
+            $school_status = $this->getSchoolProgressByUserV2($courses_data);
+            // $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
 
             // UC
             $school_name = $school->name;
@@ -108,6 +110,25 @@ class RestUserProgressController extends Controller
         array_multisort($columns, SORT_ASC, $data);
 
         return $data;
+    }
+
+    public function getSchoolProgressByUserV2($data)
+    {
+        $percentage = 0;
+
+        $courses = collect($data);
+
+        $total = $courses->count();
+        $completed = $courses->where('estado', 'aprobado')->count();
+        
+        $percentage = $total ? ($completed / $total) * 100 : 0;
+
+        return [
+            // 'status' => $status,
+            // 'status_string' => $arr_estados[$status],
+            'percentage' => round($percentage),
+            'completed' => $completed,
+        ];
     }
 
     public function getSchoolProgressByUser(School $school, $courses, $user)
