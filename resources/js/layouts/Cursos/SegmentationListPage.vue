@@ -185,13 +185,13 @@ export default {
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
-                    // {
-                    //     text: "Temas",
-                    //     icon: 'fas fa-book',
-                    //     type: 'route',
-                    //     count: 'temas_count',
-                    //     route: 'temas_route'
-                    // },
+                    {
+                        text: "Temas",
+                        icon: 'fas fa-book',
+                        type: 'route',
+                        count: 'temas_count',
+                        route: 'temas_route'
+                    },
                     {
                         text: "Segmentación",
                         icon: 'fa fa-square',
@@ -392,7 +392,7 @@ export default {
             }
 
 
-            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
+            let url = `/escuelas/${vue.update_model.first_school_id.id}/cursos/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
 
             vue.$http.put(url, bodyData)
