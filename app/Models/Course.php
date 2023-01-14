@@ -730,9 +730,9 @@ class Course extends BaseModel
         return $this->segments->where('active', ACTIVE)->count();
     }
 
-    public static function probar($course_id)
+    public static function probar()
     {
-        $course = Course::find($course_id);
+        $course = Course::find('265');
         $fun_1 = $course->getUsersBySegmentation('count');
         print_r('Función 1: ');
         print_r($fun_1);
@@ -902,7 +902,7 @@ class Course extends BaseModel
 
             $temp_segment = null;
             $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
-//            dd($course->segments);
+
             foreach ($course->segments as $segment) {
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');

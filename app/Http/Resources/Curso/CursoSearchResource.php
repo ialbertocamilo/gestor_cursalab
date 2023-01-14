@@ -25,7 +25,20 @@ class CursoSearchResource extends JsonResource
 
         $schools = $this->schools->pluck('name')->toArray();
 
-        // info($this->compatibilities_count);
+
+        $modules = [];
+
+        foreach ($this->segments as $segment) {
+
+            foreach ($segment->values as $segment_value) {
+                if ($segment_value?->criterion_value?->value_text)
+                    $modules[] = $segment_value->criterion_value->value_text;
+
+            }
+        }
+
+        $modules = array_unique($modules);
+
 
         return [
             'id' => $this->id,
@@ -34,6 +47,8 @@ class CursoSearchResource extends JsonResource
             // 'position' => $this->position,
             'nombre' => $this->name,
             'schools' => implode(',', $schools),
+            'modules' => implode(',', $modules),
+            'first_school_id' => $this->schools->first(),
             'image' => FileService::generateUrl($this->imagen),
             // 'medium_image' => FileService::generateUrl($this->imagen),
             'temas_count' => $this->topics_count,

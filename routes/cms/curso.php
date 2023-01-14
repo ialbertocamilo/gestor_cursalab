@@ -10,22 +10,30 @@ Route::controller(CursosController::class)->group(function () {
 
     Route::view('/create', 'cursos.create_edit')->name('curso.createCurso');
     Route::view('/edit/{curso}', 'cursos.create_edit')->name('curso.editCurso');
-    Route::get('/search/{curso}', 'searchCurso')->name('curso.search');
-    Route::get('/form-selects', 'getFormSelects')->name('curso.search');
 
-    Route::post('/store', 'storeCurso')->name('curso.storeCurso');
-    Route::put('/update/{curso}', 'updateCurso')->name('curso.updateCurso');
 
-    Route::get('/{curso}/encuesta', 'getEncuesta')->name('curso.encuesta');
-    Route::post('/{curso}/encuesta', 'storeUpdateEncuesta')->name('curso.encuesta');
 
-    Route::post('/{curso}', 'destroyCurso')->name('curso.destroyCurso');
+
+    Route::post('/{curso}/delete', 'destroyCurso')->name('curso.destroyCurso');
     Route::post('/{curso}/mover_curso', 'moverCurso')->name('curso.moverCurso');
 
     Route::put('/{curso}/status', 'updateStatus');
 
-    Route::get('/{course}/compatibilities', 'getCompatibilities');
-    Route::put('/{course}/compatibilities/update', 'updateCompatibilities');
+
+    // Segmentation List Page Routes
+
+    Route::get('/schools/get-data', 'getFiltersSelects')->name('segmentation.filters_selects');
+    Route::get('/form-selects', 'getFormSelects')->name('curso.form_selects_segmentation');
+
+    Route::get('/{course}/encuesta', 'getEncuestaSegmentation')->name('curso.encuesta_segmentation');
+    Route::post('/{course}/encuesta', 'storeUpdateEncuestaSegmentation')->name('curso.encuesta_segmentation');
+
+    Route::get('/search/{course}', 'searchCursoSegmentation')->name('curso.search_segmentation');
+
+    Route::put('/update/{course}', 'updateCursoSegmentation')->name('curso.updateCurso_segmentation');
+
+    Route::post('/store', 'storeCurso')->name('cursos.storeCurso');
+
 });
 
 // CURSOS
