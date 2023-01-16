@@ -767,6 +767,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 // .v-carousel__item {
+.v-dialog.v-dialog--active {
     .v-select--is-multi.v-autocomplete {
         .v-select__slot {
             padding: 6px 0 !important;
@@ -775,4 +776,4 @@ body::-webkit-scrollbar-thumb {
             padding-right: 0px !important;
         }
     }
-// }
+}
