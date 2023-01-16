@@ -34,6 +34,10 @@ Route::controller(CursosController::class)->group(function () {
 
     Route::post('/store', 'storeCurso')->name('cursos.storeCurso');
 
+    Route::get('/{course}/compatibilities', 'getCompatibilities');
+    Route::put('/{course}/compatibilities/update', 'updateCompatibilities');
+
+
 });
 
 // CURSOS

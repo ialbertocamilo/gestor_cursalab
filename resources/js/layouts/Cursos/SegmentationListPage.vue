@@ -36,7 +36,7 @@
                         />
                     </v-col>
 
-                    <v-col cols="5">
+                    <v-col cols="3">
                         <DefaultAutocomplete
                             dense
                             label="Escuelas"
@@ -46,6 +46,17 @@
                             item-value="id"
                             multiple
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                        />
+                    </v-col>
+
+                    <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado de curso"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
                         />
                     </v-col>
 
@@ -78,6 +89,7 @@
                 @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
                 @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
                 @redirect_to_course_form_page="redirect_to_course_form_page($event)"
+                @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
             />
@@ -144,6 +156,14 @@
                 @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
             />
 
+            <CompatibilityFormModal
+                :options="modalFormCompatibilityOptions"
+                width="55vw"
+                :ref="modalFormCompatibilityOptions.ref"
+                @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
+                @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -154,6 +174,7 @@ import MoverCursoModal from "./MoverCursoModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
+import CompatibilityFormModal from "./CompatibilityFormModal";
 
 export default {
     components: {
@@ -162,7 +183,8 @@ export default {
         DialogConfirm,
         'CourseValidationsDelete': CursoValidacionesModal,
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
-        SegmentFormModal
+        SegmentFormModal,
+        CompatibilityFormModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -214,6 +236,14 @@ export default {
                 ],
                 more_actions: [
                     {
+                        text: "Compatibles",
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'compatibilities_count',
+                        method_name: 'compatibility',
+                        show_condition: 'compatibility_available'
+                    },
+                    {
                         text: "Encuesta",
                         icon: 'mdi mdi-poll',
                         type: 'action',
@@ -237,9 +267,17 @@ export default {
             selects: {
                 modules: [],
                 schools: [],
+                types: [],
+                statuses: [
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
             },
             filters: {
                 q: '',
+                active: null,
+                type: null,
                 schools: [],
                 segmented_module: null,
                 // category: null
@@ -260,6 +298,15 @@ export default {
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
                 resource: 'segmentación',
+            },
+
+            modalFormCompatibilityOptions: {
+                ref: 'CompatibilityFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: '/cursos',
+                confirmLabel: 'Guardar',
+                resource: 'compatibilidad',
             },
 
             deleteConfirmationDialog: {

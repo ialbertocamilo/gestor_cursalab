@@ -207,9 +207,9 @@ export default {
                         path: "/modulos",
                         subpaths: [
                             "modulos",
-                            "abconfigs",
-                            "categorias",
-                            "cursos"
+                            // "abconfigs",
+                            // "categorias",
+                            // "cursos"
                         ],
                         selected: false,
                         permission: "modulos",
