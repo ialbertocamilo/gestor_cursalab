@@ -210,7 +210,7 @@ export default {
 
             if(vue.$refs.vue_autocomplete) {
                 const countFiltered = vue.$refs.vue_autocomplete.filteredItems.length;
-                if(countItems !== countFiltered) return 'Seleccionar filtrados';
+                if(countFiltered !== countItems) return 'Seleccionar filtrados';
             }
             return 'Seleccionar todos';
         }
@@ -237,7 +237,7 @@ export default {
                 const currentVal = val ? val : [];
                 vue.localSelected = currentVal; // watch change from parent component
                 vue.localItems = vue.itemsOrderSelect(currentVal);
-                console.log('currentVal',{ currentVal, localItems: vue.localItems });
+                // console.log('currentVal', currentVal);
             }
         }
     },
@@ -315,20 +315,17 @@ export default {
 
                 const stateValue = StaticValue.some(( {id: s_id} ) => s_id === id);
                 if(stateValue) {
-                    StaticItems.unshift(currentItem);
                     StaticItems.splice(i, 1);
+                    StaticItems.unshift(currentItem);
                 }
             }
 
             return StaticItems;
         },
         updateValue(value) {
-            let vue = this
-
-            vue.$emit('input', value || null)
-            vue.$emit('onChange')
+            let vue = this;
+            vue.$emit('change', value || null);
         },
-       
         icon() {
             const vue = this;
             const filtered = vue.$refs.vue_autocomplete;
