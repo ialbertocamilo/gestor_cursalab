@@ -1018,6 +1018,9 @@ class Course extends BaseModel
 
     public function hasBeenValidated($user = null)
     {
+        if (get_current_workspace()->id != 25)
+            return false;
+
         $user = $user ?? auth()->user();
 
         $this->load([

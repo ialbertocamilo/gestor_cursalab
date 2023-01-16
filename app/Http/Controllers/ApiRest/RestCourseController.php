@@ -29,6 +29,9 @@ class RestCourseController extends Controller
 
     public function loadPoll(Course $course)
     {
+        if ($course->hasBeenValidated())
+            return ['error' => 0, 'data' => null];
+
         $poll = $course->polls()->with([
             'questions' => function ($q) {
                 $q->with('type:id,code')
