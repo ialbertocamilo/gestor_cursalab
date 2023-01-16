@@ -38,14 +38,17 @@ class SetCourseCompatibles extends Command
 
         foreach ($all as $course) {
             
-            foreach ($modules as $module) {
+            $string = str_replace('Capacitación Farmacias Peruanas' . ' - ', '', $course->name);
 
-                $course->name = str_replace('Capacitación Farmacias Peruanas' . ' - ', '', $course->name);
-                $course->name = str_replace('Capacitación ' . $module->name . ' - ', '', $course->name);
-                $course->name = str_replace($module->name . ' - ', '', $course->name);
-                $course->name = strtolower($course->name);
+            foreach ($modules as $module) {
+                $string = str_replace('Capacitación ' . $module->name . ' - ', '', $string);
+                $string = str_replace($module->name . ' - ', '', $string);
             }
+            
+            $course->name = mb_strtolower(trim($string));
         }
+
+        info($all->pluck('name')->toArray());
 
         $grouped = $all->groupBy('name');
 

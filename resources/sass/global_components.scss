@@ -766,11 +766,13 @@ body::-webkit-scrollbar-thumb {
     white-space: pre-wrap;
 }
 
-.v-carousel__item .v-select--is-multi.v-autocomplete {
-    .v-select__slot {
-        padding: 6px 0 !important;
+// .v-carousel__item {
+    .v-select--is-multi.v-autocomplete {
+        .v-select__slot {
+            padding: 6px 0 !important;
+        }
+        .v-chip__content button.v-btn {
+            padding-right: 0px !important;
+        }
     }
-    .v-chip__content button.v-btn {
-        padding-right: 0px !important;
-    }
-}
+// }

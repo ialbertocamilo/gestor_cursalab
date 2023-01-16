@@ -13,7 +13,7 @@
                 <v-row>
                     <v-col cols="12">
                             <!-- :rules="rules.lista_escuelas" -->
-                        <DefaultAutocomplete
+                        <!-- <DefaultAutocomplete
                             dense
                             label="Cursos compatibles"
                             v-model="resource.compatibilities"
@@ -23,7 +23,20 @@
                             multiple
                             :show-select-all="false"
                             :count-show-values="6"
+                        /> -->
+
+                        <DefaultAutocompleteOrder
+                            return-object
+                            dense
+                            label="Cursos compatibles"
+                            v-model="resource.compatibilities"
+                            :items="courses"
+                            multiple
+                            item-text="name"
+                            item-id="id"
+                            :count-show-values="Infinity"
                         />
+
                     </v-col>
                 </v-row>
      

@@ -36,12 +36,14 @@ class SetCourseCompatiblesFromFile extends Command
 
         foreach ($courses as $course) {
             
+            $string = str_replace('Capacitación Farmacias Peruanas' . ' - ', '', $course->name);
+            
             foreach ($modules as $module) {
-
-                $course->name = str_replace('Capacitación Farmacias Peruanas' . ' - ', '', $course->name);
-                $course->name = str_replace('Capacitación ' . $module->name . ' - ', '', $course->name);
-                $course->name = str_replace($module->name . ' - ', '', $course->name);
+                $string = str_replace('Capacitación ' . $module->name . ' - ', '', $string);
+                $string = str_replace($module->name . ' - ', '', $string);
             }
+            
+            $course->name = mb_strtolower(trim($string));
         }
 
         $rows = config('compatible_uc_courses');
@@ -52,8 +54,8 @@ class SetCourseCompatiblesFromFile extends Command
 
         foreach ($rows as $row) {
 
-            $courses_a = $courses->where('name', $row[0]);
-            $courses_b = $courses->where('name', $row[1]);
+            $courses_a = $courses->where('name', trim(mb_strtolower($row[0])));
+            $courses_b = $courses->where('name', trim(mb_strtolower($row[1])));
 
             if ($courses_a && $courses_b) {
 
