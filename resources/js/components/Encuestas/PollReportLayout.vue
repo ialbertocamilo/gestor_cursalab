@@ -2,7 +2,7 @@
   <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-              Resultados de encuestas 
+              Resultados de encuestas
             </v-card-title>
         </v-card>
         <!-- FILTROS-->
@@ -24,7 +24,7 @@
                     />
                 </div>
                 <div class="col-sm-6">
-                  <label>Módulo</label> 
+                  <label>Módulo</label>
                   <DefaultAutocomplete
                       v-model="filters.modules"
                       :items="modules"
@@ -100,7 +100,7 @@
                           <div class="row" v-for="(type_poll_question) in types_pool_questions" :key="type_poll_question.id">
                             <div class="col-sm-6 d-flex  justify-space-between align-center" style="border: 1px solid #EDF1F4;">
                               <div style="color: #5458EA;" v-text="type_poll_question.name"></div>
-                              <v-icon 
+                              <v-icon
                                 color="#5458EA"
                                 @click="downloadReportPollQuestion(type_poll_question)"
                               >
@@ -119,13 +119,13 @@
                 </div>
               </div>
             </v-card-text>
-            <ModalBloqueReport 
+            <ModalBloqueReport
               :modalOptions="modalOptions"
               :download_list="download_list"
               @saveReport="openModalChangeName"
               @closeModal="closeModal"
             />
-            <ModalChangeNameReport 
+            <ModalChangeNameReport
               :filenameDialog="filenameDialog"
               :data="nameReport"
               @saveReport="saveReport"
@@ -213,14 +213,14 @@ export default {
       vue.schools = [];
       vue.filters.courses = [];
       vue.filters.schools = [];
-     
+
       await axios.get('/resumen_encuesta/schools/'+vue.filters.poll.id).then(({data})=>{
         vue.schools = data.data.schools;
         if(vue.schools.length==0){
           vue.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
         }
       })
-    }, 
+    },
     async loadCourses(){
       let vue = this;
       vue.poll_searched = false;
@@ -253,7 +253,7 @@ export default {
         console.log(er);
         vue.showtAlertError();
       })
-    },  
+    },
     parseToDateTime(date,type){
       if(!date){
         return '';
@@ -273,7 +273,7 @@ export default {
     async downloadReportPollQuestion(type_poll_question){
       let vue = this;
       vue.filters.type_poll_question = type_poll_question;
-      vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses; 
+      vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses;
       const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); //Function in mixin.js
       //If the selected schools are greater than 10, the data will be downloaded in parts
       const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,15);//Function in mixin.js
@@ -285,12 +285,13 @@ export default {
           let get_all_courses_id = [];
           const content = '('+array_courses.length+')';
           //message in tooltip (list of name's schools)
-          let schools_name = '';
+          let schools_name = [];
           
           for (const courses of array_courses) {
             get_all_courses_id = [...get_all_courses_id,...courses.map(c => c.id)];
             const school = this.schools.find(school => school.id == courses[0].school_id);
-            schools_name = schools_name.length == 0 ? school.name : schools_name+', '+school.name  
+            // schools_name = schools_name.length == 0 ? school.name : schools_name+', '+school.name  
+            schools_name.push(school.name);
           }
           this.download_list.push({
             content,
@@ -298,7 +299,7 @@ export default {
             status:'pending',
             url:'',
             new_name:'',
-            courses_id : get_all_courses_id 
+            courses_id : get_all_courses_id
           });
           this.modalOptions.open = true;
         }
@@ -316,7 +317,7 @@ export default {
         vue.modalOptions.loading = false;
       }
       return true;
-    },  
+    },
     change_status_download(data){
       let vue = this;
       const find_index = vue.download_list.findIndex(dl => dl.status == 'processing');
@@ -326,7 +327,7 @@ export default {
       vue.download_list[find_index].status= (data.alert) ? 'no_data' : 'complete';
       vue.verifyStatusDownload();
       return true;
-    },  
+    },
     async callApiReport(courses_id){
       let vue = this;
       vue.filters.courses_selected = courses_id;
@@ -348,6 +349,7 @@ export default {
           vue.showtAlertError();
           return false;
         }
+        vue.queryStatus("reportes", "descargar_reporte_encuesta");
         data.url = `${vue.reportsBaseUrl}/${data.ruta_descarga}`
         this.openModalChangeName(data);
         vue.hideLoader();
@@ -355,7 +357,7 @@ export default {
       .catch((e)=>{
         console.log(e);
         vue.showtAlertError();
-      }) 
+      })
     },
     showtAlertError(){
       this.hideLoader();

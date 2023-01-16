@@ -17,19 +17,39 @@
             <template slot="content">
                 <div class="row" v-for="(donwload, index) in download_list" :key="index">
                     <div class="col-sm-6 d-flex align-center" style="border: 1px solid #EDF1F4;">
-                        <span style="color:#333D5D">
-                            {{ `Bloque ${index+1}: Se están analizando` }} <b>{{ donwload.content}} escuela(s)</b>
-                        </span>
+                        <v-expansion-panels flat>
+                            <v-expansion-panel>
+                                <v-expansion-panel-header>
+                                    <span style="color:#333D5D">
+                                        {{ `Bloque ${index+1}: Se están analizando` }} <b>{{ donwload.content}} escuela(s)</b>
+                                    </span>
+                                </v-expansion-panel-header>
+                                <v-expansion-panel-content>
+                                    <v-simple-table>
+                                        <template v-slot:default>
+                                            <tbody>
+                                                <tr
+                                                    v-for="(school, index) in donwload.schools"
+                                                    :key="index"
+                                                >
+                                                    <td class="w-100">{{ school }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </template>
+                                    </v-simple-table>
+                                </v-expansion-panel-content>
+                            </v-expansion-panel>
+                        </v-expansion-panels>
                     </div>
                     <div class="col-sm-6" style="border: 1px solid #EDF1F4;">
-                        <div class="w-10" v-if="donwload.status=='pending'">
+                        <div class="mt-3 w-10" v-if="donwload.status=='pending'">
                             <span style="color:#5458EA">Pendiente</span> 
                         </div>
-                        <div class="w-10 d-flex" v-if="donwload.status=='processing'">
+                        <div class="mt-3 w-10 d-flex" v-if="donwload.status=='processing'">
                             <span style="color:#5458EA">Descargando</span>
                             <v-icon class="ml-2" color="#5458EA">fas fa-circle-notch fa-spin</v-icon> 
                         </div>
-                        <div class="w-10 d-flex justify-space-between align-center" v-if="donwload.status=='complete'">
+                        <div class="mt-3 w-10 d-flex justify-space-between align-center" v-if="donwload.status=='complete'">
                             <span style="color:#5458EA">
                                 ¡Listo para descarga!
                                 <v-icon color="#5458EA" small>mdi-checkbox-marked-circle</v-icon>
@@ -41,7 +61,7 @@
                                 mdi-download
                             </v-icon>
                         </div>
-                        <div class="w-10" v-if="donwload.status=='no_data'">
+                        <div class="mt-3 w-10" v-if="donwload.status=='no_data'">
                             <span style="color:#5458EA">Luego del análisis no se han encontrado resultados.</span>
                         </div>
                     </div>
