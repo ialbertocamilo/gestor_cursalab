@@ -228,8 +228,6 @@ export default {
         }else{
             vue.localItems = [...vue.items] // set initial value
         }
-
-        // console.log('mounted hook', vue.localItems, vue.items);
     },
     watch: {
         value: {
@@ -237,8 +235,9 @@ export default {
                 const vue = this;
 
                 const currentVal = val ? val : [];
-                vue.localSelected = currentVal // watch change from parent component
+                vue.localSelected = currentVal; // watch change from parent component
                 vue.localItems = vue.itemsOrderSelect(currentVal);
+                console.log('currentVal',{ currentVal, localItems: vue.localItems });
             }
         }
     },
@@ -309,16 +308,19 @@ export default {
             const StaticValue = val;
 
             let localItems = [];
-                
+
             for (let i = 0; i < StaticItems.length; i++) {
                 const currentItem = StaticItems[i];
                 const { id } = currentItem;
 
                 const stateValue = StaticValue.some(( {id: s_id} ) => s_id === id);
-                if(!stateValue) localItems.push(currentItem);
+                if(stateValue) {
+                    StaticItems.unshift(currentItem);
+                    StaticItems.splice(i, 1);
+                }
             }
 
-            return [ ...StaticValue, ...localItems];
+            return StaticItems;
         },
         updateValue(value) {
             let vue = this
