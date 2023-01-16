@@ -26,6 +26,9 @@ class RestTopicController extends Controller
 
     public function reviewTopic(Topic $topic, $user = null)
     {
+        if ($topic->course->hasBeenValidated())
+            return ['error' => 0, 'data' => null];
+        
         $user = auth()->user() ?? $user;
 
         $topic->load('course');
