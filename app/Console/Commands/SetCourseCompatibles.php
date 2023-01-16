@@ -40,7 +40,10 @@ class SetCourseCompatibles extends Command
             
             foreach ($modules as $module) {
 
+                $course->name = str_replace('Capacitación Farmacias Peruanas' . ' - ', '', $course->name);
+                $course->name = str_replace('Capacitación ' . $module->name . ' - ', '', $course->name);
                 $course->name = str_replace($module->name . ' - ', '', $course->name);
+                $course->name = strtolower($course->name);
             }
         }
 
