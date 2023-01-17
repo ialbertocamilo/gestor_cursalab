@@ -69,7 +69,7 @@ class SupervisorController extends Controller
         $users = User::filterText($request->filtro)
             ->select('id', 'document', 'name', 'lastname', 'surname')
             ->whereRelation('subworkspace', 'parent_id', $workspace->id)
-            ->onlyAppUser()
+            ->onlyClientUsers()
             ->limit(40)
             ->get();
 
