@@ -312,7 +312,9 @@ class CursosController extends Controller
 
     public function updateCompatibilities(Course $course, Request $request)
     {
-        $data = $request->all();
+        $courses = $request->compatibilities;
+
+        $data['compatibilities'] = array_column($courses, 'id');
 
         Course::storeCompatibilityRequest($course, $data);
 
