@@ -91,6 +91,7 @@
                     active-class="blue lighten-4 pl-2"
                 >
                     <template v-slot:activator>
+
                         <v-list-item-content
                             v-for="(datoCurso, index) in item"
                             :key="index"
@@ -98,20 +99,19 @@
                             :class="'col-' + index"
                         >
                             <v-list-item>
+
                                 <v-list-item-title
-                                    v-if="index != 'modalidad'"
+                                    v-if="item['convalidado_de'] && index === 'curso'"
                                     v-text="datoCurso"
                                     v-b-tooltip.hover
-                                    :title="index === 'convalidado_de' ? datoCurso : ''"
+                                    :title="'Convalidado de: ' + item['convalidado_de']"
                                     class="text-body-2 white-space-normal" />
-                                <!-- MODALIDAD -->
+
                                 <v-list-item-title
                                     v-else
-                                    class="text-body-2 white-space-normal">
-                                    <b-badge v-text="datoCurso.charAt(0).toUpperCase()"
-                                             n v-b-tooltip.hover
-                                             :title="obt_texto_tooltip(datoCurso)"></b-badge>
-                                </v-list-item-title>
+                                    v-text="datoCurso"
+                                    class="text-body-2 white-space-normal" />
+
                             </v-list-item>
                         </v-list-item-content>
                     </template>
