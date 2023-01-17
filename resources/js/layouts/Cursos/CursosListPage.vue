@@ -361,7 +361,7 @@ export default {
                     // vue.selects.modules = data.data.modules
                     vue.selects.types = data.data.types
                     // vue.modalOptions.selects.modules = data.data.modules
-                    vue.modalOptions.selects.types = data.data.types
+                    // vue.modalOptions.selects.types = data.data.types
                 })
         },
         activity() {

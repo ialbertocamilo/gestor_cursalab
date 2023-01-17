@@ -311,6 +311,7 @@ export default {
             // Perform request to generate report
 
             let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos_v2`
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos`
             try {
                 let response = await axios({
                     url: urlReport,

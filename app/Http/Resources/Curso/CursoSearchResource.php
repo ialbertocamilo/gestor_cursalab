@@ -15,9 +15,12 @@ class CursoSearchResource extends JsonResource
      */
     public function toArray($request)
     {
+        $first_school = $this->schools->first();
         if (is_null($request->school_id)) {
-            $route_edit = route('curso.editCurso', [$this->id]);
-            $route_topics = route('tema.list', [$this->id]);
+//            $route_edit = route('curso.editCurso', [$this->id]);
+//            $route_topics = route('tema.list', [$this->id]);
+            $route_edit = route('cursos.editCurso', [$first_school->id, $this->id]);
+            $route_topics = route('temas.list', [$first_school->id, $this->id]);
         } else {
             $route_edit = route('cursos.editCurso', [$request->school_id, $this->id]);
             $route_topics = route('temas.list', [$request->school_id, $this->id]);
@@ -25,7 +28,20 @@ class CursoSearchResource extends JsonResource
 
         $schools = $this->schools->pluck('name')->toArray();
 
-        // info($this->compatibilities_count);
+
+        $modules = [];
+
+        foreach ($this->segments as $segment) {
+
+            foreach ($segment->values as $segment_value) {
+                if ($segment_value?->criterion_value?->value_text)
+                    $modules[] = $segment_value->criterion_value->value_text;
+
+            }
+        }
+
+        $modules = array_unique($modules);
+
 
         return [
             'id' => $this->id,
@@ -34,6 +50,8 @@ class CursoSearchResource extends JsonResource
             // 'position' => $this->position,
             'nombre' => $this->name,
             'schools' => implode(',', $schools),
+            'modules' => implode(',', $modules),
+            'first_school_id' => $first_school,
             'image' => FileService::generateUrl($this->imagen),
             // 'medium_image' => FileService::generateUrl($this->imagen),
             'temas_count' => $this->topics_count,

@@ -607,7 +607,20 @@ class Course extends BaseModel
 
                 // TODO: Validar si existe algun curso compatible aprobado del curso requisito
 
-                $compatible_course_req = $requirement_course->model_course->getCourseCompatibilityByUser($user);
+                $req_course = $requirement_course->model_course;
+
+                $req_course->load([
+                    'summaries' => function ($q) use ($user) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', $user->id);
+                    },
+                    'compatibilities_a:id',
+                    'compatibilities_b:id',
+                ]);
+
+                $compatible_course_req = $req_course->getCourseCompatibilityByUser($user);
+                // $compatible_course_req = $requirement_course->model_course->getCourseCompatibilityByUser($user);
 
                 if (!$compatible_course_req):
                     $available_course = false;
@@ -717,9 +730,9 @@ class Course extends BaseModel
         return $this->segments->where('active', ACTIVE)->count();
     }
 
-    public static function probar($course_id)
+    public static function probar()
     {
-        $course = Course::find($course_id);
+        $course = Course::find('265');
         $fun_1 = $course->getUsersBySegmentation('count');
         print_r('Función 1: ');
         print_r($fun_1);
@@ -889,7 +902,7 @@ class Course extends BaseModel
 
             $temp_segment = null;
             $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
-//            dd($course->segments);
+
             foreach ($course->segments as $segment) {
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
@@ -1006,6 +1019,10 @@ class Course extends BaseModel
     public function hasBeenValidated($user = null)
     {
         $user = $user ?? auth()->user();
+
+        $workspace_id = $user->subworkspace->parent_id;
+
+        if ($workspace_id != 25) return false;
 
         $this->load([
             'summaries' => function ($q) use ($user) {

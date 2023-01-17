@@ -80,8 +80,6 @@
                                 item-value="id"
                             />
                         </v-col>
-                    </v-row>
-                    <v-row justify="center">
                         <v-col cols="4">
                             <DefaultInput
                                 dense
@@ -391,7 +389,15 @@ export default {
     methods: {
         closeModal() {
             let vue = this
-            window.location.href = vue.base_endpoint;
+
+            let params = this.getAllUrlParams(window.location.search);
+            let temp = `${this.addParamsToURL(vue.base_endpoint, params)}`;
+            temp = `${vue.base_endpoint}?${temp}`;
+
+            // console.log(temp);
+            // return;
+
+            window.location.href = temp;
         },
         confirmModal(validateForm = true) {
             let vue = this

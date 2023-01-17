@@ -9,6 +9,7 @@ use App\Http\Requests\CursoStoreRequest;
 
 use App\Http\Resources\Curso\CursoSearchResource;
 use App\Models\Taxonomy;
+use App\Models\Workspace;
 use DB;
 
 // use App\Perfil;
@@ -311,7 +312,9 @@ class CursosController extends Controller
 
     public function updateCompatibilities(Course $course, Request $request)
     {
-        $data = $request->all();
+        $courses = $request->compatibilities;
+
+        $data['compatibilities'] = array_column($courses, 'id');
 
         Course::storeCompatibilityRequest($course, $data);
 
@@ -343,6 +346,51 @@ class CursosController extends Controller
         $types = Taxonomy::getSelectData('course', 'type');
 
         return $this->success(compact('types'));
+    }
+
+
+
+    // ====================================== SEGMENTATION COURSE ===================================
+
+    public function getFiltersSelects()
+    {
+        $workspace = get_current_workspace();
+
+        $modules = Workspace::where('parent_id', $workspace->id)
+            ->select('criterion_value_id as id', 'name')
+            ->get();
+
+        $schools = School::whereRelation('workspaces', 'id', $workspace->id)
+            ->select('id', 'name')
+            ->get();
+
+        return $this->success(compact('modules', 'schools'));
+    }
+
+    public function getEncuestaSegmentation(Course $course)
+    {
+        $school = $course->schools()->first();
+        return $this->getEncuesta($school, $course);
+    }
+
+    public function storeUpdateEncuestaSegmentation(Course $course, CursoEncuestaStoreUpdate $request)
+    {
+        $school = $course->schools()->first();
+        return $this->storeUpdateEncuesta($school, $course, $request);
+    }
+
+    public function searchCursoSegmentation(Course $course)
+    {
+        $school = $course->schools()->first();
+
+        return $this->searchCurso($school, $course);
+    }
+
+    public function updateCursoSegmentation(Course $course, CursosStoreUpdateRequest $request)
+    {
+        $school = $course->schools()->first();
+
+        return $this->updateCurso($school, $course, $request);
     }
 
 }

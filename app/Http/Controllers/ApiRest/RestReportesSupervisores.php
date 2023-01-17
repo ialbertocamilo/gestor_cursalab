@@ -69,7 +69,7 @@ class RestReportesSupervisores extends Controller
 
             'estados' => $courseStatuses,
 
-            'usuarios_activos' => $totals['users'],
+            'usuarios_activos' => $totals['users'] ?? 0,
             'aprobados' => $aprobados ?? 0,
             'desaprobados' => $desaprobados ?? 0,
             'desarrollo' => $desarrollados ?? 0,

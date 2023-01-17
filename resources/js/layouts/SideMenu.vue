@@ -207,9 +207,9 @@ export default {
                         path: "/modulos",
                         subpaths: [
                             "modulos",
-                            "abconfigs",
-                            "categorias",
-                            "cursos"
+                            // "abconfigs",
+                            // "categorias",
+                            // "cursos"
                         ],
                         selected: false,
                         permission: "modulos",
@@ -263,17 +263,17 @@ export default {
                 icon: "fas fa-cog",
                 active: false,
                 items: [
-                    // {
-                    //     title: "Cursos",
-                    //     icon: "mdi mdi-notebook",
-                    //     path: "/cursos",
-                    //     subpaths: ["cursos"],
-                    //     selected: false,
-                    //     permission: "cursos",
-                    //     role: [
-                    //         "super-user",
-                    //     ]
-                    // },
+                    {
+                        title: "Cursos",
+                        icon: "mdi mdi-notebook",
+                        path: "/cursos",
+                        subpaths: ["cursos"],
+                        selected: false,
+                        permission: "cursos",
+                        role: [
+                            "super-user",
+                        ]
+                    },
                     {
                         title: "Escuelas",
                         icon: "fas fa-th-large",
@@ -373,9 +373,9 @@ export default {
                         permission: "entrenadores",
                         role: [
                             "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
+                            "admin-TEMPORAL_INACTIVO",
+                            "content-manager-TEMPORAL_INACTIVO",
+                            "trainer-TEMPORAL_INACTIVO"
                         ]
                     },
                     {
