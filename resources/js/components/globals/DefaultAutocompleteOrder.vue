@@ -210,7 +210,7 @@ export default {
 
             if(vue.$refs.vue_autocomplete) {
                 const countFiltered = vue.$refs.vue_autocomplete.filteredItems.length;
-                if(countFiltered !== countItems) return 'Seleccionar filtrados';
+                if(countItems !== countFiltered) return 'Seleccionar filtrados';
             }
             return 'Seleccionar todos';
         }
@@ -228,6 +228,8 @@ export default {
         }else{
             vue.localItems = [...vue.items] // set initial value
         }
+
+        // console.log('mounted hook', vue.localItems, vue.items);
     },
     watch: {
         value: {
@@ -235,9 +237,8 @@ export default {
                 const vue = this;
 
                 const currentVal = val ? val : [];
-                vue.localSelected = currentVal; // watch change from parent component
+                vue.localSelected = currentVal // watch change from parent component
                 vue.localItems = vue.itemsOrderSelect(currentVal);
-                // console.log('currentVal', currentVal);
             }
         }
     },
@@ -308,24 +309,24 @@ export default {
             const StaticValue = val;
 
             let localItems = [];
-
+                
             for (let i = 0; i < StaticItems.length; i++) {
                 const currentItem = StaticItems[i];
                 const { id } = currentItem;
 
                 const stateValue = StaticValue.some(( {id: s_id} ) => s_id === id);
-                if(stateValue) {
-                    StaticItems.splice(i, 1);
-                    StaticItems.unshift(currentItem);
-                }
+                if(!stateValue) localItems.push(currentItem);
             }
 
-            return StaticItems;
+            return [ ...StaticValue, ...localItems];
         },
         updateValue(value) {
-            let vue = this;
-            vue.$emit('change', value || null);
+            let vue = this
+
+            vue.$emit('input', value || null)
+            vue.$emit('onChange')
         },
+       
         icon() {
             const vue = this;
             const filtered = vue.$refs.vue_autocomplete;

@@ -314,7 +314,8 @@ class CursosController extends Controller
     {
         $courses = $request->compatibilities;
 
-        $data['compatibilities'] = array_column($courses, 'id');
+        // $data['compatibilities'] = array_column($courses, 'id');
+        $data['compatibilities'] = $courses;
 
         Course::storeCompatibilityRequest($course, $data);
 
