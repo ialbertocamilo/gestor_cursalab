@@ -64,6 +64,7 @@
                 :ref="modalFormSegmentationOptions.ref"
                 @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
                 @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+                for_section="supervisores"
             />
 
             <DefaultDeleteModal

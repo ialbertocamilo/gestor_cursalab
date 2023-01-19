@@ -121,6 +121,7 @@ export default {
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
+                        vue.queryStatus("formulario_ayuda", "crear_formulario");
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')

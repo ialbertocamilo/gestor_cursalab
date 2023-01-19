@@ -221,7 +221,9 @@ export default {
                 vue.$http
                     .post(url, formData)
                     .then(({data}) => {
-
+                        if(vue.resource.category != null && (vue.resource.media_type === 'pdf' || vue.resource.media_type === 'scorm')){
+                            vue.queryStatus("vademecum", "crear_contenido");
+                        }
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')

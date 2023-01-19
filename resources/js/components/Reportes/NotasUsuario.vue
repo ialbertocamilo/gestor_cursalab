@@ -239,6 +239,7 @@ export default {
         async buscarNotasUsuario() {
             if (this.search.length < 8) return false;
 
+            let vue = this
             // Show loading spinner
             this.showLoader()
 
@@ -258,6 +259,7 @@ export default {
                         document: this.search
                     }
                 })
+                vue.queryStatus("reportes", "consultar")
 
                 if (response.data.alert) {
                     this.Alert = response.data.alert

@@ -115,7 +115,7 @@ export default {
         user_id:{
             required:true
         }
-    },  
+    },
     data() {
         return {
             base_url: '/importar-notas',
@@ -196,7 +196,7 @@ export default {
             formData.append("course", vue.select.course);
             formData.append("evaluation_type", vue.select.evaluation_type);
             formData.append("number_socket", number_socket);
-            
+
             vue.select.topics.forEach(topic => formData.append("topics[]", topic));
             percentLoader.innerHTML = ``;
             await vue.$http.post(`${vue.base_url}/upload`, formData)
@@ -206,6 +206,7 @@ export default {
 
                     if (!has_error_messages) {
                         const success_message = data.data.msg;
+                        vue.queryStatus("subida_notas", "subir_notas");
                         vue.showAlert(success_message);
                         vue.hideLoader();
                         return;

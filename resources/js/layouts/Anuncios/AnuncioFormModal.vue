@@ -234,6 +234,7 @@ export default {
                    .post(url, formData)
                    .then(({data}) => {
 
+                        vue.queryStatus("anuncios", "crear_anuncio");
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')

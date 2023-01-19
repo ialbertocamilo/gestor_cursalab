@@ -32,7 +32,7 @@
                           <v-tab class="justify-content-start">
                             <v-icon left>mdi mdi-history</v-icon> Reinicio por tema
                           </v-tab>
-<!-- 
+<!--
                           <v-tab class="justify-content-start">
                             <v-icon left>mdi mdi-history</v-icon> Reinicio por curso
                           </v-tab>
@@ -257,7 +257,9 @@ export default {
                             this.loadData(vue.resource)
                             this.hideLoader()
                         }
-                        
+                        if (action === 'reset_x_tema')
+                            vue.queryStatus("usuarios", "reinicia_tema");
+
                         vue.$emit('onReinicioTotal')
                     })
             }else{

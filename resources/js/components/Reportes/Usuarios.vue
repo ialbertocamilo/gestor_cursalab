@@ -132,6 +132,7 @@ export default {
     },
     methods: {
         async exportUsuariosDW() {
+            let vue = this
             // show loading spinner
 
             this.showLoader()
@@ -169,6 +170,7 @@ export default {
                         'Usuarios',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    vue.queryStatus("reportes", "descargar_reporte_usuarios");
                     this.$emit('emitir-reporte', response)
                 }
 

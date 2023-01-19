@@ -299,6 +299,10 @@ export default {
             vue.validation.evaluation_data_sum = data.data.sum
             vue.validation.evaluation_data_sum_required = data.data.sum_required
             vue.validation.evaluation_data_sum_not_required = data.data.sum_not_required
+
+            if(vue.validation.status){
+                vue.queryStatus("tema", "crear_evaluacion");
+            }
         },
         getSelects() {
             // let vue = this

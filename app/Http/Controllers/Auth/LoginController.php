@@ -149,6 +149,14 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
 
+        try {
+            $nps = $this->getPollsNps($user);
+
+            if (!is_null($nps) && !$nps->error)
+                session(['nps' => $nps->data]);
+
+        } catch (\Throwable $th) {
+        }
         // Load user's workspaces
 
         $workspaces =  Workspace::loadUserWorkspaces($user->id);
@@ -187,4 +195,32 @@ class LoginController extends Controller
     {
         return $request->only($this->username(), 'password');
     }
+
+    protected function getPollsNps($user = null)
+    {
+        $curl = curl_init();
+        $email = isset($user->email) ? $user->email : null;
+        $dni = isset($user->dni) ? $user->dni : null;
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => env('URL_GET_NPS') . '?plataforma='.env('NPS_PLATFORM').'&version='.env('NPS_VERSION').'&dni='.$dni.'&email='.$email,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
+
+        $response = curl_exec($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:' . curl_error($curl);
+        }
+
+        curl_close($curl);
+
+        return json_decode($response);
+    }
+
 }

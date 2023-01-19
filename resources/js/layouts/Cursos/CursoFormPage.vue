@@ -435,6 +435,7 @@ export default {
                     if (has_info_messages)
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
                     else {
+                        vue.queryStatus("curso", "crear_curso");
                         vue.showAlert(data.data.msg)
                         setTimeout(() => vue.closeModal(), 2000)
                     }

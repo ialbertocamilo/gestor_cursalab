@@ -160,6 +160,7 @@ export default {
     },
     methods: {
         async exportUsuariosDW() {
+            let vue = this
             this.showLoader()
             let UFC = this.$refs.EstadoFiltroComponent;
 
@@ -193,6 +194,7 @@ export default {
                         'Avance Curricula',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    vue.queryStatus("reportes", "descargar_reporte_curricula");
                     this.$emit('emitir-reporte', response)
                 }
 

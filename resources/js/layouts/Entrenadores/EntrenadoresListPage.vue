@@ -99,6 +99,7 @@
             urlSubida="/entrenamiento/entrenadores/asignar_masivo"
             v-model="modal.asignar_usuarios"
             @onClose="closeModalSubidaMasiva"
+            typeForm="asigna_alumnos"
         />
 
         <ModalVerAlumnos
