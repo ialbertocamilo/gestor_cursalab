@@ -111,7 +111,7 @@ if (isset($fullScreen)) {
 
         </div>
         <div id="content_polls" style="display: none;">
-        <div class="box-valoracion " id="box_valoracion">
+        <div class="box-valoracion hide" id="box_valoracion">
             <div class="box-closed" onclick="close_box_val()">
                 <i class="mdi mdi-close-circle" id="i_close_circle"></i>
             </div>
