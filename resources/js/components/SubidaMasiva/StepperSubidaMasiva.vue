@@ -189,6 +189,11 @@ export default {
         indicaciones: {
             type: Array,
             required: false,
+        },
+        typeForm: {
+            type: String,
+            default: '',
+            required: false,
         }
     },
     data() {
@@ -279,6 +284,9 @@ export default {
                 .then((res) => {
                     setTimeout(function () {
                         vue.progress_upload = 'ok'
+                        if(vue.typeForm === 'asigna_alumnos'){
+                            vue.queryStatus("checklist", "asignar_entrenador");
+                        }
                         if (res.data.info.data_no_procesada.length > 0) {
                             vue.uploadErrors = true;
                             vue.errores = res.data.info.data_no_procesada

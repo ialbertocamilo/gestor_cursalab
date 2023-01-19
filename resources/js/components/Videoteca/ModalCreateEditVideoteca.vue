@@ -296,6 +296,9 @@ export default {
                 // return
                 vue.$http.post(url, formData)
                     .then((res) => {
+                        if(vue.resource.tags.length>0){
+                            vue.queryStatus("videoteca", "crear_contenido");
+                        }
                         vue.showAlert(res.data.msg)
                         vue.closeModal()
                         vue.$emit('onConfirm')

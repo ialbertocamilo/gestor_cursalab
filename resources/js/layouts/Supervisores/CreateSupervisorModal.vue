@@ -44,10 +44,10 @@ export default {
                 hideCancelBtn:false,
                 hideConfirmBtn:false,
             },
-            
+
         }
     },
-    
+
     methods: {
         closeModal() {
             let vue = this
@@ -65,6 +65,7 @@ export default {
             }
             vue.showLoader();
             await axios.post('supervisores/set-usuarios-as-supervisor',vue.$refs.AsignacionXDni.usuarios_ok).then(()=>{
+                vue.queryStatus("supervisores", "segmenta_usuarios");
                 vue.hideLoader();
 
                 vue.$notification.success('Se ha asignado los supervisores correctamente.', {
@@ -72,7 +73,7 @@ export default {
                     showLeftIcn: false,
                     showCloseIcn: true,
                 });
-                
+
 
                 vue.resetSelects();
                 vue.$emit('onConfirm')

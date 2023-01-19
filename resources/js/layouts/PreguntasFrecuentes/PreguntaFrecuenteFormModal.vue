@@ -128,7 +128,7 @@ export default {
                 vue.$http
                     .post(url, formData)
                     .then(({data}) => {
-
+                        vue.queryStatus("preguntas_frecuentes", "crear_preguntas");
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')

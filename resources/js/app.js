@@ -29,6 +29,9 @@ Vue.mixin(common_http_request);
 Vue.mixin(commons);
 Vue.mixin(reports);
 
+import custom from "./custom";
+Vue.mixin(custom);
+
 Vue.use(VueNotification, {
     timer: 20,
     success: {

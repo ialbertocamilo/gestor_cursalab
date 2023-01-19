@@ -76,6 +76,7 @@ export default {
                 vue.$http.post(url, vue.archivos)
                     .then(({data}) => {
                         // console.log('DATA RESPONSE :: ', data)
+                        vue.queryStatus("multimedia", "crear_contenido");
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')

@@ -219,6 +219,7 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         vue.hideLoader()
+                        vue.queryStatus("usuarios", "crear_usuario");
                     })
                     .catch((error) => {
                         vue.resource.criterion_list_final = {}
