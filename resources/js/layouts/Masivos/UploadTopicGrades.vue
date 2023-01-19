@@ -206,6 +206,7 @@ export default {
 
                     if (!has_error_messages) {
                         const success_message = data.data.msg;
+                        vue.queryStatus("subida_notas", "subir_notas");
                         vue.showAlert(success_message);
                         vue.hideLoader();
                         return;
@@ -220,7 +221,6 @@ export default {
                         "No procesados_" + Math.floor(Math.random() * 1000),
                         "Se han encontrado observaciones. Descargar lista de observaciones"
                     );
-                    vue.queryStatus("subida_notas", "subir_notas");
                     vue.hideLoader();
                 }).catch(err=>{
                     vue.hideLoader();

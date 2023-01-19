@@ -204,6 +204,7 @@ if (isset($fullScreen)) {
         const USER_EMAIL = "{{ Auth::user()->email }}";
         const USER_DOCUMENT = "{{ Auth::user()->document }}";
         const USER_WORKSPACE = "{{ $workspace->name }}";
+        const USER_WORKSPACE_SLUG = "{{ $workspace->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
     <script src="{{ asset('js/app.js?v=' . date('Y-W')) }}"></script>

@@ -150,7 +150,7 @@ class LoginController extends Controller
     {
 
         try {
-            $nps = $this->getPollsNps($user->document);
+            $nps = $this->getPollsNps($user);
 
             if (!is_null($nps) && !$nps->error)
                 session(['nps' => $nps->data]);
@@ -199,9 +199,11 @@ class LoginController extends Controller
     protected function getPollsNps($user = null)
     {
         $curl = curl_init();
+        $email = isset($user->email) ? $user->email : null;
+        $dni = isset($user->dni) ? $user->dni : null;
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => env('URL_GET_NPS') . '?plataforma='.env('NPS_PLATFORM').'&version='.env('NPS_VERSION').'&dni='.$user,
+            CURLOPT_URL => env('URL_GET_NPS') . '?plataforma='.env('NPS_PLATFORM').'&version='.env('NPS_VERSION').'&dni='.$dni.'&email='.$email,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,

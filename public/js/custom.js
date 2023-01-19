@@ -50,6 +50,7 @@ function showStars(){
         if(element.seccion == 1)
             box_val_stars_question.innerHTML = element.pregunta
     });
+    sendSaveComment();
 }
 
 function showIcons( star ){
@@ -93,6 +94,7 @@ function showIcons( star ){
 
     }
     box_val_icons.classList.remove('hide');
+    sendSaveComment();
 }
 
 function showComment(element, value){
@@ -113,6 +115,7 @@ function showComment(element, value){
         }
     });
     box_val_comment.classList.remove('hide');
+    sendSaveComment();
 }
 
 function sendComment(){
@@ -176,7 +179,9 @@ function sendSaveComment(){
           "dni": USER_DOCUMENT,
           "email": USER_EMAIL,
           "workspace": USER_WORKSPACE,
-          "subworkspace": ""
+          "subworkspace": "",
+          "workspace_slug": USER_WORKSPACE_SLUG,
+          "platform": "gestor"
         }
       };
 
