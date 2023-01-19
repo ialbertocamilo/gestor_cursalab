@@ -235,7 +235,7 @@ export default {
     },
     mounted() {
         this.getModulos()
-        this.getEstadisticas()
+        this.getEstadisticas(false);
     },
     methods: {
         getModulos() {
@@ -247,12 +247,13 @@ export default {
                     })
                 })
         },
-        getEstadisticas() {
+        getEstadisticas(change = true) {
             let vue = this
             vue.getCardsInfo()
             vue.getEvaluacionesPorFecha()
             vue.getVisitas()
             vue.getTopBoticas()
+            if (change) vue.queryStatus("dashboard", "uso_filtro");
         },
         getCardsInfo(refresh = false) {
             let vue = this

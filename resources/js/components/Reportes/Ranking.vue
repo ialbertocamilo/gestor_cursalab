@@ -36,7 +36,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione un módulo"
                     @onBlur="fetchFiltersData"
-                    :maxValuesSelected="1"
+                    :maxValuesSelected="4"
                 />
                 <!--                <b-form-text text-variant="muted">Módulo</b-form-text>-->
                 <!--                <select v-model="modulo" class="form-control">-->
@@ -92,13 +92,16 @@
                 </div>
                 <v-divider class="col-12 mb-5 p-0"></v-divider>
             </template>
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
+            </div>
             <button
                 :disabled="modulo.length === 0"
                 type="submit"
                 class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
 
                 <i class="fas fa-download"></i>
-                <span>Descargars</span>
+                <span>Descargar</span>
             </button>
         </form>
     </v-main>
@@ -108,9 +111,10 @@
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import ListItem from "./partials/ListItem.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: {EstadoFiltro, ResumenExpand, ListItem},
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem},
     props: {
         workspaceId: 0,
         modules: Array,

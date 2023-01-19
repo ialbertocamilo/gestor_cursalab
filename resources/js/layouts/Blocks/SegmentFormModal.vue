@@ -158,6 +158,10 @@ export default {
             type:Boolean,
             default:false
         },
+        for_section: {
+            type: String,
+            default: null
+        }
     },
     data() {
         return {
@@ -180,7 +184,7 @@ export default {
             modalInfoOptions: {
                 ref: 'SegmentAlertModal',
                 open: false,
-                title: null, 
+                title: null,
                 resource:'data',
                 hideConfirmBtn: false,
                 persistent: true,
@@ -207,7 +211,7 @@ export default {
             vue.modalInfoOptions.hideConfirmBtn = false;
             vue.criteriaIndexModal = 0;
             vue.stackModals.continues = [];
-            
+
             // clean segment_by_document_clean
             vue.segment_by_document_clean = !vue.segment_by_document_clean;
 
@@ -251,9 +255,9 @@ export default {
 
                 for (let i = 0; i < criterians.length; i++) {
                     const { code, values_selected } = criterians[i];
-                    
+
                     if(code === current) {
-                        cri_state = true;  
+                        cri_state = true;
                         cri_data = values_selected ? values_selected.length > 0 : false;
                         break;
                     }
@@ -280,12 +284,12 @@ export default {
                 const { criteria_selected } = stackSegments[i];
 
                 const stateVerify = VerifyCodeAndValues(criteria_selected, current);
-                const stateMessage = SetMessageByCurrent(CustomMessages[current], stateVerify, i + 1); 
+                const stateMessage = SetMessageByCurrent(CustomMessages[current], stateVerify, i + 1);
 
                 if(stateMessage.state) stackMessage.push(stateMessage);
             }
 
-            return stackMessage; 
+            return stackMessage;
         },
         setAndOpenAlertModal(responseCheck) {
             const vue = this;
@@ -300,7 +304,7 @@ export default {
                 const { cri_state, cri_data } = responseData.detail;
 
                 if(cri_state && !cri_data) vue.modalInfoOptions.hideConfirmBtn = true;
-                else vue.modalInfoOptions.hideConfirmBtn = false;                    
+                else vue.modalInfoOptions.hideConfirmBtn = false;
 
                 if(vue.criteriaIndexModal === i) {
                     vue.criteriaIndexModal = i + 1;
@@ -337,22 +341,22 @@ export default {
             const responseCheck = vue.checkIfExistCriteria(vue.segments, 'module');
 
             let state = true;
-            
+
             if(responseCheck.length) {
                 if(vue.criteriaIndexModal) {
                     const continuesCount = vue.stackModals.continues.length;
 
-                    if(vue.criteriaIndexModal === continuesCount){ 
-                        state = true; 
+                    if(vue.criteriaIndexModal === continuesCount){
+                        state = true;
                     } else {
                         vue.setAndOpenAlertModal(responseCheck);
                         state = false;
-                    } 
+                    }
                 } else {
                     vue.setAndOpenAlertModal(responseCheck);
                     state = false;
                 }
-            } 
+            }
 
             return state;
         },
@@ -379,7 +383,7 @@ export default {
             if(vue.segments.length && vue.tabs === 0) {
                 const state = vue.showModalCondition();
                 if(!state) return;
-            } 
+            }
             // === check criteria and open alert === SEGMENTACION DIRECTA ===
 
             // if (validateForm && validateSelectedModules) {
@@ -399,8 +403,20 @@ export default {
                         vue.$emit("onConfirm");
                         vue.closeModal();
                         vue.showAlert(data.data.msg);
-                        
+
                         vue.hideLoader();
+                        if (vue.for_section == "aulas_virtuales"){
+                            vue.queryStatus(
+                                "aulas_virtuales",
+                                "configura_anfitrion"
+                            );
+                        }
+                        else if (vue.for_section == "supervisores"){
+                            vue.queryStatus(
+                                "supervisores",
+                                "crear_supervisor"
+                            );
+                        }
                     })
                     .catch(error => {
                         if (error && error.errors) vue.errors = error.errors;

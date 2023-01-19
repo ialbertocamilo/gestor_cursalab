@@ -66,6 +66,12 @@ export default {
                     vue.$emit('onConfirm', emitData)
                     vue.showAlert(data.data.msg, data.type)
                     vue.hideLoader()
+
+                    if(vue.options.ref != null && vue.options.ref != undefined && vue.options.ref != ""){
+                        if(vue.options.ref =="UsuarioStatusModal"){
+                            vue.queryStatus("usuarios", "actualiza_estado");
+                        }
+                    }
                 })
                 .catch((error) => {
                     if (error.http_code === 422){

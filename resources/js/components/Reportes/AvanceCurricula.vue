@@ -62,7 +62,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
                     @onBlur="fetchFiltersCareerData"
-                    :maxValuesSelected="1"
+                    :maxValuesSelected="4"
                 />
 
 
@@ -114,6 +114,11 @@
             </div>
 
             <v-divider class="col-12 p-0 m-0"></v-divider>
+
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
+            </div>
+
             <CheckValidar ref="checkValidacion" />
             <div class="col-sm-12 mb-3 mt-4">
                 <div class="col-sm-6 pl-2">
@@ -135,8 +140,9 @@ import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
 import { mapState } from "vuex";
 import CheckValidar from "./partials/CheckValidar.vue";
+import FiltersNotification from "../globals/FiltersNotification.vue";
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem, CheckValidar },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar },
     props: {
         workspaceId: 0,
         modules: Array,
@@ -160,6 +166,7 @@ export default {
     },
     methods: {
         async exportUsuariosDW() {
+            let vue = this
             this.showLoader()
             let UFC = this.$refs.EstadoFiltroComponent;
 
@@ -193,6 +200,7 @@ export default {
                         'Avance Curricula',
                         this.generateNamesString(this.modules, this.modulo)
                     )
+                    vue.queryStatus("reportes", "descargar_reporte_curricula");
                     this.$emit('emitir-reporte', response)
                 }
 

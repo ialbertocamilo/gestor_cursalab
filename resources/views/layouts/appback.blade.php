@@ -1,12 +1,15 @@
 @php
-use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\DB;
 
-$user = auth()->user();
-$roles = $user->getRoles();
-$subworkspace = get_current_workspace();
-$accounts_count = \App\Models\Account::where('active', ACTIVE)->where('workspace_id', $subworkspace->parent_id ?? NULL)->count();
+    $user = auth()->user();
+    $roles = $user->getRoles();
+    $subworkspace = get_current_workspace();
+    $accounts_count = \App\Models\Account::where('active', ACTIVE)
+        ->where('workspace_id', $subworkspace->parent_id ?? null)
+        ->count();
 
-$show_meeting_section = $accounts_count > 0 ? "admin" : "admin_DISABLE";
+    $show_meeting_section = $accounts_count > 0 ? "admin" : "admin_DISABLE";
+    $workspace = get_current_workspace();
 @endphp
 
 @include('layouts.header')
@@ -107,12 +110,112 @@ if (isset($fullScreen)) {
             @yield('content')
 
         </div>
+        <div id="content_polls" style="display: none;">
+        <div class="box-valoracion hide" id="box_valoracion">
+            <div class="box-closed" onclick="close_box_val()">
+                <i class="mdi mdi-close-circle" id="i_close_circle"></i>
+            </div>
+            <div class="box-item-val val-init" id="box_val_init" onclick="showStars()">
+                <div class="itemb">
+                    <p id="box_val_init_btn_text">Ayúdanos a mejorar</p>
+                </div>
+            </div>
+            <div class="box-item-val hide" id="box_val_stars">
+                <div class="itemb">
+                    <p id="box_val_stars_question">¿Cómo valoras esta funcionalidad?</p>
+                </div>
+                <div class="box-stars">
+                    @for ($i = 1; $i < 11; $i++)
+                        <div class="i-star" onclick="showIcons(@php echo $i @endphp)">
+                            <i class="i-star-i mdi mdi-star-outline" id="@php echo 'i_star_'.$i @endphp"></i>
+                        </div>
+                    @endfor
+                </div>
+                <div class="box-saved">
+                    <i class="mdi mdi-check-circle" id="i_saved_stars"></i>
+                </div>
+            </div>
+            <div class="box-item-val hide" id="box_val_icons">
+                <div class="itemb">
+                    <p id="box_val_icons_question">¿Qué factor tuvo más impacto al usar esta funcionalidad?</p>
+                </div>
+                <div class="box-icons">
+                    <div id="box_val_icons_item_btn1" class="i-icon" data-char="" onclick="showComment(this)">
+                        <div class="i-img">
+                            <img id="box_val_icons_item_icon1" src="{{ asset('img/valoracion/automatica.png') }}" alt="automatica">
+                        </div>
+                        <span id="box_val_icons_item_text1">Automática</span>
+                    </div>
+                    <div id="box_val_icons_item_btn2" class="i-icon" data-char="" onclick="showComment(this)">
+                        <div class="i-img">
+                            <img id="box_val_icons_item_icon2" src="{{ asset('img/valoracion/didactica.png') }}" alt="didactica">
+                        </div>
+                        <span id="box_val_icons_item_text2">Didáctica</span>
+                    </div>
+                    <div id="box_val_icons_item_btn3" class="i-icon" data-char="" onclick="showComment(this)">
+                        <div class="i-img">
+                            <img id="box_val_icons_item_icon3" src="{{ asset('img/valoracion/innovadora.png') }}" alt="innovadora">
+                        </div>
+                        <span id="box_val_icons_item_text3">Innovadora</span>
+                    </div>
+                    <div id="box_val_icons_item_btn4" class="i-icon" data-char="" onclick="showComment(this)">
+                        <div class="i-img">
+                            <img id="box_val_icons_item_icon4" src="{{ asset('img/valoracion/practica.png') }}" alt="practica">
+                        </div>
+                        <span id="box_val_icons_item_text4">Práctica</span>
+                    </div>
+                </div>
+                <div class="box-saved">
+                    <i class="mdi mdi-check-circle" id="i_saved_icons"></i>
+                </div>
+            </div>
+            <div class="box-item-val hide" id="box_val_comment">
+                <div class="itemb">
+                    <p id="box_val_comment_question">¿Cómo podemos mejorar?</p>
+                </div>
+                <div class="box-comment">
+                    <textarea class="form-control txtarea_val" rows="4" placeholder="Coméntanos en qué podemos mejorar" id="box_val_comment_hint"></textarea>
+                </div>
+                <div class="box-send">
+                    <button type="button" class="btn-send" id="btn_send_val" onclick="sendComment()">
+                        <div class="hide spinner_btn_send" id="spinner_btn_send">
+                            <span class="spinner"></span>
+                        </div>
+                        <span id="txt_btn_send">Enviar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="box-valoracion-final hide val-final" id="box_val_final">
+            <div class="itemb">
+                <p>¡Gracias por tu feedback!</p>
+            </div>
+        </div>
+        </div>
     </div>
 </div>
 
 @section('js')
+    <script>
+        @if (session('nps'))
+            var nps_data = @php echo json_encode(session('nps')); @endphp;
+        @endif
+
+        const URL_SAVE_NPS = "@php echo env('URL_SAVE_NPS'); @endphp";
+        const USER_NAME = "{{ Auth::user()->name }}";
+        const USER_EMAIL = "{{ Auth::user()->email }}";
+        const USER_DOCUMENT = "{{ Auth::user()->document }}";
+        const USER_WORKSPACE = "{{ $workspace->name }}";
+        const USER_WORKSPACE_SLUG = "{{ $workspace->slug }}";
+    </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
     <script src="{{ asset('js/app.js?v=' . date('Y-W')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=' . date('Y-W-m')) }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#content_polls').css('display','block');
+        });
+    </script>
 
     @stack('libraries')
 

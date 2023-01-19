@@ -451,6 +451,7 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
+                        vue.queryStatus("aulas_virtuales", "crear_reunion");
 
                        /* setTimeout(() => {
                           vue.openFormModal(vue.modalInfoCreateMeeting, null, null, 'Reunión creada correctamente')

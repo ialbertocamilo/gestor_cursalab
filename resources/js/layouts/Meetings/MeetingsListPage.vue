@@ -22,6 +22,7 @@
                 <SegmentFormModal
                     :options="modalFormSegmentationOptions"
                     width="55vw"
+                    for_section="aulas_virtuales"
                     model_type="App\Models\Workspace"
                     :model_id="null"
                     :ref="modalFormSegmentationOptions.ref"

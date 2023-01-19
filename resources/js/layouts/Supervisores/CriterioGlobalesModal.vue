@@ -119,6 +119,7 @@ export default {
                         await axios.post('supervisores/set-criterio-globales-supervisor',data)
                             .then(({data})=>{
                                 const _data = data.data.data;
+                                vue.queryStatus("supervisores", "segmenta_criterios");
                                 vue.hideLoader();
 
                                 const msg1 = 'Se ha asignado los criterios a los supervisores correctamente.';

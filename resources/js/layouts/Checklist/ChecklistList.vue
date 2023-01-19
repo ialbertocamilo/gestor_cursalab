@@ -167,6 +167,7 @@ export default {
             vue.$http.post(`/entrenamiento/checklists/save_checklist`, vue.dataModalChecklist)
                 .then((res) => {
                     // console.log(res);
+                    vue.queryStatus("checklist", "crear_checklist");
                     vue.closeModalCreateEditChecklist();
                     vue.refreshDefaultTable(vue.dataTable, vue.filters);
                     // $("#pageloader").fadeOut();
