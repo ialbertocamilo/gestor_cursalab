@@ -448,7 +448,7 @@ class Course extends BaseModel
         $schools = $user_courses->groupBy('schools.*.id');
         $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
             $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
-        })
+        })->with('status:id,code')
             ->where('user_id', $user->id)
             ->get();
 
@@ -481,14 +481,24 @@ class Course extends BaseModel
 
                 $topics = $course->topics->where('active', ACTIVE);
                 $summary_topics = $summary_topics_user->whereIn('topic_id', $topics->pluck('id'));
-
+                $before_topic=null;
                 if ($summary_topics->count() > 0) {
                     foreach ($topics as $topic) {
                         $topics_view = $summary_topics->where('topic_id', $topic->id)->first();
+                        $topic_requirement = $topic->requirements->first();
+                        if($topic_requirement){
+                            $requirement_summary = $summary_topics->where('topic_id',$topic_requirement?->requirement_id)->first();
+                            $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
+                            if(!$available_topic){
+                                $last_topic = ($before_topic?->id);
+                                break;
+                            }
+                        }
+                        $before_topic=$topic;
                         $last_item = ($topic->id == $topics->last()->id);
                         if ($topics_view?->views) {
                             $passed_tests = $summary_topics->where('topic_id', $topic->id)->where('passed', 1)->first();
-                            if ($topic->evaluation_type?->code == 'calificada' && $passed_tests && !$last_item) continue;
+                            if ($topic->evaluation_type?->code == 'qualified' && $passed_tests && !$last_item) continue;
                             $last_topic = ($topic->id);
                             break;
                         }
@@ -498,7 +508,6 @@ class Course extends BaseModel
                         }
                     }
                 }
-
                 // UC rule
                 $course_name = $course->name;
                 $tags = [];
