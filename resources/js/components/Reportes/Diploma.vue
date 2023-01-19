@@ -36,7 +36,7 @@
                     multiple
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
-                    :maxValuesSelected="1"
+                    :maxValuesSelected="4"
                 />
 
                 <!--DefaultSelect
@@ -169,6 +169,9 @@
                 </div>
             </v-row>
              <v-divider class="col-12 mb-5 p-0"></v-divider>
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
+            </div>
              <div class="col-sm-6 mb-3">
                 <div class="col-sm-8 pl-0">
                     <button
@@ -189,9 +192,10 @@
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import ListItem from "./partials/ListItem.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem },
     props: {
         modules:{ type: Array, required: true },
         workspaceId:{ type: Number, required: true },

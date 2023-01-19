@@ -51,7 +51,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersCareerData"
-                            :maxValuesSelected="1"
+                            :maxValuesSelected="4"
                         />
 
                     </div>
@@ -170,6 +170,9 @@
             </div>
 
             <v-divider class="col-12 p-0 my-2"></v-divider>
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
+            </div>
             <div class="col-sm-12 mb-3">
                 <div class="col-sm-6 pl-2">
                     <button
@@ -189,9 +192,10 @@
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem },
     props: {
         workspaceId: 0,
         modules: Array,
