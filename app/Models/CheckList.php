@@ -149,13 +149,13 @@ class CheckList extends BaseModel
                             $aprobado = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
 
                             $disponible = $r_x_c && $r_x_c->status_id === $aprobado->id;
-                            $checklistRpta = ChecklistRpta::checklist($checklist->id)->where('course_id',$curso->id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
+                            $checklistRpta = ChecklistRpta::checklist($checklist->id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
                             if (!$checklistRpta) {
                                 $checklistRpta = ChecklistRpta::create([
                                     'checklist_id' => $checklist->id,
                                     'student_id' => $alumno_id,
-                                    'course_id' => $curso->id,
-                                    'school_id' => $curso->categoria['id'],
+                                    'course_id' => $curso->id, //deprecated
+                                    'school_id' => $curso->categoria['id'], //deprecated
                                     'coach_id' => $entrenador_id,
                                     'percent' => 0
                                 ]);
