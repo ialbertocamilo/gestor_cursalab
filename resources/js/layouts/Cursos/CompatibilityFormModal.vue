@@ -13,7 +13,7 @@
                 <v-row>
                     <v-col cols="12">
                             <!-- :rules="rules.lista_escuelas" -->
-                        <DefaultAutocomplete
+<!--                         <DefaultAutocomplete
                             dense
                             label="Cursos compatibles"
                             v-model="resource.compatibilities"
@@ -24,9 +24,8 @@
                             :show-select-all="false"
                             :count-show-values="10"
                         />
-
-                       <!--  <DefaultAutocompleteOrder
-                            return-object
+ -->
+                        <DefaultAutocompleteOrder
                             dense
                             label="Cursos compatibles"
                             v-model="resource.compatibilities"
@@ -35,7 +34,9 @@
                             item-text="name"
                             item-id="id"
                             :count-show-values="Infinity"
-                        /> -->
+                            :only-one="true" 
+                        />
+                        <!-- prop: only-one indica que ese componente no depende de otro  -->
 
                     </v-col>
                 </v-row>
