@@ -261,13 +261,12 @@ class AuthController extends Controller
     public function validateRecaptcha($siteToken) {
         $secretKey = env('RECAPTCHA_TOKEN'); 
         $recaptchaUrl = env('RECAPTCHA_BASE_URL'); 
-
         // enviamos una peticion a recaptcha google
-        $responseRecaptcha = Http::post($recaptchaUrl, [
-            'response' => $siteToken,
-            'secret' => $secretKey
+        $responseRecaptcha = Http::asForm()->post($recaptchaUrl, [
+            'secret' => $secretKey,
+            'response' => $siteToken
         ]);
-
+        
         return $responseRecaptcha->json();
     }
 }
