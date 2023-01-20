@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\ApiRest;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginAppRequest;
 use App\Models\Error;
@@ -10,6 +9,7 @@ use App\Models\Usuario;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 use Illuminate\Http\Request;
 
@@ -30,6 +30,17 @@ class AuthController extends Controller
 
         try {
             $data = $request->validated();
+
+            // verificar el sitetoken - recapcha
+            $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
+            $recaptcha_response = NULL;
+            if($g_recaptcha_response) {
+                //validar token recaptcha
+                $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
+                if(!$recaptcha_response['success']) {
+                    return $this->error('error at Recaptcha', 500, $recaptcha_response);
+                }
+            }
 
             $userinput = strip_tags($data['user']);
             $password = strip_tags($data['password']);
@@ -66,8 +77,13 @@ class AuthController extends Controller
                         return $this->error($message, 401);
                     }
                 }
+                
+                $responseUserData = $this->respondWithDataAndToken($data);
+                // asignamos el payload del recaptcha
+                $responseUserData['recaptcha'] = $recaptcha_response;
+                
+                return response()->json($responseUserData); 
 
-                return $this->respondWithDataAndToken($data);
             } else {
                 return $this->error('No autorizado.', 401);
             }
@@ -168,13 +184,13 @@ class AuthController extends Controller
         $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
         $config_data->filters = config('data.filters');
 
-        return response()->json([
+        return [
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
             //            'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
-        ]);
+        ];
     }
 
     /**
@@ -240,5 +256,18 @@ class AuthController extends Controller
                 throw new SubworkspaceInMaintenance();
             }
         }
+    }
+
+    public function validateRecaptcha($siteToken) {
+        $secretKey = env('RECAPTCHA_TOKEN'); 
+        $recaptchaUrl = env('RECAPTCHA_BASE_URL'); 
+
+        // enviamos una peticion a recaptcha google
+        $responseRecaptcha = Http::post($recaptchaUrl, [
+            'response' => $siteToken,
+            'secret' => $secretKey
+        ]);
+
+        return $responseRecaptcha->json();
     }
 }
