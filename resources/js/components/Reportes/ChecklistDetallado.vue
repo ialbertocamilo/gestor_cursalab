@@ -338,7 +338,7 @@ export default {
          */
         async fetchChecklist(){
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist`
             const res = await axios.get(url);
             this.Checklist_items = res.data;
         },
