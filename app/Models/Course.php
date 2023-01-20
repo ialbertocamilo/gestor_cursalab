@@ -479,7 +479,7 @@ class Course extends BaseModel
                 $course_status = self::getCourseStatusByUser($user, $course);
                 if ($course_status['status'] == 'completado') $school_completed++;
 
-                $topics = $course->topics->where('active', ACTIVE);
+                $topics = $course->topics->sortBy('position')->where('active', ACTIVE);
                 $summary_topics = $summary_topics_user->whereIn('topic_id', $topics->pluck('id'));
                 $before_topic=null;
                 if ($summary_topics->count() > 0) {
