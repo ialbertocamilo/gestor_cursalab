@@ -433,10 +433,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->save();
 
-            if ($user) {
-                if (!$from_massive) {
-                    SummaryUser::updateUserData($user, false);
-                }
+            if ($user && !$from_massive) {
+                SummaryUser::updateUserData($user, false);
             }
 
             DB::commit();
