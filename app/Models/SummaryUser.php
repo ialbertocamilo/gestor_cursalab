@@ -52,8 +52,7 @@ class SummaryUser extends Summary
         if ($comes_from_evaluation)
             $user_data['last_time_evaluated_at'] = now();
 
-
-        info($user_data);
+        // info($user_data);
 
         $row_user->update($user_data);
 
