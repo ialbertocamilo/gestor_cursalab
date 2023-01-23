@@ -70,9 +70,9 @@ class UpdateSummariesData extends Command
                 $courses = Course::disableCache()->whereIn('id', $course_ids)->get();
 
                 $now = now();
-                $this->newLine();
+                // $this->newLine();
                 $implode = implode(',', $courses->pluck('id')->toArray());
-                $this->line("[{$now}] Updating courses => {$implode}");
+                // $this->line("[{$now}] Updating courses => {$implode}");
                 foreach ($courses as $course) {
 //                    $now = now();
 //                    $this->line("[{$now}] Updating course => $course->name");
@@ -82,12 +82,12 @@ class UpdateSummariesData extends Command
             }
 
             if ($user->summary_user_update) {
-                $now = now();
-                $this->line("[{$now}] [getCurrentRowOrCreate] Updating summary user => $user->document");
+                // $now = now();
+                // $this->line("[{$now}] [getCurrentRowOrCreate] Updating summary user => $user->document");
                 SummaryUser::getCurrentRowOrCreate($user, $user);
 
                 $now = now();
-                $this->line("[{$now}] [updateUserData] Updating summary user => $user->id - $user->document");
+                // $this->line("[{$now}] [updateUserData] Updating summary user => $user->id - $user->document");
                 SummaryUser::updateUserData($user);
 
             }
