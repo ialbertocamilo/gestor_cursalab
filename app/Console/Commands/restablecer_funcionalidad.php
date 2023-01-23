@@ -96,8 +96,15 @@ class restablecer_funcionalidad extends Command
         $exist=[];
         foreach ($summary_topic as $st) {
             $summary = SummaryTopic::disableCache()->where('user_id',$st['user_id'])->where('topic_id',$st['topic_id'])->first();
-            if(!$summary){
-                SummaryTopic::insert($st);
+            if($st['grade']>$summary->grade){
+                $summary->grade = $st['grade'];
+                $summary->passed = $st['passed']; 
+                $summary->answers = $st['answers']; 
+                $summary->last_time_evaluated_at = $st['last_time_evaluated_at']; 
+                $summary->status_id = $st['status_id']; 
+                $summary->correct_answers = $st['correct_answers'];
+                $summary->failed_answers = $st['failed_answers'];
+                $summary->save();
                 $topic = Topic::with('course')->where('id',$st['topic_id'])->first();
                 $user = User::where('id',$st['user_id'])->first();
                 SummaryCourse::getCurrentRowOrCreate($topic->course, $user);
@@ -108,7 +115,7 @@ class restablecer_funcionalidad extends Command
             }
             $_bar->advance();
         }
-        Storage::disk('public')->put('json/summary_topics_created.json', json_encode($exist));
+        Storage::disk('public')->put('json/summary_topics_created_2.json', json_encode($exist));
         $_bar->finish();
     }
     //Command to restores cycles
