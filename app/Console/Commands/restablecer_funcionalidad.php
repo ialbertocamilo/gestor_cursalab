@@ -101,7 +101,7 @@ class restablecer_funcionalidad extends Command
                 $topic = Topic::with('course')->where('id',$st['topic_id'])->first();
                 $user = User::where('id',$st['user_id'])->first();
                 SummaryCourse::getCurrentRowOrCreate($topic->course, $user);
-                SummaryCourse::updateUserData($course, $user, false);
+                SummaryCourse::updateUserData($topic->course, $user, false);
                 SummaryUser::updateUserData($user);
             }else{
                 $exist[]=$st;
