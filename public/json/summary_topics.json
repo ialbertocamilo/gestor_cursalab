@@ -1,6 +1,5 @@
 [
 	{
-		"id" : 4468739,
 		"user_id" : 85464,
 		"topic_id" : 148,
 		"attempts" : 1,
@@ -26,7 +25,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468738,
 		"user_id" : 85552,
 		"topic_id" : 151,
 		"attempts" : 0,
@@ -52,7 +50,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468734,
 		"user_id" : 85464,
 		"topic_id" : 120,
 		"attempts" : 1,
@@ -78,7 +75,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468737,
 		"user_id" : 85552,
 		"topic_id" : 149,
 		"attempts" : 0,
@@ -104,7 +100,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468736,
 		"user_id" : 85552,
 		"topic_id" : 118,
 		"attempts" : 0,
@@ -130,7 +125,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468732,
 		"user_id" : 85552,
 		"topic_id" : 120,
 		"attempts" : 1,
@@ -156,7 +150,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468733,
 		"user_id" : 85464,
 		"topic_id" : 118,
 		"attempts" : 0,
@@ -182,7 +175,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4336414,
 		"user_id" : 84378,
 		"topic_id" : 293,
 		"attempts" : 3,
@@ -208,7 +200,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468729,
 		"user_id" : 84378,
 		"topic_id" : 614,
 		"attempts" : 1,
@@ -234,7 +225,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468730,
 		"user_id" : 85464,
 		"topic_id" : 431,
 		"attempts" : 1,
@@ -260,7 +250,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468731,
 		"user_id" : 85560,
 		"topic_id" : 116,
 		"attempts" : 1,
@@ -286,7 +275,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468726,
 		"user_id" : 85552,
 		"topic_id" : 114,
 		"attempts" : 3,
@@ -312,7 +300,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468723,
 		"user_id" : 85464,
 		"topic_id" : 430,
 		"attempts" : 1,
@@ -338,7 +325,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468727,
 		"user_id" : 85552,
 		"topic_id" : 116,
 		"attempts" : 2,
@@ -364,7 +350,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468716,
 		"user_id" : 85655,
 		"topic_id" : 430,
 		"attempts" : 3,
@@ -390,7 +375,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468725,
 		"user_id" : 84378,
 		"topic_id" : 307,
 		"attempts" : 1,
@@ -416,7 +400,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468677,
 		"user_id" : 84399,
 		"topic_id" : 594,
 		"attempts" : 3,
@@ -442,7 +425,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468724,
 		"user_id" : 85560,
 		"topic_id" : 115,
 		"attempts" : 1,
@@ -468,7 +450,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3868834,
 		"user_id" : 74044,
 		"topic_id" : 294,
 		"attempts" : 2,
@@ -494,7 +475,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468721,
 		"user_id" : 85552,
 		"topic_id" : 115,
 		"attempts" : 1,
@@ -520,7 +500,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468722,
 		"user_id" : 58633,
 		"topic_id" : 431,
 		"attempts" : 1,
@@ -546,7 +525,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468706,
 		"user_id" : 29427,
 		"topic_id" : 347,
 		"attempts" : 1,
@@ -572,7 +550,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468719,
 		"user_id" : 84378,
 		"topic_id" : 306,
 		"attempts" : 1,
@@ -598,7 +575,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468720,
 		"user_id" : 58633,
 		"topic_id" : 120,
 		"attempts" : 1,
@@ -624,7 +600,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468708,
 		"user_id" : 85464,
 		"topic_id" : 116,
 		"attempts" : 1,
@@ -650,7 +625,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468718,
 		"user_id" : 85552,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -676,7 +650,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468717,
 		"user_id" : 58633,
 		"topic_id" : 118,
 		"attempts" : 0,
@@ -702,7 +675,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468709,
 		"user_id" : 84378,
 		"topic_id" : 305,
 		"attempts" : 1,
@@ -728,7 +700,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468697,
 		"user_id" : 31723,
 		"topic_id" : 347,
 		"attempts" : 1,
@@ -754,7 +725,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468715,
 		"user_id" : 85552,
 		"topic_id" : 430,
 		"attempts" : 1,
@@ -780,7 +750,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468704,
 		"user_id" : 58633,
 		"topic_id" : 3878,
 		"attempts" : 1,
@@ -806,7 +775,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468713,
 		"user_id" : 85655,
 		"topic_id" : 116,
 		"attempts" : 2,
@@ -832,7 +800,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4129790,
 		"user_id" : 60704,
 		"topic_id" : 3895,
 		"attempts" : 2,
@@ -858,7 +825,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468711,
 		"user_id" : 85552,
 		"topic_id" : 431,
 		"attempts" : 1,
@@ -884,7 +850,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468714,
 		"user_id" : 85466,
 		"topic_id" : 152,
 		"attempts" : 1,
@@ -910,7 +875,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468712,
 		"user_id" : 85466,
 		"topic_id" : 151,
 		"attempts" : 0,
@@ -936,7 +900,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468691,
 		"user_id" : 85466,
 		"topic_id" : 149,
 		"attempts" : 0,
@@ -962,7 +925,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468710,
 		"user_id" : 85655,
 		"topic_id" : 114,
 		"attempts" : 1,
@@ -988,7 +950,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468703,
 		"user_id" : 85466,
 		"topic_id" : 3878,
 		"attempts" : 1,
@@ -1014,7 +975,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468700,
 		"user_id" : 84378,
 		"topic_id" : 304,
 		"attempts" : 1,
@@ -1040,7 +1000,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468637,
 		"user_id" : 85655,
 		"topic_id" : 115,
 		"attempts" : 2,
@@ -1066,7 +1025,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468698,
 		"user_id" : 85464,
 		"topic_id" : 115,
 		"attempts" : 1,
@@ -1092,7 +1050,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468687,
 		"user_id" : 58633,
 		"topic_id" : 430,
 		"attempts" : 1,
@@ -1118,7 +1075,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468702,
 		"user_id" : 85466,
 		"topic_id" : 429,
 		"attempts" : 0,
@@ -1144,7 +1100,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468684,
 		"user_id" : 838,
 		"topic_id" : 3854,
 		"attempts" : 0,
@@ -1170,7 +1125,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468701,
 		"user_id" : 85466,
 		"topic_id" : 428,
 		"attempts" : 0,
@@ -1196,7 +1150,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468695,
 		"user_id" : 84378,
 		"topic_id" : 303,
 		"attempts" : 1,
@@ -1222,7 +1175,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468692,
 		"user_id" : 85466,
 		"topic_id" : 426,
 		"attempts" : 1,
@@ -1248,7 +1200,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468680,
 		"user_id" : 85522,
 		"topic_id" : 116,
 		"attempts" : 3,
@@ -1274,7 +1225,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4149345,
 		"user_id" : 16303,
 		"topic_id" : 430,
 		"attempts" : 1,
@@ -1300,7 +1250,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3871704,
 		"user_id" : 12027,
 		"topic_id" : 294,
 		"attempts" : 1,
@@ -1326,7 +1275,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468686,
 		"user_id" : 85464,
 		"topic_id" : 114,
 		"attempts" : 1,
@@ -1352,7 +1300,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3896058,
 		"user_id" : 12027,
 		"topic_id" : 295,
 		"attempts" : 0,
@@ -1378,7 +1325,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3903920,
 		"user_id" : 12027,
 		"topic_id" : 296,
 		"attempts" : 0,
@@ -1404,7 +1350,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4004153,
 		"user_id" : 12027,
 		"topic_id" : 304,
 		"attempts" : 0,
@@ -1430,7 +1375,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468673,
 		"user_id" : 84378,
 		"topic_id" : 302,
 		"attempts" : 1,
@@ -1456,7 +1400,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468678,
 		"user_id" : 15083,
 		"topic_id" : 347,
 		"attempts" : 1,
@@ -1482,7 +1425,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468661,
 		"user_id" : 85597,
 		"topic_id" : 149,
 		"attempts" : 0,
@@ -1508,7 +1450,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468690,
 		"user_id" : 22159,
 		"topic_id" : 347,
 		"attempts" : 1,
@@ -1534,7 +1475,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468685,
 		"user_id" : 838,
 		"topic_id" : 3855,
 		"attempts" : 1,
@@ -1560,7 +1500,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468689,
 		"user_id" : 23135,
 		"topic_id" : 75,
 		"attempts" : 1,
@@ -1586,7 +1525,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468670,
 		"user_id" : 85597,
 		"topic_id" : 148,
 		"attempts" : 2,
@@ -1612,7 +1550,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3862719,
 		"user_id" : 74044,
 		"topic_id" : 290,
 		"attempts" : 1,
@@ -1638,7 +1575,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468682,
 		"user_id" : 85466,
 		"topic_id" : 148,
 		"attempts" : 1,
@@ -1664,7 +1600,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3957300,
 		"user_id" : 7467,
 		"topic_id" : 611,
 		"attempts" : 0,
@@ -1690,7 +1625,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4414102,
 		"user_id" : 22146,
 		"topic_id" : 426,
 		"attempts" : 3,
@@ -1716,7 +1650,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468681,
 		"user_id" : 23135,
 		"topic_id" : 74,
 		"attempts" : 0,
@@ -1742,7 +1675,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3984499,
 		"user_id" : 8705,
 		"topic_id" : 306,
 		"attempts" : 3,
@@ -1768,7 +1700,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468683,
 		"user_id" : 58633,
 		"topic_id" : 426,
 		"attempts" : 1,
@@ -1794,7 +1725,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3945190,
 		"user_id" : 74044,
 		"topic_id" : 610,
 		"attempts" : 1,
@@ -1820,7 +1750,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468675,
 		"user_id" : 84378,
 		"topic_id" : 301,
 		"attempts" : 1,
@@ -1846,7 +1775,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468636,
 		"user_id" : 838,
 		"topic_id" : 3853,
 		"attempts" : 0,
@@ -1872,7 +1800,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468672,
 		"user_id" : 58633,
 		"topic_id" : 428,
 		"attempts" : 0,
@@ -1898,7 +1825,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468679,
 		"user_id" : 85466,
 		"topic_id" : 118,
 		"attempts" : 0,
@@ -1924,7 +1850,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468658,
 		"user_id" : 85522,
 		"topic_id" : 115,
 		"attempts" : 3,
@@ -1950,7 +1875,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468664,
 		"user_id" : 85464,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -1976,7 +1900,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468671,
 		"user_id" : 85466,
 		"topic_id" : 120,
 		"attempts" : 1,
@@ -2002,7 +1925,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3910362,
 		"user_id" : 7467,
 		"topic_id" : 299,
 		"attempts" : 0,
@@ -2028,7 +1950,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468669,
 		"user_id" : 85375,
 		"topic_id" : 3878,
 		"attempts" : 1,
@@ -2054,7 +1975,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468654,
 		"user_id" : 84399,
 		"topic_id" : 593,
 		"attempts" : 1,
@@ -2080,7 +2000,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468659,
 		"user_id" : 58633,
 		"topic_id" : 429,
 		"attempts" : 0,
@@ -2106,7 +2025,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468668,
 		"user_id" : 85375,
 		"topic_id" : 429,
 		"attempts" : 0,
@@ -2132,7 +2050,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468660,
 		"user_id" : 85375,
 		"topic_id" : 428,
 		"attempts" : 0,
@@ -2158,7 +2075,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468666,
 		"user_id" : 85466,
 		"topic_id" : 431,
 		"attempts" : 1,
@@ -2184,7 +2100,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468663,
 		"user_id" : 85375,
 		"topic_id" : 426,
 		"attempts" : 1,
@@ -2210,7 +2125,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468632,
 		"user_id" : 85456,
 		"topic_id" : 115,
 		"attempts" : 2,
@@ -2236,7 +2150,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468651,
 		"user_id" : 85466,
 		"topic_id" : 430,
 		"attempts" : 2,
@@ -2262,7 +2175,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468656,
 		"user_id" : 21065,
 		"topic_id" : 117,
 		"attempts" : 2,
@@ -2288,7 +2200,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468631,
 		"user_id" : 85597,
 		"topic_id" : 3878,
 		"attempts" : 1,
@@ -2314,7 +2225,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468657,
 		"user_id" : 85375,
 		"topic_id" : 120,
 		"attempts" : 1,
@@ -2340,7 +2250,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3882824,
 		"user_id" : 9366,
 		"topic_id" : 297,
 		"attempts" : 0,
@@ -2366,7 +2275,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468648,
 		"user_id" : 85522,
 		"topic_id" : 114,
 		"attempts" : 3,
@@ -2392,7 +2300,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468634,
 		"user_id" : 35975,
 		"topic_id" : 3742,
 		"attempts" : 0,
@@ -2418,7 +2325,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3989523,
 		"user_id" : 10138,
 		"topic_id" : 303,
 		"attempts" : 0,
@@ -2444,7 +2350,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468625,
 		"user_id" : 85375,
 		"topic_id" : 152,
 		"attempts" : 2,
@@ -2470,7 +2375,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468652,
 		"user_id" : 5682,
 		"topic_id" : 3828,
 		"attempts" : 0,
@@ -2496,7 +2400,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3860204,
 		"user_id" : 10138,
 		"topic_id" : 293,
 		"attempts" : 0,
@@ -2522,7 +2425,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4412881,
 		"user_id" : 27749,
 		"topic_id" : 430,
 		"attempts" : 3,
@@ -2548,7 +2450,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468628,
 		"user_id" : 74044,
 		"topic_id" : 661,
 		"attempts" : 1,
@@ -2574,7 +2475,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4413032,
 		"user_id" : 27749,
 		"topic_id" : 431,
 		"attempts" : 2,
@@ -2600,7 +2500,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468650,
 		"user_id" : 5682,
 		"topic_id" : 3829,
 		"attempts" : 0,
@@ -2626,7 +2525,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4333429,
 		"user_id" : 84063,
 		"topic_id" : 671,
 		"attempts" : 2,
@@ -2652,7 +2550,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468649,
 		"user_id" : 5682,
 		"topic_id" : 3764,
 		"attempts" : 1,
@@ -2678,7 +2575,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468635,
 		"user_id" : 85466,
 		"topic_id" : 116,
 		"attempts" : 1,
@@ -2704,7 +2600,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468646,
 		"user_id" : 5682,
 		"topic_id" : 3842,
 		"attempts" : 2,
@@ -2730,7 +2625,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468645,
 		"user_id" : 85522,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -2756,7 +2650,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4425054,
 		"user_id" : 5682,
 		"topic_id" : 3841,
 		"attempts" : 1,
@@ -2782,7 +2675,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468615,
 		"user_id" : 20500,
 		"topic_id" : 347,
 		"attempts" : 1,
@@ -2808,7 +2700,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3991552,
 		"user_id" : 12080,
 		"topic_id" : 303,
 		"attempts" : 0,
@@ -2834,7 +2725,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468633,
 		"user_id" : 85655,
 		"topic_id" : 431,
 		"attempts" : 1,
@@ -2860,7 +2750,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468626,
 		"user_id" : 85466,
 		"topic_id" : 115,
 		"attempts" : 2,
@@ -2886,7 +2775,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4307589,
 		"user_id" : 84063,
 		"topic_id" : 662,
 		"attempts" : 1,
@@ -2912,7 +2800,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468630,
 		"user_id" : 85655,
 		"topic_id" : 113,
 		"attempts" : 2,
@@ -2938,7 +2825,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468618,
 		"user_id" : 85456,
 		"topic_id" : 114,
 		"attempts" : 1,
@@ -2964,7 +2850,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1563334,
 		"user_id" : 57313,
 		"topic_id" : 3047,
 		"attempts" : 1,
@@ -2990,7 +2875,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3691710,
 		"user_id" : 57313,
 		"topic_id" : 3469,
 		"attempts" : null,
@@ -3016,7 +2900,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468591,
 		"user_id" : 35975,
 		"topic_id" : 3721,
 		"attempts" : 2,
@@ -3042,7 +2925,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468616,
 		"user_id" : 85597,
 		"topic_id" : 429,
 		"attempts" : 0,
@@ -3068,7 +2950,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468624,
 		"user_id" : 58214,
 		"topic_id" : 3827,
 		"attempts" : 1,
@@ -3094,7 +2975,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3879052,
 		"user_id" : 10398,
 		"topic_id" : 297,
 		"attempts" : 0,
@@ -3120,7 +3000,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468611,
 		"user_id" : 26652,
 		"topic_id" : 116,
 		"attempts" : 1,
@@ -3146,7 +3025,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468595,
 		"user_id" : 85564,
 		"topic_id" : 431,
 		"attempts" : 1,
@@ -3172,7 +3050,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468623,
 		"user_id" : 85375,
 		"topic_id" : 151,
 		"attempts" : 0,
@@ -3198,7 +3075,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468617,
 		"user_id" : 85466,
 		"topic_id" : 114,
 		"attempts" : 1,
@@ -3224,7 +3100,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468620,
 		"user_id" : 58214,
 		"topic_id" : 3825,
 		"attempts" : 1,
@@ -3250,7 +3125,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468622,
 		"user_id" : 85375,
 		"topic_id" : 149,
 		"attempts" : 0,
@@ -3276,7 +3150,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1962144,
 		"user_id" : 35975,
 		"topic_id" : 3189,
 		"attempts" : 1,
@@ -3302,7 +3175,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468621,
 		"user_id" : 85375,
 		"topic_id" : 148,
 		"attempts" : 1,
@@ -3328,7 +3200,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468619,
 		"user_id" : 85375,
 		"topic_id" : 118,
 		"attempts" : 0,
@@ -3354,7 +3225,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468609,
 		"user_id" : 58214,
 		"topic_id" : 3822,
 		"attempts" : 1,
@@ -3380,7 +3250,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468600,
 		"user_id" : 85456,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -3406,7 +3275,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468610,
 		"user_id" : 85466,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -3432,7 +3300,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468614,
 		"user_id" : 85375,
 		"topic_id" : 431,
 		"attempts" : 1,
@@ -3458,7 +3325,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468596,
 		"user_id" : 85597,
 		"topic_id" : 426,
 		"attempts" : 1,
@@ -3484,7 +3350,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468604,
 		"user_id" : 44571,
 		"topic_id" : 2537,
 		"attempts" : 3,
@@ -3510,7 +3375,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3864175,
 		"user_id" : 9423,
 		"topic_id" : 290,
 		"attempts" : 0,
@@ -3536,7 +3400,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3913350,
 		"user_id" : 9423,
 		"topic_id" : 300,
 		"attempts" : 0,
@@ -3562,7 +3425,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468612,
 		"user_id" : 85375,
 		"topic_id" : 430,
 		"attempts" : 1,
@@ -3588,7 +3450,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468607,
 		"user_id" : 85375,
 		"topic_id" : 116,
 		"attempts" : 1,
@@ -3614,7 +3475,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3892577,
 		"user_id" : 10398,
 		"topic_id" : 295,
 		"attempts" : 0,
@@ -3640,7 +3500,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3895294,
 		"user_id" : 9923,
 		"topic_id" : 295,
 		"attempts" : 0,
@@ -3666,7 +3525,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468602,
 		"user_id" : 58214,
 		"topic_id" : 347,
 		"attempts" : 1,
@@ -3692,7 +3550,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468606,
 		"user_id" : 85375,
 		"topic_id" : 115,
 		"attempts" : 1,
@@ -3718,7 +3575,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468587,
 		"user_id" : 26652,
 		"topic_id" : 115,
 		"attempts" : 3,
@@ -3744,7 +3600,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468590,
 		"user_id" : 84880,
 		"topic_id" : 45,
 		"attempts" : 1,
@@ -3770,7 +3625,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468605,
 		"user_id" : 85375,
 		"topic_id" : 114,
 		"attempts" : 1,
@@ -3796,7 +3650,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3896988,
 		"user_id" : 12180,
 		"topic_id" : 295,
 		"attempts" : 0,
@@ -3822,7 +3675,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468594,
 		"user_id" : 85560,
 		"topic_id" : 114,
 		"attempts" : 1,
@@ -3848,7 +3700,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468601,
 		"user_id" : 85375,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -3874,7 +3725,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468599,
 		"user_id" : 44571,
 		"topic_id" : 3739,
 		"attempts" : 0,
@@ -3900,7 +3750,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468598,
 		"user_id" : 58214,
 		"topic_id" : 243,
 		"attempts" : 0,
@@ -3926,7 +3775,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3915322,
 		"user_id" : 12180,
 		"topic_id" : 300,
 		"attempts" : 0,
@@ -3952,7 +3800,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468597,
 		"user_id" : 58214,
 		"topic_id" : 241,
 		"attempts" : 0,
@@ -3978,7 +3825,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468592,
 		"user_id" : 58214,
 		"topic_id" : 342,
 		"attempts" : 1,
@@ -4004,7 +3850,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3861081,
 		"user_id" : 10879,
 		"topic_id" : 293,
 		"attempts" : 0,
@@ -4030,7 +3875,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3956921,
 		"user_id" : 12180,
 		"topic_id" : 611,
 		"attempts" : 0,
@@ -4056,7 +3900,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3819851,
 		"user_id" : 44571,
 		"topic_id" : 3741,
 		"attempts" : 0,
@@ -4082,7 +3925,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3237536,
 		"user_id" : 44571,
 		"topic_id" : 2386,
 		"attempts" : null,
@@ -4108,7 +3950,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3907352,
 		"user_id" : 10879,
 		"topic_id" : 299,
 		"attempts" : 0,
@@ -4134,7 +3975,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468589,
 		"user_id" : 85597,
 		"topic_id" : 428,
 		"attempts" : 0,
@@ -4160,7 +4000,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3912708,
 		"user_id" : 10879,
 		"topic_id" : 300,
 		"attempts" : 1,
@@ -4186,7 +4025,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468586,
 		"user_id" : 26652,
 		"topic_id" : 114,
 		"attempts" : 2,
@@ -4212,7 +4050,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4212206,
 		"user_id" : 58214,
 		"topic_id" : 234,
 		"attempts" : 2,
@@ -4238,7 +4075,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3761132,
 		"user_id" : 35975,
 		"topic_id" : 3407,
 		"attempts" : null,
@@ -4264,7 +4100,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 2451783,
 		"user_id" : 35975,
 		"topic_id" : 3400,
 		"attempts" : 1,
@@ -4290,7 +4125,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468585,
 		"user_id" : 85560,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -4316,7 +4150,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4212203,
 		"user_id" : 58214,
 		"topic_id" : 233,
 		"attempts" : 0,
@@ -4342,7 +4175,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468584,
 		"user_id" : 26652,
 		"topic_id" : 113,
 		"attempts" : 1,
@@ -4368,7 +4200,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3044523,
 		"user_id" : 16,
 		"topic_id" : 333,
 		"attempts" : 1,
@@ -4394,7 +4225,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4436218,
 		"user_id" : 60704,
 		"topic_id" : 1817,
 		"attempts" : 0,
@@ -4420,7 +4250,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4468581,
 		"user_id" : 60704,
 		"topic_id" : 1052,
 		"attempts" : 2,
@@ -4446,7 +4275,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 2960205,
 		"user_id" : 60704,
 		"topic_id" : 3051,
 		"attempts" : 1,
@@ -4472,7 +4300,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1149751,
 		"user_id" : 60704,
 		"topic_id" : 1014,
 		"attempts" : 0,
@@ -4498,7 +4325,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3466031,
 		"user_id" : 60704,
 		"topic_id" : 2807,
 		"attempts" : null,
@@ -4524,7 +4350,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3469759,
 		"user_id" : 60704,
 		"topic_id" : 2811,
 		"attempts" : null,
@@ -4550,7 +4375,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1829904,
 		"user_id" : 60704,
 		"topic_id" : 1204,
 		"attempts" : 2,
@@ -4576,7 +4400,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4359508,
 		"user_id" : 60704,
 		"topic_id" : 3797,
 		"attempts" : 0,
@@ -4602,7 +4425,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3780765,
 		"user_id" : 59468,
 		"topic_id" : 2500,
 		"attempts" : null,
@@ -4628,7 +4450,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1893669,
 		"user_id" : 60704,
 		"topic_id" : 1667,
 		"attempts" : 0,
@@ -4654,7 +4475,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 2179826,
 		"user_id" : 60704,
 		"topic_id" : 1573,
 		"attempts" : 0,
@@ -4680,7 +4500,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4290640,
 		"user_id" : 60704,
 		"topic_id" : 3739,
 		"attempts" : 0,
@@ -4706,7 +4525,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4290637,
 		"user_id" : 60704,
 		"topic_id" : 3418,
 		"attempts" : 1,
@@ -4732,7 +4550,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 4327187,
 		"user_id" : 60704,
 		"topic_id" : 2987,
 		"attempts" : 0,
@@ -4758,7 +4575,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 3999880,
 		"user_id" : 60704,
 		"topic_id" : 3327,
 		"attempts" : 3,
@@ -4784,7 +4600,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1622465,
 		"user_id" : 60704,
 		"topic_id" : 1910,
 		"attempts" : 2,
@@ -4810,7 +4625,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1256816,
 		"user_id" : 60704,
 		"topic_id" : 1470,
 		"attempts" : 0,
@@ -4836,7 +4650,6 @@
 		"deleted_at" : null
 	},
 	{
-		"id" : 1481873,
 		"user_id" : 36655,
 		"topic_id" : 3001,
 		"attempts" : 2,
