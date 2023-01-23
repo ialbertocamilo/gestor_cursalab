@@ -38,7 +38,14 @@ class AuthController extends Controller
                 //validar token recaptcha
                 $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
                 if(!$recaptcha_response['success']) {
-                    return $this->error('error at Recaptcha', 500, $recaptcha_response);
+                    return $this->error('error-recaptcha', 500, $recaptcha_response);
+                }
+                //validar el score de recaptcha
+                if($recaptcha_response['score'] >= 0.5) {
+                    return $this->error('error-recaptcha', 500, [ 
+                            'score' => $recaptcha_response['score'],
+                            'error-codes' => ['score-is-hight']
+                        ]);
                 }
             }
 
@@ -79,9 +86,7 @@ class AuthController extends Controller
                 }
                 
                 $responseUserData = $this->respondWithDataAndToken($data);
-                // asignamos el payload del recaptcha
-                $responseUserData['recaptcha'] = $recaptcha_response;
-                
+                // $responseUserData['recaptcha'] = $recaptcha_response; opcional
                 return response()->json($responseUserData); 
 
             } else {
@@ -260,13 +265,14 @@ class AuthController extends Controller
 
     public function validateRecaptcha($siteToken) {
         $secretKey = env('RECAPTCHA_TOKEN'); 
-        $recaptchaUrl = env('RECAPTCHA_BASE_URL'); 
-        // enviamos una peticion a recaptcha google
+        $recaptchaUrl = env('RECAPTCHA_BASE_URL');
+
+        // validamo token recaptcha
         $responseRecaptcha = Http::asForm()->post($recaptchaUrl, [
             'secret' => $secretKey,
             'response' => $siteToken
         ]);
-        
+
         return $responseRecaptcha->json();
     }
 }

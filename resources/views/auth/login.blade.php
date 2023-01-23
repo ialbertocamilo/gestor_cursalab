@@ -24,7 +24,11 @@
         <form method="POST" class="form-validate" action="{{ route('login_post') }}">
           @csrf
           <div class="form-group">
-            <input id="login-username" type="text" name="email" required data-msg="Por favor ingrese su email" class="input-material form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" autocomplete="off">
+            <input id="login-username" type="text" name="email" required 
+                  data-msg="Por favor ingrese su email" 
+                  class="input-material form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" 
+                  autocomplete="off">
+            
             <label for="login-username" class="label-material active">{{ __('Email') }}</label>
             @if ($errors->has('email'))
             <span class="invalid-feedback" role="alert">
