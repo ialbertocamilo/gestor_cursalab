@@ -29,6 +29,7 @@ use Illuminate\Console\Command;
 use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class restablecer_funcionalidad extends Command
@@ -82,9 +83,33 @@ class restablecer_funcionalidad extends Command
         // $this->restore_tickets();
         // $this->restore_attempts();
         // $this->restore_cycle();
-        $this->restore_prefix();
+        // $this->restore_prefix();
+        $this->restore_summary_topics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restore_summary_topics(){
+        $path = public_path() . "/json/summary_topics.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $summary_topic = json_decode(file_get_contents($path), true);
+        $_bar = $this->output->createProgressBar(count($summary_topic));
+        $_bar->start();
+        $exist=[];
+        foreach ($summary_topic as $st) {
+            $summary = SummaryTopic::disableCache()->where('user_id',$st['user_id'])->where('topic_id',$st['topic_id'])->first();
+            if(!$summary){
+                SummaryTopic::insert($st);
+                $topic = Topic::with('course')->where('id',$st['topic_id'])->first();
+                $user = User::where('id',$st['user_id'])->first();
+                SummaryCourse::getCurrentRowOrCreate($topic->course, $user);
+                SummaryCourse::updateUserData($course, $user, false);
+                SummaryUser::updateUserData($user);
+            }else{
+                $exist[]=$st;
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/summary_topics_created.json', json_encode($exist));
+        $_bar->finish();
     }
     //Command to restores cycles
     public function restore_cycle(){
@@ -255,19 +280,19 @@ class restablecer_funcionalidad extends Command
         $tickets = Ticket::whereNull('workspace_id')->orWhere('workspace_id',0)->get();
         $faker = Faker::create('es_ES');
         foreach ($tickets as $ticket) {
-            
+
             if(strlen($ticket->reason) == 1){
                 $pregunta = Post::select('title')->where('id',$ticket->reason)->first();
                 $ticket->reason = $pregunta->title ?? '';
             }
-            
+
             if(is_null($ticket->created_at)){
                 $date = $faker->dateTimeBetween('-30 days', '+0 days');
                 $dateFormat = $date->format('Y-m-d H:m:s');
                 $ticket->created_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
                 $ticket->updated_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
             }
-            
+
             if(is_null($ticket->workspace_id) || $ticket->workspace_id==0){
                 $user = User::where('id',$ticket->user_id)->first();
                 $ticket->workspace_id = $user->subworkspace?->parent_id;
@@ -347,7 +372,7 @@ class restablecer_funcionalidad extends Command
                                     ->update([
                                         'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
                                     ]);
-    
+
                         PollQuestionAnswer::select('id')->where('respuestas','[]')
                                     ->whereIn('id',array_column($percent_20,'id'))
                                     ->update([
