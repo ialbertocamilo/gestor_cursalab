@@ -97,10 +97,10 @@ class UsuarioAyudaController extends Controller
 
         if ($ticket->status == 'solucionado' && $ticket->user)
         {
-            $user = $ticket->user;
+            // $user = $ticket->user;
 
-            $user->notify(new UsuarioAyudaNotification($ticket));
-            return $this->success(['msg' => 'Ticket solucionado y notificado correctamente.']);
+            // $user->notify(new UsuarioAyudaNotification($ticket));
+            // return $this->success(['msg' => 'Ticket solucionado y notificado correctamente.']);
         }
 
         return $this->success(['msg' => 'Ticket actualizado correctamente.']);

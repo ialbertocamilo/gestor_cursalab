@@ -110,6 +110,7 @@ if (isset($fullScreen)) {
             @yield('content')
 
         </div>
+        <div id="content_polls" style="display: none;">
         <div class="box-valoracion hide" id="box_valoracion">
             <div class="box-closed" onclick="close_box_val()">
                 <i class="mdi mdi-close-circle" id="i_close_circle"></i>
@@ -190,6 +191,7 @@ if (isset($fullScreen)) {
                 <p>¡Gracias por tu feedback!</p>
             </div>
         </div>
+        </div>
     </div>
 </div>
 
@@ -208,7 +210,12 @@ if (isset($fullScreen)) {
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
     <script src="{{ asset('js/app.js?v=' . date('Y-W')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=' . date('Y-W')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=' . date('Y-W-m')) }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#content_polls').css('display','block');
+        });
+    </script>
 
     @stack('libraries')
 

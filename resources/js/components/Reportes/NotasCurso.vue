@@ -74,7 +74,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
-                            :maxValuesSelected="3"
+                            :maxValuesSelected="4"
                         />
                     </div>
                     <!-- Escuela -->

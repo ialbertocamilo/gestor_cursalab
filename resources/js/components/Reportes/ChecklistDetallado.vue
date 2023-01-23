@@ -3,11 +3,9 @@
     <v-main>
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el reporte de los checklist detallada por cada actividad.
+                Descarga el reporte detallado de actividades en un checklist.
             </template>
-            <list-item
-                titulo="Módulo"
-                subtitulo="Módulo al que pertenece el usuario" />
+           
             <list-item
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
@@ -19,24 +17,29 @@
                     subtitulo="Área al que pertenece el usuario" />
             </div>
 
-            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-
+            <list-item titulo="Estado" subtitulo="Estado del usuario (Activo - Inactivo)" />
+            <list-item
+                titulo="Módulo"
+                subtitulo="Módulo al que pertenece el usuario" />
             <div v-show="workspaceId === 25">
                 <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
                 <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
             </div>
-
-            <list-item titulo="DNI (entrenador)" subtitulo="" />
+            <list-item
+                titulo="Criterios"
+                subtitulo="Listado de criterios del usuario" />
+            <list-item titulo="Documento (entrenador)" subtitulo="" />
             <list-item titulo="Nombre (entrenador)" subtitulo="" />
             <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
             <list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
-            <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
+            <list-item titulo="Curso(s) Asignado" subtitulo="Curso que tiene asignado el usuario y relacionado al checklist" />
+            <list-item titulo="Tipo de curs" subtitulo="Curso que tiene asignado el usuario y relacionado al checklist" />
             <list-item titulo="Checklist" subtitulo="" />
-            <list-item titulo="Avance de Checklist" subtitulo="" />
-            <list-item titulo="Actividad" subtitulo="" />
+            <list-item titulo="Cumplimiento del Checklist" subtitulo="Porcentaje de avance del usuario con respecto al checklist." />
+            <!-- <list-item titulo="Actividad" subtitulo="" />
             <list-item titulo="A quien califica" subtitulo="" />
-            <list-item titulo="Estado" subtitulo="" />
+            <list-item titulo="Estado" subtitulo="" /> -->
         </ResumenExpand>
         <form @submit.prevent="exportReport" class="row px-4">
             <!-- Modulo -->
@@ -56,7 +59,7 @@
                 />
             </div>
             <!-- Escuela -->
-            <div class="col-sm-4 mb-3">
+            <!-- <div class="col-sm-4 mb-3">
                 <DefaultAutocomplete
                 dense
                 v-model="escuela"
@@ -71,9 +74,9 @@
                 @onChange="escuelaChange"
                 :maxValuesSelected="10"
                 />
-            </div>
+            </div> -->
             <!-- Curso -->
-            <div class="col-sm-4 mb-3">
+            <!-- <div class="col-sm-4 mb-3">
 
                 <DefaultAutocomplete
                 dense
@@ -88,14 +91,14 @@
                 placeholder="Seleccione los cursos"
                 @onChange="cursoChange"
                 />
-            </div>
+            </div> -->
             <!-- CheckList -->
             <div class="col-sm-4 mb-3">
+                <!-- :disabled="!courses[0]" -->
                 <DefaultAutocomplete
                 dense
                 v-model="checklist"
-                :items="Checklist"
-                :disabled="!courses[0]"
+                :items="Checklist_items"
                 label="Checklist"
                 item-text="title"
                 item-value="id"
@@ -182,7 +185,7 @@
             <div class="col-sm-12 mb-3">
                 <div class="col-sm-6 px-0">
                     <button
-                        :disabled="modulo.length === 0 || escuela.length === 0 || checklist.length === 0"
+                        :disabled="modulo.length === 0 || checklist.length === 0"
                         type="submit" class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
                         <span>Descargar</span>
@@ -212,7 +215,7 @@ export default {
             courses: [],
             areas:[],
 
-            Checklist: [],
+            Checklist_items: [],
 
             loadingGrupos: false,
             loadingCarreras: false,
@@ -228,7 +231,8 @@ export default {
         }
     },
     mounted() {
-        this.fetchFiltersData()
+        this.fetchFiltersData();
+        this.fetchChecklist();
     },
     methods: {
         /**
@@ -334,9 +338,9 @@ export default {
          */
         async fetchChecklist(){
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist/${this.curso.join()}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist/${this.workspaceId}`;
             const res = await axios.get(url);
-            this.Checklist = res.data;
+            this.Checklist_items = res.data;
         },
         async fetchFiltersAreaData() {
             this.areas = [];

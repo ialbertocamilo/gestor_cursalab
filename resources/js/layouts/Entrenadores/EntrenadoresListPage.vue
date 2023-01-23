@@ -208,7 +208,7 @@ export default {
             let vue = this;
             // await vue.getData();
             vue.modal.asignar_usuarios = false;
-
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
         },
         async closeModalVerAlumnos() {
             let vue = this;
