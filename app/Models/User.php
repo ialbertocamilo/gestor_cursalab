@@ -68,7 +68,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username', 'fullname', 'slug', 'alias', 'person_number', 'phone_number',
+        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
@@ -1087,7 +1087,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->expires_code = now()->addMinutes($currentMinutes);
 
         //enviar codigo al email
-        $mail_data = [ 'subject' => 'Soporte login - 2FA',
+        $mail_data = [ 'subject' => 'Código de verificación:'.$currentCode,
                        'code' => $currentCode,
                        'minutes' => $currentMinutes,
                        'user' => $user->name.' '.$user->lastname ];

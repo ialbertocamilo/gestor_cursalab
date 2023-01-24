@@ -5,11 +5,12 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use MailerSend\LaravelDriver\MailerSendTrait;
+
 
 class EmailTemplate extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, MailerSendTrait;
     public $view;
     public $data;
     /**
@@ -30,7 +31,9 @@ class EmailTemplate extends Mailable
      */
     public function build()
     {
-        return $this->subject($this->data['subject'])
-                    ->view($this->view, ['data' => $this->data ]);
+        return $this->view($this->view, ['data' => $this->data ])
+            ->text($this->view,  ['data' => $this->data ])
+            ->subject($this->data['subject'])
+            ->mailersend(null);
     }
 }

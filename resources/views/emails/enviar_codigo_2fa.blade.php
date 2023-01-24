@@ -4,7 +4,7 @@
         <td>
             <h1 style=" color:#333D5D;margin-top:2rem;font-weight:bold;font-size: 1.1rem; padding: 0px 46px;">¡Hola!</h1>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                <b>{{ $data['user'] }}</b>, tu código de verificación es:
+                {{ $data['user'] }}, tu código de verificación es:
             </p>
         </td>
     </tr>
@@ -19,13 +19,18 @@
     </tr>
     <tr style="background-color:#F9FAFB;margin-top:10px">
         <td>
-            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">Ten en cuenta que este código expirará en {{ $data['minutes'] }} minutos.
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">El código de verificación sera válido por {{ $data['minutes'] }} minutos. Por favor no compartas este código con nadie
+            ¿No reconoces esta actividad? Por favor contáctate inmediatamente con el equipo de Soporte de Cursalab
             </p>
         </td>
     </tr>
     <tr style="background-color:#F9FAFB;margin-top:10px">
         <td>
-            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">El equipo Cursalab.
+            <p style="color:#333D5D; font-style: italic; font-size: .9rem;padding: 0px 46px;">Este mensaje es automático, por favor no responder.
+            </p>
+        </td>
+        <td>
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">Cursalab.
             </p>
         </td>
     </tr>

@@ -130,13 +130,18 @@ class LoginController extends Controller
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
 
-                // verificacion de doble autenticacion
-                $response2FA = (bool) $user->generateCode2FA();
-                if($response2FA) { 
-                    session()->put('init_2fa', $user->id);
-                    return redirect('/2fa');
+                if($user->enable_2fa) {
+                    // verificacion de doble autenticacion
+                    $response2FA = (bool) $user->generateCode2FA();
+                    if($response2FA) { 
+                        session()->put('init_2fa', $user->id);
+                        return redirect('/2fa');
+                    }
+                    // verificacion de doble autenticacion
+
+                } else {
+                    return $this->sendLoginResponse($request);
                 }
-                // verificacion de doble autenticacion
 
                
             } else {
