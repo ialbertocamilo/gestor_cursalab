@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Faker\Factory as Faker;
 use Carbon\Carbon;
 use App\Models\Poll;
 use App\Models\Post;
@@ -21,13 +20,16 @@ use App\Models\Matricula;
 use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
+use Faker\Factory as Faker;
 use App\Models\SummaryTopic;
 use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
+use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class restablecer_funcionalidad extends Command
@@ -78,28 +80,228 @@ class restablecer_funcionalidad extends Command
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
         // $this->restore_surname();
-        $this->restore_tickets();
+        // $this->restore_tickets();
         // $this->restore_attempts();
+        // $this->restore_cycle();
+        // $this->restore_prefix();
+        $this->restore_summary_topics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restore_summary_topics(){
+        $path = public_path() . "/json/summary_topics.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $summary_topic = json_decode(file_get_contents($path), true);
+        $_bar = $this->output->createProgressBar(count($summary_topic));
+        $_bar->start();
+        $exist=[];
+        foreach ($summary_topic as $st) {
+            $summary = SummaryTopic::disableCache()->where('user_id',$st['user_id'])->where('topic_id',$st['topic_id'])->first();
+            if(is_null($st['grade']) && is_null($summary->grade)){
+                if($summary->status_id != $st['status_id']){
+                    $summary->grade = $st['grade'];
+                    $summary->passed = $st['passed']; 
+                    $summary->answers = $st['answers']; 
+                    $summary->last_time_evaluated_at = $st['last_time_evaluated_at']; 
+                    $summary->status_id = $st['status_id']; 
+                    $summary->correct_answers = $st['correct_answers'];
+                    $summary->failed_answers = $st['failed_answers'];
+                    $summary->save();
+                    $topic = Topic::with('course')->where('id',$st['topic_id'])->first();
+                    $user = User::where('id',$st['user_id'])->first();
+                    SummaryCourse::getCurrentRowOrCreate($topic->course, $user);
+                    SummaryCourse::updateUserData($topic->course, $user, false);
+                    SummaryUser::updateUserData($user);
+                }
+            }else{
+                $exist[]=$st;
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/summary_topics_created_3.json', json_encode($exist));
+        $_bar->finish();
+    }
+    //Command to restores cycles
+    public function restore_cycle(){
+        $criterion = Criterion::where('code','cycle')->first();
+        $cycle_values = CriterionValue::select('id',DB::raw('LOWER(value_text) as value_text'))
+        ->where('criterion_id',$criterion->id)->whereIn('value_text',['ciclo 1','ciclo 2','ciclo 3','ciclo 4'])->orderBy('value_text','asc')->get();
+        $insert_criterion_value_user = [];
+        foreach ($cycle_values as $cycle_value) {
+            if($cycle_value->value_text != 'ciclo 1'){
+                $before_cycles_name = $this->getCyclesNames($cycle_value->value_text);
+                $before_cycles_ids = $cycle_values->whereIn('value_text',$before_cycles_name)->pluck('id');
+                $users_cycle = CriterionValueUser::where('criterion_value_id',$cycle_value->id)->get();
+                $this->info('Ciclo: '.$cycle_value->value_text);
+                $_bar = $this->output->createProgressBar(count($users_cycle));
+                $_bar->start();
+                foreach ($users_cycle as $user_cycle) {
+                    foreach ($before_cycles_ids as $cycle_id) {
+                        # code...
+                        $has_cycle = CriterionValueUser::where('criterion_value_id',$cycle_id)->where('user_id',$user_cycle->user_id)->first();
+                        if(!$has_cycle){
+                            $insert_criterion_value_user[] = [
+                                'user_id'=>$user_cycle->user_id,
+                                'criterion_value_id'=>$cycle_id
+                            ];
+                        }
+                    }
+                    $_bar->advance();
+                }
+                $_bar->finish();
+            }
+        }
+        $insert_chunks = array_chunk($insert_criterion_value_user,200);
+        foreach ($insert_chunks as $chunk) {
+            CriterionValueUser::insert($chunk);
+        }
+        cache_clear_model(CriterionValueUser::class);
+    }
+    private function getCyclesNames($cycle_name){
+        return match (strtolower($cycle_name)) {
+            'ciclo 2' => ['ciclo 1'],
+            'ciclo 3' => ['ciclo 1','ciclo 2'],
+            'ciclo 4' => ['ciclo 1','ciclo 2','ciclo 3'],
+            default => $cycle_name
+        };
+    }
+    public function restore_prefix(){//
+        $group_m4 = CriterionValue::where('value_text','like','%M4::%')->get();
+        foreach ($group_m4 as $m4) {
+            $substring = substr($m4->value_text,4);
+            $m4->value_text = 'MF::'.$substring;
+            $m4->update();
+        }
+        $group_m5 = CriterionValue::where('value_text','like','%M5::%')->get();
+        foreach ($group_m5 as $m5) {
+            $substring = substr($m5->value_text,4);
+            $m5->value_text = 'IK::'.$substring;
+            $m5->update();
+        }
+        $group_m6 = CriterionValue::where('value_text','like','%M6::%')->get();
+        foreach ($group_m6 as $m6) {
+            $substring = substr($m6->value_text,4);
+            $m6->value_text = 'FP::'.$substring;
+            $m6->update();
+        }
+
+        $criterion = Criterion::where('code','grupo')->first();
+        $groups_with_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))
+        ->where('criterion_id',$criterion->id)->where(function($q){
+            $q->where('value_text','like','%MF::%')
+            ->orWhere('value_text','like','%IK::%')
+            ->orWhere('value_text','like','%FP::%');
+        })->get();
+        $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)->where(function($q){
+            $q->where('value_text','not like','%MF::%')
+            ->where('value_text','not like','%IK::%')
+            ->where('value_text','not like','%FP::%');
+        })->get();
+        $_bar = $this->output->createProgressBar(count($groups_without_prefix));
+        $_bar->start();
+        $modules = Workspace::where('name','Farmacias Peruanas')->with('subworkspaces')->first();
+        foreach ($groups_without_prefix as $group) {
+            foreach ($modules->subworkspaces as $module) {
+                $prefix = $this->getPrefix($module['name']).'::'.$group->value_text;
+                $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
+                if($group_prefix_equivalent){
+                    DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
+                        $query->select('id')
+                            ->from('users')
+                            ->where('subworkspace_id', $module['id']);
+                    })->where('criterion_value_id',$group->id)->update([
+                        'criterion_value_id'=>$group_prefix_equivalent->id
+                    ]);
+                }
+            }
+            $_bar->advance();
+        }
+        $_bar->finish();
+        //anothers prefix
+        $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)->where(function($q){
+            $q->orWhere('value_text','like','%M4:G%');
+            // ->orWhere('value_text','like','%M5: %')
+            // ->orWhere('value_text','like','%M6: %');
+        })->get();
+        foreach ($groups_without_prefix as $group) {
+            foreach ($modules->subworkspaces as $module) {
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M4:','',$group->value_text);
+                $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
+                if($group_prefix_equivalent){
+                    DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
+                        $query->select('id')
+                            ->from('users')
+                            ->where('subworkspace_id', $module['id']);
+                    })->where('criterion_value_id',$group->id)->update([
+                        'criterion_value_id'=>$group_prefix_equivalent->id
+                    ]);
+                }
+            }
+            $_bar->advance();
+        }
+        $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)
+        ->where('value_text','like','%M5:G%')->get();
+        foreach ($groups_without_prefix as $group) {
+            foreach ($modules->subworkspaces as $module) {
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M5:','',$group->value_text);
+                $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
+                if($group_prefix_equivalent){
+                    DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
+                        $query->select('id')
+                            ->from('users')
+                            ->where('subworkspace_id', $module['id']);
+                    })->where('criterion_value_id',$group->id)->update([
+                        'criterion_value_id'=>$group_prefix_equivalent->id
+                    ]);
+                }
+            }
+            $_bar->advance();
+        }
+        $groups_without_prefix = CriterionValue::select('id',DB::raw('UPPER(value_text) as value_text'))->where('criterion_id',$criterion->id)
+        ->where('value_text','like','%M6:G%')->get();
+        foreach ($groups_without_prefix as $group) {
+            foreach ($modules->subworkspaces as $module) {
+                $prefix = $this->getPrefix($module['name']).'::'. str_replace('M6:','',$group->value_text);
+                $group_prefix_equivalent = $groups_with_prefix->where('value_text',$prefix)->first();
+                if($group_prefix_equivalent){
+                    DB::table('criterion_value_user')->whereIn('user_id', function ($query) use ($module) {
+                        $query->select('id')
+                            ->from('users')
+                            ->where('subworkspace_id', $module['id']);
+                    })->where('criterion_value_id',$group->id)->update([
+                        'criterion_value_id'=>$group_prefix_equivalent->id
+                    ]);
+                }
+            }
+            $_bar->advance();
+        }
+        cache_clear_model(CriterionValueUser::class);
+        cache_clear_model(CriterionValue::class);
+    }
+    private function getPrefix($module){
+        return match ($module) {
+            'Mifarma' => 'MF',
+            'Inkafarma' => 'IK',
+            'FAPE Masivos' => 'FP',
+            'Administrativos FAPE' => 'FP',
+        };
     }
     public function restore_tickets(){
         $tickets = Ticket::whereNull('workspace_id')->orWhere('workspace_id',0)->get();
         $faker = Faker::create('es_ES');
         foreach ($tickets as $ticket) {
-            
+
             if(strlen($ticket->reason) == 1){
                 $pregunta = Post::select('title')->where('id',$ticket->reason)->first();
                 $ticket->reason = $pregunta->title ?? '';
             }
-            
+
             if(is_null($ticket->created_at)){
                 $date = $faker->dateTimeBetween('-30 days', '+0 days');
                 $dateFormat = $date->format('Y-m-d H:m:s');
                 $ticket->created_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
                 $ticket->updated_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
             }
-            
+
             if(is_null($ticket->workspace_id) || $ticket->workspace_id==0){
                 $user = User::where('id',$ticket->user_id)->first();
                 $ticket->workspace_id = $user->subworkspace?->parent_id;
@@ -109,22 +311,14 @@ class restablecer_funcionalidad extends Command
         dd(count($tickets));
     }
     public function restore_surname(){
-        $path = public_path() . "/json/surnames.json"; // ie: /var/www/laravel/public/json/filename.json
+        $path = public_path() . "/json/surnames.json"; // ie: /var/www/laravel/app/storage/json/filename.json
         $users = json_decode(file_get_contents($path), true);
         $_bar = $this->output->createProgressBar(count($users));
         $_bar->start();
         foreach ($users as $user) {
-            try {
-                DB::beginTransaction();
-                User::where('document',$user['document'])->update([
-                    'surname'=>$user['surname']
-                ]);
-                DB::commit();
-                //code...
-            } catch (\Throwable $th) {
-                $this->info('error',$user['document']);
-                DB::rollBack();
-            }
+            User::where('document',$user['document'])->update([
+                'surname'=>$user['surname']
+            ]);
             $_bar->advance();
         }
         $_bar->finish();
@@ -132,7 +326,7 @@ class restablecer_funcionalidad extends Command
     public function restore_attempts(){
         $workspaces = Workspace::whereNull('parent_id')->get();
         foreach ($workspaces as $workspace) {
-            $mod_eval = $this->getModEval($workspace->name);            
+            $mod_eval = $this->getModEval($workspace->name);
             Course::whereHas('workspaces',function($q) use ($workspace){
                 $q->where('workspace_id',$workspace->id);
             })->update([
@@ -157,41 +351,48 @@ class restablecer_funcionalidad extends Command
         $polls = Poll::with('questions')
         ->whereIn('id',[1,7,14,17,18,21,25,27,28,29])
         ->get();
+        $_bar = $this->output->createProgressBar(count($polls));
+        $_bar->start();
         foreach ($polls as $key => $poll) {
             $questions_id = $poll->questions->where('type_id',4563)->pluck('id');
+            $this->info($questions_id);
             foreach ($questions_id as $question_id) {
-                $polls_answers = PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->where('poll_question_id',$question_id)->get();
-                $percent_random = rand(40,50);;
-                if($polls_answers->count() > 0){
-                    $firs_slice =   $this->array_percentage($polls_answers->toArray(),$percent_random);
-                    $second_slice = $this->array_percentage($firs_slice[1],100-$percent_random);
-                    $percent_50 = $firs_slice[0]; 
-                    $percent_30 = $second_slice[0]; 
-                    $percent_20 = $second_slice[1];
-                    info($percent_50);
-                    info($percent_30);
-                    info($percent_20);
-                    // [{"resp_cal":5,"preg_cal":"Califica"}]
-                    PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->whereIn('id',array_column($percent_50,'id'))
-                                ->update([
-                                    'respuestas' => '[{"resp_cal":5,"preg_cal":"Califica"}]'
-                                ]);
-                    PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->whereIn('id',array_column($percent_30,'id'))
-                                ->update([
-                                    'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
-                                ]);
+                $this->info($question_id);
+                $poll_question_answers = PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                ->where('poll_question_id',$question_id)->limit(10000)->get();
+                $percent_random = rand(40,50);
+                if($poll_question_answers->count() > 0){
+                    $chunk_poll_question_answers = array_chunk($poll_question_answers->toArray(),500);
+                    foreach ($chunk_poll_question_answers as $polls_answers) {
+                        # code...
+                        $firs_slice =   $this->array_percentage($polls_answers,$percent_random);
+                        $second_slice = $this->array_percentage($firs_slice[1],100-$percent_random);
+                        $percent_50 = $firs_slice[0];
+                        $percent_30 = $second_slice[0];
+                        $percent_20 = $second_slice[1];
+                        // [{"resp_cal":5,"preg_cal":"Califica"}]
+                        PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                    ->whereIn('id',array_column($percent_50,'id'))
+                                    ->update([
+                                        'respuestas' => '[{"resp_cal":5,"preg_cal":"Califica"}]'
+                                    ]);
+                        PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                    ->whereIn('id',array_column($percent_30,'id'))
+                                    ->update([
+                                        'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
+                                    ]);
 
-                    PollQuestionAnswer::select('id')->where('respuestas','[]')
-                                ->whereIn('id',array_column($percent_20,'id'))
-                                ->update([
-                                    'respuestas' => '[{"resp_cal":3,"preg_cal":"Califica"}]'
-                                ]);
+                        PollQuestionAnswer::select('id')->where('respuestas','[]')
+                                    ->whereIn('id',array_column($percent_20,'id'))
+                                    ->update([
+                                        'respuestas' => '[{"resp_cal":3,"preg_cal":"Califica"}]'
+                                    ]);
+                    }
                 }
             }
+            $_bar->advance();
         }
+        $_bar->finish();
     }
     function array_percentage($array, $percentage) {
         $count = count($array);
@@ -209,7 +410,7 @@ class restablecer_funcionalidad extends Command
     //     foreach ($subworkspaces as $subworkspace) {
     //         $courses = Db::table('course_workspace')->where('workspace');
     //         dd($subworkspace->mod_evaluaciones);
-    //     }        
+    //     }
     // }
     public function restore_summary_course(){
         // User::select('id','subworkspace_id')->whereIn('document',[71342592])->get()->map(function($user){
@@ -254,7 +455,7 @@ class restablecer_funcionalidad extends Command
             }
             $this->info('Fin restore user');
             $_bar->finish();
-        }); 
+        });
     }
     // 45671352
     public function restoreSummaryCourse(){
@@ -285,7 +486,7 @@ class restablecer_funcionalidad extends Command
                 $_bar->advance();
             }
             $_bar->finish();
-        }); 
+        });
     }
     public function restoreRequirements(){
         $temas = Topic::whereNotNull('topic_requirement_id')->get();

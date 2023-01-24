@@ -115,7 +115,7 @@ const SUB_ITEM_GLOSARY =  { title:"Glosario",
                           };
 
 const SUB_ITEM_VADEMECUM = {
-                            title:"Vademécum",
+                            title:"Protocolos y Documentos",
                             icon:"fas fa-file-invoice",
                             path:"/vademecum",
                             subpaths:["vademecum"],
@@ -149,7 +149,7 @@ export default {
                             "admin",
                             "content-manager",
                             "trainer",
-                            "reports"
+                            "reports",
                         ]
                     },
                     {
@@ -207,9 +207,9 @@ export default {
                         path: "/modulos",
                         subpaths: [
                             "modulos",
-                            "abconfigs",
-                            "categorias",
-                            "cursos"
+                            // "abconfigs",
+                            // "categorias",
+                            // "cursos"
                         ],
                         selected: false,
                         permission: "modulos",
@@ -263,6 +263,17 @@ export default {
                 icon: "fas fa-cog",
                 active: false,
                 items: [
+                    {
+                        title: "Cursos",
+                        icon: "mdi mdi-notebook",
+                        path: "/cursos",
+                        subpaths: ["cursos"],
+                        selected: false,
+                        permission: "cursos",
+                        role: [
+                            "super-user",
+                        ]
+                    },
                     {
                         title: "Escuelas",
                         icon: "fas fa-th-large",
@@ -362,9 +373,9 @@ export default {
                         permission: "entrenadores",
                         role: [
                             "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
+                            "admin-TEMPORAL_INACTIVO",
+                            "content-manager-TEMPORAL_INACTIVO",
+                            "trainer-TEMPORAL_INACTIVO"
                         ]
                     },
                     {
@@ -398,8 +409,9 @@ export default {
                         role: [
                             "super-user",
                             "admin",
-                            "trainer-TEMPORAL_INACTIVO",
-                            "reports-TEMPORAL_INACTIVO"
+                            "trainer",
+                            "reports",
+                            'only-reports'
                         ]
                     },
                     // {
@@ -419,16 +431,16 @@ export default {
                     {
                         title: "Encuestas",
                         icon: "fas fa-poll",
-                        path: "/resumen_encuesta/index",
+                        path: "/resumen_encuesta",
                         subpaths: ["resumen_encuesta"],
                         selected: false,
                         permission: "resumen_encuesta",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO",
-                            "reports-TEMPORAL_INACTIVO"
+                            "admin",
+                            "trainer",
+                            "reports",
+                            'only-reports'
                         ]
                     }
                 ]
@@ -617,7 +629,7 @@ export default {
                 if(workspace.id === 25) {
                   vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
                 }
-                
+
                 vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 //=== only for "Farmacias Peruanas"
 

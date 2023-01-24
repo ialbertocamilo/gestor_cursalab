@@ -48,6 +48,11 @@ Segment extends BaseModel
         // return $this->hasMany(SegmentValue::class);
     }
 
+    public function criterion()
+    {
+        return $this->belongsTo(Criterion::class);
+    }
+
     protected function getCriteriaByWorkspace($workspace)
     {
         return Criterion::select('id', 'name', 'position', 'code', 'field_id')

@@ -133,13 +133,12 @@ class Topic extends BaseModel
             else :
                 $tema = self::create($data);
             endif;
-            if ($data['topic_requirement_id']){
+            if ($data['topic_requirement_id']) {
                 Requirement::updateOrCreate(
                     ['model_type' => Topic::class, 'model_id' => $tema->id,],
                     ['requirement_type' => Topic::class, 'requirement_id' => $data['topic_requirement_id']]
                 );
-            }
-            else{
+            } else {
                 $tema->requirements()->delete();
             }
             $tema->medias()->delete();
@@ -202,7 +201,7 @@ class Topic extends BaseModel
 
         // Validar que sea el último tema activo y que se va a desactivar,
         // eso haría que se desactive el curso, validar si ese curso es requisito de otro e impedir que se desactive el tema
-        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic,$data);
+        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic, $data);
         if ($last_topic_active_and_required_course['ok']) $validations->push($last_topic_active_and_required_course);
 
 
@@ -254,7 +253,7 @@ class Topic extends BaseModel
         return $temp;
     }
 
-    public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic,$data)
+    public function checkIfIsLastActiveTopicAndRequiredCourse(School $school, Topic $topic, $data)
     {
         $course_requirements = Requirement::whereHasMorph('requirement', [Course::class], function ($query) use ($topic) {
             $query->where('id', $topic->course->id);
@@ -385,7 +384,7 @@ class Topic extends BaseModel
 
         // Validar que sea el último tema activo y que se va a desactivar,
         // eso haría que se desactive el curso, validar si ese curso es requisito de otro e impedir que se desactive el tema
-        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic,$data);
+        $last_topic_active_and_required_course = $this->checkIfIsLastActiveTopicAndRequiredCourse($school, $topic, $data);
         if ($last_topic_active_and_required_course['ok']) $validations->push($last_topic_active_and_required_course);
 
 
@@ -437,7 +436,7 @@ class Topic extends BaseModel
 
         // UC
         $school_name = $school->name;
-        if ($workspace_id === 25){
+        if ($workspace_id === 25) {
             $school_name = removeUCModuleNameFromCourseName($school_name);
         }
 
@@ -452,33 +451,63 @@ class Topic extends BaseModel
 
         $courses = $courses->sortBy('position');
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
-                                    ->whereIn('course_id', $user_courses->pluck('id'))
-                                    ->where('user_id', $user->id)
-                                    ->groupBy('course_id')
-                                    ->get();
+            ->whereIn('course_id', $user_courses->pluck('id'))
+            ->where('user_id', $user->id)
+            ->groupBy('course_id')
+            ->get();
         foreach ($courses as $course) {
+
+            // $compatible = $course->getCourseCompatibilityByUser($user);
+
             // UC rule
             $course_name = $course->name;
-            if ($workspace_id === 25){
+            if ($workspace_id === 25) {
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
-            
-            $course_status = Course::getCourseStatusByUser($user, $course);
+
+            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course);
             $topics_data = [];
 
             $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
 
+            $topics_count = $topics->count();
+
             foreach ($topics as $topic) {
-                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
+                
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
                     $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
                         ? route('media.download.media_topic', [$media->id]) : null;
                 }
+
+                // if (true) {
+                if ($course->compatible) {
+
+                    $topics_data[] = [
+                        'id' => $topic->id,
+                        'nombre' => $topic->name,
+                        'requisito_id' => NULL,
+                        'imagen' => $topic->imagen,
+                        'contenido' => $topic->content,
+                        'media' => $media_topics,
+                        'evaluable' => 'no',
+                        'tipo_ev' => NULL,
+                        'nota' => '-',
+                        'disponible' => true,
+                        'intentos_restantes' => '-',
+                        'estado_tema' => 'aprobado',
+                        'estado_tema_str' => 'Convalidado',
+                        'compatible' => true,
+                    ];
+
+                    continue;
+                }
+
+                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
                 $topics_data[] = [
                     'id' => $topic->id,
@@ -498,6 +527,39 @@ class Topic extends BaseModel
                 ];
             }
 
+            // if (true) {
+            if ($course->compatible) {
+
+                $schools_courses[] = [
+                    'id' => $course->id,
+                    'nombre' => $course_name,
+                    'descripcion' => $course->description,
+                    'imagen' => $course->imagen,
+                    'requisito_id' => NULL,
+                    'c_evaluable' => 'no',
+                    'disponible' => true,
+                    'status' => 'aprobado',
+
+                    'encuesta' => false,
+                    'encuesta_habilitada' => false,
+                    'encuesta_resuelta' => false,
+                    'encuesta_id' => null,
+
+                    'temas_asignados' => $topics_count,
+                    'temas_completados' => $topics_count,
+
+                    'porcentaje' => '100.00',
+                    'temas' => $topics_data,
+                    'mod_evaluaciones' => NULL,
+                    'compatible' => [
+                        'id' => $course->compatible->course->id ?? 'X',
+                        'name' => $course->compatible->course->name ?? 'TEST DEFAULT COMPATIBLE',
+                    ],
+                ];
+
+                continue;
+            }
+
             $schools_courses[] = [
                 'id' => $course->id,
 //                'nombre' => $course->name,
@@ -514,11 +576,11 @@ class Topic extends BaseModel
                 'encuesta_id' => $course_status['poll_id'],
                 'temas_asignados' => $course_status['exists_summary_course'] ?
                     $course_status['assigned_topics'] :
-                    $topics->count(),
+                    $topics_count,
                 'temas_completados' => $course_status['completed_topics'],
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
-                'mod_evaluaciones'=>$course->mod_evaluaciones
+                'mod_evaluaciones' => $course->mod_evaluaciones
             ];
         }
 
@@ -536,10 +598,15 @@ class Topic extends BaseModel
         $available_topic = false;
         $remaining_attempts = $max_attempts;
         // $summary_topic = $topic->summaryByUser($user->id);
-        $summary_topic = SummaryTopic::getCurrentRow($topic, $user);
+//        $summary_topic = SummaryTopic::getCurrentRow($topic, $user);
+        $summary_topic = $topic->summaries->first();
         $last_topic_reviewed = null;
         // $topic_status = 'por-iniciar';
         $topic_status = $summary_topic->status->code ?? 'por-iniciar';
+
+        $statuses = Taxonomy::where('group', 'topic')->where('type', 'user-status')
+            ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+            ->pluck('id')->toArray();
 
         if ($topic->assessable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
@@ -550,17 +617,19 @@ class Topic extends BaseModel
             }
         }
 
-        $topic_requirement = $topic->requirements()->first();
+//        $topic_requirement = $topic->requirements()->first();
+        $topic_requirement = $topic->requirements->first();
 
         if (!$topic_requirement) {
             $available_topic = true;
         } else {
-            $summary_requirement_topic = SummaryTopic::with('status')
+            $summary_requirement_topic = SummaryTopic::with('status:id,name,code')
                 ->where('user_id', $user->id)
                 ->where('topic_id', $topic_requirement->requirement_id)
                 ->first();
 
-            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
+//            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
+            $activity_requirement = in_array($summary_requirement_topic?->status_id, $statuses);
             $test_requirement = $summary_requirement_topic?->result == 1;
 
             if ($activity_requirement || $test_requirement)
@@ -619,26 +688,23 @@ class Topic extends BaseModel
     {
         $topic_grade = null;
         $available_topic = true;
-//        $topic_requirement = $topic->requirements()->first();
         $topic_requirement = $topic->requirements->first();
 
         if ($topic_requirement) :
-//            $requirement_summary = SummaryTopic::with('status:id,code')
-//                ->where('topic_id', $topic_requirement->requirement_id)
-//                ->where('user_id', $user->id)->first();
+
             $requirement_summary = $topic_requirement->summaries_topics->first();
 
             $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
-//        $summary_topic = SummaryTopic::with('status:id,code')->where('topic_id', $topic->id)->where('user_id', $user->id)->first();
         $summary_topic = $topic->summaries->first();
 
         if ($topic->evaluation_type?->code === 'qualified' && $summary_topic)
             $topic_grade = $summary_topic->grade;
 
         $topic_status = $summary_topic?->status?->code ?? 'por-iniciar';
-        if(!$available_topic){
+
+        if (!$available_topic) {
             $topic_status = 'bloqueado';
         }
 
@@ -659,7 +725,7 @@ class Topic extends BaseModel
 
         $counter = false;
 
-        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft(null,$topic->course)) {
+        if ($row and $row->hasFailed() and $row->hasNoAttemptsLeft(null, $topic->course)) {
 
             $times = [];
 

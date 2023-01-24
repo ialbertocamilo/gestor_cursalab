@@ -16,6 +16,7 @@ import VueApexCharts from "vue-apexcharts";
 import globalComponents from "./global-components";
 import common_http_request from "./mixins/common_http_request";
 import commons from "./mixins/commons";
+import reports from "./mixins/reports";
 import axiosDefault from "./plugins/axios";
 
 import Permissions from "./mixins/Permissions";
@@ -26,6 +27,10 @@ Vue.component("apexcharts", VueApexCharts);
 Vue.mixin(globalComponents);
 Vue.mixin(common_http_request);
 Vue.mixin(commons);
+Vue.mixin(reports);
+
+import custom from "./custom";
+Vue.mixin(custom);
 
 Vue.use(VueNotification, {
     timer: 20,
@@ -148,6 +153,8 @@ Vue.component("supervisores-layout", require("./layouts/Supervisores/Supervisore
 Vue.component("upload-topic-grades-layout", require("./layouts/Masivos/UploadTopicGrades.vue"));
 
 Vue.component("homeview", require("./layouts/General/DashboardView"));
+
+Vue.component("resumen-encuesta", require("./components/Encuestas/PollReportLayout.vue"));
 
 // Workspaces
 

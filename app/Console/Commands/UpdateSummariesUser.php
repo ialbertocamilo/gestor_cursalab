@@ -36,7 +36,8 @@ class UpdateSummariesUser extends Command
         $summary_users = SummaryUser::when($documents, function ($q) use($documents){
             $q->whereHas('user',function($q2)use($documents){
                $q2->whereIn('document',explode(',',$documents));
-            });
+                // $q2->whereIn('subworkspace_id',[27,29])->where('active',1);
+        });
         })->with('user')->get();
 //        $summary_users = SummaryUser::with('user')
 //            ->where('user_id', 27660)->get();
@@ -53,7 +54,7 @@ class UpdateSummariesUser extends Command
             // $summaries_courses = SummaryCourse::withWhereHas('course')->where('user_id', $user->id)->get();
 
             foreach ($courses as $course){
-                SummaryCourse::getCurrentRowOrCreate($course, $user);
+                // SummaryCourse::getCurrentRowOrCreate($course, $user);
                 SummaryCourse::updateUserData($course, $user, update_attempts: false);
             }
 

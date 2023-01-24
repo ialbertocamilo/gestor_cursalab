@@ -3,88 +3,109 @@
     <v-main>
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el reporte de los checklist detallada por cada actividad.
+                Descarga el reporte detallado de actividades en un checklist.
             </template>
-            <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
+           
             <list-item
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
-            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
-            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
+            <!-- Workspace: Farmacias peruanas -->
+            <div v-show="workspaceId === 25">
+                <list-item
+                    titulo="Área"
+                    subtitulo="Área al que pertenece el usuario" />
+            </div>
+
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
-            <list-item titulo="DNI (entrenador)" subtitulo="" />
+            <list-item titulo="Estado" subtitulo="Estado del usuario (Activo - Inactivo)" />
+            <list-item
+                titulo="Módulo"
+                subtitulo="Módulo al que pertenece el usuario" />
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+                <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            </div>
+            <list-item
+                titulo="Criterios"
+                subtitulo="Listado de criterios del usuario" />
+            <list-item titulo="Documento (entrenador)" subtitulo="" />
             <list-item titulo="Nombre (entrenador)" subtitulo="" />
             <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
             <list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
-            <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
+            <list-item titulo="Curso(s) Asignado" subtitulo="Curso que tiene asignado el usuario y relacionado al checklist" />
+            <list-item titulo="Tipo de curs" subtitulo="Curso que tiene asignado el usuario y relacionado al checklist" />
             <list-item titulo="Checklist" subtitulo="" />
-            <list-item titulo="Avance de Checklist" subtitulo="" />
-            <list-item titulo="Actividad" subtitulo="" />
+            <list-item titulo="Cumplimiento del Checklist" subtitulo="Porcentaje de avance del usuario con respecto al checklist." />
+            <!-- <list-item titulo="Actividad" subtitulo="" />
             <list-item titulo="A quien califica" subtitulo="" />
-            <list-item titulo="Estado" subtitulo="" />
+            <list-item titulo="Estado" subtitulo="" /> -->
         </ResumenExpand>
-        <form @submit.prevent="exportReport" class="row">
+        <form @submit.prevent="exportReport" class="row px-4">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select class="form-control"
-                        v-model="modulo">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                <DefaultAutocomplete
+                dense
+                v-model="modulo"
+                :items="modules"
+                label="Módulo"
+                item-text="name"
+                item-value="id"
+                multiple
+                :showSelectAll="false"
+                placeholder="Seleccione los módulos"
+                @onBlur="fetchFiltersAreaData"
+                :maxValuesSelected="1"
+                />
             </div>
             <!-- Escuela -->
-            <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Escuela</b-form-text>
-                <select
-                    v-model="escuela"
-                    class="form-control"
-                    :disabled="!schools[0]"
-                    @change="escuelaChange"
-                >
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in schools"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
+            <!-- <div class="col-sm-4 mb-3">
+                <DefaultAutocomplete
+                dense
+                v-model="escuela"
+                :items="schools"
+                label="Escuela"
+                item-text="name"
+                item-value="id"
+                multiple
+                :disabled="!schools[0]"
+                :showSelectAll="false"
+                placeholder="Seleccione las escuelas"
+                @onChange="escuelaChange"
+                :maxValuesSelected="10"
+                />
+            </div> -->
             <!-- Curso -->
-            <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Curso</b-form-text>
-                <select v-model="curso"
-                        class="form-control"
-                        :disabled="!courses[0]"
-                        @change="cursoChange()">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in courses"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
-            </div>
+            <!-- <div class="col-sm-4 mb-3">
+
+                <DefaultAutocomplete
+                dense
+                v-model="curso"
+                :items="courses"
+                label="Curso"
+                item-text="name"
+                item-value="id"
+                multiple
+                :disabled="!courses[0]"
+                :showSelectAll="false"
+                placeholder="Seleccione los cursos"
+                @onChange="cursoChange"
+                />
+            </div> -->
             <!-- CheckList -->
             <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Checklist</b-form-text>
-                <select v-model="checklist"
-                        :disabled="!courses[0]"
-                        class="form-control">
-                    <option value="">- Selecciona un checklist -</option>
-                    <option v-for="(item, index) in Checklist"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.title }}
-                    </option>
-                </select>
+                <!-- :disabled="!courses[0]" -->
+                <DefaultAutocomplete
+                dense
+                v-model="checklist"
+                :items="Checklist_items"
+                label="Checklist"
+                item-text="title"
+                item-value="id"
+                multiple
+                :showSelectAll="false"
+                placeholder="Seleccione los checklists"
+                />
             </div>
             <v-divider class="col-12 mb-0 p-0"></v-divider>
             <!-- Fechas -->
@@ -92,7 +113,7 @@
                 <!-- Filtros secundarios -->
                 <div class="col-8 px-0">
                     <!-- Filtros Checkboxs -->
-                    <EstadoFiltro ref="EstadoFiltroComponent"/>
+                    <EstadoFiltro ref="EstadoFiltroComponent" class="px-0"/>
 
                     <!--          Nuevos filtros         -->
                     <!--
@@ -134,6 +155,26 @@
                             </div>
                         </div>
                     </div> -->
+
+                   <div class="col-12 px-0" v-if="workspaceId === 25">
+                        <b-form-text text-variant="muted">Áreas</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="area"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona una #Módulo"
+                            :disabled="!modulo"
+                            :items="areas"
+                            :background-color="!area ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
                 </div>
                 <!--          Fechas          -->
                 <div class="col-4 ml-auto">
@@ -141,10 +182,16 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <button :disabled="!checklist" type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-                <i class="fas fa-download"></i>
-                <span>Descargar</span>
-            </button>
+            <div class="col-sm-12 mb-3">
+                <div class="col-sm-6 px-0">
+                    <button
+                        :disabled="modulo.length === 0 || checklist.length === 0"
+                        type="submit" class="btn btn-md btn-primary btn-block text-light">
+                        <i class="fas fa-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
         </form>
     </v-main>
 </template>
@@ -156,7 +203,7 @@ import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem,FechaFiltro },
+    components: { EstadoFiltro, ResumenExpand, ListItem, FechaFiltro },
     props: {
         workspaceId: 0,
         modules: Array,
@@ -166,24 +213,26 @@ export default {
         return {
             schools: [],
             courses: [],
+            areas:[],
 
-            Checklist: [],
-
+            Checklist_items: [],
 
             loadingGrupos: false,
             loadingCarreras: false,
             loadingCiclos: false,
             //
-            modulo: "",
-            escuela: "",
-            curso: "",
-            checklist:"",
+            area:[],
+            modulo: [],
+            escuela: [],
+            curso: [],
+            checklist: []
             //
             // cursos_libres:false,
         }
     },
     mounted() {
-        this.fetchFiltersData()
+        this.fetchFiltersData();
+        this.fetchChecklist();
     },
     methods: {
         /**
@@ -212,17 +261,18 @@ export default {
                 workspaceId: this.workspaceId,
                 // cursos_libres : this.cursos_libres,
                 //
-                modulos: this.modulo ? [+this.modulo] : [],
+                modulos: this.modulo,
                 escuela: this.escuela,
                 curso: this.curso,
+                areas: this.area,
                 //
                 grupo: this.grupo,
-                checklist:this.checklist,
+                checklist: this.checklist,
                 //
                 UsuariosActivos: UFC.UsuariosActivos,
                 UsuariosInactivos: UFC.UsuariosInactivos,
                 start: FechaFiltro.start,
-                end: FechaFiltro.end,
+                end: FechaFiltro.end
             }
 
             let url = `${this.$props.reportsBaseUrl}/exportar/checklist_detallado`
@@ -237,6 +287,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Checklist detallado',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
@@ -253,15 +307,15 @@ export default {
          * @returns {Promise<boolean>}
          */
         async escuelaChange() {
-            this.curso = null;
-            this.tema = null;
+            this.curso = [];
+            this.tema = [];
             this.courses = [];
             this.topics = [];
 
-            if (!this.escuela) return false;
+            if (this.escuela.length === 0) return false;
 
-            this.cursos_libres =false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
+            this.cursos_libres = false;
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
             let res = await axios({
                 url,
                 method: 'get'
@@ -270,8 +324,8 @@ export default {
         },
         async cursoChange() {
 
-            this.checklist = "";
-            if (!this.curso) {
+            this.checklist = [];
+            if (this.curso.length === 0) {
                 await this.escuelaChange();
                 return false;
             }
@@ -284,15 +338,27 @@ export default {
          */
         async fetchChecklist(){
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist/${this.curso}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist/${this.workspaceId}`;
             const res = await axios.get(url);
-            this.Checklist = res.data;
+            this.Checklist_items = res.data;
+        },
+        async fetchFiltersAreaData() {
+            this.areas = [];
+            this.area = [];
+
+            if (this.modulo.length === 0) return;
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/grupo`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            this.areas = response.data
         }
     }
 }
 </script>
-<style>
-.v-label {
-    display: contents !important;
-}
+<style scoped>
+
 </style>

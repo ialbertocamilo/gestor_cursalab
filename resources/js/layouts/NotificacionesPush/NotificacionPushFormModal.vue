@@ -406,6 +406,7 @@ export default {
                     data
                 )
                 .then((response) => {
+                    vue.queryStatus("notificaciones", "enviar_notificacion");
                     vue.closeModal();
                     vue.showAlert(response.data.title);
                     vue.$emit('onConfirm');

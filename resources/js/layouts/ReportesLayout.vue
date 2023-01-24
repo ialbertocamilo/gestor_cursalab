@@ -144,6 +144,13 @@ TABS
                     </span>
                 </v-tab>
 
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-account</v-icon>
+                    <span class="pt-2">
+                        Historial de usuario
+                    </span>
+                </v-tab>
+
 <!--
 
 TABS CONTENT
@@ -183,16 +190,11 @@ TABS CONTENT
                        </v-card-text>
                    </v-card>
                </v-tab-item>
-                
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                             <!--Diploma 
-                                :Modulos="Modulos" 
-                                :API_FILTROS="API_FILTROS" 
-                                :API_REPORTES="API_REPORTES"
-                                @emitir-reporte="crearReporte" /-->
-                            <Diploma 
+                            <Diploma
                                 :workspaceId="workspaceId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
@@ -200,7 +202,7 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                
+
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -306,12 +308,8 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <!--<Vademecum :VademecumList="VademecumList" :API_FILTROS="API_FILTROS"
-                                       :API_REPORTES="API_REPORTES"
-                                       @emitir-reporte="crearReporte"/>-->
-
                             <Vademecum :workspaceId="workspaceId"
-                                       :vademecumList="VademecumList" 
+                                       :vademecumList="VademecumList"
                                        :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
                         </v-card-text>
@@ -321,9 +319,6 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <!--<Videoteca :VideotecaList="VideotecaList" :API_FILTROS="API_FILTROS"
-                                       :API_REPORTES="API_REPORTES"
-                                       @emitir-reporte="crearReporte"/>-->
                             <Videoteca :workspaceId="workspaceId"
                                        :reportsBaseUrl="reportsBaseUrl"
                                        @emitir-reporte="crearReporte"/>
@@ -370,7 +365,20 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Meetings/>
+                            <Meetings
+                                @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <HistorialUsuario
+                                :workspaceId="workspaceId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                :API_REPORTES="API_REPORTES"
+                                @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -378,16 +386,56 @@ TABS CONTENT
             </v-tabs>
         </v-card>
         <!-- </v-app> -->
+
+
+        <!--
+        Report's filename dialog
+        ======================================== -->
+
+        <v-dialog
+            v-model="filenameDialog"
+            width="600"
+        >
+            <v-card class="p-4">
+                <v-text-field
+                    v-model="reportFilename"
+                    label="Nombre de archivo del reporte"
+                    required
+                ></v-text-field>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <b-button
+                        variant="primary"
+                        block
+                        @click="filenameDialog = false">
+                        Cancelar
+                    </b-button>
+                    <b-button
+                        variant="primary"
+                        block
+                        class="m-0 ml-4"
+                        @click="downloadReport()">
+                        Descargar
+                    </b-button>
+                </v-card-actions>
+
+            </v-card>
+        </v-dialog>
     </v-app>
 </template>
 <script>
 
+
 const FileSaver = require("file-saver");
 const moment = require("moment");
 moment.locale("es");
+
+import {mapState} from "vuex";
 import NotasTema from "../components/Reportes/NotasTema";
 import Diploma from "../components/Reportes/Diploma";
 import NotasUsuario from "../components/Reportes/NotasUsuario";
+import HistorialUsuario from "../components/Reportes/HistorialUsuario";
 import Usuarios from "../components/Reportes/Usuarios";
 import Visitas from "../components/Reportes/Visitas";
 import NotasCurso from "../components/Reportes/NotasCurso";
@@ -398,15 +446,16 @@ import UsuarioUploads from "../components/Reportes/UsuarioUploads";
 import AvanceCurricula from "../components/Reportes/AvanceCurricula";
 import Vademecum from "../components/Reportes/Vademecum.vue";
 import Videoteca from "../components/Reportes/Videoteca.vue";
-import {mapState} from "vuex";
 import TemasNoEvaluables from "../components/Reportes/TemasNoEvaluables.vue";
 import ChecklistDetallado from "../components/Reportes/ChecklistDetallado.vue";
 import ChecklistGeneral from "../components/Reportes/ChecklistGeneral.vue";
 import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
-import Segmentacion from '../components/Reportes/Segmentacion.vue'
+import Segmentacion from '../components/Reportes/Segmentacion.vue';
+
 export default {
     components: {
+        HistorialUsuario,
         NotasUsuario,
         Usuarios,
         Visitas,
@@ -445,7 +494,11 @@ export default {
             userSession:{},
             superUserRoleId : 1,
             configRoleId: 2,
-            adminRoleId : 3
+            adminRoleId : 3,
+
+            filenameDialog: false,
+            reportDownloadUrl: null,
+            reportFilename: null
         };
     },
     mounted () {
@@ -502,21 +555,30 @@ export default {
 
             if (!res.data.ruta_descarga) return
 
+            // Update report name and show filename dialog
+
+            this.reportDownloadUrl = res.data.excludeBaseUrl
+                ? res.data.ruta_descarga
+                : `${this.reportsBaseUrl}/${res.data.ruta_descarga}`
+            this.reportFilename = res.data.new_name;
+            this.filenameDialog = true;
+        },
+        async downloadReport() {
             this.showLoader()
 
             try {
-                let urlReporte = `${this.reportsBaseUrl}/${res.data.ruta_descarga}`
 
-                // La extension la define el back-end, ya que el quien crea el archivo
-
-                FileSaver.saveAs(urlReporte, res.data.new_name)
-
+                FileSaver.saveAs(
+                    this.reportDownloadUrl,
+                    this.reportFilename
+                )
+                this.filenameDialog = false;
+                this.hideLoader()
 
             } catch (error) {
                 console.log(error);
-                // this.hideLoader()
+
                 this.hideLoader()
-                return error;
             }
         }
     },
@@ -572,6 +634,7 @@ color: #ffffff !important;
     color: darkgrey !important;
     font-size: 20px !important;
 }
+
 
 /* Tooltips */
 [tooltip] {

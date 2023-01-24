@@ -6,6 +6,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\UCMigrationData\Migration_1;
 use App\Notifications\UserResetPasswordNotification;
+use Clockwork\DataSource\DBALDataSource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -71,7 +72,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
         'user_relations',
-        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at','is_updating'
+        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating'
     ];
 
     protected $with = ['roles', 'abilities'];
@@ -387,7 +388,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    protected function storeRequest($data, $user = null, $update_password = true,$from_massive=false)
+    protected function storeRequest($data, $user = null, $update_password = true, $from_massive = false)
     {
         try {
 
@@ -398,7 +399,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     unset($data['password']);
                 }
                 $user->update($data);
-                if(!$from_massive){
+                if (!$from_massive) {
                     SummaryUser::updateUserData($user);
                 }
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
@@ -406,7 +407,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 else:
                     $user_document = CriterionValue::whereRelation('criterion', 'code', 'document')
                         ->where('value_text', $old_document)->first();
-                    if(!$user_document){
+                    if (!$user_document) {
                         $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $old_document);
                     }
                 endif;
@@ -496,7 +497,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request, $withAdvancedFilters = false)
     {
         $query = self::onlyClientUsers();
-        if (auth()->user()->isA('super-user')){
+        if (auth()->user()->isA('super-user')) {
             $query = self::query();
         }
 
@@ -504,7 +505,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if (get_current_workspace()->id == 25) {
 
-            $with = ['subworkspace', 'criterion_values' => function($q) {
+            $with = ['subworkspace', 'criterion_values' => function ($q) {
                 $q->whereIn('criterion_id', [40, 41]);
             }];
         }
@@ -589,7 +590,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $with_direct_segmentation = true,
         $withFreeCourses = true,
         $withRelations = 'default',
-        $only_ids = false)
+        $only_ids = false,
+        $response_type = 'courses-separated',
+    )
     {
         $user = $this;
         $user->load('criterion_values:id,value_text,criterion_id');
@@ -599,20 +602,42 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //        if ($with_programs) $this->setProgramCourses($user, $all_courses);
 
         if ($with_direct_segmentation)
-            $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses);
+            $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $response_type);
 
-        if ($only_ids)
-            return array_unique(array_column($all_courses, 'id'));
+        if ($response_type === 'courses-unified')
+            return $all_courses;
+
+        $current_courses = $all_courses['current_courses'] ?? [];
+        $compatibles_courses = $all_courses['compatibles'] ?? [];
 
         $query = $this->getUserCourseSegmentationQuery($withRelations);
 
-        return $query->whereIn('id', array_column($all_courses, 'id'))->get();
+        $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
+
+
+        if ($only_ids)
+            return array_unique(array_column($current_courses, 'id'));
+
+
+        foreach ($courses as $course) {
+
+            $compatible_course = $compatibles_courses[$course->id] ?? false;
+
+            if ($compatible_course) {
+
+                $course->compatible = $compatible_course;
+
+            }
+        }
+
+        return $courses;
     }
 
     private function getUserCourseSegmentationQuery($withRelations)
     {
-        $relations = config("courses.user-courses-query.$withRelations");
-
+        // $relations = config("courses.user-courses-query.$withRelations");
+        $user_id = auth()->user() ? auth()->user()->id : $this->id;
+        $relations = config("courses.user-courses-query")($withRelations, $user_id);
         return Course::with($relations);
     }
 
@@ -744,8 +769,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses)
+    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $response_type)
     {
+//        $all_courses['compatibles'] = [];
         $user->loadMissing('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
@@ -787,15 +813,51 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                 if ($valid_segment) :
 
-//                    if ($user->subworkspace->parent_id === 25)
-//                        $course = $course->getCourseCompatibilityByUser($user);
+                    // COMPATIBLE VALIDATION
 
-                    $all_courses[] = $course;
+                    if ($response_type === 'courses-separated') {
+                        if ($user->subworkspace->parent_id === 25):
 
-                    break;
+                            $compatible = $course->getCourseCompatibilityByUser($user);
+
+                            if ($compatible):
+
+                                $all_courses['compatibles'][$course->id] = $compatible;
+
+                            endif;
+
+                        endif;
+
+                        $all_courses['current_courses'][] = $course;
+
+                        break;
+                    }
+
+                    if ($response_type === 'courses-unified') {
+
+                        $compatible = null;
+
+                        if ($user->subworkspace->parent_id === 25):
+
+                            $compatible = $course->getCourseCompatibilityByUser($user);
+
+                        endif;
+
+                        $temp = $compatible ? $compatible->course : $course;
+
+//                        if ($course->id == 1136)
+//                            dd($temp);
+
+                        $all_courses[] = $temp;
+
+                        break;
+                    }
+
                 endif;
             }
         }
+//        dd($all_courses);
+
         unset($user->active_cycle);
     }
 //    public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $withRelations)
@@ -875,6 +937,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return true;
     }
+
     public function updateLastUserLogin()
     {
         $user = $this;

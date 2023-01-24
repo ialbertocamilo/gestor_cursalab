@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\AppErrorRequest;
-use App\Http\Requests\MeetingAppRequest;
-use App\Http\Requests\Meeting\MeetingAppUploadAttendantsRequest;
-use App\Http\Requests\Meeting\MeetingAppUploadhAttendantsRequest;
-use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
-use App\Http\Resources\MeetingAppResource;
-use App\Http\Resources\MeetingResource;
-use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
-use App\Models\Abconfig;
-use App\Models\Attendant;
-use App\Models\Criterio;
+use stdClass;
+use Carbon\Carbon;
 use App\Models\Error;
 use App\Models\Meeting;
+use App\Models\Abconfig;
+use App\Models\Criterio;
 use App\Models\Taxonomy;
+use App\Models\Attendant;
 use App\Models\Workspace;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use stdClass;
+use App\Models\CriterionValue;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\AppErrorRequest;
+use App\Http\Resources\MeetingResource;
+use App\Http\Requests\MeetingAppRequest;
+use App\Http\Resources\MeetingAppResource;
+use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
+use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Http\Requests\Meeting\MeetingAppUploadAttendantsRequest;
+use App\Http\Requests\Meeting\MeetingAppUploadhAttendantsRequest;
 
 class RestMeetingController extends Controller
 {
@@ -175,8 +176,13 @@ class RestMeetingController extends Controller
         $user_types = Taxonomy::getData('meeting', 'user')->pluck('code', 'id');
 
         $params = ['config_id' => $request->config_id ?? auth()->user()->config_id];
-        $grupos = [];
-
+        $grupos = CriterionValue::query()
+        ->whereRelation('criterion', 'code', 'grupo')
+        ->whereRelation('workspaces', 'id', $subworkspace->parent_id)
+        ->where('active', ACTIVE)
+        ->select('id', "value_text as nombre")
+        ->get();
+        
         return $this->success(compact('grupos', 'modulos', 'user_types'));
     }
 

@@ -10,11 +10,16 @@
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
-            <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
+            </div>
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
-            <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+
+            <div v-show="workspaceId === 25">
+                <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
+                <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
+            </div>
             <list-item titulo="Documento (entrenador)" subtitulo="" />
             <list-item titulo="Nombre (entrenador)" subtitulo="" />
             <!-- <list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
@@ -25,19 +30,22 @@
             <list-item titulo="Avance total" subtitulo="" />
         </ResumenExpand>
 
-        <form @submit.prevent="exportReport" class="row">
+        <form @submit.prevent="exportReport" class="row px-3">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
-                <b-form-text text-variant="muted">Módulo</b-form-text>
-                <select class="form-control"
-                        v-model="modulo">
-                    <option value>- [Todos] -</option>
-                    <option v-for="(item, index) in modules"
-                            :key="index"
-                            :value="item.id">
-                        {{ item.name }}
-                    </option>
-                </select>
+                <DefaultAutocomplete
+                    dense
+                    v-model="modulo"
+                    :items="modules"
+                    label="Módulo"
+                    item-text="name"
+                    item-value="id"
+                    multiple
+                    :showSelectAll="false"
+                    placeholder="Seleccione los módulos"
+                    @onBlur="fetchFiltersAreaData"
+                    :maxValuesSelected="4"
+                />
             </div>
 
             <v-divider class="col-12 mb-0 p-0"></v-divider>
@@ -71,7 +79,7 @@
                 <!-- Filtros secundarios -->
                 <div class="col-8 px-0">
                     <!-- Filtros Checkboxs -->
-                    <EstadoFiltro ref="EstadoFiltroComponent"/>
+                    <EstadoFiltro ref="EstadoFiltroComponent" class="px-0"/>
 
                     <!--          Nuevos filtros         -->
                     <!--
@@ -115,6 +123,27 @@
                             </div>
                         </div>
                     </div> -->
+
+                   <div class="col-12 px-0" v-if="workspaceId === 25">
+                        <b-form-text text-variant="muted">Áreas</b-form-text>
+                        <v-select
+                            attach
+                            solo
+                            chips
+                            clearable
+                            multiple
+                            :show-select-all="false"
+                            hide-details="false"
+                            v-model="area"
+                            item-value="id"
+                            item-text="name"
+                            label="Selecciona una #Módulo"
+                            :disabled="!modulo"
+                            :items="areas"
+                            :background-color="!area ? '' : 'light-blue lighten-5'">
+                        </v-select>
+                    </div>
+
                 </div>
                 <!--          Fechas          -->
                 <div class="col-4 ml-auto">
@@ -122,10 +151,22 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
-            <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
-                <i class="fas fa-download"></i>
-                <span>Descargar</span>
-            </button>
+
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
+            </div>
+
+            <div class="col-sm-12 mb-3">
+                <div class="col-sm-6 px-0">
+                    <button
+                        :disabled="modulo.length === 0"
+                        type="submit"
+                        class="btn btn-md btn-primary btn-block text-light">
+                        <i class="fas fa-download"></i>
+                        <span>Descargar</span>
+                    </button>
+                </div>
+            </div>
         </form>
     </v-main>
 </template>
@@ -135,9 +176,10 @@ import FechaFiltro from "./partials/FechaFiltro.vue";
 import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
+import FiltersNotification from "../globals/FiltersNotification.vue";
 
 export default {
-    components: { EstadoFiltro, ResumenExpand, ListItem,FechaFiltro },
+    components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem,FechaFiltro },
     props: {
         workspaceId: 0,
         modules: Array,
@@ -156,7 +198,9 @@ export default {
             loadingCarreras: false,
             loadingCiclos: false,
             //
-            modulo: "",
+            modulo: [],
+            areas:[],
+            area:[]
             // escuela: "",
             // curso: "",
             //
@@ -171,9 +215,10 @@ export default {
             let FechaFiltro = this.$refs.FechasFiltros;
             let params = {
                 workspaceId: this.workspaceId,
-                modulos: this.modulo ? [+this.modulo] : [],
+                modulos: this.modulo,
                 UsuariosActivos: UFC.UsuariosActivos,
                 UsuariosInactivos: UFC.UsuariosInactivos,
+                areas: this.area,
                 start: FechaFiltro.start,
                 end: FechaFiltro.end
             };
@@ -189,6 +234,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Checklist general',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 
@@ -199,12 +248,24 @@ export default {
             // Hide loading spinner
 
             this.hideLoader()
+        },
+        async fetchFiltersAreaData() {
+            this.areas = [];
+            this.area = [];
+
+            if(this.modulo.length === 0) return;
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo[0]}/criterion-values/grupo`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            this.areas = response.data
         }
     }
 }
 </script>
 <style>
-.v-label {
-    display: contents !important;
-}
+
 </style>

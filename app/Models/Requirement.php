@@ -23,6 +23,11 @@ class Requirement extends BaseModel
         return $this->morphTo();
     }
 
+    public function model_course()
+    {
+        return $this->hasOne(Course::class, 'id', 'requirement_id');
+    }
+
     public function requirement()
     {
         return $this->morphTo();
@@ -37,7 +42,6 @@ class Requirement extends BaseModel
     {
         return $this->hasMany(SummaryTopic::class, 'topic_id', 'requirement_id');
     }
-
 
     protected function storeRequest($data, $requirement = null)
     {

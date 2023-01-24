@@ -21,10 +21,19 @@ class PollQuestionAnswer extends BaseModel
     {
         return $this->belongsTo(Curso::class, 'course_id');
     }
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
 
     public function usuario()
     {
         return $this->belongsTo(Usuario::class, 'user_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 

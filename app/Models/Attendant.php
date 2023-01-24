@@ -407,7 +407,13 @@ class Attendant extends BaseModel
         $query->when($currIndexes, function ($q) use ($currIndexes){
             $q->whereIn('users.id', $currIndexes);
         });
-
+        # === filtro de usuarios por grupos ===
+        $grupos_id = $filters['grupos_id'] ?? null;
+        $query->when($grupos_id, function ($q) use ($grupos_id){
+            $q->whereHas('criterion_user', function($q2) use ($grupos_id){
+                $q2->whereIn('criterion_value_id',$grupos_id);  
+            } );
+        });
         // $query->simplePaginate(5);
         return $query->orderBy('subworkspace_id')
                      ->orderBy('name')->get();

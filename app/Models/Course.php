@@ -81,6 +81,28 @@ class Course extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
 
+    public function compatibilities_a()
+    {
+        return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
+    }
+
+    public function compatibilities_b()
+    {
+        return $this->belongsToMany(Course::class, 'compatibilities', 'course_b_id', 'course_a_id');
+    }
+
+    public function getCompatibilities()
+    {
+        // return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
+        // info('this->compatibilities_a');
+        // info($this->compatibilities_a);
+
+        // info('this->compatibilities_b');
+        // info($this->compatibilities_b);
+
+        return $this->compatibilities_a->merge($this->compatibilities_b);
+    }
+
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
@@ -130,6 +152,8 @@ class Course extends BaseModel
             });
         }
 
+        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b']);
+
         if ($request->schools) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->whereIn('school_id', $request->schools);
@@ -145,8 +169,6 @@ class Course extends BaseModel
             });
 
         }
-
-        $q->withCount(['topics', 'polls', 'segments', 'type']);
 
         if ($request->q)
             $q->where('name', 'like', "%$request->q%");
@@ -198,10 +220,21 @@ class Course extends BaseModel
             $data['scheduled_restarts'] = $data['reinicios_programado'];
 
             if ($course) :
+
                 $course->update($data);
-            else :
+
+                // TODO: Compatibles: Si se cambia el estado del curso
+                if ($course->wasChanged('active')):
+
+                    $course->updateOnModifyingCompatibility();
+
+                endif;
+
+            else:
+
                 $course = self::create($data);
                 $course->workspaces()->sync([$workspace->id]);
+
             endif;
 
             if ($data['requisito_id']) :
@@ -218,6 +251,8 @@ class Course extends BaseModel
 
 
             $course->schools()->sync($data['escuelas']);
+
+            // $course->compatibilities()->sync($data['compatibilities'] ?? []);
 
             // Generate code when is not defined
 
@@ -329,7 +364,8 @@ class Course extends BaseModel
 
     public function getMessagesOnUpdateStatus($course)
     {
-        $temp['ok'] = ($course->wasChanged('active') or $course->active === 1) and $course->topics->count() > 0;
+//        dd($course->wasChanged('active'), $course->wasChanged('active') && $course->active === 1);
+        $temp['ok'] = ($course->wasChanged('active') and $course->active === 1) and $course->topics->count() > 0;
 
         if (!$temp['ok']) return $temp;
 
@@ -412,7 +448,7 @@ class Course extends BaseModel
         $schools = $user_courses->groupBy('schools.*.id');
         $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
             $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
-        })
+        })->with('status:id,code')
             ->where('user_id', $user->id)
             ->get();
 
@@ -425,6 +461,7 @@ class Course extends BaseModel
         $data = [];
 
         foreach ($schools as $school_id => $courses) {
+
             $school = $courses->first()->schools->where('id', $school_id)->first();
             $school_courses = [];
             $school_completed = 0;
@@ -435,22 +472,33 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
+
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
                 $last_topic = null;
                 $course_status = self::getCourseStatusByUser($user, $course);
                 if ($course_status['status'] == 'completado') $school_completed++;
 
-                $topics = $course->topics->where('active', ACTIVE);
+                $topics = $course->topics->sortBy('position')->where('active', ACTIVE);
                 $summary_topics = $summary_topics_user->whereIn('topic_id', $topics->pluck('id'));
-
+                $before_topic=null;
                 if ($summary_topics->count() > 0) {
                     foreach ($topics as $topic) {
                         $topics_view = $summary_topics->where('topic_id', $topic->id)->first();
+                        $topic_requirement = $topic->requirements->first();
+                        if($topic_requirement){
+                            $requirement_summary = $summary_topics->where('topic_id',$topic_requirement?->requirement_id)->first();
+                            $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
+                            if(!$available_topic){
+                                $last_topic = ($before_topic?->id);
+                                break;
+                            }
+                        }
+                        $before_topic=$topic;
                         $last_item = ($topic->id == $topics->last()->id);
                         if ($topics_view?->views) {
                             $passed_tests = $summary_topics->where('topic_id', $topic->id)->where('passed', 1)->first();
-                            if ($topic->evaluation_type?->code == 'calificada' && $passed_tests && !$last_item) continue;
+                            if ($topic->evaluation_type?->code == 'qualified' && $passed_tests && !$last_item) continue;
                             $last_topic = ($topic->id);
                             break;
                         }
@@ -460,7 +508,6 @@ class Course extends BaseModel
                         }
                     }
                 }
-
                 // UC rule
                 $course_name = $course->name;
                 $tags = [];
@@ -500,7 +547,8 @@ class Course extends BaseModel
                     'temas_completados' => $course_status['completed_topics'],
                     'porcentaje' => $course_status['progress_percentage'],
                     'tags' => $tags,
-                    'ultimo_tema_visto' => $last_topic_reviewed
+                    'ultimo_tema_visto' => $last_topic_reviewed,
+                    'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
                 ];
             }
 
@@ -540,6 +588,9 @@ class Course extends BaseModel
 
     protected function getCourseStatusByUser(User $user, Course $course): array
     {
+//        if ($course->compatible)
+//            dd($course->compatible);
+
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
         $available_course = true;
@@ -550,56 +601,72 @@ class Course extends BaseModel
         $assigned_topics = 0;
         $completed_topics = 0;
 
-//        $status_approved = Taxonomy::getFirstData('course', 'user-status', 'aprobado');
-//        $status_enc_pend = Taxonomy::getFirstData('course', 'user-status', 'enc_pend');
-//        $status_desaprobado = Taxonomy::getFirstData('course', 'user-status', 'desaprobado');
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
         $status_approved = $statuses->where('code', 'aprobado')->first();
         $status_enc_pend = $statuses->where('code', 'enc_pend')->first();
         $status_desaprobado = $statuses->where('code', 'desaprobado')->first();
 
         $requirement_course = $course->requirements->first();
-//        info("REQUISITO DEL CURSO {$course->name}");
-//        info($requirement_course);
-        // info("requirement_course");
-        // info($requirement_course);
+
         if ($requirement_course) {
-//            $summary_requirement_course = SummaryCourse::with('course')
-//                ->where('user_id', $user->id)
-//                ->where('course_id', $requirement_course->requirement_id)
-//                ->whereRelation('status', 'code', '=', 'aprobado')
-//                ->first();
+
             $summary_requirement_course = $requirement_course->summaries_course->first();
-            //            info("requirement_course");
-            //            info($summary_requirement_course);
+
             if (!$summary_requirement_course) {
-                $available_course = false;
-                $status = 'bloqueado';
+
+                // TODO: Validar si existe algun curso compatible aprobado del curso requisito
+
+                $req_course = $requirement_course->model_course;
+
+                $req_course->load([
+                    'summaries' => function ($q) use ($user) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', $user->id);
+                    },
+                    'compatibilities_a:id',
+                    'compatibilities_b:id',
+                ]);
+
+                $compatible_course_req = $req_course->getCourseCompatibilityByUser($user);
+                // $compatible_course_req = $requirement_course->model_course->getCourseCompatibilityByUser($user);
+
+                if (!$compatible_course_req):
+                    $available_course = false;
+                    $status = 'bloqueado';
+                endif;
+
             }
         }
         // info($available_course);
         if ($available_course) {
+
+            if ($course->compatible):
+
+                return [
+                    'status' => 'aprobado',
+                    'progress_percentage' => 100,
+                    'available' => true,
+                    'poll_id' => null,
+                    'available_poll' => false,
+                    'enabled_poll' => false,
+                    'solved_poll' => false,
+                    'exists_summary_course' => false,
+                    'assigned_topics' => $course->topics->count(),
+                    'completed_topics' => $course->topics->count(),
+                ];
+
+            endif;
+
             $poll = $course->polls->first();
             if ($poll) {
                 $poll_id = $poll->id;
                 $available_poll = true;
 
-//                $poll_questions_answers = $course->poll_question_answers_count;
-
-//                $poll_questions_answers = collect()
-//
-//                foreach ($poll->questions as $question)
-//                    foreach ($question as $answers)
-//                        $poll_questions_answers->push($answers);
-
-                //                info($poll_questions_answers);
-//                if ($poll_questions_answers->count() > 0)
                 if ($course->poll_question_answers_count)
                     $solved_poll = true;
             }
 
-            // $summary_course = $course->summaryByUser($user->id);
-//            $summary_course = SummaryCourse::getCurrentRow($course, $user);
             $summary_course = $course->summaries->first();
 
             if ($summary_course) {
@@ -607,6 +674,7 @@ class Course extends BaseModel
                 $assigned_topics = $summary_course->assigned;
                 $course_progress_percentage = $summary_course->advanced_percentage;
                 if ($course_progress_percentage == 100 && $summary_course->status_id == $status_approved->id) :
+
 //                if ($course_progress_percentage == 100 && $summary_course->status->code == 'aprobado') :
                     $status = 'completado';
                 elseif ($course_progress_percentage == 100 && $summary_course->status_id == $status_enc_pend->id) :
@@ -671,9 +739,9 @@ class Course extends BaseModel
         return $this->segments->where('active', ACTIVE)->count();
     }
 
-    public static function probar($course_id)
+    public static function probar()
     {
-        $course = Course::find($course_id);
+        $course = Course::find('265');
         $fun_1 = $course->getUsersBySegmentation('count');
         print_r('Función 1: ');
         print_r($fun_1);
@@ -681,6 +749,7 @@ class Course extends BaseModel
         print_r('Función 2: ');
         print_r($fun_2);
     }
+
     public function usersSegmented($course_segments, $type = 'get_records')
     {
         $users_id_course = [];
@@ -689,16 +758,16 @@ class Course extends BaseModel
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
                 $segment_type = Criterion::find($idx);
-                if($segment_type->field_type->code =='date'){
-                    $select_date = CriterionValue::select('id')->where(function($q)use($values){
+                if ($segment_type->field_type->code == 'date') {
+                    $select_date = CriterionValue::select('id')->where(function ($q) use ($values) {
                         foreach ($values as $value) {
                             $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
                             $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
-                            $q->orWhereRaw('value_date between "'.$starts_at.'" and "'.$finishes_at.'"');
+                            $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
                         }
-                    })->where('criterion_id',$idx)->get();
+                    })->where('criterion_id', $idx)->get();
                     $ids = $select_date->pluck('id');
-                }else{
+                } else {
                     $ids = $values->pluck('criterion_value_id');
                 }
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($ids, $idx) {
@@ -707,6 +776,7 @@ class Course extends BaseModel
                 });
             }
             // $counts[$key] = $query->count();
+//            dd($query->toSql());
             $users_id_course = array_merge($users_id_course, $query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');
@@ -748,7 +818,7 @@ class Course extends BaseModel
 
         foreach ($this->segments as $key => $segment) {
 
-            $query = User::select('id')->where('active',1);
+            $query = User::select('id')->where('active', 1);
             // $clause = $key == 0 ? 'where' : 'orWhere';
 
             $grouped = $segment->values->groupBy('criterion_id');
@@ -858,16 +928,123 @@ class Course extends BaseModel
 //            $ciclos_values = $temp_segment->values()->whereRelation('criterion', 'code', 'cycle')->pluck('criterion_value_id');
 //            $ciclos = CriterionValue::whereIn('id', $ciclos_values)->where('value_text', '<>', 'Ciclo 0')->get();
 
-            $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
-                ->whereRelation('criterion', 'code', 'cycle')
-                ->where('value_text', '<>', 'Ciclo 0')
-                ->orderBy('position')
-                ->first();
+            $ciclo = null;
+            if ($temp_segment)
+                $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
+                    ->whereRelation('criterion', 'code', 'cycle')
+                    ->where('value_text', '<>', 'Ciclo 0')
+                    ->orderBy('position')
+                    ->first();
 
             if ($ciclo)
                 $tags = [$ciclo->value_text];
         }
 
         return $tags;
+    }
+
+    public function updateOnModifyingCompatibility()
+    {
+        $course = $this;
+        // $course->loadMissing('compatibilities.segments');
+
+        $course->compatibilities = $course->getCompatibilities();
+
+        if ($course->compatibilities->count() === 0) return;
+
+        $course->loadMissing('segments');
+
+        $courses_to_update[] = $course->id;
+
+        $users_segmented = Course::usersSegmented($course->segments, type: 'users_id');
+
+        foreach ($course->compatibilities as $compatibility_course) {
+
+            $users_segmented = array_merge(
+                $users_segmented,
+                Course::usersSegmented($compatibility_course->segments, type: 'users_id'),
+            );
+            $courses_to_update[] = $compatibility_course->id;
+        }
+
+        // TODO: review how to reduce the number of users to update
+        $users_segmented = array_unique($users_segmented);
+//        $users_to_update = SummaryCourse::whereIn('user_id', $users_segmented)
+//            ->whereIn('course_id', $courses_to_update)
+//            ->whereNull('grade_average')
+//            ->pluck('user_id');
+
+        $chunk_users = array_chunk($users_segmented, 80);
+        foreach ($chunk_users as $chunked_users) {
+            SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update);
+        }
+    }
+
+
+    public function getCourseCompatibilityByUser($user)
+    {
+        $compatible_course = null;
+
+        $course = $this;
+        $course->compatibilities = $course->getCompatibilities();
+
+        $summary_course = $course->summaries->first();
+//        dd($course->compatibilities->pluck('id')->toArray());
+
+        if ($summary_course) return null;
+
+        if ($course->compatibilities->count() === 0) return null;
+
+        $compatible_summary_course = SummaryCourse::with('course:id,name')
+            ->whereRelation('course', 'active', ACTIVE)
+            ->where('user_id', $user->id)
+            ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
+            ->orderBy('grade_average', 'DESC')
+            ->whereRelation('status', 'code', 'aprobado')
+            ->first();
+
+
+        if ($compatible_summary_course):
+
+            $compatible_summary_course->course->compatible_of = $course;
+            $compatible_course = $compatible_summary_course;
+
+        endif;
+
+        return $compatible_course;
+    }
+
+    protected function storeCompatibilityRequest($course, $data = [])
+    {
+        $course->compatibilities_b()->sync([]);
+        $course->compatibilities_a()->sync($data['compatibilities'] ?? []);
+
+        // TODO: Compatibles: Actualizar al modificar los cursos compatibles
+        // $course->updateOnModifyingCompatibility();
+
+        return $course;
+    }
+
+    public function hasBeenValidated($user = null)
+    {
+        $user = $user ?? auth()->user();
+
+        $workspace_id = $user->subworkspace->parent_id;
+
+        if ($workspace_id != 25) return false;
+
+        $this->load([
+            'summaries' => function ($q) use ($user) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', $user->id);
+            },
+            'compatibilities_a:id',
+            'compatibilities_b:id',
+        ]);
+
+        $compatible = $this->getCourseCompatibilityByUser($user);
+
+        return $compatible ? true : false;
     }
 }

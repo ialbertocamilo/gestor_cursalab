@@ -99,6 +99,7 @@
             urlSubida="/entrenamiento/entrenadores/asignar_masivo"
             v-model="modal.asignar_usuarios"
             @onClose="closeModalSubidaMasiva"
+            typeForm="asigna_alumnos"
         />
 
         <ModalVerAlumnos
@@ -207,7 +208,7 @@ export default {
             let vue = this;
             // await vue.getData();
             vue.modal.asignar_usuarios = false;
-
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
         },
         async closeModalVerAlumnos() {
             let vue = this;

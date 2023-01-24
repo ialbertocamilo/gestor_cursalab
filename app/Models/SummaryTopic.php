@@ -26,6 +26,8 @@ class SummaryTopic extends Summary
         'last_time_evaluated_at',
     ];
 
+    // protected $hidden = ['answers'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -93,9 +95,11 @@ class SummaryTopic extends Summary
         // Get "Desaprobado" status from taxonomies
 
         $desaprobado = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        //Some users use the quiz attempt but don't finish it, so the summary topic has the status to-start
+        $por_iniciar = Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
 
         $query = SummaryTopic::whereIn('topic_id', $topicsIds)
-            ->where('status_id', $desaprobado->id)
+            ->whereIn('status_id', [$desaprobado->id,$por_iniciar->id])
             ->where('attempts', '>=', $attemptsLimit);
         if ($scheduleDate)
             $query->where('last_time_evaluated_at', '<=', $scheduleDate);

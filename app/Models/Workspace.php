@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\DB;
@@ -70,9 +71,9 @@ class Workspace extends BaseModel
     {
         return $this->belongsToMany(
             Criterion::class
-            // 'criterion_workspace',
-            // 'workspace_id',
-            // 'criterion_id'
+        // 'criterion_workspace',
+        // 'workspace_id',
+        // 'criterion_id'
         );
     }
 
@@ -170,8 +171,8 @@ class Workspace extends BaseModel
         $ids = self::loadSubWorkspacesIds($workspaceId);
 
         $count = User::query()
-                    ->whereIn('subworkspace_id', $ids)
-                    ->count();
+            ->whereIn('subworkspace_id', $ids)
+            ->count();
 
         return $count ?? 0;
     }
@@ -189,10 +190,10 @@ class Workspace extends BaseModel
             // Return all workspaces, excluding subworkspaces
 
             return Workspace::query()
-                            ->where('parent_id', null)
-                            ->where('workspaces.active', ACTIVE)
-                            ->where('workspaces.deleted_at', null)
-                            ->select('workspaces.*');
+                ->where('parent_id', null)
+                ->where('workspaces.active', ACTIVE)
+                ->where('workspaces.deleted_at', null)
+                ->select('workspaces.*');
         }
 
 
@@ -211,17 +212,17 @@ class Workspace extends BaseModel
         // access to, according to its role
 
         $workspacesIds = AssignedRole::query()
-                           ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
-                           ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
-                           ->whereIn('assigned_roles.role_id', $allowedRoles)
-                           ->where('users.id', $userId)
-                           ->select('assigned_roles.*')
-                           ->pluck('scope');
+            ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
+            ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
+            ->whereIn('assigned_roles.role_id', $allowedRoles)
+            ->where('users.id', $userId)
+            ->select('assigned_roles.*')
+            ->pluck('scope');
 
         return Workspace::query()
-                        ->whereIn('id', $workspacesIds)
-                        ->where('workspaces.active', ACTIVE)
-                        ->select('workspaces.*');
+            ->whereIn('id', $workspacesIds)
+            ->where('workspaces.active', ACTIVE)
+            ->select('workspaces.*');
     }
 
     /**
@@ -260,8 +261,8 @@ class Workspace extends BaseModel
     {
 
         return Workspace::where('active', ACTIVE)
-                        ->where('parent_id', $workspaceId)
-                        ->pluck('id');
+            ->where('parent_id', $workspaceId)
+            ->pluck('id');
     }
 
     /**
@@ -275,7 +276,7 @@ class Workspace extends BaseModel
         //$subworkspace = Workspace::find($moduleId);
 
         $subworkspace = Workspace::where('criterion_value_id', $moduleId)
-                                 ->first();
+            ->first();
 
         return $subworkspace->id ?? NULL;
 
@@ -289,6 +290,19 @@ class Workspace extends BaseModel
 //             ->first();
 //
 //        return $workspace->id ?? NULL;
+    }
+
+    /**
+     * Find a subworkspace using its criterion value id
+     *
+     * @param $criterionValueId
+     * @return Builder|Model|object|null
+     */
+    public static function findSubworkspaceWithCriterionValueId($criterionValueId)
+    {
+        return Workspace::query()
+            ->where('criterion_value_id', $criterionValueId)
+            ->first();
     }
 
     protected function searchSubWorkspace($request)
@@ -322,15 +336,15 @@ class Workspace extends BaseModel
 
             DB::beginTransaction();
 
-            if ($subworkspace){
+            if ($subworkspace) {
 
                 $subworkspace->update($data);
-                if($subworkspace->wasChanged('name')){
-                    CriterionValue::where('id',$subworkspace->criterion_value_id)->update([
+                if ($subworkspace->wasChanged('name')) {
+                    CriterionValue::where('id', $subworkspace->criterion_value_id)->update([
                         'value_text' => $data['name'],
                     ]);
                 }
-            }else{
+            } else {
 
                 $data['parent_id'] = session('workspace')->id ?? NULL;
 
@@ -440,17 +454,17 @@ class Workspace extends BaseModel
         $workspace = get_current_workspace();
 
         return Workspace::select($attributes)
-                        ->where('active', ACTIVE)
-                        ->where('parent_id', $workspace->id)
-                        ->get();
+            ->where('active', ACTIVE)
+            ->where('parent_id', $workspace->id)
+            ->get();
     }
 
     protected function loadSubWorkspacesSiblings($subworkspace, $attributes)
     {
         return Workspace::select($attributes)
-                        ->where('active', ACTIVE)
-                        ->where('parent_id', $subworkspace->parent_id)
-                        ->get();
+            ->where('active', ACTIVE)
+            ->where('parent_id', $subworkspace->parent_id)
+            ->get();
     }
 
     public function criterion_workspace()

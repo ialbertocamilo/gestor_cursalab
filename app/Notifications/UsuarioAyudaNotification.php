@@ -7,7 +7,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-use App\Models\UsuarioAyuda;
+use App\Models\Ticket;
 
 class UsuarioAyudaNotification extends Notification
 {
@@ -18,9 +18,9 @@ class UsuarioAyudaNotification extends Notification
      *
      * @return void
      */
-    public function __construct(UsuarioAyuda $usuario_ayuda)
+    public function __construct(Ticket $ticket)
     {
-        $this->usuario_ayuda = $usuario_ayuda;
+        $this->ticket = $ticket;
     }
 
     /**
@@ -57,8 +57,8 @@ class UsuarioAyudaNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'ticket'=>$this->usuario_ayuda->id,
-            'mensaje' => $this->usuario_ayuda->msg_to_user,
+            'ticket'=>$this->ticket->id,
+            'mensaje' => $this->ticket->msg_to_user,
             'tipo' => 'soporte',
             'url'=>'null'
         ];

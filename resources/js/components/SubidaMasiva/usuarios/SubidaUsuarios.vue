@@ -56,6 +56,7 @@ export default {
             this.archivo = res;
         },
         async enviar_archivo() {
+            let vue = this;
             let validar_data = this.validar_data();
             if (validar_data) {
                 let data = new FormData();
@@ -78,6 +79,7 @@ export default {
                             <li>Cantidad de usuarios creados/actualizados: ${data.datos_procesados || 0}</li>
                             <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
                         </ul>`
+                    vue.queryStatus("subida_masiva", "subir_archivo");
                     this.hideLoader();
                     this.enviar_alerta(message);
                 }).catch(err => {

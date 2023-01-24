@@ -759,3 +759,21 @@ body::-webkit-scrollbar-thumb {
 .tabs-item-detail .v-window__container .v-window-item .v-card{
     margin-top: 25px !important;
 }
+
+// Allow multiline options in selects
+
+.v-select .v-list-item__title {
+    white-space: pre-wrap;
+}
+
+// .v-carousel__item {
+.v-dialog.v-dialog--active {
+    .v-select--is-multi.v-autocomplete {
+        .v-select__slot {
+            padding: 6px 0 !important;
+        }
+        .v-chip__content button.v-btn {
+            padding-right: 0px !important;
+        }
+    }
+}

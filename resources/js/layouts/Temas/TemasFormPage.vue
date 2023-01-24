@@ -402,6 +402,7 @@ export default {
                     if (has_info_messages)
                         await vue.handleValidationsAfterUpdate(data.data, vue.topicsValidationModal, vue.topicsValidationModalDefault);
                     else {
+                        vue.queryStatus("tema", "crear_tema");
                         vue.showAlert(data.data.msg)
                         setTimeout(() => vue.leavePage(), 2000)
                     }

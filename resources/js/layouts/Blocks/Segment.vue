@@ -21,8 +21,7 @@
 
         <v-col cols="12" md="12" lg="12">
             <span class="mb-3">Selecciona criterios:</span>
-
-            <DefaultAutocomplete
+            <DefaultAutocompleteOrder
                 return-object
                 dense
                 label="Criterios"
@@ -32,6 +31,9 @@
                 item-text="name"
                 item-id="id"
                 :count-show-values="4"
+
+                :loading-state="true"
+                :clearable-state="true"
             />
         </v-col>
 

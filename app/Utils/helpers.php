@@ -196,7 +196,7 @@ function catchInfo($title, $message)
 
 function errorExceptionServer($code = '')
 {
-    return response()->json(['message' => 'Error de servidor.', 'code' => $code], 400);
+    return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.', 'code' => $code], 400);
 }
 
 
@@ -279,4 +279,10 @@ function removeUCModuleNameFromCourseName($course_name): string
         $name = str_replace("Capacitación Farmacias Peruanas - ", "", $course_name);
 
     return $name;
+}
+
+function stringContains($string, $q)
+{
+    // if (!$q) return false;
+    return false !== stripos($string, $q);
 }

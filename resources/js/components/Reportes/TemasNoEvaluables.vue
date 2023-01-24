@@ -14,15 +14,15 @@
             <div v-show="workspaceId === 25">
                 <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
             </div>
-    
+
             <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
-    
+
             <div v-show="workspaceId === 25">
                 <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
                 <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
             </div>
-    
+
             <list-item
                 titulo="Estado"
                 subtitulo="El estado indica si el usuario está habilitado para usar la plataforma (Activo: Si, Inactivo: No)"
@@ -39,63 +39,69 @@
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <!-- Modulo -->
-                        <b-form-text text-variant="muted">Módulo</b-form-text>
-                        <select
+                       <DefaultAutocomplete
+                            dense
                             v-model="modulo"
-                            class="form-control"
-                            @change="fetchFiltersAreaData"
-                        >
-                            <option value="">- [Todos] -</option>
-                            <option v-for="(item, index) in modules"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                            :items="modules"
+                            label="Módulo"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los módulos"
+                            @onBlur="fetchFiltersAreaData"
+                            :maxValuesSelected="4"
+                        />
                     </div>
                     <!-- Escuela -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <b-form-text text-variant="muted">Escuela</b-form-text>
-                        <select
+                         <DefaultAutocomplete
+                            dense
                             v-model="escuela"
-                            class="form-control"
+                            :items="schools"
                             :disabled="!schools[0]"
-                            @change="escuelaChange"
-                        >
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in schools"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                            label="Escuelas"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione las escuelas"
+                            @onChange="escuelaChange"
+                            :maxValuesSelected="10"
+                        />
                     </div>
                     <!-- Curso -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <b-form-text text-variant="muted">Curso</b-form-text>
-                        <select v-model="curso" class="form-control"
-                                :disabled="!courses[0]" @change="cursoChange">
-                            <option value>- [Todos] -</option>
-                            <option v-for="(item, index) in courses"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+
+                        <DefaultAutocomplete
+                            dense
+                            v-model="curso"
+                            :items="courses"
+                            :disabled="!courses[0]"
+                            @onChange="cursoChange"
+                            label="Curso"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los cursos"
+                        />
+
                     </div>
                     <!-- Tema -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                        <b-form-text text-variant="muted">Tema</b-form-text>
-                        <select v-model="tema" class="form-control"
-                                :disabled="!topics[0]">
-                            <option value>- Todos -</option>
-                            <option v-for="(item, index) in topics"
-                                    :key="index"
-                                    :value="item.id">
-                                {{ item.name }}
-                            </option>
-                        </select>
+                        <DefaultAutocomplete
+                            dense
+                            v-model="tema"
+                            :items="topics"
+                            :disabled="!topics[0]"
+                            label="Tema"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            :showSelectAll="false"
+                            placeholder="Seleccione los temas"
+                        />
                     </div>
                 </div>
             </div>
@@ -103,19 +109,19 @@
             <!-- Filtros secundarios -->
             <div class="col-12 row justify-content-around">
                 <!-- Checkboxs -->
-                <div class="col-7 pt-0">
+                <div class="col-6 pt-0">
                     <div class="form-row">
                         <div class="col-12 py-0">
                             <EstadoFiltro ref="EstadoFiltroComponent" @emitir-cambio="" />
                         </div>
                         <div class="col-12 py-0">
                             <EstadoFiltro ref="EstadoFiltroTemasComponent"
-                                          title="Estado de temas" 
+                                          title="Estado de temas"
                                           tooltip_activos="Temas activos en el reporte"
                                           tooltip_inactivos="Temas Inactivos en el reporte"
                                           @emitir-cambio="" />
                         </div>
-                        <div class="col-12 px-5 py-0" v-if="workspaceId === 25">
+                        <div class="col-12 pl-5 pr-0 py-0" v-if="workspaceId === 25">
                             <b-form-text text-variant="muted">Áreas</b-form-text>
                             <v-select
                                 attach
@@ -137,8 +143,11 @@
                     </div>
                 </div>
                 <!-- Fechas -->
-                <div class="col-5">
-                    <FechaFiltro ref="FechasFiltros" />
+                <div class="col-6 pl-6">
+                    <FechaFiltro ref="FechasFiltros"
+                        label-start="Fecha inicial de última actualización"
+                        label-end="Fecha final de última actualización"
+                        />
                 </div>
             </div>
             <div class="col-12 py-0">
@@ -164,8 +173,16 @@
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
+
+            <div class="col-12">
+                <FiltersNotification></FiltersNotification>
+            </div>
+
             <div class="col-12 px-6">
-                <button type="submit" class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
+                <button
+                    :disabled="modulo.length === 0 || escuela.length === 0"
+                    type="submit"
+                    class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
                     <span>Descargar</span>
                 </button>
@@ -181,8 +198,9 @@ import ListItem from "./partials/ListItem.vue";
 import ResumenExpand from "./partials/ResumenExpand.vue";
 import EstadoFiltro from "./partials/EstadoFiltro.vue";
 import FechaFiltro from "./partials/FechaFiltro";
+import FiltersNotification from "../globals/FiltersNotification.vue";
 export default {
-    components: { EstadoFiltro, FechaFiltro, ResumenExpand, ListItem, CheckTemas },
+    components: {FiltersNotification, EstadoFiltro, FechaFiltro, ResumenExpand, ListItem, CheckTemas },
     props: {
         workspaceId: 0,
         modules: Array,
@@ -195,10 +213,10 @@ export default {
             topics: [],
             areas: [],
 
-            modulo: "",
-            escuela: "",
-            curso: "",
-            tema: "",
+            modulo: [],
+            escuela: [],
+            curso: [],
+            tema: [],
             area: [],
 
             loadingGrupos: false,
@@ -248,6 +266,7 @@ export default {
 
             // Perform request to generate report
 
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables_v2`
             let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables`
             try {
                 let response = await axios({
@@ -255,10 +274,10 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
-                        modulos: this.modulo ? [this.modulo] : [],
-                        escuelas: this.escuela ? [this.escuela] : [],
-                        cursos: this.curso ? [this.curso] : [],
-                        temas: this.tema ? [this.tema] : [],
+                        modulos: this.modulo,
+                        escuelas: this.escuela,
+                        cursos: this.curso,
+                        temas: this.tema,
                         areas: this.area,
                         tipocurso: this.tipocurso,
 
@@ -278,6 +297,10 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    response.data.new_name = this.generateFilename(
+                        'Temas no evaluables',
+                        this.generateNamesString(this.modules, this.modulo)
+                    )
                     // Emit event to parent component
                     this.$emit('emitir-reporte', response)
                 }
@@ -296,15 +319,15 @@ export default {
          * @returns {Promise<boolean>}
          */
         async escuelaChange() {
-            this.curso = null;
-            this.tema = null;
+            this.curso = [];
+            this.tema = [];
             this.courses = [];
             this.topics = [];
 
-            if (!this.escuela) return false;
+            if (this.escuela.length === 0) return false;
 
             this.cursos_libres =false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
             let res = await axios({
                 url,
                 method: 'get'
@@ -316,11 +339,12 @@ export default {
          * @returns {Promise<boolean>}
          */
         async cursoChange() {
-            this.tema = null;
+            this.tema = [];
             this.topics = [];
-            if (!this.curso) return false;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/topics/${this.curso}`
+            if (this.curso.length === 0) return false;
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/topics/${this.curso.join()}`
             let res = await axios({
                 url,
                 method: 'get'
@@ -328,12 +352,12 @@ export default {
             this.topics = res.data;
         },
         async fetchFiltersAreaData() {
-            if(!this.modulo) {
+            if (this.modulo.length === 0) {
                 this.areas = [];
                 return;
             }
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo}/criterion-values/grupo`
+            let url = `${this.$props.reportsBaseUrl}/filtros/sub-workspace/${this.modulo.join()}/criterion-values/grupo`
             let response = await axios({
                 url: url,
                 method: 'get'
@@ -349,9 +373,7 @@ export default {
 </script>
 
 <style scoped>
-.v-label {
-    display: contents !important;
-}
+
 ::-webkit-calendar-picker-indicator {
     color: rgba(0, 0, 0, 0);
     opacity: 0;

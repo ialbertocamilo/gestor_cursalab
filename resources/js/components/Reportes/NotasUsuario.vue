@@ -101,6 +101,8 @@
                                 <v-list-item-title
                                     v-if="index != 'modalidad'"
                                     v-text="datoCurso"
+                                    v-b-tooltip.hover
+                                    :title="index === 'convalidado_de' ? datoCurso : ''"
                                     class="text-body-2 white-space-normal" />
                                 <!-- MODALIDAD -->
                                 <v-list-item-title
@@ -237,6 +239,7 @@ export default {
         async buscarNotasUsuario() {
             if (this.search.length < 8) return false;
 
+            let vue = this
             // Show loading spinner
             this.showLoader()
 
@@ -256,6 +259,7 @@ export default {
                         document: this.search
                     }
                 })
+                vue.queryStatus("reportes", "consultar")
 
                 if (response.data.alert) {
                     this.Alert = response.data.alert

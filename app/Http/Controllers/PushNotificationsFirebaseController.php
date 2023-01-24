@@ -51,7 +51,8 @@ class PushNotificationsFirebaseController extends Controller
     public function getListSelects()
     {
         $estados = [];
-        $modules = Criterion::getValuesForSelect('module');
+        // $modules = Criterion::getValuesForSelect('module');
+        $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id','name as nombre']);
 
         foreach ($modules as $module) {
             $module->modulo_selected = false;
@@ -132,6 +133,7 @@ class PushNotificationsFirebaseController extends Controller
         $nueva_notificacion->detalles_json = json_encode($_detalles_json);
         $nueva_notificacion->success = 0;
         $nueva_notificacion->failure = 0;
+        $nueva_notificacion->workspace_id = get_current_workspace()?->id;
         $nueva_notificacion->save();
 
         return response()->json([

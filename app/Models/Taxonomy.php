@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\CustomAudit;
+
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;

@@ -37,6 +37,10 @@
             </v-row>
             <v-row>
                 <v-col cols="12">
+                    <span>Usuarios disponibles:</span>
+                </v-col>
+
+                <v-col cols="12">
 
                     <div class="box-document-segmentation-results">
                         <ul>
@@ -51,22 +55,36 @@
                                 </v-btn>
 
                             </li>
+
+                            <li class="text-center" v-show="!filter_result.length">
+                                No se encontraron resultados.
+                            </li>
                         </ul>
                     </div>
                 </v-col>
             </v-row>
             <v-row>
                 <v-col cols="12">
-                    <span>Usuarios agregados:</span>
+                    <span>
+                        Usuarios agregados:
+                        <span v-text="segment.criteria_selected.length"></span>
+                    </span>
                 </v-col>
 
             </v-row>
             <v-row>
+                <v-col cols="7" v-show="segment.criteria_selected.length">
+                    <DefaultInput
+                        clearable dense
+                        v-model="usersearch"
+                        placeholder="Buscar por nombre o documento"
+                    />
+                </v-col>
                 <v-col cols="12">
 
                     <div class="box-selected-segmentation-document">
                         <ul>
-                            <li v-for="user in segment.criteria_selected"
+                            <li v-for="user in arrayCriteriaSelected"
                                 class="d-flex justify-content-between align-items-center">
 
                                 {{ user.document }} - {{ user.fullname }}
@@ -76,6 +94,10 @@
                                     <v-icon small v-text="'mdi-minus'"/>
                                 </v-btn>
 
+                            </li>
+
+                            <li class="text-center" v-show="!arrayCriteriaSelected.length">
+                                No se encontraron resultados.
                             </li>
                         </ul>
                     </div>
@@ -91,6 +113,9 @@ export default {
     props: {
         segment: {
             required: true
+        },
+        currentClean:{
+            required: true
         }
     },
     data() {
@@ -100,23 +125,52 @@ export default {
             file: null,
             debounce: null,
             filter_result: [],
+            usersearch: null
         };
     },
-    computed: {},
+    computed: {
+        arrayCriteriaSelected() {
+            const vue = this;
+            const UserSelecteds = vue.segment.criteria_selected;
+            let usersearch = vue.usersearch || '';
+                usersearch = usersearch.trim();
+
+            //check if empty
+            if(!usersearch.length) return UserSelecteds;
+                usersearch = usersearch.toLowerCase();
+
+            return UserSelecteds.filter( ({ document: doc, fullname: full }) => {
+                const searchDoc =  (doc.toLowerCase()).includes(usersearch);
+                const searchFull =  (full.toLowerCase()).includes(usersearch);
+                
+                return (searchDoc || searchFull); 
+            });
+        }
+    },
     watch: {
+        currentClean: {
+            handler(tabs) {
+                const vue = this;
+                vue.resetFields();
+            }
+        },
         search(filter_text) {
             let vue = this;
 
-            if (filter_text === null) return;
+            if (filter_text === null) return vue.filter_result = [];
 
-            if (filter_text.length <= 2) return;
+            if (filter_text.length <= 2) return vue.filter_result = [];
+
+            const { docState, docData } = vue.checkIfExistUser(filter_text); 
+            if (docState) return vue.filter_result = [];
 
             vue.autocomplete_loading = true;
 
             clearTimeout(this.debounce);
 
             this.debounce = setTimeout(() => {
-                let data = {filter_text: filter_text};
+                let data = { filter_text: filter_text,
+                             omit_documents: docData };
                 const url = `/segments/search-users`;
 
                 vue.$http.post(url, data)
@@ -132,6 +186,14 @@ export default {
         },
     },
     methods: {
+        checkIfExistUser(currentdoc) {
+            currentdoc = currentdoc.trim();
+
+            const vue = this;
+            const UserDocuments = vue.segment.criteria_selected.map( ({document: doc}) => doc );
+            return { docState : UserDocuments.includes(currentdoc),
+                     docData: UserDocuments };
+        },
         addUser(user) {
             let vue = this;
 
@@ -187,6 +249,7 @@ export default {
         resetFields() {
             let vue = this;
             vue.search = null;
+            vue.usersearch = null;
             vue.filter_result = [];
         }
     }

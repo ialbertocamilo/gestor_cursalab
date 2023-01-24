@@ -83,6 +83,10 @@ export default {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
                     // Emit event to parent component
+                    response.data.new_name = this.generateFilename(
+                        'Usuarios uploads',
+                        ''
+                    )
                     this.$emit('emitir-reporte', response)
                 }
 

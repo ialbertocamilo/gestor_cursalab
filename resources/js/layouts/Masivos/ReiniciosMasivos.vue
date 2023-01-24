@@ -605,6 +605,7 @@
 
                         vue.overlay.estado = false;
                         vue.overlay.texto = "";
+                        vue.queryStatus("intentos_masivos", "agregar_intentos");
                         vue.showAlert(res.data.msg, 'success')
                         // vue.mostrarNotificacion("success", res.data.msg);
                         vue.reiniciarValoresAll();

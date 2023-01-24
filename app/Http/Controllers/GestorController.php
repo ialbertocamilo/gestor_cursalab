@@ -67,35 +67,63 @@ class GestorController extends Controller
 
     private function getDiplomaCursoData($user_id, $course_id)
     {
-        $user = User::with('subworkspace')->select('id','name', 'surname', 'lastname', 'subworkspace_id')->where('id', $user_id)->first();
+        $user = User::with('subworkspace')
+            ->select('id', 'name', 'surname', 'lastname', 'subworkspace_id')
+            ->where('id', $user_id)->first();
         if (!$user) abort(404);
 
-        $course = Course::select('id', 'name', 'plantilla_diploma', 'show_certification_date')->where('id', $course_id)->first();
+        // D3
+        $course = Course::with([
+            'compatibilities_a:id',
+            'compatibilities_b:id',
+            'summaries' => function ($q) use ($user_id) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', $user_id);
+            },
+        ])
+            ->select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+            ->where('id', $course_id)->first();
+
         if (!$course) abort(404);
+
+        $course_to_export = $course;
+
+        if (request()->has('original_id')) {
+            $original_id = request()->original_id;
+
+            $validate_compatible = $this->validateCompatibleCourse($user, $course, $original_id);
+
+            if ($validate_compatible)
+                $course_to_export = $validate_compatible;
+
+        }
 
         $summary_course = SummaryCourse::getCurrentRow($course, $user);
 
         if (!$summary_course?->certification_issued_at) abort(404);
 
         $template_certification = '';
-        if($course->plantilla_diploma){
-            $template_certification = $course->plantilla_diploma;
+
+        if ($course_to_export->plantilla_diploma) {
+            $template_certification = $course_to_export->plantilla_diploma;
         }
-        if(!$template_certification){
-            $school = $course->schools()->first();
-            ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma; 
+        if (!$template_certification) {
+            $school = $course_to_export->schools()->first();
+            ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma;
         }
-        if(!$template_certification && $user->subworkspace->plantilla_diploma){
+        if (!$template_certification && $user->subworkspace->plantilla_diploma) {
             $template_certification = $user->subworkspace->plantilla_diploma;
         }
+
         // $plantilla_curso = $course->plantilla_diploma != null ? $course->plantilla_diploma : $user->subworkspace->plantilla_diploma;
         $fecha = $summary_course->certification_issued_at;
         $base64 = $this->parse_image($template_certification);
 
         return array(
-            'show_certification_date' => $course->show_certification_date,
+            'show_certification_date' => $course_to_export->show_certification_date,
 //            'video' => $course->name,
-            'video' => removeUCModuleNameFromCourseName($course->name),
+            'video' => removeUCModuleNameFromCourseName($course_to_export->name),
             'usuario' => $user->fullname,
             'fecha' => $fecha,
             'image' => $base64,
@@ -290,6 +318,34 @@ class GestorController extends Controller
         }
 
         back()->with('error', 'Error.');
+    }
+
+    private function validateCompatibleCourse($user, $course_compatible, $original_course_id)
+    {
+        // C3
+        $original_course = Course::with([
+            'compatibilities_a:id',
+            'compatibilities_b:id',
+            'summaries' => function ($q) use ($user) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', $user->id);
+            },
+        ])
+            ->select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+            ->where('id', $original_course_id)->first();
+
+        if (!$original_course) abort(404);
+        // TODO: Si llega compatible validar que sea su compatible el curso de la ruta ($course_id)
+        // Compatible de C3
+        $compatible = $original_course->getCourseCompatibilityByUser($user);
+
+        if (!$compatible) abort(404);
+
+        // D3 !== Compatible de C3
+        if ($course_compatible->id !== $compatible->course->id) abort(404);
+
+        return $original_course;
     }
 
 

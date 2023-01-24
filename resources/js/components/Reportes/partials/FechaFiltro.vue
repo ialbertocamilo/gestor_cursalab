@@ -1,7 +1,19 @@
 <template>
 	<div>
 		<div class="mb-3">
-			<small class="text-muted">Fecha inicial</small>
+
+			<!-- label - tooltip -->
+			<div class="d-flex justify-content-between">
+				<small class="text-muted" v-text="labelStart"></small>
+	         <div v-show="tooltipStart.length" 
+	         	  :tooltip="tooltipStart"
+	              :tooltip-position="tooltipPosition"
+	              class="z-100">
+		          <v-icon class="info-icon">mdi-information-outline</v-icon>
+		      </div>
+			</div>
+			<!-- label - tooltip -->
+	
 			<div class="input-group">
 				<input
 					type="date"
@@ -26,7 +38,19 @@
 			</div>
 		</div>
 		<div class="mb-3">
-			<small class="text-muted">Fecha final</small>
+
+			<!-- label - tooltip -->
+			<div class="d-flex justify-content-between">
+				<small class="text-muted" v-text="labelEnd"></small>
+			   <div v-show="tooltipEnd.length" 
+	         	  :tooltip="tooltipEnd"
+	              :tooltip-position="tooltipPosition"
+	              class="z-100">
+		          <v-icon class="info-icon">mdi-information-outline</v-icon>
+		      </div>
+			</div>
+			<!-- label - tooltip -->
+
 			<div class="input-group">
 				<input
 					type="date"
@@ -54,6 +78,30 @@
 </template>
 <script>
 export default {
+	props: {
+		// label
+		labelStart: { 
+			type: String, 
+			default:'Fecha inicial'
+		},
+		labelEnd:{
+			type: String,
+			default:'Fecha final'
+		},
+		// tooltip
+		tooltipStart: {
+			type: String,
+			default:''
+		},
+		tooltipEnd: {
+			type: String,
+			default:''
+		},
+		tooltipPosition:{
+			type: String,
+			default: 'left'
+		}
+	},
 	data() {
 		return {
 			start: undefined,
@@ -62,3 +110,9 @@ export default {
 	}
 };
 </script>
+<style scoped>
+	.z-100 {
+		z-index: 100;
+	}
+
+</style>

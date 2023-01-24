@@ -9,6 +9,7 @@ use App\Http\Requests\CursoStoreRequest;
 
 use App\Http\Resources\Curso\CursoSearchResource;
 use App\Models\Taxonomy;
+use App\Models\Workspace;
 use DB;
 
 // use App\Perfil;
@@ -172,8 +173,12 @@ class CursosController extends Controller
                 return $this->success(compact('validations'), 'Ocurrió un error', 422);
         endif;
 
+        // TODO: Compatibles: Actualizar si se elimina el curso
+        $course->updateOnModifyingCompatibility();
+
         $course->delete();
         $course->requirements()->delete();
+
 
         $response = [
             'curso' => $course,
@@ -196,6 +201,13 @@ class CursosController extends Controller
 
         $course->active = $update_status_to;
         $course->save();
+
+        // TODO: Compatibles: Actualizar si se modifica el estado del curso
+        if ($course->wasChanged('active')):
+
+            $course->updateOnModifyingCompatibility();
+
+        endif;
 
         $response = [
             'curso' => $course,
@@ -286,6 +298,35 @@ class CursosController extends Controller
         return redirect()->route('categorias.cursos', [$curso->categoria->config->id, $curso->categoria->id])->with('info', 'Eliminado Correctamente');
     }
 
+    public function getCompatibilities(Course $course)
+    {
+        $workspace = get_current_workspace();
+        $compatibilities = $course->getCompatibilities();
+        $courses = Course::select('id', 'name')
+                        ->whereRelation('workspaces', 'id', $workspace->id)
+                        ->where('id', '<>', $course->id)
+                        ->get();
+
+        return $this->success(compact('compatibilities', 'courses'));
+    }
+
+    public function updateCompatibilities(Course $course, Request $request)
+    {
+        $courses = $request->compatibilities;
+
+        // $data['compatibilities'] = array_column($courses, 'id');
+        $data['compatibilities'] = $courses;
+
+        Course::storeCompatibilityRequest($course, $data);
+
+        $response = [
+            // 'curso' => $course,
+            'msg' => 'Compatibilidad de curso actualizado correctamente.',
+        ];
+
+        return $this->success($response);
+    }
+
     // public function moverCurso(Abconfig $abconfig, Categoria $categoria, Curso $curso, MoverCursoRequest $request)
     // {
     //     $data = $request->validated();
@@ -306,6 +347,51 @@ class CursosController extends Controller
         $types = Taxonomy::getSelectData('course', 'type');
 
         return $this->success(compact('types'));
+    }
+
+
+
+    // ====================================== SEGMENTATION COURSE ===================================
+
+    public function getFiltersSelects()
+    {
+        $workspace = get_current_workspace();
+
+        $modules = Workspace::where('parent_id', $workspace->id)
+            ->select('criterion_value_id as id', 'name')
+            ->get();
+
+        $schools = School::whereRelation('workspaces', 'id', $workspace->id)
+            ->select('id', 'name')
+            ->get();
+
+        return $this->success(compact('modules', 'schools'));
+    }
+
+    public function getEncuestaSegmentation(Course $course)
+    {
+        $school = $course->schools()->first();
+        return $this->getEncuesta($school, $course);
+    }
+
+    public function storeUpdateEncuestaSegmentation(Course $course, CursoEncuestaStoreUpdate $request)
+    {
+        $school = $course->schools()->first();
+        return $this->storeUpdateEncuesta($school, $course, $request);
+    }
+
+    public function searchCursoSegmentation(Course $course)
+    {
+        $school = $course->schools()->first();
+
+        return $this->searchCurso($school, $course);
+    }
+
+    public function updateCursoSegmentation(Course $course, CursosStoreUpdateRequest $request)
+    {
+        $school = $course->schools()->first();
+
+        return $this->updateCurso($school, $course, $request);
     }
 
 }

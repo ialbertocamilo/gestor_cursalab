@@ -61,8 +61,21 @@
                         />
                     </v-col>
                 </v-row>
-
-                <v-row justify="space-around" v-if="resource.scorm">
+                <v-row>
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            :itemText="'name'"
+                            :items="media_types"
+                            v-model="resource.media_type"
+                            label="Tipo de contenido"
+                            :rules="rules.media_type"
+                            class="mt-2 mb-2"
+                        />
+                    </v-col>
+                </v-row>
+                <v-row justify="space-around"
+                       v-if="resource.scorm && (resource.media_type === 'scorm' || resource.media_type == null)">
                     <v-col cols="12" class="">
                         <fieldset class="editor text-center p-2">
                             <legend>SCORM Actual</legend>
@@ -73,14 +86,13 @@
                         </fieldset>
                     </v-col>
                 </v-row>
-
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex-- justify-content-center">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputScorm"
                             v-model="resource.media"
-                            label="SCORM"
-                            :file-types="['scorm']"
+                            :label="getMediaTypeName(resource.media_type)"
+                            :file-types="[resource.media_type]"
                             @onSelect="setFile($event, resource, 'media')"/>
                     </v-col>
                 </v-row>
@@ -101,7 +113,7 @@
 <script>
 
 const fields = [
-    'name', 'active', 'category', 'subcategory', 'modules', 'media'
+    'name', 'active', 'category', 'subcategory', 'modules', 'media', 'media_type'
 ];
 
 const file_fields = ['scorm', 'media'];
@@ -126,6 +138,7 @@ export default {
 
                 media: null,
                 media_id: null,
+                media_type: null,
 
                 category: null,
                 subcategory: null,
@@ -149,8 +162,13 @@ export default {
                 name: this.getRules(['required', 'max:100']),
                 modules: this.getRules(['required']),
                 scorm: this.getRules(['required']),
-                // dni: this.getRules(['required', 'number'])
+                media_type: this.getRules(['required'])
             },
+            media_types: [
+                {name: 'PDF', id: 'pdf'},
+                {name: 'SCORM', id: 'scorm'},
+                {name: 'Imagen', id: 'image'},
+            ]
         }
     },
     methods: {
@@ -165,6 +183,16 @@ export default {
             let vue = this
             vue.$refs.inputScorm.removeAllFilesFromDropzone()
             vue.$refs.vademecumForm.resetValidation()
+        },
+        getMediaTypeName (mediaTypeId) {
+
+            if (!mediaTypeId) return 'SCORM';
+
+            let mediaType = this.media_types.find(
+                mediaType => mediaType.id === mediaTypeId
+            );
+
+            return mediaType ? mediaType.name : '';
         },
         confirmModal() {
 
@@ -186,12 +214,16 @@ export default {
 
             if (validateForm) {
 
-                let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+                let formData = vue.getMultipartFormData(
+                    method, vue.resource, fields, file_fields
+                );
 
                 vue.$http
                     .post(url, formData)
                     .then(({data}) => {
-
+                        if(vue.resource.category != null && (vue.resource.media_type === 'pdf' || vue.resource.media_type === 'scorm')){
+                            vue.queryStatus("vademecum", "crear_contenido");
+                        }
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')

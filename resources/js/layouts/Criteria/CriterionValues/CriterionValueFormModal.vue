@@ -112,6 +112,7 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
+                        vue.queryStatus("criterios", "edita_valor");
                     })
                     .catch(async (error) => {
                         vue.hideLoader()

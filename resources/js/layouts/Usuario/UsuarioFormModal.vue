@@ -48,10 +48,10 @@
 
                 <v-row justify="space-around">
                     <v-col cols="4" class="d-flex justify-content-center">
+                        <!-- :rules="rules.email" -->
                         <DefaultInput
                             clearable
                             v-model="resource.email"
-                            :rules="rules.email"
                             label="Correo electrónico"
                         />
                     </v-col>
@@ -177,7 +177,7 @@ export default {
                 surname: this.getRules(['required', 'max:100', 'text']),
                 document: this.getRules(['required', 'min:8']),
                 password: this.getRules(['required', 'min:8']),
-                email: this.getRules(['required', 'min:8']),
+                // email: this.getRules(['required', 'min:8']),
                 password_not_required: this.getRules([]),
             }
         }
@@ -219,6 +219,7 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         vue.hideLoader()
+                        vue.queryStatus("usuarios", "crear_usuario");
                     })
                     .catch((error) => {
                         vue.resource.criterion_list_final = {}

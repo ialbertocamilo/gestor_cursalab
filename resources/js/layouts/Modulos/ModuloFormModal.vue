@@ -404,6 +404,7 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                         this.hideLoader()
+                        vue.queryStatus("modulo", "crear_modulo");
                     })
             } else {
                 this.hideLoader()

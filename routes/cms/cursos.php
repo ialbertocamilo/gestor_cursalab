@@ -27,6 +27,8 @@ Route::controller(CursosController::class)->group(function() {
 
 	Route::put('/{course}/status', 'updateStatus');
 
+	
+
 });
 
 // CURSOS

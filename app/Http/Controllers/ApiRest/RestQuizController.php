@@ -115,6 +115,9 @@ class RestQuizController extends Controller
     public function cargar_preguntas($topic_id)
     {
         $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
+        
+        if ($topic->course->hasBeenValidated())
+            return ['error' => 0, 'data' => null];
 
         $is_qualified = $topic->evaluation_type->code == 'qualified';
         $is_random = $is_qualified;
@@ -188,6 +191,9 @@ class RestQuizController extends Controller
     {
         $topic->load('course.topics');
 
+        if ($topic->course->hasBeenValidated())
+            return ['error' => 0, 'data' => null];
+
         $row = SummaryTopic::incrementViews($topic);
 
         if (!$row) return ['error' => 1, 'data' => null];
@@ -203,6 +209,9 @@ class RestQuizController extends Controller
 
     public function contador_tema_reseteo(Topic $topic)
     {
+        if ($topic->course->hasBeenValidated())
+            return ['error' => 0, 'data' => null];
+
         $counter = Topic::getCounter($topic);
 
         return ['error' => 0, 'data' => $counter];

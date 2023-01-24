@@ -80,8 +80,6 @@
                                 item-value="id"
                             />
                         </v-col>
-                    </v-row>
-                    <v-row justify="center">
                         <v-col cols="4">
                             <DefaultInput
                                 dense
@@ -92,7 +90,7 @@
                             />
                                 <!-- :rules="rules.position" -->
                                 <!-- show-required -->
-    
+
                         </v-col>
                         <v-col cols="4">
                             <DefaultInput
@@ -139,7 +137,7 @@
                             >
                                 <template slot="content">
                                     <v-row justify="center">
-                                     
+
                                         <v-col cols="6">
                                             <DefaultInput
                                                 label="Nota mínima aprobatoria"
@@ -278,7 +276,7 @@ const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id',
     'description', 'requisito_id', 'lista_escuelas',
-    'duration', 'investment'
+    'duration', 'investment', 'show_certification_date'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -322,6 +320,7 @@ export default {
                 scheduled_restarts_horas: null,
                 scheduled_restarts_minutos: 1,
                 lista_escuelas: [],
+                show_certification_date: false
             },
             resource: {},
             rules: {
@@ -436,6 +435,7 @@ export default {
                     if (has_info_messages)
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
                     else {
+                        vue.queryStatus("curso", "crear_curso");
                         vue.showAlert(data.data.msg)
                         setTimeout(() => vue.closeModal(), 2000)
                     }

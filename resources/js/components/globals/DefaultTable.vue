@@ -223,7 +223,13 @@
                                         <v-list-item-title class="d-flex justify-content-start">
                                             <v-icon color="primary" class="mx-1" small
                                                     v-text="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
+
                                             {{ action.text }}
+                                                
+                                            <template v-if="action.count && item[action.count]">
+                                                &nbsp;<strong>[{{ item[action.count] }}]</strong>
+                                            </template>
+
                                         </v-list-item-title>
 
                                     </v-list-item-content>
