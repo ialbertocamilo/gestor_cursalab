@@ -41,10 +41,10 @@ class AuthController extends Controller
                     return $this->error('error-recaptcha', 500, $recaptcha_response);
                 }
                 //validar el score de recaptcha
-                if($recaptcha_response['score'] >= 0.5) {
+                if(!$recaptcha_response['score'] >= 0.5) {
                     return $this->error('error-recaptcha', 500, [ 
                             'score' => $recaptcha_response['score'],
-                            'error-codes' => ['score-is-hight']
+                            'error-codes' => ['score-is-low']
                         ]);
                 }
             }

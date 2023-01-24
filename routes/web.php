@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\TwoFAController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\DashboardController;
@@ -14,10 +15,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', 'login', 301);
 
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+// login routes
+Route::get('login', [LoginController::class, 'showLoginFormInit'])->name('login');
 Route::post('login_post', [LoginController::class, 'login'])->name('login_post');
-Route::post('login_2auth', [LoginController::class, '2auth'])->name('login2auth');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+// 2FA routes
+Route::get('2fa', [TwoFAController::class, 'showAuth2faForm'])->name('2fa');
+Route::post('login_auth2fa', [LoginController::class, 'auth2fa'])->name('login_auth2fa');
+Route::get('login_auth2fa_resend', [LoginController::class, 'auth2fa_resend'])->name('login_auth2fa_resend');
+
 
 Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -50,7 +57,7 @@ Route::get('informacion_app', function () {
     return view('informacion_app');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::view('welcome', 'welcome');
 
     Route::get('/workspaces/search', [WorkspaceController::class, 'search']);

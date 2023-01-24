@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Session;
 
 class LoginController extends Controller
 {
@@ -72,6 +73,23 @@ class LoginController extends Controller
 
     //     return $this->sendFailedLoginResponse($request);
     // }
+    public function showLoginFormInit()
+    {
+        if(session()->has('init_2fa')) {
+            //resetear codigo y expiracion
+            $user = auth()->user();
+            $user->resetToNullCode2FA();
+
+            session()->forget('init_2fa'); 
+            
+            // resetear sessions
+            $this->guard()->logout();
+            session()->invalidate();
+            session()->regenerateToken();
+        }
+
+        return $this->showLoginForm();
+    }
 
     public function login(Request $request)
     {
@@ -102,18 +120,26 @@ class LoginController extends Controller
 
         if ($this->attemptLogin($request)) {
 
+
             $user = $this->guard()->user();
 
             if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             {
+
                 if ($request->hasSession()) {
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
 
-                return $this->sendLoginResponse($request);
-            }
-            else
-            {
+                // verificacion de doble autenticacion
+                $response2FA = (bool) $user->generateCode2FA();
+                if($response2FA) { 
+                    session()->put('init_2fa', $user->id);
+                    return redirect('/2fa');
+                }
+                // verificacion de doble autenticacion
+
+               
+            } else {
                 $this->guard()->logout();
 
                 $request->session()->invalidate();
@@ -128,6 +154,36 @@ class LoginController extends Controller
         $this->incrementLoginAttempts($request);
 
         return $this->sendFailedLoginResponse($request);
+    }
+
+    // verificar el codigo y expiracion 2FA
+    public function auth2fa(Request $request) 
+    {
+        $user = $this->guard()->user();
+        $checkCode = ($request->code === $user->code); 
+        $checkExpire = ($user->expires_code > now()); 
+        
+        if($checkCode && $checkExpire) {
+            session()->forget('init_2fa'); 
+            $user->resetToNullCode2FA();
+            // session iniciada
+            return $this->sendLoginResponse($request);
+        }
+        
+        throw ValidationException::withMessages([
+            'code' => ['Código incorrecto y/o expirado.']
+        ]);
+    }
+
+    // reenviar codigo 2FA
+    public function auth2fa_resend()
+    {
+        $user = $this->guard()->user();
+        $user->generateCode2FA();
+            
+        throw ValidationException::withMessages([
+            'resend' => 'Re-enviamos'
+        ]);
     }
 
     protected function sendLoginResponse(Request $request)

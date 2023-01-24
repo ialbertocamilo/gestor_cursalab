@@ -37,6 +37,9 @@ use Illuminate\Support\Str;
 
 use Spatie\Image\Manipulations;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailTemplate;    
+
 use Bouncer;
 
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
@@ -1067,5 +1070,43 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'last_time_evaluated_at' => $row?->last_time_evaluated_at,
             'score' => $row?->score
         ];
+    }
+
+    public function generateCode2FA()
+    {
+        $user = $this;
+        $currentRange = env('AUTH2FA_CODE_DIGITS');
+        $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
+
+        $start = '1'.str_repeat('0', $currentRange - 1);  
+        $end = str_repeat('9', $currentRange);
+        $currentCode = rand($start, $end);
+
+        $user->timestamps = false; // no actualizar el usuario
+        $user->code = $currentCode;
+        $user->expires_code = now()->addMinutes($currentMinutes);
+
+        //enviar codigo al email
+        $mail_data = [ 'subject' => 'Soporte login - 2FA',
+                       'code' => $currentCode,
+                       'minutes' => $currentMinutes,
+                       'user' => $user->name.' '.$user->lastname ];
+
+        // enviar email
+        Mail::to($user->email)
+            ->send(new EmailTemplate('emails.enviar_codigo_2fa', $mail_data));
+
+        return $user->save();
+    }
+
+    public function resetToNullCode2FA() {
+
+        $user = $this;
+
+        $user->timestamps = false; // no actualizar el usuario
+        $user->code = NULL;
+        $user->expires_code = NULL;
+
+        $user->save();
     }
 }
