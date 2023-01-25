@@ -53,6 +53,7 @@ export default {
     },
     methods: {
         async descargarUsuarioUploads() {
+            let vue = this
             this.showLoader()
             let UFC = this.$refs.EstadoFiltroComponent;
 
@@ -82,6 +83,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_usuario_uploads");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Usuarios uploads',

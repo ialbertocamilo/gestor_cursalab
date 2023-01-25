@@ -251,6 +251,7 @@ export default {
                 if (response.data.alert) {
                     vue.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_visitas");
                     response.data.new_name = this.generateFilename(
                         'Visitas',
                         this.generateNamesString(this.modules, this.modulo)
