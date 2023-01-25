@@ -17,7 +17,7 @@
   <div class="content_login_form">
     <div class="form-holder has-shadow">
       <div class="logo mt-5 mx-auto text-center">
-        <img src="img/logo_cursalab.png" alt="..." class="img-fluid" width="230">
+        <img src="img/logo_cursalab_v2_black.png" alt="cursalab" class="img-fluid" width="270">
       </div>
       <div class="px-4 mt-5 mx-3 text-center">
         <p>
@@ -63,6 +63,11 @@
               </button>
             </div>
           </div>
+
+          <div class="text-center mt-3">
+            <a href="{{ route('login') }}" class="text-primary"> Ir a inicio de sessión.</a>
+          </div>
+
         </form>
       </div>
 

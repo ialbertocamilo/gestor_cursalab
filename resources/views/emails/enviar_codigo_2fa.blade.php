@@ -19,8 +19,10 @@
     </tr>
     <tr style="background-color:#F9FAFB;margin-top:10px">
         <td>
-            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">El código de verificación sera válido por {{ $data['minutes'] }} minutos. Por favor no compartas este código con nadie
-            ¿No reconoces esta actividad? Por favor contáctate inmediatamente con el equipo de Soporte de Cursalab
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">El código de verificación sera válido por {{ $data['minutes'] }} minutos. Por favor no compartas este código con nadie.
+            </p>
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
+            ¿No reconoces esta actividad?. Por favor contáctate inmediatamente con el equipo de Soporte de Cursalab.
             </p>
         </td>
     </tr>
@@ -28,8 +30,6 @@
         <td>
             <p style="color:#333D5D; font-style: italic; font-size: .9rem;padding: 0px 46px;">Este mensaje es automático, por favor no responder.
             </p>
-        </td>
-        <td>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">Cursalab.
             </p>
         </td>
