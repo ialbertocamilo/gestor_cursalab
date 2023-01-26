@@ -84,9 +84,34 @@ class restablecer_funcionalidad extends Command
         // $this->restore_attempts();
         // $this->restore_cycle();
         // $this->restore_prefix();
-        $this->restore_summary_topics();
+        // $this->restore_summary_topics();
+        $this->restoreCriterionValuesFromJson();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restoreCriterionValuesFromJson(){
+        $users_affected_json = public_path() . "/json/ledgers.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $historic_criterion_values_user_json = public_path() . "/json/criterion_value_users.json";
+        $historic_criterion_values_user = collect(json_decode(file_get_contents($historic_criterion_values_user_json), true));
+        $users_not_modified = [];
+        $_bar->start();
+        foreach ($users_affected as $user) {
+            $_user = User::find($user['recordable_id']);
+            if($_user){
+                $criterion_values = $_user->criterion_values()->get();
+                if(count($criterion_values) == 1){
+                    $find_criterion_value =  $historic_criterion_values_user->where('user_id',$user['recordable_id'])->pluck('criterion_value_id')->toArray();
+                    $_user->criterion_values()->syncWithoutDetaching($find_criterion_value);
+                }
+            }else{
+                $users_not_modified[] = $user;
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/users_not_modified.json', json_encode($users_not_modified,JSON_UNESCAPED_UNICODE));
+        $_bar->finish();
     }
     public function restore_summary_topics(){
         $path = public_path() . "/json/summary_topics.json"; // ie: /var/www/laravel/app/storage/json/filename.json
@@ -99,10 +124,10 @@ class restablecer_funcionalidad extends Command
             if(is_null($st['grade']) && is_null($summary->grade)){
                 if($summary->status_id != $st['status_id']){
                     $summary->grade = $st['grade'];
-                    $summary->passed = $st['passed']; 
-                    $summary->answers = $st['answers']; 
-                    $summary->last_time_evaluated_at = $st['last_time_evaluated_at']; 
-                    $summary->status_id = $st['status_id']; 
+                    $summary->passed = $st['passed'];
+                    $summary->answers = $st['answers'];
+                    $summary->last_time_evaluated_at = $st['last_time_evaluated_at'];
+                    $summary->status_id = $st['status_id'];
                     $summary->correct_answers = $st['correct_answers'];
                     $summary->failed_answers = $st['failed_answers'];
                     $summary->save();
