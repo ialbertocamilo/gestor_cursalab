@@ -104,6 +104,7 @@ class restablecer_funcionalidad extends Command
                 if(count($criterion_values) == 1){
                     $find_criterion_value =  $historic_criterion_values_user->where('user_id',$user['recordable_id'])->pluck('criterion_value_id')->toArray();
                     $_user->criterion_values()->syncWithoutDetaching($find_criterion_value);
+                    SummaryUser::updateUserData($_user);
                 }
             }else{
                 $users_not_modified[] = $user;
