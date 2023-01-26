@@ -256,6 +256,7 @@ export default {
             this.schools = responseSchools.data
         },
         async exportNotasTema() {
+            let vue = this;
             // show loading spinner
 
             this.showLoader()
@@ -297,6 +298,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_temas_no_eval");
                     response.data.new_name = this.generateFilename(
                         'Temas no evaluables',
                         this.generateNamesString(this.modules, this.modulo)

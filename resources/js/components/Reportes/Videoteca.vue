@@ -80,6 +80,7 @@ export default {
     },
     methods: {
         ExportarVideoteca() {
+            let vue = this
             this.showLoader()
 
             let params = {
@@ -93,6 +94,7 @@ export default {
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
+                        vue.queryStatus("reportes", "descargar_reporte_videoteca");
                         res.data.new_name = this.generateFilename(
                             'Videoteca',
                             ''

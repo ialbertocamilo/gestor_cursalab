@@ -308,6 +308,7 @@ export default {
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
+                        vue.queryStatus("reportes", "descargar_reporte_diplomas");
                         res.data.new_name = this.generateFilename(
                             'Diploma',
                             this.generateNamesString(this.modules, this.modulo)
