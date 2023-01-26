@@ -13,43 +13,57 @@
         div,
         h1,
         p {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 16px;
         }
     </style>
-    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 </head>
 
-<body style="font-family:Roboto;margin:0;padding:0;word-spacing:normal;background-color:#F8F9FC;">
+<body style="font-family: 'Poppins', sans-serif; margin:0; padding:0; word-spacing:normal; background-color:#F8F9FC;">
+
+  
     <div role="article" aria-roledescription="email" lang="es"
         style="text-size-adjust:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;background-color:#F8F9FC;">
         <table role="presentation" style="width:100%;border:none;border-spacing:0;">
             <tr>
                 <td align="center" style="padding:0;">
                     <table role="presentation"
-                        style="width:98%;max-width:600px;border:none;border-spacing:0;text-align:left;font-family: 'Roboto', sans-serif;font-size:16px;line-height:22px;color:#363636;border:1px solid #e6e7e8;padding:30px;background:white;">
+                        style="width:98%;max-width:600px;border:none;border-spacing:0;text-align:left;font-size:16px;line-height:22px;color:#363636;border:1px solid #e6e7e8;padding:30px;background:white; position:relative">
                         {{-- HEADER --}}
                         <tr>
-                            <td colspan="2" align="center">
+                            <td colspan="2" align="center" style="font-family: 'Poppins', sans-serif;">
                                 <table role="presentation"
-                                    style="width:100%;border:none;border-spacing:0;border-top-left-radius: 4px; border-top-right-radius: 4px;background-color: #5458EA;">
+                                    style="width:100%;border:none;border-spacing:0;border-top-left-radius: 4px; border-top-right-radius: 4px;background-color: #FFFFFF; padding: 0 15px;">
                                     <tr>
-                                        <td style="padding-left: 15px;">
+                                        <td>
                                             <a href="https://cursalab.io/" target="_blank"
                                                 style="color: white;text-decoration: none;">
-                                                <img src="https://cursalab.io/mailing/21-09-2021/img/cursalab.png"
+                                                <img src="https://cursalab.io/wp-content/uploads/2022/11/logo-web-light-1536x506.png"
                                                     alt="Cursalab" width="130"
                                                     style="max-width: 130;height:auto;border:none;">
                                             </a>
-                                        </td>
+                                        </td> 
+                                      <td style="font-family: 'Poppins', sans-serif; text-align: end; font-size:.8rem; font-weight: 600;">
+                                        Crece, mira y 
+                                        <span style="color:#9996FC;">
+                                          APRENDE
+                                        </span>
+                                      </td>
                                     </tr>
                                 </table>
                             </td>
                         </tr>
+                        {{-- HEADER --}}
+
                         {{-- BODY --}}
                         @yield('body')
+                        {{-- BODY --}}
+
                         {{-- FOOTER --}}
-                        <tr style="">
+                        <tr>
                             <td colspan="2" align="center">
                                 <table role="presentation"
                                     style="text-align:center;width:100%;border:none;border-spacing:0;padding:15px 0 10px;border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;background-color: #5458EA;">
@@ -113,7 +127,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td align="center" colspan="12">
+                            <td align="center" colspan="12"  style="font-family: 'Poppins', sans-serif;">
                                 <p style="color:#5D5FEF;font-size: 13px;font-weight: bold;">© Cursalab
                                     {{ date('Y') }} | Lima, Perú</p>
                             </td>

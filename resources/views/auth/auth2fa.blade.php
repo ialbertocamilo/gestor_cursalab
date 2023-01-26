@@ -52,8 +52,8 @@
           </div>
 
           <div class="form-row">
-            <div class="col-6">
-              <a href="{{ route('login_auth2fa_resend') }}" class="btn py-2 btn-block btn-secondary">
+            <div class="col-6 text-center">
+              <a href="{{ route('login_auth2fa_resend') }}" class="text-primary text-decoration-none py-2">
                 Reenviar
               </a>
             </div>

@@ -1109,4 +1109,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $user->save();
     }
+
+    public function setUserPassUpdateToken($token) {
+        $user = $this;
+        
+        $user->pass_token_updated = $token;
+        return $user->save();
+    }
+
+    public function checkPassUpdateToken($token, $id_user) {
+        return $this->where('pass_token_updated', $token)
+                    ->where('id', $id_user)->count();
+    }
+
 }

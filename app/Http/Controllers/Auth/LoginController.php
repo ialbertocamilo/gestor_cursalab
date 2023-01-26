@@ -8,7 +8,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use Session;
+use Illuminate\Auth\Events\PasswordReset;
+
+
 
 class LoginController extends Controller
 {
@@ -81,6 +83,7 @@ class LoginController extends Controller
             $user->resetToNullCode2FA();
 
             session()->forget('init_2fa'); 
+            session()->forget('init_reset'); 
             
             // resetear sessions
             $this->guard()->logout();
@@ -122,6 +125,7 @@ class LoginController extends Controller
 
 
             $user = $this->guard()->user();
+            $user->resetToNullCode2FA(); // reset 2fa values
 
             if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             {
@@ -140,9 +144,15 @@ class LoginController extends Controller
                     // verificacion de doble autenticacion
 
                 } else {
+
+                    // verifica si se requiere actualizar contraseña
+                    if($this->checkIfCanResetPassword()) {
+                        return $this->showResetPassword();
+                    }
+                    // verifica si se requiere actualizar contraseña
+
                     return $this->sendLoginResponse($request);
                 }
-
                
             } else {
                 $this->guard()->logout();
@@ -161,6 +171,35 @@ class LoginController extends Controller
         return $this->sendFailedLoginResponse($request);
     }
 
+    // redireccionar a link de reseteo
+    public function showResetPassword() {
+        $user = $this->guard()->user();
+        session()->put('init_reset', $user->id);
+
+        // crear token 
+        $currentEntropy = env('RESET_PASSWORD_TOKEN_ENTROPY');
+        $token = bin2hex(random_bytes($currentEntropy));
+
+        // insertar token 'table';
+        $responseToken = (bool) $user->setUserPassUpdateToken($token);
+        
+        if($responseToken) {
+            return redirect('reset/'.$token); // vista resetea token
+        }
+    }
+
+    // verificar si debe actualizar su contraseña
+    public function checkIfCanResetPassword()
+    {
+        $user = $this->guard()->user();
+        $currentDays = env('RESET_PASSWORD_DAYS');
+        settype($currentDays, "int");
+
+        $diferenceDays = now()->diffInDays($user->last_pass_updated_at);
+        return ($diferenceDays >= $currentDays);
+        // return ($diferenceDays >= $currentDays) && $user->enable_resetpass;
+    }
+
     // verificar el codigo y expiracion 2FA
     public function auth2fa(Request $request) 
     {
@@ -171,6 +210,10 @@ class LoginController extends Controller
         if($checkCode && $checkExpire) {
             session()->forget('init_2fa'); 
             $user->resetToNullCode2FA();
+
+            // verifica si se requiere actualizar contraseña
+
+
             // session iniciada
             return $this->sendLoginResponse($request);
         }
