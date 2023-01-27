@@ -30,7 +30,7 @@ class CheckSchoolWorkspace
         {
             $subworkspaces_id = $workspace->subworkspaces->pluck('id');
 
-            $schools = School::whereHas('workspaces', function($q) use ($subworkspaces_id) {
+            $schools = School::whereHas('subworkspaces', function($q) use ($subworkspaces_id) {
                 $q->whereIn('workspace_id', $subworkspaces_id);
             })
             ->get();

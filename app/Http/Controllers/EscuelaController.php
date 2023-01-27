@@ -91,13 +91,13 @@ class EscuelaController extends Controller
         return $this->success(['msg' => 'Escuela eliminada correctamente.']);
     }
 
-    public function updateStatus(Abconfig $abconfig, Categoria $categoria)
-    {
-        //        return $categoria;
+    // public function updateStatus(Abconfig $abconfig, Categoria $categoria)
+    // {
+    //     //        return $categoria;
 
-        $estado = ($categoria->estado == 1) ? 0 : 1;
-        $categoria->estado = $estado;
-        $categoria->save();
-        return $this->success(['info' => 'Estado actualizado con éxito.']);
-    }
+    //     $estado = ($categoria->estado == 1) ? 0 : 1;
+    //     $categoria->estado = $estado;
+    //     $categoria->save();
+    //     return $this->success(['info' => 'Estado actualizado con éxito.']);
+    // }
 }

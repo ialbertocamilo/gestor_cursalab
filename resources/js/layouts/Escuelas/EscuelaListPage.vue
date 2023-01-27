@@ -17,16 +17,6 @@
             <v-card-text>
                 <v-row class="justify-content-start">
                     <v-col cols="3">
-                        <DefaultInput
-                            learable dense
-                            v-model="filters.q"
-                            label="Buscar por nombre..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
-                            append-icon="mdi-magnify"
-                        />
-                    </v-col>
-                    <v-col cols="3">
                         <DefaultSelect
                             clearable dense
                             :items="selects.modules"
@@ -56,6 +46,16 @@
                             v-model="filters.dates"
                             label="Fecha de creación"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                        />
+                    </v-col>
+                    <v-col cols="3">
+                        <DefaultInput
+                            learable dense
+                            v-model="filters.q"
+                            label="Buscar por nombre..."
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            append-icon="mdi-magnify"
                         />
                     </v-col>
                 </v-row>

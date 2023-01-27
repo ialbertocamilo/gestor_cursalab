@@ -17,7 +17,7 @@ class School extends BaseModel
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
     }
 
-    public function workspaces()
+    public function subworkspaces()
     {
         return $this->belongsToMany(Workspace::class);
     }
@@ -39,12 +39,13 @@ class School extends BaseModel
 
         $escuelas = School::
             // whereRelation('workspaces', 'workspace_id', $workspace->id)
-            whereHas('workspaces', function ($j) use ($modules_id) {
+            whereHas('subworkspaces', function ($j) use ($modules_id) {
                 $j->whereIn('workspace_id', $modules_id);
             })
-            ->withCount(['courses' => function ($c) use ($workspace) {
-                $c->whereRelation('workspaces', 'id', $workspace->id);
-            }]);
+            ->withCount(['courses']);
+            // ->withCount(['courses' => function ($c) use ($workspace) {
+            //     $c->whereRelation('workspaces', 'id', $workspace->id);
+            // }]);
 
         if ($request->q)
             $escuelas->where('name', 'like', "%$request->q%");
@@ -88,17 +89,15 @@ class School extends BaseModel
     {
         try {
 
-            $workspace = get_current_workspace();
-
             DB::beginTransaction();
 
             if ($school) :
                 $school->update($data);
             else :
                 $school = self::create($data);
-
-                $workspace->schools()->attach($school);
             endif;
+            
+            $school->subworkspaces()->sync($data['subworkspaces'] ?? []);
 
             // Generate code when is not defined
 
@@ -108,6 +107,7 @@ class School extends BaseModel
             }
 
             DB::commit();
+
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -120,5 +120,22 @@ class School extends BaseModel
         cache_clear_model(Course::class);
 
         return $school;
+    }
+
+    public function setSelectSuffixes($active_suffix = true, $subworkspaces_suffix = true)
+    {
+        if ($subworkspaces_suffix) {
+
+            $subworkspaces = implode(', ', $this->subworkspaces->pluck('codigo_matricula')->toArray());
+            
+            $this->name .= " [{$subworkspaces}]";
+        }
+
+        if ($active_suffix) {
+
+            $active = !$this->active ? " [Inactivo]" : "";
+            
+            $this->name .= "{$active}";
+        }
     }
 }
