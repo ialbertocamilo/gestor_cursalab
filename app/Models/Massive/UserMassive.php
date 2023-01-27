@@ -191,6 +191,13 @@ class UserMassive extends Massive implements ToCollection
         $user['criterion_list_final'] = [];
         foreach ($data_criteria as $dc) {
             //Validación de requerido
+            if($dc['criterion_code'] == 'gender' && empty($dc['value_excel'])){
+                $has_error = true;
+                $errors_index[] =[
+                    'index' => $dc['index'],
+                    'message' => ($this->messageInSpanish) ? 'Colocar un género existente.' : 'The field ' . $dc['criterion_code'] . ' is required.'
+                ];
+            }
             if (!empty($dc['value_excel'])) {
                 $criterion = $criteria->where('id', $dc['criterion_id'])->first();
                 $code_criterion = $criterion->field_type->code;
