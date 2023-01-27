@@ -32,29 +32,22 @@ class SummaryUser extends Summary
 
         if (!$row_user) return true;
 
-        [$courses_id, $total_courses] = SummaryUser::getTotalCoursesAndIdentifiers($user);
+        [$courses_id, $courses_assigned] = SummaryUser::getTotalCoursesAndIdentifiers($user);
 
         $passed = SummaryCourse::getUserTotalCoursesByStatusCode($user, $courses_id, 'aprobado');
         $attempts = SummaryCourse::getUserTotalAttemptsByCourses($user, $courses_id);
         $grade_average = SummaryTopic::getUserAverageGradeByCourses($user, $courses_id);
+        $advanced_percentage = SummaryUser::getGeneralPercentage($courses_assigned, $passed);
+        $score = User::calculate_rank($passed, $grade_average, $attempts);
 
-        $completed = ($passed > $total_courses) ? $total_courses : $passed;
+        $courses_completed = ($passed > $courses_assigned) ? $courses_assigned : $passed;
 
-        $user_data = [
-            'courses_assigned' => $total_courses,
-            'courses_completed' => $completed,
-            'grade_average' => $grade_average,
-            'attempts' => $attempts,
-            'score' => User::calculate_rank($passed, $grade_average, $attempts),
-            'advanced_percentage' => SummaryUser::getGeneralPercentage($total_courses, $passed),
-        ];
+        $data = compact('courses_assigned', 'courses_completed', 'grade_average', 'attempts', 'score', 'advanced_percentage');
 
         if ($comes_from_evaluation)
-            $user_data['last_time_evaluated_at'] = now();
+            $data['last_time_evaluated_at'] = now();
 
-        // info($user_data);
-
-        $row_user->update($user_data);
+        $row_user->update($data);
 
         return $row_user;
     }
@@ -69,11 +62,11 @@ class SummaryUser extends Summary
 
     protected function getTotalCoursesAndIdentifiers($user)
     {
-        $user_courses = $user->getCurrentCourses(withRelations: 'soft');
+        $user_courses = $user->getCurrentCourses(withFreeCourses: false, withRelations: 'soft');
 
         $user_courses_id = $user_courses->whereNull('compatible')->pluck('id');
         $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
-        
+
         return [
             $user_courses_id->merge($user_compatibles_courses_id),
             $user_courses->count(),

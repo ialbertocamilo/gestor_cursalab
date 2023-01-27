@@ -58,7 +58,7 @@ class UpdateSummariesUser extends Command
                 SummaryCourse::updateUserData($course, $user, update_attempts: false);
             }
 
-            SummaryUser::updateUserData($summary_user->user);
+            SummaryUser::updateUserData($summary_user->user, false);
 
             $bar->advance();
         }
