@@ -195,7 +195,7 @@ class UserMassive extends Massive implements ToCollection
                 $has_error = true;
                 $errors_index[] =[
                     'index' => $dc['index'],
-                    'message' => ($this->messageInSpanish) ? 'Colocar un género existente.' : 'The field ' . $dc['criterion_code'] . ' is required.'
+                    'message' => ($this->messageInSpanish) ? 'El criterio género es requerido.' : 'The field ' . $dc['criterion_code'] . ' is required.'
                 ];
             }
             if (!empty($dc['value_excel'])) {
