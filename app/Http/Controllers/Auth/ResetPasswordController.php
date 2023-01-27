@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ResetPasswordController extends Controller
 {
@@ -65,12 +66,6 @@ class ResetPasswordController extends Controller
             return redirect('/login');
         }
 
-        return view('auth.passwords.reset');
-    }
-
-    public function reset(Request $request)
-    {
-        $user = auth()->user();
-        dd($request);
+        return view('auth.passwords.reset_pass', [ 'token'=> $currentToken ]);
     }
 }

@@ -25,13 +25,17 @@ Route::get('2fa', [TwoFAController::class, 'showAuth2faForm'])->name('2fa');
 Route::post('login_auth2fa', [LoginController::class, 'auth2fa'])->name('login_auth2fa');
 Route::get('login_auth2fa_resend', [LoginController::class, 'auth2fa_resend'])->name('login_auth2fa_resend');
 
+// laravel reset pass
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-/* Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');*/
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-// routes reset pass
-Route::get('reset/{token}', [ResetPasswordController::class, 'showResetFormInit'])->name('password.reset');
-Route::post('password_reset', [ResetPasswordController::class, 'reset'])->name('password_update');
+// custom reset pass
+Route::get('reset/{token}', [ResetPasswordController::class, 'showResetFormInit'])->name('reset');
+Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('password_reset');
+
 
 
 Route::get('home', [DashboardController::class, 'index'])->name('home');

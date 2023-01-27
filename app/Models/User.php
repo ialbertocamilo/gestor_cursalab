@@ -68,7 +68,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa', 'slug', 'alias', 'person_number', 'phone_number',
+        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
@@ -1099,8 +1099,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $user->save();
     }
 
-    public function resetToNullCode2FA() {
-
+    public function resetToNullCode2FA() 
+    {
         $user = $this;
 
         $user->timestamps = false; // no actualizar el usuario
@@ -1110,16 +1110,37 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->save();
     }
 
+    public function resetToNullResetPass()
+    {
+        $user = $this;
+
+        $user->timestamps = false; // no actualizar el usuario
+        $user->pass_token_updated = NULL;
+
+        $user->save();
+    }
+
     public function setUserPassUpdateToken($token) {
         $user = $this;
         
+        $user->timestamps = false; // no actualizar el usuario
         $user->pass_token_updated = $token;
         return $user->save();
     }
 
+    // validamos el token para la vista 'auth.passwords.reset.blae.php'
     public function checkPassUpdateToken($token, $id_user) {
         return $this->where('pass_token_updated', $token)
                     ->where('id', $id_user)->count();
+    }
+
+    // actualizar contraseña usuario
+    public function updatePasswordUser($password) {
+        $user = $this;
+        $data = [ 'last_pass_updated_at' => now(),
+                  'password' => $password ];
+        
+        $user->update($data);
     }
 
 }

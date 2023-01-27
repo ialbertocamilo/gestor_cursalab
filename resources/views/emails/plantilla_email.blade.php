@@ -118,7 +118,7 @@
                                         <td>
                                             <a href="https://api.whatsapp.com/send?phone=51964156106&text=HolaCursalab,estoyinteresadoensusserviciosdecapacitaci%C3%B3ndigital"
                                                 target="_blank" style="text-decoration: none;">
-                                                <img src="{{ url('/img/icon-whatsapp.png') }}" alt=""
+                                                <img src="{{ url('/img/whatsapp.png') }}" alt=""
                                                     width="20" style="max-width: 20;height:auto;border:none;">
                                             </a>
                                         </td>

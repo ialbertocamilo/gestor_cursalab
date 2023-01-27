@@ -9,7 +9,8 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\PasswordReset;
-
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\ResetPasswordRequest;
 
 
 class LoginController extends Controller
@@ -83,13 +84,20 @@ class LoginController extends Controller
             $user->resetToNullCode2FA();
 
             session()->forget('init_2fa'); 
-            session()->forget('init_reset'); 
-            
-            // resetear sessions
-            $this->guard()->logout();
-            session()->invalidate();
-            session()->regenerateToken();
         }
+
+        if(session()->has('init_reset')) {
+            //resetear codigo y expiracion - reset pass
+            $user = auth()->user();
+            $user->resetToNullResetPass();
+
+            session()->forget('init_reset'); 
+        }
+
+        // resetear sessions
+        $this->guard()->logout();
+        session()->invalidate();
+        session()->regenerateToken();
 
         return $this->showLoginForm();
     }
@@ -151,6 +159,7 @@ class LoginController extends Controller
                     }
                     // verifica si se requiere actualizar contraseña
 
+                    // === iniciar session ===
                     return $this->sendLoginResponse($request);
                 }
                
@@ -199,6 +208,40 @@ class LoginController extends Controller
         return ($diferenceDays >= $currentDays);
         // return ($diferenceDays >= $currentDays) && $user->enable_resetpass;
     }
+    
+    // actualizar contraseña usuario
+    public function reset_pass(ResetPasswordRequest $request)
+    {
+        $request->validated();
+
+        $currentToken = $request->token;
+        $currentPassword = $request->password;
+        $currentRePassword = $request->repassword;
+
+        if($currentPassword === $currentRePassword) {
+            $user = auth()->user();
+            
+            // verificar token
+            $checkToken = $user->checkPassUpdateToken($currentToken, $user->id); 
+
+            if($checkToken) {
+                $user->updatePasswordUser($currentPassword);
+
+                $user->resetToNullResetPass();
+                session()->forget('init_reset'); 
+
+                // === iniciar session ===
+                return $this->sendLoginResponse($request);
+            }
+            return redirect('/login');
+        }
+
+        throw ValidationException::withMessages([
+            'password' => 'El campo contraseña no coincide.',
+            'repassword' => 'El campo repetir contraseña no coincide.'
+        ]);
+    }
+
 
     // verificar el codigo y expiracion 2FA
     public function auth2fa(Request $request) 
@@ -212,9 +255,12 @@ class LoginController extends Controller
             $user->resetToNullCode2FA();
 
             // verifica si se requiere actualizar contraseña
+            if($this->checkIfCanResetPassword()) {
+                return $this->showResetPassword();
+            }
+            // verifica si se requiere actualizar contraseña
 
-
-            // session iniciada
+            // === iniciar session ===
             return $this->sendLoginResponse($request);
         }
         
