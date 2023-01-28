@@ -117,6 +117,7 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem},
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -164,15 +165,17 @@ export default {
         async exportNotasCurso() {
             let vue = this
 
-            // show loading spinner
-
-            this.showLoader()
-
             let UFC = this.$refs.EstadoFiltroComponent;
-            //let fechaFiltro = this.$refs.FechasFiltros;
 
             // Perform request to generate report
 
+            const selectedFilters = {
+                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Áreas" : this.generateNamesString(this.areas, this.area),
+                "Sedes" : this.generateNamesString(this.sedes, this.sede)
+            }
             let urlReport = `${this.$props.reportsBaseUrl}/exportar/ranking`
             try {
                 let response = await axios({
@@ -180,6 +183,8 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        selectedFilters: selectedFilters,
                         modulos: this.modulo ? this.modulo : [],
                         areas: this.area,
                         sedes: this.sede,
@@ -187,6 +192,7 @@ export default {
                         UsuariosInactivos: UFC.UsuariosInactivos
                     }
                 })
+
 
                 // When there are no results notify
                 // user, download report otherwise
@@ -214,9 +220,7 @@ export default {
                 console.log(ex.message)
             }
 
-            // Hide loading spinner
-
-            this.hideLoader()
+            this.$emit('emitir-reporte', selectedFilters)
         },
     }
 }

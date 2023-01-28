@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\GeneratedReportResource;
 use App\Models\GeneratedReport;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
@@ -9,7 +10,8 @@ use Illuminate\Http\Request;
 class ReportsController extends Controller
 {
 
-    public function registerGeneratedReport(Request $request) {
+    public function loadReportsQueue(Request $request): \Illuminate\Http\JsonResponse
+    {
 
         $user = auth()->user();
 
@@ -17,16 +19,19 @@ class ReportsController extends Controller
 
         $workspaceId = session('workspace')->id;
 
-        // Register report
+        // Load workspace's reports queue
 
-        GeneratedReport::create([
-            'name' => $request->name,
-            'download_url' => $request->downloadUrl,
-            'admin_id' => $user->id,
-            'workspace_id' => $workspaceId,
-            'filters' => json_encode($request->filters)
-        ]);
+        $reports = GeneratedReport::query()
+            ->with('admin.subworkspace')
+            ->where([
+                'admin_id' => $user->id,
+                'workspace_id' => $workspaceId,
+            ])
+            ->orderBy('created_at', 'desc')
+            ->paginate();
 
-        return response()->json(['success' => true]);
+        GeneratedReportResource::collection($reports);
+
+        return $this->success($reports);
     }
 }

@@ -14,4 +14,9 @@ class GeneratedReport extends Model
     ];
 
     protected $table = 'generated_reports';
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
 }

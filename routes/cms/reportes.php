@@ -7,7 +7,7 @@ use App\Http\Controllers\ReportsController;
 
 Route::get('reportes/{layout}', [ExportarController::class, 'indexReport'])->name('exportar.reportes');
 
-Route::post('/reports/generated-report-file', [ReportsController::class, 'registerGeneratedReport']);
+Route::get('/reports/queue', [ReportsController::class, 'loadReportsQueue']);
 
 Route::prefix('exportar')->controller(ExportarController::class)->group(function () {
 
