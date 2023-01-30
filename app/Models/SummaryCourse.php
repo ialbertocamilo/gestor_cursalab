@@ -368,6 +368,9 @@ class SummaryCourse extends Summary
             ->whereIn('course_id', $courses_id)
             ->count();
 
+        info('getUserTotalCoursesByStatusCode count');
+        info($count);
+
         return $count;
     }
 }

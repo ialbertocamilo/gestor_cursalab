@@ -35,6 +35,14 @@ class RestUserProgressController extends Controller
                 ->count() + $user_compatibles_courses_count
             : 0;
 
+        info('completed_courses');
+        info($completed_courses);
+
+        info($user_courses_id->toArray());
+
+        info('user_compatibles_courses_count');
+        info($user_compatibles_courses_count);
+
         $assigned_courses_count = $assigned_courses
                 ->where('type.code', '<>', 'free')
                 ->count();
