@@ -152,6 +152,9 @@ class AuthController extends Controller
             'workspace' => $workspace_data,
             'can_be_host' => $can_be_host,
             'ciclo_actual' => $ciclo_actual,
+            'android' => $user->android,
+            'ios' => $user->ios,
+            'huawei' => $user->huawei,
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo
