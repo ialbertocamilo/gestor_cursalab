@@ -86,13 +86,13 @@ class LoginController extends Controller
             session()->forget('init_2fa'); 
         }
 
-        if(session()->has('init_reset')) {
+        /*if(session()->has('init_reset')) {
             //resetear codigo y expiracion - reset pass
             $user = auth()->user();
             $user->resetToNullResetPass();
 
             session()->forget('init_reset'); 
-        }
+        }*/
 
         // resetear sessions
         $this->guard()->logout();
@@ -152,12 +152,13 @@ class LoginController extends Controller
                     // verificacion de doble autenticacion
 
                 } else {
-
+                    /*
                     // verifica si se requiere actualizar contraseña
                     if($this->checkIfCanResetPassword()) {
                         return $this->showResetPassword();
                     }
                     // verifica si se requiere actualizar contraseña
+                    */
 
                     // === iniciar session ===
                     return $this->sendLoginResponse($request);
@@ -204,7 +205,12 @@ class LoginController extends Controller
         $currentDays = env('RESET_PASSWORD_DAYS');
         settype($currentDays, "int");
 
+        if(is_null($user->last_pass_updated_at)) {
+            return true;
+        }
+        
         $diferenceDays = now()->diffInDays($user->last_pass_updated_at);
+
         return ($diferenceDays >= $currentDays);
         // return ($diferenceDays >= $currentDays) && $user->enable_resetpass;
     }
@@ -254,11 +260,13 @@ class LoginController extends Controller
             session()->forget('init_2fa'); 
             $user->resetToNullCode2FA();
 
+            /*
             // verifica si se requiere actualizar contraseña
             if($this->checkIfCanResetPassword()) {
                 return $this->showResetPassword();
             }
             // verifica si se requiere actualizar contraseña
+            */
 
             // === iniciar session ===
             return $this->sendLoginResponse($request);

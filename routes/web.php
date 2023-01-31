@@ -33,9 +33,8 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // custom reset pass
-Route::get('reset/{token}', [ResetPasswordController::class, 'showResetFormInit'])->name('reset');
-Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('password_reset');
-
+/*Route::get('reset/{token}', [ResetPasswordController::class, 'showResetFormInit'])->name('reset');
+Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('password_reset');*/
 
 
 Route::get('home', [DashboardController::class, 'index'])->name('home');
@@ -65,6 +64,7 @@ Route::get('informacion_app', function () {
 
 Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::view('welcome', 'welcome');
+    // Route::view('/reset_password','layouts.user-reset-pass')->name('reset_password');
 
     Route::get('/workspaces/search', [WorkspaceController::class, 'search']);
     Route::put('/usuarios/session/workspace/{workspace}', [UsuarioController::class, 'updateWorkspaceInSession']);

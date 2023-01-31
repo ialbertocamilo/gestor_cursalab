@@ -18,9 +18,9 @@ class Check2FA
     public function handle(Request $request, Closure $next)
     {
 
-        if (Session::has('init_reset')) {
+        /*if (Session::has('init_reset')) {
             return redirect('/login');
-        }
+        }*/
 
         if (Session::has('init_2fa')) {
             return redirect('/2fa');

@@ -2,6 +2,7 @@
 
 @section('morecss')
 <style>
+
 .label-material.active{
   color:#007aff;
 }
@@ -17,20 +18,21 @@
       </div>
       <div class="px-4 mt-4 mx-3 text-center">
         <p>
-          Para continuar <span class="text-primary">{{ auth()->user()->name.' '.auth()->user()->lastname }} </span> , 
-          por favor actualiza tu contraseña. {{ $token }}
+          Para continuar <span class="text-primary">{{ auth()->user()->name.' '.auth()->user()->lastname }} </span>, 
+          por favor actualiza tu contraseña.
         </p>
       </div>
 
       <div class="form mt-2">
-        <form method="POST" class="form-validate" action="{{ route('password_reset') }}">
+        <form method="POST" class="form-validate" autocomplete="off" action="{{ route('password_reset') }}">
           @csrf
           <input hidden name="token" value="{{ $token }}" >
+          <input hidden name="email" value="{{ auth()->user()->email }}" >
 
           <div class="form-group">
             <input id="reset-password" type="password" name="password" 
                 required data-msg="Por favor ingrese su contraseña" 
-                class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" autocomplete="off" autofocus maxlength="20">
+                class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="20">
 
             <label for="reset-password" class="label-material active">Contraseña</label>
             @if ($errors->has('password'))

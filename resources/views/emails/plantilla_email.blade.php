@@ -47,10 +47,6 @@
                                             </a>
                                         </td> 
                                       <td style="font-family: 'Poppins', sans-serif; text-align: end; font-size:.8rem; font-weight: 600;">
-                                        Crece, mira y 
-                                        <span style="color:#9996FC;">
-                                          APRENDE
-                                        </span>
                                       </td>
                                     </tr>
                                 </table>
@@ -115,13 +111,13 @@
                                                     alt="Cursalab" style="max-width: 100%;" width="18px">
                                             </a>
                                         </td>
-                                        <td>
-                                            <a href="https://api.whatsapp.com/send?phone=51964156106&text=HolaCursalab,estoyinteresadoensusserviciosdecapacitaci%C3%B3ndigital"
+                                        {{--<td>
+                                            <a href="https://api.whatsapp.com/send?phone=51964156106&text=Hola Cursalab, estoy interesado en sus servicios de capacitaci%C3%B3n digital"
                                                 target="_blank" style="text-decoration: none;">
-                                                <img src="{{ url('/img/whatsapp.png') }}" alt=""
-                                                    width="20" style="max-width: 20;height:auto;border:none;">
+                                                <img src="{{ url('/img/whatsapp-icon.png') }}" alt=""
+                                                    width="22px" style="max-width: 100%;">
                                             </a>
-                                        </td>
+                                        </td>--}}                                    
                                     </tr>
                                 </table>
                             </td>

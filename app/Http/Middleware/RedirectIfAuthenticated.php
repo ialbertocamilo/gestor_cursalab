@@ -23,7 +23,7 @@ class RedirectIfAuthenticated
         $guards = empty($guards) ? [null] : $guards;
 
         if(Session::has('init_2fa')) $guards = []; // guards a vacio
-        if(Session::has('init_reset')) $guards = []; // guards a vacio
+        // if(Session::has('init_reset')) $guards = []; // guards a vacio
         
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
