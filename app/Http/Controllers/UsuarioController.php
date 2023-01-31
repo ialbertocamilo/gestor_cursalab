@@ -6,6 +6,8 @@ use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Resources\Usuario\UsuarioSearchResource;
+use App\Http\Requests\ResetPasswordRequest;
+use Illuminate\Validation\ValidationException;
 use App\Models\Abconfig;
 use App\Models\AssignedRole;
 use App\Models\Botica;
@@ -837,4 +839,43 @@ class UsuarioController extends Controller
             );
         }
     }
+
+    public function updatePasswordUser(ResetPasswordRequest $request)
+    {
+        $request->validated();
+        
+        $actualPassword = $request->currpassword;
+        $currentPassword = $request->password;
+        $currentRePassword = $request->repassword;
+
+        $user = auth()->user();
+        // verficamos su actual contraseña
+        if(!Auth::attempt([ 'email' => $user->email, 
+                            'password' => $actualPassword])) {
+
+            throw ValidationException::withMessages([
+                'currpassword' => 'La contraseña actual no coincide.'
+            ]);
+        }
+
+        // verficamos que no sea la misma
+        if($actualPassword === $currentPassword) {
+            throw ValidationException::withMessages([
+                'password' => 'La nueva contraseña es igual a la actual.',
+            ]);
+        }
+
+        if($currentPassword === $currentRePassword) {
+            $user->updatePasswordUser($currentPassword);
+
+            return redirect('/reset_password')
+                             ->with('info', 'Contraseña actualizada correctamente');
+        }
+
+        throw ValidationException::withMessages([
+            'password' => 'El campo nueva contraseña no coincide.',
+            'repassword' => 'El campo repetir contraseña no coincide.'
+        ]);
+    }
+
 }

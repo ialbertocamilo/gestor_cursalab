@@ -39,7 +39,7 @@
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">El código de verificación será válido por {{ $data['minutes'] }} minutos. Por favor no compartas este código con nadie.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-            ¿No reconoces esta actividad?. Por favor contáctate inmediatamente con el equipo de soporte.
+            ¿No reconoces esta actividad?. Por favor contáctate inmediatamente con el equipo de Customer Experience.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
             Este es un mensaje automático, por favor no responder.

@@ -30,11 +30,25 @@
           <input hidden name="email" value="{{ auth()->user()->email }}" >
 
           <div class="form-group">
-            <input id="reset-password" type="password" name="password" 
-                required data-msg="Por favor ingrese su contraseña" 
-                class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="20">
+            <input id="current-password" type="password" name="currpassword" 
+                required data-msg="Por favor ingrese su contraseña actual" 
+                class="input-material form-control{{ $errors->has('currpassword') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="100">
 
-            <label for="reset-password" class="label-material active">Contraseña</label>
+            <label for="current-password" class="label-material active">Contraseña actual</label>
+            @if ($errors->has('currpassword'))
+            <span class="invalid-feedback" role="alert">
+              <strong>{{ $errors->first('currpassword') }}</strong>
+            </span>
+            @endif
+          </div>
+
+
+          <div class="form-group">
+            <input id="reset-password" type="password" name="password" 
+                required data-msg="Por favor ingrese su nueva contraseña" 
+                class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="100">
+
+            <label for="reset-password" class="label-material active">Nueva contraseña</label>
             @if ($errors->has('password'))
             <span class="invalid-feedback" role="alert">
               <strong>{{ $errors->first('password') }}</strong>
@@ -44,10 +58,10 @@
 
           <div class="form-group">
             <input id="reset-repassword" type="password" name="repassword" 
-                required data-msg="Por favor ingrese su contraseña" 
-                class="input-material form-control{{ $errors->has('repassword') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="20">
+                required data-msg="Por favor repita su nueva contraseña" 
+                class="input-material form-control{{ $errors->has('repassword') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="100">
 
-            <label for="reset-repassword" class="label-material active">Repetir Contraseña</label>
+            <label for="reset-repassword" class="label-material active">Repetir contraseña</label>
             @if ($errors->has('repassword'))
             <span class="invalid-feedback" role="alert">
               <strong>{{ $errors->first('repassword') }}</strong>
@@ -61,7 +75,7 @@
             </button>
             <br>
             <br>
-            <a href="{{ route('login') }}" class="text-primary"> Ir a inicio de sessión.</a>
+            <a href="{{ route('login') }}" class="text-primary"> Ir a inicio de sesión</a>
           </div>
         </form>
       </div>

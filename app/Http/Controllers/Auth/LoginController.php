@@ -86,13 +86,13 @@ class LoginController extends Controller
             session()->forget('init_2fa'); 
         }
 
-        /*if(session()->has('init_reset')) {
+        if(session()->has('init_reset')) {
             //resetear codigo y expiracion - reset pass
             $user = auth()->user();
             $user->resetToNullResetPass();
 
             session()->forget('init_reset'); 
-        }*/
+        }
 
         // resetear sessions
         $this->guard()->logout();
@@ -152,13 +152,12 @@ class LoginController extends Controller
                     // verificacion de doble autenticacion
 
                 } else {
-                    /*
+                    
                     // verifica si se requiere actualizar contraseña
                     if($this->checkIfCanResetPassword()) {
                         return $this->showResetPassword();
                     }
                     // verifica si se requiere actualizar contraseña
-                    */
 
                     // === iniciar session ===
                     return $this->sendLoginResponse($request);
@@ -221,11 +220,27 @@ class LoginController extends Controller
         $request->validated();
 
         $currentToken = $request->token;
+        $actualPassword = $request->currpassword;
         $currentPassword = $request->password;
         $currentRePassword = $request->repassword;
 
+        $user = auth()->user();
+
+        if(!Auth::attempt([ 'email' => $user->email, 
+                            'password' => $actualPassword])) {
+
+            throw ValidationException::withMessages([
+                'currpassword' => 'La contraseña actual no coincide.'
+            ]);
+        }
+
+        if($actualPassword === $currentPassword) {
+            throw ValidationException::withMessages([
+                'password' => 'La nueva contraseña es igual a la actual.',
+            ]);
+        }
+
         if($currentPassword === $currentRePassword) {
-            $user = auth()->user();
             
             // verificar token
             $checkToken = $user->checkPassUpdateToken($currentToken, $user->id); 
@@ -243,7 +258,7 @@ class LoginController extends Controller
         }
 
         throw ValidationException::withMessages([
-            'password' => 'El campo contraseña no coincide.',
+            'password' => 'El campo nueva contraseña no coincide.',
             'repassword' => 'El campo repetir contraseña no coincide.'
         ]);
     }
@@ -260,13 +275,11 @@ class LoginController extends Controller
             session()->forget('init_2fa'); 
             $user->resetToNullCode2FA();
 
-            /*
             // verifica si se requiere actualizar contraseña
             if($this->checkIfCanResetPassword()) {
                 return $this->showResetPassword();
             }
             // verifica si se requiere actualizar contraseña
-            */
 
             // === iniciar session ===
             return $this->sendLoginResponse($request);
