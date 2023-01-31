@@ -17,14 +17,14 @@ class RestUserProgressController extends Controller
         $user = auth()->user();
         $user->load('summary', 'summary_courses');
 
-//        $assigned_courses = $user->getCurrentCourses();
         $assigned_courses = $user->getCurrentCourses(withRelations: 'user-progress');
         $user_courses_id = $assigned_courses->whereNull('compatible')->pluck('id');
+
+        $user_compatibles_courses_id = $assigned_courses->whereNotNull('compatible')->pluck('id');
         $user_compatibles_courses_count = $assigned_courses->whereNotNull('compatible')->where('type.code', '<>', 'free')->count();
 
         $summary_user = $user->summary;
 
-//        $completed_courses = $summary_user ? $summary_user->course_completed : 0;
         $completed_courses = $summary_user ?
             $user->summary_courses()
                 ->whereHas('course', fn($q) => $q
@@ -34,14 +34,6 @@ class RestUserProgressController extends Controller
                 ->whereRelation('status', 'code', 'aprobado')
                 ->count() + $user_compatibles_courses_count
             : 0;
-
-        info('completed_courses');
-        info($completed_courses);
-
-        info($user_courses_id->toArray());
-
-        info('user_compatibles_courses_count');
-        info($user_compatibles_courses_count);
 
         $assigned_courses_count = $assigned_courses
                 ->where('type.code', '<>', 'free')
@@ -58,7 +50,6 @@ class RestUserProgressController extends Controller
 
         $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->where('type.code', '<>', 'free')->count()) * 100) : 0;
         $general_percentage = min($general_percentage, 100);
-
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses_count,

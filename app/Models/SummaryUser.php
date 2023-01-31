@@ -32,11 +32,12 @@ class SummaryUser extends Summary
 
         if (!$row_user) return true;
 
-        [$courses_id, $courses_assigned] = SummaryUser::getTotalCoursesAndIdentifiers($user);
+        [$courses_id, $all_courses_id, $courses_assigned, $courses_compatible] = SummaryUser::getTotalCoursesAndIdentifiers($user);
 
-        $passed = SummaryCourse::getUserTotalCoursesByStatusCode($user, $courses_id, 'aprobado');
-        $attempts = SummaryCourse::getUserTotalAttemptsByCourses($user, $courses_id);
-        $grade_average = SummaryTopic::getUserAverageGradeByCourses($user, $courses_id);
+        $passed = SummaryCourse::getUserTotalCoursesByStatusCode($user, $courses_id, 'aprobado') + $courses_compatible;
+
+        $attempts = SummaryCourse::getUserTotalAttemptsByCourses($user, $all_courses_id);
+        $grade_average = SummaryTopic::getUserAverageGradeByCourses($user, $all_courses_id);
         $advanced_percentage = SummaryUser::getGeneralPercentage($courses_assigned, $passed);
         $score = User::calculate_rank($passed, $grade_average, $attempts);
 
@@ -62,14 +63,17 @@ class SummaryUser extends Summary
 
     protected function getTotalCoursesAndIdentifiers($user)
     {
-        $user_courses = $user->getCurrentCourses(withFreeCourses: false, withRelations: 'soft');
+        $courses = $user->getCurrentCourses(withFreeCourses: false, withRelations: 'soft');
 
-        $user_courses_id = $user_courses->whereNull('compatible')->pluck('id');
-        $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
+        $courses_id = $courses->whereNull('compatible')->pluck('id');
+        $courses_compatibles_id = $courses->whereNotNull('compatible')->pluck('compatible.course_id');
 
         return [
-            $user_courses_id->merge($user_compatibles_courses_id),
-            $user_courses->count(),
+            $courses_id,
+            $courses_id->merge($courses_compatibles_id),
+            $courses->count(),
+            $courses_compatibles_id->count(),
+            // $courses_compatibles_id,
         ];
     }
 
