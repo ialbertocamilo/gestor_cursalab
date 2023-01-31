@@ -98,12 +98,12 @@ export default {
                         type: 'action',
                         method_name: 'edit'
                     },
-                    // {
-                    //     text: "Eliminar",
-                    //     icon: 'far fa-trash-alt',
-                    //     type: 'action',
-                    //     method_name: 'delete'
-                    // },
+                    {
+                        text: "Eliminar",
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
+                    },
                 ],
             },
 
@@ -121,7 +121,7 @@ export default {
             modalDeleteOptions: {
                 ref: 'ChecklistDeleteModal',
                 open: false,
-                base_endpoint: '/checklists',
+                base_endpoint: '/entrenamiento/checklists',
                 endpoint: '',
             },
             dataModalChecklist: {},

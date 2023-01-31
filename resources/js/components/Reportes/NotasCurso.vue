@@ -300,6 +300,7 @@ export default {
             this.schools = responseSchools.data
         },
         async exportNotasCurso() {
+            let vue = this;
 
             // show loading spinner
 
@@ -310,8 +311,8 @@ export default {
 
             // Perform request to generate report
 
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos_v2`
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos_v2`
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_cursos`
             try {
                 let response = await axios({
                     url: urlReport,
@@ -343,6 +344,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_cursos");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Notas por curso',

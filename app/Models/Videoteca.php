@@ -268,7 +268,7 @@ class Videoteca extends BaseModel
                 'tipo' => $data['media_type'],
                 'string' => in_array($data['media_type'], ['youtube', 'vimeo'], true)
                             ? $data['media_video']
-                            : $data['media']['file']
+                            : ($data['media']['file'] ?? null)
             ],
             //'tags' => $data['tags'],
             'tags' => $this->processTags($data['tags']),

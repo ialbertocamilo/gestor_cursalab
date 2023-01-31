@@ -44,12 +44,12 @@
         {{ Form::text('password', '', ['class' => 'form-control']) }}
     </div>
 </div>
-<div class="form-group row">
+{{-- <div class="form-group row">
     {{ Form::label('document', 'N° Documento', ['class' => 'col-sm-3 form-control-label']) }}
     <div class="col-sm-9">
         {{ Form::text('document', null, ['class' => 'form-control']) }}
     </div>
-</div>
+</div> --}}
 
 <hr>
 <div class="row mb-3">

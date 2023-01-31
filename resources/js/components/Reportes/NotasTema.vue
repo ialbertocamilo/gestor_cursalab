@@ -357,6 +357,7 @@ export default {
         }
         ,
         async exportNotasTema() {
+            let vue = this;
 
             // show loading spinner
 
@@ -368,8 +369,8 @@ export default {
 
             // Perform request to generate report
 
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas_v3`
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas_v3`
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas`
             try {
                 let response = await axios({
                     url: urlReport,
@@ -406,6 +407,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_temas");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Notas Tema',

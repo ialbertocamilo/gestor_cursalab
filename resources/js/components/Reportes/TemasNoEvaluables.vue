@@ -256,6 +256,7 @@ export default {
             this.schools = responseSchools.data
         },
         async exportNotasTema() {
+            let vue = this;
             // show loading spinner
 
             this.showLoader()
@@ -266,8 +267,8 @@ export default {
 
             // Perform request to generate report
 
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables_v2`
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables_v2`
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables`
             try {
                 let response = await axios({
                     url: urlReport,
@@ -297,6 +298,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_temas_no_eval");
                     response.data.new_name = this.generateFilename(
                         'Temas no evaluables',
                         this.generateNamesString(this.modules, this.modulo)

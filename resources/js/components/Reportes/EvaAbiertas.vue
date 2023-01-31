@@ -240,6 +240,7 @@ export default {
         }
         ,
         async exportEvaAbiertas() {
+            let vue = this;
 
             // show loading spinner
 
@@ -250,8 +251,8 @@ export default {
 
             // Perform request to generate report
 
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas_v2`
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas_v2`
+            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas`
             try {
                 let response = await axios({
                     url: urlReport,
@@ -279,6 +280,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_eva_abiertas");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Evaluaciones abiertas',
