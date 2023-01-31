@@ -50,6 +50,7 @@ class TwoFactorAuth extends Command
 
     public function updateStatesUsers(int $state) 
     {
-        User::whereNot('enable_2fa', $state)->update(['enable_2fa' => $state]);
+        User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports','only-reports')->whereNot('enable_2fa', $state)->update(['enable_2fa' => $state]);
+        // User::whereNot('enable_2fa', $state)->update(['enable_2fa' => $state]);
     }
 }

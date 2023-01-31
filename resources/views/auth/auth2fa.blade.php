@@ -65,7 +65,7 @@
           </div>
 
           <div class="text-center mt-3">
-            <a href="{{ route('login') }}" class="text-primary"> Ir a inicio de sesión.</a>
+            <a href="{{ route('login') }}" class="text-primary"> Ir a inicio de sesión</a>
           </div>
 
         </form>

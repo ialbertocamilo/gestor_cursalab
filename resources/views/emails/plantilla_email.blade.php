@@ -103,14 +103,14 @@
                                                     alt="Cursalab" style="max-width: 100%;" width="22px">
                                             </a>
                                         </td>
-                                        <td>
+                                        {{-- <td>
                                             <a target="_blank"
                                                 href="https://vm.tiktok.com/ZMRCwrbHV?utm_source=Mailing&utm_id=TikTok"
                                                 style="text-decoration: none;">
                                                 <img src="https://cursalab.io/mailing/21-09-2021/img/icon-tik.png"
                                                     alt="Cursalab" style="max-width: 100%;" width="18px">
                                             </a>
-                                        </td>
+                                        </td> --}}
                                         {{--<td>
                                             <a href="https://api.whatsapp.com/send?phone=51964156106&text=Hola Cursalab, estoy interesado en sus servicios de capacitaci%C3%B3n digital"
                                                 target="_blank" style="text-decoration: none;">
