@@ -27,19 +27,20 @@
                     </div>
                 </button>
                 <div class="dropdown-menu dropdown-header-menu shadow">
-                    <a class="dropdown-item py-2 dropdown-item-custom" href="/reset_password">
+                    <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/reset_password">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-shield-alt"></span> 
                         </div>
                         <span>Actualizar contraseña</span>
                     </a>
-                    <a class="dropdown-item py-2 dropdown-item-custom" href="/workspaces/list">
+                    <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/workspaces/list">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-th-large"></span> 
                         </div>
                         <span>Listar workspaces</span>
                     </a>
-                    <a class="dropdown-item py-2 dropdown-item-custom" href="{{ route('logout') }}"
+                    <a class="dropdown-item py-2 dropdown-item-custom text-body" 
+                        href="{{ route('logout') }}"
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-sign-out-alt"></span>

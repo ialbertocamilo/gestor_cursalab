@@ -1132,12 +1132,11 @@ span.lbl_txt_val {
 
 .dropdown-icon-width{
 	width: 1.8rem;
-	color: #404040;
 }
 
 .dropdown-item-custom{
 	display: flex !important;
-	align-items: center;
+	align-items: center !important;
 }
 
 .btn-unset{

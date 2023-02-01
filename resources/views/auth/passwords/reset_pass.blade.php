@@ -16,13 +16,16 @@
       <div class="logo mt-1 mx-auto text-center">
         <img src="{{ url('img/logo_cursalab_v2_black.png') }}" alt="cursalab" class="img-fluid" width="270">
       </div>
-      <div class="px-4 mt-4 mx-3 text-center">
+      <div class="px-4 mt-4 mx-3">
         <p>
-          Para continuar 
+          ¡Hola!
           <span class="text-primary">
             {{ auth()->user()->name.' '.auth()->user()->lastname }} 
-          </span>, 
-          por favor actualiza tu contraseña.
+          </span>, para continuar por favor actualiza tu contraseña.
+        </p>
+
+        <p>
+          Elige una contraseña segura y no la utilices en otras cuentas, ni la compartas con nadie.
         </p>
       </div>
 
@@ -31,20 +34,6 @@
           @csrf
           <input hidden name="token" value="{{ $token }}" >
           <input hidden name="email" value="{{ auth()->user()->email }}" >
-
-          <div class="form-group">
-            <input id="current-password" type="password" name="currpassword" 
-                required data-msg="Por favor ingrese su contraseña actual" 
-                class="input-material form-control{{ $errors->has('currpassword') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="100">
-
-            <label for="current-password" class="label-material active">Contraseña actual</label>
-            @if ($errors->has('currpassword'))
-            <span class="invalid-feedback" role="alert">
-              <strong>{{ $errors->first('currpassword') }}</strong>
-            </span>
-            @endif
-          </div>
-
 
           <div class="form-group">
             <input id="reset-password" type="password" name="password" 
@@ -64,7 +53,7 @@
                 required data-msg="Por favor repita su nueva contraseña" 
                 class="input-material form-control{{ $errors->has('repassword') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="100">
 
-            <label for="reset-repassword" class="label-material active">Repetir contraseña</label>
+            <label for="reset-repassword" class="label-material active">Repetir nueva contraseña</label>
             @if ($errors->has('repassword'))
             <span class="invalid-feedback" role="alert">
               <strong>{{ $errors->first('repassword') }}</strong>
@@ -74,11 +63,14 @@
 
           <div class="form-group mb-0 text-center">
             <button type="submit" class="btn btn-primary">
-              Actualizar
+              Actualizar Contraseña
             </button>
-            <br>
-            <br>
-            <a href="{{ route('login') }}" class="text-primary"> Ir a inicio de sesión</a>
+            <p>
+              <span class="font-weight-bold">
+                ¿ Por qué veo esto ?
+              </span>
+              {{ session('newpassword') ? session('newpassword') : 'Expiró la vigencia de '.$days.' de tu contraseña. Por seguridad debes actualizarla.'   }}
+            </p>
           </div>
         </form>
       </div>
