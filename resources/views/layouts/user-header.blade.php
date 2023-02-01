@@ -4,9 +4,9 @@
         {{-- LOGO  --}}
         @if(Request::path() == 'reset_password')
         <div>
-            <img src="/img/we-connect-logo.png"
-                 width="70px" 
-                 alt="We connect">       
+            <img src="/img/logo_cursalab_v2_black.png"
+                 width="150px" 
+                 alt="Cursalab">       
         </div>
         @endif
         {{-- LOGO  --}}
@@ -14,34 +14,46 @@
 
         {{-- PERFIL  --}}
         <div class="d-flex">
+
             <div class="btn-group">
-                <div class="py-0 d-flex">
-                    <div class="username-rol">
+               <button class="d-flex align-items-center btn btn-unset dropdown-toggle" 
+                       type="button" data-toggle="dropdown" aria-expanded="false">
+                   <div class="username-rol">
                         <p class="username">{{ Auth::user()->name }}</p>
                         <p class="rol">{{ Auth::user()->email }}</p>
                     </div>
-                    <div class="avatar-image">
+                    <div class="avatar-image mr-2">
                         <img class="avatar" src="{{ asset('img/avatar-default.png') }}" />
                     </div>
-                </div>
-
-                <button type="button" class="btn dropdown-toggle dropdown-toggle-split" 
-                        id="dropdownMenuProfile" 
-                        data-toggle="dropdown" aria-haspopup="true" 
-                        aria-expanded="false" data-reference="parent" 
-                        >
-                    <span class="sr-only">Toggle Dropdown</span>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right-custom" 
-                     aria-labelledby="dropdownMenuProfile">
-                    <a class="dropdown-item" href="/reset_password">
-                        Actualizar contraseña
+                <div class="dropdown-menu dropdown-header-menu shadow">
+                    <a class="dropdown-item py-2 dropdown-item-custom" href="/reset_password">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-shield-alt"></span> 
+                        </div>
+                        <span>Actualizar contraseña</span>
+                    </a>
+                    <a class="dropdown-item py-2 dropdown-item-custom" href="/workspaces/list">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-th-large"></span> 
+                        </div>
+                        <span>Listar workspaces</span>
+                    </a>
+                    <a class="dropdown-item py-2 dropdown-item-custom" href="{{ route('logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-sign-out-alt"></span>
+                        </div>
+                        <span>Cerrar sesiòn</span>
+                        <form id="logout-form" action="{{ route('logout') }}"
+                              method="POST" style="display: none;">
+                            @csrf
+                        </form>
                     </a>
                 </div>
             </div>
 
-
-            <div class="vertical"></div>
+           {{--  <div class="vertical"></div>
             <div class="main-header-options">
 
                 @if (Request::path() != 'workspaces/list')
@@ -55,12 +67,11 @@
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
-                <form id="logout-form"
-                      action="{{ route('logout') }}"
-                      method="POST" style="display: none;">
+                <form id="logout-form" action="{{ route('logout') }}"
+                    method="POST" style="display: none;">
                     @csrf
                 </form>
-            </div>
+            </div> --}}
         </div>
         {{-- PERFIL  --}}
 

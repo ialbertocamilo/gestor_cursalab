@@ -1120,7 +1120,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->save();
     }
 
-    public function setUserPassUpdateToken($token) {
+    public function setUserPassUpdateToken($token) 
+    {
         $user = $this;
         
         $user->timestamps = false; // no actualizar el usuario
@@ -1129,13 +1130,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     }
 
     // validamos el token para la vista 'auth.passwords.reset.blae.php'
-    public function checkPassUpdateToken($token, $id_user) {
+    public function checkPassUpdateToken($token, $id_user) 
+    {
         return $this->where('pass_token_updated', $token)
                     ->where('id', $id_user)->count();
     }
 
     // actualizar contraseña usuario
-    public function updatePasswordUser($password) {
+    public function updatePasswordUser($password) 
+    {
         $user = $this;
         $data = [ 'last_pass_updated_at' => now(),
                   'password' => $password ];
@@ -1143,4 +1146,34 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->update($data);
     }
 
+    // incrementar intentos
+    public function incrementAttempts($email)
+    {
+        $user = $this;
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX');
+        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK');
+
+        // existe ese email-usuario
+        $exist = $user->where('email', $email)->first();
+        if(!$exist) return $exist; // null o vacio
+
+        // incrementar intento a email-usuario
+        $current = $user->find($exist->id);
+        
+        if($exist->attempts == 0) {
+            $current->attempts = 1;
+        
+        }else if($exist->attempts == $currentAttempts){
+            if($exist->attempts_lock_time) {
+                return $exist; // retornar consulta 'exist' 
+            }
+            $current->attempts_lock_time = now()->addMinutes($currentMinutes);  
+        }else{
+            $current->attempts = $exist->attempts++;  
+        }
+
+        $current->save();
+
+        return $current; // previa consulta
+    }
 }

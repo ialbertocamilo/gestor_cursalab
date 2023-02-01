@@ -171,11 +171,26 @@ class LoginController extends Controller
                 $request->session()->regenerateToken();
             }
         }
+        $this->incrementLoginAttempts($request);
+        
+        //verificar si el e-mail usuario existe
+        // $attempts = User::incrementAttempts($request->email);
+        // dd($attempts);
+
+        /*if(!$countAttempts) {
+            return $this->sendFailedLoginResponse($request);
+        }else{
+            
+            throw ValidationException::withMessages([
+               'email' => [trans('auth.failed')],
+               'attempt_time' => ,
+               'attempts_count' => ,
+            ]);
+        }*/
 
         // If the login attempt was unsuccessful we will increment the number of attempts
         // to login and redirect the user back to the login form. Of course, when this
         // user surpasses their maximum number of attempts they will get locked out.
-        $this->incrementLoginAttempts($request);
 
         return $this->sendFailedLoginResponse($request);
     }
@@ -295,10 +310,8 @@ class LoginController extends Controller
     {
         $user = $this->guard()->user();
         $user->generateCode2FA();
-            
-        throw ValidationException::withMessages([
-            'resend' => 'Re-enviamos'
-        ]);
+         
+        return back()->with('resend', 'Re-enviamos');
     }
 
     protected function sendLoginResponse(Request $request)

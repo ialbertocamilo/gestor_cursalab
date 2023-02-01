@@ -1125,7 +1125,23 @@ span.lbl_txt_val {
 
 /* valoracion nps */
 
+.dropdown-header-menu {
+    right: -0.2rem !important;
+    left: -2.4rem !important;
+}
 
-.dropdown-menu-right-custom {
-	right: -0.2rem !important;
-}    
+.dropdown-icon-width{
+	width: 1.8rem;
+	color: #404040;
+}
+
+.dropdown-item-custom{
+	display: flex !important;
+	align-items: center;
+}
+
+.btn-unset{
+	border: none !important;
+	box-shadow: none !important;
+	outline: none !important;
+}

@@ -21,8 +21,8 @@
       </div>
       <div class="px-4 mt-5 mx-3 text-center">
         <p>
-          <span class="{{$errors->has('resend') ? 'font-weight-bold' : ''}}">
-            {{ $errors->has('resend') ? $errors->first('resend') : 'Hemos enviado' }}
+          <span class="{{ session('resend') ? 'font-weight-bold' : ''}}">
+            {{ session('resend') ? session('resend') : 'Hemos enviado' }}
           </span> 
           un código al correo 
           <span class="text-primary">{{ auth()->user()->email }}</span>, 

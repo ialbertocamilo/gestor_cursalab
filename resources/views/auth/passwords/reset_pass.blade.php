@@ -13,12 +13,15 @@
 <div class="page login-page d-flex justify-content-end align-items-center">
   <div class="content_login_form">
     <div class="form-holder has-shadow">
-      <div class="logo mt-5 mx-auto text-center">
+      <div class="logo mt-1 mx-auto text-center">
         <img src="{{ url('img/logo_cursalab_v2_black.png') }}" alt="cursalab" class="img-fluid" width="270">
       </div>
       <div class="px-4 mt-4 mx-3 text-center">
         <p>
-          Para continuar <span class="text-primary">{{ auth()->user()->name.' '.auth()->user()->lastname }} </span>, 
+          Para continuar 
+          <span class="text-primary">
+            {{ auth()->user()->name.' '.auth()->user()->lastname }} 
+          </span>, 
           por favor actualiza tu contraseña.
         </p>
       </div>
@@ -69,7 +72,7 @@
             @endif
           </div>
 
-          <div class="form-group text-center">
+          <div class="form-group mb-0 text-center">
             <button type="submit" class="btn btn-primary">
               Actualizar
             </button>

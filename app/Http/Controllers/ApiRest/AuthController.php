@@ -31,21 +31,47 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
 
-            // verificar el sitetoken - recapcha
-            $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
-            $recaptcha_response = NULL;
-            if($g_recaptcha_response) {
-                //validar token recaptcha
-                $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
-                if(!$recaptcha_response['success']) {
-                    return $this->error('error-recaptcha', 500, $recaptcha_response);
+            info($data);
+
+            $currentOS = $data['os'] ?? '';
+            $availableRecaptcha = true;
+
+            if($currentOS and $currentOS == 'android' ) {
+                $currentVersion = $data['version'];
+                settype($currentVersion, "float");
+
+                $mobilesVersion = ['android' => 3.4];
+
+                if($currentVersion >= $mobilesVersion[$currentOS]) {
+                    $availableRecaptcha = true;
+                }else{
+                    $availableRecaptcha = false;
                 }
-                //validar el score de recaptcha
-                if(!$recaptcha_response['score'] >= 0.5) {
+            }
+
+            // verificar el sitetoken - recapcha
+
+            if($availableRecaptcha) {
+                $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
+                $recaptcha_response = NULL;
+                
+                if($g_recaptcha_response) {
+                    //validar token recaptcha
+                    $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
+                    if(!$recaptcha_response['success']) {
+                        return $this->error('error-recaptcha', 500, $recaptcha_response);
+                    }
+                    //validar el score de recaptcha
+                    if(!$recaptcha_response['score'] >= 0.5) {
+                        return $this->error('error-recaptcha', 500, [ 
+                                'score' => $recaptcha_response['score'],
+                                'error-codes' => ['score-is-low']
+                            ]);
+                    }
+                }else {
                     return $this->error('error-recaptcha', 500, [ 
-                            'score' => $recaptcha_response['score'],
-                            'error-codes' => ['score-is-low']
-                        ]);
+                        'message' => 'recaptcha is required'
+                    ]);
                 }
             }
 
