@@ -83,7 +83,8 @@ class CriterionValue extends BaseModel
 
         if ($request->workspace_id)
             $q->whereRelation('workspaces', 'id', $request->workspace_id);
-        if ($request->q)
+
+        if (isset($request->q) && $request->q != '')
             $q->where('value_text', 'like', '%'.trim($request->q).'%');
         $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
