@@ -17,13 +17,23 @@
             <v-card-text>
                 <v-row class="justify-content-start">
                     <v-col cols="3">
-                        <DefaultSelect
+                        <!-- <DefaultSelect
                             clearable dense
                             :items="selects.modules"
                             v-model="filters.module"
                             label="Módulo"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
+                        /> -->
+                        <DefaultAutocomplete
+                            dense
+                            label="Módulos"
+                            :items="selects.modules"
+                            v-model="filters.modules"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -150,6 +160,7 @@ export default {
                     // {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombres", value: "name"},
+                    {text: "Módulos", value: "modules", sortable: false},
                     {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
@@ -205,7 +216,7 @@ export default {
             },
             filters: {
                 q: '',
-                module: null,
+                modules: [],
                 active: null,
             },
             modalEscuelasValidaciones: {},

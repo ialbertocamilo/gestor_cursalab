@@ -35,7 +35,7 @@ class School extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $modules_id = $request->module ? [$request->module] : $workspace->subworkspaces->pluck('id')->toArray();
+        $modules_id = $request->modules ?? $workspace->subworkspaces->pluck('id')->toArray();
 
         $escuelas = School::
             // whereRelation('workspaces', 'workspace_id', $workspace->id)
