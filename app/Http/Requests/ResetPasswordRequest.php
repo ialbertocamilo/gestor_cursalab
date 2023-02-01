@@ -25,9 +25,9 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             'token' => 'nullable',
-            'currpassword' => 'required|max:100|min:4',
-            'password' => 'required|max:100|min:4',
-            'repassword' => 'required|max:100|min:4'
+            'currpassword' => 'nullable|max:100|min:8',
+            'password' => 'required|max:100|min:8',
+            'repassword' => 'required|max:100|min:8'
         ];
     }
 
@@ -35,11 +35,11 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             'repassword.required' => 'El campo repetir contraseña es obligatorio.',
-            'repassword.min' => 'El campo repetir contraseña debe contener al menos 4 caracteres.',
+            'repassword.min' => 'El campo repetir contraseña debe contener al menos 8 caracteres.',
             'repassword.max' => 'El campo repetir contraseña no debe ser mayor que 100 caracteres.',
 
             'currpassword.required' => 'El campo contraseña actual es obligatorio.',
-            'currpassword.min' => 'El campo repetir contraseña debe contener al menos 4 caracteres.',
+            'currpassword.min' => 'El campo repetir contraseña debe contener al menos 8 caracteres.',
             'currpassword.max' => 'El campo repetir contraseña no debe ser mayor que 100 caracteres.'
 
         ];

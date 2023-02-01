@@ -31,8 +31,6 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
 
-            info($data);
-
             $currentOS = $data['os'] ?? '';
             $availableRecaptcha = true;
 
@@ -50,7 +48,6 @@ class AuthController extends Controller
             }
 
             // verificar el sitetoken - recapcha
-
             if($availableRecaptcha) {
                 $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
                 $recaptcha_response = NULL;

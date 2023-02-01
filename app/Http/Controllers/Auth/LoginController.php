@@ -235,28 +235,20 @@ class LoginController extends Controller
         $request->validated();
 
         $currentToken = $request->token;
-        $actualPassword = $request->currpassword;
         $currentPassword = $request->password;
         $currentRePassword = $request->repassword;
 
         $user = auth()->user();
 
-        if(!Auth::attempt([ 'email' => $user->email, 
+        if(Auth::attempt([ 'email' => $user->email, 
                             'password' => $actualPassword])) {
-
             throw ValidationException::withMessages([
-                'currpassword' => 'La contraseña actual no coincide.'
-            ]);
-        }
-
-        if($actualPassword === $currentPassword) {
-            throw ValidationException::withMessages([
-                'password' => 'La nueva contraseña es igual a la actual.',
+                'password' => 'La nueva contraseña debe ser diferente.'
             ]);
         }
 
         if($currentPassword === $currentRePassword) {
-            
+
             // verificar token
             $checkToken = $user->checkPassUpdateToken($currentToken, $user->id); 
 
