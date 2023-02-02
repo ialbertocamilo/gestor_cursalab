@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\ApiRest;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginAppRequest;
 use App\Models\Error;
@@ -10,6 +9,7 @@ use App\Models\Usuario;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 use Illuminate\Http\Request;
 
@@ -30,6 +30,45 @@ class AuthController extends Controller
 
         try {
             $data = $request->validated();
+
+            $currentOS = $data['os'] ?? '';
+            $availableRecaptcha = true;
+
+            if($currentOS and $currentOS == 'android' ) {
+                $currentVersion = $data['version'];
+                settype($currentVersion, "float");
+
+                $mobilesVersion = ['android' => 3.3];
+
+                if($currentVersion >= $mobilesVersion[$currentOS]) {
+                    $availableRecaptcha = true;
+                }else{
+                    $availableRecaptcha = false;
+                }
+            }
+
+            // verificar el sitetoken - recapcha
+            if($availableRecaptcha) {
+                $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
+                $recaptcha_response = NULL;
+                
+                if($g_recaptcha_response) {
+                    //validar token recaptcha
+                    $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
+                    if(!$recaptcha_response['success']) {
+                        return $this->error('error-recaptcha', 500, $recaptcha_response);
+                    }
+                    //validar el score de recaptcha
+                    if(!$recaptcha_response['score'] >= 0.5) {
+                        return $this->error('error-recaptcha', 500, [ 
+                                'score' => $recaptcha_response['score'],
+                                'error-codes' => ['score-is-low']
+                            ]);
+                    }
+                }else {
+                    return $this->error('error-recaptcha', 500);
+                }
+            }
 
             $userinput = strip_tags($data['user']);
             $password = strip_tags($data['password']);
@@ -66,8 +105,11 @@ class AuthController extends Controller
                         return $this->error($message, 401);
                     }
                 }
+                
+                $responseUserData = $this->respondWithDataAndToken($data);
+                // $responseUserData['recaptcha'] = $recaptcha_response; opcional
+                return response()->json($responseUserData); 
 
-                return $this->respondWithDataAndToken($data);
             } else {
                 return $this->error('No autorizado.', 401);
             }
@@ -171,13 +213,13 @@ class AuthController extends Controller
         $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
         $config_data->filters = config('data.filters');
 
-        return response()->json([
+        return [
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
             //            'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
-        ]);
+        ];
     }
 
     /**
@@ -243,5 +285,18 @@ class AuthController extends Controller
                 throw new SubworkspaceInMaintenance();
             }
         }
+    }
+
+    public function validateRecaptcha($siteToken) {
+        $secretKey = env('RECAPTCHA_TOKEN'); 
+        $recaptchaUrl = env('RECAPTCHA_BASE_URL');
+
+        // validamo token recaptcha
+        $responseRecaptcha = Http::asForm()->post($recaptchaUrl, [
+            'secret' => $secretKey,
+            'response' => $siteToken
+        ]);
+
+        return $responseRecaptcha->json();
     }
 }

@@ -158,6 +158,22 @@
     </div>
     <div class="col-md-3">
         <div class="col-sm-9">
+            {{ Form::label('enable2fa', 'Habilitar 2FA', ['class'=>'form-control-label m-0'] ) }}
+            <div class="form-check">
+                {{ Form::radio('enable_2fa', '1', false, ['class'=>'form-check-input', 'id'=>'enablefa1']) }}
+                <label class="form-check-label" for="enablefa1">
+                    Activo
+                </label>
+            </div>
+            <div class="form-check">
+                {{ Form::radio('enable_2fa', '0', true, ['class'=>'form-check-input', 'id'=>'enablefa2']) }}
+                <label class="form-check-label" for="enablefa2">
+                    Inactivo
+                </label>
+            </div>
+
+            <br>
+            
             {{ Form::label('estado', 'Estado', ['class'=>'form-control-label m-0'] ) }}
             <div class="form-check">
                 {{ Form::radio('active', '1', false, ['class'=>'form-check-input', 'id'=>'estado1']) }}

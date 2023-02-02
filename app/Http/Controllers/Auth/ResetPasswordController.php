@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class ResetPasswordController extends Controller
@@ -47,5 +49,23 @@ class ResetPasswordController extends Controller
     protected function setUserPassword($user, $password)
     {
         $user->password = $password;
+    }
+
+    public function showResetFormInit(Request $request) 
+    {
+        $currentToken = $request->token;
+        
+        if(!$currentToken) {
+            return redirect('/login');
+        }
+        // verificar existencia del token
+        $user = auth()->user();
+        $checkToken = $user->checkPassUpdateToken($currentToken, $user->id); 
+
+        if(!$checkToken) {
+            return redirect('/login');
+        }
+
+        return view('auth.passwords.reset_pass', [ 'token'=> $currentToken ]);
     }
 }
