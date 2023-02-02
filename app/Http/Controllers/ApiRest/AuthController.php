@@ -51,7 +51,7 @@ class AuthController extends Controller
             if($availableRecaptcha) {
                 $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
                 $recaptcha_response = NULL;
-                
+
                 if($g_recaptcha_response) {
                     //validar token recaptcha
                     $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
@@ -60,7 +60,7 @@ class AuthController extends Controller
                     }
                     //validar el score de recaptcha
                     if(!$recaptcha_response['score'] >= 0.5) {
-                        return $this->error('error-recaptcha', 500, [ 
+                        return $this->error('error-recaptcha', 500, [
                                 'score' => $recaptcha_response['score'],
                                 'error-codes' => ['score-is-low']
                             ]);
@@ -105,10 +105,10 @@ class AuthController extends Controller
                         return $this->error($message, 401);
                     }
                 }
-                
+
                 $responseUserData = $this->respondWithDataAndToken($data);
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
-                return response()->json($responseUserData); 
+                return response()->json($responseUserData);
 
             } else {
                 return $this->error('No autorizado.', 401);
@@ -288,7 +288,7 @@ class AuthController extends Controller
     }
 
     public function validateRecaptcha($siteToken) {
-        $secretKey = env('RECAPTCHA_TOKEN'); 
+        $secretKey = env('RECAPTCHA_TOKEN');
         $recaptchaUrl = env('RECAPTCHA_BASE_URL');
 
         // validamo token recaptcha
