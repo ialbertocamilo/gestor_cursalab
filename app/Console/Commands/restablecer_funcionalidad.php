@@ -102,7 +102,7 @@ class restablecer_funcionalidad extends Command
         $criteria_to_set = ['cycle','botica','grupo','career'];
         foreach ($users_affected as $document) {
             $has_modified = false;
-            $user = User::where('document',$document)->first();
+            $user = User::where('document',$document['document'])->first();
             if($user){
                 foreach ($criteria_to_set as $code) {
                     $criterion_values_by_code=$user->criterion_values()
