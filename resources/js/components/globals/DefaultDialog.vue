@@ -9,7 +9,7 @@
     >
         <v-card>
             <v-card-title class="default-dialog-title" v-show="showTitle">
-                {{ options.title }}
+                <div v-html="options.title"></div>
                 <v-spacer/>
                 <v-btn
                     v-show="options.showCloseIcon"

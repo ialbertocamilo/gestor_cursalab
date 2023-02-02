@@ -12,27 +12,26 @@
                 <v-simple-table class="reports-history">
                     <template v-slot:default>
                         <thead>
-
-                        <tr>
-                            <th class="text-left text-white">
-                                Fecha
-                            </th>
-                            <th class="text-left text-white">
-                                Reporte
-                            </th>
-                            <th class="text-center text-white">
-                                Filtros usados
-                            </th>
-                            <th class="text-left text-white">
-                                Admin
-                            </th>
-                            <th class="text-left text-white">
-                                Estado
-                            </th>
-                            <th class="text-center text-white">
-                                Archivo
-                            </th>
-                        </tr>
+                            <tr>
+                                <th class="text-left text-white">
+                                    Fecha
+                                </th>
+                                <th class="text-left text-white">
+                                    Reporte
+                                </th>
+                                <th class="text-center text-white">
+                                    Filtros usados
+                                </th>
+                                <th class="text-left text-white">
+                                    Admin
+                                </th>
+                                <th class="text-left text-white">
+                                    Estado
+                                </th>
+                                <th class="text-center text-white">
+                                    Archivo
+                                </th>
+                            </tr>
                         </thead>
                         <tbody>
                         <tr
@@ -42,7 +41,17 @@
                             <td>{{ item.created_at }}</td>
                             <td>{{ item.name }}</td>
                             <td class="text-center">
-                                <v-icon color="#5457E7">
+
+                                <v-icon
+                                    v-if="objectIsEmpty(item.filters_descriptions)"
+                                    color="#C2C2C2">
+                                    mdi-filter-menu
+                                </v-icon>
+
+                                <v-icon
+                                    v-if="!objectIsEmpty(item.filters_descriptions)"
+                                    @click="showModal(item.filters_descriptions)"
+                                    color="#5457E7">
                                     mdi-filter-menu
                                 </v-icon>
                             </td>
@@ -73,31 +82,41 @@
 
             </v-col>
         </v-row>
+
+        <ReportFiltersModal
+            :isOpen="filtersModalIsOpen"
+            :filters="activeFilters"
+            @cancel="filtersModalIsOpen = false"></ReportFiltersModal>
     </div>
 
 </template>
 
 <script>
 
+import ReportFiltersModal from "./ReportFiltersModal.vue";
+
 export default {
+    components: {ReportFiltersModal},
     props : {
 
     },
     data () {
         return {
-            reportsBaseUrl: '',
             reports: [ ],
+            filtersModalIsOpen: false,
+            activeFilters: {}
         }
     },
     mounted: function () {
 
-        this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchReports()
     },
     methods: {
+        /**
+         * Fetch genrated reports list
+         * @returns {Promise<void>}
+         */
         fetchReports: async function () {
-
-
 
             try {
 
@@ -112,8 +131,15 @@ export default {
                 console.log(ex)
             }
         },
+        showModal(filters) {
+            this.activeFilters = filters
+            this.filtersModalIsOpen = true
+        },
+        objectIsEmpty (obj) {
+            return JSON.stringify(obj) === '{}'
+        }
+        ,
         download(url, name) {
-
             this.$root.downloadReport(url, name)
 
         }
