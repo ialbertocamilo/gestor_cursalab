@@ -85,9 +85,71 @@ class restablecer_funcionalidad extends Command
         // $this->restore_cycle();
         // $this->restore_prefix();
         // $this->restore_summary_topics();
-        $this->restoreCriterionValuesFromJson();
+        // $this->restoreCriterionValuesFromJson();
+        // $this->getCriterionValuesUser();
+        $this->restoreCriterionValuesFromJsonV2();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restoreCriterionValuesFromJsonV2(){
+        $users_affected_json = public_path() . "/json/users.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $historic_criterion_values_user_json = public_path() . "/json/criterion_values_users.json";
+        $historic_criterion_values_user = collect(json_decode(file_get_contents($historic_criterion_values_user_json), true));
+        $users_not_modified = [];
+        $_bar->start();
+        $criteria_to_set = ['cycle','botica','grupo','career'];
+        foreach ($users_affected as $document) {
+            $user = User::where('document',$document)->first();
+            if($user){
+                foreach ($criteria_to_set as $code) {
+                    $criterion_values_by_code=$user->criterion_values()
+                        ->whereHas('criterion',function($q) use($code) { 
+                            $q->where('code',$code);
+                        })
+                        ->first();
+                    if(!$criterion_values_by_code){
+                        $historic_criterio_by_code = $historic_criterion_values_user->where('user_id',$user->id)->where('code',$code)->first();
+                        if($historic_criterio_by_code){
+                            DB::table('criterion_value_user')->insert([
+                                'criterion_value_id'=>$historic_criterio_by_code['criterion_value_id'],
+                                'user_id'=>$historic_criterio_by_code['user_id']
+                            ]);
+                        }
+                    }
+                }
+            }else{
+                $users_not_modified[] = $user;
+            }
+            dd($user);
+            $_bar->advance();
+        }
+    }
+    public function getCriterionValuesUser(){
+        $users_affected_json = public_path() . "/json/users.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $_bar->start();
+        $criterion_values_to_set = [];
+        foreach ($users_affected as $document) {
+            $user = User::where('document',$document)->first();
+            if($user){
+                $criterion_values=$user->criterion_values()->with('criterion')
+                        ->whereHas('criterion',fn($q) => $q->whereIn('code',['cycle','botica','grupo','career']))
+                        ->get();
+                foreach ($criterion_values as $value) {
+                    $criterion_values_to_set[]=[
+                        'criterion_id'=>$value->id,
+                        'user_id'=>$user->id,
+                        'code'=>$value->criterion->code
+                    ];
+                }
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/criterion_values_users.json', json_encode($criterion_values_to_set,JSON_UNESCAPED_UNICODE));
+        $_bar->finish();
     }
     public function restoreCriterionValuesFromJson(){
         $users_affected_json = public_path() . "/json/ledgers.json"; // ie: /var/www/laravel/app/storage/json/filename.json
