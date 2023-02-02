@@ -110,7 +110,7 @@ class restablecer_funcionalidad extends Command
                             $q->where('code',$code);
                         })
                         ->first();
-                    if(!$criterion_values_by_code){
+                    if(!$criterion_values_by_code && $criterion_values_by_code?->value_text != '-'){
                         $historic_criterio_by_code = $historic_criterion_values_user->where('user_id',$user->id)->where('code',$code)->first();
                         if($historic_criterio_by_code){
                             $has_modified = true;
