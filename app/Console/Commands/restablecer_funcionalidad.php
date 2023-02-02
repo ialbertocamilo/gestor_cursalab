@@ -123,7 +123,6 @@ class restablecer_funcionalidad extends Command
                 }
                 if($has_modified){
                     SummaryUser::updateUserData($user);
-                    dd($user->document);
                 }
             }else{
                 $users_not_modified[] = $user;
