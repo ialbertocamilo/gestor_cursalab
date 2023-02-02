@@ -111,7 +111,7 @@ class restablecer_funcionalidad extends Command
                         })
                         ->first();
                     if(!$criterion_values_by_code && $criterion_values_by_code?->value_text != '-'){
-                        $historic_criterio_by_code = $historic_criterion_values_user->where('user_id',$user->id)->where('code',$code)->first();
+                        $historic_criterio_by_code = $historic_criterion_values_user->where('document',$user->document)->where('code',$code)->first();
                         if($historic_criterio_by_code){
                             $has_modified = true;
                             DB::table('criterion_value_user')->insert([
@@ -147,7 +147,7 @@ class restablecer_funcionalidad extends Command
                 foreach ($criterion_values as $value) {
                     $criterion_values_to_set[]=[
                         'criterion_id'=>$value->id,
-                        'user_id'=>$user->id,
+                        'document'=>$user->document,
                         'code'=>$value->criterion->code
                     ];
                 }
