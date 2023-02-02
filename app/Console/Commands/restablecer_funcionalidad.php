@@ -100,8 +100,8 @@ class restablecer_funcionalidad extends Command
         $users_not_modified = [];
         $_bar->start();
         $criteria_to_set = ['cycle','botica','grupo','career'];
-        $has_modified = false;
         foreach ($users_affected as $document) {
+            $has_modified = false;
             $user = User::where('document',$document)->first();
             if($user){
                 foreach ($criteria_to_set as $code) {
@@ -115,14 +115,14 @@ class restablecer_funcionalidad extends Command
                         if($historic_criterio_by_code){
                             $has_modified = true;
                             DB::table('criterion_value_user')->insert([
-                                'criterion_value_id'=>$historic_criterio_by_code['criterion_value_id'],
+                                'criterion_value_id'=>$historic_criterio_by_code['criterion_id'],
                                 'user_id'=>$historic_criterio_by_code['user_id']
                             ]);
                         }
                     }
                 }
-                SummaryUser::updateUserData($user);
                 if($has_modified){
+                    SummaryUser::updateUserData($user);
                     dd($user->document);
                 }
             }else{
