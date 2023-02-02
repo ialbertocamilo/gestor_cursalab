@@ -116,7 +116,7 @@ class restablecer_funcionalidad extends Command
                             $has_modified = true;
                             DB::table('criterion_value_user')->insert([
                                 'criterion_value_id'=>$historic_criterio_by_code['criterion_id'],
-                                'user_id'=>$historic_criterio_by_code['user_id']
+                                'user_id'=>$user->id
                             ]);
                         }
                     }
