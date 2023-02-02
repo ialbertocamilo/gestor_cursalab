@@ -18,6 +18,7 @@ class GeneratedReportResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'name' => $this->name,
             'report_type' => $this->report_type,
             'download_url' => $this->download_url,
             'admin' => $this->admin,

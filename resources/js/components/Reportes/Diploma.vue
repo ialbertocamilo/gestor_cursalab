@@ -23,7 +23,7 @@
              <list-item titulo="Link ver diploma" subtitulo="Enlace para ver el diploma" />
              <list-item titulo="Link descarga diploma" subtitulo="Enlace para descargar el diploma" />
         </ResumenExpand>
-        <form @submit.prevent="_exportDiplomas" class="row col-12">
+        <form @submit.prevent="generateReport" class="row col-12">
         <!-- Modulo -->
             <div class="col-md-6 mb-3">
                    <DefaultAutocomplete
@@ -179,7 +179,7 @@
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar </span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -199,6 +199,7 @@ export default {
     props: {
         modules:{ type: Array, required: true },
         workspaceId:{ type: Number, required: true },
+        adminId:{ type: Number, required: true },
         reportsBaseUrl:{ type: String, required: true }
     },
     data() {
@@ -269,9 +270,21 @@ export default {
                     vue.hideLoader()
                 });
         },
-        _exportDiplomas() {
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue._exportDiplomas)
+        },
+        async _exportDiplomas(reportName) {
             const vue = this;
-            vue.showLoader();
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions =  {
+                "Módulos": this.generateNamesString(this.modules, this.filters.module),
+                "Escuelas": this.generateNamesString(this.schools, this.filters.school),
+                "Cursos": this.generateNamesString(this.courses, this.filters.course),
+                "Fecha de emisión": this.filters.date
+            }
+
 
             const pushDataStates = (states) => {
                 let stackTemporal = [];
@@ -301,37 +314,22 @@ export default {
                     estados_usuario,
                     estados_escuela,
                     estados_curso
-                }
+                },
+                workspaceId: vue.workspaceId,
+                adminId: vue.adminId,
+                reportName
             };
 
-            axios.post(`${vue.reportsBaseUrl}/exportar/diplomas`, reqPayload)
-                .then((res) => {
-                    //console.log(res);
-                    if (res.data.alert) {
-                        this.showAlert(res.data.alert, 'warning');
-                    } else {
-
-                        res.data.new_name = this.generateFilename(
-                            'Diploma',
-                            this.generateNamesString(this.modules, this.modulo)
-                        )
-                        res.data.selectedFilters = {
-                            "Módulos": this.generateNamesString(this.modules, this.filters.module),
-                            "Escuelas": this.generateNamesString(this.schools, this.filters.school),
-                            "Cursos": this.generateNamesString(this.courses, this.filters.course),
-                            "Fecha de emisión": this.filters.date
-                        }
-                        this.$emit("emitir-reporte", res);
-                    }
-                    this.hideLoader();
-
-                }, (err) => {
-                    console.log(err);
-                    console.log(err.message);
-                    alert("Se ha encontrado el siguiente err : " + err);
-
-                    vue.hideLoader();
+            const urlReport = `${vue.reportsBaseUrl}/exportar/diplomas`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: reqPayload
                 })
+            } catch (ex) {
+                console.log(ex.message)
+            }
         },
         schoolsInit() {
             const vue = this;

@@ -48,7 +48,7 @@
             <list-item titulo="Última visita" subtitulo="Fecha de la última a la plataforma" />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form class="row" @submit.prevent="exportUsuariosDW">
+        <form class="row" @submit.prevent="generateReport">
             <div class="col-12 col-lg-6 px-6">
 
                 <DefaultAutocomplete
@@ -127,7 +127,7 @@
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -145,6 +145,7 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -165,10 +166,23 @@ export default {
         };
     },
     methods: {
-        async exportUsuariosDW() {
-            let vue = this
-            this.showLoader()
+
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.exportUsuariosDW)
+        },
+        async exportUsuariosDW(reportName) {
+
             let UFC = this.$refs.EstadoFiltroComponent;
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Carreras" : this.generateNamesString(this.careers, this.career),
+                "Áreas" : this.generateNamesString(this.areas, this.area),
+            }
 
             // Perform request to generate report
 
@@ -179,6 +193,9 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: this.modulo,
 
                         UsuariosActivos: UFC.UsuariosActivos,
@@ -189,28 +206,9 @@ export default {
                     }
                 })
 
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Avance Curricula',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-
-                    this.$emit('emitir-reporte', response)
-                }
-
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
         async fetchFiltersCareerData() {
             this.careers = [];

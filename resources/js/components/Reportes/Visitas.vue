@@ -34,7 +34,7 @@
             <list-item titulo="Cantidad de visitas por tema" subtitulo="Total de visitas por cada tema" />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form class="row" @submit.prevent="exportVisitas">
+        <form class="row" @submit.prevent="generateReport">
             <!-- Ya que cuando se usa el axios de laravel, por defecto envia el token -->
             <div class="col-12">
                 <div class="row px-3">
@@ -180,7 +180,7 @@
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -198,6 +198,7 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -221,10 +222,26 @@ export default {
         };
     },
     methods: {
-        async exportVisitas() {
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.exportVisitas)
+        },
+        async exportVisitas(reportName) {
             const vue = this;
-            vue.showLoader();
+
             let UFC = vue.$refs.EstadoFiltroComponent;
+
+            this.$emit('reportStarted')
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Escuelas": this.generateNamesString(this.schools, this.school),
+                "Cursos": this.generateNamesString(this.courses, this.course),
+                "Activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Carreras" : this.generateNamesString(this.careers, this.career),
+                "Áreas" : this.generateNamesString(this.areas, this.area),
+                "Cursos libres": this.yesOrNo(this.tipocurso)
+            }
 
             // Perform request to generate report
 
@@ -235,6 +252,9 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: vue.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: vue.modulo,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
@@ -247,27 +267,6 @@ export default {
                         courses: vue.course
                     }
                 })
-
-                if (response.data.alert) {
-                    vue.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_visitas");
-                    response.data.new_name = this.generateFilename(
-                        'Visitas',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    response.data.selectedFilters = {
-                        "Módulos": this.generateNamesString(this.modules, this.modulo),
-                        "Escuelas": this.generateNamesString(this.schools, this.school),
-                        "Cursos": this.generateNamesString(this.courses, this.course),
-                        "Activos" : this.yesOrNo(UFC.UsuariosActivos),
-                        "Inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                        "Carreras" : this.generateNamesString(this.careers, this.career),
-                        "Áreas" : this.generateNamesString(this.areas, this.area),
-                        "Cursos libres": this.yesOrNo(this.tipocurso)
-                    }
-                    vue.$emit('emitir-reporte', response)
-                }
 
             } catch (ex) {
                 console.log(ex.message)

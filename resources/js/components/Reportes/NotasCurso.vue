@@ -57,7 +57,7 @@
         </ResumenExpand>
 
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportNotasCurso" class="row">
+        <form @submit.prevent="generateReport" class="row">
             <div class="col-12">
                 <div class="row px-3">
                     <!-- Modulo -->
@@ -247,7 +247,7 @@
                     type="submit"
                     class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
-                    <span>Descargar</span>
+                    <span>Generar reporte</span>
                 </button>
             </div>
         </form>
@@ -267,6 +267,7 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -299,15 +300,34 @@ export default {
 
             this.schools = responseSchools.data
         },
-        async exportNotasCurso() {
-            let vue = this;
 
-            // show loading spinner
-
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.exportNotasCurso)
+        },
+        async exportNotasCurso(reportName) {
 
             let UFC = this.$refs.EstadoFiltroComponent;
             let DATES = this.$refs.FechasFiltros;
+
+            this.$emit('reportStarted')
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Escuelas": this.generateNamesString(this.schools, this.school),
+                "Cursos": this.generateNamesString(this.courses, this.course),
+                "Temas": this.generateNamesString(this.topics, this.tema),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                'Fecha inicial': DATES.start,
+                'Fecha final': DATES.end,
+                'Aprobados': this.yesOrNo(this.aprobados),
+                'Desaprobados': this.yesOrNo(this.desaprobados),
+                'Desarrollo': this.yesOrNo(this.desarrollo),
+                'Encuesta pendiente': this.yesOrNo(this.encuestaPendiente),
+
+                "Áreas" : this.generateNamesString(this.areas, this.area),
+                "Cursos libres": this.yesOrNo(this.tipocurso)
+            }
 
             // Perform request to generate report
 
@@ -319,6 +339,9 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: this.modulo,
                         escuelas: this.escuela,
                         cursos: this.curso,
@@ -338,47 +361,9 @@ export default {
                     }
                 })
 
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_cursos");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Notas por curso',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    response.data.selectedFilters = {
-                        "Módulos": this.generateNamesString(this.modules, this.modulo),
-                        "Escuelas": this.generateNamesString(this.schools, this.school),
-                        "Cursos": this.generateNamesString(this.courses, this.course),
-                        "Temas": this.generateNamesString(this.topics, this.tema),
-                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
-                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                        "Temas activos": this.yesOrNo(TEMAS.UsuariosActivos),
-                        "Temas inactivos": this.yesOrNo(TEMAS.UsuariosInactivos),
-                        'Fecha inicial': DATES.start,
-                        'Fecha final': DATES.end,
-                        'Aprobados': this.yesOrNo(this.aprobados),
-                        'Desaprobados': this.yesOrNo(this.desaprobados),
-                        'Desarrollo': this.yesOrNo(this.desarrollo),
-                        'Encuesta pendiente': this.yesOrNo(this.encuestaPendiente),
-
-                        "Áreas" : this.generateNamesString(this.areas, this.area),
-                        "Cursos libres": this.yesOrNo(this.tipocurso)
-                    }
-                    this.$emit('emitir-reporte', response)
-                }
-
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
         async fetchFiltersAreaData() {
             if (this.modulo.length === 0) {

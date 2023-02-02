@@ -1,12 +1,19 @@
 <template>
     <v-app class="--section-list">
 
-<!--        <alert-->
-<!--            background='#F8F8FB'-->
-<!--            border='#C1C1FF'-->
-<!--            icon='mdi-information-outline'-->
+        <ReportPromptModal
+            :placeholder="'Opcional'"
+            :isOpen="isAskingForNewReport"
+            @cancel="isAskingForNewReport = false"
+            @confirm="confirmNewReport($event)"/>
+
+<!--        <DefaultToast-->
+<!--            v-if="isBeingProcessedNotification"-->
+<!--            icon=""-->
 <!--            text="Tu reporte esta siendo procesado."-->
-<!--            class="mb-6"-->
+<!--            :background="'#FFC225'"-->
+<!--            @close="isBeingProcessedNotification = false"-->
+<!--            @delay-finished="isBeingProcessedNotification = false"-->
 <!--        />-->
 
         <v-row style="flex: 0 1 auto">
@@ -208,11 +215,12 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Usuarios :workspaceId="workspaceId"
-                                      :adminId="adminId"
-                                      :modules="modules"
-                                      :reportsBaseUrl="reportsBaseUrl"
-                                      @emitir-reporte="crearReporte"/>
+                            <Usuarios
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -225,7 +233,7 @@ TABS CONTENT
                                :adminId="adminId"
                                :modules="modules"
                                :reportsBaseUrl="reportsBaseUrl"
-                               @emitir-reporte="crearReporte"/>
+                               @generateReport="generateReport($event)"/>
                        </v-card-text>
                    </v-card>
                </v-tab-item>
@@ -238,7 +246,7 @@ TABS CONTENT
                                 :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte" />
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -251,7 +259,7 @@ TABS CONTENT
                                 :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -259,11 +267,12 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <NotasTema :workspaceId="workspaceId"
-                                       :adminId="adminId"
-                                       :modules="modules"
-                                       :reportsBaseUrl="reportsBaseUrl"
-                                       @emitir-reporte="crearReporte"/>
+                            <NotasTema
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -276,7 +285,7 @@ TABS CONTENT
                                 :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -289,7 +298,7 @@ TABS CONTENT
                                :adminId="adminId"
                                :modules="modules"
                                :reportsBaseUrl="reportsBaseUrl"
-                               @emitir-reporte="crearReporte"/>
+                               @generateReport="generateReport($event)"/>
                        </v-card-text>
                    </v-card>
                </v-tab-item>
@@ -302,7 +311,7 @@ TABS CONTENT
                                :adminId="adminId"
                                :modules="modules"
                                :reportsBaseUrl="reportsBaseUrl"
-                               @emitir-reporte="crearReporte"/>
+                               @generateReport="generateReport($event)"/>
                        </v-card-text>
                    </v-card>
                </v-tab-item>
@@ -315,7 +324,7 @@ TABS CONTENT
                                 :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -323,11 +332,12 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Renicios :workspaceId="workspaceId"
-                                      :adminId="adminId"
-                                      :admins="admins"
-                                      :reportsBaseUrl="reportsBaseUrl"
-                                      @emitir-reporte="crearReporte"/>
+                            <Renicios
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :admins="admins"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -348,7 +358,7 @@ TABS CONTENT
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -356,11 +366,12 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Vademecum :workspaceId="workspaceId"
-                                       :adminId="adminId"
-                                       :vademecumList="VademecumList"
-                                       :reportsBaseUrl="reportsBaseUrl"
-                                       @emitir-reporte="crearReporte"/>
+                            <Vademecum
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :vademecumList="VademecumList"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -368,10 +379,11 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Videoteca :workspaceId="workspaceId"
-                                       :adminId="adminId"
-                                       :reportsBaseUrl="reportsBaseUrl"
-                                       @emitir-reporte="crearReporte"/>
+                            <Videoteca
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -384,7 +396,7 @@ TABS CONTENT
                                 :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -397,7 +409,7 @@ TABS CONTENT
                                 :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -408,9 +420,12 @@ TABS CONTENT
                             <Ranking
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
+
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+
+                                @generateReport="generateReport($event)"
+                                />
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -484,7 +499,7 @@ TABS CONTENT
 
 <script>
 
-import Alert from "../documentation_page/components/alert.vue";
+import ReportPromptModal from "../components/Reportes/ReportPromptModal.vue";
 
 const FileSaver = require("file-saver");
 const moment = require("moment");
@@ -512,11 +527,13 @@ import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
 import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
+import DefaultToast from "../components/globals/DefaultToast.vue";
 
 export default {
     components: {
+        ReportPromptModal,
+        DefaultToast,
         ReportsHistory,
-        Alert,
         HistorialUsuario,
         NotasUsuario,
         Usuarios,
@@ -543,6 +560,9 @@ export default {
 
             workspaceId: 0,
             adminId: 0,
+            isAskingForNewReport: false,
+            generateReportCallback: () => {},
+
             modules: [],
             admins: [],
             reportsBaseUrl: '',
@@ -564,20 +584,16 @@ export default {
 
             selectedFilters: {},
             filenameDialog: false,
+            isBeingProcessedNotification: false,
+            isReadyNotification: false,
             reportDownloadUrl: null,
             reportFilename: null
         }
     },
     mounted () {
+        const vue = this
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData();
-
-        let socket = window.io('http://localhost:3000');
-        socket.on('report-finished', (e) => {
-            console.log(e)
-            alert(e.message)
-        });
-
     }
     ,
     methods: {
@@ -653,10 +669,18 @@ export default {
                 this.hideLoader()
 
             } catch (error) {
-                console.log(error);
-
+                console.log(error)
                 this.hideLoader()
             }
+        },
+        generateReport(callback) {
+            this.generateReportCallback = callback
+            this.isAskingForNewReport = true
+        },
+        confirmNewReport(event) {
+
+            this.generateReportCallback(event.reportName)
+            this.isAskingForNewReport = false
         }
     },
     computed: {

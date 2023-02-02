@@ -9,7 +9,6 @@
         </div>
         <div class="vertical"></div>
         <div class="main-header-options">
-
             @if (Request::path() != 'workspaces/list')
             <a href="/workspaces/list"
                 class="mr-3">
@@ -28,6 +27,16 @@
             </form>
         </div>
     </div>
+
+    <default-toast
+        v-if="reportIsReady"
+        icon=""
+        :text="finishedReportMessage"
+        :button-text="reportLinkText"
+        :button-action="reportLinkAction"
+        :background="reportHasResults ? '#FFC225' : '#CE98FE'"
+        @close="hideReportsIsReadyNotification()"
+        @delay-finished="hideReportsIsReadyNotification()"></default-toast>
 </div>
 {{-- <div class="main-header">
     <div class="content">

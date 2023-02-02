@@ -9,7 +9,7 @@
         <v-row class="pr-4 pl-4 pb-4">
             <v-col cols="12">
 
-                <v-simple-table class="border">
+                <v-simple-table class="reports-history">
                     <template v-slot:default>
                         <thead>
 
@@ -40,7 +40,7 @@
                             :key="item.id"
                         >
                             <td>{{ item.created_at }}</td>
-                            <td>{{ item.report_type }}</td>
+                            <td>{{ item.name }}</td>
                             <td class="text-center">
                                 <v-icon color="#5457E7">
                                     mdi-filter-menu
@@ -54,7 +54,7 @@
                             </td>
                             <td class="text-center">
                                 <v-icon
-                                    @click="download(item.download_url)"
+                                    @click="download(item.download_url, item.name)"
                                     v-if="item.is_ready"
                                     color="#5457E7">
                                     mdi-download
@@ -112,24 +112,28 @@ export default {
                 console.log(ex)
             }
         },
-        download(downloadUrl) {
-            downloadUrl = `${this.reportsBaseUrl}/${downloadUrl}`
-            console.log(downloadUrl)
+        download(url, name) {
+
+            this.$root.downloadReport(url, name)
+
         }
     }
 }
 
 </script>
 
-<style scoped>
+<style>
 
-thead {
+.reports-history table {
     overflow: hidden !important;
     border-top-left-radius: 10px !important;
     border-top-right-radius: 10px !important;
-    background: #5457E7;
 }
 
+
+.reports-history table thead {
+    background: #5457E7;
+}
 
 
 </style>

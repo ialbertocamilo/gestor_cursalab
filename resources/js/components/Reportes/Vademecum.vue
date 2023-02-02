@@ -37,7 +37,8 @@
             />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form class="row col-md-8 col-xl-5" @submit.prevent="ExportarVademecum">
+        <form class="row col-md-8 col-xl-5"
+              @submit.prevent="generateReport">
             <!-- Grupos -->
             <div class="col-12">
                 <b-form-text text-variant="muted">Vademecum</b-form-text>
@@ -77,7 +78,7 @@
                 <div class="col-sm-8 pl-0">
                     <button type="submit" class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -93,6 +94,7 @@ export default {
     components: { ResumenExpand, ListItem },
     props: {
         workspaceId: { type: Number, required: true },
+        adminId: { type: Number, required: true },
         vademecumList: { type: Array },
         reportsBaseUrl: { type: String , required: true }
     },
@@ -102,40 +104,35 @@ export default {
         };
     },
     methods: {
-        ExportarVademecum() {
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.ExportarVademecum)
+        },
+        async ExportarVademecum(reportName) {
 
-            let params = {
-                workspaceId: this.workspaceId,
-                vademecumsSelected: this.vademecumSelected
-            };
-            axios
-                .post(`${this.reportsBaseUrl}/exportar/vademecum`, params)
-                .then((res) => {
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                'Vademecum' : this.generateNamesString(this.vademecumList, this.vademecumSelected),
+            }
 
-                    if (res.data.alert) {
-                        this.showAlert(res.data.alert, 'warning');
-                    } else {
-                        vue.queryStatus("reportes", "descargar_reporte_vademecum");
-                        res.data.new_name = this.generateFilename(
-                            'Vademecum',
-                            ''
-                        )
-                        res.data.selectedFilters = {
-                            'Vademecum' : this.generateNamesString(this.vademecumList, this.vademecumSelected),
-                        }
-                        this.$emit("emitir-reporte", res);
+
+            let urlReport = `${this.reportsBaseUrl}/exportar/vademecum`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: {
+                        workspaceId: this.workspaceId,
+                        vademecumsSelected: this.vademecumSelected,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
+
                     }
-                    this.hideLoader();
-
-                }, (err) => {
-                    console.log(err);
-                    console.log(err.message);
-
-                    alert("Se ha encontrado el siguiente error : " + err);
-
-                    this.hideLoader();
-                });
+                })
+            } catch (ex) {
+                console.log(ex.message)
+            }
         }
     },
     created() {

@@ -22,7 +22,7 @@
             <list-item titulo="Nota"
                        subtitulo="En caso de empate, la ultima evaluación definará el orden; es decir el usuario que ha resuelto primero su última evaluación tendrá una mejor posición con respecto a los demás usuarios con el mismo puntaje"/>
         </ResumenExpand>
-        <form @submit.prevent="exportNotasCurso" class="row">
+        <form @submit.prevent="generateReport" class="row">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
                 <DefaultAutocomplete
@@ -101,7 +101,9 @@
                 class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
 
                 <i class="fas fa-download"></i>
-                <span>Descargar</span>
+
+                <span>Generar reporte</span>
+
             </button>
         </form>
     </v-main>
@@ -162,29 +164,35 @@ export default {
 
                 })
         },
-        async exportNotasCurso() {
-            let vue = this
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.exportNotasCurso)
+        },
+        async exportNotasCurso(reportName) {
 
             let UFC = this.$refs.EstadoFiltroComponent;
 
             // Perform request to generate report
-
-            const selectedFilters = {
+            this.$emit('reportStarted')
+            const filtersDescriptions = {
                 "Módulos": this.generateNamesString(this.modules, this.modulo),
                 "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
                 "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
                 "Áreas" : this.generateNamesString(this.areas, this.area),
                 "Sedes" : this.generateNamesString(this.sedes, this.sede)
             }
+
             let urlReport = `${this.$props.reportsBaseUrl}/exportar/ranking`
             try {
+
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
                         adminId: this.adminId,
-                        selectedFilters: selectedFilters,
+                        reportName: reportName,
+                        filtersDescriptions: filtersDescriptions,
                         modulos: this.modulo ? this.modulo : [],
                         areas: this.area,
                         sedes: this.sede,
@@ -219,8 +227,6 @@ export default {
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            this.$emit('emitir-reporte', selectedFilters)
         },
     }
 }

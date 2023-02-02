@@ -30,7 +30,7 @@
             <list-item titulo="Avance total" subtitulo="" />
         </ResumenExpand>
 
-        <form @submit.prevent="exportReport" class="row px-3">
+        <form @submit.prevent="generateReport" class="row px-3">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
                 <DefaultAutocomplete
@@ -163,7 +163,7 @@
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -182,6 +182,7 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem,FechaFiltro },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -208,56 +209,46 @@ export default {
         }
     },
     methods: {
-        async exportReport() {
-            let vue = this
 
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.exportReport)
+        },
+        async exportReport(reportName) {
+
             let UFC = this.$refs.EstadoFiltroComponent;
             let FechaFiltro = this.$refs.FechasFiltros;
-            let params = {
-                workspaceId: this.workspaceId,
-                modulos: this.modulo,
-                UsuariosActivos: UFC.UsuariosActivos,
-                UsuariosInactivos: UFC.UsuariosInactivos,
-                areas: this.area,
-                start: FechaFiltro.start,
-                end: FechaFiltro.end
-            };
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                'Fecha inicial': FechaFiltro.start,
+                'Fecha final': FechaFiltro.end,
+                "Áreas" : this.generateNamesString(this.areas, this.area)
+            }
+
             let url = `${this.$props.reportsBaseUrl}/exportar/checklist_general`
 
             try {
-                let response = await axios.post(url, params);
 
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_checklist_general");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Checklist general',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    response.data.selectedFilters = {
-                        "Módulos": this.generateNamesString(this.modules, this.modulo),
-                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
-                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                        'Fecha inicial': FechaFiltro.start,
-                        'Fecha final': FechaFiltro.end,
-                        "Áreas" : this.generateNamesString(this.areas, this.area)
-                    }
-                    this.$emit('emitir-reporte', response)
-                }
+                let response = await axios.post(url, {
+                    workspaceId: this.workspaceId,
+                    adminId: this.adminId,
+                    reportName,
+                    filtersDescriptions,
+                    modulos: this.modulo,
+                    UsuariosActivos: UFC.UsuariosActivos,
+                    UsuariosInactivos: UFC.UsuariosInactivos,
+                    areas: this.area,
+                    start: FechaFiltro.start,
+                    end: FechaFiltro.end
+                })
 
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
         async fetchFiltersAreaData() {
             this.areas = [];

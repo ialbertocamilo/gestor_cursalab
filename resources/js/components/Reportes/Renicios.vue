@@ -24,7 +24,7 @@
             />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportRenicios"
+        <form @submit.prevent="generateReport"
               class="row col-xl-10 col-sm-12">
             <!-- Admins -->
             <div class="col-sm-6 mb-2">
@@ -105,7 +105,7 @@
             <div class="col-sm-12 mb-2 mt-4">
                 <div class="col-sm-4 pl-0 mt-5">
                     <button type="submit" class="btn btn-md btn-primary btn-block">
-                        <i class="fas fa-download"></i> <span>Descargar</span>
+                        <i class="fas fa-download"></i> <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -122,6 +122,7 @@ export default {
     components: { ResumenExpand, ListItem },
     props: {
         workspaceId: 0,
+        adminId: 0,
         admins: Array,
         reportsBaseUrl: ''
     },
@@ -138,13 +139,20 @@ export default {
         };
     },
     methods: {
-        async exportRenicios() {
-            let vue = this;
-            // show loading spinner
-
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.exportRenicios)
+        },
+        async exportRenicios(reportName) {
 
             let UFC = this.$refs.EstadoFiltroComponent;
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Administradores": this.generateNamesString(this.admins, this.admin),
+                'Fecha inicial': this.start,
+                'Fecha final': this.end
+            }
 
             // Perform request to generate report
 
@@ -155,6 +163,9 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         admin: this.admin,
                         tipo: this.tipo,
                         start: this.start,
@@ -162,33 +173,9 @@ export default {
                     }
                 })
 
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_reinicios");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Reinicios',
-                        this.generateNamesString(this.admins, this.admin)
-                    )
-                    response.data.selectedFilters = {
-                        "Administradores": this.generateNamesString(this.admins, this.admin),
-                        'Fecha inicial': this.start,
-                        'Fecha final': this.end
-                    }
-                    this.$emit('emitir-reporte', response)
-                }
-
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         }
     }
 };

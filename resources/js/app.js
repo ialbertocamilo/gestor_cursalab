@@ -1,4 +1,5 @@
 require("./bootstrap");
+const FileSaver = require("file-saver");
 
 window.Vue = require("vue");
 import vuetify from "./plugins/vuetify";
@@ -48,6 +49,8 @@ Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 // import 'bootstrap/dist/css/bootstrap.css'
 import "bootstrap-vue/dist/bootstrap-vue.css";
+
+Vue.component("default-toast", require("./components/globals/DefaultToast.vue"));
 
 Vue.component("tags-form", require("./components/forms/Tags.vue"));
 Vue.component("curricula-form", require("./components/forms/Curricula.vue"));
@@ -182,5 +185,72 @@ Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
 const app = new Vue({
     vuetify,
     store,
-    el: "#app"
+    el: "#app",
+    data: {
+        adminId: 0,
+        workspaceId: 0
+    },
+    computed: {
+        reportIsReady() { return this.$store.state.reportIsReady },
+        reportHasResults() { return this.$store.state.reportHasResults },
+        finishedReportMessage() { return this.$store.state.finishedReportMessage },
+        reportLinkText() { return this.$store.state.reportLinkText },
+        reportLinkAction() { return this.$store.state.reportLinkAction }
+    },
+    mounted() {
+
+        this.fetchData()
+        this.listenReportsNotifications()
+    },
+    methods: {
+        listenReportsNotifications() {
+            const vue = this
+            let socket = window.io(this.getReportsBaseUrl());
+            socket.on('report-finished', (e) => {
+
+                if (vue.adminId === e.adminId) {
+                    let message = e.message
+                    if (e.success) {
+                        vue.$store.commit('setReportLinkText', 'Descargar')
+                        vue.$store.commit('setReportLinkAction', () => {
+                            this.downloadReport(e.url, e.name)
+                        })
+                    } else {
+                        vue.$store.commit('setReportLinkText','Revísalo aquí')
+                        vue.$store.commit('setReportLinkAction', () => {
+                            window.location.href = '/exportar/node'
+                        })
+                    }
+
+                    vue.$store.commit('setReportHasResults', e.success);
+                    vue.$store.commit('setFinishedReportMessage', e.message);
+                    vue.$store.commit('showReportIsReadyNotification');
+                }
+            })
+        },
+        hideReportsIsReadyNotification() {
+            this.$store.commit('hideReportIsReadyNotification')
+        },
+        async fetchData() {
+            let vue = this;
+
+            // Fetch current session workspace
+
+            let url = `../usuarios/session`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+            vue.adminId = response.data.user.id
+            vue.workspaceId = response.data.session.workspace.id
+        },
+        downloadReport(url, name) {
+            url = `${this.getReportsBaseUrl()}/${url}`
+            try {
+                FileSaver.saveAs(url, name)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
 });

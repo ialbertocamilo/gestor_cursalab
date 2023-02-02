@@ -30,11 +30,11 @@
         </div>
         <div class="px-4">
             <button
-                @click="descargarUsuarioUploads"
+                @click="generateReport"
                 class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2 mt-5"
             >
                 <i class="fas fa-download"></i>
-                <span>Descargar</span>
+                <span>Generar reporte</span>
             </button>
         </div>
     </v-main>
@@ -49,13 +49,23 @@ export default {
     components: { EstadoFiltro, ResumenExpand, ListItem },
     props: {
         workspaceId: 0,
+        adminId: 0,
         reportsBaseUrl: ''
     },
     methods: {
-        async descargarUsuarioUploads() {
-            let vue = this
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.descargarUsuarioUploads)
+        },
+        async descargarUsuarioUploads(reportName) {
+
             let UFC = this.$refs.EstadoFiltroComponent;
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions =  {
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+            }
 
             // Get bucket base url
 
@@ -71,38 +81,18 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
                         baseUrl: baseUrl
                     }
                 })
 
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_usuario_uploads");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Usuarios uploads',
-                        ''
-                    )
-                    response.data.selectedFilters = {
-                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
-                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                    }
-                    this.$emit('emitir-reporte', response)
-                }
-
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         }
     }
 };

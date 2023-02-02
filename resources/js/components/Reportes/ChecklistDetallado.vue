@@ -41,7 +41,7 @@
             <list-item titulo="A quien califica" subtitulo="" />
             <list-item titulo="Estado" subtitulo="" /> -->
         </ResumenExpand>
-        <form @submit.prevent="exportReport" class="row px-4">
+        <form @submit.prevent="generateReport" class="row px-4">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
                 <DefaultAutocomplete
@@ -188,7 +188,7 @@
                         :disabled="modulo.length === 0 || checklist.length === 0"
                         type="submit" class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -206,6 +206,7 @@ export default {
     components: { EstadoFiltro, ResumenExpand, ListItem, FechaFiltro },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -251,69 +252,55 @@ export default {
 
             this.schools = responseSchools.data
         },
-        async exportReport() {
-            let vue = this
 
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', vue.exportReport)
+        },
+        async exportReport(reportName) {
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Escuelas": this.generateNamesString(this.schools, this.school),
+                "Cursos": this.generateNamesString(this.courses, this.course),
+                "Checklist": this.generateNamesString(this.Checklist, this.checklist),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                'Fecha inicial': FechaFiltro.start,
+                'Fecha final': FechaFiltro.end,
+                "Áreas" : this.generateNamesString(this.areas, this.area)
+            }
 
             let UFC = this.$refs.EstadoFiltroComponent;
             let FechaFiltro = this.$refs.FechasFiltros;
-            let params = {
-                workspaceId: this.workspaceId,
-                // cursos_libres : this.cursos_libres,
-                //
-                modulos: this.modulo,
-                escuela: this.escuela,
-                curso: this.curso,
-                areas: this.area,
-                //
-                grupo: this.grupo,
-                checklist: this.checklist,
-                //
-                UsuariosActivos: UFC.UsuariosActivos,
-                UsuariosInactivos: UFC.UsuariosInactivos,
-                start: FechaFiltro.start,
-                end: FechaFiltro.end
-            }
 
             let url = `${this.$props.reportsBaseUrl}/exportar/checklist_detallado`
 
             try {
-                let response = await axios.post(url, params);
 
-                // When there are no results notify user,
-                // download report otherwise
+                let response = await axios.post(url, {
+                    workspaceId: this.workspaceId,
+                    // cursos_libres : this.cursos_libres,
+                    //
+                    modulos: this.modulo,
+                    escuela: this.escuela,
+                    curso: this.curso,
+                    areas: this.area,
+                    //
+                    grupo: this.grupo,
+                    checklist: this.checklist,
+                    //
+                    UsuariosActivos: UFC.UsuariosActivos,
+                    UsuariosInactivos: UFC.UsuariosInactivos,
+                    start: FechaFiltro.start,
+                    end: FechaFiltro.end
+                });
 
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_checklist_detallado");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Checklist detallado',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    response.data.selectedFilters = {
-                        "Módulos": this.generateNamesString(this.modules, this.modulo),
-                        "Escuelas": this.generateNamesString(this.schools, this.school),
-                        "Cursos": this.generateNamesString(this.courses, this.course),
-                        "Checklist": this.generateNamesString(this.Checklist, this.checklist),
-                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
-                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                        'Fecha inicial': FechaFiltro.start,
-                        'Fecha final': FechaFiltro.end,
-                        "Áreas" : this.generateNamesString(this.areas, this.area)
-                    }
-                    this.$emit('emitir-reporte', response)
-                }
 
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
         /**
          * Fetch courses
