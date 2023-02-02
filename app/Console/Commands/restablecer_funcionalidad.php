@@ -100,6 +100,7 @@ class restablecer_funcionalidad extends Command
         $users_not_modified = [];
         $_bar->start();
         $criteria_to_set = ['cycle','botica','grupo','career'];
+        $has_modified = false;
         foreach ($users_affected as $document) {
             $user = User::where('document',$document)->first();
             if($user){
@@ -112,6 +113,7 @@ class restablecer_funcionalidad extends Command
                     if(!$criterion_values_by_code){
                         $historic_criterio_by_code = $historic_criterion_values_user->where('user_id',$user->id)->where('code',$code)->first();
                         if($historic_criterio_by_code){
+                            $has_modified = true;
                             DB::table('criterion_value_user')->insert([
                                 'criterion_value_id'=>$historic_criterio_by_code['criterion_value_id'],
                                 'user_id'=>$historic_criterio_by_code['user_id']
@@ -119,12 +121,17 @@ class restablecer_funcionalidad extends Command
                         }
                     }
                 }
+                SummaryUser::updateUserData($user);
+                if($has_modified){
+                    dd($user->document);
+                }
             }else{
                 $users_not_modified[] = $user;
             }
-            dd($user);
             $_bar->advance();
         }
+        cache_clear_model(CriterionValueUser::class);
+        cache_clear_model(CriterionValue::class);
     }
     public function getCriterionValuesUser(){
         $users_affected_json = public_path() . "/json/users.json"; // ie: /var/www/laravel/app/storage/json/filename.json
