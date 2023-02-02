@@ -1,22 +1,177 @@
 [
     {
-        "criterion_id": 180993,
-        "user_id": 86229,
+        "criterion_id": 263536,
+        "user_id": 41816,
         "code": "botica"
     },
     {
-        "criterion_id": 237638,
+        "criterion_id": 263537,
+        "user_id": 41816,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 263538,
+        "user_id": 41816,
+        "code": "cycle"
+    },
+    {
+        "criterion_id": 180654,
+        "user_id": 41816,
+        "code": "career"
+    },
+    {
+        "criterion_id": 261501,
         "user_id": 86229,
         "code": "grupo"
     },
     {
-        "criterion_id": 180710,
-        "user_id": 86229,
+        "criterion_id": 261468,
+        "user_id": 86506,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86904,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86905,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86932,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86961,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86963,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86964,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86965,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86966,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86969,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86974,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86975,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86976,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86978,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86979,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86980,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86982,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86986,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86988,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 86989,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 86997,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 87089,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261501,
+        "user_id": 87109,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 261468,
+        "user_id": 87127,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 180853,
+        "user_id": 87181,
+        "code": "botica"
+    },
+    {
+        "criterion_id": 180714,
+        "user_id": 87181,
+        "code": "grupo"
+    },
+    {
+        "criterion_id": 180707,
+        "user_id": 87181,
+        "code": "cycle"
+    },
+    {
+        "criterion_id": 180708,
+        "user_id": 87181,
         "code": "cycle"
     },
     {
         "criterion_id": 180651,
-        "user_id": 86229,
+        "user_id": 87181,
         "code": "career"
+    },
+    {
+        "criterion_id": 180709,
+        "user_id": 87181,
+        "code": "cycle"
     }
 ]
