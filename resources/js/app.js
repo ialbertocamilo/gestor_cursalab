@@ -195,11 +195,13 @@ const app = new Vue({
         reportHasResults() { return this.$store.state.reportHasResults },
         finishedReportMessage() { return this.$store.state.finishedReportMessage },
         reportLinkText() { return this.$store.state.reportLinkText },
-        reportLinkAction() { return this.$store.state.reportLinkAction }
+        reportLinkAction() { return this.$store.state.reportLinkAction },
+        newReportNotificationIsVisible() { return this.$store.state.newReportNotification.isVisible },
+        newReportNotificationMessage() { return this.$store.state.newReportNotification.message }
     },
     mounted() {
 
-        this.fetchData()
+        this.fetchSessionData()
         this.listenReportsNotifications()
     },
     methods: {
@@ -231,7 +233,10 @@ const app = new Vue({
         hideReportsIsReadyNotification() {
             this.$store.commit('hideReportIsReadyNotification')
         },
-        async fetchData() {
+        hideNewReportNotification() {
+            this.$store.commit('newReportNotificationVisible', false)
+        },
+        async fetchSessionData() {
             let vue = this;
 
             // Fetch current session workspace

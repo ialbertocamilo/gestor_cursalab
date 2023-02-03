@@ -11,6 +11,11 @@ export default new Vuex.Store({
         reportLinkText: '',
         reportLinkAction: '',
 
+        newReportNotification : {
+            isVisible: false,
+            message: ''
+        },
+
         User: {
             rol : null
         } // Current user
@@ -23,5 +28,8 @@ export default new Vuex.Store({
         setReportHasResults: (state, newStatus) => state.reportHasResults = newStatus,
         showReportIsReadyNotification: (state) => state.reportIsReady = true,
         hideReportIsReadyNotification: (state) => state.reportIsReady = false,
+
+        newReportNotificationVisible: (state, value) => state.newReportNotification.isVisible = value,
+        newReportNotificationMessage: (state, value) => state.newReportNotification.message = value
     }
 })

@@ -29,6 +29,15 @@
     </div>
 
     <default-toast
+        v-if="newReportNotificationIsVisible"
+        icon=""
+        :text="newReportNotificationMessage"
+        :bottom="'145px'"
+        :background="'#FFC225'"
+        @close="hideNewReportNotification()"
+        @delay-finished="hideNewReportNotification()"></default-toast>
+
+    <default-toast
         v-if="reportIsReady"
         icon=""
         :text="finishedReportMessage"
@@ -54,14 +63,14 @@
             </div>
 
             @if (Request::path() != 'reset_password')
-            <button type="button" class="btn dropdown-toggle dropdown-toggle-split" 
-                    id="dropdownMenuProfile" 
-                    data-toggle="dropdown" aria-haspopup="true" 
-                    aria-expanded="false" data-reference="parent" 
+            <button type="button" class="btn dropdown-toggle dropdown-toggle-split"
+                    id="dropdownMenuProfile"
+                    data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false" data-reference="parent"
                     >
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
-            <div class="dropdown-menu dropdown-menu-right-custom" 
+            <div class="dropdown-menu dropdown-menu-right-custom"
                  aria-labelledby="dropdownMenuProfile">
                 <a class="dropdown-item" href="/reset_password">
                     Actualizar contraseña

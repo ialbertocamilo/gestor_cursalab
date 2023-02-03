@@ -681,6 +681,15 @@ export default {
 
             this.generateReportCallback(event.reportName)
             this.isAskingForNewReport = false
+
+            // notify that the report has been added
+
+            const message = event.reportName
+                ? `Tu solicitud de reporte "${event.reportName}" se añadió correctamente.`
+                : `Tu solicitud de reporte se añadió correctamente.`
+
+            this.$store.commit('newReportNotificationMessage', message)
+            this.$store.commit('newReportNotificationVisible', true)
         }
     },
     computed: {

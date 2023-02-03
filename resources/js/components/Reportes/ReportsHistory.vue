@@ -111,6 +111,26 @@ export default {
 
         this.fetchReports()
     },
+    computed: {
+        /**
+         * Listen store's stare value change
+         * @returns {boolean}
+         */
+        reportIsReady() { return this.$store.state.reportIsReady },
+    }
+    ,
+    watch: {
+        /**
+         * Watch for changes in reportIsReady property
+         */
+        reportIsReady(isReady) {
+            // Since report is ready,
+            if (isReady) {
+                this.fetchReports()
+            }
+        }
+    }
+    ,
     methods: {
         /**
          * Fetch genrated reports list

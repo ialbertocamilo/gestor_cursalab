@@ -1,6 +1,9 @@
 <template>
     <div
-        :style="{ 'background-color': background, 'border-color': borderColor }"
+        :style="{
+            'background-color': background,
+            'border-color': borderColor,
+            'bottom': bottom }"
         class="default-toast">
         <v-icon
             v-if="icon"
@@ -10,6 +13,7 @@
             <span v-html="text" class="text"></span>
             <a  v-if="buttonText"
                 href="javascript:"
+                class="ml-1"
                 @click="() => { buttonAction(); close(); }">
                 {{ buttonText }}
             </a>
@@ -38,7 +42,7 @@ export default {
         },
         delay: {
             type: Number,
-            default: 99000
+            default: 10000
         },
         background: {
             type: String,
@@ -47,6 +51,10 @@ export default {
         borderColor: {
             type: String,
             default: 'transparent'
+        },
+        bottom: {
+            type: String,
+            default: '90px',
         },
         text: String,
         text_color: {
@@ -61,12 +69,15 @@ export default {
             default: () => {}
         }
     },
+    watch: {
+
+    },
     mounted: function () {
+        console.log(11111)
         const vue = this
         setTimeout(() => {
             this.$emit('delay-finished')
         }, vue.delay)
-
     },
     methods: {
         close : function () {
@@ -86,15 +97,14 @@ export default {
     padding-left: 15px;
     padding-right: 15px;
     height: 45px;
-    bottom: 90px;
     right: 90px;
     border: 1px solid transparent;
     border-radius: 10px;
 }
 
-default-toast .text-wrapper {
+.default-toast .text-wrapper {
     display: block;
-    flex-grow: 1;
+    flex-grow: 2;
 }
 
 .default-toast .text {
