@@ -4,9 +4,11 @@
         {{-- LOGO  --}}
         @if(Request::path() == 'reset_password')
         <div>
+            <a href="/welcome">
             <img src="/img/logo_cursalab_v2_black.png"
                  width="150px" 
-                 alt="Cursalab">       
+                 alt="Cursalab">
+            </a>
         </div>
         @endif
         {{-- LOGO  --}}
@@ -26,7 +28,7 @@
                         <img class="avatar" src="{{ asset('img/avatar-default.png') }}" />
                     </div>
                 </button>
-                <div class="dropdown-menu dropdown-header-menu shadow">
+                <div class="dropdown-menu dropdown-header-menu shadow-md">
                     <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/reset_password">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-shield-alt"></span> 
@@ -37,7 +39,7 @@
                         <div class="dropdown-icon-width">
                             <span class="fas fa-th-large"></span> 
                         </div>
-                        <span>Listar workspaces</span>
+                        <span>Mis workspaces</span>
                     </a>
                     <a class="dropdown-item py-2 dropdown-item-custom text-body" 
                         href="{{ route('logout') }}"

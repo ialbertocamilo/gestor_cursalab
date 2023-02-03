@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\ResetPasswordRequest;
+use App\Models\User;
 
 
 class LoginController extends Controller
@@ -122,6 +123,7 @@ class LoginController extends Controller
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
         // the login attempts for this application. We'll key this by the username and
         // the IP address of the client making these requests into this application.
+
         if (method_exists($this, 'hasTooManyLoginAttempts') &&
             $this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
@@ -129,18 +131,30 @@ class LoginController extends Controller
             return $this->sendLockoutResponse($request);
         }
 
-        if ($this->attemptLogin($request)) {
+        $user = new User;
 
+        $userAttempt = $user->checkAttemptManual($request); 
+        if($userAttempt) {
+            // verficacion de attempts
+            if($userAttempt->attempts == env('ATTEMPTS_LOGIN_MAX') && now() <= $userAttempt->attempts_lock_time) {
+                $userAttempt['fulled_attempts'] = true;
+                return $this->sendAttempsResponse($userAttempt);
+            } 
+            // verficacion de attempts
+        }
+
+        if ($this->attemptLogin($request)) {
 
             $user = $this->guard()->user();
             $user->resetToNullCode2FA(); // reset 2fa values
 
             if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             {
-
                 if ($request->hasSession()) {
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
+
+                $user->resetAttemptsUser(); // reset attempts
 
                 if($user->enable_2fa) {
                     // verificacion de doble autenticacion
@@ -171,28 +185,34 @@ class LoginController extends Controller
                 $request->session()->regenerateToken();
             }
         }
-        $this->incrementLoginAttempts($request);
-        
-        //verificar si el e-mail usuario existe
-        // $attempts = User::incrementAttempts($request->email);
-        // dd($attempts);
+        // verificar intentos   
+        $user->checkTimeToReset($request->email); 
 
-        /*if(!$countAttempts) {
-            return $this->sendFailedLoginResponse($request);
-        }else{
-            
-            throw ValidationException::withMessages([
-               'email' => [trans('auth.failed')],
-               'attempt_time' => ,
-               'attempts_count' => ,
-            ]);
-        }*/
+        $user_attempts = $user->incrementAttempts($request->email);
+        if($user_attempts) return $this->sendAttempsResponse($user_attempts);
+        // verificar intentos
 
         // If the login attempt was unsuccessful we will increment the number of attempts
         // to login and redirect the user back to the login form. Of course, when this
         // user surpasses their maximum number of attempts they will get locked out.
 
+        $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
+    }
+
+    // respuesta de error para intentos fallidos
+    public function sendAttempsResponse($user_attempts)
+    {
+        $errors = [ 'current_time'   => now()->diff($user_attempts->attempts_lock_time)->format("%I:%S"),
+                    'attempts_count' => $user_attempts->attempts,
+                    'attempts_max'   => env('ATTEMPTS_LOGIN_MAX'),
+                    'attempts_fulled'=> $user_attempts->fulled_attempts ];
+
+        if(!$user_attempts->fulled_attempts) {
+            $errors = array_merge( $errors, ['email' => [trans('auth.failed')]] );
+        }
+
+        throw ValidationException::withMessages($errors);
     }
 
     // redireccionar a link de reseteo
@@ -240,8 +260,9 @@ class LoginController extends Controller
 
         $user = auth()->user();
 
+        // si es igual al email y/o contraseña existente
         if(Auth::attempt([ 'email' => $user->email, 
-                            'password' => $actualPassword])) {
+                           'password' => $currentPassword]) ||  $user->email === $currentPassword) {
             throw ValidationException::withMessages([
                 'password' => 'La nueva contraseña debe ser diferente.'
             ]);
@@ -266,7 +287,7 @@ class LoginController extends Controller
 
         throw ValidationException::withMessages([
             'password' => 'El campo nueva contraseña no coincide.',
-            'repassword' => 'El campo repetir contraseña no coincide.'
+            'repassword' => 'El campo repetir nueva contraseña no coincide.'
         ]);
     }
 

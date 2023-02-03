@@ -34,13 +34,17 @@ class ResetPasswordRequest extends FormRequest
     public function messages()
     {
         return [
-            'repassword.required' => 'El campo repetir contraseña es obligatorio.',
-            'repassword.min' => 'El campo repetir contraseña debe contener al menos 8 caracteres.',
-            'repassword.max' => 'El campo repetir contraseña no debe ser mayor que 100 caracteres.',
+            'password.required'=> 'El campo nueva contraseña es obligatorio',
+            'password.min' => 'El campo nueva contraseña debe contener al menos 8 caracteres.',
+            'password.max' => 'El campo nueva contraseña no debe ser mayor que 100 caracteres.',
+
+            'repassword.required' => 'El campo repetir nueva contraseña es obligatorio.',
+            'repassword.min' => 'El campo repetir nueva contraseña debe contener al menos 8 caracteres.',
+            'repassword.max' => 'El campo repetir nueva contraseña no debe ser mayor que 100 caracteres.',
 
             'currpassword.required' => 'El campo contraseña actual es obligatorio.',
-            'currpassword.min' => 'El campo repetir contraseña debe contener al menos 8 caracteres.',
-            'currpassword.max' => 'El campo repetir contraseña no debe ser mayor que 100 caracteres.'
+            'currpassword.min' => 'El campo contraseña actual debe contener al menos 8 caracteres.',
+            'currpassword.max' => 'El campo contraseña actual no debe ser mayor que 100 caracteres.'
 
         ];
     }

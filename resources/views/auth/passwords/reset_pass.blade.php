@@ -38,7 +38,11 @@
           <div class="form-group">
             <input id="reset-password" type="password" name="password" 
                 required data-msg="Por favor ingrese su nueva contraseña" 
-                class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="100">
+                class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }} no-icon one" autocomplete="off" maxlength="100" autofocus>
+            <div class="one toggle-eye text-muted" 
+                onclick="toggleEyeInputId(this, 'reset-password')">
+              <span class="far fa-eye fa-lg"></span>
+            </div>
 
             <label for="reset-password" class="label-material active">Nueva contraseña</label>
             @if ($errors->has('password'))
@@ -51,9 +55,13 @@
           <div class="form-group">
             <input id="reset-repassword" type="password" name="repassword" 
                 required data-msg="Por favor repita su nueva contraseña" 
-                class="input-material form-control{{ $errors->has('repassword') ? ' is-invalid' : '' }}" autocomplete="off" maxlength="100">
+                class="input-material form-control{{ $errors->has('repassword') ? ' is-invalid' : '' }} no-icon two" autocomplete="off" maxlength="100">
+            <div class="two toggle-eye text-muted" 
+                 onclick="toggleEyeInputId(this, 'reset-repassword')">
+              <span class="far fa-eye fa-lg"></span>
+            </div>
 
-            <label for="reset-repassword" class="label-material active">Repetir nueva contraseña</label>
+            <label for="reset-repassword" class="label-material">Repetir nueva contraseña</label>
             @if ($errors->has('repassword'))
             <span class="invalid-feedback" role="alert">
               <strong>{{ $errors->first('repassword') }}</strong>
@@ -63,15 +71,17 @@
 
           <div class="form-group mb-0 text-center">
             <button type="submit" class="btn btn-primary">
-              Actualizar Contraseña
+              Actualizar contraseña
             </button>
-            <p>
-              <span class="font-weight-bold">
-                ¿ Por qué veo esto ?
-              </span>
-              {{ session('newpassword') ? session('newpassword') : 'Expiró la vigencia de '.$days.' de tu contraseña. Por seguridad debes actualizarla.'   }}
-            </p>
           </div>
+
+          <p class="mb-0 mt-4">
+            <span class="font-weight-bold">
+              ¿Por qué veo esto?
+            </span>
+            {{ $message }}
+          </p>
+
         </form>
       </div>
 

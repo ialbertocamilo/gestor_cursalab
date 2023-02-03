@@ -859,9 +859,9 @@ class UsuarioController extends Controller
         }
 
         // verficamos que no sea la misma
-        if($actualPassword === $currentPassword) {
+        if($actualPassword === $currentPassword || $user->email === $currentPassword) {
             throw ValidationException::withMessages([
-                'password' => 'La nueva contraseña es igual a la actual.',
+                'password' => 'La nueva contraseña debe ser diferente.',
             ]);
         }
 
@@ -874,7 +874,7 @@ class UsuarioController extends Controller
 
         throw ValidationException::withMessages([
             'password' => 'El campo nueva contraseña no coincide.',
-            'repassword' => 'El campo repetir contraseña no coincide.'
+            'repassword' => 'El campo repetir nueva contraseña no coincide.'
         ]);
     }
 

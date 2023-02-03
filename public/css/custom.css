@@ -1125,8 +1125,17 @@ span.lbl_txt_val {
 
 /* valoracion nps */
 
+.shadow-md{
+	box-shadow: 0px 5px 28px -2px rgba(0,0,0,0.10);
+}
+
+.form-control.is-valid.no-icon, 
+.form-control.is-invalid.no-icon {
+	background-image: none !important;
+}
+
 .dropdown-header-menu {
-    right: -0.2rem !important;
+    right: -0.6rem !important;
     left: -2.4rem !important;
 }
 
@@ -1144,3 +1153,49 @@ span.lbl_txt_val {
 	box-shadow: none !important;
 	outline: none !important;
 }
+
+.toggle-eye{
+	position: absolute;
+	cursor: pointer;
+	right: 0.5rem;
+	top: 1.1rem;
+	opacity: .6;
+}
+
+/*solo soporta hasta tres por layout*/
+/*one*/
+.form-control.is-valid.one + .one.toggle-eye,
+.form-control.is-valid.one + .invalid-feedback + .one.toggle-eye{
+	color: #38c172 !important;
+}
+.form-control.is-invalid.one + .one.toggle-eye,
+.form-control.is-invalid.one + .invalid-feedback + .one.toggle-eye{
+	color: #dc3545 !important;
+}
+/*one*/
+
+
+/*two*/
+.form-control.is-valid.two + .two.toggle-eye,
+.form-control.is-valid.two + .invalid-feedback + .two.toggle-eye{
+	color: #38c172 !important;
+}
+.form-control.is-invalid.two + .two.toggle-eye,
+.form-control.is-invalid.two + .invalid-feedback + .two.toggle-eye{
+	color: #dc3545 !important;
+}
+/*two*/
+
+
+/*three*/
+.form-control.is-valid.three + .three.toggle-eye,
+.form-control.is-valid.three + .invalid-feedback + .three.toggle-eye{
+	color: #38c172 !important;
+}
+.form-control.is-invalid.three + .three.toggle-eye,
+.form-control.is-invalid.three + .invalid-feedback + .three.toggle-eye{
+	color: #dc3545 !important;
+}
+/*three*/
+/*solo soporta hasta tres por layout*/
+

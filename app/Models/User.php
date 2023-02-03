@@ -19,6 +19,7 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 use Altek\Accountant\Contracts\Identifiable;
 use Altek\Accountant\Contracts\Recordable;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 use Silber\Bouncer\Database\Models;
 
@@ -68,7 +69,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'slug', 'alias', 'person_number', 'phone_number',
+        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'attempts', 'attempts_lock_time', 'attempts_times_locks', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
@@ -1154,26 +1155,81 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK');
 
         // existe ese email-usuario
-        $exist = $user->where('email', $email)->first();
-        if(!$exist) return $exist; // null o vacio
+        $current = $user->where('email', $email)->first();
+        if(!$current) return NULL; // null o vacio
 
-        // incrementar intento a email-usuario
-        $current = $user->find($exist->id);
-        
-        if($exist->attempts == 0) {
-            $current->attempts = 1;
-        
-        }else if($exist->attempts == $currentAttempts){
-            if($exist->attempts_lock_time) {
-                return $exist; // retornar consulta 'exist' 
-            }
-            $current->attempts_lock_time = now()->addMinutes($currentMinutes);  
-        }else{
-            $current->attempts = $exist->attempts++;  
+        $userAttempts = $current->attempts;
+        $current_user = $current;
+
+        // retornar el tiempo restantes
+        if($userAttempts == $currentAttempts) {
+            $current_user['fulled_attempts'] = true;
+            return $current_user;
         }
 
-        $current->save();
+        // retornar los intentos restantes
+        $current_user->timestamps = false;
+        $current_user->attempts = $userAttempts + 1;
+        $current_user->attempts_lock_time = now()->addMinutes($currentMinutes);
 
-        return $current; // previa consulta
+        $current_user->save();
+
+         if($current_user->attempts == $currentAttempts) {
+            $current_user->attempts_times_locks = $current_user->attempts_times_locks + 1;
+            $current_user->save();
+
+            $current_user['fulled_attempts'] = true;
+            return $current_user;
+        }
+        $current_user['fulled_attempts'] = false; 
+        return $current_user;
+    }
+
+    //verificar tiempo
+    public function checkTimeToReset($email)
+    {
+        $user = $this;
+        $current_user = $user->where('email', $email)->first();
+        if(!$current_user) return NULL; // null o vacio
+
+        $staticMinTime = now();
+        $staticUserTime = $current_user->attempts_lock_time;
+
+        if($staticUserTime && $staticMinTime >= $staticUserTime){
+            $current_user->timestamps = false;
+            $current_user->attempts = 0; 
+            $current_user->attempts_lock_time = NULL;
+
+            $current_user->save();
+            
+            return $current_user;
+        }
+
+        return NULL;
+    }
+
+    public function resetAttemptsUser()
+    {
+        $user = $this;
+
+        $user->timestamps = false;
+        $user->attempts = 0; 
+        $user->attempts_lock_time = NULL;
+
+        $user->save();
+    }
+
+    public function checkAttemptManual($request)
+    {
+        $user = $this;
+        $attempt = $user->where('email', $request->email)
+                        ->where('active', 1)->first();
+    
+        if(!$attempt) return false;
+
+        $checkEmail = $attempt->email == $request->email;
+        $checkPassword = Hash::check($request->password, $attempt->password);
+
+        return ($checkEmail && $checkPassword) ? $attempt : false;
     }
 }

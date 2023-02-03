@@ -67,6 +67,9 @@ class ResetPasswordController extends Controller
             return redirect('/login');
         }
 
-        return view('auth.passwords.reset_pass', [ 'token'=> $currentToken ]);
+        $is_new_pass = $user->last_pass_updated_at ? 'Expiró la vigencia de '.env('RESET_PASSWORD_DAYS').' días para tu contraseña. Por seguridad debes actualizarla.' : 'Por seguridad debes actualizar tu contraseña a una nueva.';
+
+        return view('auth.passwords.reset_pass', [ 'token' => $currentToken,
+                                                   'message' => $is_new_pass ]);
     }
 }
