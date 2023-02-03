@@ -87,9 +87,32 @@ class restablecer_funcionalidad extends Command
         // $this->restore_summary_topics();
         // $this->restoreCriterionValuesFromJson();
         // $this->getCriterionValuesUser();
-        $this->restoreCriterionValuesFromJsonV2();
+        // $this->restoreCriterionValuesFromJsonV2();
+        $this->deleteDuplicatesInSummaryCourses();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function deleteDuplicatesInSummaryCourses(){
+        $summaries_duplicates = SummaryCourse::disableCache()->select('id','course_id','user_id', DB::raw('COUNT(*) as `count`'))
+                                ->groupBy('user_id', 'course_id')
+                                ->whereNotNull('course_id')
+                                ->havingRaw('COUNT(*) > 1')
+                                ->get();
+        $_bar = $this->output->createProgressBar(count($summaries_duplicates));
+        $_bar->start();
+        foreach ($summaries_duplicates as $summary) {
+            $duplicates = SummaryCourse::disableCache()->where('user_id',$summary->user_id)->where('course_id',$summary->course_id)->orderBy('updated_at','desc')->get();
+            if(count($duplicates) == 2){
+                $element_to_delete = ($duplicates[0]->attempts < $duplicates[1]->attempts) ? $duplicates[0] : $duplicates[1];
+                $element_to_delete->forceDelete();
+                $user  = User::where('id',$summary->user_id)->first();
+                $course = Course::with('topics')->where('id',$summary->course_id)->first();
+                SummaryCourse::updateUserData($course, $user, false ,false);
+                SummaryUser::updateUserData($user);
+            }
+            $_bar->advance();
+        }
+        $_bar->finish();
     }
     public function restoreCriterionValuesFromJsonV2(){
         $users_affected_json = public_path() . "/json/users.json"; // ie: /var/www/laravel/app/storage/json/filename.json

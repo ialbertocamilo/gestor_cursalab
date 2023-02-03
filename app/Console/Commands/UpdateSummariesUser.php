@@ -55,7 +55,7 @@ class UpdateSummariesUser extends Command
 
             foreach ($courses as $course){
                 // SummaryCourse::getCurrentRowOrCreate($course, $user);
-                SummaryCourse::updateUserData($course, $user, update_attempts: false);
+                SummaryCourse::updateUserData($course, $user, false, false);
             }
 
             SummaryUser::updateUserData($summary_user->user);
