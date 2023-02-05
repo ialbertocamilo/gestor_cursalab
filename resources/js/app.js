@@ -227,7 +227,7 @@ const app = new Vue({
             })
 
             socket.on('report-started', (e) => {
-                console.log('report-started', e.report)
+
                 if (vue.adminId === e.adminId) {
                     vue.notifyReportHasStarted(e.report)
                 }
@@ -260,7 +260,7 @@ const app = new Vue({
 
                 // Notify user that report has no results
 
-                this.$toast.warning({
+                this.$toast.error({
                     component: Vue.component('comp', {
                         template: `
                                     <div>${e.message} <a href="javascript:"

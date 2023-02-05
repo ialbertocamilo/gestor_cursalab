@@ -66,7 +66,7 @@
                             <td class="text-center">
                                 <v-icon
                                     @click="download(item.download_url, item.name)"
-                                    v-if="item.is_ready"
+                                    v-if="item.is_ready && item.download_url"
                                     color="#5457E7">
                                     mdi-download
                                 </v-icon>

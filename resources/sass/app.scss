@@ -109,7 +109,7 @@ Override Vue Toastification plugin styles
 ======================================== */
 
 .Vue-Toastification__toast--warning,
-.Vue-Toastification__toast--danger {
+.Vue-Toastification__toast--error {
     color: #1A2128 !important;
     font-weight: 700 !important;
     font-size: 14px !important;
@@ -120,7 +120,7 @@ Override Vue Toastification plugin styles
 .Vue-Toastification__toast--warning {
     background-color: #ffc107 !important;
 }
-.Vue-Toastification__toast--danger {
+.Vue-Toastification__toast--error {
     background-color: #CE98FE !important;
 }
 
