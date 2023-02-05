@@ -73,7 +73,6 @@ export default {
 
     },
     mounted: function () {
-        console.log(11111)
         const vue = this
         setTimeout(() => {
             this.$emit('delay-finished')

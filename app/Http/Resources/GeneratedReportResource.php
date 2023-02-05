@@ -25,6 +25,7 @@ class GeneratedReportResource extends JsonResource
             'filters' => json_decode($this->filters),
             'filters_descriptions' => json_decode($this->filters_descriptions),
             'is_ready' => $this->is_ready,
+            'is_processing' => $this->is_processing,
             'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : 'No definido',
             'updated_at' => $this->updated_at ? $this->updated_at->format('d/m/Y g:i a') : 'No definido',
         ];

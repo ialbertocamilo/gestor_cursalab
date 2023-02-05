@@ -36,6 +36,7 @@
             </v-card-actions>
         </v-card>
         <v-icon
+            v-if="options.showFloatingCloseButton"
             @click="closeModal()"
             small
             color="white"
@@ -104,6 +105,11 @@ export default {
 .notificationCenter{
     z-index: 300 !important;
 }
+
+.v-dialog {
+    position: fixed;
+    overflow-y: unset;
+}
 </style>
 
 <style scoped>
@@ -116,6 +122,7 @@ export default {
     height: 30px;
     width: 30px;
     border-radius: 50%;
+    box-shadow: 0 2px 6px 0px rgba(0,0,0,0.75);
     z-index: 999;
 }
 </style>

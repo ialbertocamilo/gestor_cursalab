@@ -28,24 +28,6 @@
         </div>
     </div>
 
-    <default-toast
-        v-if="newReportNotificationIsVisible"
-        icon=""
-        :text="newReportNotificationMessage"
-        :bottom="'145px'"
-        :background="'#FFC225'"
-        @close="hideNewReportNotification()"
-        @delay-finished="hideNewReportNotification()"></default-toast>
-
-    <default-toast
-        v-if="reportIsReady"
-        icon=""
-        :text="finishedReportMessage"
-        :button-text="reportLinkText"
-        :button-action="reportLinkAction"
-        :background="reportHasResults ? '#FFC225' : '#CE98FE'"
-        @close="hideReportsIsReadyNotification()"
-        @delay-finished="hideReportsIsReadyNotification()"></default-toast>
 </div>
 {{-- <div class="main-header">
     <div class="content">

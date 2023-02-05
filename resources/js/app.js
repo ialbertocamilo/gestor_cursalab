@@ -6,6 +6,8 @@ import vuetify from "./plugins/vuetify";
 import mixin from "./mixin";
 import snackbar from "./mixins/snackbar";
 import VueNotification from "@kugatsu/vuenotification";
+
+
 import store from "./store";
 // MIXIN
 Vue.mixin(mixin);
@@ -13,6 +15,8 @@ Vue.mixin(snackbar);
 
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import ApexCharts from "apexcharts";
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 import VueApexCharts from "vue-apexcharts";
 import globalComponents from "./global-components";
 import common_http_request from "./mixins/common_http_request";
@@ -40,6 +44,22 @@ Vue.use(VueNotification, {
         color: "#0f5132"
     }
 });
+
+Vue.use(Toast, {
+    position: "bottom-right",
+    transition: "Vue-Toastification__slideBlurred",
+    timeout: 10000,
+    closeOnClick: false,
+    pauseOnFocusLoss: true,
+    pauseOnHover: false,
+    draggable: true,
+    draggablePercent: 0.6,
+    showCloseButtonOnHover: false,
+    hideProgressBar: false,
+    closeButton: "button",
+    icon: false,
+    newestOnTop: true
+});
 // Vue.use(axiosDefault)
 Vue.prototype.$http = axiosDefault;
 
@@ -49,6 +69,7 @@ Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 // import 'bootstrap/dist/css/bootstrap.css'
 import "bootstrap-vue/dist/bootstrap-vue.css";
+
 
 Vue.component("default-toast", require("./components/globals/DefaultToast.vue"));
 
@@ -190,17 +211,7 @@ const app = new Vue({
         adminId: 0,
         workspaceId: 0
     },
-    computed: {
-        reportIsReady() { return this.$store.state.reportIsReady },
-        reportHasResults() { return this.$store.state.reportHasResults },
-        finishedReportMessage() { return this.$store.state.finishedReportMessage },
-        reportLinkText() { return this.$store.state.reportLinkText },
-        reportLinkAction() { return this.$store.state.reportLinkAction },
-        newReportNotificationIsVisible() { return this.$store.state.newReportNotification.isVisible },
-        newReportNotificationMessage() { return this.$store.state.newReportNotification.message }
-    },
     mounted() {
-
         this.fetchSessionData()
         this.listenReportsNotifications()
     },
@@ -211,31 +222,67 @@ const app = new Vue({
             socket.on('report-finished', (e) => {
 
                 if (vue.adminId === e.adminId) {
-                    let message = e.message
-                    if (e.success) {
-                        vue.$store.commit('setReportLinkText', 'Descargar')
-                        vue.$store.commit('setReportLinkAction', () => {
-                            this.downloadReport(e.url, e.name)
-                        })
-                    } else {
-                        vue.$store.commit('setReportLinkText','Revísalo aquí')
-                        vue.$store.commit('setReportLinkAction', () => {
-                            window.location.href = '/exportar/node'
-                        })
-                    }
-
-                    vue.$store.commit('setReportHasResults', e.success);
-                    vue.$store.commit('setFinishedReportMessage', e.message);
-                    vue.$store.commit('showReportIsReadyNotification');
+                    vue.notifyReportHasFinished(e)
                 }
             })
-        },
-        hideReportsIsReadyNotification() {
-            this.$store.commit('hideReportIsReadyNotification')
-        },
-        hideNewReportNotification() {
-            this.$store.commit('newReportNotificationVisible', false)
-        },
+
+            socket.on('report-started', (e) => {
+                console.log('report-started', e.report)
+                if (vue.adminId === e.adminId) {
+                    vue.notifyReportHasStarted(e.report)
+                }
+            })
+        }
+        ,
+        notifyReportHasFinished (e) {
+
+            const vue = this
+
+            // Notify user that report is ready to donwload
+
+            if (e.success) {
+
+                this.$toast.warning({
+                    component: Vue.component('comp', {
+                        template: `
+                                    <div>${e.message} <a href="javascript:"
+                                                         @click.stop="clicked">Descargar</a>
+                                    </div>`,
+                        methods: {
+                            clicked() { this.$emit('download') }
+                        }
+                    }),
+                    listeners: {
+                        download: () => this.downloadReport(e.url, e.name)
+                    }
+                });
+            } else {
+
+                // Notify user that report has no results
+
+                this.$toast.warning({
+                    component: Vue.component('comp', {
+                        template: `
+                                    <div>${e.message} <a href="javascript:"
+                                                         @click.stop="clicked">Revisalo aquí</a>
+                                    </div>`,
+                        methods: {
+                            clicked() { this.$emit('redirect') }
+                        }
+                    }),
+                    listeners: {
+                        redirect: () => { window.location.href = '/exportar/node' }
+                    }
+                });
+            }
+        }
+        ,
+        notifyReportHasStarted (report) {
+
+            const message = `Tu reporte "${report.name}" se encuentra en proceso.`
+            this.$toast.warning(message)
+        }
+        ,
         async fetchSessionData() {
             let vue = this;
 

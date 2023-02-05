@@ -4,9 +4,10 @@
             :options="{
             title: 'Confirmar solicitud',
             confirmLabel: 'Entendido',
-            persistent: true,
+            persistent: false,
             open: isOpen,
-            hideCancelBtn: true
+            hideCancelBtn: true,
+            showFloatingCloseButton: true
          }"
             :width="'390px'"
             :showCardActionsBorder="false"

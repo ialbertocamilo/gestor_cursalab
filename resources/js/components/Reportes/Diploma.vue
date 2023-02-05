@@ -317,7 +317,8 @@ export default {
                 },
                 workspaceId: vue.workspaceId,
                 adminId: vue.adminId,
-                reportName
+                reportName,
+                filtersDescriptions
             };
 
             const urlReport = `${vue.reportsBaseUrl}/exportar/diplomas`
@@ -435,7 +436,6 @@ export default {
     },
     mounted() {
         const vue = this;
-        console.log('mounted Diplomas')
         vue.schoolsInit();// schools by workpaceId
     }
 };

@@ -2,7 +2,8 @@
     <DefaultDialog
         :options="{
             title: 'Filtro&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Detalle / descripción',
-            open: isOpen
+            open: isOpen,
+            showFloatingCloseButton: true
          }"
         @onCancel="close"
         :width="'667px'"

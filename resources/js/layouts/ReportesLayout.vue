@@ -41,7 +41,7 @@
 
         <v-card v-if="activeTab === 'history'" flat class="elevation-0 --mb-4">
 
-            <ReportsHistory />
+            <ReportsHistory :adminId="adminId"/>
 
         </v-card>
         <v-card v-if="activeTab === 'new-report'" flat class="elevation-0 --mb-4">
@@ -687,9 +687,7 @@ export default {
             const message = event.reportName
                 ? `Tu solicitud de reporte "${event.reportName}" se añadió correctamente.`
                 : `Tu solicitud de reporte se añadió correctamente.`
-
-            this.$store.commit('newReportNotificationMessage', message)
-            this.$store.commit('newReportNotificationVisible', true)
+            this.$toast.warning(message)
         }
     },
     computed: {

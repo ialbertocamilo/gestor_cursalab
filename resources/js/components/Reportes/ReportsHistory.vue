@@ -59,7 +59,9 @@
                                 {{ item.admin.name + ' ' + (item.admin.lastname || '') }}
                             </td>
                             <td>
-                                {{ item.is_ready ? 'Completado' : 'Pendiente' }}
+                                {{ item.is_ready
+                                    ? 'Completado'
+                                    : item.is_processing ? 'Procesando' : 'Pendiente' }}
                             </td>
                             <td class="text-center">
                                 <v-icon
@@ -98,7 +100,10 @@ import ReportFiltersModal from "./ReportFiltersModal.vue";
 export default {
     components: {ReportFiltersModal},
     props : {
-
+        adminId : {
+            type: Number,
+            default: 0
+        }
     },
     data () {
         return {
@@ -109,28 +114,24 @@ export default {
     },
     mounted: function () {
 
+        const vue = this
         this.fetchReports()
-    },
-    computed: {
-        /**
-         * Listen store's stare value change
-         * @returns {boolean}
-         */
-        reportIsReady() { return this.$store.state.reportIsReady },
-    }
-    ,
-    watch: {
-        /**
-         * Watch for changes in reportIsReady property
-         */
-        reportIsReady(isReady) {
-            // Since report is ready,
-            if (isReady) {
-                this.fetchReports()
+
+        let socket = window.io(this.getReportsBaseUrl());
+        socket.on('report-finished', (e) => {
+
+            if (vue.adminId === e.adminId) {
+                vue.fetchReports()
             }
-        }
-    }
-    ,
+        })
+
+        socket.on('report-started', (e) => {
+
+            if (vue.adminId === e.adminId) {
+                vue.fetchReports()
+            }
+        })
+    },
     methods: {
         /**
          * Fetch genrated reports list
