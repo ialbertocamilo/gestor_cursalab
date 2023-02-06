@@ -180,6 +180,11 @@ export default {
         clearableState:{
             type: Boolean,
             default: false
+        },
+        // indicamos que este componente no esta ligado a otro componente
+        onlyOne:{
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -200,16 +205,25 @@ export default {
         },
         computedLocalLoading() {
             const vue = this;
-            vue.localItems = [ ...vue.items ];
 
+            if(vue.loadingState) {
+                // como esta cargando no va a pasar por el watch y aqui ordenamos.
+                if(!vue.localItems.length) vue.localItems = vue.itemsOrderSelect(vue.localSelected);
+            } 
             return (vue.items.length === 0) && vue.loadingState;
         },
         computedLocalTextToggle() {
             const vue = this;
-            const countItems = vue.localItems.length;
+            let countItems = vue.localItems.length - vue.localSelected.length;
 
             if(vue.$refs.vue_autocomplete) {
                 const countFiltered = vue.$refs.vue_autocomplete.filteredItems.length;
+
+                if(vue.loadingState) { // si el loading esta activo - llega nueva data despues de 'x' ms
+                    if(vue.localItems.length === countFiltered) return 'Seleccionar todos';
+                    countItems = vue.localItems.length - vue.localSelected.length;
+                }
+
                 if(countItems !== countFiltered) return 'Seleccionar filtrados';
             }
             return 'Seleccionar todos';
@@ -256,7 +270,8 @@ export default {
                 
                 vue.localSelected.splice(index, 1);
             }
-            vue.updateValue(vue.localSelected);
+            
+            vue.updateValue(vue.localSelected);// actualizar al agregar
         },
         itemSelect(itemId){
             const vue = this;
@@ -302,6 +317,8 @@ export default {
             if(vue.clearableState) vue.checkCleareable(index);
 
             vue.localSelected.splice(index, 1);
+
+            vue.updateValue(vue.localSelected); // actualizar al remover
         },
         itemsOrderSelect(val){
             const vue = this;
@@ -315,16 +332,24 @@ export default {
                 const { id } = currentItem;
 
                 const stateValue = StaticValue.some(( {id: s_id} ) => s_id === id);
-                if(!stateValue) localItems.push(currentItem);
+                if(stateValue) {
+                    localItems.push(currentItem);
+                }
             }
 
-            return [ ...StaticValue, ...localItems];
+            return [ ...localItems, ...StaticItems ];
         },
         updateValue(value) {
             let vue = this
+            const prevData = vue.returnObject ? value.slice() : value.map(el => el.id);
 
-            vue.$emit('input', value || null)
+            vue.$emit('input', prevData || null)
             vue.$emit('onChange')
+
+            // es un solo componente y la data - no esta ligado a otro componente
+            if(vue.onlyOne) {
+                vue.localItems = vue.itemsOrderSelect(vue.localSelected);
+            }
         },
        
         icon() {
@@ -341,8 +366,8 @@ export default {
         toggle() {
             let vue = this;
             vue.$nextTick(() => {
-                vue.localSelected = vue.selectAll() ? [] : vue.selectIdsOrObject()
-                vue.updateValue(vue.localSelected)
+                vue.localSelected = vue.selectAll() ? [] : vue.selectIdsOrObject();
+                vue.updateValue(vue.localSelected);
             });
         },
         selectIdsOrObject() {
@@ -353,19 +378,24 @@ export default {
 
             if(vue.selectFilter()) currentData = [];
             else if(filtered.length) currentData = filtered;
-
-            if (vue.returnObject) {
-                // return vue.items.slice();
-                return currentData.slice();
-            } else {
-                // return vue.items.map(el => el.id);
-                return currentData.map(el => el.id);
-            }
+            
+            return currentData;           
         },
         selectFilter() {
             const vue = this;
             const filtered = vue.$refs.vue_autocomplete.filteredItems;
-            return filtered.length === vue.localSelected.length; 
+
+            //verificar que los items filtrados sean iguales con los seleccionados en cantidad
+            if(filtered.length === vue.localSelected.length) {
+                // verficar que sus items sean iguales a traves del 'id'
+                const currentSames = filtered.every((ele) => {
+                    const existState = vue.localSelected.some((s_ele) => s_ele.id === ele.id );
+                    return (existState === true);
+                });
+
+                return currentSames; //me indica que son similares y que pueden borrarse.
+            } 
+            return false;// (filtered.length === vue.localSelected.length); no valida que sean iguales
         },
         selectAll() {
             const vue = this;

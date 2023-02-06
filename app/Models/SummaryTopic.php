@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use App\Models\Course;
+use DB;
 
 class SummaryTopic extends Summary
 {
@@ -191,5 +192,20 @@ class SummaryTopic extends Summary
     public function hasAttemptsLeft($attempts_limit = null)
     {
         return ! $this->hasNoAttemptsLeft($attempts_limit);
+    }
+
+    protected function getUserAverageGradeByCourses($user, $courses_id, $rounded = true)
+    {
+        $res = SummaryTopic::query()
+            ->select(DB::raw('AVG(IFNULL(grade, 0)) AS nota_avg'))
+            ->whereHas('topic', fn($q) => $q->where('active', ACTIVE)->whereIn('course_id', $courses_id))
+            ->whereRelation('topic', 'assessable', ACTIVE)
+            ->whereRelation('topic.evaluation_type', 'code', 'qualified')
+            ->where('user_id', $user->id)
+            ->first();
+
+        $avg = $res->nota_avg ?? 0;
+
+        return $rounded ? round($avg, 2) : $avg;
     }
 }

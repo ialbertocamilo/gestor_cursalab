@@ -338,4 +338,39 @@ class SummaryCourse extends Summary
             'users' => $activeUsers
         ];
     }
+
+    protected function getUserAverageGradeByCourses($user, $courses_id)
+    {
+        $average = SummaryCourse::query()
+            ->whereRelation('course.type', 'code', '<>', 'free')
+            ->whereIn('course_id', $courses_id)
+            ->where('user_id', $user->id)
+            ->avg('grade_average');
+
+        return $average;
+    }
+
+    protected function getUserTotalAttemptsByCourses($user, $courses_id)
+    {
+        $sum = SummaryCourse::query()
+            // ->whereRelation('course', 'active', ACTIVE)
+            ->whereRelation('course.type', 'code', '<>', 'free')
+            ->where('user_id', $user->id)
+            ->whereIn('course_id', $courses_id)
+            ->sum('attempts');
+
+        return $sum;
+    }
+
+    protected function getUserTotalCoursesByStatusCode($user, $courses_id, $status_code)
+    {
+        $count = SummaryCourse::query()
+            ->where('user_id', $user->id)
+            ->whereRelation('status', 'code', $status_code)
+            ->whereRelation('course.type', 'code', '<>', 'free')
+            ->whereIn('course_id', $courses_id)
+            ->count();
+
+        return $count;
+    }
 }

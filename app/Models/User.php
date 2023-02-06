@@ -401,10 +401,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
+                
                 $user->update($data);
-                if (!$from_massive) {
-                    SummaryUser::updateUserData($user);
-                }
+   
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
@@ -435,6 +434,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->sync($data['criterion_list_final']);
 
             $user->save();
+
+            if ($user && !$from_massive) {
+                SummaryUser::updateUserData($user, false);
+            }
+
             DB::commit();
         } catch (\Exception $e) {
 
