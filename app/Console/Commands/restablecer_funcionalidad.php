@@ -86,8 +86,8 @@ class restablecer_funcionalidad extends Command
         // $this->restore_prefix();
         // $this->restore_summary_topics();
         // $this->restoreCriterionValuesFromJson();
-        // $this->getCriterionValuesUser();
-        $this->restoreCriterionValuesFromJsonV2();
+        $this->getCriterionValuesUser();
+        // $this->restoreCriterionValuesFromJsonV2();
         // $this->deleteDuplicatesInSummaryCourses();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
