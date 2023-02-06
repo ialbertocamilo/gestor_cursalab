@@ -24,7 +24,7 @@
           @endif
 
           @if($errors->has('attempts_fulled') && !$errors->first('attempts_fulled'))
-            <p class="mb-0">Haz realizado {{ $errors->first('attempts_count') }} de {{ $errors->first('attempts_max') }} intentos </p>
+            <p class="mb-0">Has realizado {{ $errors->first('attempts_count') }} de {{ $errors->first('attempts_max') }} intentos </p>
           @endif
         </div>
       </div>
