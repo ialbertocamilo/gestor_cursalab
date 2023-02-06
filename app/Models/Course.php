@@ -1029,7 +1029,7 @@ class Course extends BaseModel
         $course->compatibilities_a()->sync($data['compatibilities'] ?? []);
 
         // TODO: Compatibles: Actualizar al modificar los cursos compatibles
-        // $course->updateOnModifyingCompatibility();
+        $course->updateOnModifyingCompatibility();
 
         return $course;
     }
