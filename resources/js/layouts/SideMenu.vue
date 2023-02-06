@@ -272,6 +272,8 @@ export default {
                         permission: "cursos",
                         role: [
                             "super-user",
+                            "admin",
+                            "content-manager",
                         ]
                     },
                     {
