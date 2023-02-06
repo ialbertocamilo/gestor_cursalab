@@ -59,9 +59,7 @@
                                 {{ item.admin.name + ' ' + (item.admin.lastname || '') }}
                             </td>
                             <td>
-                                {{ item.is_ready
-                                    ? 'Completado'
-                                    : item.is_processing ? 'Procesando' : 'Pendiente' }}
+                                {{ getReportStatus(item) }}
                             </td>
                             <td class="text-center">
                                 <v-icon
@@ -162,7 +160,22 @@ export default {
         ,
         download(url, name) {
             this.$root.downloadReport(url, name)
+        },
+        getReportStatus(report) {
 
+            let status = ''
+
+            if (report.is_ready && report.download_url) {
+                status = 'Completado'
+            } else if (report.is_ready && !report.download_url) {
+                status = 'Sin resultados'
+            } else if (report.is_processing) {
+                status = 'Procesando'
+            } else {
+                status = 'Pendiente'
+            }
+
+            return status
         }
     }
 }
