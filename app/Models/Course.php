@@ -636,6 +636,15 @@ class Course extends BaseModel
                     $status = 'bloqueado';
                 endif;
 
+            }else{
+                try {
+                    if(!in_array($summary_requirement_course?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                        $available_course = false;
+                        $status = 'bloqueado';
+                    }
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
             }
         }
         // info($available_course);

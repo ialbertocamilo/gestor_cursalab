@@ -162,6 +162,7 @@ export default {
                 })
         },
         async exportNotasCurso() {
+            let vue = this
 
             // show loading spinner
 
@@ -193,6 +194,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_ranking");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Ranking',

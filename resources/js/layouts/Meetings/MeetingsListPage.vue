@@ -5,6 +5,10 @@
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
                     Aulas Virtuales
+                    <DefaultInfoTooltip
+                        class="ml-3" 
+                        right
+                        text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
                     <v-spacer/>
                      <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
@@ -31,8 +35,7 @@
                   />
 
 
-                    <DefaultInfoTooltip left
-                        text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
+                    
 
 
                     <MeetingDirectionsModal

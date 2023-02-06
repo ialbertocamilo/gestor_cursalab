@@ -5,7 +5,7 @@
             <template v-slot:resumen>
                 Descarga el reporte detallado de actividades en un checklist.
             </template>
-           
+
             <list-item
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
@@ -252,6 +252,7 @@ export default {
             this.schools = responseSchools.data
         },
         async exportReport() {
+            let vue = this
 
             this.showLoader()
 
@@ -286,6 +287,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_checklist_detallado");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Checklist detallado',

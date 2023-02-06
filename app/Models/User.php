@@ -37,6 +37,9 @@ use Illuminate\Support\Str;
 
 use Spatie\Image\Manipulations;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailTemplate;    
+
 use Bouncer;
 
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
@@ -65,7 +68,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username', 'fullname', 'slug', 'alias', 'person_number', 'phone_number',
+        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'slug', 'alias', 'person_number', 'phone_number',
         'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
@@ -1072,4 +1075,76 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             'score' => $row?->score
         ];
     }
+
+    public function generateCode2FA()
+    {
+        $user = $this;
+        $currentRange = env('AUTH2FA_CODE_DIGITS');
+        $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
+
+        $start = '1'.str_repeat('0', $currentRange - 1);  
+        $end = str_repeat('9', $currentRange);
+        $currentCode = rand($start, $end);
+
+        $user->timestamps = false; // no actualizar el usuario
+        $user->code = $currentCode;
+        $user->expires_code = now()->addMinutes($currentMinutes);
+
+        //enviar codigo al email
+        $mail_data = [ 'subject' => 'Código de verificación: '.$currentCode,
+                       'code' => $currentCode,
+                       'minutes' => $currentMinutes,
+                       'user' => $user->name.' '.$user->lastname ];
+
+        // enviar email
+        Mail::to($user->email)
+            ->send(new EmailTemplate('emails.enviar_codigo_2fa', $mail_data));
+
+        return $user->save();
+    }
+
+    public function resetToNullCode2FA() 
+    {
+        $user = $this;
+
+        $user->timestamps = false; // no actualizar el usuario
+        $user->code = NULL;
+        $user->expires_code = NULL;
+
+        $user->save();
+    }
+
+    public function resetToNullResetPass()
+    {
+        $user = $this;
+
+        $user->timestamps = false; // no actualizar el usuario
+        $user->pass_token_updated = NULL;
+
+        $user->save();
+    }
+
+    public function setUserPassUpdateToken($token) {
+        $user = $this;
+        
+        $user->timestamps = false; // no actualizar el usuario
+        $user->pass_token_updated = $token;
+        return $user->save();
+    }
+
+    // validamos el token para la vista 'auth.passwords.reset.blae.php'
+    public function checkPassUpdateToken($token, $id_user) {
+        return $this->where('pass_token_updated', $token)
+                    ->where('id', $id_user)->count();
+    }
+
+    // actualizar contraseña usuario
+    public function updatePasswordUser($password) {
+        $user = $this;
+        $data = [ 'last_pass_updated_at' => now(),
+                  'password' => $password ];
+        
+        $user->update($data);
+    }
+
 }

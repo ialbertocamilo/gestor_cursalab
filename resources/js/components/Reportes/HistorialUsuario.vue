@@ -212,6 +212,7 @@ export default {
 
         },
         async downloadReport() {
+            let vue = this
             // show loading spinner
 
             this.showLoader()
@@ -236,6 +237,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_historial_usuario");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Historial usuario',

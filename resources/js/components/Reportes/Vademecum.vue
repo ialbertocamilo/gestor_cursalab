@@ -103,6 +103,7 @@ export default {
 	},
 	methods: {
 		ExportarVademecum() {
+            let vue = this
 			this.showLoader()
 
 			let params = {
@@ -116,6 +117,7 @@ export default {
                     if (res.data.alert) {
                         this.showAlert(res.data.alert, 'warning');
                     } else {
+                        vue.queryStatus("reportes", "descargar_reporte_vademecum");
                         res.data.new_name = this.generateFilename(
                             'Vademecum',
                             ''

@@ -29,6 +29,7 @@ use Illuminate\Console\Command;
 use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class restablecer_funcionalidad extends Command
@@ -82,9 +83,159 @@ class restablecer_funcionalidad extends Command
         // $this->restore_tickets();
         // $this->restore_attempts();
         // $this->restore_cycle();
-        $this->restore_prefix();
+        // $this->restore_prefix();
+        // $this->restore_summary_topics();
+        // $this->restoreCriterionValuesFromJson();
+        // $this->getCriterionValuesUser();
+        // $this->restoreCriterionValuesFromJsonV2();
+        $this->deleteDuplicatesInSummaryCourses();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function deleteDuplicatesInSummaryCourses(){
+        $summaries_duplicates = SummaryCourse::disableCache()->select('id','course_id','user_id', DB::raw('COUNT(*) as `count`'))
+                                ->groupBy('user_id', 'course_id')
+                                ->whereNotNull('course_id')
+                                ->havingRaw('COUNT(*) > 1')
+                                ->get();
+        $_bar = $this->output->createProgressBar(count($summaries_duplicates));
+        $_bar->start();
+        foreach ($summaries_duplicates as $summary) {
+            $duplicates = SummaryCourse::disableCache()->where('user_id',$summary->user_id)->where('course_id',$summary->course_id)->orderBy('updated_at','desc')->get();
+            if(count($duplicates) == 2){
+                $element_to_delete = ($duplicates[0]->attempts < $duplicates[1]->attempts) ? $duplicates[0] : $duplicates[1];
+                $element_to_delete->forceDelete();
+                $user  = User::where('id',$summary->user_id)->first();
+                $course = Course::with('topics')->where('id',$summary->course_id)->first();
+                SummaryCourse::updateUserData($course, $user, false ,false);
+                SummaryUser::updateUserData($user);
+            }
+            $_bar->advance();
+        }
+        $_bar->finish();
+    }
+    public function restoreCriterionValuesFromJsonV2(){
+        $users_affected_json = public_path() . "/json/users.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $historic_criterion_values_user_json = public_path() . "/json/criterion_values_users.json";
+        $historic_criterion_values_user = collect(json_decode(file_get_contents($historic_criterion_values_user_json), true));
+        $users_not_modified = [];
+        $_bar->start();
+        $criteria_to_set = ['cycle','botica','grupo','career'];
+        foreach ($users_affected as $document) {
+            $has_modified = false;
+            $user = User::where('document',$document['document'])->first();
+            if($user){
+                foreach ($criteria_to_set as $code) {
+                    $criterion_values_by_code=$user->criterion_values()
+                        ->whereHas('criterion',function($q) use($code) { 
+                            $q->where('code',$code);
+                        })
+                        ->first();
+                    if(!$criterion_values_by_code && $criterion_values_by_code?->value_text != '-'){
+                        $historic_criterio_by_code = $historic_criterion_values_user->where('document',$user->document)->where('code',$code)->first();
+                        if($historic_criterio_by_code){
+                            $has_modified = true;
+                            DB::table('criterion_value_user')->insert([
+                                'criterion_value_id'=>$historic_criterio_by_code['criterion_id'],
+                                'user_id'=>$user->id
+                            ]);
+                        }
+                    }
+                }
+                if($has_modified){
+                    SummaryUser::updateUserData($user);
+                }
+            }else{
+                $users_not_modified[] = $user;
+            }
+            $_bar->advance();
+        }
+        cache_clear_model(CriterionValueUser::class);
+        cache_clear_model(CriterionValue::class);
+    }
+    public function getCriterionValuesUser(){
+        $users_affected_json = public_path() . "/json/users.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $_bar->start();
+        $criterion_values_to_set = [];
+        foreach ($users_affected as $document) {
+            $user = User::where('document',$document)->first();
+            if($user){
+                $criterion_values=$user->criterion_values()->with('criterion')
+                        ->whereHas('criterion',fn($q) => $q->whereIn('code',['cycle','botica','grupo','career']))
+                        ->get();
+                foreach ($criterion_values as $value) {
+                    $criterion_values_to_set[]=[
+                        'criterion_id'=>$value->id,
+                        'document'=>$user->document,
+                        'code'=>$value->criterion->code
+                    ];
+                }
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/criterion_values_users.json', json_encode($criterion_values_to_set,JSON_UNESCAPED_UNICODE));
+        $_bar->finish();
+    }
+    public function restoreCriterionValuesFromJson(){
+        $users_affected_json = public_path() . "/json/ledgers.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $historic_criterion_values_user_json = public_path() . "/json/criterion_value_users.json";
+        $historic_criterion_values_user = collect(json_decode(file_get_contents($historic_criterion_values_user_json), true));
+        $users_not_modified = [];
+        $_bar->start();
+        foreach ($users_affected as $user) {
+            $_user = User::find($user['recordable_id']);
+            if($_user){
+                $criterion_values = $_user->criterion_values()->get();
+                if(count($criterion_values) == 1){
+                    $find_criterion_value =  $historic_criterion_values_user->where('user_id',$user['recordable_id'])->pluck('criterion_value_id')->toArray();
+                    $_user->criterion_values()->syncWithoutDetaching($find_criterion_value);
+                    SummaryUser::updateUserData($_user);
+                }
+            }else{
+                $users_not_modified[] = $user;
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/users_not_modified.json', json_encode($users_not_modified,JSON_UNESCAPED_UNICODE));
+        $_bar->finish();
+    }
+    public function restore_summary_topics(){
+        $path = public_path() . "/json/summary_topics.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $summary_topic = json_decode(file_get_contents($path), true);
+        $_bar = $this->output->createProgressBar(count($summary_topic));
+        $_bar->start();
+        $exist=[];
+        foreach ($summary_topic as $st) {
+            $summary = SummaryTopic::disableCache()->where('user_id',$st['user_id'])->where('topic_id',$st['topic_id'])->first();
+            if(is_null($st['grade']) && is_null($summary->grade)){
+                if($summary->status_id != $st['status_id']){
+                    $summary->grade = $st['grade'];
+                    $summary->passed = $st['passed'];
+                    $summary->answers = $st['answers'];
+                    $summary->last_time_evaluated_at = $st['last_time_evaluated_at'];
+                    $summary->status_id = $st['status_id'];
+                    $summary->correct_answers = $st['correct_answers'];
+                    $summary->failed_answers = $st['failed_answers'];
+                    $summary->save();
+                    $topic = Topic::with('course')->where('id',$st['topic_id'])->first();
+                    $user = User::where('id',$st['user_id'])->first();
+                    SummaryCourse::getCurrentRowOrCreate($topic->course, $user);
+                    SummaryCourse::updateUserData($topic->course, $user, false);
+                    SummaryUser::updateUserData($user);
+                }
+            }else{
+                $exist[]=$st;
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/summary_topics_created_3.json', json_encode($exist));
+        $_bar->finish();
     }
     //Command to restores cycles
     public function restore_cycle(){
@@ -255,19 +406,19 @@ class restablecer_funcionalidad extends Command
         $tickets = Ticket::whereNull('workspace_id')->orWhere('workspace_id',0)->get();
         $faker = Faker::create('es_ES');
         foreach ($tickets as $ticket) {
-            
+
             if(strlen($ticket->reason) == 1){
                 $pregunta = Post::select('title')->where('id',$ticket->reason)->first();
                 $ticket->reason = $pregunta->title ?? '';
             }
-            
+
             if(is_null($ticket->created_at)){
                 $date = $faker->dateTimeBetween('-30 days', '+0 days');
                 $dateFormat = $date->format('Y-m-d H:m:s');
                 $ticket->created_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
                 $ticket->updated_at = Carbon::parse($dateFormat)->format('Y-m-d H:m:s');
             }
-            
+
             if(is_null($ticket->workspace_id) || $ticket->workspace_id==0){
                 $user = User::where('id',$ticket->user_id)->first();
                 $ticket->workspace_id = $user->subworkspace?->parent_id;
@@ -347,7 +498,7 @@ class restablecer_funcionalidad extends Command
                                     ->update([
                                         'respuestas' => '[{"resp_cal":4,"preg_cal":"Califica"}]'
                                     ]);
-    
+
                         PollQuestionAnswer::select('id')->where('respuestas','[]')
                                     ->whereIn('id',array_column($percent_20,'id'))
                                     ->update([

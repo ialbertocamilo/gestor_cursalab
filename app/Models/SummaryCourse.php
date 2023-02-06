@@ -163,7 +163,7 @@ class SummaryCourse extends Summary
     }
 
 
-    protected function updateUserData($course, $user = null, $update_attempts = true)
+    protected function updateUserData($course, $user = null, $update_attempts = true,$update_certification_data=true)
     {
         $user = $user ?? auth()->user();
         $row_course = SummaryCourse::getCurrentRow($course, $user);
@@ -224,7 +224,6 @@ class SummaryCourse extends Summary
 //        info("GRADE AVERGAE UPDATED :: " . $grade_average);
 
         $course_data = compact('assigned', 'passed', 'taken', 'reviewed', 'failed', 'grade_average', 'advanced_percentage');
-        $course_data['last_time_evaluated_at'] = now();
 
         $status = 'desarrollo';
 
@@ -243,17 +242,20 @@ class SummaryCourse extends Summary
                 if ($poll_answers > 0) {
 //                    info("3");
                     $status = 'aprobado';
-                    $course_data['certification_issued_at'] = now();
+                    if($update_certification_data){
+                        $course_data['certification_issued_at'] = now();
+                    }
                 }
 
             } else {
 
                 $status = 'aprobado';
-                $course_data['certification_issued_at'] = now();
+                if($update_certification_data){
+                    $course_data['certification_issued_at'] = now();
+                }
             }
 
         } else {
-
             // if ($failed >= $assigned)
             if((count($topics_qualified)>0) && ($failed >= count($topics_qualified))){
                 $status = 'desaprobado';
@@ -263,6 +265,7 @@ class SummaryCourse extends Summary
 //        info("UPDATE TO ". $status);
         $course_data['status_id'] = Taxonomy::getFirstData('course', 'user-status', $status)->id;
         if ($update_attempts)
+            $course_data['last_time_evaluated_at'] = now();
             $course_data['attempts'] = $row_course->attempts + 1;
 
 //        info($row_course->status_id);

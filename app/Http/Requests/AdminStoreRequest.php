@@ -33,7 +33,7 @@ class AdminStoreRequest extends FormRequest
             'password' => "{$pass}|max:255",
 
             'email' => "required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL",
-            'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
+            // 'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
             'username' => 'nullable',
             'phone_number' => 'nullable',

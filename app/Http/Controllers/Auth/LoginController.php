@@ -8,6 +8,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\ResetPasswordRequest;
+
 
 class LoginController extends Controller
 {
@@ -72,6 +76,31 @@ class LoginController extends Controller
 
     //     return $this->sendFailedLoginResponse($request);
     // }
+    public function showLoginFormInit()
+    {
+        if(session()->has('init_2fa')) {
+            //resetear codigo y expiracion
+            $user = auth()->user();
+            $user->resetToNullCode2FA();
+
+            session()->forget('init_2fa'); 
+        }
+
+        /*if(session()->has('init_reset')) {
+            //resetear codigo y expiracion - reset pass
+            $user = auth()->user();
+            $user->resetToNullResetPass();
+
+            session()->forget('init_reset'); 
+        }*/
+
+        // resetear sessions
+        $this->guard()->logout();
+        session()->invalidate();
+        session()->regenerateToken();
+
+        return $this->showLoginForm();
+    }
 
     public function login(Request $request)
     {
@@ -102,18 +131,40 @@ class LoginController extends Controller
 
         if ($this->attemptLogin($request)) {
 
+
             $user = $this->guard()->user();
+            $user->resetToNullCode2FA(); // reset 2fa values
 
             if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             {
+
                 if ($request->hasSession()) {
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
 
-                return $this->sendLoginResponse($request);
-            }
-            else
-            {
+                if($user->enable_2fa) {
+                    // verificacion de doble autenticacion
+                    $response2FA = (bool) $user->generateCode2FA();
+                    if($response2FA) { 
+                        session()->put('init_2fa', $user->id);
+                        return redirect('/2fa');
+                    }
+                    // verificacion de doble autenticacion
+
+                } else {
+                    /*
+                    // verifica si se requiere actualizar contraseña
+                    if($this->checkIfCanResetPassword()) {
+                        return $this->showResetPassword();
+                    }
+                    // verifica si se requiere actualizar contraseña
+                    */
+
+                    // === iniciar session ===
+                    return $this->sendLoginResponse($request);
+                }
+               
+            } else {
                 $this->guard()->logout();
 
                 $request->session()->invalidate();
@@ -128,6 +179,113 @@ class LoginController extends Controller
         $this->incrementLoginAttempts($request);
 
         return $this->sendFailedLoginResponse($request);
+    }
+
+    // redireccionar a link de reseteo
+    public function showResetPassword() {
+        $user = $this->guard()->user();
+        session()->put('init_reset', $user->id);
+
+        // crear token 
+        $currentEntropy = env('RESET_PASSWORD_TOKEN_ENTROPY');
+        $token = bin2hex(random_bytes($currentEntropy));
+
+        // insertar token 'table';
+        $responseToken = (bool) $user->setUserPassUpdateToken($token);
+        
+        if($responseToken) {
+            return redirect('reset/'.$token); // vista resetea token
+        }
+    }
+
+    // verificar si debe actualizar su contraseña
+    public function checkIfCanResetPassword()
+    {
+        $user = $this->guard()->user();
+        $currentDays = env('RESET_PASSWORD_DAYS');
+        settype($currentDays, "int");
+
+        if(is_null($user->last_pass_updated_at)) {
+            return true;
+        }
+        
+        $diferenceDays = now()->diffInDays($user->last_pass_updated_at);
+
+        return ($diferenceDays >= $currentDays);
+        // return ($diferenceDays >= $currentDays) && $user->enable_resetpass;
+    }
+    
+    // actualizar contraseña usuario
+    public function reset_pass(ResetPasswordRequest $request)
+    {
+        $request->validated();
+
+        $currentToken = $request->token;
+        $currentPassword = $request->password;
+        $currentRePassword = $request->repassword;
+
+        if($currentPassword === $currentRePassword) {
+            $user = auth()->user();
+            
+            // verificar token
+            $checkToken = $user->checkPassUpdateToken($currentToken, $user->id); 
+
+            if($checkToken) {
+                $user->updatePasswordUser($currentPassword);
+
+                $user->resetToNullResetPass();
+                session()->forget('init_reset'); 
+
+                // === iniciar session ===
+                return $this->sendLoginResponse($request);
+            }
+            return redirect('/login');
+        }
+
+        throw ValidationException::withMessages([
+            'password' => 'El campo contraseña no coincide.',
+            'repassword' => 'El campo repetir contraseña no coincide.'
+        ]);
+    }
+
+
+    // verificar el codigo y expiracion 2FA
+    public function auth2fa(Request $request) 
+    {
+        $user = $this->guard()->user();
+        $checkCode = ($request->code === $user->code); 
+        $checkExpire = ($user->expires_code > now()); 
+        
+        if($checkCode && $checkExpire) {
+            session()->forget('init_2fa'); 
+            $user->resetToNullCode2FA();
+
+            /*
+            // verifica si se requiere actualizar contraseña
+            if($this->checkIfCanResetPassword()) {
+                return $this->showResetPassword();
+            }
+            // verifica si se requiere actualizar contraseña
+            */
+
+            // === iniciar session ===
+            return $this->sendLoginResponse($request);
+        }
+        
+        throw ValidationException::withMessages([
+            'code' => ['Código incorrecto y/o expirado.']
+        ]);
+    }
+
+    // reenviar codigo 2FA
+    public function auth2fa_resend()
+    {
+        $user = $this->guard()->user();
+        $user->generateCode2FA();
+            
+        throw ValidationException::withMessages([
+            'resend' => 'Re-enviamos'
+        ]);
     }
 
     protected function sendLoginResponse(Request $request)

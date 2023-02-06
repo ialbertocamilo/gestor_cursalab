@@ -44,12 +44,12 @@
         {{ Form::text('password', '', ['class' => 'form-control']) }}
     </div>
 </div>
-<div class="form-group row">
+{{-- <div class="form-group row">
     {{ Form::label('document', 'N° Documento', ['class' => 'col-sm-3 form-control-label']) }}
     <div class="col-sm-9">
         {{ Form::text('document', null, ['class' => 'form-control']) }}
     </div>
-</div>
+</div> --}}
 
 <hr>
 <div class="row mb-3">
@@ -158,6 +158,22 @@
     </div>
     <div class="col-md-3">
         <div class="col-sm-9">
+            {{ Form::label('enable2fa', 'Habilitar 2FA', ['class'=>'form-control-label m-0'] ) }}
+            <div class="form-check">
+                {{ Form::radio('enable_2fa', '1', false, ['class'=>'form-check-input', 'id'=>'enablefa1']) }}
+                <label class="form-check-label" for="enablefa1">
+                    Activo
+                </label>
+            </div>
+            <div class="form-check">
+                {{ Form::radio('enable_2fa', '0', true, ['class'=>'form-check-input', 'id'=>'enablefa2']) }}
+                <label class="form-check-label" for="enablefa2">
+                    Inactivo
+                </label>
+            </div>
+
+            <br>
+            
             {{ Form::label('estado', 'Estado', ['class'=>'form-control-label m-0'] ) }}
             <div class="form-check">
                 {{ Form::radio('active', '1', false, ['class'=>'form-check-input', 'id'=>'estado1']) }}
