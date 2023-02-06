@@ -87,8 +87,8 @@ class restablecer_funcionalidad extends Command
         // $this->restore_summary_topics();
         // $this->restoreCriterionValuesFromJson();
         // $this->getCriterionValuesUser();
-        // $this->restoreCriterionValuesFromJsonV2();
-        $this->deleteDuplicatesInSummaryCourses();
+        $this->restoreCriterionValuesFromJsonV2();
+        // $this->deleteDuplicatesInSummaryCourses();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
@@ -122,7 +122,7 @@ class restablecer_funcionalidad extends Command
         $historic_criterion_values_user = collect(json_decode(file_get_contents($historic_criterion_values_user_json), true));
         $users_not_modified = [];
         $_bar->start();
-        $criteria_to_set = ['cycle','botica','grupo','career'];
+        $criteria_to_set = ['department_name_nivel_1','department_name_nivel_2','department_name_nivel_3','department_name_nivel_4','department_name_nivel_5','department_name_nivel_6'];
         foreach ($users_affected as $document) {
             $has_modified = false;
             $user = User::where('document',$document['document'])->first();
@@ -165,7 +165,7 @@ class restablecer_funcionalidad extends Command
             $user = User::where('document',$document)->first();
             if($user){
                 $criterion_values=$user->criterion_values()->with('criterion')
-                        ->whereHas('criterion',fn($q) => $q->whereIn('code',['cycle','botica','grupo','career']))
+                        ->whereHas('criterion',fn($q) => $q->whereIn('code',['department_name_nivel_1','department_name_nivel_2','department_name_nivel_3','department_name_nivel_4','department_name_nivel_5','department_name_nivel_6']))
                         ->get();
                 foreach ($criterion_values as $value) {
                     $criterion_values_to_set[]=[
