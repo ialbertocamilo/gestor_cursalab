@@ -86,8 +86,8 @@ class restablecer_funcionalidad extends Command
         // $this->restore_prefix();
         // $this->restore_summary_topics();
         // $this->restoreCriterionValuesFromJson();
-        // $this->getCriterionValuesUser();
-        $this->restoreCriterionValuesFromJsonV2();
+        $this->getCriterionValuesUser();
+        // $this->restoreCriterionValuesFromJsonV2();
         // $this->deleteDuplicatesInSummaryCourses();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
@@ -122,10 +122,31 @@ class restablecer_funcionalidad extends Command
         $historic_criterion_values_user = collect(json_decode(file_get_contents($historic_criterion_values_user_json), true));
         $users_not_modified = [];
         $_bar->start();
-        $criteria_to_set = ['department_name_nivel_1','department_name_nivel_2','department_name_nivel_3','department_name_nivel_4','department_name_nivel_5','department_name_nivel_6'];
+        $criteria_to_set = [
+            'document_type_id',
+            'business_unit_id',
+            'business_unit_name',
+            'gender',
+            'position_name',
+            'position_code',
+            'date_start',
+            'birthday_date',
+            'location_code',
+            'location_name',
+            'department_name',
+            'department_code',
+            'email_type',
+            'national_identifier_number_manager',
+            'nombre_de_jefe',
+            'posicion_jefe',
+            'region',
+            'department_name_nivel_1','department_name_nivel_2',
+            'department_name_nivel_3','department_name_nivel_4',
+            'department_name_nivel_5','department_name_nivel_6'
+        ];
         foreach ($users_affected as $document) {
             $has_modified = false;
-            $user = User::where('document',$document['document'])->first();
+            $user = User::where('id',$document['user_id'])->first();
             if($user){
                 foreach ($criteria_to_set as $code) {
                     $criterion_values_by_code=$user->criterion_values()
@@ -134,7 +155,7 @@ class restablecer_funcionalidad extends Command
                         })
                         ->first();
                     if(!$criterion_values_by_code && $criterion_values_by_code?->value_text != '-'){
-                        $historic_criterio_by_code = $historic_criterion_values_user->where('document',$user->document)->where('code',$code)->first();
+                        $historic_criterio_by_code = $historic_criterion_values_user->where('user_id',$user->id)->where('code',$code)->first();
                         if($historic_criterio_by_code){
                             $has_modified = true;
                             DB::table('criterion_value_user')->insert([
@@ -161,16 +182,38 @@ class restablecer_funcionalidad extends Command
         $_bar = $this->output->createProgressBar(count($users_affected));
         $_bar->start();
         $criterion_values_to_set = [];
+        $criterios_evaluated = [
+            'document_type_id',
+            'business_unit_id',
+            'business_unit_name',
+            'gender',
+            'position_name',
+            'position_code',
+            'date_start',
+            'birthday_date',
+            'location_code',
+            'location_name',
+            'department_name',
+            'department_code',
+            'email_type',
+            'national_identifier_number_manager',
+            'nombre_de_jefe',
+            'posicion_jefe',
+            'region',
+            'department_name_nivel_1','department_name_nivel_2',
+            'department_name_nivel_3','department_name_nivel_4',
+            'department_name_nivel_5','department_name_nivel_6'
+        ];
         foreach ($users_affected as $document) {
-            $user = User::where('document',$document)->first();
+            $user = User::where('id',$document['user_id'])->first();
             if($user){
                 $criterion_values=$user->criterion_values()->with('criterion')
-                        ->whereHas('criterion',fn($q) => $q->whereIn('code',['department_name_nivel_1','department_name_nivel_2','department_name_nivel_3','department_name_nivel_4','department_name_nivel_5','department_name_nivel_6']))
+                        ->whereHas('criterion',fn($q) => $q->whereIn('code',$criterios_evaluated))
                         ->get();
                 foreach ($criterion_values as $value) {
                     $criterion_values_to_set[]=[
                         'criterion_id'=>$value->id,
-                        'document'=>$user->document,
+                        'user_id'=>$user->id,
                         'code'=>$value->criterion->code
                     ];
                 }
