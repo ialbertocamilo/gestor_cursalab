@@ -1,752 +1,697 @@
 [
     {
-        "criterion_id": 87,
-        "document": "000830391",
+        "criterion_id": 8376,
+        "document": "43202248",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 88,
-        "document": "000830391",
+        "criterion_id": 8377,
+        "document": "43202248",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 143,
-        "document": "000830391",
+        "criterion_id": 8378,
+        "document": "43202248",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 144,
-        "document": "000830391",
+        "criterion_id": 8484,
+        "document": "43202248",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "000830391",
+        "criterion_id": 8485,
+        "document": "43202248",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "000830391",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 87,
-        "document": "44496947",
+        "criterion_id": 8376,
+        "document": "47392082",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 88,
-        "document": "44496947",
+        "criterion_id": 8377,
+        "document": "47392082",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 143,
-        "document": "44496947",
+        "criterion_id": 8378,
+        "document": "47392082",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 144,
-        "document": "44496947",
+        "criterion_id": 8484,
+        "document": "47392082",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "44496947",
+        "criterion_id": 8504,
+        "document": "47392082",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "44496947",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 87,
-        "document": "41383190",
+        "criterion_id": 8376,
+        "document": "40452297",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 88,
-        "document": "41383190",
+        "criterion_id": 8377,
+        "document": "40452297",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 143,
-        "document": "41383190",
+        "criterion_id": 8378,
+        "document": "40452297",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 144,
-        "document": "41383190",
+        "criterion_id": 8484,
+        "document": "40452297",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "41383190",
+        "criterion_id": 8485,
+        "document": "40452297",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "41383190",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 87,
-        "document": "77146171",
+        "criterion_id": 8376,
+        "document": "46537928",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 88,
-        "document": "77146171",
+        "criterion_id": 8377,
+        "document": "46537928",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 89,
-        "document": "77146171",
+        "criterion_id": 8378,
+        "document": "46537928",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 90,
-        "document": "77146171",
+        "criterion_id": 8379,
+        "document": "46537928",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "77146171",
+        "criterion_id": 8380,
+        "document": "46537928",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "77146171",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "70976211",
+        "criterion_id": 8376,
+        "document": "40082788",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "70976211",
+        "criterion_id": 8377,
+        "document": "40082788",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1831,
-        "document": "70976211",
+        "criterion_id": 8378,
+        "document": "40082788",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1979,
-        "document": "70976211",
+        "criterion_id": 8484,
+        "document": "40082788",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "70976211",
+        "criterion_id": 8504,
+        "document": "40082788",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "70976211",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "72181978",
+        "criterion_id": 8376,
+        "document": "74011508",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "72181978",
+        "criterion_id": 8377,
+        "document": "74011508",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1831,
-        "document": "72181978",
+        "criterion_id": 8378,
+        "document": "74011508",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1979,
-        "document": "72181978",
+        "criterion_id": 8484,
+        "document": "74011508",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "72181978",
+        "criterion_id": 8485,
+        "document": "74011508",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "72181978",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "43003185",
+        "criterion_id": 8376,
+        "document": "77139098",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "43003185",
+        "criterion_id": 8377,
+        "document": "77139098",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1831,
-        "document": "43003185",
+        "criterion_id": 8378,
+        "document": "77139098",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1979,
-        "document": "43003185",
+        "criterion_id": 8484,
+        "document": "77139098",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "43003185",
+        "criterion_id": 8504,
+        "document": "77139098",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "43003185",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "73455176",
+        "criterion_id": 8376,
+        "document": "76430791",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "73455176",
+        "criterion_id": 8377,
+        "document": "76430791",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1895,
-        "document": "73455176",
+        "criterion_id": 8378,
+        "document": "76430791",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 2004,
-        "document": "73455176",
+        "criterion_id": 8484,
+        "document": "76430791",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 260531,
-        "document": "73455176",
+        "criterion_id": 8485,
+        "document": "76430791",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "73455176",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "77707143",
+        "criterion_id": 8376,
+        "document": "42874893",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "77707143",
+        "criterion_id": 8377,
+        "document": "42874893",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1858,
-        "document": "77707143",
+        "criterion_id": 8378,
+        "document": "42874893",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1917,
-        "document": "77707143",
+        "criterion_id": 8484,
+        "document": "42874893",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "77707143",
+        "criterion_id": 8504,
+        "document": "42874893",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "77707143",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "77390500",
+        "criterion_id": 8376,
+        "document": "71651961",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "77390500",
+        "criterion_id": 8377,
+        "document": "71651961",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1831,
-        "document": "77390500",
+        "criterion_id": 8378,
+        "document": "71651961",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1979,
-        "document": "77390500",
+        "criterion_id": 8484,
+        "document": "71651961",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "77390500",
+        "criterion_id": 8485,
+        "document": "71651961",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "77390500",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "44194359",
+        "criterion_id": 8376,
+        "document": "76384932",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "44194359",
+        "criterion_id": 8377,
+        "document": "76384932",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1930,
-        "document": "44194359",
+        "criterion_id": 8378,
+        "document": "76384932",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1931,
-        "document": "44194359",
+        "criterion_id": 8484,
+        "document": "76384932",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "44194359",
+        "criterion_id": 8485,
+        "document": "76384932",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "44194359",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "42268039",
+        "criterion_id": 8376,
+        "document": "74240558",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "42268039",
+        "criterion_id": 8377,
+        "document": "74240558",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1831,
-        "document": "42268039",
+        "criterion_id": 8378,
+        "document": "74240558",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1979,
-        "document": "42268039",
+        "criterion_id": 8420,
+        "document": "74240558",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "42268039",
-        "code": "department_name_nivel_5"
-    },
-    {
-        "criterion_id": 223224,
-        "document": "42268039",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "76372931",
+        "criterion_id": 8376,
+        "document": "72837635",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "76372931",
+        "criterion_id": 8377,
+        "document": "72837635",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1895,
-        "document": "76372931",
+        "criterion_id": 8378,
+        "document": "72837635",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 2004,
-        "document": "76372931",
+        "criterion_id": 8420,
+        "document": "72837635",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 260531,
-        "document": "76372931",
-        "code": "department_name_nivel_5"
-    },
-    {
-        "criterion_id": 223224,
-        "document": "76372931",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 1829,
-        "document": "75286468",
+        "criterion_id": 8376,
+        "document": "60861508",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 1830,
-        "document": "75286468",
+        "criterion_id": 8377,
+        "document": "60861508",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 1831,
-        "document": "75286468",
+        "criterion_id": 8378,
+        "document": "60861508",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 1979,
-        "document": "75286468",
+        "criterion_id": 8484,
+        "document": "60861508",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "75286468",
+        "criterion_id": 8485,
+        "document": "60861508",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "75286468",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "08884221",
+        "criterion_id": 8376,
+        "document": "71113163",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "08884221",
+        "criterion_id": 8377,
+        "document": "71113163",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 818,
-        "document": "08884221",
+        "criterion_id": 8378,
+        "document": "71113163",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 819,
-        "document": "08884221",
+        "criterion_id": 8484,
+        "document": "71113163",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 820,
-        "document": "08884221",
+        "criterion_id": 8504,
+        "document": "71113163",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "08884221",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "45695612",
+        "criterion_id": 8376,
+        "document": "10697716",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "45695612",
+        "criterion_id": 8377,
+        "document": "10697716",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 802,
-        "document": "45695612",
+        "criterion_id": 8378,
+        "document": "10697716",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 925,
-        "document": "45695612",
+        "criterion_id": 8484,
+        "document": "10697716",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "45695612",
+        "criterion_id": 8504,
+        "document": "10697716",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "45695612",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "74130119",
+        "criterion_id": 8376,
+        "document": "75816758",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "74130119",
+        "criterion_id": 8377,
+        "document": "75816758",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 837,
-        "document": "74130119",
+        "criterion_id": 8378,
+        "document": "75816758",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 896,
-        "document": "74130119",
+        "criterion_id": 8484,
+        "document": "75816758",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 1008,
-        "document": "74130119",
+        "criterion_id": 8485,
+        "document": "75816758",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "74130119",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "000091131",
+        "criterion_id": 8376,
+        "document": "75599330",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "000091131",
+        "criterion_id": 8377,
+        "document": "75599330",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 223975,
-        "document": "000091131",
+        "criterion_id": 8378,
+        "document": "75599330",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 223974,
-        "document": "000091131",
+        "criterion_id": 8379,
+        "document": "75599330",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "000091131",
+        "criterion_id": 8380,
+        "document": "75599330",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "000091131",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "44416190",
+        "criterion_id": 8376,
+        "document": "45057317",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "44416190",
+        "criterion_id": 8377,
+        "document": "45057317",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 837,
-        "document": "44416190",
+        "criterion_id": 8378,
+        "document": "45057317",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 838,
-        "document": "44416190",
+        "criterion_id": 8484,
+        "document": "45057317",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 956,
-        "document": "44416190",
-        "code": "department_name_nivel_5"
-    },
-    {
-        "criterion_id": 223224,
-        "document": "44416190",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "70990672",
+        "criterion_id": 8376,
+        "document": "71336969",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "70990672",
+        "criterion_id": 8377,
+        "document": "71336969",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 818,
-        "document": "70990672",
+        "criterion_id": 8378,
+        "document": "71336969",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 902,
-        "document": "70990672",
+        "criterion_id": 8484,
+        "document": "71336969",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "70990672",
-        "code": "department_name_nivel_5"
-    },
-    {
-        "criterion_id": 223224,
-        "document": "70990672",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "46356609",
+        "criterion_id": 8376,
+        "document": "46454981",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "46356609",
+        "criterion_id": 8377,
+        "document": "46454981",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 837,
-        "document": "46356609",
+        "criterion_id": 8378,
+        "document": "46454981",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 896,
-        "document": "46356609",
+        "criterion_id": 8484,
+        "document": "46454981",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "46356609",
+        "criterion_id": 8485,
+        "document": "46454981",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "46356609",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "46551426",
+        "criterion_id": 8376,
+        "document": "46484608",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "46551426",
+        "criterion_id": 8377,
+        "document": "46484608",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 802,
-        "document": "46551426",
+        "criterion_id": 8378,
+        "document": "46484608",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 223974,
-        "document": "46551426",
+        "criterion_id": 8484,
+        "document": "46484608",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "46551426",
+        "criterion_id": 8485,
+        "document": "46484608",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "46551426",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 875,
-        "document": "46802157",
-        "code": "department_name_nivel_3"
-    },
-    {
-        "criterion_id": 876,
-        "document": "46802157",
-        "code": "department_name_nivel_4"
-    },
-    {
-        "criterion_id": 800,
-        "document": "46802157",
+        "criterion_id": 8376,
+        "document": "76786617",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "46802157",
+        "criterion_id": 8377,
+        "document": "76786617",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 888,
-        "document": "46802157",
-        "code": "department_name_nivel_5"
-    },
-    {
-        "criterion_id": 889,
-        "document": "46802157",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 837,
-        "document": "47261705",
+        "criterion_id": 8378,
+        "document": "76786617",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 800,
-        "document": "47261705",
-        "code": "department_name_nivel_1"
-    },
-    {
-        "criterion_id": 801,
-        "document": "47261705",
-        "code": "department_name_nivel_2"
-    },
-    {
-        "criterion_id": 223974,
-        "document": "47261705",
+        "criterion_id": 8484,
+        "document": "76786617",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "47261705",
+        "criterion_id": 8504,
+        "document": "76786617",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "47261705",
-        "code": "department_name_nivel_6"
-    },
-    {
-        "criterion_id": 800,
-        "document": "41444331",
+        "criterion_id": 8376,
+        "document": "48549168",
         "code": "department_name_nivel_1"
     },
     {
-        "criterion_id": 801,
-        "document": "41444331",
+        "criterion_id": 8377,
+        "document": "48549168",
         "code": "department_name_nivel_2"
     },
     {
-        "criterion_id": 223975,
-        "document": "41444331",
+        "criterion_id": 8378,
+        "document": "48549168",
         "code": "department_name_nivel_3"
     },
     {
-        "criterion_id": 223974,
-        "document": "41444331",
+        "criterion_id": 8379,
+        "document": "48549168",
         "code": "department_name_nivel_4"
     },
     {
-        "criterion_id": 223973,
-        "document": "41444331",
+        "criterion_id": 8380,
+        "document": "48549168",
         "code": "department_name_nivel_5"
     },
     {
-        "criterion_id": 223224,
-        "document": "41444331",
-        "code": "department_name_nivel_6"
+        "criterion_id": 8376,
+        "document": "43639071",
+        "code": "department_name_nivel_1"
+    },
+    {
+        "criterion_id": 8377,
+        "document": "43639071",
+        "code": "department_name_nivel_2"
+    },
+    {
+        "criterion_id": 8378,
+        "document": "43639071",
+        "code": "department_name_nivel_3"
+    },
+    {
+        "criterion_id": 8445,
+        "document": "43639071",
+        "code": "department_name_nivel_4"
+    },
+    {
+        "criterion_id": 8376,
+        "document": "42188741",
+        "code": "department_name_nivel_1"
+    },
+    {
+        "criterion_id": 8377,
+        "document": "42188741",
+        "code": "department_name_nivel_2"
+    },
+    {
+        "criterion_id": 8378,
+        "document": "42188741",
+        "code": "department_name_nivel_3"
+    },
+    {
+        "criterion_id": 8484,
+        "document": "42188741",
+        "code": "department_name_nivel_4"
+    },
+    {
+        "criterion_id": 8485,
+        "document": "42188741",
+        "code": "department_name_nivel_5"
+    },
+    {
+        "criterion_id": 8376,
+        "document": "09775552",
+        "code": "department_name_nivel_1"
+    },
+    {
+        "criterion_id": 8377,
+        "document": "09775552",
+        "code": "department_name_nivel_2"
+    },
+    {
+        "criterion_id": 8378,
+        "document": "09775552",
+        "code": "department_name_nivel_3"
+    },
+    {
+        "criterion_id": 8484,
+        "document": "09775552",
+        "code": "department_name_nivel_4"
+    },
+    {
+        "criterion_id": 8504,
+        "document": "09775552",
+        "code": "department_name_nivel_5"
+    },
+    {
+        "criterion_id": 8376,
+        "document": "76664029",
+        "code": "department_name_nivel_1"
+    },
+    {
+        "criterion_id": 8377,
+        "document": "76664029",
+        "code": "department_name_nivel_2"
+    },
+    {
+        "criterion_id": 8378,
+        "document": "76664029",
+        "code": "department_name_nivel_3"
+    },
+    {
+        "criterion_id": 8484,
+        "document": "76664029",
+        "code": "department_name_nivel_4"
+    },
+    {
+        "criterion_id": 8485,
+        "document": "76664029",
+        "code": "department_name_nivel_5"
+    },
+    {
+        "criterion_id": 8376,
+        "document": "70717239",
+        "code": "department_name_nivel_1"
+    },
+    {
+        "criterion_id": 8377,
+        "document": "70717239",
+        "code": "department_name_nivel_2"
+    },
+    {
+        "criterion_id": 8378,
+        "document": "70717239",
+        "code": "department_name_nivel_3"
+    },
+    {
+        "criterion_id": 8420,
+        "document": "70717239",
+        "code": "department_name_nivel_4"
     }
 ]
