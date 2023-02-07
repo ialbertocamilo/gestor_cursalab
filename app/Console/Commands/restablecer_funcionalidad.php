@@ -110,6 +110,7 @@ class restablecer_funcionalidad extends Command
                 if(!$criterion_values_by_code){
                     $info_user[] = [
                         'user_id'=>$users['user_id'],
+                        'documento'=>$user->document,
                         'workspace'=>$user->subworkspace->parent->name,
                         'subworkspace'=>$user->subworkspace->name,
                         'created_at'=>$user->created_at
