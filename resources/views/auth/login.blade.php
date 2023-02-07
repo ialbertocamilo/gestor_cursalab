@@ -66,9 +66,21 @@
                         </div>
                     </div> -->
           <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary">
-              {{ __('Ingresar') }}
-            </button>
+
+            @if($errors->has('attempts_fulled') && $errors->first('attempts_count') == $errors->first('attempts_max'))
+
+              <button type="submit" class="btn btn-primary" id="decrement-timeout-disabled" disabled>
+                {{ __('Ingresar') }}
+              </button>
+            
+            @else
+            
+              <button type="submit" class="btn btn-primary">
+                {{ __('Ingresar') }}
+              </button>
+            
+            @endif
+
             <br>
           </div>
         </form>

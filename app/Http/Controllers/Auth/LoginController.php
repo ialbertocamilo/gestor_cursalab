@@ -136,7 +136,7 @@ class LoginController extends Controller
         $userAttempt = $user->checkAttemptManual($request); 
         if($userAttempt) {
             // verficacion de attempts
-            if($userAttempt->attempts == env('ATTEMPTS_LOGIN_MAX') && now() <= $userAttempt->attempts_lock_time) {
+            if($userAttempt->attempts >= env('ATTEMPTS_LOGIN_MAX') && now() <= $userAttempt->attempts_lock_time) {
                 $userAttempt['fulled_attempts'] = true;
                 return $this->sendAttempsResponse($userAttempt);
             } 

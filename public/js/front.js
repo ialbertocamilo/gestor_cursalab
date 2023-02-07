@@ -178,6 +178,7 @@ $(document).ready(function () {
 
 ((w, d) => {
 
+    /* funcion global para ver contraseña */
     w.toggleEyeInputId = function (evt, elementId) {
         const iconEye = evt.firstElementChild;
         const inputRef = d.getElementById(elementId);
@@ -193,9 +194,13 @@ $(document).ready(function () {
 
         iconEye.className = `far ${currentIcon} fa-lg`;
     }
+    /* funcion global para ver contraseña*/
 
-    function decrementTimeAnimation(elementId) {
-        const domRef = d.getElementById(elementId);
+    /* funcion local animar el tiempo solo para 'login.blade.php' */
+    function decrementTimeAnimation(elementId, elementBtnId) {
+        const domRef = d.getElementById(elementId); // span
+        const btnRef = d.getElementById(elementBtnId) ?? false; // button
+
         if(!domRef) return;
 
         let currentTime = domRef.textContent.split(':');
@@ -238,9 +243,12 @@ $(document).ready(function () {
             if (_hrs === 0 && _min === 0 && _sec === 0) {
                 clearInterval(startAnimation);
                 domRef.parentElement.classList.add('d-none');
+                // deshabilitar boton
+                if(btnRef) btnRef.removeAttribute('disabled');
             }
         }
     }
-    decrementTimeAnimation('decrement-animation');
+    decrementTimeAnimation('decrement-animation', 'decrement-timeout-disabled');
+    /* funcion local animar el tiempo solo para 'login.blade.php' */
 
 })(window, document);
