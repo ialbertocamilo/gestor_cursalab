@@ -100,7 +100,7 @@ class restablecer_funcionalidad extends Command
         $_bar = $this->output->createProgressBar(count($users_affected));
         $_bar->start();
         foreach ($users_affected as $users) {
-            $user = User::where('id',$users['user_id'])->first();
+            $user = User::where('id',$users['user_id'])->with('subworkspace','subworkspace.parent')->first();
             if($user){
                 $criterion_values_by_code=$user->criterion_values()
                         ->whereHas('criterion',function($q){ 
@@ -110,6 +110,8 @@ class restablecer_funcionalidad extends Command
                 if(!$criterion_values_by_code){
                     $info_user[] = [
                         'user_id'=>$users['user_id'],
+                        'workspace'=>$user->subworkspace->parent->name,
+                        'subworkspace'=>$user->subworkspace->name
                     ];
                 }
             }
