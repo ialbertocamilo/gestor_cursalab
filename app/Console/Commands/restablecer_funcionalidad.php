@@ -104,7 +104,7 @@ class restablecer_funcionalidad extends Command
             if($user){
                 $criterion_values_by_code=$user->criterion_values()
                         ->whereHas('criterion',function($q){ 
-                            $q->where('code','cycle');
+                            $q->where('code','department_name_nivel_1');
                         })
                 ->first();
                 if(!$criterion_values_by_code){
