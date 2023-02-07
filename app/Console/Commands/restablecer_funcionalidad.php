@@ -113,7 +113,7 @@ class restablecer_funcionalidad extends Command
                         'documento'=>$user->document,
                         'workspace'=>$user->subworkspace->parent->name,
                         'subworkspace'=>$user->subworkspace->name,
-                        'created_at'=>$user->created_at
+                        'created_at'=>Carbon::parse($user->created_at)->format('Y-m-d H:m:s')
                     ];
                 }
             }
