@@ -87,10 +87,37 @@ class restablecer_funcionalidad extends Command
         // $this->restore_summary_topics();
         // $this->restoreCriterionValuesFromJson();
         // $this->getCriterionValuesUser();
-        $this->restoreCriterionValuesFromJsonV2();
+        // $this->restoreCriterionValuesFromJsonV2();
+        $this->getInfoUser();
         // $this->deleteDuplicatesInSummaryCourses();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function getInfoUser(){
+        $users_affected_json = public_path() . "/json/users.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $info_user = [];
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $_bar->start();
+        foreach ($users_affected as $users) {
+            $user = User::where('id',$users['user_id'])->with('subworkspace','subworkspace.parent')->first();
+            if($user){
+                $info_user[] = [
+                    'documento'=>$user->document,
+                    'workspace'=>$user->subworkspace->parent->name,
+                    'subworkspace'=>$user->subworkspace->name
+                ];
+            }else{
+                $info_user[] = [
+                    'documento'=>$users['user_id'],
+                    'workspace'=>'-',
+                    'subworkspace'=>'-'
+                ];
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/info_users.json', json_encode($info_user,JSON_UNESCAPED_UNICODE));
+        $_bar->finish();
     }
     public function deleteDuplicatesInSummaryCourses(){
         $summaries_duplicates = SummaryCourse::disableCache()->select('id','course_id','user_id', DB::raw('COUNT(*) as `count`'))
