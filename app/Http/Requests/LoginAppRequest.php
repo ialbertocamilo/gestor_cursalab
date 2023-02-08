@@ -27,7 +27,8 @@ class LoginAppRequest extends FormRequest
             'user' => "required",
             'password' => "required",
             'os' => 'nullable',
-            'version' => 'nullable'
+            'version' => 'nullable',
+            'g-recaptcha-response' => 'nullable'
         ];
     }
 }

@@ -42,6 +42,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::post('/save_actividad_by_id', 'guardarActividadByID');
 		Route::post('/delete_actividad_by_id', 'eliminarActividadByID');
 		Route::post('/buscar_curso', 'buscarCurso');
+		Route::delete('/{id}/destroy', 'deleteChecklist');
 	});
 
 });

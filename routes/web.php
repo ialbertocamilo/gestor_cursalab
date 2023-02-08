@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\TwoFAController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\DashboardController;
@@ -14,15 +15,27 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', 'login', 301);
 
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+// login routes
+Route::get('login', [LoginController::class, 'showLoginFormInit'])->name('login');
 Route::post('login_post', [LoginController::class, 'login'])->name('login_post');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
+// 2FA routes
+Route::get('2fa', [TwoFAController::class, 'showAuth2faForm'])->name('2fa');
+Route::post('login_auth2fa', [LoginController::class, 'auth2fa'])->name('login_auth2fa');
+Route::get('login_auth2fa_resend', [LoginController::class, 'auth2fa_resend'])->name('login_auth2fa_resend');
+
+// laravel reset pass
 Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+// custom reset pass
+/*Route::get('reset/{token}', [ResetPasswordController::class, 'showResetFormInit'])->name('reset');
+Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('password_reset');*/
+
 
 Route::get('home', [DashboardController::class, 'index'])->name('home');
 
@@ -49,8 +62,9 @@ Route::get('informacion_app', function () {
     return view('informacion_app');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::view('welcome', 'welcome');
+    // Route::view('/reset_password','layouts.user-reset-pass')->name('reset_password');
 
     Route::get('/workspaces/search', [WorkspaceController::class, 'search']);
     Route::put('/usuarios/session/workspace/{workspace}', [UsuarioController::class, 'updateWorkspaceInSession']);

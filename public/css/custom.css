@@ -1124,3 +1124,8 @@ span.lbl_txt_val {
 /* spinner */
 
 /* valoracion nps */
+
+
+.dropdown-menu-right-custom {
+	right: -0.2rem !important;
+}    

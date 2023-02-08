@@ -357,6 +357,7 @@ export default {
         }
         ,
         async exportNotasTema() {
+            let vue = this;
 
             // show loading spinner
 
@@ -406,6 +407,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_temas");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Notas Tema',

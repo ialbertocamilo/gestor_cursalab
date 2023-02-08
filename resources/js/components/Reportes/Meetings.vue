@@ -136,6 +136,7 @@ export default {
     methods: {
         exportMeetings() {
             let vue = this
+            vue.queryStatus("reportes", "descargar_reporte_meetings");
 
 
             const start = this.start

@@ -209,6 +209,7 @@ export default {
     },
     methods: {
         async exportReport() {
+            let vue = this
 
             this.showLoader()
             let UFC = this.$refs.EstadoFiltroComponent;
@@ -233,6 +234,7 @@ export default {
                 if (response.data.alert) {
                     this.showAlert(response.data.alert, 'warning')
                 } else {
+                    vue.queryStatus("reportes", "descargar_reporte_checklist_general");
                     // Emit event to parent component
                     response.data.new_name = this.generateFilename(
                         'Checklist general',

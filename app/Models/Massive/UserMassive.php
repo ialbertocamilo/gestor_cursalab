@@ -101,7 +101,6 @@ class UserMassive extends Massive implements ToCollection
             });
             $data_user = $this->prepare_data_user($data_users, $data_criteria, $criteria);
             if (!$data_user['has_error']) {
-
                 $user = User::where('document', $data_user['user']['document'])->first();
 
 //                $current_workspace = get_current_workspace();
@@ -192,6 +191,13 @@ class UserMassive extends Massive implements ToCollection
         $user['criterion_list_final'] = [];
         foreach ($data_criteria as $dc) {
             //Validación de requerido
+            if($dc['criterion_code'] == 'gender' && empty($dc['value_excel'])){
+                $has_error = true;
+                $errors_index[] =[
+                    'index' => $dc['index'],
+                    'message' => ($this->messageInSpanish) ? 'El criterio género es requerido.' : 'The field ' . $dc['criterion_code'] . ' is required.'
+                ];
+            }
             if (!empty($dc['value_excel'])) {
                 $criterion = $criteria->where('id', $dc['criterion_id'])->first();
                 $code_criterion = $criterion->field_type->code;
@@ -221,13 +227,19 @@ class UserMassive extends Massive implements ToCollection
                 if (is_array($dc['value_excel'])) {
                     foreach ($dc['value_excel'] as $key => $value_excel) {
                         $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$value_excel);
+                        if($criterion_value['has_error']){
+                            $has_error = $criterion_value['has_error'];
+                            $errors_index[] = $criterion_value['info_error'];
+                            continue;
+                        }
                         $user['criterion_list'][$dc['criterion_code']][] =  $criterion_value['criterion_value']->id;
                         $user['criterion_list_final'][] =  $criterion_value['criterion_value']->id;
                     }
                 }else{
                     $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$dc['value_excel']);
                     if($criterion_value['has_error']){
-                        $info_error[] = $criterion_value['info_error'];
+                        $has_error = $criterion_value['has_error'];
+                        $errors_index[] = $criterion_value['info_error'];
                         continue;
                     }
                     $user['criterion_list'][$dc['criterion_code']] = $criterion_value['criterion_value']->id;
@@ -241,7 +253,7 @@ class UserMassive extends Massive implements ToCollection
     private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel){
         $has_error = false;
         $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
-        if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value->id)->first())) {
+        if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value?->id)->first())) {
             $has_error = true;
             return [
                 'has_error'=>$has_error,
@@ -472,8 +484,6 @@ class UserMassive extends Massive implements ToCollection
 
             }
         }
-
-        dd($headers);
 
         return collect();
     }

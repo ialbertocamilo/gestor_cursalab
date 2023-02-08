@@ -13,7 +13,7 @@ class UpdateSummariesUser extends Command
      *
      * @var string
      */
-    protected $signature = 'summary-user:update {documents?}';
+    protected $signature = 'summary-user:update {documents?} {--without-courses}';
 
     /**
      * The console command description.
@@ -33,6 +33,7 @@ class UpdateSummariesUser extends Command
         $this->info(" Inicio: " . now());
         info(" Inicio: " . now());
         $documents = $this->argument("documents");
+        $without_courses = $this->option("without-courses");
         $summary_users = SummaryUser::when($documents, function ($q) use($documents){
             $q->whereHas('user',function($q2)use($documents){
                $q2->whereIn('document',explode(',',$documents));
@@ -46,19 +47,22 @@ class UpdateSummariesUser extends Command
         $bar = $this->output->createProgressBar($count_summaries);
         $bar->start();
 
-
         foreach ($summary_users as $summary_user){
 
             $user = $summary_user->user;
-            $courses = $user->getCurrentCourses();
-            // $summaries_courses = SummaryCourse::withWhereHas('course')->where('user_id', $user->id)->get();
 
-            foreach ($courses as $course){
-                // SummaryCourse::getCurrentRowOrCreate($course, $user);
-                SummaryCourse::updateUserData($course, $user, update_attempts: false);
+            if (!$without_courses) {
+
+                $courses = $user->getCurrentCourses();
+                // $summaries_courses = SummaryCourse::withWhereHas('course')->where('user_id', $user->id)->get();
+
+                foreach ($courses as $course){
+                    // SummaryCourse::getCurrentRowOrCreate($course, $user);
+                    SummaryCourse::updateUserData($course, $user, false, false);
+                }
             }
 
-            SummaryUser::updateUserData($summary_user->user);
+            SummaryUser::updateUserData($summary_user->user, false);
 
             $bar->advance();
         }

@@ -230,6 +230,25 @@ class EntrenamientoController extends Controller
         return $this->success($data);
     }
 
+    public function deleteChecklist($checklist_id){
+        $message = 'Eliminado exitosamente.';
+        $type_message = 'success';
+        if(ChecklistRpta::where('checklist_id',$checklist_id)->first()){
+            $message = 'Este checklist no se puede eliminar debido a que tiene respuestas relacionadas.';
+            $type_message = 'warning';
+        }else{
+            $checklist = Checklist::where('id',$checklist_id)->first();
+            $checklist->checklist_actividades()->delete();
+            $checklist->delete();
+        }
+        return response()->json([
+            'type'=>$type_message,
+            'data'=>[
+                'msg' => $message]
+            ], 
+        200);
+    }
+    
     public function listarChecklist(Request $request)
     {
         $data = $request->all();
