@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\GeneratedReportResource;
 use App\Models\GeneratedReport;
 use App\Models\Taxonomy;
-use App\Models\Workspace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -21,9 +19,6 @@ class ReportsController extends Controller
      */
     public function loadReportsQueue(Request $request): JsonResponse
     {
-
-        $user = auth()->user();
-
         // get admin workspace
 
         $workspaceId = session('workspace')->id;
@@ -32,11 +27,8 @@ class ReportsController extends Controller
 
         $reports = GeneratedReport::query()
             ->with('admin.subworkspace')
-            ->where([
-                'admin_id' => $user->id,
-                'workspace_id' => $workspaceId,
-            ])
-            ->where('created_at', '>=', Carbon::now()->firstOfMonth()->toDateTimeString())
+            ->where('workspace_id', $workspaceId)
+            ->where('created_at', '>=', Carbon::today()->subDays(30)->toDateTimeString())
             ->orderBy('created_at', 'desc')
             ->get()
             ->toArray();
@@ -65,7 +57,8 @@ class ReportsController extends Controller
      * Load report types from taxonomy
      * @return JsonResponse
      */
-    public function loadRepotsTypes() {
+    public function loadRepotsTypes(): JsonResponse
+    {
         return $this->success(Taxonomy::getDataByGroupAndType(
             'reports', 'report'
         ));

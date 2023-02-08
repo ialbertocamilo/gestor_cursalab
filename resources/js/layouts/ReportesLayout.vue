@@ -685,8 +685,8 @@ export default {
             const reportType = this.reportTypes.find(rt => rt.code === report.type)
 
             if (reportType) {
-                this.reportName = reportType.name + ' ' + moment(new Date).format('MM-DD')
-                console.log(this.reportName)
+                this.reportName = reportType.name + ' ' +
+                    moment(new Date).format('MM-DD')
             }
         },
         confirmNewReport(event) {
