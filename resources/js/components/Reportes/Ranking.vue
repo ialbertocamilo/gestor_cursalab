@@ -125,6 +125,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'ranking',
             areas: [],
             sedes: [],
             modulo: [],
@@ -166,7 +167,7 @@ export default {
         },
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportNotasCurso)
+            vue.$emit('generateReport',{callback: vue.exportNotasCurso, type: vue.reportType})
         },
         async exportNotasCurso(reportName) {
 
@@ -175,14 +176,14 @@ export default {
             // Perform request to generate report
             this.$emit('reportStarted')
             const filtersDescriptions = {
-                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
                 "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
                 "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                "Áreas" : this.generateNamesString(this.areas, this.area),
-                "Sedes" : this.generateNamesString(this.sedes, this.sede)
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
+                "Sedes" : this.generateNamesArray(this.sedes, this.sede)
             }
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/ranking`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
 
                 let response = await axios({
@@ -200,29 +201,6 @@ export default {
                         UsuariosInactivos: UFC.UsuariosInactivos
                     }
                 })
-
-
-                // When there are no results notify
-                // user, download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_ranking");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Ranking',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    response.data.selectedFilters = {
-                        "Módulos": this.generateNamesString(this.modules, this.modulo),
-                        "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
-                        "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                        "Áreas" : this.generateNamesString(this.areas, this.area),
-                        "Sedes" : this.generateNamesString(this.sedes, this.sede)
-                    }
-                    this.$emit('emitir-reporte', response)
-                }
 
             } catch (ex) {
                 console.log(ex.message)

@@ -11,13 +11,25 @@
     >
         <template v-slot:content>
             <v-row
-                v-for="(value, label) in filters"
+                v-for="(values, label) in filters"
                 :key="label">
                 <v-col cols="4">
                     <span class="label">{{ label }}:</span>
                 </v-col>
                 <v-col cols="8">
-                    <div class="value">{{ value }}</div>
+                    <div
+                        v-if="!isArray(values)"
+                        class="value">
+                        {{ values }}
+                    </div>
+                    <div
+                        v-if="isArray(values)"
+                        class="value">
+                        <div v-for=" name of values">
+                            {{ name }}
+                        </div>
+                    </div>
+
                 </v-col>
             </v-row>
         </template>
@@ -48,6 +60,9 @@ export default {
         close() {
             this.$emit('cancel')
         },
+        isArray(arr) {
+            return Array.isArray(arr)
+        }
     }
 }
 </script>
@@ -64,5 +79,7 @@ export default {
         border-radius: 10px;
         padding: 4px;
         min-height: 28px;
+        max-height: 100px;
+        overflow-y: auto;
     }
 </style>

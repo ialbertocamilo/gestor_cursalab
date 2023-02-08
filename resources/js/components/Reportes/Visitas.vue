@@ -204,6 +204,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'visitas',
             careers: [],
             areas: [],
             career: [],
@@ -224,7 +225,7 @@ export default {
     methods: {
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportVisitas)
+            vue.$emit('generateReport', {callback: vue.exportVisitas, type: vue.reportType})
         },
         async exportVisitas(reportName) {
             const vue = this;
@@ -233,19 +234,19 @@ export default {
 
             this.$emit('reportStarted')
             const filtersDescriptions = {
-                "Módulos": this.generateNamesString(this.modules, this.modulo),
-                "Escuelas": this.generateNamesString(this.schools, this.school),
-                "Cursos": this.generateNamesString(this.courses, this.course),
-                "Activos" : this.yesOrNo(UFC.UsuariosActivos),
-                "Inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                "Carreras" : this.generateNamesString(this.careers, this.career),
-                "Áreas" : this.generateNamesString(this.areas, this.area),
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.school),
+                "Cursos": this.generateNamesArray(this.courses, this.course),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Carreras" : this.generateNamesArray(this.careers, this.career),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
                 "Cursos libres": this.yesOrNo(this.tipocurso)
             }
 
             // Perform request to generate report
 
-            let urlReport = `${vue.$props.reportsBaseUrl}/exportar/visitas`
+            let urlReport = `${vue.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,

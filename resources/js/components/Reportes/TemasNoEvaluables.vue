@@ -209,6 +209,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'temas_no_evaluables',
             schools: [],
             courses: [],
             topics: [],
@@ -258,7 +259,7 @@ export default {
         },
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportNotasTema)
+            vue.$emit('generateReport', {callback: vue.exportNotasTema, type: vue.reportType})
         },
         async exportNotasTema(reportName) {
 
@@ -268,10 +269,10 @@ export default {
 
             this.$emit('reportStarted')
             const filtersDescriptions = {
-                "Módulos": this.generateNamesString(this.modules, this.modulo),
-                "Escuelas": this.generateNamesString(this.schools, this.school),
-                "Cursos": this.generateNamesString(this.courses, this.course),
-                "Temas": this.generateNamesString(this.topics, this.tema),
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.escuela),
+                "Cursos": this.generateNamesArray(this.courses, this.curso),
+                "Temas": this.generateNamesArray(this.topics, this.tema),
 
                 "Usuarios activos" : this.yesOrNo(userStatusFilter.UsuariosActivos),
                 "Usuarios inactivos" : this.yesOrNo(userStatusFilter.UsuariosInactivos),
@@ -279,14 +280,13 @@ export default {
                 "Temas inactivos": this.yesOrNo(topicStatusFilter.UsuariosInactivos),
                 'Fecha inicial': this.start,
                 'Fecha final': this.end,
-                "Áreas" : this.generateNamesString(this.areas, this.area),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
                 "Cursos libres": this.yesOrNo(this.tipocurso)
             }
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables_v2`
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,

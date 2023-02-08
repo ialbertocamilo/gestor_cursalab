@@ -317,6 +317,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'consolidado_temas',
             schools: [],
             courses: [],
             topics: [],
@@ -358,7 +359,7 @@ export default {
         },
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportNotasTema)
+            vue.$emit('generateReport', {callback: vue.exportNotasTema, type: vue.reportType})
         }
         ,
         async exportNotasTema(reportName) {
@@ -368,10 +369,10 @@ export default {
 
             this.$emit('reportStarted')
             const filtersDescriptions = {
-                "Módulos": this.generateNamesString(this.modules, this.modulo),
-                "Escuelas": this.generateNamesString(this.schools, this.school),
-                "Cursos": this.generateNamesString(this.courses, this.course),
-                "Temas": this.generateNamesString(this.topics, this.tema),
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.escuela),
+                "Cursos": this.generateNamesArray(this.courses, this.curso),
+                "Temas": this.generateNamesArray(this.topics, this.tema),
                 "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
                 "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
                 "Temas activos": this.yesOrNo(TEMAS.UsuariosActivos),
@@ -383,14 +384,13 @@ export default {
                 'Desaprobados': this.yesOrNo(this.desaprobados),
                 'Realizados': this.yesOrNo(this.realizados),
                 'Por iniciar': this.yesOrNo(this.porIniciar),
-                "Áreas" : this.generateNamesString(this.areas, this.area),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
                 "Cursos libres": this.yesOrNo(this.tipocurso)
             }
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas_v3`
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,

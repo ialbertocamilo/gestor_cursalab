@@ -212,6 +212,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'checklist_detallado',
             schools: [],
             courses: [],
             areas:[],
@@ -255,32 +256,36 @@ export default {
 
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportReport)
+            vue.$emit('generateReport', {callback: vue.exportReport, type: vue.reportType})
         },
         async exportReport(reportName) {
-
-            this.$emit('reportStarted', {})
-            const filtersDescriptions = {
-                "Módulos": this.generateNamesString(this.modules, this.modulo),
-                "Escuelas": this.generateNamesString(this.schools, this.school),
-                "Cursos": this.generateNamesString(this.courses, this.course),
-                "Checklist": this.generateNamesString(this.Checklist, this.checklist),
-                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
-                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                'Fecha inicial': FechaFiltro.start,
-                'Fecha final': FechaFiltro.end,
-                "Áreas" : this.generateNamesString(this.areas, this.area)
-            }
 
             let UFC = this.$refs.EstadoFiltroComponent;
             let FechaFiltro = this.$refs.FechasFiltros;
 
-            let url = `${this.$props.reportsBaseUrl}/exportar/checklist_detallado`
+            console.log(this.Checklist_items, this.checklist)
 
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.escuela),
+                "Cursos": this.generateNamesArray(this.courses, this.curso),
+                "Checklist": this.generateNamesArray(this.Checklist_items, this.checklist),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                'Fecha inicial': FechaFiltro.start,
+                'Fecha final': FechaFiltro.end,
+                "Áreas" : this.generateNamesArray(this.areas, this.area)
+            }
+
+            let url = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
 
                 let response = await axios.post(url, {
                     workspaceId: this.workspaceId,
+                    adminId: this.adminId,
+                    reportName,
+                    filtersDescriptions,
                     // cursos_libres : this.cursos_libres,
                     //
                     modulos: this.modulo,

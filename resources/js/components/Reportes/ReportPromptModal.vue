@@ -7,7 +7,8 @@
             persistent: false,
             open: isOpen,
             hideCancelBtn: true,
-            showFloatingCloseButton: true
+            showFloatingCloseButton: true,
+            hideConfirmBtn: !reportName
          }"
             :width="'390px'"
             :showCardActionsBorder="false"
@@ -39,9 +40,18 @@ export default {
             type: String,
             default: ''
         },
+        prefix: {
+            type: String,
+            default: ''
+        },
         isOpen: {
             type: Boolean,
             default: false
+        }
+    },
+    watch: {
+        prefix: function (value) {
+            this.reportName = value
         }
     },
     data () {

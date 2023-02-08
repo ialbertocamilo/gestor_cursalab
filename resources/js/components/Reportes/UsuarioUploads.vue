@@ -52,10 +52,15 @@ export default {
         adminId: 0,
         reportsBaseUrl: ''
     },
+    data() {
+        return {
+            reportType: 'user_uploads',
+        }
+    },
     methods: {
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.descargarUsuarioUploads)
+            vue.$emit('generateReport', {callback: vue.descargarUsuarioUploads, type: vue.reportType})
         },
         async descargarUsuarioUploads(reportName) {
 
@@ -74,7 +79,7 @@ export default {
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/user_uploads`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,

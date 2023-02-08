@@ -127,6 +127,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'usuarios',
             careers:[],
             areas:[],
 
@@ -139,7 +140,7 @@ export default {
 
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportUsuariosDW)
+            vue.$emit('generateReport', { callback: vue.exportUsuariosDW, type: vue.reportType})
         },
         async exportUsuariosDW(reportName) {
 
@@ -147,16 +148,16 @@ export default {
 
             this.$emit('reportStarted', {})
             const filtersDescriptions = {
-                "Módulos" : this.generateNamesString(this.modules, this.modulo),
-                "Activos" : this.yesOrNo(UFC.UsuariosActivos),
-                "Inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
-                "Carreras" : this.generateNamesString(this.careers, this.career),
-                "Áreas" : this.generateNamesString(this.areas, this.area),
+                "Módulos" : this.generateNamesArray(this.modules, this.modulo),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Carreras" : this.generateNamesArray(this.careers, this.career),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
             }
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/usuarios`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
 
             try {
                 let response = await axios({

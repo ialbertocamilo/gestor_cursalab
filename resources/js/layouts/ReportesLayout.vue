@@ -2,19 +2,10 @@
     <v-app class="--section-list">
 
         <ReportPromptModal
-            :placeholder="'Opcional'"
+            :prefix="reportName"
             :isOpen="isAskingForNewReport"
             @cancel="isAskingForNewReport = false"
             @confirm="confirmNewReport($event)"/>
-
-<!--        <DefaultToast-->
-<!--            v-if="isBeingProcessedNotification"-->
-<!--            icon=""-->
-<!--            text="Tu reporte esta siendo procesado."-->
-<!--            :background="'#FFC225'"-->
-<!--            @close="isBeingProcessedNotification = false"-->
-<!--            @delay-finished="isBeingProcessedNotification = false"-->
-<!--        />-->
 
         <v-row style="flex: 0 1 auto">
             <v-col cols="12" class="main-tabs-wrapper">
@@ -25,7 +16,7 @@
                     <v-icon :color="activeTab === 'history' ? 'white' : '#5457E7'">
                         mdi-folder-file-outline
                     </v-icon>
-                    Reportes
+                    Mis reportes
                 </button>
                 <button
                     @click="activeTab = 'new-report'"
@@ -34,7 +25,7 @@
                     <v-icon :color="activeTab === 'new-report' ? 'white' : '#5457E7'">
                         mdi-file-chart
                     </v-icon>
-                    Nuevo reporte
+                    Generar nuevo reporte
                 </button>
             </v-col>
         </v-row>
@@ -527,12 +518,10 @@ import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
 import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
-import DefaultToast from "../components/globals/DefaultToast.vue";
 
 export default {
     components: {
         ReportPromptModal,
-        DefaultToast,
         ReportsHistory,
         HistorialUsuario,
         NotasUsuario,
@@ -565,6 +554,7 @@ export default {
 
             modules: [],
             admins: [],
+            reportTypes: [],
             reportsBaseUrl: '',
 
             value: "",
@@ -584,6 +574,7 @@ export default {
 
             selectedFilters: {},
             filenameDialog: false,
+            reportName: '',
             isBeingProcessedNotification: false,
             isReadyNotification: false,
             reportDownloadUrl: null,
@@ -640,7 +631,20 @@ export default {
             this.admins = response2.data.admins
             this.VademecumList = response2.data.vademecums
 
-            // console.log(response2.data);
+            // Fetch report types
+
+            let reportTypesUrl = '../reports/types'
+            try {
+                let response3 = await axios({
+                    url: reportTypesUrl,
+                    method: 'get'
+                })
+
+                vue.reportTypes = response3.data.data
+            } catch (ex) {
+                console.log(ex)
+            }
+
         },
         async crearReporte(res) {
 
@@ -673,9 +677,17 @@ export default {
                 this.hideLoader()
             }
         },
-        generateReport(callback) {
-            this.generateReportCallback = callback
+        generateReport(report) {
+            this.generateReportCallback = report.callback
             this.isAskingForNewReport = true
+
+            // Generate report name
+            const reportType = this.reportTypes.find(rt => rt.code === report.type)
+
+            if (reportType) {
+                this.reportName = reportType.name + ' ' + moment(new Date).format('MM-DD')
+                console.log(this.reportName)
+            }
         },
         confirmNewReport(event) {
 
@@ -687,7 +699,21 @@ export default {
             const message = event.reportName
                 ? `Tu solicitud de reporte "${event.reportName}" se añadió correctamente.`
                 : `Tu solicitud de reporte se añadió correctamente.`
-            this.$toast.warning(message)
+
+            this.$toast.warning({
+                component: Vue.component('comp', {
+                    template: `
+                        <div>${message} <a href="javascript:"
+                                             @click.stop="clicked">Revisalo aquí</a>
+                        </div>`,
+                    methods: {
+                        clicked() { this.$emit('redirect') }
+                    }
+                }),
+                listeners: {
+                    redirect: () => { window.location.href = '/exportar/node' }
+                }
+            });
         }
     },
     computed: {

@@ -17,7 +17,10 @@
                                     Fecha
                                 </th>
                                 <th class="text-left text-white">
-                                    Reporte
+                                    Tipo
+                                </th>
+                                <th class="text-left text-white">
+                                    Nombre
                                 </th>
                                 <th class="text-center text-white">
                                     Filtros usados
@@ -39,6 +42,7 @@
                             :key="item.id"
                         >
                             <td>{{ item.created_at }}</td>
+                            <td>{{ item.report_type }}</td>
                             <td>{{ item.name }}</td>
                             <td class="text-center">
 
@@ -144,7 +148,7 @@ export default {
                     method: 'get'
                 })
 
-                this.reports = response.data.data.data
+                this.reports = response.data.data
 
             } catch (ex) {
                 console.log(ex)

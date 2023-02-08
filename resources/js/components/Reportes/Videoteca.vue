@@ -80,10 +80,15 @@ export default {
         adminId:{ type: Number, required: true },
         reportsBaseUrl: { type: String, required: true }
     },
+    data() {
+      return {
+          reportType: 'videoteca',
+      }
+    },
     methods: {
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.ExportarVideoteca)
+            vue.$emit('generateReport', {callback: vue.ExportarVideoteca, type: vue.reportType})
         },
         async ExportarVideoteca(reportName) {
 
@@ -91,7 +96,7 @@ export default {
             this.$emit('reportStarted', {})
 
 
-            const url = `${this.reportsBaseUrl}/exportar/videoteca`
+            const url = `${this.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: url,

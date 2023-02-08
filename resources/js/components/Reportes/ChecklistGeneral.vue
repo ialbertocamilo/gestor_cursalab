@@ -188,6 +188,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'checklist_general',
             Escuelas: [],
             Cursos: [],
             //
@@ -212,7 +213,7 @@ export default {
 
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportReport)
+            vue.$emit('generateReport', {callback: vue.exportReport, type: vue.reportType})
         },
         async exportReport(reportName) {
 
@@ -221,15 +222,15 @@ export default {
 
             this.$emit('reportStarted', {})
             const filtersDescriptions = {
-                "Módulos": this.generateNamesString(this.modules, this.modulo),
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
                 "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
                 "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
                 'Fecha inicial': FechaFiltro.start,
                 'Fecha final': FechaFiltro.end,
-                "Áreas" : this.generateNamesString(this.areas, this.area)
+                "Áreas" : this.generateNamesArray(this.areas, this.area)
             }
 
-            let url = `${this.$props.reportsBaseUrl}/exportar/checklist_general`
+            let url = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
 
             try {
 

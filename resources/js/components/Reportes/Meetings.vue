@@ -138,7 +138,6 @@ export default {
             let vue = this
             vue.queryStatus("reportes", "descargar_reporte_meetings");
 
-
             const start = this.start
             const end = this.end
 

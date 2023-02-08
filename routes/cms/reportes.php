@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportsController;
 Route::get('reportes/{layout}', [ExportarController::class, 'indexReport'])->name('exportar.reportes');
 
 Route::get('/reports/queue', [ReportsController::class, 'loadReportsQueue']);
+Route::get('/reports/types', [ReportsController::class, 'loadRepotsTypes']);
 
 Route::prefix('exportar')->controller(ExportarController::class)->group(function () {
 

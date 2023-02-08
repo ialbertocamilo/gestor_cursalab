@@ -70,9 +70,6 @@ Vue.use(IconsPlugin);
 // import 'bootstrap/dist/css/bootstrap.css'
 import "bootstrap-vue/dist/bootstrap-vue.css";
 
-
-Vue.component("default-toast", require("./components/globals/DefaultToast.vue"));
-
 Vue.component("tags-form", require("./components/forms/Tags.vue"));
 Vue.component("curricula-form", require("./components/forms/Curricula.vue"));
 

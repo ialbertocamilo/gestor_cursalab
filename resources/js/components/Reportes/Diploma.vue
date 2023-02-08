@@ -204,6 +204,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'diplomas',
             schools: [],
             courses: [],
 
@@ -272,19 +273,10 @@ export default {
         },
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue._exportDiplomas)
+            vue.$emit('generateReport', {callback: vue._exportDiplomas, type: vue.reportType})
         },
         async _exportDiplomas(reportName) {
             const vue = this;
-
-            this.$emit('reportStarted', {})
-            const filtersDescriptions =  {
-                "Módulos": this.generateNamesString(this.modules, this.filters.module),
-                "Escuelas": this.generateNamesString(this.schools, this.filters.school),
-                "Cursos": this.generateNamesString(this.courses, this.filters.course),
-                "Fecha de emisión": this.filters.date
-            }
-
 
             const pushDataStates = (states) => {
                 let stackTemporal = [];
@@ -299,6 +291,24 @@ export default {
             const estados_usuario = pushDataStates(vue.$refs.EstadoUsuarioFiltroComponent);
             const estados_escuela = pushDataStates(vue.$refs.EstadoEscuelaFiltroComponent);
             const estados_curso = pushDataStates(vue.$refs.EstadoCursoFiltroComponent);
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions =  {
+                "Módulos": this.generateNamesArray(this.modules, this.filters.module),
+                "Escuelas": this.generateNamesArray(this.schools, this.filters.school),
+                "Cursos": this.generateNamesArray(this.courses, this.filters.course),
+                "Fecha de emisión": this.filters.date.length > 0
+                    ? this.filters.date
+                    : '',
+                "Usuarios activos" : this.yesOrNo(estados_usuario.includes(1)),
+                "Usuarios inactivos" : this.yesOrNo(estados_usuario.includes(0)),
+
+                "Escuelas activas" : this.yesOrNo(estados_escuela.includes(1)),
+                "Escuelas inactivas" : this.yesOrNo(estados_escuela.includes(0)),
+
+                "Cursos activos" : this.yesOrNo(estados_curso.includes(1)),
+                "Cursos inactivos" : this.yesOrNo(estados_curso.includes(0)),
+            }
 
             const reqPayload = {
                 //data
@@ -321,7 +331,7 @@ export default {
                 filtersDescriptions
             };
 
-            const urlReport = `${vue.reportsBaseUrl}/exportar/diplomas`
+            const urlReport = `${vue.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,

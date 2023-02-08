@@ -93,6 +93,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'segmentation',
             schools: [],
             courses: [],
             //
@@ -128,19 +129,19 @@ export default {
         ,
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportSegmentacion)
+            vue.$emit('generateReport', {callback: vue.exportSegmentacion, type: vue.reportType})
         },
         async exportSegmentacion(reportName) {
 
             this.$emit('reportStarted', {})
             const filtersDescriptions = {
-                "Escuelas": this.generateNamesString(this.schools, this.filters.school),
-                "Cursos": this.generateNamesString(this.courses, [this.filters.course]),
+                "Escuelas": this.generateNamesArray(this.schools, this.filters.school),
+                "Cursos": this.generateNamesArray(this.courses, [this.filters.course]),
             }
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/segmentation`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,

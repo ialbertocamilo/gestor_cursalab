@@ -128,6 +128,7 @@ export default {
     },
     data() {
         return {
+            reportType: 'reinicios',
             tipos: [ {id:'por_tema', name:'Reinicios por temas'},
                      {id:'por_curso', name:'Reinicios por cursos'},
                      {id:'total', name:'Reinicios totales'} ],
@@ -141,7 +142,7 @@ export default {
     methods: {
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.exportRenicios)
+            vue.$emit('generateReport', {callback: vue.exportRenicios, type: vue.reportType})
         },
         async exportRenicios(reportName) {
 
@@ -149,14 +150,14 @@ export default {
 
             this.$emit('reportStarted', {})
             const filtersDescriptions = {
-                "Administradores": this.generateNamesString(this.admins, this.admin),
+                "Administradores": this.generateNamesArray(this.admins, this.admin),
                 'Fecha inicial': this.start,
                 'Fecha final': this.end
             }
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/reinicios`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,

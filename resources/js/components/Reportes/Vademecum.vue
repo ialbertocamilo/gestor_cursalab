@@ -100,23 +100,23 @@ export default {
     },
     data() {
         return {
+            reportType: 'vademecum',
             vademecumSelected: []
         };
     },
     methods: {
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', vue.ExportarVademecum)
+            vue.$emit('generateReport', {callback: vue.ExportarVademecum, type: vue.reportType})
         },
         async ExportarVademecum(reportName) {
 
             this.$emit('reportStarted', {})
             const filtersDescriptions = {
-                'Vademecum' : this.generateNamesString(this.vademecumList, this.vademecumSelected),
+                'Vademecum' : this.generateNamesArray(this.vademecumList, this.vademecumSelected),
             }
 
-
-            let urlReport = `${this.reportsBaseUrl}/exportar/vademecum`
+            let urlReport = `${this.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,
