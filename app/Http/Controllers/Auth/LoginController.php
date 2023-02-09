@@ -80,7 +80,7 @@ class LoginController extends Controller
     public function showLoginFormInit()
     {
         if(session()->has('init_2fa')) {
-            //resetear codigo y expiracion
+            // resetear codigo y expiracion
             $user = auth()->user();
             $user->resetToNullCode2FA();
 
@@ -88,7 +88,7 @@ class LoginController extends Controller
         }
 
         if(session()->has('init_reset')) {
-            //resetear codigo y expiracion - reset pass
+            // resetear codigo y expiracion - reset pass
             $user = auth()->user();
             $user->resetToNullResetPass();
 
@@ -133,15 +133,10 @@ class LoginController extends Controller
 
         $user = new User;
 
+        // === intentos ===
         $userAttempt = $user->checkAttemptManual($request); 
-        if($userAttempt) {
-            // verficacion de attempts
-            if($userAttempt->attempts >= env('ATTEMPTS_LOGIN_MAX') && now() <= $userAttempt->attempts_lock_time) {
-                $userAttempt['fulled_attempts'] = true;
-                return $this->sendAttempsResponse($userAttempt);
-            } 
-            // verficacion de attempts
-        }
+        if($userAttempt) return $this->sendAttempsResponse($userAttempt);
+        // === intentos ===
 
         if ($this->attemptLogin($request)) {
 
@@ -167,14 +162,13 @@ class LoginController extends Controller
 
                 } else {
                     
-                    // verifica si se requiere actualizar contraseña
-                    if($this->checkIfCanResetPassword()) {
+                    // === reset password ===
+                    if($user->checkIfCanResetPassword()) {
                         return $this->showResetPassword();
                     }
-                    // verifica si se requiere actualizar contraseña
+                    // === reset password ===
 
-                    // === iniciar session ===
-                    return $this->sendLoginResponse($request);
+                    return $this->sendLoginResponse($request); // login
                 }
                
             } else {
@@ -232,23 +226,6 @@ class LoginController extends Controller
         }
     }
 
-    // verificar si debe actualizar su contraseña
-    public function checkIfCanResetPassword()
-    {
-        $user = $this->guard()->user();
-        $currentDays = env('RESET_PASSWORD_DAYS');
-        settype($currentDays, "int");
-
-        if(is_null($user->last_pass_updated_at)) {
-            return true;
-        }
-        
-        $diferenceDays = now()->diffInDays($user->last_pass_updated_at);
-
-        return ($diferenceDays >= $currentDays);
-        // return ($diferenceDays >= $currentDays) && $user->enable_resetpass;
-    }
-    
     // actualizar contraseña usuario
     public function reset_pass(ResetPasswordRequest $request)
     {
@@ -291,7 +268,6 @@ class LoginController extends Controller
         ]);
     }
 
-
     // verificar el codigo y expiracion 2FA
     public function auth2fa(Request $request) 
     {
@@ -303,14 +279,13 @@ class LoginController extends Controller
             session()->forget('init_2fa'); 
             $user->resetToNullCode2FA();
 
-            // verifica si se requiere actualizar contraseña
-            if($this->checkIfCanResetPassword()) {
+            // === reset password ===
+            if($user->checkIfCanResetPassword()) {
                 return $this->showResetPassword();
             }
-            // verifica si se requiere actualizar contraseña
+            // === reset password ===
 
-            // === iniciar session ===
-            return $this->sendLoginResponse($request);
+            return $this->sendLoginResponse($request); // login
         }
         
         throw ValidationException::withMessages([

@@ -1073,6 +1073,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         ];
     }
 
+    // === 2FA ===
     public function generateCode2FA()
     {
         $user = $this;
@@ -1110,7 +1111,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $user->save();
     }
+    // === 2FA ===
 
+    // === RESET PASSWORD ===
     public function resetToNullResetPass()
     {
         $user = $this;
@@ -1130,14 +1133,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $user->save();
     }
 
-    // validamos el token para la vista 'auth.passwords.reset.blae.php'
     public function checkPassUpdateToken($token, $id_user) 
     {
+        // validamos el token para la vista 'auth.passwords.reset.blae.php'
         return $this->where('pass_token_updated', $token)
                     ->where('id', $id_user)->count();
     }
 
-    // actualizar contraseña usuario
     public function updatePasswordUser($password) 
     {
         $user = $this;
@@ -1147,12 +1149,56 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->update($data);
     }
 
-    // incrementar intentos
+    public function checkIfCanResetPassword()
+    {
+        $user = $this;
+
+        $currentDays = env('RESET_PASSWORD_DAYS');
+        settype($currentDays, "int");
+
+        if(is_null($user->last_pass_updated_at)) {
+            return true;
+        }
+        //verficar la vigencia de dias
+        $diferenceDays = now()->diffInDays($user->last_pass_updated_at);
+        return ($diferenceDays >= $currentDays);
+    }
+    // === RESET PASSWORD ===
+
+    // === INTENTOS APP/GESTOR ===
+    public function userIncrementAttempts($current, $currentAttempts)
+    {
+        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK');
+        $userAttempts = $current->attempts;
+        $fulledAttempts = false;
+
+        // nro de bloqueos
+        if($userAttempts >= $currentAttempts) {
+            $current->attempts = $currentAttempts;
+            $fulledAttempts = true;
+        } else {
+            $current->attempts = $userAttempts + 1;
+            $fulledAttempts = (($userAttempts + 1) == $currentAttempts);
+        }
+
+        // nro de bloqueos
+        if($fulledAttempts) {
+            $current->attempts_times_locks = $current->attempts_times_locks + 1;
+        }
+
+        $current->attempts_lock_time = now()->addMinutes($currentMinutes);
+        $current->timestamps = false;
+
+        $current->save();
+        $current['fulled_attempts'] = $fulledAttempts; 
+
+        return $current;
+    }
+
     public function incrementAttempts($email)
     {
         $user = $this;
         $currentAttempts = env('ATTEMPTS_LOGIN_MAX');
-        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK');
 
         // existe ese email-usuario
         $current = $user->where('email', $email)->first();
@@ -1161,31 +1207,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $userAttempts = $current->attempts;
         $current_user = $current;
 
-        // retornar el tiempo restantes
-        if($userAttempts == $currentAttempts) {
+        // intentos completos
+        if ($userAttempts == $currentAttempts) {
             $current_user['fulled_attempts'] = true;
             return $current_user;
         }
 
-        // retornar los intentos restantes
-        $current_user->timestamps = false;
-        $current_user->attempts = $userAttempts + 1;
-        $current_user->attempts_lock_time = now()->addMinutes($currentMinutes);
-
-        $current_user->save();
-
-         if($current_user->attempts == $currentAttempts) {
-            $current_user->attempts_times_locks = $current_user->attempts_times_locks + 1;
-            $current_user->save();
-
-            $current_user['fulled_attempts'] = true;
-            return $current_user;
-        }
-        $current_user['fulled_attempts'] = false; 
-        return $current_user;
+        return $this->userIncrementAttempts($current_user, $currentAttempts);
     }
 
-    //verificar tiempo
     public function checkTimeToReset($email)
     {
         $user = $this;
@@ -1221,15 +1251,44 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function checkAttemptManual($request)
     {
+        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK');
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX');
+
         $user = $this;
-        $attempt = $user->where('email', $request->email)
+        $current = $user->where('email', $request->email)
                         ->where('active', 1)->first();
     
-        if(!$attempt) return false;
+        if(!$current) return false;
 
-        $checkEmail = $attempt->email == $request->email;
-        $checkPassword = Hash::check($request->password, $attempt->password);
+        $checkEmail = ($current->email == $request->email);
+        $checkPassword = Hash::check($request->password, $current->password);
 
-        return ($checkEmail && $checkPassword) ? $attempt : false;
+        if($checkEmail && $checkPassword) {
+            $timeCondition = (now() <= $current->attempts_lock_time);
+            
+            if($current->attempts == $currentAttempts && $timeCondition) {
+                $current['fulled_attempts'] = true;
+                return $current;
+            }
+
+            if($current->attempts >= $currentAttempts && $timeCondition) {
+
+                $current->attempts = $currentAttempts;
+                $current->timestamps = false;
+
+                $current->save();
+                $current['fulled_attempts'] = true;
+
+                return $current;
+            } 
+
+            return false;
+        }
+        return false;
     }
+    // === INTENTOS APP/GESTOR ===
+
+    /* user / success / 
+       user 5 const 7 */
+
 }
