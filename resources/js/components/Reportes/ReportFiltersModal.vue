@@ -106,11 +106,7 @@ export default {
             this.filterDescriptions = []
             let isTheFirstElement = true
             for (let [property, values] of Object.entries(filters)) {
-                //
-                // if (Array.isArray(values)) {
-                //     values = value.sort()
-                // }
-                console.log(values)
+
                 this.filterDescriptions.push({
                     label: property,
                     key: this.generateKey(property),
