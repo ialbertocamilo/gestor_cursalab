@@ -39,8 +39,16 @@ class EscuelaController extends Controller
         // $school->nombre_ciclo_0 = $nombre_ciclo_0->nombre ?? null;
         $school->makeHidden('scheduled_restarts');
 
+        $school->load('subworkspaces');
+
+        $workspace = get_current_workspace();
+
+        $modules = Workspace::where('parent_id', $workspace?->id)
+            ->select('id', 'name')->get();
+
         return $this->success([
             'escuela' => $school,
+            'modules' => $modules,
         ]);
     }
 

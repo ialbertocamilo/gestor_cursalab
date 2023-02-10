@@ -17,9 +17,14 @@ class School extends BaseModel
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1');
     }
 
-    public function subworkspaces()
+    public function workspaces()
     {
         return $this->belongsToMany(Workspace::class);
+    }
+
+    public function subworkspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'school_subworkspace', 'school_id', 'subworkspace_id');
     }
 
     public function courses()
@@ -40,7 +45,7 @@ class School extends BaseModel
         $escuelas = School::
             // whereRelation('workspaces', 'workspace_id', $workspace->id)
             whereHas('subworkspaces', function ($j) use ($modules_id) {
-                $j->whereIn('workspace_id', $modules_id);
+                $j->whereIn('subworkspace_id', $modules_id);
             })
             ->withCount(['courses']);
             // ->withCount(['courses' => function ($c) use ($workspace) {
