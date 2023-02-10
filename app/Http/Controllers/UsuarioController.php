@@ -208,7 +208,7 @@ class UsuarioController extends Controller
 
         // $data['subworkspace_id'] = get_current_workspace()?->id;
 
-        User::storeRequest($data);
+        // User::storeRequest($data);
 
         return $this->success(['msg' => 'Usuario creado correctamente.']);
     }

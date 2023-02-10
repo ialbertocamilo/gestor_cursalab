@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class ResetPasswordRequest extends FormRequest
 {
@@ -23,10 +24,16 @@ class ResetPasswordRequest extends FormRequest
      */
     public function rules()
     {
+        $user = auth()->user();
+        $piecesPass = stringConcatEqualNum([$user->document, $user->email], 4);
+
         return [
             'token' => 'nullable',
             'currpassword' => 'nullable|max:100|min:8',
-            'password' => 'required|max:100|min:8',
+            'password' => ['required', 'max:100',"not_regex:/($piecesPass)/i", 
+                            Password::min(8)->mixedCase()
+                                            ->numbers()
+                                            ->uncompromised(3) ],
             'repassword' => 'required|max:100|min:8'
         ];
     }
@@ -37,6 +44,7 @@ class ResetPasswordRequest extends FormRequest
             'password.required'=> 'El campo nueva contraseña es obligatorio',
             'password.min' => 'El campo nueva contraseña debe contener al menos 8 caracteres.',
             'password.max' => 'El campo nueva contraseña no debe ser mayor que 100 caracteres.',
+            'password.not_regex' => 'El campo nueva contraseña debe ser diferente.',
 
             'repassword.required' => 'El campo repetir nueva contraseña es obligatorio.',
             'repassword.min' => 'El campo repetir nueva contraseña debe contener al menos 8 caracteres.',
