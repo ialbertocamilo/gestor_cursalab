@@ -444,18 +444,19 @@ Segment extends BaseModel
             ->first();
 
         // Load criteria values ids
+        return Segment::where('model_id',$supervisorId)->where('code_id',$supervisorTaxonomy->id)->with('values')->get();
 
-        return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
-            ->where('segments.model_id', $supervisorId)
-            ->where('segments.code_id', $supervisorTaxonomy->id)
-            ->where('segments.active', 1)
-            ->whereNull('segments_values.deleted_at')
-            ->select([
-                'segments_values.criterion_id',
-                'segments_values.criterion_value_id'
-            ])
-            ->orderBy('criterion_id')
-            ->get();
+        // return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
+        //     ->where('segments.model_id', $supervisorId)
+        //     ->where('segments.code_id', $supervisorTaxonomy->id)
+        //     ->where('segments.active', 1)
+        //     ->whereNull('segments_values.deleted_at')
+        //     ->select([
+        //         'segments_values.criterion_id',
+        //         'segments_values.criterion_value_id'
+        //     ])
+        //     ->orderBy('criterion_id')
+        //     ->get();
     }
 
     public static function loadSupervisorSegmentUsersIds($supervisorId, $workspaceId): array|string
