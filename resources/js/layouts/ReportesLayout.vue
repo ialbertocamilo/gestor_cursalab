@@ -7,7 +7,7 @@
             @cancel="isAskingForNewReport = false"
             @confirm="confirmNewReport($event)"/>
 
-        <v-row style="flex: 0 1 auto">
+        <v-row class="pl-3 pr-3" style="flex: 0 1 auto">
             <v-col cols="12" class="main-tabs-wrapper">
                 <button
                     @click="activeTab = 'history'"

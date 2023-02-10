@@ -17,10 +17,12 @@
         >
             <template v-slot:content>
                 <p>
-                    Esta acción puede tomar unos minutos, por lo que te notificaremos cuando esté listo para su descarga.
+                    Esta acción puede tomar unos minutos, por lo que te
+                    notificaremos cuando esté listo para su descarga.
                 </p>
                 <p>
-                    Podrás ver el estado de tu solicitud en la sección de Reportes generados.
+                    Podrás ver el estado de tu solicitud en la sección de
+                    "Mis reportes".
                 </p>
 
                 <v-text-field
@@ -65,11 +67,9 @@ export default {
     methods: {
         close() {
             this.$emit('cancel')
-            this.reportName = ''
         },
         confirm() {
             this.$emit('confirm', { reportName: this.reportName })
-            this.reportName = ''
         }
     }
 }
