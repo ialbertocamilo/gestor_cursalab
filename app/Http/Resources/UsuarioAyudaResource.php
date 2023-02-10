@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -36,7 +37,7 @@ class UsuarioAyudaResource extends JsonResource
             'info_support' => $this->info_support ?? '',
             'msg_to_user' => $this->msg_to_user ?? '',
             'contact' => $this->contact ?? '',
-            'created_at' => $this->created_at?->format('d/m/Y g:i a'),
+            'cretead_at' => Carbon::parse($this->created_at)->subHours(5)->format('d/m/Y g:i A'),
             'updated_at' => $this->updated_at?->format('d/m/Y g:i a'),
         ];
 

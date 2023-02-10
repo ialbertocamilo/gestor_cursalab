@@ -65,7 +65,7 @@ class Ticket extends BaseModel
                         $q->where('name', 'like', "%$request->q%");
 
                         //                        if (strlen($request->q) > 4)
-                        //                            $q->orWhere('dni', 'like', "%$request->q%");
+                        $q->orWhere('dni', 'like', "%$request->q%");
                     }
 
                     if ($request->modulo)
