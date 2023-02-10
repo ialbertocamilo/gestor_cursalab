@@ -55,6 +55,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     use Notifiable;
 
     use Cachable;
+    
+    use SoftDeletes;
 
     use Cachable {
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
