@@ -15,6 +15,7 @@ class SummaryTopic extends Summary
         'failed_answers', 'restarts', 'current_quiz_started_at', 'current_quiz_finishes_at', 'taking_quiz', 'grade',
         'old_admin_id', 'answers_old', 'restarter_id',
         'passed', 'last_time_evaluated_at',
+        'last_media_access', 'last_media_duration', 'media_progress',
     ];
 
     protected $casts = [
@@ -42,6 +43,11 @@ class SummaryTopic extends Summary
     public function status()
     {
         return $this->belongsTo(Taxonomy::class, 'status_id');
+    }
+
+    public function mediatopic()
+    {
+        return $this->belongsTo(MediaTema::class, 'last_media_access');
     }
 
     protected function setStartQuizData($topic)

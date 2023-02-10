@@ -45,6 +45,10 @@ return new class extends Migration
             $table->foreignId('source_id')->nullable()->constrained('taxonomies');
             $table->foreignId('status_id')->nullable()->constrained('taxonomies');
 
+            $table->foreignId('last_media_access')->nullable()->constrained('media_topics');
+            $table->string('last_media_duration')->nullable();
+            $table->json('media_progress')->nullable();
+
             $table->boolean('active')->nullable();
 
             $table->timestamps();

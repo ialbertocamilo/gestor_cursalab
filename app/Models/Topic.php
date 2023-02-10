@@ -477,12 +477,26 @@ class Topic extends BaseModel
             foreach ($topics as $topic) {
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
-                
+
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
                     $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
                         ? route('media.download.media_topic', [$media->id]) : null;
                 }
+
+                $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+                ->where('topic_id', $topic->id)
+                ->where('user_id', $user->id)
+                ->first();
+
+
+                $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+                $last_media_access = $summary_topic?->last_media_access;
+                $last_media_duration = $summary_topic?->last_media_duration;
+
+                $media_topic_progress = array('media_progress' => $media_progress,
+                                            'last_media_access' => $last_media_access,
+                                            'last_media_duration' => $last_media_duration);
 
                 // if (true) {
                 if ($course->compatible) {
@@ -494,6 +508,7 @@ class Topic extends BaseModel
                         'imagen' => $topic->imagen,
                         'contenido' => $topic->content,
                         'media' => $media_topics,
+                        'media_topic_progress'=>$media_topic_progress,
                         'evaluable' => 'no',
                         'tipo_ev' => NULL,
                         'nota' => '-',
@@ -516,6 +531,7 @@ class Topic extends BaseModel
                     'imagen' => $topic->imagen,
                     'contenido' => $topic->content,
                     'media' => $media_topics,
+                    'media_topic_progress'=>$media_topic_progress,
                     'evaluable' => $topic->assessable ? 'si' : 'no',
                     'tipo_ev' => $topic->evaluation_type->code ?? NULL,
                     'nota' => $topic_status['grade'],
