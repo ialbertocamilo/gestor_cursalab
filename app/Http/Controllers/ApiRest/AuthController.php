@@ -1,12 +1,15 @@
 <?php
 
 namespace App\Http\Controllers\ApiRest;
+
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginAppRequest;
+use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest, 
+                        PasswordResetAppRequest };
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\Usuario;
+use App\Models\{ Usuario, User };
 use Exception;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -31,46 +34,13 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
 
-            $currentOS = $data['os'] ?? '';
-            $availableRecaptcha = true;
-
-            if($currentOS and $currentOS == 'android' ) {
-                $currentVersion = $data['version'];
-                settype($currentVersion, "float");
-
-                $mobilesVersion = ['android' => 3.3];
-
-                if($currentVersion >= $mobilesVersion[$currentOS]) {
-                    $availableRecaptcha = true;
-                }else{
-                    $availableRecaptcha = false;
-                }
-            }
-
-            // verificar el sitetoken - recapcha
+            // === validacion de recaptcha ===
+            $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
             if($availableRecaptcha) {
-                $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
-                $recaptcha_response = NULL;
-                
-                if($g_recaptcha_response) {
-                    //validar token recaptcha
-                    $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
-                    if(!$recaptcha_response['success']) {
-                        return $this->error('error-recaptcha', 500, $recaptcha_response);
-                    }
-                    //validar el score de recaptcha
-                    if(!$recaptcha_response['score'] >= 0.5) {
-                        return $this->error('error-recaptcha', 500, [ 
-                                'score' => $recaptcha_response['score'],
-                                'error-codes' => ['score-is-low']
-                            ]);
-                    }
-                }else {
-                    return $this->error('error-recaptcha', 500, [ 
-                        'message' => 'recaptcha is required'
-                    ]);
-                }
-            }
+                $responseRecaptcha = $this->checkRecaptchaData($data);
+                if($responseRecaptcha !== true) return $responseRecaptcha;
+            }  
+            // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
             $password = strip_tags($data['password']);
@@ -80,6 +50,16 @@ class AuthController extends Controller
             // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
             $credentials1['username'] = trim($userinput);
             $credentials2['document'] = trim($userinput);
+
+            $userInstance = new User;
+
+            // === validacion de intentos ===
+            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2]); 
+            if($user_attempts) {
+                $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+                return $this->error('Intento fallido.', 401, $responseAttempts);
+            }
+            // === validacion de intentos ===
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
 
@@ -107,12 +87,33 @@ class AuthController extends Controller
                         return $this->error($message, 401);
                     }
                 }
-                
-                $responseUserData = $this->respondWithDataAndToken($data);
+
+                $user = Auth::user();
+                $user->resetAttemptsUser(); // resetea intentos
+
+                // === validar si debe reestablecer contraseña ===
+                $canResetPassWord = $user->checkIfCanResetPassword();
+                if($canResetPassWord) {
+                    // === verificar el dni como password ===
+                    $responseResetPass = $this->checkSameDataCredentials(trim($userinput), $password);
+                    return response()->json($responseResetPass);
+                }
+                // === validar si debe reestablecer contraseña === 
+
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
+                $responseUserData = $this->respondWithDataAndToken($data);
                 return response()->json($responseUserData); 
 
             } else {
+                // === validacion de intentos ===
+                $userInstance->checkTimeToReset($userinput, 'APP'); 
+                $user_attempts = $userInstance->incrementAttempts($userinput, 'APP');
+                if($user_attempts) {
+                    $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+                    return $this->error('Intento fallido.', 401, $responseAttempts);
+                }
+                // === validacion de intentos ===
+
                 return $this->error('No autorizado.', 401);
             }
 
@@ -286,16 +287,150 @@ class AuthController extends Controller
         }
     }
 
+    public function sendAttempsAppResponse($user_attempts)
+    {
+        $errors = [ 'current_time'   => now()->diff($user_attempts->attempts_lock_time)->format("%I:%S"),
+                    'attempts_count' => $user_attempts->attempts,
+                    'attempts_max'   => env('ATTEMPTS_LOGIN_MAX_APP'),
+                    'attempts_fulled'=> $user_attempts->fulled_attempts ];
+
+        return $errors;
+    }
+
+    public function checkVersionMobileRecaptcha($data)
+    {
+        $currentOS = $data['os'] ?? '';
+        $availableRecaptcha = false; // estado de recaptcha
+
+        if($currentOS && $currentOS == 'android' ) {
+            $currentVersion = $data['version'];
+            settype($currentVersion, "float");
+
+            $mobilesVersion = ['android' => 3.3];
+
+            if($currentVersion >= $mobilesVersion[$currentOS]) $availableRecaptcha = true;
+            else $availableRecaptcha = false;
+        }
+
+        return $availableRecaptcha; 
+    }
+
+    public function checkRecaptchaData($data)
+    {
+        $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
+        $recaptcha_response = NULL;
+                
+        if ($g_recaptcha_response) {
+            //validar token recaptcha
+            $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
+            if(!$recaptcha_response['success']) {
+                return $this->error('error-recaptcha', 500, $recaptcha_response);
+            }
+            //validar el score de recaptcha
+            if(!$recaptcha_response['score'] >= 0.5) {
+                return $this->error('error-recaptcha', 500, [ 
+                        'score' => $recaptcha_response['score'],
+                        'error-codes' => ['score-is-low']
+                ]);
+            }
+     
+            return true;
+
+        } else { 
+            return $this->error('error-recaptcha', 500); 
+        }
+    }
+
     public function validateRecaptcha($siteToken) {
         $secretKey = env('RECAPTCHA_TOKEN'); 
         $recaptchaUrl = env('RECAPTCHA_BASE_URL');
 
-        // validamo token recaptcha
+        // validamos token recaptcha
         $responseRecaptcha = Http::asForm()->post($recaptchaUrl, [
             'secret' => $secretKey,
             'response' => $siteToken
         ]);
 
         return $responseRecaptcha->json();
+    }
+
+    public function checkSameDataCredentials($userinput, $password)
+    {
+        $user = auth()->user();
+        $checkCredentials['require_quizz'] = ($userinput === $password) && ($user->email === NULL);
+        
+        if(!$checkCredentials['require_quizz']) {
+            return $this->sendEmailResetPassword($user, $checkCredentials);
+        }
+        return $checkCredentials;
+    }
+
+    public function sendEmailResetPassword($user, $checkCredentials)
+    {
+        $workspaceName = Workspace::find($user->subworkspace->parent_id)->name;
+        $subWorkspaceName = $user->subworkspace->name;
+
+        $mail_data = [ 'email' =>  $user->email,
+                       'workspace' => $workspaceName,
+                       'subworkspace' => $subWorkspaceName,
+                       'fullname' => $user->name.' '.$user->lastname ];
+
+        $status = Password::sendResetLink(['email' => $user->email]);
+
+        $checkCredentials['recovery_email']['success'] = ($status === Password::RESET_LINK_SENT);
+        $checkCredentials['recovery_email']['data'] = $mail_data;
+
+        return $checkCredentials;
+    }
+
+    public function resendEmailResetPassword()
+    {
+        if(!session('auth_resend')) return $this->error('no-auth-resend', 503);
+        if(!auth()->user()) return $this->error('no-auth-reset', 503);
+
+        $user = auth()->user(); 
+        return $user->email ? $this->success('Reenviamos email', $this->sendEmailResetPassword($user)):
+                              $this->error('no-auth-reset', 503);
+    }
+
+    public function validateQuizz(QuizzAppRequest $request)
+    {
+        if(Auth::check()) {
+            dd('paseed check autentication');
+        }
+        $user = auth()->user();
+    }
+
+    public function checkTokenResetPass_One(PasswordResetAppRequest $request)
+    {
+        if(!auth()->user()) return $this->error('no-auth-reset', 503);
+
+        $request->add(['email' => auth()->user()->email]);
+        $request->validated();
+
+        $credentials = $request->only('email', 'password', 'password_confirmation', 'token');
+
+        $status = Password::reset($credentials, function($user, $password) {
+            $user->password = $password;
+            $user->setRememberToken(Str::random(60));
+            $user->save();
+        });
+
+        return $this->success('Contraseña actualizada', ['success' => ($status == Password::PASSWORD_RESET)]);
+    }
+
+    public function checkTokenResetPass_Two(PasswordResetAppRequest $request)
+    {
+        if(Auth::check()) {
+            dd('paseed check autentication');
+        }
+        $user = auth()->user();
+        $credentials = $request->only('password', 'password_confirmation');
+
+        /*$status = Password::reset($request, function($user, $password) {
+            $user->password = $password;
+            $user->setRememberToken(Str::random(60));
+            $user->save();
+        });*/    
     }
 }

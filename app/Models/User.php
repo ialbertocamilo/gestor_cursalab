@@ -1166,9 +1166,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     // === RESET PASSWORD ===
 
     // === INTENTOS APP/GESTOR ===
-    public function userIncrementAttempts($current, $currentAttempts)
+    public function userIncrementAttempts($current, $currentAttempts, $currentMinutes)
     {
-        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK');
         $userAttempts = $current->attempts;
         $fulledAttempts = false;
 
@@ -1195,13 +1194,24 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $current;
     }
 
-    public function incrementAttempts($email)
+    public function currentUserByEnviroment($keyenv, $value)
     {
         $user = $this;
-        $currentAttempts = env('ATTEMPTS_LOGIN_MAX');
+        if ($keyenv == 'GESTOR') {
+            return $user->where('email', $value)->first();
+        }
 
-        // existe ese email-usuario
-        $current = $user->where('email', $email)->first();
+        return $user->where('document', $value)
+                    ->orWhere('username', $value)->first();
+    }
+
+    public function incrementAttempts($value, $keyenv = 'GESTOR')
+    {
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX_'.$keyenv);
+        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK_'.$keyenv);
+
+        // existe ese data-usuario
+        $current = $this->currentUserByEnviroment($keyenv, $value); 
         if(!$current) return NULL; // null o vacio
 
         $userAttempts = $current->attempts;
@@ -1213,13 +1223,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return $current_user;
         }
 
-        return $this->userIncrementAttempts($current_user, $currentAttempts);
+        return $this->userIncrementAttempts($current_user, $currentAttempts, $currentMinutes);
     }
 
-    public function checkTimeToReset($email)
+    public function checkTimeToReset($value, $keyenv = 'GESTOR')
     {
-        $user = $this;
-        $current_user = $user->where('email', $email)->first();
+        $current_user = $this->currentUserByEnviroment($keyenv, $value);
         if(!$current_user) return NULL; // null o vacio
 
         $staticMinTime = now();
@@ -1249,10 +1258,31 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->save();
     }
 
-    public function checkAttemptManual($request)
+    public function checkCredentialsAttempts($current, $currentAttempts)
     {
-        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK');
-        $currentAttempts = env('ATTEMPTS_LOGIN_MAX');
+        $timeCondition = (now() <= $current->attempts_lock_time);
+            
+        if($current->attempts == $currentAttempts && $timeCondition) {
+            $current['fulled_attempts'] = true;
+            return $current;
+        }
+
+        if($current->attempts >= $currentAttempts && $timeCondition) {
+
+            $current->attempts = $currentAttempts;
+            $current->timestamps = false;
+
+            $current->save();
+            $current['fulled_attempts'] = true;
+
+            return $current;
+        } 
+        return false;
+    }
+
+    public function checkAttemptManualGestor($request)
+    {
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX_GESTOR');
 
         $user = $this;
         $current = $user->where('email', $request->email)
@@ -1264,25 +1294,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $checkPassword = Hash::check($request->password, $current->password);
 
         if($checkEmail && $checkPassword) {
-            $timeCondition = (now() <= $current->attempts_lock_time);
-            
-            if($current->attempts == $currentAttempts && $timeCondition) {
-                $current['fulled_attempts'] = true;
-                return $current;
-            }
+            return $this->checkCredentialsAttempts($current, $currentAttempts);
+        }
+        return false;
+    }
 
-            if($current->attempts >= $currentAttempts && $timeCondition) {
+    public function checkAttemptManualApp($credentials)
+    {
+        ['username' => $req_username, 
+         'password' => $req_password] = $credentials[0];
 
-                $current->attempts = $currentAttempts;
-                $current->timestamps = false;
+        ['document' => $req_document] = $credentials[1];
 
-                $current->save();
-                $current['fulled_attempts'] = true;
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX_APP');
 
-                return $current;
-            } 
+        $current = $this->currentUserByEnviroment('APP', $req_document);
+        if(!$current) return false;
 
-            return false;
+        $checkUserDoc = ($current->document == $req_document) || ($current->username == $req_username);
+        $checkPassword = Hash::check($req_password, $current->password);
+
+        if($checkUserDoc && $checkPassword) {
+            return $this->checkCredentialsAttempts($current, $currentAttempts);
         }
         return false;
     }

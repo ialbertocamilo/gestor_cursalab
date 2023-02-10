@@ -134,7 +134,7 @@ class LoginController extends Controller
         $user = new User;
 
         // === intentos ===
-        $userAttempt = $user->checkAttemptManual($request); 
+        $userAttempt = $user->checkAttemptManualGestor($request); 
         if($userAttempt) return $this->sendAttempsResponse($userAttempt);
         // === intentos ===
 
@@ -199,7 +199,7 @@ class LoginController extends Controller
     {
         $errors = [ 'current_time'   => now()->diff($user_attempts->attempts_lock_time)->format("%I:%S"),
                     'attempts_count' => $user_attempts->attempts,
-                    'attempts_max'   => env('ATTEMPTS_LOGIN_MAX'),
+                    'attempts_max'   => env('ATTEMPTS_LOGIN_MAX_GESTOR'),
                     'attempts_fulled'=> $user_attempts->fulled_attempts ];
 
         if(!$user_attempts->fulled_attempts) {
