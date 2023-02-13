@@ -478,19 +478,31 @@ class Topic extends BaseModel
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
 
-                foreach ($media_topics as $media) {
-                    unset($media->created_at, $media->updated_at, $media->deleted_at);
-                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
-                        ? route('media.download.media_topic', [$media->id]) : null;
-                }
-
                 $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
                 ->where('topic_id', $topic->id)
                 ->where('user_id', $user->id)
                 ->first();
 
-
                 $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+
+                foreach ($media_topics as $media) {
+                    unset($media->created_at, $media->updated_at, $media->deleted_at);
+                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                        ? route('media.download.media_topic', [$media->id]) : null;
+
+                    $media->status_progress = 'por-iniciar';
+
+                    if(!is_null($media_progress)){
+                        foreach($media_progress as $medp){
+                            if($medp->media_topic_id == $media->id){
+                                $media->status_progress = $medp->status;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
                 $last_media_access = $summary_topic?->last_media_access;
                 $last_media_duration = $summary_topic?->last_media_duration;
 
