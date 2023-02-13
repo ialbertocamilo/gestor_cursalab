@@ -73,7 +73,7 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_matricula();
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
-        // $this->restoreCriterionDocument();
+        $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
@@ -89,7 +89,7 @@ class restablecer_funcionalidad extends Command
         // $this->getCriterionValuesUser();
         // $this->restoreCriterionValuesFromJsonV2();
         // $this->deleteDuplicatesInSummaryCourses();
-        $this->restoreUserIdInTickets();
+        // $this->restoreUserIdInTickets();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
