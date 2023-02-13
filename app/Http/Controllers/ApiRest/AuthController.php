@@ -91,6 +91,7 @@ class AuthController extends Controller
                 $user = Auth::user();
                 $user->resetAttemptsUser(); // resetea intentos
 
+                /*
                 // === validar si debe reestablecer contraseña ===
                 $canResetPassWord = $user->checkIfCanResetPassword();
                 if($canResetPassWord) {
@@ -99,7 +100,8 @@ class AuthController extends Controller
                     return response()->json($responseResetPass);
                 }
                 // === validar si debe reestablecer contraseña === 
-
+                */
+                
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
                 $responseUserData = $this->respondWithDataAndToken($data);
                 return response()->json($responseUserData); 
@@ -300,7 +302,7 @@ class AuthController extends Controller
     public function checkVersionMobileRecaptcha($data)
     {
         $currentOS = $data['os'] ?? '';
-        $availableRecaptcha = false; // estado de recaptcha
+        $availableRecaptcha = true; // estado de recaptcha
 
         if($currentOS && $currentOS == 'android' ) {
             $currentVersion = $data['version'];
