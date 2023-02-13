@@ -1,7 +1,7 @@
 <template>
     <DefaultDialog
         :options="{
-            title: 'Filtro&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Detalle / descripción',
+            title: 'Filtros usados',
             open: isOpen,
             showFloatingCloseButton: true
          }"
@@ -114,6 +114,14 @@ export default {
                     isVisible: isTheFirstElement
                 })
                 isTheFirstElement = false
+            }
+        }
+        ,
+        isOpen: function (value) {
+            // Clear search criteria when
+            // modal is being opened
+            if (value) {
+                this.searchValue = ''
             }
         }
     },
