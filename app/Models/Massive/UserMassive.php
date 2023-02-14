@@ -49,7 +49,10 @@ class UserMassive extends Massive implements ToCollection
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id')
             ->orderBy('position')
             ->get();
-
+        //Verify statics headers
+        if(!$this->headersIsComplete($rows[0]->toArray())){
+            return;
+        }
         //Get headers
         $headers = $this->process_header($rows[0], $criteria);
 
@@ -62,7 +65,6 @@ class UserMassive extends Massive implements ToCollection
             $this->error_message = $message;
             return;
         endif;
-
         $this->process_user($rows, $headers, $criteria);
     }
 
@@ -351,7 +353,17 @@ class UserMassive extends Massive implements ToCollection
         $static_headers = $this->getStaticHeaders();
         return $static_headers->where('header_name', $value)->first();
     }
-
+    private function headersIsComplete($excel_headers):bool {
+        $static_headers = self::getStaticHeaders()->where('required',true)->toArray();
+        $isComplete=true;
+        foreach ($static_headers as $header) {
+            if(!in_array(strtolower($header['header_name']),$excel_headers) && !in_array(strtoupper($header['header_name']),$excel_headers)){
+                $this->error_message = 'La columna '.$header['header_name']. ' dentro de la plantilla es requerida.';
+                $isComplete = false;
+            }
+        }
+        return $isComplete;
+    }
     public function getStaticHeaders()
     {
         return collect([
@@ -404,11 +416,10 @@ class UserMassive extends Massive implements ToCollection
             ->toArray();
 
         $rows = $this->getRowsByHeader('Módulo');
-        $rows_filtered_by_sub_workspace = array_filter($rows, fn($value) => in_array(mb_strtolower($value), $sub_workspaces_names));
-
+        $rows_filtered_by_sub_workspace = array_filter($rows, fn($value) => in_array(mb_strtolower(trim($value)), $sub_workspaces_names));
         $rows = $this->getRowsByHeader('ESTADO');
-        $rows_to_activate = array_filter($rows, fn($value) => strtolower($value) === 'active');
-        $rows_to_inactivate = array_filter($rows, fn($value) => strtolower($value) === 'inactive');
+        $rows_to_activate = array_filter($rows, fn($value) => strtolower(trim($value)) === 'active');
+        $rows_to_inactivate = array_filter($rows, fn($value) => strtolower(trim($value)) === 'inactive');
 
 
         $documents_to_inactivate = array_intersect(array_keys($rows_to_inactivate), array_keys($rows_filtered_by_sub_workspace));
