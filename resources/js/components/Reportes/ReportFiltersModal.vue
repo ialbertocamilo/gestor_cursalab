@@ -3,7 +3,8 @@
         :options="{
             title: 'Filtros usados',
             open: isOpen,
-            showFloatingCloseButton: true
+            showFloatingCloseButton: true,
+
          }"
         @onCancel="close"
         :width="'667px'"
@@ -125,7 +126,19 @@ export default {
             }
         }
     },
+    mounted() {
+        // Keypresses on overlay:
+        document.addEventListener('keydown', this.onKeydown)
+    },
     methods: {
+        onKeydown(e) {
+            if (this.isOpen) {
+                if (e.keyCode == 27) {
+                    this.close()
+                    console.log('ESC')
+                }
+            }
+        },
         matchesSearch(value) {
             if (!this.searchValue) return false
             if (!value) return false
