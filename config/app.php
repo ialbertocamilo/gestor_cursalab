@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Facade;
 
 return [
+    'CHATBOT_HUBSPOT' => env('CHATBOT_HUBSPOT',''),
 
     /*
     |--------------------------------------------------------------------------
@@ -222,7 +223,7 @@ return [
         App\Providers\ValidationServiceProvider::class,
 
         // Jenssegers\Mongodb\MongodbServiceProvider::class,
-        // App\Providers\TenancyServiceProvider::class, 
+        // App\Providers\TenancyServiceProvider::class,
 
     ],
 
