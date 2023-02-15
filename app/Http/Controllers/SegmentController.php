@@ -46,6 +46,14 @@ class SegmentController extends Controller
         return $this->success(compact('criteria', 'segments', 'users_count'));
     }
 
+    public function loadModulesFromCourseSchools(Request $request) {
+        $modulesIds = Course::getModulesIdsFromCourseSchools(
+            $request->courseId
+        );
+
+        return $this->success($modulesIds);
+    }
+
     public function create(Request $request)
     {
         $workspace = session('workspace');

@@ -1057,4 +1057,28 @@ class Course extends BaseModel
 
         return $compatible ? true : false;
     }
+
+    public static function getModulesIdsFromCourseSchools($courseId): array
+    {
+        $course = Course::find($courseId);
+        $modulesIds = [];
+        if ($course) {
+            $_schooldsIds = $course->schools()->pluck('id')->toArray();
+            $schooldsIds = implode(',', $_schooldsIds);
+            $subworkspaces = DB::select(DB::raw("
+                        select distinct w.criterion_value_id
+                        from school_subworkspace sw
+                            inner join workspaces w on sw.subworkspace_id = w.id
+                        where school_id in ($schooldsIds)
+                    "));
+
+            if ($subworkspaces) {
+                $modulesIds = collect($subworkspaces)
+                    ->pluck('criterion_value_id')
+                    ->toArray();
+            }
+        }
+
+        return $modulesIds;
+    }
 }

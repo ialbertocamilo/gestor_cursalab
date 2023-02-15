@@ -467,7 +467,40 @@ export default {
                 vue.total = _data.users_count;
             });
 
+            // When model type is course, load module ids
+
+            if (resource.id && vue.model_type === 'App\\Models\\Course') {
+                await vue.loadModulesFromCourseSchools(resource.id)
+            }
+
             return 0;
+        },
+        /**
+         * Load modules ids from schools in which the course belongs to
+         * @param courseId
+         * @returns {Promise<void>}
+         */
+        async loadModulesFromCourseSchools(courseId) {
+            if (!this.resource) return
+            let url = `${this.options.base_endpoint}/modules/course/${courseId}`;
+            try {
+                const response = await this.$http.get(url);
+                let modulesIds = []
+                if (response.data.data) {
+                    modulesIds = response.data.data
+
+                    let moduleCriteria = this.criteria.find(c => c.code === 'module')
+                    if (moduleCriteria) {
+                        if (this.segments[0].criteria_selected.length === 0) {
+
+                            moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
+                            this.segments[0].criteria_selected.push(moduleCriteria)
+                        }
+                    }
+                }
+            } catch (ex) {
+                console.log(ex)
+            }
         },
         loadSelects() {
             let vue = this;

@@ -105,7 +105,7 @@ export default {
 
             if (criterion){
                 const hasValuesSelected = criterion.hasOwnProperty('values_selected');
-                if(!hasValuesSelected) 
+                if(!hasValuesSelected)
                     criterion = Object.assign(criterion, {values_selected: []});
                 // criterion.values_selected = data.date_range_selected;
                 console.log(`CRITERION`, criterion);
