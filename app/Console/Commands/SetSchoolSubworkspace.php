@@ -42,6 +42,13 @@ class SetSchoolSubworkspace extends Command
             'IK' => 27,
             'MF' => 26,
             'FP' => 28,
+
+            'MAKRO' => 24,
+            // 'FRET' => 
+            'OSLO' => 21,
+            // 'MASS' => 
+            'PLAZA VEA' => 19,
+            'PLAZA VEA Y VIVANDA' => 19,
         ];
 
         $shorts = [];
@@ -58,7 +65,7 @@ class SetSchoolSubworkspace extends Command
 
             if (count($parts) > 1) {
 
-                $code = $parts[0];
+                $code = mb_strtoupper($parts[0]);
                 $shorts[$code] = $code;
 
                 $module_id = $subworkspaces[$code] ?? null;
