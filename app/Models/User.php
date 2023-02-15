@@ -98,7 +98,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     protected $ledgerThreshold = 100;
 
-
     protected $casts = [
         'email_verified_at' => 'datetime',
         'active' => 'boolean',
@@ -260,6 +259,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $criterion_ids = $this->criterion_values()->get()->pluck('criterion_id')->toArray();
 
         return Criterion::whereIn('id', $criterion_ids)->get();
+    }
+
+    public function getCriterionValueCode($criterion_code)
+    {
+        $criterion = Criterion::where('code', $criterion_code)->first();
+        return $this->criterion_values()->where('criterion_id', $criterion->id)->first();
     }
 
     // public function post()
@@ -1003,6 +1008,30 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $this->notify(new UserResetPasswordNotification($token));
     }
 
+    public function sendPasswordRecoveryNotification($user, $token)
+    {
+
+        $url = url(route('password.reset', [
+                    'token' => $token,
+                    'email' => $user->email,
+                    ], false));
+
+        $url_recovery = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url);
+        $url_recovery = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim($url_recovery, '/');
+
+        $url_coordinador = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim('/ayuda-coordinador', '/');
+
+        $mail_data = [ 'subject' => 'Link de verificación',
+                       'user' => $user->name.' '.$user->lastname,
+                       'time' => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire'),
+                       'link_recovery' => $url_recovery,
+                       'link_coordinador' => $url_coordinador ];
+        // dd($mail_data);
+
+        Mail::to($user->email)->send(new EmailTemplate('emails.reestablecer_pass', $mail_data));
+
+    }
+
     public static function countActiveUsersInWorkspace($workspaceId)
     {
 
@@ -1149,11 +1178,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->update($data);
     }
 
-    public function checkIfCanResetPassword()
+    public function checkIfCanResetPassword($keyenv = 'GESTOR')
     {
         $user = $this;
 
-        $currentDays = env('RESET_PASSWORD_DAYS');
+        $currentDays = env('RESET_PASSWORD_DAYS_'.$keyenv);
         settype($currentDays, "int");
 
         if(is_null($user->last_pass_updated_at)) {
@@ -1321,7 +1350,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     }
     // === INTENTOS APP/GESTOR ===
 
-    /* user / success / 
-       user 5 const 7 */
+    public function setInitialEmail()
+    {
+        $user = $this;
+        
+        $user->timestamps = false;
+        $user->email = '';
 
+        $user->save();
+    }
 }

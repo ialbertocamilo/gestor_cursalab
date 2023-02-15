@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class QuizzAppRequest extends FormRequest
 {
@@ -23,9 +24,11 @@ class QuizzAppRequest extends FormRequest
      */
     public function rules()
     {
+        $posibleValues = ['M', 'F'];
+
         return [
-            'birth_date' => 'required',
-            'gender' => 'nullable'
+            'birthday_date' => 'required|date_format:d-m-Y',
+            'gender' => ['nullable', Rule::in($posibleValues)]
         ];
     }
 }

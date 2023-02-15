@@ -215,7 +215,7 @@ class LoginController extends Controller
         session()->put('init_reset', $user->id);
 
         // crear token 
-        $currentEntropy = env('RESET_PASSWORD_TOKEN_ENTROPY');
+        $currentEntropy = env('RESET_PASSWORD_TOKEN_ENTROPY_GESTOR');
         $token = bin2hex(random_bytes($currentEntropy));
 
         // insertar token 'table';

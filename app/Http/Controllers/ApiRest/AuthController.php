@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest, 
                         PasswordResetAppRequest };
+use App\Mixins\PasswordBrokerMixin;
 use App\Models\Error;
 use App\Models\Workspace;
 use App\Models\{ Usuario, User };
@@ -13,8 +14,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SubworkspaceInMaintenance extends Exception {};
 
@@ -39,8 +40,8 @@ class AuthController extends Controller
             if($availableRecaptcha) {
                 $responseRecaptcha = $this->checkRecaptchaData($data);
                 if($responseRecaptcha !== true) return $responseRecaptcha;
-            }  
-            // === validacion de recaptcha ===
+            }
+           // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
             $password = strip_tags($data['password']);
@@ -62,6 +63,13 @@ class AuthController extends Controller
             // === validacion de intentos ===
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+
+                // === verificar el dni como password ===
+                if (trim($userinput) === $password) {
+                    $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
+                    return response()->json($responseResetPass);
+                }
+                // === verificar el dni como password ===
 
                 // When "Show message" variable is true and
                 // company is Farmacias Peruanas
@@ -90,18 +98,14 @@ class AuthController extends Controller
 
                 $user = Auth::user();
                 $user->resetAttemptsUser(); // resetea intentos
-
-                /*
+                
                 // === validar si debe reestablecer contraseña ===
-                $canResetPassWord = $user->checkIfCanResetPassword();
+                $canResetPassWord = $user->checkIfCanResetPassword('APP');
                 if($canResetPassWord) {
-                    // === verificar el dni como password ===
-                    $responseResetPass = $this->checkSameDataCredentials(trim($userinput), $password);
-                    return response()->json($responseResetPass);
+                    return $this->resetPasswordBuildToken($user);
                 }
                 // === validar si debe reestablecer contraseña === 
-                */
-                
+
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
                 $responseUserData = $this->respondWithDataAndToken($data);
                 return response()->json($responseUserData); 
@@ -289,16 +293,31 @@ class AuthController extends Controller
         }
     }
 
-    public function sendAttempsAppResponse($user_attempts)
+    // === ATTEMPTS ===
+    public function sendAttempsAppResponse($user_attempts, $user_time = true)
     {
-        $errors = [ 'current_time'   => now()->diff($user_attempts->attempts_lock_time)->format("%I:%S"),
-                    'attempts_count' => $user_attempts->attempts,
+        $errors = [ 'attempts_count' => $user_attempts->attempts,
                     'attempts_max'   => env('ATTEMPTS_LOGIN_MAX_APP'),
                     'attempts_fulled'=> $user_attempts->fulled_attempts ];
 
+        if($user_time) {
+            $current_time = now()->diff($user_attempts->attempts_lock_time)->format("%I:%S");
+            return array_merge(['current_time' => $current_time], $errors);
+        }
         return $errors;
     }
 
+    public function incrementAttemptsOnly($user)
+    {
+        $user_attempts = $user->incrementAttempts($user->document, 'APP');
+        if($user_attempts) {
+            $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
+            return $this->error('Intento fallido.', 401, $responseAttempts);
+        }
+    }
+    // === ATTEMPTS ===
+
+    // === RECAPTCHA === 
     public function checkVersionMobileRecaptcha($data)
     {
         $currentOS = $data['os'] ?? '';
@@ -343,7 +362,8 @@ class AuthController extends Controller
         }
     }
 
-    public function validateRecaptcha($siteToken) {
+    public function validateRecaptcha($siteToken) 
+    {
         $secretKey = env('RECAPTCHA_TOKEN'); 
         $recaptchaUrl = env('RECAPTCHA_BASE_URL');
 
@@ -355,16 +375,18 @@ class AuthController extends Controller
 
         return $responseRecaptcha->json();
     }
+    // === RECAPTCHA ===
 
     public function checkSameDataCredentials($userinput, $password)
     {
         $user = auth()->user();
-        $checkCredentials['require_quizz'] = ($userinput === $password) && ($user->email === NULL);
-        
+        $checkCredentials['require_quizz'] = ($userinput === $password) && !((bool) $user->email);
+
         if(!$checkCredentials['require_quizz']) {
             return $this->sendEmailResetPassword($user, $checkCredentials);
         }
         return $checkCredentials;
+        // return $this->sendQuizzQuestionsValidate($user, $checkCredentials);
     }
 
     public function sendEmailResetPassword($user, $checkCredentials)
@@ -377,7 +399,12 @@ class AuthController extends Controller
                        'subworkspace' => $subWorkspaceName,
                        'fullname' => $user->name.' '.$user->lastname ];
 
-        $status = Password::sendResetLink(['email' => $user->email]);
+        $userCallback = function ($user_instance, $token) {
+            // enviar email
+            $user_instance->sendPasswordRecoveryNotification($user_instance, $token);
+        };
+
+        $status = Password::sendResetLink(['email' => $user->email], $userCallback);
 
         $checkCredentials['recovery_email']['success'] = ($status === Password::RESET_LINK_SENT);
         $checkCredentials['recovery_email']['data'] = $mail_data;
@@ -385,54 +412,129 @@ class AuthController extends Controller
         return $checkCredentials;
     }
 
-    public function resendEmailResetPassword()
+    public function sendQuizzQuestionsValidate($user, $checkCredentials)
     {
-        if(!session('auth_resend')) return $this->error('no-auth-resend', 503);
-        if(!auth()->user()) return $this->error('no-auth-reset', 503);
+        $criteriaCodeStack = ['birthday_date', 'gender'];
+        $callBackCode = function ($code) use ($user) {
+            return [ $code => $user->getCriterionValueCode($code)->value_text ];
+        };
+        $stackAnswers = array_map($callBackCode, $criteriaCodeStack);
+        $date = $user->getCriterionValueCode('birthday_date')->value_text;
 
-        $user = auth()->user(); 
-        return $user->email ? $this->success('Reenviamos email', $this->sendEmailResetPassword($user)):
-                              $this->error('no-auth-reset', 503);
+        return [ 'user' => $stackAnswers, 
+                 'birht_date' => date('d-m-Y', strtotime($date)),
+                 'checkCredentials' => $checkCredentials ];
+        // dd(['user' => $user, 'checkCredentials' => $checkCredentials]);
     }
 
-    public function validateQuizz(QuizzAppRequest $request)
+    public function test_user()
     {
-        if(Auth::check()) {
-            dd('paseed check autentication');
-        }
-        $user = auth()->user();
+       return User::find(96);
     }
 
-    public function checkTokenResetPass_One(PasswordResetAppRequest $request)
+    // === QUIZZ ===
+    public function quizz(QuizzAppRequest $request)
     {
-        if(!auth()->user()) return $this->error('no-auth-reset', 503);
-
-        $request->add(['email' => auth()->user()->email]);
+        if(!Auth::check()) return $this->error('no-auth', 503);
         $request->validated();
 
-        $credentials = $request->only('email', 'password', 'password_confirmation', 'token');
+        $user = auth()->user();
+        // $user = $this->test_user();
+
+        if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
+            $user['fulled_attempts'] = true;
+            $responseAttempts = $this->sendAttempsAppResponse($user, false);
+            return $this->error('Intento fallido.', 401, $responseAttempts);
+        }
+
+        if($request->birthday_date) {
+            $user_birth_date = $user->getCriterionValueCode('birthday_date')->value_text;
+            $user_state_date = (date('d-m-Y', strtotime($user_birth_date)) == $request->birthday_date);
+
+            if($user_state_date && !$request->gender) return $this->success(true, 'Respuesta correcta');
+            if(!$user_state_date) return $this->incrementAttemptsOnly($user);
+        }
+
+        if($request->gender) {
+            $user_prev_gender = $user->getCriterionValueCode('gender')->value_text;
+            $user_gender = strtoupper(str_split($user_prev_gender)[0]); // primera letra
+            $user_state_gender = ($user_gender == $request->gender);
+
+            // if($user_state_gender) return $this->success(true, 'Respuesta correcta');
+            if($user_state_gender && $user_state_date) return $this->resetPasswordBuildToken($user);
+            return $this->incrementAttemptsOnly($user);
+        }
+
+        return $this->incrementAttemptsOnly($user);  
+    }
+
+    public function quizz_verify(QuizzAppRequest $request)
+    {
+        if(!Auth::check()) return $this->error('no-auth', 503);
+        // $request->validated();
+
+        $user = auth()->user();
+        // $user = $this->test_user();
+
+        $user_birth_date = $user->getCriterionValueCode('birthday_date')->value_text;
+        $user_state_date = (date('d-m-Y', strtotime($user_birth_date)) == $request->birthday_date);
+
+        $user_gender = $user->getCriterionValueCode('gender')->value_text;
+        $user_state_gender = ($user_gender == $user->gender);
+
+        return ($user_state_date && $user_state_gender) ? $this->resetPasswordBuildToken($user) 
+                                                        : $this->error('no-auth', 503);
+    }
+    // === QUIZZ ===
+
+    // === RESET ===
+    public function resetPasswordBuildToken($user)
+    {
+        $user['email'] = empty($user->email) ? $user->document : $user->email;
+        $token = Password::createToken($user);
+
+        $response = [ 'user_data' => [ 'fullname' => $user->getFullnameAttribute(),
+                                       'identifier' => $user->email ], 
+                      'user_token' => $token ];
+
+        return $this->success($response, 'Resetear Contraseña');
+    }
+
+    public function reset_password(PasswordResetAppRequest $request)
+    {
+        $data = $request->validated();
+
+        $data_input['os'] = strip_tags($data['os'] ?? '');
+        $data_input['version'] = strip_tags($data['version'] ?? '');
+
+        $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
+                                         : $request->only('document', 'password', 'password_confirmation', 'token');
 
         $status = Password::reset($credentials, function($user, $password) {
             $user->password = $password;
+            $user->last_pass_updated_at = now(); // actualizacion de contraseña
             $user->setRememberToken(Str::random(60));
             $user->save();
         });
 
-        return $this->success('Contraseña actualizada', ['success' => ($status == Password::PASSWORD_RESET)]);
-    }
+        if($status == Password::PASSWORD_RESET) {
 
-    public function checkTokenResetPass_Two(PasswordResetAppRequest $request)
-    {
-        if(Auth::check()) {
-            dd('paseed check autentication');
+            $credentials1 = $credentials2 = ['password' => $request->password];
+            $userinput = $request->email ? $credentials['email'] : $credentials['document'];
+
+            $credentials1['email'] = $userinput;
+            $credentials2['document'] = $userinput;
+
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+                $user = Auth::user();
+
+                if(!$request->email) $user->setInitialEmail();
+                $user->resetAttemptsUser();
+
+                return $this->respondWithDataAndToken($data_input);
+            }
         }
-        $user = auth()->user();
-        $credentials = $request->only('password', 'password_confirmation');
-
-        /*$status = Password::reset($request, function($user, $password) {
-            $user->password = $password;
-            $user->setRememberToken(Str::random(60));
-            $user->save();
-        });*/    
+        return $this->error('invalid-token', 503, $status);
     }
+    // === RESET ===
 }

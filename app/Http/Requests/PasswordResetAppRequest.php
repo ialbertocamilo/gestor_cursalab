@@ -25,8 +25,12 @@ class PasswordResetAppRequest extends FormRequest
     {
         return [
             'email' => 'nullable|email',
+            'document' => 'nullable|min:8',
             'password' => ['required', 'confirmed'],
-            'token' => 'nullable'
+            'token' => 'required',
+
+            'os' => 'nullable',
+            'version' => 'nullable'
         ];
     }
 }
