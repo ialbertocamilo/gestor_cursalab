@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use App\Rules\VerifyLimitAllowedUsers;
 use Illuminate\Foundation\Http\FormRequest;
 
