@@ -493,7 +493,7 @@ export default {
                     if (moduleCriteria) {
 
                         // When there is no criteria selected, add modules
-                        // 
+                        //
 
                         if (this.segments[0].criteria_selected.length === 0) {
                             moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
