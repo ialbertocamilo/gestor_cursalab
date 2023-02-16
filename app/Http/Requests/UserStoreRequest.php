@@ -48,7 +48,7 @@ class UserStoreRequest extends FormRequest
         }
         if($id){
             $user = User::where('id',$id)->select('active')->first();
-            if($user->active != $this->active){
+            if($user && $user->active != $this->active){
                 $rules['active'] = [new VerifyLimitAllowedUsers($this->method())];
             }
         }
