@@ -5,7 +5,6 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest, 
                         PasswordResetAppRequest };
-use App\Mixins\PasswordBrokerMixin;
 use App\Models\Error;
 use App\Models\Workspace;
 use App\Models\{ Usuario, User };
@@ -143,7 +142,7 @@ class AuthController extends Controller
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
-        $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
+        // $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
         // if ($user->subworkspace_id == 29 AND $user->external_id) {
 
@@ -311,7 +310,8 @@ class AuthController extends Controller
     {
         $user_attempts = $user->incrementAttempts($user->document, 'APP');
         if($user_attempts) {
-            $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
+            // $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
+            $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
             return $this->error('Intento fallido.', 401, $responseAttempts);
         }
     }
@@ -441,11 +441,21 @@ class AuthController extends Controller
         $user = auth()->user();
         // $user = $this->test_user();
 
-        if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
+        /*if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
             $user['fulled_attempts'] = true;
             $responseAttempts = $this->sendAttempsAppResponse($user, false);
             return $this->error('Intento fallido.', 401, $responseAttempts);
+        }*/
+
+        // === validacion de intentos ===
+        $user_attempts = $user->checkTimeToReset($user->document, 'APP'); 
+        
+        if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
+            $user['fulled_attempts'] = true;
+            $responseAttempts = $this->sendAttempsAppResponse($user);
+            return $this->error('Intento fallido.', 401, $responseAttempts);
         }
+        // === validacion de intentos ===
 
         if($request->birthday_date) {
             $user_birth_date = $user->getCriterionValueCode('birthday_date')->value_text;
@@ -460,8 +470,10 @@ class AuthController extends Controller
             $user_gender = strtoupper(str_split($user_prev_gender)[0]); // primera letra
             $user_state_gender = ($user_gender == $request->gender);
 
-            // if($user_state_gender) return $this->success(true, 'Respuesta correcta');
-            if($user_state_gender && $user_state_date) return $this->resetPasswordBuildToken($user);
+            if($user_state_gender && $user_state_date) {
+                $user->resetAttemptsUser(); // resetear intentos
+                return $this->resetPasswordBuildToken($user);
+            } 
             return $this->incrementAttemptsOnly($user);
         }
 
@@ -471,10 +483,10 @@ class AuthController extends Controller
     public function quizz_verify(QuizzAppRequest $request)
     {
         if(!Auth::check()) return $this->error('no-auth', 503);
-        // $request->validated();
+        $request->validated();
 
-        $user = auth()->user();
-        // $user = $this->test_user();
+        // $user = auth()->user();
+        $user = $this->test_user();
 
         $user_birth_date = $user->getCriterionValueCode('birthday_date')->value_text;
         $user_state_date = (date('d-m-Y', strtotime($user_birth_date)) == $request->birthday_date);
@@ -510,6 +522,13 @@ class AuthController extends Controller
         $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
                                          : $request->only('document', 'password', 'password_confirmation', 'token');
 
+        // === prov el email a documento ===
+        if(!$request->email) {
+            $instance = new User;
+            $instance->setDocumentAsEmail($request->document);
+        }
+        // === prov el email a documento === 
+
         $status = Password::reset($credentials, function($user, $password) {
             $user->password = $password;
             $user->last_pass_updated_at = now(); // actualizacion de contraseña
@@ -533,7 +552,14 @@ class AuthController extends Controller
 
                 return $this->respondWithDataAndToken($data_input);
             }
+        } else {
+
+            if(!$request->email) {
+                $instance = new User;
+                $instance->setDocumentAsEmail($request->document, true);
+            }
         }
+
         return $this->error('invalid-token', 503, $status);
     }
     // === RESET ===

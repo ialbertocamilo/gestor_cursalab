@@ -1013,10 +1013,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $url = url(route('password.reset', [
                     'token' => $token,
-                    'email' => $user->email,
+                    'email' => $user->email
                     ], false));
 
-        $url_recovery = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url);
+        $url_recovery = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url.'&recovery=true');
         $url_recovery = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim($url_recovery, '/');
 
         $url_coordinador = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim('/ayuda-coordinador', '/');
@@ -1026,7 +1026,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                        'time' => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire'),
                        'link_recovery' => $url_recovery,
                        'link_coordinador' => $url_coordinador ];
-        // dd($mail_data);
 
         Mail::to($user->email)->send(new EmailTemplate('emails.reestablecer_pass', $mail_data));
 
@@ -1358,5 +1357,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->email = '';
 
         $user->save();
+    }
+
+    public function setDocumentAsEmail($document, $revert = false)
+    {
+        $user = $this;
+        $current = $user->where('document', $document)->first();
+    
+        $current->timestamps = false;
+     
+        if($revert) $current->email = '';
+        else $current->email = $document;
+
+        $current->save();
     }
 }
