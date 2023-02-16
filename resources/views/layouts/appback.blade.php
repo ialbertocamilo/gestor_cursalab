@@ -300,3 +300,9 @@ if (isset($fullScreen)) {
 
 <!-- Asigna (a input) Media Modal -->
 @include('media.asigna_modal')
+
+@if (config('app.CHATBOT_HUBSPOT'))
+<!-- Start of HubSpot Embed Code -->
+<script type="text/javascript" id="hs-script-loader" async defer src="{{config('app.CHATBOT_HUBSPOT')}}"></script>
+<!-- End of HubSpot Embed Code -->
+@endif
