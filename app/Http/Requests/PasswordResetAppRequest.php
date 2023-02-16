@@ -36,7 +36,7 @@ class PasswordResetAppRequest extends FormRequest
 
         return [
             'email' => 'nullable|email',
-            'document' => 'nullable|min:8',
+            'document' => 'nullable',
             'password' => ['required', 'confirmed',
                            'max:100',"not_regex:/($piecesPass)/i", 
                             Password::min(8)->mixedCase()

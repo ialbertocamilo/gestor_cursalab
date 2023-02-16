@@ -24,12 +24,10 @@ class QuizzAppRequest extends FormRequest
      */
     public function rules()
     {
-        $posibleValues = ['M', 'F'];
-
         return [
             'id_user' => 'required',
             'birthday_date' => 'required|date_format:d-m-Y',
-            'gender' => ['nullable', Rule::in($posibleValues)]
+            'gender' => 'nullable'
         ];
     }
 }
