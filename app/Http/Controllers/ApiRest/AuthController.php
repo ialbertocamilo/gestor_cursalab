@@ -381,6 +381,7 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         $checkCredentials['require_quizz'] = ($userinput === $password) && !((bool) $user->email);
+        $checkCredentials['id_user'] = $user->id;
 
         if(!$checkCredentials['require_quizz']) {
             return $this->sendEmailResetPassword($user, $checkCredentials);
@@ -435,11 +436,10 @@ class AuthController extends Controller
     // === QUIZZ ===
     public function quizz(QuizzAppRequest $request)
     {
-        if(!Auth::check()) return $this->error('no-auth', 503);
+        // if(!Auth::check()) return $this->error('no-auth', 503);
+        // $user = auth()->user();
         $request->validated();
-
-        $user = auth()->user();
-        // $user = $this->test_user();
+        $user = User::find($request->id_user);
 
         /*if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
             $user['fulled_attempts'] = true;
