@@ -142,7 +142,7 @@ class AuthController extends Controller
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
-        // $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
+        $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
         // if ($user->subworkspace_id == 29 AND $user->external_id) {
 
