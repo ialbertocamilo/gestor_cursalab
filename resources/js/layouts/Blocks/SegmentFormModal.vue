@@ -10,6 +10,26 @@
             <v-form ref="segmentForm" class="---mb-6">
                 <DefaultErrors :errors="errors"/>
 
+                <!--
+                Module-School breadcrumbs
+                ======================================== -->
+
+                <div v-if="isCourseSegmentation()"
+                     class="card p-2">
+
+                    <DefaultSimpleBreadcrumbs
+                        v-for="moduleSchool of modulesSchools"
+                        :key="module.module_id"
+                        :breadcrumbs="[
+                        {title: moduleSchool.module_name, disabled: true},
+                        {title: moduleSchool.school_name, disabled: true},
+                    ]"/>
+                </div>
+
+                <!--
+                Tabs
+                ======================================== -->
+
                 <v-tabs
                     v-model="tabs"
                     fixed-tabs
@@ -180,6 +200,7 @@ export default {
             segments: [],
             segment_by_document: null,
             criteria: [],
+            modulesSchools: [],
 
             modalInfoOptions: {
                 ref: 'SegmentAlertModal',
@@ -469,14 +490,14 @@ export default {
 
             // When model type is course, load module ids
 
-            if (resource.id && vue.model_type === 'App\\Models\\Course') {
+            if (resource.id && vue.isCourseSegmentation()) {
                 await vue.loadModulesFromCourseSchools(resource.id)
             }
 
             return 0;
         },
         /**
-         * Load modules ids from schools in which the course belongs to
+         * Load modules ids from schools the course belongs to
          * @param courseId
          * @returns {Promise<void>}
          */
@@ -487,14 +508,15 @@ export default {
                 const response = await this.$http.get(url);
                 let modulesIds = []
                 if (response.data.data) {
-                    modulesIds = response.data.data
+                    modulesIds = response.data.data.modulesIds
+                    this.modulesSchools = response.data.data.modulesSchools
+
+                    // When there is no criteria selected, adds
+                    // module criteria and select modules from
+                    // course schools
 
                     let moduleCriteria = this.criteria.find(c => c.code === 'module')
                     if (moduleCriteria) {
-
-                        // When there is no criteria selected, add modules
-                        //
-
                         if (this.segments[0].criteria_selected.length === 0) {
                             moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
                             this.segments[0].criteria_selected.push(moduleCriteria)
@@ -531,6 +553,9 @@ export default {
 
                 // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
             }
+        },
+        isCourseSegmentation() {
+            return this.model_type === 'App\\Models\\Course'
         }
     }
 };

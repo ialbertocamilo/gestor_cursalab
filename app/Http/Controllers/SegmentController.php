@@ -47,11 +47,19 @@ class SegmentController extends Controller
     }
 
     public function loadModulesFromCourseSchools(Request $request) {
-        $modulesIds = Course::getModulesIdsFromCourseSchools(
-            $request->courseId
-        );
+        $modules = Course::getModulesFromCourseSchools($request->courseId);
+        $modulesIds = [];
+        if ($modules) {
+            $modulesIds = collect($modules)
+                ->unique('module_id')
+                ->pluck('module_id')
+                ->toArray();
+        }
 
-        return $this->success($modulesIds);
+        return $this->success([
+            'modulesIds' => $modulesIds,
+            'modulesSchools' => $modules
+        ]);
     }
 
     public function create(Request $request)

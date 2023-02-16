@@ -29,6 +29,7 @@
                 :items="new_criteria"
                 multiple
                 item-text="name"
+                :ready-only-codes="['module']"
                 item-id="id"
                 :count-show-values="4"
 

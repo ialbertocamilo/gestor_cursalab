@@ -22,14 +22,14 @@
             :no-data-text="noDataText"
             :rules="rules"
             :loading="computedLocalLoading"
-            
+
             :class="localDisabled && 'grey lighten-4'"
             ref="vue_autocomplete"
-        >   
+        >
             <template v-slot:prepend-item v-if="multiple && showSelectAll">
                 <v-list-item ripple dense @click="toggle">
                     <v-list-item-action>
-                        <v-icon :color="localSelected.length > 0 ? 'indigo darken-4' : ''" 
+                        <v-icon :color="localSelected.length > 0 ? 'indigo darken-4' : ''"
                                 v-text="icon()"/>
                     </v-list-item-action>
                     <v-list-item-content>
@@ -46,10 +46,10 @@
             <template v-slot:item="{ item }" v-if="!customItems">
                 <v-list-item ripple dense @click="select(item)">
                     <v-list-item-icon>
-                        <v-icon :color="itemSelect(item.id).color" 
+                        <v-icon :color="itemSelect(item.id).color"
                                 v-text="itemSelect(item.id).icon" />
                     </v-list-item-icon>
-                    
+
                     <v-list-item-content>
                         <v-list-item-title v-text="String(item[itemText])"></v-list-item-title>
                     </v-list-item-content>
@@ -60,7 +60,11 @@
             <template v-slot:selection="{ item, index }" v-if="multiple">
                 <v-chip small class="flex justify-content-between mt-1" v-if="index < countShowValues">
                     <span> {{ String(item[itemText]) }}
-                        <v-btn icon small @click="removeItem(item.id)">
+                        <v-btn
+                            v-if="!readyOnlyCodes.includes(item.code)"
+                            icon
+                            small
+                            @click="removeItem(item.id)">
                             <v-icon color="white">mdi-minus-circle</v-icon>
                         </v-btn>
                     </span>
@@ -72,15 +76,15 @@
                     (+{{ localSelected.length - countShowValues }})
                 </span>
             </template>
-            
+
             <template v-slot:label v-if="showRequired">
                 {{ label }} <RequiredFieldSymbol/>
             </template>
         </v-autocomplete>
 
         <!--div class="d-flex flex-column justify-content-center align-items-center">
-            <v-btn 
-                text small color="primary" class="h-20 p-0" 
+            <v-btn
+                text small color="primary" class="h-20 p-0"
                 @click="canEditInput">
                 <span v-text="localSelected.length > 0 ? 'Editar': 'Agregar' "></span>
             </v-btn>
@@ -96,6 +100,10 @@
 <script>
 export default {
     props: {
+        readyOnlyCodes: {
+            type: Array,
+            default: function() { return [] }
+        },
         items: {
             type: Object | Array,
             required: true,
@@ -209,7 +217,7 @@ export default {
             if(vue.loadingState) {
                 // como esta cargando no va a pasar por el watch y aqui ordenamos.
                 if(!vue.localItems.length) vue.localItems = vue.itemsOrderSelect(vue.localSelected);
-            } 
+            }
             return (vue.items.length === 0) && vue.loadingState;
         },
         computedLocalTextToggle() {
@@ -262,15 +270,15 @@ export default {
             const { id: itemId } = item;
 
             const currentState = vue.localSelected.some( ({ id }) => id === itemId );
-            
-            if(!currentState) vue.localSelected.push(item); 
+
+            if(!currentState) vue.localSelected.push(item);
             else {
                 const index = vue.localSelected.findIndex( ({ id }) => id === itemId );
                 if(vue.clearableState) vue.checkCleareable(index);
-                
+
                 vue.localSelected.splice(index, 1);
             }
-            
+
             vue.updateValue(vue.localSelected);// actualizar al agregar
         },
         itemSelect(itemId){
@@ -296,9 +304,9 @@ export default {
             const vue = this;
 
             if(vue.clearableState && index === null){
-                const valuesCount = vue.localSelected.length; 
+                const valuesCount = vue.localSelected.length;
                 for (let i = 0; i < valuesCount; i++) {
-                    vue.localSelected[i].values_selected = []; 
+                    vue.localSelected[i].values_selected = [];
                 }
             } else vue.localSelected[index].values_selected = [];
 
@@ -307,13 +315,13 @@ export default {
         clearEditInput(){
             const vue = this;
             if(vue.clearableState) vue.checkCleareable();
-            
+
             vue.localSelected = [];
             vue.updateValue([]);
         },
         removeItem(s_id) {
             const vue = this;
-            const index = vue.localSelected.findIndex( ({id}) => id === s_id) 
+            const index = vue.localSelected.findIndex( ({id}) => id === s_id)
             if(vue.clearableState) vue.checkCleareable(index);
 
             vue.localSelected.splice(index, 1);
@@ -326,7 +334,7 @@ export default {
             const StaticValue = val;
 
             let localItems = [];
-                
+
             for (let i = 0; i < StaticItems.length; i++) {
                 const currentItem = StaticItems[i];
                 const { id } = currentItem;
@@ -351,11 +359,11 @@ export default {
                 vue.localItems = vue.itemsOrderSelect(vue.localSelected);
             }
         },
-       
+
         icon() {
             const vue = this;
             const filtered = vue.$refs.vue_autocomplete;
-            
+
             if (vue.selectAll()) return "mdi-close-box";
             if (vue.selectSome()) return "mdi-minus-box";
             if (filtered) {
@@ -374,12 +382,12 @@ export default {
             const vue = this;
             const filtered = vue.$refs.vue_autocomplete.filteredItems;
 
-            let currentData =  []; 
+            let currentData =  [];
 
             if(vue.selectFilter()) currentData = [];
             else if(filtered.length) currentData = filtered;
-            
-            return currentData;           
+
+            return currentData;
         },
         selectFilter() {
             const vue = this;
@@ -394,7 +402,7 @@ export default {
                 });
 
                 return currentSames; //me indica que son similares y que pueden borrarse.
-            } 
+            }
             return false;// (filtered.length === vue.localSelected.length); no valida que sean iguales
         },
         selectAll() {
@@ -436,12 +444,12 @@ export default {
     }
 
     .v-scroll-auto-complete::-webkit-scrollbar-track {
-        background: #cfcfcf; 
+        background: #cfcfcf;
         border-radius: 3rem;
     }
- 
+
     .v-scroll-auto-complete::-webkit-scrollbar-thumb {
-        background: #afafaf; 
+        background: #afafaf;
         border-radius: 3rem;
     }
 
