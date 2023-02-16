@@ -15,8 +15,8 @@
         app
         class="bg-default-primary"
     >
-        <v-card-title class="v-card__title bg-default-primary d-flex justify-center rounded-0">
-            <img src="/img/logo_cursalab_white.png" alt="Cursalab" width="130">
+        <v-card-title class="title-logo-wrapper bg-white flex-center rounded-0">
+            <img src="/img/logo_cursalab_v2_black.png" alt="Cursalab" width="130">
         </v-card-title>
         <v-list
             dark
@@ -190,4 +190,24 @@ export default {
 .bg-default-primary{
     background:#5458ea
 }
+.flex-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.bg-white{
+    background: white;
+}
+.title-logo-wrapper {
+    /* height: 130px; */
+    box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25);
+    cursor: pointer;
+
+    line-height: 22px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
 </style>

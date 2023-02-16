@@ -444,88 +444,91 @@ Segment extends BaseModel
             ->first();
 
         // Load criteria values ids
+        return Segment::where('model_id',$supervisorId)->where('code_id',$supervisorTaxonomy->id)->with('values')->get();
 
-        return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
-            ->where('segments.model_id', $supervisorId)
-            ->where('segments.code_id', $supervisorTaxonomy->id)
-            ->where('segments.active', 1)
-            ->whereNull('segments_values.deleted_at')
-            ->select([
-                'segments_values.criterion_id',
-                'segments_values.criterion_value_id'
-            ])
-            ->orderBy('criterion_id')
-            ->get();
+        // return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
+        //     ->where('segments.model_id', $supervisorId)
+        //     ->where('segments.code_id', $supervisorTaxonomy->id)
+        //     ->where('segments.active', 1)
+        //     ->whereNull('segments_values.deleted_at')
+        //     ->select([
+        //         'segments_values.criterion_id',
+        //         'segments_values.criterion_value_id'
+        //     ])
+        //     ->orderBy('criterion_id')
+        //     ->get();
     }
 
     public static function loadSupervisorSegmentUsersIds($supervisorId, $workspaceId): array|string
     {
 
-        $criterionValues = Segment::loadSupervisorSegmentCriterionValues($supervisorId);
+        $segments = Segment::loadSupervisorSegmentCriterionValues($supervisorId);
 
-        if (count($criterionValues) === 0) return [];
-
+        if (count($segments) === 0) return [];
+        //Function to get 
+        $course = new Course();
+        return $course->usersSegmented($segments,'users_id');
         // Generate conditions
 
-        $criterionIds = [];
-        $previousCriterionId = null;
-        $WHERE = [];
-        foreach ($criterionValues as $value) {
+        // $criterionIds = [];
+        // $previousCriterionId = null;
+        // $WHERE = [];
+        // foreach ($criterionValues as $value) {
 
-            $criterionId = $value->criterion_id;
+        //     $criterionId = $value->criterion_id;
 
-            if ($criterionId !== $previousCriterionId) {
+        //     if ($criterionId !== $previousCriterionId) {
 
-                if (!in_array($criterionId, $criterionIds))
-                    $criterionIds[] = $criterionId;
+        //         if (!in_array($criterionId, $criterionIds))
+        //             $criterionIds[] = $criterionId;
 
-                $previousCriterionId = $criterionId;
+        //         $previousCriterionId = $criterionId;
 
-                $criterionValuesIds = $criterionValues->where('criterion_id', $criterionId)
-                    ->pluck('criterion_value_id')
-                    ->toArray();
-                $WHERE[] = "(
-                    scv.criterion_id = $criterionId and
-                    scv.criterion_value_id in (" . implode(',', $criterionValuesIds) . ")
-                )";
-            }
-        }
+        //         $criterionValuesIds = $criterionValues->where('criterion_id', $criterionId)
+        //             ->pluck('criterion_value_id')
+        //             ->toArray();
+        //         $WHERE[] = "(
+        //             scv.criterion_id = $criterionId and
+        //             scv.criterion_value_id in (" . implode(',', $criterionValuesIds) . ")
+        //         )";
+        //     }
+        // }
 
-        // When no condition was generated, stop method execution
+        // // When no condition was generated, stop method execution
 
-        if (count($WHERE) === 0) return [];
+        // if (count($WHERE) === 0) return [];
 
-        $WHERE = implode(' or ', $WHERE);
-        $criterionCount = count($criterionIds);
-        $criterionIds = implode(',', $criterionIds);
-        $modulesIds = Workspace::loadSubWorkspacesIds($workspaceId)->toArray();
-        $query = "
-            select
-                user_id
-            from (
-                -- Users' criterion values
-                select
-                    cvu.user_id,
-                    cvu.criterion_value_id,
-                    cv.criterion_id
-                from
-                    criterion_value_user cvu
-                        inner join criterion_values cv on cv.id = cvu.criterion_value_id
-                        inner join users u on u.id = cvu.user_id
-                where cv.criterion_id in ($criterionIds) and
-                      u.subworkspace_id in (" . implode(',', $modulesIds) . ")
-            ) scv
-            where
-                $WHERE
+        // $WHERE = implode(' or ', $WHERE);
+        // $criterionCount = count($criterionIds);
+        // $criterionIds = implode(',', $criterionIds);
+        // $modulesIds = Workspace::loadSubWorkspacesIds($workspaceId)->toArray();
+        // $query = "
+        //     select
+        //         user_id
+        //     from (
+        //         -- Users' criterion values
+        //         select
+        //             cvu.user_id,
+        //             cvu.criterion_value_id,
+        //             cv.criterion_id
+        //         from
+        //             criterion_value_user cvu
+        //                 inner join criterion_values cv on cv.id = cvu.criterion_value_id
+        //                 inner join users u on u.id = cvu.user_id
+        //         where cv.criterion_id in ($criterionIds) and
+        //               u.subworkspace_id in (" . implode(',', $modulesIds) . ")
+        //     ) scv
+        //     where
+        //         $WHERE
 
-            group by
-                user_id
-            having count(user_id) = $criterionCount
-        ";
+        //     group by
+        //         user_id
+        //     having count(user_id) = $criterionCount
+        // ";
 
-        return collect(DB::select(DB::raw($query)))
-            ->pluck('user_id')
-            ->toArray();
+        // return collect(DB::select(DB::raw($query)))
+        //     ->pluck('user_id')
+        //     ->toArray();
     }
 
     protected function usersReached($model, $model_id)

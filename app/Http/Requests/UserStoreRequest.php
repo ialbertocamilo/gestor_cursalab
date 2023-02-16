@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use App\Rules\VerifyLimitAllowedUsers;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -41,10 +42,18 @@ class UserStoreRequest extends FormRequest
             'criterion_list_final' => 'nullable',
             'criterion_list' => 'nullable',
 
-            'active' => [new VerifyLimitAllowedUsers($this->method())],
         ];
         if($this->email){
             $rules['email'] ="required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL" ;
+        }
+        if($id){
+            $user = User::where('id',$id)->select('active')->first();
+            if($user->active != $this->active){
+                $rules['active'] = [new VerifyLimitAllowedUsers($this->method())];
+            }
+        }
+        if(!$id && $this->active){
+            $rules['active'] = [new VerifyLimitAllowedUsers($this->method())];
         }
         return $rules;
     }

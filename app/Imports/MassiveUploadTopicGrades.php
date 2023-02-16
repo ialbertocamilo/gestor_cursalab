@@ -174,7 +174,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                         'grade' => $grade,
 
                         'views' => $views,
-                        'attempts' => $attempts,
+                        'attempts' => ($attempts === 0) ? 1 : $attempts,
 
                         'correct_answers' => $correct_answers,
                         'failed_answers' => $failed_answers,
