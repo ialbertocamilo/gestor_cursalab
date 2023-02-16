@@ -40,7 +40,7 @@ class AuthController extends Controller
                 $responseRecaptcha = $this->checkRecaptchaData($data);
                 if($responseRecaptcha !== true) return $responseRecaptcha;
             }
-           // === validacion de recaptcha ===
+            // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
             $password = strip_tags($data['password']);
@@ -307,12 +307,14 @@ class AuthController extends Controller
         return $errors;
     }
 
-    public function incrementAttemptsOnly($user)
+    public function incrementAttemptsOnly($user, $returned = false)
     {
         $user_attempts = $user->incrementAttempts($user->document, 'APP');
         if($user_attempts) {
             // $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
             $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+
+            if($returned) return $responseAttempts;
             return $this->error('Intento fallido.', 401, $responseAttempts);
         }
     }
@@ -429,24 +431,11 @@ class AuthController extends Controller
         // dd(['user' => $user, 'checkCredentials' => $checkCredentials]);
     }
 
-    public function test_user()
-    {
-       return User::find(96);
-    }
-
     // === QUIZZ ===
     public function quizz(QuizzAppRequest $request)
     {
-        // if(!Auth::check()) return $this->error('no-auth', 503);
-        // $user = auth()->user();
         $request->validated();
         $user = User::find($request->id_user);
-
-        /*if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
-            $user['fulled_attempts'] = true;
-            $responseAttempts = $this->sendAttempsAppResponse($user, false);
-            return $this->error('Intento fallido.', 401, $responseAttempts);
-        }*/
 
         // === validacion de intentos ===
         $user_attempts = $user->checkTimeToReset($user->document, 'APP'); 
@@ -459,9 +448,16 @@ class AuthController extends Controller
         // === validacion de intentos ===
 
         if($request->birthday_date) {
-            $user_birth_date = $user->getCriterionValueCode('birthday_date')->value_text;
-            $user_state_date = (date('d-m-Y', strtotime($user_birth_date)) == $request->birthday_date);
+            $user_birth_date = $user->getCriterionValueCode('birthday_date');
+            
+            if(is_null($user_birth_date)){
+                // no tiene fecha de nacimiento 
+                $response = $this->incrementAttemptsOnly($user, true); 
+                $response['birthday_date'] = 'No existe la fecha de nacimiento en este usuario';
+                return $this->error('Intento fallido', 401, $response);
+            }
 
+            $user_state_date = (date('d-m-Y', strtotime($user_birth_date->value_text)) == $request->birthday_date);
             if($user_state_date && !$request->gender) return $this->success(true, 'Respuesta correcta');
             if(!$user_state_date) return $this->incrementAttemptsOnly($user);
         }
@@ -501,14 +497,15 @@ class AuthController extends Controller
     // === QUIZZ ===
 
     // === RESET ===
-    public function resetPasswordBuildToken($user)
+    public function resetPasswordBuildToken($user, $returned = false)
     {
         $user['email'] = empty($user->email) ? $user->document : $user->email;
         $token = Password::createToken($user);
 
-        $response = [ 'user_data' => [ 'fullname' => $user->getFullnameAttribute(),
+        $response = [ 'user_data'  => [ 'fullname' => $user->getFullnameAttribute(),
                                        'identifier' => $user->email ], 
-                      'user_token' => $token ];
+                      'user_token' => $token,
+                      'reset_days' => env('RESET_PASSWORD_DAYS_APP') ];
 
         return $this->success($response, 'Resetear Contraseña');
     }
@@ -516,6 +513,8 @@ class AuthController extends Controller
     public function reset_password(PasswordResetAppRequest $request)
     {
         $data = $request->validated();
+
+        if(!$request->email && !$request->document) return $this->error('no-auth', 503);
 
         $data_input['os'] = strip_tags($data['os'] ?? '');
         $data_input['version'] = strip_tags($data['version'] ?? '');

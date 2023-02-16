@@ -407,6 +407,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
+                if ($update_password && isset($data['password'])) {
+                    $data['last_pass_updated_at'] = now();
+                }
                 $user->update($data);
                 if (!$from_massive) {
                     SummaryUser::updateUserData($user);
@@ -421,6 +424,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     }
                 endif;
             else :
+                if ($update_password && isset($data['password'])) {
+                    $data['last_pass_updated_at'] = now();
+                }
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);

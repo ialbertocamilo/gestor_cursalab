@@ -29,11 +29,16 @@ class PasswordResetAppRequest extends FormRequest
 
         if($this->email) {
             $user = new User;
-            $document = $user->currentUserByEnviroment('GESTOR', $this->email)->document; 
+            $current = $user->currentUserByEnviroment('GESTOR', $this->email); 
+            $document = $current->document ?? NULL;
+        }else {
+            $document = $this->document;
         }
 
         $piecesPass = stringConcatEqualNum([$document, $this->email], 4);
-
+        
+        dd($this->docume);
+        
         return [
             'email' => 'nullable|email',
             'document' => 'nullable',
@@ -47,13 +52,13 @@ class PasswordResetAppRequest extends FormRequest
             'version' => 'nullable'
         ];
     }
-     public function messages()
-     {
+    public function messages()
+    {
          return [   
                     'password.required'=> 'El campo nueva contraseña es obligatorio',
                     'password.min' => 'El campo nueva contraseña debe contener al menos 8 caracteres.',
                     'password.max' => 'El campo nueva contraseña no debe ser mayor que 100 caracteres.',
                     'password.not_regex' => 'El campo nueva contraseña debe ser diferente.'
                 ];
-     }
+    }
 }

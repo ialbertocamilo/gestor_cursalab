@@ -28,16 +28,22 @@ class UserStoreRequest extends FormRequest
     {
         $id = $this->isMethod('post') ? 'NULL' : $this->segment(2);
         $pass = $this->isMethod('post') ? 'required' : 'nullable';
+
         $piecesPass = stringConcatEqualNum([$this->document, $this->email], 4);
+        $passwordRules = $this->isMethod('post') ? 
+                    ['max:100', "{$pass}", 'min:8'] : 
+                    ['max:100', "{$pass}", "not_regex:/($piecesPass)/i", 
+                            Password::min(8)->mixedCase()
+                                            ->numbers()
+                                            ->uncompromised(3) ];
+        
+
 
         $rules = [
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
-            'password' => ['max:100', "{$pass}", "not_regex:/($piecesPass)/i", 
-                            Password::min(8)->mixedCase()
-                                            ->numbers()
-                                            ->uncompromised(3) ],
+            'password' => $passwordRules,
             'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
             'username' => 'nullable',
             'phone_number' => 'nullable',
