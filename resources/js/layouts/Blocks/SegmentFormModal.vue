@@ -491,8 +491,11 @@ export default {
 
                     let moduleCriteria = this.criteria.find(c => c.code === 'module')
                     if (moduleCriteria) {
-                        if (this.segments[0].criteria_selected.length === 0) {
 
+                        // When there is no criteria selected, add modules
+                        // 
+
+                        if (this.segments[0].criteria_selected.length === 0) {
                             moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
                             this.segments[0].criteria_selected.push(moduleCriteria)
                         }
