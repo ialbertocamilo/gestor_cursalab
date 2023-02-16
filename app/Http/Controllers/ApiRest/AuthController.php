@@ -65,6 +65,7 @@ class AuthController extends Controller
 
                 // === verificar el dni como password ===
                 if (trim($userinput) === $password) {
+                    $responseResetPass = [];
                     $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
                     return response()->json($responseResetPass);
                 }
