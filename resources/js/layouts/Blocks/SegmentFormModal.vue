@@ -14,12 +14,12 @@
                 Module-School breadcrumbs
                 ======================================== -->
 
-                <div v-if="isCourseSegmentation()"
+                <div v-if="isCourseSegmentation() && modulesSchools.length"
                      class="card p-2">
 
                     <DefaultSimpleBreadcrumbs
                         v-for="moduleSchool of modulesSchools"
-                        :key="module.module_id"
+                        :key="moduleSchool.subworkspace_id"
                         :breadcrumbs="[
                         {title: moduleSchool.module_name, disabled: true},
                         {title: moduleSchool.school_name, disabled: true},
