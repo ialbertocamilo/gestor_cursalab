@@ -204,6 +204,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $q->whereRaw('document like ?', ["%{$filter}%"]);
             $q->orWhereRaw('name like ?', ["%{$filter}%"]);
             $q->orWhereRaw('email like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('email_gestor like ?', ["%{$filter}%"]);
             $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
             $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
         });
@@ -1100,7 +1101,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                        'user' => $user->name.' '.$user->lastname ];
 
         // enviar email
-        Mail::to($user->email)
+        Mail::to($user->email_gestor)
             ->send(new EmailTemplate('emails.enviar_codigo_2fa', $mail_data));
 
         return $user->save();
