@@ -37,6 +37,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
                     :maxValuesSelected="4"
+                    @onChange="moduloChange"
                 />
 
                 <!--DefaultSelect
@@ -54,9 +55,9 @@
             <div class="col-md-6 mb-3">
 
                 <DefaultAutocomplete
-                    :disabled="!schools[0]"
+                    :disabled="!filteredSchools[0]"
                     v-model="filters.school"
-                    :items="schools"
+                    :items="filteredSchools"
                     label="Escuela"
                     item-text="name"
                     item-value="id"
@@ -203,6 +204,7 @@ export default {
     },
     data() {
         return {
+            filteredSchools: [],
             schools: [],
             courses: [],
 
@@ -373,38 +375,22 @@ export default {
             }, (err) => console.log(err));
         },
         async moduloChange() {
+
             let vue = this;
 
-            vue.filters.escuela = "";
-            vue.filters.curso = "";
-            vue.Escuelas = [];
-            vue.Cursos = [];
+            vue.filters.school = [];
+            vue.filters.course = [];
 
-            const estado_escuela_filtro = this.$refs.EstadoEscuelaFiltroComponent;
-            if (!vue.filters.modulo) return false;
-
-            /*let res = await axios.post(`${vue.reportsBaseUrl}filtros/cambia_modulo_multiple_carga_escuela`, {
-                mod: vue.filters.modulo,
-                escuela_active : estado_escuela_filtro.UsuariosActivos,
-                escuela_inactive : estado_escuela_filtro.UsuariosInactivos,
-            });*/
-
-            const requestPayload = {
-                modulo: vue.filters.modulo,
-                workspaceId: vue.workspaceId,
-                escuela_active : estado_escuela_filtro.UsuariosActivos,
-                escuela_inactive : estado_escuela_filtro.UsuariosInactivos,
-            };
-
-            /*let res = await axios.post(`${vue.reportsBaseUrl}/filtros/cambia_modulo_multiple_carga_escuela`, requestPayload);
-
-            console.log(res);
-
-            this.Escuelas = res.data;
-
-            if(vue.Escuelas.length == 0){
-                alert('No se encontrarón escuelas.');
-            }*/
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+                if (vue.filters.module.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
         },
         async escuelaChange() {
             let vue = this;

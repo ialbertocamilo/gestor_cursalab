@@ -67,6 +67,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
+                            @onChange="moduloChange"
                             :maxValuesSelected="4"
                         />
                     </div>
@@ -75,8 +76,8 @@
                         <DefaultAutocomplete
                             dense
                             v-model="escuela"
-                            :items="schools"
-                            :disabled="!schools[0]"
+                            :items="filteredSchools"
+                            :disabled="!filteredSchools[0]"
                             label="Escuelas"
                             item-text="name"
                             item-value="id"
@@ -316,6 +317,7 @@ export default {
     },
     data() {
         return {
+            filteredSchools: [],
             schools: [],
             courses: [],
             topics: [],
@@ -423,6 +425,26 @@ export default {
             // Hide loading spinner
 
             this.hideLoader()
+        },
+        async moduloChange() {
+
+            let vue = this;
+
+            vue.escuela = [];
+            vue.curso = [];
+            vue.tema = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+
+                if (vue.modulo.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
         },
         /**
          * Fetch courses
