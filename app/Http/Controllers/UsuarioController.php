@@ -63,6 +63,7 @@ class UsuarioController extends Controller
 
             return [
                 'user' => [
+                    'id' => $user->id,
                     'username' => $user->username,
                     'fullname' => $user->fullname,
                     'roles' => $roles

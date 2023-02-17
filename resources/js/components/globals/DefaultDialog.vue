@@ -9,7 +9,7 @@
     >
         <v-card>
             <v-card-title class="default-dialog-title" v-show="showTitle">
-                {{ options.title }}
+                <div v-html="options.title"></div>
                 <v-spacer/>
                 <v-btn
                     v-show="options.showCloseIcon"
@@ -22,7 +22,9 @@
                 <slot name="content"/>
                 <slot name="more-content"/>
             </v-card-text>
-            <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" v-if="showCardActions">
+            <v-card-actions
+                :style="showCardActionsBorder ? { 'border-top': '1px solid rgba(0,0,0,.12)' } : null"
+                v-if="showCardActions">
                 <DefaultModalActionButton
                     :cancel-label="options.cancelLabel"
                     :confirm-label="options.confirmLabel"
@@ -33,6 +35,14 @@
                     @confirm="confirmModal"/>
             </v-card-actions>
         </v-card>
+        <v-icon
+            v-if="options.showFloatingCloseButton"
+            @click="closeModal()"
+            small
+            color="white"
+            class="floating-close-button">
+            mdi-close
+        </v-icon>
     </v-dialog>
 </template>
 <script>
@@ -58,6 +68,10 @@ export default {
             default: true
         },
         showCardActions: {
+            type: Boolean,
+            default: true
+        },
+        showCardActionsBorder: {
             type: Boolean,
             default: true
         },
@@ -90,5 +104,25 @@ export default {
 <style>
 .notificationCenter{
     z-index: 300 !important;
+}
+
+.v-dialog {
+    position: fixed;
+    overflow-y: unset;
+}
+</style>
+
+<style scoped>
+.floating-close-button {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: #5457E7;
+    padding: 5px;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px 0px rgba(0,0,0,0.75);
+    z-index: 999;
 }
 </style>

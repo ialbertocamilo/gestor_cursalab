@@ -3,8 +3,12 @@
 use App\Http\Controllers\ExportarConferenciasController;
 use App\Http\Controllers\CurriculasGruposController;
 use App\Http\Controllers\ExportarController;
+use App\Http\Controllers\ReportsController;
 
 Route::get('reportes/{layout}', [ExportarController::class, 'indexReport'])->name('exportar.reportes');
+
+Route::get('/reports/queue', [ReportsController::class, 'loadReportsQueue']);
+Route::get('/reports/types', [ReportsController::class, 'loadRepotsTypes']);
 
 Route::prefix('exportar')->controller(ExportarController::class)->group(function () {
 
@@ -38,7 +42,6 @@ Route::prefix('exportar')->controller(ExportarController::class)->group(function
 	// ->middleware('permission:exportar.index');
 	Route::get('/reporte_filtrado', 'exportReporteFiltrado')->name('exportar.reporte_filtrado');
 
-
 	//****************** MEETINGS *****************/
 	Route::get('/meetings_types', 'meetings_types');
 
@@ -57,6 +60,6 @@ Route::prefix('exportar')->group(function () {
 
 	// EXPORTAR CURRICULAS EN EXCEL
 	Route::get('/curricula_excel', [CurriculasGruposController::class, 'exportarCurriculasExcel']);
-   
+
 });
 

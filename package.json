@@ -37,6 +37,7 @@
         "prismjs": "^1.27.0",
         "vue-apexcharts": "^1.6.2",
         "vue-router": "^3.5.3",
+        "vue-toastification": "^1.7.14",
         "vue2-datepicker": "^3.9.1",
         "vue2-dropzone": "^3.6.0",
         "vue2-timepicker": "^1.1.6",
