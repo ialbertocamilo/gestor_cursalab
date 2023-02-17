@@ -72,7 +72,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      */
     protected $fillable = [
         'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'slug', 'alias', 'person_number', 'phone_number',
-        'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
+        'email', 'email_gestor','password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
