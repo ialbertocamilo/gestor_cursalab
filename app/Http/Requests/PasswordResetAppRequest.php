@@ -37,8 +37,6 @@ class PasswordResetAppRequest extends FormRequest
 
         $piecesPass = stringConcatEqualNum([$document, $this->email], 4);
         
-        dd($this->docume);
-        
         return [
             'email' => 'nullable|email',
             'document' => 'nullable',

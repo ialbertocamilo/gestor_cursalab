@@ -1200,7 +1200,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     // === RESET PASSWORD ===
 
     // === INTENTOS APP/GESTOR ===
-    public function userIncrementAttempts($current, $currentAttempts, $currentMinutes)
+    public function userIncrementAttempts($current, $currentAttempts, $currentMinutes, $permanent = false)
     {
         $userAttempts = $current->attempts;
         $fulledAttempts = false;
@@ -1223,8 +1223,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $current->timestamps = false;
 
         $current->save();
-        $current['fulled_attempts'] = $fulledAttempts; 
 
+        if($permanent) {
+            $current->timestamps = false;
+            $current->attempts_lock_time = NULL;
+            $current->save();
+        }
+
+        $current['fulled_attempts'] = $fulledAttempts; 
         return $current;
     }
 
@@ -1239,7 +1245,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     ->orWhere('username', $value)->first();
     }
 
-    public function incrementAttempts($value, $keyenv = 'GESTOR')
+    public function incrementAttempts($value, $keyenv = 'GESTOR', $permanent = false)
     {
         $currentAttempts = env('ATTEMPTS_LOGIN_MAX_'.$keyenv);
         $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK_'.$keyenv);
@@ -1257,7 +1263,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return $current_user;
         }
 
-        return $this->userIncrementAttempts($current_user, $currentAttempts, $currentMinutes);
+        return $this->userIncrementAttempts($current_user, $currentAttempts, $currentMinutes, $permanent);
     }
 
     public function checkTimeToReset($value, $keyenv = 'GESTOR')
@@ -1292,10 +1298,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->save();
     }
 
-    public function checkCredentialsAttempts($current, $currentAttempts)
+    public function checkCredentialsAttempts($current, $currentAttempts, $permanent = false)
     {
-        $timeCondition = (now() <= $current->attempts_lock_time);
+        $availablePermanentBlock = ($current->attempts == $currentAttempts && is_null($current->attempts_lock_time));
+
+        if($availablePermanentBlock && $permanent) {
+            $current['fulled_attempts'] = true;
+            return $current;
+        }
+
+        if($availablePermanentBlock && !$permanent) {
+            $current->timestamps = false;
+            $current->attempts = 0; 
+            $current->attempts_lock_time = NULL;
+
+            $current->save();
             
+            return false;
+        }
+
+        $timeCondition = (now() <= $current->attempts_lock_time);
+                                
+
         if($current->attempts == $currentAttempts && $timeCondition) {
             $current['fulled_attempts'] = true;
             return $current;
@@ -1333,7 +1357,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return false;
     }
 
-    public function checkAttemptManualApp($credentials)
+    public function checkAttemptManualApp($credentials, $permanent = false)
     {
         ['username' => $req_username, 
          'password' => $req_password] = $credentials[0];
@@ -1349,7 +1373,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $checkPassword = Hash::check($req_password, $current->password);
 
         if($checkUserDoc && $checkPassword) {
-            return $this->checkCredentialsAttempts($current, $currentAttempts);
+            return $this->checkCredentialsAttempts($current, $currentAttempts, $permanent);
         }
         return false;
     }

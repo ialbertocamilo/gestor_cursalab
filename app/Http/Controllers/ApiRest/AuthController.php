@@ -54,10 +54,10 @@ class AuthController extends Controller
             $userInstance = new User;
 
             // === validacion de intentos ===
-            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2]); 
+            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2], true); //permanent
             if($user_attempts) {
                 $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
-                return $this->error('Intento fallido.', 401, $responseAttempts);
+                return $this->error('Intento fallido.', 400, $responseAttempts);
             }
             // === validacion de intentos ===
 
@@ -66,6 +66,8 @@ class AuthController extends Controller
                 // === verificar el dni como password ===
                 if (trim($userinput) === $password) {
                     $responseResetPass = [];
+                    Auth::user()->resetAttemptsUser(); // resetea intentos
+                
                     $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
                     return response()->json($responseResetPass);
                 }
@@ -106,8 +108,9 @@ class AuthController extends Controller
                 }
                 // === validar si debe reestablecer contraseña === 
 
-                // $responseUserData['recaptcha'] = $recaptcha_response; opcional
                 $responseUserData = $this->respondWithDataAndToken($data);
+                // $responseUserData['recaptcha'] = $recaptcha_response; opcional
+
                 return response()->json($responseUserData); 
 
             } else {
@@ -116,7 +119,7 @@ class AuthController extends Controller
                 $user_attempts = $userInstance->incrementAttempts($userinput, 'APP');
                 if($user_attempts) {
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
-                    return $this->error('Intento fallido.', 401, $responseAttempts);
+                    return $this->error('Intento fallido.', 400, $responseAttempts);
                 }
                 // === validacion de intentos ===
 
@@ -143,7 +146,7 @@ class AuthController extends Controller
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
-        $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
+        // $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
         // if ($user->subworkspace_id == 29 AND $user->external_id) {
 
@@ -203,6 +206,9 @@ class AuthController extends Controller
             'workspace' => $workspace_data,
             'can_be_host' => $can_be_host,
             'ciclo_actual' => $ciclo_actual,
+            'android' => $user->android,
+            'ios' => $user->ios,
+            'huawei' => $user->huawei,
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo
@@ -301,7 +307,9 @@ class AuthController extends Controller
                     'attempts_fulled'=> $user_attempts->fulled_attempts ];
 
         if($user_time) {
-            $current_time = now()->diff($user_attempts->attempts_lock_time)->format("%I:%S");
+            $current_time = is_null($user_attempts->attempts_lock_time) ? false 
+                          : now()->diff($user_attempts->attempts_lock_time)->format("%I:%S");
+
             return array_merge(['current_time' => $current_time], $errors);
         }
         return $errors;
@@ -309,13 +317,12 @@ class AuthController extends Controller
 
     public function incrementAttemptsOnly($user, $returned = false)
     {
-        $user_attempts = $user->incrementAttempts($user->document, 'APP');
+        $user_attempts = $user->incrementAttempts($user->document, 'APP', true); // permanent
         if($user_attempts) {
             // $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
             $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
-
             if($returned) return $responseAttempts;
-            return $this->error('Intento fallido.', 401, $responseAttempts);
+            return $this->error('Intento fallido.', 400, $responseAttempts);
         }
     }
     // === ATTEMPTS ===
@@ -438,12 +445,11 @@ class AuthController extends Controller
         $user = User::find($request->id_user);
 
         // === validacion de intentos ===
-        $user_attempts = $user->checkTimeToReset($user->document, 'APP'); 
-        
+        // $user_attempts = $user->checkTimeToReset($user->document, 'APP'); // reset intentos
         if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
             $user['fulled_attempts'] = true;
             $responseAttempts = $this->sendAttempsAppResponse($user);
-            return $this->error('Intento fallido.', 401, $responseAttempts);
+            return $this->error('Intento fallido.', 400, $responseAttempts);
         }
         // === validacion de intentos ===
 
@@ -451,10 +457,11 @@ class AuthController extends Controller
             $user_birth_date = $user->getCriterionValueCode('birthday_date');
             
             if(is_null($user_birth_date)){
+                return $this->incrementAttemptsOnly($user);
                 // no tiene fecha de nacimiento 
-                $response = $this->incrementAttemptsOnly($user, true); 
-                $response['birthday_date'] = 'No existe la fecha de nacimiento en este usuario';
-                return $this->error('Intento fallido', 401, $response);
+                // $response = $this->incrementAttemptsOnly($user, true); 
+                // $response['birthday_date'] = 'No existe la fecha de nacimiento en este usuario';
+                // return $this->error('Intento fallido', 400, $response);
             }
 
             $user_state_date = (date('d-m-Y', strtotime($user_birth_date->value_text)) == $request->birthday_date);
@@ -476,24 +483,6 @@ class AuthController extends Controller
 
         return $this->incrementAttemptsOnly($user);  
     }
-
-    public function quizz_verify(QuizzAppRequest $request)
-    {
-        if(!Auth::check()) return $this->error('no-auth', 503);
-        $request->validated();
-
-        // $user = auth()->user();
-        $user = $this->test_user();
-
-        $user_birth_date = $user->getCriterionValueCode('birthday_date')->value_text;
-        $user_state_date = (date('d-m-Y', strtotime($user_birth_date)) == $request->birthday_date);
-
-        $user_gender = $user->getCriterionValueCode('gender')->value_text;
-        $user_state_gender = ($user_gender == $user->gender);
-
-        return ($user_state_date && $user_state_gender) ? $this->resetPasswordBuildToken($user) 
-                                                        : $this->error('no-auth', 503);
-    }
     // === QUIZZ ===
 
     // === RESET ===
@@ -502,10 +491,11 @@ class AuthController extends Controller
         $user['email'] = empty($user->email) ? $user->document : $user->email;
         $token = Password::createToken($user);
 
-        $response = [ 'user_data'  => [ 'fullname' => $user->getFullnameAttribute(),
-                                       'identifier' => $user->email ], 
-                      'user_token' => $token,
-                      'reset_days' => env('RESET_PASSWORD_DAYS_APP') ];
+        $response = [ 'user_data'   => [ 'fullname' => $user->getFullnameAttribute(),
+                                         'identifier' => $user->email ], 
+                      'user_token'  => $token,
+                      'reset_days'  => env('RESET_PASSWORD_DAYS_APP'),
+                      'first_reset' => is_null($user->last_pass_updated_at) ];
 
         return $this->success($response, 'Resetear Contraseña');
     }
@@ -521,7 +511,16 @@ class AuthController extends Controller
 
         $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
                                          : $request->only('document', 'password', 'password_confirmation', 'token');
+        
+        $credentials1 = $credentials2 = ['password' => $request->password];
+        $userinput = $request->email ? $credentials['email'] : $credentials['document'];
+        
+        $credentials1['email'] = $userinput;
+        $credentials2['document'] = $userinput;
 
+        if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            return $this->error('Contraseña no válida, asegurate de crear una nueva contraseña.', 422);
+        }
         // === prov el email a documento ===
         if(!$request->email) {
             $instance = new User;
@@ -537,12 +536,6 @@ class AuthController extends Controller
         });
 
         if($status == Password::PASSWORD_RESET) {
-
-            $credentials1 = $credentials2 = ['password' => $request->password];
-            $userinput = $request->email ? $credentials['email'] : $credentials['document'];
-
-            $credentials1['email'] = $userinput;
-            $credentials2['document'] = $userinput;
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
                 $user = Auth::user();
