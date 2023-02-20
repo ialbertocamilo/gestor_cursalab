@@ -53,7 +53,7 @@ class RestTopicController extends Controller
         return $this->success(['msg' => "Tema revisado correctamente."]);
     }
 
-    public function reviewTopicMedia( Request $request, Topic $topic, Media $media, $user = null)
+    public function reviewTopicMedia( Request $request, Topic $topic, MediaTema $media, $user = null)
     {
         if ($topic->course->hasBeenValidated())
             return ['error' => 0, 'data' => null];
@@ -88,7 +88,10 @@ class RestTopicController extends Controller
             foreach($media_progress as $med_pro)
             {
                 $status = ($med_pro->media_topic_id == $media->id) ? 'revisado' : $med_pro->status;
-                array_push($user_progress_media, (object) array('media_topic_id' => $med_pro->media_topic_id, 'status'=> $status));
+                $last_media_duration = ($med_pro->media_topic_id == $media->id) ? $request->last_media_duration : $med_pro->last_media_duration;
+                array_push($user_progress_media, (object) array('media_topic_id' => $med_pro->media_topic_id,
+                'status' => $status,
+                'last_media_duration' => $last_media_duration));
             }
             $summary_topic->media_progress = json_encode($user_progress_media);
         }
@@ -98,7 +101,75 @@ class RestTopicController extends Controller
             foreach($medias as $med)
             {
                 $status = ($med->id == $media->id) ? 'revisado' : 'por-iniciar';
-                array_push($user_progress_media, (object) array('media_topic_id' => $med->id, 'status'=> $status));
+                $last_media_duration = ($med->id == $media->id) ? $request->last_media_duration : $med->last_media_duration;
+                array_push($user_progress_media, (object) array('media_topic_id' => $med->id,
+                'status'=> $status,
+                'last_media_duration' => $last_media_duration));
+            }
+            $summary_topic->media_progress = json_encode($user_progress_media);
+        }
+
+
+
+        $summary_topic->last_media_access = $media->id;
+        $summary_topic->last_media_duration = $request->last_media_duration;
+        $summary_topic->save();
+
+        return $this->success(['msg' => "Contenido revisado correctamente."]);
+    }
+
+    public function reviewTopicMediaDuration( Request $request, Topic $topic, MediaTema $media, $user = null)
+    {
+        if ($topic->course->hasBeenValidated())
+            return ['error' => 0, 'data' => null];
+
+        $user = auth()->user() ?? $user;
+
+        $topic->load('course');
+
+        $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+            ->where('topic_id', $topic->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$summary_topic) return $this->error("No se pudo revisar el contenido.", 422);
+
+        // $reviewed_topic_taxonomy = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
+        // $summary_topic->status_id = $reviewed_topic_taxonomy?->id;
+        // $summary_topic->last_time_evaluated_at = now();
+        // $summary_topic->save();
+
+        // SummaryCourse::updateUserData($topic->course, $user);
+        // SummaryUser::updateUserData($user);
+
+
+        $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
+
+        $media_progress = !is_null($summary_topic->media_progress) ? json_decode($summary_topic->media_progress) : null;
+
+        if(!is_null($media_progress))
+        {
+            $user_progress_media = array();
+            foreach($media_progress as $med_pro)
+            {
+                $status = $med_pro->status ?? 'iniciado';
+                $last_media_duration = ($med_pro->media_topic_id == $media->id) ? $request->last_media_duration : $med_pro->last_media_duration;
+                array_push($user_progress_media, (object) array('media_topic_id' => $med_pro->media_topic_id,
+                'status' => $status,
+                'last_media_duration' => $last_media_duration));
+            }
+            $summary_topic->media_progress = json_encode($user_progress_media);
+        }
+        else
+        {
+            $user_progress_media = array();
+            foreach($medias as $med)
+            {
+                $status = $med->status ?? 'iniciado';
+                $last_media_duration = ($med->id == $media->id) ? $request->last_media_duration : $med->last_media_duration;
+                array_push($user_progress_media, (object) array('media_topic_id' => $med->id,
+                'status'=> $status,
+                'last_media_duration' => $last_media_duration));
             }
             $summary_topic->media_progress = json_encode($user_progress_media);
         }

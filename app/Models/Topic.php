@@ -435,7 +435,7 @@ class Topic extends BaseModel
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
 
         // UC
-        $school_name = $school->name;
+        $school_name = $school?->name;
         if ($workspace_id === 25) {
             $school_name = removeUCModuleNameFromCourseName($school_name);
         }
@@ -491,11 +491,13 @@ class Topic extends BaseModel
                         ? route('media.download.media_topic', [$media->id]) : null;
 
                     $media->status_progress = 'por-iniciar';
+                    $media->last_media_duration = null;
 
                     if(!is_null($media_progress)){
                         foreach($media_progress as $medp){
                             if($medp->media_topic_id == $media->id){
                                 $media->status_progress = $medp->status;
+                                $media->last_media_duration = $medp->last_media_duration;
                                 break;
                             }
                         }
