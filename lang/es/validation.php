@@ -80,6 +80,13 @@ return [
     'unique'               => 'El campo :attribute ya ha sido registrado.',
     'url'                  => 'El formato :attribute es inválido.',
 
+    'password' => [
+        'letters' => 'El dato ":attribute" debe contener una letra',
+        'mixed' => 'El dato ":attribute" debe contener una letra mayúscula y una minúscula',
+        'numbers' => 'El dato ":attribute" debe contener un número',
+        'symbols' => 'El dato ":attribute" debe contener un símbolo',
+        'uncompromised' => 'La ":attribute" ha aparecido en una fuga de datos. Por favor cambia la :attribute',
+    ],
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines

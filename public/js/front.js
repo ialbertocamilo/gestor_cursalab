@@ -174,3 +174,81 @@ $(document).ready(function () {
     });
 
 });
+
+
+((w, d) => {
+
+    /* funcion global para ver contraseña */
+    w.toggleEyeInputId = function (evt, elementId) {
+        const iconEye = evt.firstElementChild;
+        const inputRef = d.getElementById(elementId);
+        const currentType = inputRef.type;
+
+        let currentIcon = 'fa-eye';
+
+        if(currentType === 'text') inputRef.type = 'password';            
+        else {
+            inputRef.type = 'text';
+            currentIcon = 'fa-eye-slash';
+        }
+
+        iconEye.className = `far ${currentIcon} fa-lg`;
+    }
+    /* funcion global para ver contraseña*/
+
+    /* funcion local animar el tiempo solo para 'login.blade.php' */
+    function decrementTimeAnimation(elementId, elementBtnId) {
+        const domRef = d.getElementById(elementId); // span
+        const btnRef = d.getElementById(elementBtnId) ?? false; // button
+
+        if(!domRef) return;
+
+        let currentTime = domRef.textContent.split(':');
+        let no_hrs = false; // ver la hora
+        
+        if(currentTime.length === 2) {
+            currentTime = ['00', ...currentTime];
+            no_hrs = true;
+        }
+
+        const [hrs, min, sec] = currentTime;
+        
+        let _hrs = Number(hrs),
+            _min = Number(min),
+            _sec = Number(sec);
+
+        let startAnimation;
+        startAnimation = setInterval(initDecrementation, 1000);
+
+        function initDecrementation(str = [0, 0, 0]) {
+            _sec--;
+            if(_sec === 0 && _min > 0) {
+                _sec = 60;
+                _min--;
+            } 
+            
+            if(_min === 0 && _hrs > 0) {
+                _min = 60;
+                _hrs--; 
+            }
+
+            const currHrs = (_hrs < 10) ? `0${_hrs}` : _hrs;
+            const currMin = (_min < 10) ? `0${_min}` : _min;
+            const currSec = (_sec < 10) ? `0${_sec}` : _sec;
+
+            let joinTime = (no_hrs) ? [`${currMin}m`, `${currSec}s`] : 
+                                      [`${currMin}h`, `${currMin}m`, `${currSec}s`]; 
+            domRef.textContent = joinTime.join(':'); 
+
+            if (_hrs === 0 && _min === 0 && _sec === 0) {
+                clearInterval(startAnimation);
+                domRef.parentElement.classList.add('d-none');
+                // deshabilitar boton
+                if(btnRef) btnRef.removeAttribute('disabled');
+            }
+        }
+    }
+    decrementTimeAnimation('decrement-animation', 'decrement-timeout-disabled');
+    /* funcion local animar el tiempo solo para 'login.blade.php' */
+
+})(window, document);

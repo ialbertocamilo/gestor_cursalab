@@ -286,3 +286,13 @@ function stringContains($string, $q)
     // if (!$q) return false;
     return false !== stripos($string, $q);
 }
+
+function stringConcatEqualNum(array $data, int $num)
+{
+    $piecesJoin = implode('', $data);
+    $piecesPart = str_split($piecesJoin, $num);
+    $pieceIndex = floor(strlen($piecesJoin) / $num);
+    unset($piecesPart[$pieceIndex]);
+
+    return implode('|', $piecesPart);
+}

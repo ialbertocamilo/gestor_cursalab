@@ -15,16 +15,25 @@
       <div class="logo mt-5 mx-auto text-center">
         <img src="img/logo_cursalab_v2_black.png" alt="cursalab" class="img-fluid" width="270">
       </div>
-      <div class="titulo text-center mt-5 mb-5">
+      <div class="titulo text-center mt-3 mb-1">
         <h3>¡Bienvenido!</h3>
-        {{-- <h2><strong>Cursalab Gestiona</strong></h2> --}}
+
+        <div class="mt-4 {{ $errors->has('attempts_fulled') ? 'text-danger' : '' }}">
+          @if($errors->has('attempts_fulled') && $errors->first('attempts_count') == $errors->first('attempts_max'))
+            <p class="mb-0">Por favor vuelve a intentarlo dentro de <span id="decrement-animation">{{ $errors->first('current_time') }}</span></p>
+          @endif
+
+          @if($errors->has('attempts_fulled') && !$errors->first('attempts_fulled'))
+            <p class="mb-0">Has realizado {{ $errors->first('attempts_count') }} de {{ $errors->first('attempts_max') }} intentos </p>
+          @endif
+        </div>
       </div>
 
-      <div class="form mt-5">
+      <div class="form mt-1">
         <form method="POST" class="form-validate" action="{{ route('login_post') }}">
           @csrf
           <div class="form-group">
-            <input id="login-username" type="text" name="email" required data-msg="Por favor ingrese su email" class="input-material form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" autocomplete="off">
+            <input id="login-username" type="text" name="email" required data-msg="Por favor ingrese su email" class="input-material form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" autocomplete="off" autofocus>
             <label for="login-username" class="label-material active">{{ __('Email') }}</label>
             @if ($errors->has('email'))
             <span class="invalid-feedback" role="alert">
@@ -32,9 +41,14 @@
             </span>
             @endif
           </div>
+
           <div class="form-group">
-            <input id="login-password" type="password" name="password" required data-msg="Por favor ingrese su contraseña" class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" autocomplete="off">
-            <label for="login-password" class="label-material active">{{ __('Contraseña') }}</label>
+            <input id="login-password" type="password" name="password" required data-msg="Por favor ingrese su contraseña" class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }} no-icon one" autocomplete="off">
+            <div class="one toggle-eye text-muted" onclick="toggleEyeInputId(this, 'login-password')">
+              <span class="far fa-eye fa-lg"></span>
+            </div>
+            <label for="login-password" class="label-material">{{ __('Contraseña') }}</label>
+
             @if ($errors->has('password'))
             <span class="invalid-feedback" role="alert">
               <strong>{{ $errors->first('password') }}</strong>
@@ -52,9 +66,21 @@
                         </div>
                     </div> -->
           <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary">
-              {{ __('Ingresar') }}
-            </button>
+
+            @if($errors->has('attempts_fulled') && $errors->first('attempts_count') == $errors->first('attempts_max'))
+
+              <button type="submit" class="btn btn-primary" id="decrement-timeout-disabled" disabled>
+                {{ __('Ingresar') }}
+              </button>
+            
+            @else
+            
+              <button type="submit" class="btn btn-primary">
+                {{ __('Ingresar') }}
+              </button>
+            
+            @endif
+
             <br>
           </div>
         </form>
