@@ -39,7 +39,6 @@
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-6 mt-2">
-
                         <DefaultAutocomplete
                             dense
                             v-model="modulo"
@@ -52,6 +51,7 @@
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersCareerData"
                             :maxValuesSelected="4"
+                            @onChange="moduloChange"
                         />
 
                     </div>
@@ -68,7 +68,7 @@
                             :show-select-all="false"
                             hide-details="false"
                             v-model="school"
-                            :items="schools"
+                            :items="filteredSchools"
                             item-value="id"
                             item-text="name"
                             label="Selecciona un #Módulo"
@@ -210,6 +210,7 @@ export default {
             career: [],
             area: [],
 
+            filteredSchools: [],
             schools: [],
             courses: [],
             school: [],
@@ -325,7 +326,25 @@ export default {
             let urlSchools = `${vue.$props.reportsBaseUrl}/filtros/schools/${vue.$props.workspaceId}`;
             let responseSchools = await axios({ url: urlSchools, method: 'get'});
             vue.schools = responseSchools.data;
-        }
+        },
+        async moduloChange() {
+
+            let vue = this;
+
+            vue.school = [];
+            vue.courses = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+                if (vue.modulo.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
+        },
     },
     mounted() {
         const vue = this;
