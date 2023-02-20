@@ -57,6 +57,11 @@ class AuthController extends Controller
             $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2], true); //permanent
             if($user_attempts) {
                 $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+
+                // custom message
+                if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
+                    return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+                } 
                 return $this->error('Intento fallido.', 400, $responseAttempts);
             }
             // === validacion de intentos ===
@@ -115,10 +120,15 @@ class AuthController extends Controller
 
             } else {
                 // === validacion de intentos ===
-                $userInstance->checkTimeToReset($userinput, 'APP'); 
-                $user_attempts = $userInstance->incrementAttempts($userinput, 'APP');
+                $userInstance->checkTimeToReset(trim($userinput), 'APP'); 
+                $user_attempts = $userInstance->incrementAttempts(trim($userinput), 'APP');
                 if($user_attempts) {
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+                    // custom message
+                    if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
+                        return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+                    } 
+
                     return $this->error('Intento fallido.', 400, $responseAttempts);
                 }
                 // === validacion de intentos ===

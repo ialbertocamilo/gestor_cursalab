@@ -65,6 +65,7 @@ class UsuarioController extends Controller
 
             return [
                 'user' => [
+                    'id' => $user->id,
                     'username' => $user->username,
                     'fullname' => $user->fullname,
                     'roles' => $roles
@@ -205,7 +206,6 @@ class UsuarioController extends Controller
     public function store(UserStoreRequest $request)
     {
         $data = $request->validated();
-
         // $data['subworkspace_id'] = get_current_workspace()?->id;
 
         User::storeRequest($data);
@@ -216,9 +216,8 @@ class UsuarioController extends Controller
     public function update(UserStoreRequest $request, User $user)
     {
         $data = $request->validated();
-
         // $data['subworkspace_id'] = get_current_workspace()?->id;
-//        info($data);
+        // info($data);
         User::storeRequest($data, $user);
 
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);

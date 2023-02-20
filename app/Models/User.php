@@ -39,7 +39,7 @@ use Illuminate\Support\Str;
 use Spatie\Image\Manipulations;
 
 use Illuminate\Support\Facades\Mail;
-use App\Mail\EmailTemplate;    
+use App\Mail\EmailTemplate;
 
 use Bouncer;
 
@@ -56,6 +56,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     use Notifiable;
 
     use Cachable;
+
+    use SoftDeletes;
 
     use Cachable {
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
@@ -409,11 +411,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 }
                 if ($update_password && isset($data['password'])) {
                     $data['last_pass_updated_at'] = now();
+                    $data['attempts'] = 0;
+                    $data['attempts_lock_time'] = NULL;
                 }
                 $user->update($data);
-                if (!$from_massive) {
-                    SummaryUser::updateUserData($user);
-                }
+
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
@@ -426,6 +428,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             else :
                 if ($update_password && isset($data['password'])) {
                     $data['last_pass_updated_at'] = now();
+                    $data['attempts'] = 0;
+                    $data['attempts_lock_time'] = NULL;
                 }
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
@@ -447,6 +451,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->sync($data['criterion_list_final']);
 
             $user->save();
+
+            if ($user && !$from_massive) {
+                SummaryUser::updateUserData($user, false);
+            }
+
             DB::commit();
         } catch (\Exception $e) {
 
@@ -1114,7 +1123,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $currentRange = env('AUTH2FA_CODE_DIGITS');
         $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
 
-        $start = '1'.str_repeat('0', $currentRange - 1);  
+        $start = '1'.str_repeat('0', $currentRange - 1);
         $end = str_repeat('9', $currentRange);
         $currentCode = rand($start, $end);
 
@@ -1135,7 +1144,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $user->save();
     }
 
-    public function resetToNullCode2FA() 
+    public function resetToNullCode2FA()
     {
         $user = $this;
 
@@ -1158,28 +1167,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->save();
     }
 
-    public function setUserPassUpdateToken($token) 
+    public function setUserPassUpdateToken($token)
     {
         $user = $this;
-        
+
         $user->timestamps = false; // no actualizar el usuario
         $user->pass_token_updated = $token;
         return $user->save();
     }
 
-    public function checkPassUpdateToken($token, $id_user) 
+    public function checkPassUpdateToken($token, $id_user)
     {
         // validamos el token para la vista 'auth.passwords.reset.blae.php'
         return $this->where('pass_token_updated', $token)
                     ->where('id', $id_user)->count();
     }
 
-    public function updatePasswordUser($password) 
+    public function updatePasswordUser($password)
     {
         $user = $this;
         $data = [ 'last_pass_updated_at' => now(),
                   'password' => $password ];
-        
+
         $user->update($data);
     }
 
@@ -1251,7 +1260,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK_'.$keyenv);
 
         // existe ese data-usuario
-        $current = $this->currentUserByEnviroment($keyenv, $value); 
+        $current = $this->currentUserByEnviroment($keyenv, $value);
         if(!$current) return NULL; // null o vacio
 
         $userAttempts = $current->attempts;
@@ -1276,11 +1285,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if($staticUserTime && $staticMinTime >= $staticUserTime){
             $current_user->timestamps = false;
-            $current_user->attempts = 0; 
+            $current_user->attempts = 0;
             $current_user->attempts_lock_time = NULL;
 
             $current_user->save();
-            
+
             return $current_user;
         }
 
@@ -1292,7 +1301,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
 
         $user->timestamps = false;
-        $user->attempts = 0; 
+        $user->attempts = 0;
         $user->attempts_lock_time = NULL;
 
         $user->save();
@@ -1334,7 +1343,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $current['fulled_attempts'] = true;
 
             return $current;
-        } 
+        }
         return false;
     }
 
@@ -1345,7 +1354,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
         $current = $user->where('email', $request->email)
                         ->where('active', 1)->first();
-    
+
         if(!$current) return false;
 
         $checkEmail = ($current->email == $request->email);
@@ -1359,7 +1368,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function checkAttemptManualApp($credentials, $permanent = false)
     {
-        ['username' => $req_username, 
+        ['username' => $req_username,
          'password' => $req_password] = $credentials[0];
 
         ['document' => $req_document] = $credentials[1];
