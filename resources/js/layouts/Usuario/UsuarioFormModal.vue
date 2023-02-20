@@ -69,6 +69,7 @@
                             v-model="resource.password"
                             label="Contraseña"
                             type="password"
+                            ref="passwordRefModal"
                             :rules="options.action === 'edit' ? rules.password_not_required : rules.password"
                         />
                     </v-col>
@@ -188,15 +189,17 @@ export default {
     },
     methods: {
         closeModal() {
-            let vue = this
+            let vue = this;
             // vue.options.open = false
-            vue.resetSelects()
-            vue.resetValidation()
-            vue.$emit('onCancel')
+            vue.resetSelects();
+            vue.resetValidation();
+            vue.$emit('onCancel');
         },
         resetValidation() {
             let vue = this
-            vue.resetFormValidation('UsuarioForm')
+            vue.resetFormValidation('UsuarioForm');
+            vue.errors = [];
+            vue.$refs.passwordRefModal.resetTypePassword();
         },
         async confirmModal() {
             let vue = this
