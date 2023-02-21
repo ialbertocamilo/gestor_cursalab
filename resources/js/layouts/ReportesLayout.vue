@@ -873,6 +873,9 @@ color: #ffffff !important;
 
 
 <style scoped>
+.v-tab {
+    text-transform: capitalize !important
+}
 
 .main-tabs-wrapper {
     margin-bottom: 40px;
