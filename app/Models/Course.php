@@ -537,6 +537,7 @@ class Course extends BaseModel
                     'c_evaluable' => $course->assessable,
                     'disponible' => $course_status['available'],
                     'status' => $course_status['status'],
+                    'requirements' => $course_status['requirements'],
                     'encuesta' => $course_status['available_poll'],
                     'encuesta_habilitada' => $course_status['enabled_poll'],
                     'encuesta_resuelta' => $course_status['solved_poll'],
@@ -600,6 +601,7 @@ class Course extends BaseModel
         $solved_poll = false;
         $assigned_topics = 0;
         $completed_topics = 0;
+        $requirement_list = null;
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
         $status_approved = $statuses->where('code', 'aprobado')->first();
@@ -634,6 +636,11 @@ class Course extends BaseModel
                 if (!$compatible_course_req):
                     $available_course = false;
                     $status = 'bloqueado';
+                    if($requirement_course?->requirement_id){
+                        $req = Course::where('id',$requirement_course?->requirement_id)->first();
+                        $req_school = $req->schools->first();
+                        $requirement_list = ['id' => $requirement_course?->requirement_id, 'name' => $req->name, 'school_id' => $req_school?->id];
+                    }
                 endif;
 
             }else{
@@ -641,6 +648,11 @@ class Course extends BaseModel
                     if(!in_array($summary_requirement_course?->status?->code,['aprobado', 'realizado', 'revisado'])){
                         $available_course = false;
                         $status = 'bloqueado';
+                        if($requirement_course?->requirement_id){
+                            $req = Course::where('id',$requirement_course?->requirement_id)->first();
+                            $req_school = $req->schools->first();
+                            $requirement_list = ['id' => $requirement_course?->requirement_id, 'name' => $req->name, 'school_id' => $req_school?->id];
+                        }
                     }
                 } catch (\Throwable $th) {
                     //throw $th;
@@ -707,6 +719,7 @@ class Course extends BaseModel
 
         return [
             'status' => $status,
+            'requirements' => $requirement_list,
             'progress_percentage' => $course_progress_percentage,
             'available' => $available_course,
             'poll_id' => $poll_id,

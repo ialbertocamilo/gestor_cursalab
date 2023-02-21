@@ -519,6 +519,7 @@ class Topic extends BaseModel
                         'id' => $topic->id,
                         'nombre' => $topic->name,
                         'requisito_id' => NULL,
+                        'requirements' => NULL,
                         'imagen' => $topic->imagen,
                         'contenido' => $topic->content,
                         'media' => $media_topics,
@@ -542,6 +543,7 @@ class Topic extends BaseModel
                     'id' => $topic->id,
                     'nombre' => $topic->name,
                     'requisito_id' => $topic_status['topic_requirement'],
+                    'requirements' => $topic_status['requirements'],
                     'imagen' => $topic->imagen,
                     'contenido' => $topic->content,
                     'media' => $media_topics,
@@ -666,8 +668,15 @@ class Topic extends BaseModel
                 $available_topic = true;
         }
 
+        $topic_req_name = null;
+        if($topic_requirement?->requirement_id){
+            $topic_req = Topic::where('id', $topic_requirement?->requirement_id)->first();
+            $topic_req_name = $topic_req?->name;
+        }
+
         return [
             //            'topic_name' => $topic->name,
+            'requirements' => ($topic_requirement) ? ['id' => $topic_requirement?->requirement_id, 'name' => $topic_req_name] : null,
             'status' => $topic_status,
             'topic_requirement' => $topic_requirement?->id,
             'grade' => $grade,
