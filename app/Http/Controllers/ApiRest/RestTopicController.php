@@ -69,15 +69,6 @@ class RestTopicController extends Controller
 
         if (!$summary_topic) return $this->error("No se pudo revisar el contenido.", 422);
 
-        // $reviewed_topic_taxonomy = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
-        // $summary_topic->status_id = $reviewed_topic_taxonomy?->id;
-        // $summary_topic->last_time_evaluated_at = now();
-        // $summary_topic->save();
-
-        // SummaryCourse::updateUserData($topic->course, $user);
-        // SummaryUser::updateUserData($user);
-
-
         $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
 
         $media_progress = !is_null($summary_topic->media_progress) ? json_decode($summary_topic->media_progress) : null;
@@ -109,11 +100,29 @@ class RestTopicController extends Controller
             $summary_topic->media_progress = json_encode($user_progress_media);
         }
 
-
-
         $summary_topic->last_media_access = $media->id;
         $summary_topic->last_media_duration = $request->last_media_duration;
         $summary_topic->save();
+
+        $pending = false;
+        $validate_summary_progress = json_decode($summary_topic->media_progress);
+        if(is_array($validate_summary_progress) && count($validate_summary_progress) > 0){
+            foreach($validate_summary_progress as $validate){
+                if($validate->status != "revisado")
+                    $pending = true;
+            }
+        }
+        if(!$pending){
+
+            $reviewed_topic_taxonomy = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
+            $summary_topic->status_id = $reviewed_topic_taxonomy?->id;
+            $summary_topic->last_time_evaluated_at = now();
+            $summary_topic->save();
+
+            SummaryCourse::updateUserData($topic->course, $user);
+            SummaryUser::updateUserData($user);
+
+        }
 
         return $this->success(['msg' => "Contenido revisado correctamente."]);
     }
@@ -180,7 +189,7 @@ class RestTopicController extends Controller
         $summary_topic->last_media_duration = $request->last_media_duration;
         $summary_topic->save();
 
-        return $this->success(['msg' => "Contenido revisado correctamente."]);
+        return $this->success(['msg' => "Se actualizó la duración del contenido."]);
     }
 
 }
