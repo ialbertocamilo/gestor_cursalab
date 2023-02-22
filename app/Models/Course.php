@@ -548,8 +548,26 @@ class Course extends BaseModel
                     }
                 }
 
-                $last_media_access = $summary_topic?->last_media_access;
-                $last_media_duration = $summary_topic?->last_media_duration;
+                $last_media_access = null;
+                $last_media_duration = null;
+                $last_media_status = null;
+
+                if($media_topics){
+                    foreach($media_topics as $medt){
+                        if($medt->status_progress == 'iniciado'){
+                            $last_media_access = $medt->id;
+                            $last_media_status = $medt->status_progress;
+                            $last_media_duration = $medt->last_media_duration;
+                            break;
+                        }
+                        else if($medt->status_progress == 'por-iniciar'){
+                            $last_media_access = $medt->id;
+                            $last_media_status = $medt->status_progress;
+                            $last_media_duration = $medt->last_media_duration;
+                            break;
+                        }
+                    }
+                }
 
                 if (is_null($last_course_reviewed) && $course_status['status'] != 'completado') {
                     $last_course_reviewed = [
@@ -561,7 +579,7 @@ class Course extends BaseModel
                     ];
                 }
 
-                if ($course_status['status'] != 'completado') {
+                if ($course_status['status'] != 'completado' && $course_status['status'] != 'bloqueado') {
                     $last_school_courses[] = [
                         'id' => $course->id,
                         'nombre' => $course_name,
@@ -571,6 +589,7 @@ class Course extends BaseModel
                         'ultimo_tema_visto' => [
                             'id' => $last_topic_reviewed,
                             'last_media_access' => $last_media_access,
+                            'last_media_status' => $last_media_status,
                             'last_media_duration' => $last_media_duration
                         ],
                     ];
@@ -640,6 +659,7 @@ class Course extends BaseModel
     {
 //        if ($course->compatible)
 //            dd($course->compatible);
+        $workspace_id = $user->subworkspace->parent_id;
 
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
@@ -687,8 +707,55 @@ class Course extends BaseModel
                     $status = 'bloqueado';
                     if($requirement_course?->requirement_id){
                         $req = Course::where('id',$requirement_course?->requirement_id)->first();
+
+                        $available_course_req = true;
+                        $requirement_course_req = $req->requirements->first();
+
+                        if ($requirement_course_req) {
+
+                            $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+
+                            if (!$summary_requirement_course_req) {
+
+                                $req_course_req = $requirement_course_req->model_course;
+
+                                $req_course_req->load([
+                                    'summaries' => function ($q) use ($user) {
+                                        $q
+                                            ->with('status:id,name,code')
+                                            ->where('user_id', $user->id);
+                                    },
+                                    'compatibilities_a:id',
+                                    'compatibilities_b:id',
+                                ]);
+
+                                $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+
+                                if (!$compatible_course_req_req):
+                                    $available_course_req = false;
+                                endif;
+                            }else{
+                                try {
+                                    if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                                        $available_course_req = false;
+                                    }
+                                } catch (\Throwable $th) {
+                                    //throw $th;
+                                }
+                            }
+                        }
+
                         $req_school = $req->schools->first();
-                        $requirement_list = ['id' => $requirement_course?->requirement_id, 'name' => $req->name, 'school_id' => $req_school?->id];
+                        $course_name_req = $req->name;
+                        if ($workspace_id === 25) {
+                            $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                        }
+                        $requirement_list = [
+                            'id' => $requirement_course?->requirement_id,
+                            'name' => $course_name_req,
+                            'school_id' => $req_school?->id,
+                            'disponible' => $available_course_req
+                        ];
                     }
                 endif;
 
@@ -699,8 +766,55 @@ class Course extends BaseModel
                         $status = 'bloqueado';
                         if($requirement_course?->requirement_id){
                             $req = Course::where('id',$requirement_course?->requirement_id)->first();
+
+                            $requirement_course_req = $req->requirements->first();
+                            $available_course_req = true;
+
+                            if ($requirement_course_req) {
+
+                                $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+
+                                if (!$summary_requirement_course_req) {
+
+                                    $req_course_req = $requirement_course_req->model_course;
+
+                                    $req_course_req->load([
+                                        'summaries' => function ($q) use ($user) {
+                                            $q
+                                                ->with('status:id,name,code')
+                                                ->where('user_id', $user->id);
+                                        },
+                                        'compatibilities_a:id',
+                                        'compatibilities_b:id',
+                                    ]);
+
+                                    $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+
+                                    if (!$compatible_course_req_req):
+                                        $available_course_req = false;
+                                    endif;
+                                }else{
+                                    try {
+                                        if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                                            $available_course_req = false;
+                                        }
+                                    } catch (\Throwable $th) {
+                                        //throw $th;
+                                    }
+                                }
+                            }
+
                             $req_school = $req->schools->first();
-                            $requirement_list = ['id' => $requirement_course?->requirement_id, 'name' => $req->name, 'school_id' => $req_school?->id];
+                            $course_name_req = $req->name;
+                            if ($workspace_id === 25) {
+                                $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                            }
+                            $requirement_list = [
+                                'id' => $requirement_course?->requirement_id,
+                                'name' => $course_name_req,
+                                'school_id' => $req_school?->id,
+                                'disponible' => $available_course_req
+                            ];
                         }
                     }
                 } catch (\Throwable $th) {

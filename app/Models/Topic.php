@@ -559,6 +559,146 @@ class Topic extends BaseModel
                 ];
             }
 
+            $requirement_list = null;
+            $requirement_course = $course->requirements->first();
+
+            if ($requirement_course) {
+
+                $summary_requirement_course = $requirement_course->summaries_course->first();
+
+                if (!$summary_requirement_course) {
+
+                    $req_course = $requirement_course->model_course;
+
+                    $req_course->load([
+                        'summaries' => function ($q) use ($user) {
+                            $q
+                                ->with('status:id,name,code')
+                                ->where('user_id', $user->id);
+                        },
+                        'compatibilities_a:id',
+                        'compatibilities_b:id',
+                    ]);
+
+                    $compatible_course_req = $req_course->getCourseCompatibilityByUser($user);
+
+                    if (!$compatible_course_req):
+                        if($requirement_course?->requirement_id){
+                            $req = Course::where('id',$requirement_course?->requirement_id)->first();
+
+                            $requirement_course_req = $req->requirements->first();
+                            $available_course_req = true;
+
+                            if ($requirement_course_req) {
+
+                                $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+
+                                if (!$summary_requirement_course_req) {
+
+                                    $req_course_req = $requirement_course_req->model_course;
+
+                                    $req_course_req->load([
+                                        'summaries' => function ($q) use ($user) {
+                                            $q
+                                                ->with('status:id,name,code')
+                                                ->where('user_id', $user->id);
+                                        },
+                                        'compatibilities_a:id',
+                                        'compatibilities_b:id',
+                                    ]);
+
+                                    $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+
+                                    if (!$compatible_course_req_req):
+                                        $available_course_req = false;
+                                    endif;
+                                }else{
+                                    try {
+                                        if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                                            $available_course_req = false;
+                                        }
+                                    } catch (\Throwable $th) {
+                                        //throw $th;
+                                    }
+                                }
+                            }
+
+                            $req_school = $req->schools->first();
+                            $course_name_req = $req->name;
+                            if ($workspace_id === 25) {
+                                $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                            }
+                            $requirement_list = [
+                                'id' => $requirement_course?->requirement_id,
+                                'name' => $course_name_req,
+                                'school_id' => $req_school?->id,
+                                'disponible' => $available_course_req
+                            ];
+                        }
+                    endif;
+
+                }else{
+                    try {
+                        if(!in_array($summary_requirement_course?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                            if($requirement_course?->requirement_id){
+                                $req = Course::where('id',$requirement_course?->requirement_id)->first();
+
+                                $requirement_course_req = $req->requirements->first();
+                                $available_course_req = true;
+
+                                if ($requirement_course_req) {
+
+                                    $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+
+                                    if (!$summary_requirement_course_req) {
+
+                                        $req_course_req = $requirement_course_req->model_course;
+
+                                        $req_course_req->load([
+                                            'summaries' => function ($q) use ($user) {
+                                                $q
+                                                    ->with('status:id,name,code')
+                                                    ->where('user_id', $user->id);
+                                            },
+                                            'compatibilities_a:id',
+                                            'compatibilities_b:id',
+                                        ]);
+
+                                        $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+
+                                        if (!$compatible_course_req_req):
+                                            $available_course_req = false;
+                                        endif;
+                                    }else{
+                                        try {
+                                            if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                                                $available_course_req = false;
+                                            }
+                                        } catch (\Throwable $th) {
+                                            //throw $th;
+                                        }
+                                    }
+                                }
+
+                                $req_school = $req->schools->first();
+                                $course_name_req = $req->name;
+                                if ($workspace_id === 25) {
+                                    $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                                }
+                                $requirement_list = [
+                                    'id' => $requirement_course?->requirement_id,
+                                    'name' => $course_name_req,
+                                    'school_id' => $req_school?->id,
+                                    'disponible' => $available_course_req
+                                ];
+                            }
+                        }
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
+                }
+            }
+
             // if (true) {
             if ($course->compatible) {
 
@@ -599,6 +739,7 @@ class Topic extends BaseModel
                 'descripcion' => $course->description,
                 'imagen' => $course->imagen,
                 'requisito_id' => $course->require,
+                'requirements' => $requirement_list,
                 'c_evaluable' => $course->c_evaluable,
                 'disponible' => $course_status['available'],
                 'status' => $course_status['status'],
