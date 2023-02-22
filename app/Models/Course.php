@@ -468,6 +468,7 @@ class Course extends BaseModel
             $school_assigned = 0;
             $school_percentage = 0;
             $last_course_reviewed = null;
+            $last_school_courses = [];
 
             $courses = $courses->sortBy('position');
 
@@ -518,6 +519,38 @@ class Course extends BaseModel
 
                 $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
 
+
+                $media_topics = MediaTema::where('topic_id',$last_topic_reviewed)->orderBy('position')->get();
+
+                $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+                ->where('topic_id', $last_topic_reviewed)
+                ->where('user_id', $user->id)
+                ->first();
+
+                $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+
+                foreach ($media_topics as $media) {
+                    unset($media->created_at, $media->updated_at, $media->deleted_at);
+                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                        ? route('media.download.media_topic', [$media->id]) : null;
+
+                    $media->status_progress = 'por-iniciar';
+                    $media->last_media_duration = null;
+
+                    if(!is_null($media_progress)){
+                        foreach($media_progress as $medp){
+                            if($medp->media_topic_id == $media->id){
+                                $media->status_progress = $medp->status;
+                                $media->last_media_duration = $medp->last_media_duration;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                $last_media_access = $summary_topic?->last_media_access;
+                $last_media_duration = $summary_topic?->last_media_duration;
+
                 if (is_null($last_course_reviewed) && $course_status['status'] != 'completado') {
                     $last_course_reviewed = [
                         'id' => $course->id,
@@ -525,6 +558,21 @@ class Course extends BaseModel
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
                         'ultimo_tema_visto' => $last_topic_reviewed,
+                    ];
+                }
+
+                if ($course_status['status'] != 'completado') {
+                    $last_school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'imagen' => $course->imagen,
+                        'porcentaje' => $course_status['progress_percentage'],
+                        // 'ultimo_tema_visto' => $last_topic_reviewed,
+                        'ultimo_tema_visto' => [
+                            'id' => $last_topic_reviewed,
+                            'last_media_access' => $last_media_access,
+                            'last_media_duration' => $last_media_duration
+                        ],
                     ];
                 }
 
@@ -576,6 +624,7 @@ class Course extends BaseModel
                 'porcentaje' => $school_percentage,
                 'estado' => $school_status,
                 'ultimo_curso' => $last_course_reviewed,
+                'ultimos_cursos' => $last_school_courses,
                 'orden' => $school->position,
                 "cursos" => $school_courses,
             ];
@@ -666,6 +715,7 @@ class Course extends BaseModel
 
                 return [
                     'status' => 'aprobado',
+                    'requirements' => null,
                     'progress_percentage' => 100,
                     'available' => true,
                     'poll_id' => null,
