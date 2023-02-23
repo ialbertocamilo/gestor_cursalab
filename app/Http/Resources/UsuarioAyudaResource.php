@@ -20,7 +20,8 @@ class UsuarioAyudaResource extends JsonResource
         $colors = config('constantes.soporte-estados-colors');
         $image = '';
         if($this->reason != 'Soporte Login'){
-            $image =  $this->workspace ? ($this->workspace->logo ? space_url($this->workspace->logo) : '') : '';
+            // $image =  $this->workspace ? ($this->workspace->logo ? space_url($this->workspace->logo) : '') : '';
+            $image = $this->user?->subworkspace?->logo ? ($this->user->subworkspace?->logo ? space_url($this->user->subworkspace?->logo) : '') : '';
         }
         $data = [
             'id' => $this->id,
