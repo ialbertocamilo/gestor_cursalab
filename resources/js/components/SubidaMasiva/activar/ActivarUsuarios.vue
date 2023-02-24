@@ -1,12 +1,11 @@
 <template>
     <v-row>
         <v-col cols="12" md="5" height="200px">
-            <v-card-title>Descripción:</v-card-title>
             <v-card-text class="py-0">
                 Se cambia el estado del usuario a 1(activo).
             </v-card-text>
-            <v-card-title>Puntos a tomar en cuenta:</v-card-title>
-            <v-card-text>
+            <v-card-title class="tit">Instructivo:</v-card-title>
+            <v-card-text class="instructivo">
                 <ul>
                     <li class="mt-2">
                         <b>La cantidad máxima de filas por excel es de 2500.</b>
@@ -16,14 +15,21 @@
                     </li>
                 </ul>
             </v-card-text>
+            <div class="btn_download_template">
+                <a :href="url_template" class="btn btn-primary" download><i
+                    class="fas fa-download ml-2"></i> Descargar plantilla</a>
+            </div>
         </v-col>
-        <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
+        <v-col cols="12" md="2" height="200px" class="d-flex justify-content-center">
+            <div class="separador-v"></div>
+        </v-col>
+        <v-col cols="12" md="5" class="d-flex flex-column justify-content-center">
             <v-row class="d-flex justify-content-center my-2">
                 <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta"/>
             </v-row>
             <v-row class="d-flex justify-content-center">
                 <v-card-actions>
-                    <v-btn color="success" @click="enviar_archivo()">Subir</v-btn>
+                    <v-btn color="primary" @click="enviar_archivo()">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -34,7 +40,7 @@ import vuedropzone from "./../dropzone.vue";
 
 const percentLoader = document.getElementById('percentLoader');
 export default {
-    props: ['q_error'],
+    props: ['q_error', 'url_template'],
     components: {vuedropzone},
     data() {
         return {
@@ -107,5 +113,31 @@ export default {
 .v-input__slot {
     display: flex;
     align-items: initial !important;
+}
+.separador-v{
+    border-left: 1px solid #94DDDB;
+}
+.tit,
+.instructivo .v-card__text ul li,
+.v-card__text{
+    font-family: "Nunito", sans-serif;
+}
+.tit {
+    font-size: 15px !important;
+    font-weight: 700;
+}
+.instructivo .v-card__text ul li {
+    font-size: 14px;
+    line-height: 20px;
+}
+.btn_download_template {
+    margin-left: 15px;
+}
+.btn_download_template .btn-primary {
+    background-color: #fff !important;
+    color: #5458ea !important;
+    border: 1px solid #5458ea !important;
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
 }
 </style>
