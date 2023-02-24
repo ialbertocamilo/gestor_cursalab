@@ -30,7 +30,7 @@ class ResetPasswordRequest extends FormRequest
         return [
             'token' => 'nullable',
             'currpassword' => 'nullable|max:100|min:8',
-            'password' => ['required', 'max:100',"not_regex:/($piecesPass)/i", 
+            'password' => ['required', 'max:100', 
                             Password::min(8)->mixedCase()
                                             ->numbers()
                                             ->uncompromised(3) ],

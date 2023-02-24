@@ -73,7 +73,7 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_matricula();
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
-        $this->restoreCriterionDocument();
+        // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
@@ -90,8 +90,70 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValuesFromJsonV2();
         // $this->deleteDuplicatesInSummaryCourses();
         // $this->restoreUserIdInTickets();
+        $this->restore_career();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function restore_career(){
+        $users_affected_json = public_path() . "/json/users_carreras.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $users_not_modified = [];
+        $_bar->start();
+        $criteria_to_set = ['career'];
+        $criterion_career = Criterion::where('code','career')->first();
+        $workspace = Workspace::where('slug','farmacias-peruanas')->whereNull('parent_id')->first();
+        foreach ($users_affected as $user_affected) {
+            $has_modified = false;
+            $user = User::where('document',$user_affected['documento'])->first();
+            if($user){
+                foreach ($criteria_to_set as $code) {
+                    $criterion_values_by_code=$user->criterion_values()
+                        ->whereHas('criterion',function($q) use($code) { 
+                            $q->where('code',$code);
+                        })
+                        ->first();
+                    if($criterion_values_by_code){
+                        CriterionValueUser::where('user_id',$user->id)->where('criterion_value_id',$criterion_values_by_code->id)->delete();
+                    }
+                    $criterion_to_set = $this->getCriterionValueId('value_text',$criterion_career,trim($user_affected[$code]),$workspace);
+                    DB::table('criterion_value_user')->insert([
+                        'criterion_value_id'=>$criterion_to_set->id,
+                        'user_id'=>$user->id
+                    ]);
+                }
+                SummaryUser::updateUserData($user);
+            }else{
+                $users_not_modified[] = $user;
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/users_not_modified.json', json_encode($users_not_modified,JSON_UNESCAPED_UNICODE));
+        cache_clear_model(CriterionValueUser::class);
+        cache_clear_model(CriterionValue::class);
+    }
+    private function getCriterionValueId($colum_name,$criterion,$value_excel,$workspace){
+        $has_error = false;
+        $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
+        if (!$criterion_value) {
+            $criterion_value = new CriterionValue();
+            $criterion_value[$colum_name] = $value_excel;
+            $criterion_value['value_text'] = $value_excel;
+            $criterion_value->criterion_id = $criterion->id;
+            $criterion_value->active = 1;
+            $criterion_value->save();
+        }
+        $workspace_value = DB::table('criterion_value_workspace')->where([
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
+        ])->first();
+        if (!$workspace_value) {
+            DB::table('criterion_value_workspace')->insert([
+                'workspace_id' => $workspace->id,
+                'criterion_value_id' => $criterion_value->id
+            ]);
+        }
+        return $criterion_value;
     }
     public function restoreUserIdInTickets(){
         $tickets = Ticket::whereNull('user_id')->get();
