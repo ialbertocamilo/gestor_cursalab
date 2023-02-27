@@ -632,7 +632,8 @@ class Topic extends BaseModel
                                 'id' => $requirement_course?->requirement_id,
                                 'name' => $course_name_req,
                                 'school_id' => $req_school?->id,
-                                'disponible' => $available_course_req
+                                'disponible' => $available_course_req,
+                                'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
                             ];
                         }
                     endif;
@@ -689,7 +690,8 @@ class Topic extends BaseModel
                                     'id' => $requirement_course?->requirement_id,
                                     'name' => $course_name_req,
                                     'school_id' => $req_school?->id,
-                                    'disponible' => $available_course_req
+                                    'disponible' => $available_course_req,
+                                    'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
                                 ];
                             }
                         }
@@ -793,6 +795,7 @@ class Topic extends BaseModel
 //        $topic_requirement = $topic->requirements()->first();
         $topic_requirement = $topic->requirements->first();
 
+        $available_topic_req = false;
         if (!$topic_requirement) {
             $available_topic = true;
         } else {
@@ -813,11 +816,14 @@ class Topic extends BaseModel
         if($topic_requirement?->requirement_id){
             $topic_req = Topic::where('id', $topic_requirement?->requirement_id)->first();
             $topic_req_name = $topic_req?->name;
+            $summary_topic_req = $topic_req->summaries->where('user_id',$user->id)->first();
+            $topic_status_req = $summary_topic_req->status->code ?? 'por-iniciar';
+            $available_topic_req = $topic_status_req == 'por-iniciar';
         }
 
         return [
             //            'topic_name' => $topic->name,
-            'requirements' => ($topic_requirement) ? ['id' => $topic_requirement?->requirement_id, 'name' => $topic_req_name] : null,
+            'requirements' => ($topic_requirement) ? ['id' => $topic_requirement?->requirement_id, 'name' => $topic_req_name, 'disponible' => $available_topic_req] : null,
             'status' => $topic_status,
             'topic_requirement' => $topic_requirement?->id,
             'grade' => $grade,
@@ -943,5 +949,88 @@ class Topic extends BaseModel
         }
 
         return $counter;
+    }
+
+    protected function ultimoTemaVisto( Course $curso, User $user ): array
+    {
+        $topics_user = $curso->topics->pluck('id')->toArray();
+
+        $topics = $curso->topics->sortBy('position')->where('active', ACTIVE);
+        $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id);
+
+        $last_topic = null;
+        if ($summary_topics->count() > 0) {
+            foreach ($topics as $topic) {
+                $topics_view = $summary_topics->where('topic_id', $topic->id)->first();
+                $last_item = ($topic->id == $topics->last()->id);
+                if ($topics_view?->views) {
+                    $passed_tests = $summary_topics->where('topic_id', $topic->id)->where('passed', 1)->first();
+                    if ($topic->evaluation_type?->code == 'qualified' && $passed_tests && !$last_item) continue;
+                    $last_topic = ($topic->id);
+                    break;
+                }
+                if (is_null($last_topic) && $last_item) {
+                    $last_topic = $topic->id;
+                    break;
+                }
+            }
+        }
+
+        $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
+
+        $media_topics = MediaTema::where('topic_id',$last_topic_reviewed)->orderBy('position')->get();
+
+        $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+        ->where('topic_id', $last_topic_reviewed)
+        ->where('user_id', $user->id)
+        ->first();
+
+        $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+
+        foreach ($media_topics as $media) {
+            unset($media->created_at, $media->updated_at, $media->deleted_at);
+            $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                ? route('media.download.media_topic', [$media->id]) : null;
+
+            $media->status_progress = 'por-iniciar';
+            $media->last_media_duration = null;
+
+            if(!is_null($media_progress)){
+                foreach($media_progress as $medp){
+                    if($medp->media_topic_id == $media->id){
+                        $media->status_progress = $medp->status;
+                        $media->last_media_duration = $medp->last_media_duration;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $last_media_access = null;
+        $last_media_duration = null;
+        $last_media_status = null;
+
+        if($media_topics){
+            foreach($media_topics as $medt){
+                if($medt->status_progress == 'iniciado'){
+                    $last_media_access = $medt->id;
+                    $last_media_status = $medt->status_progress;
+                    $last_media_duration = $medt->last_media_duration;
+                    break;
+                }
+                else if($medt->status_progress == 'por-iniciar'){
+                    $last_media_access = $medt->id;
+                    $last_media_status = $medt->status_progress;
+                    $last_media_duration = $medt->last_media_duration;
+                    break;
+                }
+            }
+        }
+        return [
+            'id' => $last_topic_reviewed,
+            'last_media_access' => $last_media_access,
+            'last_media_status' => $last_media_status,
+            'last_media_duration' => $last_media_duration
+        ];
     }
 }
