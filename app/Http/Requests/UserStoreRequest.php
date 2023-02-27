@@ -31,12 +31,12 @@ class UserStoreRequest extends FormRequest
         $pass = $this->isMethod('post') ? 'required' : 'nullable';
 
         $piecesPass = stringConcatEqualNum([$this->document, $this->email], 4);
-        $passwordRules = $this->isMethod('post') ? 
-                    ['max:100', "{$pass}", 'min:8'] : 
-                    ['max:100', "{$pass}", 
-                            Password::min(8)->mixedCase()
-                                            ->numbers()
-                                            ->uncompromised(3) ];
+        // $passwordRules = $this->isMethod('post') ? 
+        //             ['max:100', "{$pass}", 'min:8'] : 
+        //             ['max:100', "{$pass}", 
+        //                     Password::min(8)->mixedCase()
+        //                                     ->numbers()
+        //                                     ->uncompromised(3) ];
         
 
 
