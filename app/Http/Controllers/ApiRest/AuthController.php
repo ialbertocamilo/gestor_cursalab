@@ -38,7 +38,7 @@ class AuthController extends Controller
                 $currentVersion = $data['version'];
                 settype($currentVersion, "float");
 
-                $mobilesVersion = ['android' => 3.3];
+                $mobilesVersion = ['android' => 3.4];
 
                 if($currentVersion >= $mobilesVersion[$currentOS]) {
                     $availableRecaptcha = true;

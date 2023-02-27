@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class ResetPasswordController extends Controller
@@ -51,21 +52,24 @@ class ResetPasswordController extends Controller
         $user->password = $password;
     }
 
-    public function showResetFormInit(Request $request) 
+    public function showResetFormInit(Request $request)
     {
         $currentToken = $request->token;
-        
+
         if(!$currentToken) {
             return redirect('/login');
         }
         // verificar existencia del token
         $user = auth()->user();
-        $checkToken = $user->checkPassUpdateToken($currentToken, $user->id); 
+        $checkToken = $user->checkPassUpdateToken($currentToken, $user->id);
 
         if(!$checkToken) {
             return redirect('/login');
         }
 
-        return view('auth.passwords.reset_pass', [ 'token'=> $currentToken ]);
+        $is_new_pass = $user->last_pass_updated_at ? 'Expiró la vigencia de '.env('RESET_PASSWORD_DAYS').' días para tu contraseña. Por seguridad debes actualizarla.' : 'Por seguridad debes actualizar tu contraseña a una nueva.';
+
+        return view('auth.passwords.reset_pass', [ 'token' => $currentToken,
+                                                   'message' => $is_new_pass ]);
     }
 }

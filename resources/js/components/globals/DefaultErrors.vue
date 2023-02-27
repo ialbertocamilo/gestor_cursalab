@@ -9,14 +9,11 @@
             dismissible
             class="form-alert"
         >
-            <v-row >
-                <li v-for="(error, i) in errors" :key="i">
-                    <span v-for="(row, j) in error" :key="j">
-                        {{ row }}
-                    </span>
+            <ul class="mb-0" v-for="(error, i) in errors" :key="i">
+                <li v-for="(row, j) in error" :key="j">
+                    {{ row }}
                 </li>
-            </v-row>
-
+            </ul>
         </v-alert>
 </template>
 
