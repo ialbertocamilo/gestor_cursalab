@@ -210,7 +210,7 @@ if (isset($fullScreen)) {
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
     <script src="{{ asset('js/app.js?v=' . date('Y-W')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=2' . date('Y-W-m')) }}"></script>
     <script>
         $(document).ready(function () {
             $('#content_polls').css('display','block');
