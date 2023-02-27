@@ -88,8 +88,8 @@ function showIcons( star ){
                     item_icon.src = value.icono
                     item_btn.dataset.char = value.id
                 });
+                box_val_icons_question.innerHTML = element.pregunta
             }
-            box_val_icons_question.innerHTML = element.pregunta
         });
 
     }
