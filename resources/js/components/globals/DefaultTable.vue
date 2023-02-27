@@ -225,7 +225,7 @@
                                                     v-text="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
 
                                             {{ action.text }}
-                                                
+
                                             <template v-if="action.count && item[action.count]">
                                                 &nbsp;<strong>[{{ item[action.count] }}]</strong>
                                             </template>
@@ -245,23 +245,14 @@
 
             <!--   CUSTOM COLUMNS -->
 
-            <template v-slot:item.custom_meeting_name="{item, header}">
-                <div class="d-flex justify-content-start">
-                    <div class="my-0 list-custom_meeting_name">
-                        {{ item.custom_meeting_name }}
-                    </div>
-                    <v-chip
-                        class="default-chip ml-2"
-                        x-small
-                        color="primary"
-                        active-class="default-chip"
-                    >
-                        {{ item.attendants_count }}
-                        <v-icon small class="ml-1">mdi-account-supervisor</v-icon>
-                    </v-chip>
+            <template v-slot:item.status_meeting="{ item, header }">
+                <div class="d-flex justify-center flex-row my-2"
+                     v-if="item.status_meeting">
+                     <span :style="{'color': `${item.status_meeting.color}`, 'font-weight':'700'}">
+                        {{ item.status_meeting.text || item.status_meeting }}
+                    </span>
                 </div>
             </template>
-
             <template v-slot:item.custom_block="{item, header}">
 
 

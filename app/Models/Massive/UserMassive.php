@@ -26,7 +26,10 @@ class UserMassive extends Massive implements ToCollection
     public $rows = [];
     public $error_message = null;
     public $rows_to_activate = 0;
-
+    private $user_states=[
+        'active',
+        'inactive'
+    ];
     public function __construct($data = [])
     {
         $this->name_socket = $this->formatNameSocket('upload-massive', $data['number_socket'] ?? null);
@@ -151,7 +154,17 @@ class UserMassive extends Massive implements ToCollection
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];
+                            
             if ($dt['code'] == 'active') {
+                if(!in_array(strtolower($dt['value_excel']),$this->user_states)){
+                    $has_error = true;
+                    $errors_index[] = [
+                        'index' => $dt['index'],
+                        'message' => 'Los valores para el estado son: Active o Inactive.'
+                    ];
+                    continue;
+                }
+                
                 $user[$dt['code']] = (strtolower($dt['value_excel']) == 'active') ? 1 : 0;
             }
         }
