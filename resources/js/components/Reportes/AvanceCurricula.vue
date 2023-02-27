@@ -170,7 +170,7 @@ export default {
 
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', {callback: vue.exportUsuariosDW(), type: vue.reportType})
+            vue.$emit('generateReport', {callback: vue.exportUsuariosDW, type: vue.reportType})
         },
         async exportUsuariosDW(reportName) {
 
