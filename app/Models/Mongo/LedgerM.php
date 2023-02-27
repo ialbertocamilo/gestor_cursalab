@@ -8,16 +8,18 @@ class LedgerM extends Model
 {
     protected $connection = 'mongodb';
     protected $collection = 'ledgers';
-    // protected $casts = ['created_at' => 'datetime'];
-    // public static function store(){
-    //     DB::table('ledgers')->chunkById(1000, function ($ledgers_chunk){
-    //         foreach ($ledgers_chunk as $ledger) {
-    //             $ledger->properties = json_decode($ledger->properties);
-    //             $ledger->modified = json_decode($ledger->modified);
-    //             self::insert((array) $ledger);
-    //         }
-    //     });
-    // }
+    protected $casts = ['created_at' => 'datetime'];
+    public static function store(){
+        DB::table('ledgers')->chunkById(10, function ($ledgers_chunk){
+            foreach ($ledgers_chunk as $ledger) {
+                $ledger->properties = json_decode($ledger->properties);
+                $ledger->modified = json_decode($ledger->modified);
+            }
+            dd($ledgers_chunk);
+            self::insert((array) $ledgers_chunk);
+            dd('entro');
+        });
+    }
     public static function countByTopic($date)
     {
         return self::
