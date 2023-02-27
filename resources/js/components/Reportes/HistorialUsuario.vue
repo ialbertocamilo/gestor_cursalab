@@ -243,6 +243,9 @@ export default {
                         'Historial usuario',
                         this.search
                     )
+                    response.data.selectedFilters = {
+                        'Documento': this.search
+                    }
                     this.$emit('emitir-reporte', response)
                 }
 

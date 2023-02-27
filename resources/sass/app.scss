@@ -101,3 +101,35 @@ body::-webkit-scrollbar-thumb {
     -webkit-box-shadow: none !important;
     box-shadow: none !important;
 }
+
+/*
+
+Override Vue Toastification plugin styles
+
+======================================== */
+
+.Vue-Toastification__toast--warning,
+.Vue-Toastification__toast--error {
+    color: #1A2128 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 14px 24px !important;
+    min-height: 45px !important;
+}
+
+.Vue-Toastification__toast--warning {
+    background-color: #ffc107 !important;
+}
+.Vue-Toastification__toast--error {
+    background-color: #CE98FE !important;
+}
+
+.Vue-Toastification__toast a:hover,
+.Vue-Toastification__toast a {
+    color: white !important;
+    text-decoration: underline !important;
+}
+
+.Vue-Toastification__toast-body {
+    font-size: 14px !important;
+}
