@@ -222,7 +222,7 @@ return [
         // App\Providers\ChartServiceProvider::class,
         App\Providers\ValidationServiceProvider::class,
 
-        // Jenssegers\Mongodb\MongodbServiceProvider::class,
+        Jenssegers\Mongodb\MongodbServiceProvider::class,
         // App\Providers\TenancyServiceProvider::class,
 
     ],

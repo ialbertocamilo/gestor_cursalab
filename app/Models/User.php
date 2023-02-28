@@ -38,7 +38,8 @@ use Illuminate\Support\Str;
 use Spatie\Image\Manipulations;
 
 use Illuminate\Support\Facades\Mail;
-use App\Mail\EmailTemplate;    
+use App\Mail\EmailTemplate;
+use Jenssegers\Mongodb\Eloquent\HybridRelations;
 
 use Bouncer;
 
@@ -57,13 +58,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     use Cachable;
 
     use SoftDeletes;
-    
 
+  use HybridRelations;
     use Cachable {
+        Cachable::newEloquentBuilder insteadof HybridRelations;
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
         Cachable::newBelongsToMany insteadof \Altek\Eventually\Eventually, CustomAudit;
         Cachable::newMorphToMany insteadof \Altek\Eventually\Eventually, CustomAudit;
     }
+
+    protected $connection = 'mysql';
 
     /**
      * The attributes that are mass assignable.
@@ -81,7 +85,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating'
     ];
 
-    protected $with = ['roles', 'abilities'];
+    // protected $with = ['roles'
+    // , 'abilities'
+// ];
     protected $appends = ['fullname', 'age'];
     protected $dates = ['birthdate'];
 
@@ -404,9 +410,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
-                
+
                 $user->update($data);
-   
+
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
@@ -1085,7 +1091,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $currentRange = env('AUTH2FA_CODE_DIGITS');
         $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
 
-        $start = '1'.str_repeat('0', $currentRange - 1);  
+        $start = '1'.str_repeat('0', $currentRange - 1);
         $end = str_repeat('9', $currentRange);
         $currentCode = rand($start, $end);
 
@@ -1106,7 +1112,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $user->save();
     }
 
-    public function resetToNullCode2FA() 
+    public function resetToNullCode2FA()
     {
         $user = $this;
 
@@ -1129,7 +1135,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setUserPassUpdateToken($token) {
         $user = $this;
-        
+
         $user->timestamps = false; // no actualizar el usuario
         $user->pass_token_updated = $token;
         return $user->save();
@@ -1146,7 +1152,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
         $data = [ 'last_pass_updated_at' => now(),
                   'password' => $password ];
-        
+
         $user->update($data);
     }
 

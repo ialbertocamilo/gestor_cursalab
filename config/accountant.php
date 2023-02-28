@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 return [
-
     'ledger' => [
-
         /*
         |--------------------------------------------------------------------------
         | Ledger Implementation
@@ -15,7 +13,8 @@ return [
         |
         */
 
-        'implementation' => Altek\Accountant\Models\Ledger::class,
+        // 'implementation' => Altek\Accountant\Models\Ledger::class,
+        'implementation' => App\Models\MongoLedger::class,
 
         /*
         |--------------------------------------------------------------------------
@@ -63,11 +62,11 @@ return [
     */
 
     'resolvers' => [
-        'context'    => Altek\Accountant\Resolvers\ContextResolver::class,
+        'context' => Altek\Accountant\Resolvers\ContextResolver::class,
         'ip_address' => Altek\Accountant\Resolvers\IpAddressResolver::class,
-        'url'        => Altek\Accountant\Resolvers\UrlResolver::class,
+        'url' => Altek\Accountant\Resolvers\UrlResolver::class,
         'user_agent' => Altek\Accountant\Resolvers\UserAgentResolver::class,
-        'user'       => Altek\Accountant\Resolvers\UserResolver::class,
+        'user' => Altek\Accountant\Resolvers\UserResolver::class,
     ],
 
     /*
@@ -101,13 +100,7 @@ return [
     |
     */
 
-    'events' => [
-        'created',
-        'updated',
-        'restored',
-        'deleted',
-        'forceDeleted',
-    ],
+    'events' => ['created', 'updated', 'restored', 'deleted', 'forceDeleted'],
 
     /*
     |--------------------------------------------------------------------------
@@ -121,10 +114,6 @@ return [
 
     'user' => [
         'prefix' => 'user',
-        'guards' => [
-            'web',
-            'api',
-        ],
+        'guards' => ['web', 'api'],
     ],
-
 ];
