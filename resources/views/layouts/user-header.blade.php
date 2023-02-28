@@ -4,13 +4,13 @@
 
         {{-- LOGO  --}}
         @if(Request::path() == 'reset_password')
-        <div>
-            <a href="/welcome">
-            <img src="/img/logo_cursalab_v2_black.png"
-                 width="150px"
-                 alt="Cursalab">
-            </a>
-        </div>
+            <div>
+                <a href="/welcome">
+                    <img src="/img/logo_cursalab_v2_black.png"
+                         width="150px"
+                         alt="Cursalab">
+                </a>
+            </div>
         @endif
         {{-- LOGO  --}}
 
@@ -19,9 +19,9 @@
         <div class="d-flex">
 
             <div class="btn-group">
-               <button class="d-flex align-items-center btn btn-unset dropdown-toggle"
-                       type="button" data-toggle="dropdown" aria-expanded="false">
-                   <div class="username-rol">
+                <button class="d-flex align-items-center btn btn-unset dropdown-toggle"
+                        type="button" data-toggle="dropdown" aria-expanded="false">
+                    <div class="username-rol">
                         <p class="username">{{ Auth::user()->name }}</p>
                         <p class="rol">{{ Auth::user()->email }}</p>
                     </div>
@@ -43,7 +43,7 @@
                         <span>Mis workspaces</span>
                     </a>
                     <a class="dropdown-item py-2 dropdown-item-custom text-body"
-                        href="{{ route('logout') }}"
+                       href="{{ route('logout') }}"
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-sign-out-alt"></span>
@@ -57,25 +57,25 @@
                 </div>
             </div>
 
-           {{--  <div class="vertical"></div>
-            <div class="main-header-options">
+            {{--  <div class="vertical"></div>
+             <div class="main-header-options">
 
-                @if (Request::path() != 'workspaces/list')
-                <a href="/workspaces/list"
-                    class="mr-3">
-                    <i class="fa fa-th"></i>
-                </a>
-                @endif
+                 @if (Request::path() != 'workspaces/list')
+                 <a href="/workspaces/list"
+                     class="mr-3">
+                     <i class="fa fa-th"></i>
+                 </a>
+                 @endif
 
-                <a href="{{ route('logout') }}"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}"
-                    method="POST" style="display: none;">
-                    @csrf
-                </form>
-            </div> --}}
+                 <a href="{{ route('logout') }}"
+                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                     <i class="fas fa-sign-out-alt"></i>
+                 </a>
+                 <form id="logout-form" action="{{ route('logout') }}"
+                     method="POST" style="display: none;">
+                     @csrf
+                 </form>
+             </div> --}}
         </div>
         {{-- PERFIL  --}}
 
