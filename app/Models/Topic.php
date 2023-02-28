@@ -816,14 +816,17 @@ class Topic extends BaseModel
         if($topic_requirement?->requirement_id){
             $topic_req = Topic::where('id', $topic_requirement?->requirement_id)->first();
             $topic_req_name = $topic_req?->name;
-            $summary_topic_req = $topic_req->summaries->where('user_id',$user->id)->first();
-            $topic_status_req = $summary_topic_req->status->code ?? 'por-iniciar';
-            $available_topic_req = $topic_status_req == 'por-iniciar';
+            $topic_req_status = self::getTopicProgressByUser($user,$topic_req);
+            $available_topic_req = !($topic_req_status['status'] == 'bloqueado');
         }
 
         return [
             //            'topic_name' => $topic->name,
-            'requirements' => ($topic_requirement) ? ['id' => $topic_requirement?->requirement_id, 'name' => $topic_req_name, 'disponible' => $available_topic_req] : null,
+            'requirements' => ($topic_requirement) ? [
+                'id' => $topic_requirement?->requirement_id,
+                'name' => $topic_req_name,
+                'disponible' => $available_topic_req
+                ] : null,
             'status' => $topic_status,
             'topic_requirement' => $topic_requirement?->id,
             'grade' => $grade,
@@ -878,12 +881,12 @@ class Topic extends BaseModel
 
         if ($topic_requirement) :
 
-            $requirement_summary = $topic_requirement->summaries_topics->first();
+            $requirement_summary = $topic_requirement->summaries_topics->where('user_id',$user->id)->first();
 
             $available_topic = $requirement_summary && in_array($requirement_summary?->status?->code, ['aprobado', 'realizado', 'revisado']);
         endif;
 
-        $summary_topic = $topic->summaries->first();
+        $summary_topic = $topic->summaries->where('user_id',$user->id)->first();
 
         if ($topic->evaluation_type?->code === 'qualified' && $summary_topic)
             $topic_grade = $summary_topic->grade;
