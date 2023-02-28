@@ -53,11 +53,11 @@ class UserStoreRequest extends FormRequest
                         new SequentialCharacters(),
                     ];
 
-
         $rules = [
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
+            'password' => "{$pass}|max:255",
             // 'password' => $passwordRules,
             'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
             'username' => 'nullable',
