@@ -4,6 +4,7 @@ namespace App\Models\Mongo;
 
 use Jenssegers\Mongodb\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use MongoDB\BSON\ObjectId;
 class LedgerM extends Model
 {
     protected $connection = 'mongodb';
@@ -12,11 +13,11 @@ class LedgerM extends Model
     public static function store(){
         DB::table('ledgers')->chunkById(10, function ($ledgers_chunk){
             foreach ($ledgers_chunk as $ledger) {
+                $ledger->_id = new ObjectId();
                 $ledger->properties = json_decode($ledger->properties);
                 $ledger->modified = json_decode($ledger->modified);
             }
-            dd($ledgers_chunk);
-            self::insert((array) $ledgers_chunk);
+            self::insert($ledgers_chunk->toArray());
             dd('entro');
         });
     }
