@@ -169,7 +169,9 @@ export default {
 
             let status = ''
 
-            if (report.is_ready && report.download_url) {
+            if (report.failed) {
+                status = 'No procesado'
+            } else if (report.is_ready && report.download_url) {
                 status = 'Completado'
             } else if (report.is_ready && !report.download_url) {
                 status = 'Sin resultados'
