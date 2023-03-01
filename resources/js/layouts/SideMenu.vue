@@ -709,7 +709,15 @@ export default {
     color: #fff;
 }
 .list_submenu {
-    margin-left: 10px;
+    margin-left: 31px;
+}
+.list_submenu .v-list-item__title.item_title {
+    white-space: normal;
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.1px;
+    color: #E5E6FC;
 }
 .list_submenu .v-list-item {
     margin-top: 3px;

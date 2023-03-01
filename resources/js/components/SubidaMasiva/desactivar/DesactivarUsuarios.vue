@@ -1,6 +1,6 @@
 <template>
     <v-row >
-        <v-col cols="12" md="5" height="200px">
+        <v-col cols="12" md="5" height="200px" class="mt-100">
 				<v-card-text class="py-0">
 					Se cambia el estado del usuario a 0(inactivo).
 				</v-card-text>
@@ -11,10 +11,13 @@
                             <b>La cantidad máxima de filas por excel es de 2500.</b>
                         </li>
                         <li class="mt-2">
-                            <b>Columnas del excel:</b>DNI - Fecha de cese (opcional).
+                            Columnas del excel: <b>DNI - Fecha de cese (opcional)</b>.
                         </li>
                         <li class="mt-2">
-                            <b>La fecha de cese debe tener el formato (yyyy/mm/dd) o (dd/mm/yyyy).</b>
+                            La fecha de cese debe tener el formato <b>(yyyy/mm/dd)</b> o <b>(dd/mm/yyyy)</b>.
+                        </li>
+                        <li class="mt-2">
+                            El archivo debe pesar menos de <b>XXX Mb</b>
                         </li>
                     </ul>
                 </v-card-text>
@@ -32,7 +35,7 @@
             </v-row>
             <v-row class="d-flex justify-content-center">
                 <v-card-actions>
-                    <v-btn color="primary" @click="enviar_archivo()">Confirmar</v-btn>
+                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -102,7 +105,7 @@
         }
     }
 </script>
-<style>
+<style lang="scss">
 .v-input__slot{
     display: flex;
     align-items: initial !important;
@@ -132,5 +135,8 @@
     border: 1px solid #5458ea !important;
     font-family: "Nunito", sans-serif;
     font-size: 14px;
+}
+.mt-100{
+    margin-top: 100px !important;
 }
 </style>

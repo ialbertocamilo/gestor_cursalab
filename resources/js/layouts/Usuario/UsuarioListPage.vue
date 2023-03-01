@@ -130,7 +130,7 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>Usuario</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
@@ -303,6 +303,24 @@ export default {
                 open: false,
                 base_endpoint: '/usuarios',
                 contentText: '¿Desea cambiar de estado a este registro?',
+                title_modal: 'Cambio de estado de <b>Usuario</b>',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un Usuario!',
+                        details: [
+                            'El usuario no podrá ingresar a la plataforma.',
+                            'Podrá enviar solicitudes desde la sección de ayuda del Log in.',
+                            'Aparecerá en los reportes y consultas con el estado inactivo.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un Usuario!',
+                        details: [
+                            'El usuario ahora podrá ingresar a la plataforma.',
+                            'Podrá rendir los cursos, de estar segmentado.'
+                        ]
+                    }
+                },
                 endpoint: '',
             },
         }

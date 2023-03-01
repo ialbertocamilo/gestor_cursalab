@@ -6,12 +6,35 @@
         width="30vw"
     >
         <template v-slot:content>
-            <b>{{ options.contentText || contentText }}</b>
-            <br>
-            <br>
-            El registro pasará a estar
-            "{{ !resource.active ? 'Activo' : 'Inactivo' }}"
-            <!--            {{ !resource.active ? '' : 'y los usuarios asignados no podrán verlo' }}-->
+            <div class="bx_content" v-if="options.title_modal">
+                <div class="bx_header">
+                    <div class="img"><img src="/img/modal_alert.png"></div>
+                    <div class="cont">
+                        <span v-if="resource.active">{{ options.content_modal.inactive.title }}</span>
+                        <span v-if="!resource.active">{{ options.content_modal.active.title }}</span>
+                    </div>
+                </div>
+                <div class="bx_details">
+                    <ul v-if="resource.active">
+                        <li v-for="(item, index) in options.content_modal.inactive.details" :key="index">
+                            <span>{{ item }}</span>
+                        </li>
+                    </ul>
+                    <ul v-if="!resource.active">
+                        <li v-for="(item, index) in options.content_modal.active.details" :key="index">
+                            <span>{{ item }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div v-else>
+                <b>{{ options.contentText || contentText }}</b>
+                <br>
+                <br>
+                El registro pasará a estar
+                "{{ !resource.active ? 'Activo' : 'Inactivo' }}"
+                <!--            {{ !resource.active ? '' : 'y los usuarios asignados no podrán verlo' }}-->
+            </div>
         </template>
     </DefaultAlertDialog>
 </template>
@@ -98,3 +121,29 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.bx_header {
+    display: flex;
+    align-items: center;
+}
+.bx_header .cont span {
+    color: #2A3649;
+    font-size: 20px;
+    font-family: "Nunito", sans-serif;
+    font-weight: 700;
+    margin-left: 29px;
+}
+.bx_details {
+    border-top: 1px solid #D9D9D9;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+.bx_details ul li {
+    text-align: left;
+    font-family: "Nunito", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #2A3649;
+}
+</style>

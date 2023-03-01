@@ -8,7 +8,7 @@
     >
         <v-card>
             <v-card-title class="default-dialog-title">
-                {{ options.title }}
+                <span v-html="options.title"></span>
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
@@ -19,7 +19,7 @@
                 <slot name="content"/>
             </v-card-text>
             <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
-                <DefaultModalActionButton 
+                <DefaultModalActionButton
                     @cancel="closeModal"
                     @confirm="confirmModal"
                     :cancelLabel="cancelLabel"

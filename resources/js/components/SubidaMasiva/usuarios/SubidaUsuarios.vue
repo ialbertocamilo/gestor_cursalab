@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-col cols="12" md="5" height="200px">
+        <v-col cols="12" md="5" height="200px" class="mt-100">
             <v-card-text class="py-0">
                 <!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
                 Se crea o actualiza los usuarios según los datos indicados en el Excel.
@@ -36,13 +36,13 @@
         <v-col cols="12" md="2" height="200px" class="d-flex justify-content-center">
             <div class="separador-v"></div>
         </v-col>
-        <v-col cols="12" md="5" class="d-flex flex-column justify-content-center">
-            <v-row class="d-flex justify-content-center my-2">
+        <v-col cols="12" md="5" class="">
+            <v-row class="d-flex justify-content-center my-2" style="width: 100%;">
                 <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta"/>
             </v-row>
-            <v-row class="d-flex justify-content-center">
+            <v-row class="d-flex justify-content-center align-items-start">
                 <v-card-actions>
-                    <v-btn color="primary" @click="enviar_archivo()">Confirmar</v-btn>
+                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -119,7 +119,7 @@ export default {
     }
 }
 </script>
-<style>
+<style lang="scss">
 .v-input__slot {
     display: flex;
     align-items: initial !important;
@@ -149,5 +149,8 @@ export default {
     border: 1px solid #5458ea !important;
     font-family: "Nunito", sans-serif;
     font-size: 14px;
+}
+.mt-100{
+    margin-top: 100px !important;
 }
 </style>

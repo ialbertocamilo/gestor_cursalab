@@ -38,77 +38,80 @@
                         </v-col>
                     </v-row>
                     <v-row>
-                        <v-col cols="12">
-                            <DefaultInput
-                                dense
-                                label="Descripción"
-                                placeholder="Ingrese una descripción"
-                                v-model="resource.description"
-                            />
+                        <v-col cols="9">
+                            <v-row>
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        dense
+                                        label="Descripción"
+                                        placeholder="Ingrese una descripción"
+                                        v-model="resource.description"
+                                    />
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultAutocomplete
+                                        dense
+                                        label="Requisito"
+                                        v-model="resource.requisito_id"
+                                        :items="selects.requisito_id"
+                                        custom-items
+                                        item-text="name"
+                                        item-value="id"
+                                        clearable
+                                    >
+                                        <template v-slot:customItems="{item}">
+                                            <v-list-item-content>
+                                                <v-list-item-title v-html="item.name"/>
+                                                <v-list-item-subtitle class="list-cursos-carreras" v-html="item.escuelas"/>
+                                            </v-list-item-content>
+                                        </template>
+                                    </DefaultAutocomplete>
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultAutocomplete
+                                        show-required
+                                        :rules="rules.types"
+                                        dense
+                                        label="Tipo de curso"
+                                        v-model="resource.type_id"
+                                        :items="selects.types"
+                                        item-text="name"
+                                        item-value="id"
+                                    />
+                                </v-col>
+                            </v-row>
                         </v-col>
-
-                    </v-row>
-                    <v-row>
-                        <v-col cols="6">
-                            <DefaultAutocomplete
-                                dense
-                                label="Requisito"
-                                v-model="resource.requisito_id"
-                                :items="selects.requisito_id"
-                                custom-items
-                                item-text="name"
-                                item-value="id"
-                                clearable
-                            >
-                                <template v-slot:customItems="{item}">
-                                    <v-list-item-content>
-                                        <v-list-item-title v-html="item.name"/>
-                                        <v-list-item-subtitle class="list-cursos-carreras" v-html="item.escuelas"/>
-                                    </v-list-item-content>
-                                </template>
-                            </DefaultAutocomplete>
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultAutocomplete
-                                show-required
-                                :rules="rules.types"
-                                dense
-                                label="Tipo de curso"
-                                v-model="resource.type_id"
-                                :items="selects.types"
-                                item-text="name"
-                                item-value="id"
-                            />
-                        </v-col>
-                        <v-col cols="4">
-                            <DefaultInput
-                                dense
-                                type="number"
-                                label="Orden"
-                                placeholder="Orden"
-                                v-model="resource.position"
-                            />
-                                <!-- :rules="rules.position" -->
-                                <!-- show-required -->
-
-                        </v-col>
-                        <v-col cols="4">
-                            <DefaultInput
-                                numbersOnly
-                                dense
-                                label="Duración (en horas)"
-                                placeholder="Ingrese la duración del curso"
-                                v-model="resource.duration"
-                            />
-                        </v-col>
-                        <v-col cols="4">
-                            <DefaultInput
-                                numbersOnly
-                                dense
-                                label="Inversión (en soles)"
-                                placeholder="Ingrese la inversión"
-                                v-model="resource.investment"
-                            />
+                        <v-col cols="3" class="sep-left">
+                            <v-row>
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        dense
+                                        type="number"
+                                        label="Orden"
+                                        placeholder="Orden"
+                                        v-model="resource.position"
+                                    />
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultAutocomplete
+                                        dense
+                                        label="Duración"
+                                        v-model="resource.duration"
+                                        :items="selects.duration"
+                                        item-text="name"
+                                        item-value="id"
+                                    />
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        numbersOnly
+                                        dense
+                                        label="Inversión"
+                                        placeholder="Ej. S/2000"
+                                        v-model="resource.investment"
+                                    />
+                                </v-col>
+                            </v-row>
                         </v-col>
                     </v-row>
                     <v-row justify="center">
@@ -335,6 +338,32 @@ export default {
                 requisito_id: [],
                 lista_escuelas: [],
                 types: [],
+                duration: [
+                    { 'id':'0.25', 'name':'0:15 h.' },
+                    { 'id':'0.50', 'name':'0:30 h.' },
+                    { 'id':'0.75', 'name':'0:45 h.' },
+                    { 'id':'1.00', 'name':'1:00 h.' },
+                    { 'id':'1.25', 'name':'1:15 h.' },
+                    { 'id':'1.50', 'name':'1:30 h.' },
+                    { 'id':'1.75', 'name':'1:45 h.' },
+                    { 'id':'2.00', 'name':'2:00 h.' },
+                    { 'id':'2.25', 'name':'2:15 h.' },
+                    { 'id':'2.50', 'name':'2:30 h.' },
+                    { 'id':'2.75', 'name':'2:45 h.' },
+                    { 'id':'3.00', 'name':'3:00 h.' },
+                    { 'id':'3.25', 'name':'3:15 h.' },
+                    { 'id':'3.50', 'name':'3:30 h.' },
+                    { 'id':'3.75', 'name':'3:45 h.' },
+                    { 'id':'4.00', 'name':'4:00 h.' },
+                    { 'id':'4.25', 'name':'4:15 h.' },
+                    { 'id':'4.50', 'name':'4:30 h.' },
+                    { 'id':'4.75', 'name':'4:45 h.' },
+                    { 'id':'5.00', 'name':'5:00 h.' },
+                    { 'id':'5.25', 'name':'5:15 h.' },
+                    { 'id':'5.50', 'name':'5:30 h.' },
+                    { 'id':'5.75', 'name':'5:45 h.' },
+                    { 'id':'6.00', 'name':'6:00 h.' },
+                ],
             },
             loadingActionBtn: false,
             courseValidationModal: {
@@ -566,5 +595,16 @@ export default {
         width: 50px;
         height: 30px;
     }
+}
+.sep-left {
+    position: relative;
+}
+.sep-left:before {
+    border-left: 1px solid #D9D9D9;
+    position: absolute;
+    left: 0;
+    content: '';
+    top: 25px;
+    bottom: 25px;
 }
 </style>
