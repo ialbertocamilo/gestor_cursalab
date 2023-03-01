@@ -142,18 +142,28 @@ export default {
         })
     },
     methods: {
+        notifyUser (message) {
+            this.$toast.warning({
+                component: Vue.component('comp', {
+                    template: `<div>${message}</div>`
+                })
+            });
+        },
         async restartQueue () {
             const url = `${this.reportsBaseUrl}/reports/queue/started/${this.workspaceId}`
             try {
                 let response = await axios({
                     url,
-                    method: 'get'
+                    method: 'post',
+                    data: {
+                        adminId: this.adminId
+                    }
                 })
 
                 if (response.data.started) {
-                    alert('La cola de reportes se ha reiniciado')
+                    this.notifyUser('La cola de reportes se ha reiniciado')
                 } else {
-                    alert('La cola de reportes se ha reiniciado')
+                    this.notifyUser('No hay reportes pendientes para reiniciar')
                 }
                 await this.fetchReports()
 
