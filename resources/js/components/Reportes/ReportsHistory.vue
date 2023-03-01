@@ -4,6 +4,13 @@
             <v-col cols="12" >
                 En esta lista encontrarás todos los reportes generados de este mes,
                 listos para descargar.
+                <v-btn
+                    v-if="isSuperUser"
+                    color="primary"
+                    class="text-white m-3"
+                    @click="restartQueue">
+                    Reiniciar cola de reportes
+                </v-btn>
             </v-col>
         </v-row>
         <v-row class="pr-4 pl-4 pb-4">
@@ -105,7 +112,13 @@ export default {
         adminId : {
             type: Number,
             default: 0
-        }
+        },
+        isSuperUser: {
+            tyle: Boolean,
+            default: false
+        },
+        reportsBaseUrl: '',
+        workspaceId: 0
     },
     data () {
         return {
@@ -121,20 +134,34 @@ export default {
 
         let socket = window.io(this.getReportsBaseUrl());
         socket.on('report-finished', (e) => {
-
-            if (vue.adminId === e.adminId) {
-                vue.fetchReports()
-            }
+            vue.fetchReports()
         })
 
         socket.on('report-started', (e) => {
-
-            if (vue.adminId === e.adminId) {
-                vue.fetchReports()
-            }
+            vue.fetchReports()
         })
     },
     methods: {
+        async restartQueue () {
+            const url = `${this.reportsBaseUrl}/reports/queue/started/${this.workspaceId}`
+            try {
+                let response = await axios({
+                    url,
+                    method: 'get'
+                })
+
+                if (response.data.started) {
+                    alert('La cola de reportes se ha reiniciado')
+                } else {
+                    alert('La cola de reportes se ha reiniciado')
+                }
+                await this.fetchReports()
+
+            } catch (ex) {
+                console.log(ex)
+                await this.fetchReports()
+            }
+        },
         /**
          * Fetch genrated reports list
          * @returns {Promise<void>}
