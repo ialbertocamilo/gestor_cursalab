@@ -44,7 +44,11 @@
             </template>
 
             <template v-slot:item="{ item }" v-if="!customItems">
-                <v-list-item ripple dense @click="select(item)">
+                <v-list-item
+                    ripple
+                    dense
+                    :class="readyOnlyCodes.includes(item.code) ? 'readonly-list-item' : ''"
+                    @click="select(item)">
                     <v-list-item-icon>
                         <v-icon :color="itemSelect(item.id).color"
                                 v-text="itemSelect(item.id).icon" />
@@ -451,6 +455,10 @@ export default {
     .v-scroll-auto-complete::-webkit-scrollbar-thumb {
         background: #afafaf;
         border-radius: 3rem;
+    }
+
+    .readonly-list-item {
+        display: none !important;
     }
 
 </style>

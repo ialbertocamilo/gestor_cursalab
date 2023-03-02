@@ -32,7 +32,7 @@
                 :ready-only-codes="['module']"
                 item-id="id"
                 :count-show-values="4"
-
+                :showSelectAll="false"
                 :loading-state="true"
                 :clearable-state="true"
             />
