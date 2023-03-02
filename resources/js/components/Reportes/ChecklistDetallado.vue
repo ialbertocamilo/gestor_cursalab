@@ -301,6 +301,12 @@ export default {
                     start: FechaFiltro.start,
                     end: FechaFiltro.end
                 });
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_checklist_detallado");
+                    }, 500);
+                }
 
 
             } catch (ex) {

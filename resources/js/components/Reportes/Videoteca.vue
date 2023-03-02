@@ -108,6 +108,12 @@ export default {
                         filtersDescriptions: {}
                     }
                 })
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_videoteca");
+                    }, 500);
+                }
             } catch (ex) {
                 console.log(ex.message)
             }

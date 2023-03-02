@@ -312,6 +312,12 @@ export default {
                         inactiveTopics: topicStatusFilter.UsuariosInactivos
                     }
                 })
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_temas_no_eval");
+                    }, 500);
+                }
 
             } catch (ex) {
                 console.log(ex.message)

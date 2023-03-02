@@ -130,6 +130,12 @@ export default {
 
                     }
                 })
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_vademecum");
+                    }, 500);
+                }
             } catch (ex) {
                 console.log(ex.message)
             }
