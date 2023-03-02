@@ -27,13 +27,17 @@
                     </v-icon>
                     Generar nuevo reporte
                 </button>
+
+
             </v-col>
         </v-row>
 
         <v-card v-if="activeTab === 'history'" flat class="elevation-0 --mb-4">
-
-            <ReportsHistory :adminId="adminId"/>
-
+            <ReportsHistory
+                is-super-user="isSuperUser"
+                :workspaceId="workspaceId"
+                :reportsBaseUrl="reportsBaseUrl"
+                :adminId="adminId"/>
         </v-card>
         <v-card v-if="activeTab === 'new-report'" flat class="elevation-0 --mb-4">
             <v-tabs vertical class="reports-menu">
@@ -549,6 +553,7 @@ export default {
 
             workspaceId: 0,
             adminId: 0,
+            isSuperUser: false,
             isAskingForNewReport: false,
             generateReportCallback: () => {},
 
@@ -585,25 +590,26 @@ export default {
         const vue = this
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData();
+        this.isSuper();
     }
     ,
     methods: {
-        isAdmin () {
-            let isAdmin = false;
+        isSuper () {
+            let isSuper = false;
             let vue = this;
-            if (!vue.userSession.user) return isAdmin;
+            if (!vue.userSession.user) return isSuper;
             vue.userSession
                 .user
                 .roles.forEach(r => {
-                let isAdminOrSuper = (
+                let isSuperInOneRole = (
                     r.role_id === vue.superUserRoleId
                 );
-                if (isAdminOrSuper) {
-                    isAdmin = true;
+                if (isSuperInOneRole) {
+                    isSuper = true;
                 }
             })
 
-            return isAdmin;
+            this.isSuperUser = isSuper
         },
         async fetchData() {
             let vue = this;
@@ -774,6 +780,10 @@ color: #ffffff !important;
 .info-icon {
     color: darkgrey !important;
     font-size: 20px !important;
+}
+
+button.restart-queue {
+
 }
 
 
