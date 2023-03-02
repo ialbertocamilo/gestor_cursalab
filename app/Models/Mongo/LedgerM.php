@@ -11,14 +11,15 @@ class LedgerM extends Model
     protected $collection = 'ledgers';
     protected $casts = ['created_at' => 'datetime'];
     public static function store(){
-        DB::table('ledgers')->chunkById(10, function ($ledgers_chunk){
+        DB::table('ledgers')->chunkById(10000, function ($ledgers_chunk){
+            $i = 0;
             foreach ($ledgers_chunk as $ledger) {
+                $i++;
                 $ledger->_id = new ObjectId();
                 $ledger->properties = json_decode($ledger->properties);
                 $ledger->modified = json_decode($ledger->modified);
+                self::insert((array) $ledger);
             }
-            self::insert($ledgers_chunk->toArray());
-            dd('entro');
         });
     }
     public static function countByTopic($date)
