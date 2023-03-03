@@ -100,14 +100,15 @@
                                         :items="selects.duration"
                                         item-text="name"
                                         item-value="id"
+                                        placeholder="Ej. 2:00 h."
                                     />
                                 </v-col>
                                 <v-col cols="12">
                                     <DefaultInput
                                         numbersOnly
                                         dense
-                                        label="Inversión"
-                                        placeholder="Ej. S/2000"
+                                        label="Inversión (S/)"
+                                        placeholder="Ej. 2000"
                                         v-model="resource.investment"
                                     />
                                 </v-col>
@@ -148,7 +149,7 @@
                                                 :rules="rules.nota_aprobatoria"
                                                 show-required
                                                 dense
-                                                @onFocus="alertNotaMinima()"
+                                                @onFocus="curso_id && conf_focus ? alertNotaMinima() : null"
                                             />
                                         </v-col>
                                         <v-col cols="6">
@@ -274,6 +275,7 @@
             />
             <DialogConfirm
                 v-model="deleteConfirmationDialog.open"
+                :options="deleteConfirmationDialog"
                 width="450px"
                 title="Cambiar de estado del Curso"
                 subtitle="¡Estas a punto cambiar la configuración de un Curso!"
@@ -309,6 +311,7 @@ export default {
         return {
             url: window.location.search,
             errors: [],
+            conf_focus: true,
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
             resourceDefault: {
@@ -349,29 +352,13 @@ export default {
                 lista_escuelas: [],
                 types: [],
                 duration: [
-                    { 'id':'0.25', 'name':'0:15 h.' },
                     { 'id':'0.50', 'name':'0:30 h.' },
-                    { 'id':'0.75', 'name':'0:45 h.' },
                     { 'id':'1.00', 'name':'1:00 h.' },
-                    { 'id':'1.25', 'name':'1:15 h.' },
                     { 'id':'1.50', 'name':'1:30 h.' },
-                    { 'id':'1.75', 'name':'1:45 h.' },
                     { 'id':'2.00', 'name':'2:00 h.' },
-                    { 'id':'2.25', 'name':'2:15 h.' },
-                    { 'id':'2.50', 'name':'2:30 h.' },
-                    { 'id':'2.75', 'name':'2:45 h.' },
                     { 'id':'3.00', 'name':'3:00 h.' },
-                    { 'id':'3.25', 'name':'3:15 h.' },
-                    { 'id':'3.50', 'name':'3:30 h.' },
-                    { 'id':'3.75', 'name':'3:45 h.' },
                     { 'id':'4.00', 'name':'4:00 h.' },
-                    { 'id':'4.25', 'name':'4:15 h.' },
-                    { 'id':'4.50', 'name':'4:30 h.' },
-                    { 'id':'4.75', 'name':'4:45 h.' },
                     { 'id':'5.00', 'name':'5:00 h.' },
-                    { 'id':'5.25', 'name':'5:15 h.' },
-                    { 'id':'5.50', 'name':'5:30 h.' },
-                    { 'id':'5.75', 'name':'5:45 h.' },
                     { 'id':'6.00', 'name':'6:00 h.' },
                 ],
             },
@@ -395,6 +382,16 @@ export default {
             },
             deleteConfirmationDialog: {
                 open: false,
+                title_modal: 'Cambiar de estado del <b>Curso</b>',
+                type_modal: 'confirm',
+                content_modal: {
+                    confirm: {
+                        title: '¡Estas a punto cambiar la configuración de un Curso!',
+                        details: [
+                            'Los usuarios con historico se mantendrán con la información y no se recalculará su status'
+                        ],
+                    }
+                },
             },
         }
     },
@@ -436,6 +433,7 @@ export default {
         confirmDelete(validateForm = true) {
             let vue = this
             vue.deleteConfirmationDialog.open = false
+            vue.conf_focus = false
         },
         closeModal() {
             let vue = this

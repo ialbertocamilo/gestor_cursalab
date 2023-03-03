@@ -280,7 +280,7 @@ export default {
                 contentText: '¿Desea cambiar de estado a este registro?',
                 content_modal: {
                     inactive: {
-                        title: '¡Estás por desactivar un Usuario!',
+                        title: '¡Estás por desactivar un usuario!',
                         details: [
                             'El usuario no podrá ingresar a la plataforma.',
                             'Podrá enviar solicitudes desde la sección de ayuda del Log in.',
@@ -288,7 +288,7 @@ export default {
                         ],
                     },
                     active: {
-                        title: '¡Estás por activar un Usuario!',
+                        title: '¡Estás por activar un usuario!',
                         details: [
                             'El usuario ahora podrá ingresar a la plataforma.',
                             'Podrá rendir los cursos, de estar segmentado.'

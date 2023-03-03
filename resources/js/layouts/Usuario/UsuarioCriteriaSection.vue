@@ -9,7 +9,7 @@
                         :rules="criterion.required ? rules.required : []"
                         :multiple="!!criterion.multiple"
                         placeholder="Elige una opción"
-                        :label="criterion.name"
+                        :label="criterion.name+'*'"
                         :items="criterion.values"
                         item-text="value_text"
                         clearable

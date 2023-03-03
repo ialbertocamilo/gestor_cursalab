@@ -27,7 +27,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.name"
-                            label="Nombres"
+                            label="Nombres*"
                             :rules="rules.name"
                         />
                     </v-col>
@@ -35,7 +35,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.lastname"
-                            label="Apellido Paterno"
+                            label="Apellido Paterno*"
                             :rules="rules.lastname"
                         />
                     </v-col>
@@ -43,7 +43,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.surname"
-                            label="Apellido Materno"
+                            label="Apellido Materno*"
                             :rules="rules.surname"
                         />
                     </v-col>
@@ -62,7 +62,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.document"
-                            label="Identificador"
+                            label="Identificador*"
                             :rules="rules.document"
                         />
                     </v-col>
@@ -70,7 +70,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.password"
-                            label="Contraseña"
+                            label="Contraseña*"
                             type="password"
                             ref="passwordRefModal"
                             :rules="options.action === 'edit' ? rules.password_not_required : rules.password"
