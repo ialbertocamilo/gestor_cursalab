@@ -2,7 +2,7 @@
     <v-switch
         class="default-toggle"
         inset
-        :label="new_label"
+        :label="pre_label ? pre_label+' '+new_label : new_label"
         hide-details="auto"
         v-model="localSwitch"
         @change="updateValue"
@@ -40,6 +40,10 @@ export default {
         inactiveLabel:{
             type: String,
             default: 'Inactivo'
+        },
+        pre_label: {
+            type: String,
+            required: false
         },
     },
     data() {

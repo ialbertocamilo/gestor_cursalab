@@ -12,7 +12,10 @@
 
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
-                        <strong>Información de usuario</strong>
+                        <div class="header_inf">
+                            <strong>Información del usuario</strong>
+                            <span>*Criterios obligatorios</span>
+                        </div>
                     </v-col>
                     <v-col cols="12" class="py-0">
                         <DefaultDivider/>
@@ -99,7 +102,7 @@
                     </v-col>
                 </v-row>
 
-                <!-- <v-row justify="space-around" align="start" align-content="center">
+                <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
                         <strong>Criterios obligatorios para la creación de un usuario.</strong>
                     </v-col>
@@ -111,20 +114,20 @@
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                             <UsuarioCriteriaSection
-                                v-show="sections.showCriteria"
                                 ref="CriteriaSection"
                                 :options="options"
                                 :user="resource"
                                 :criterion_list="criterion_list"
+                                :only_req="true"
                             />
                     </v-col>
-                </v-row> -->
+                </v-row>
 
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                         @click="sections.showCriteria = !sections.showCriteria"
                         style="cursor: pointer">
-                        <strong>Criterios</strong>
+                        <strong>Más Criterios</strong>
                         <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
                     </v-col>
                     <v-col cols="12" class="py-0">
@@ -133,6 +136,9 @@
                 </v-row>
 
                 <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
+                        <span class="lbl_mas_cri">Criterios generales para la creación de un usuario.</span>
+                    </v-col>
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                         <v-expand-transition>
                             <UsuarioCriteriaSection
@@ -141,14 +147,18 @@
                                 :options="options"
                                 :user="resource"
                                 :criterion_list="criterion_list"
+                                :only_req="false"
                             />
                         </v-expand-transition>
                     </v-col>
                 </v-row>
 
                 <v-row>
-                    <v-col cols="2">
-                        <DefaultToggle v-model="resource.active"/>
+                    <v-col cols="9">
+                        <span class="lbl_error_cri" v-show="show_lbl_error_cri">*Debes completar todos los criterios obligatorios.</span>
+                    </v-col>
+                    <v-col cols="3" class="rem-m">
+                        <DefaultToggle v-model="resource.active" pre_label="Usuario"/>
                     </v-col>
                 </v-row>
 
@@ -201,7 +211,8 @@ export default {
                 password: this.getRules(['required', 'min:8']),
                 // email: this.getRules(['required', 'min:8']),
                 password_not_required: this.getRules([]),
-            }
+            },
+            show_lbl_error_cri: false
         }
     },
     mounted() {
@@ -226,6 +237,7 @@ export default {
             let vue = this
             vue.showLoader()
             const validateForm = vue.validateForm('UsuarioForm')
+            vue.show_lbl_error_cri = !validateForm
 
             const edit = vue.options.action === 'edit'
             const base = `${vue.options.base_endpoint}`
@@ -254,7 +266,6 @@ export default {
                     })
             } else {
                 vue.hideLoader()
-                vue.sections.showCriteria = true
             }
         }
         ,
@@ -332,3 +343,35 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.header_inf {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.header_inf span {
+    color: #434D56;
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+}
+span.lbl_mas_cri {
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #434D56;
+}
+.rem-m .v-input.default-toggle {
+    margin-top: 0 !important;
+    width: 100%;
+}
+.lbl_error_cri{
+    color: #FF5252;
+    font-family: "Nunito", sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+}
+.v-application .error--text .v-text-field__details {
+    display: none;
+}
+</style>

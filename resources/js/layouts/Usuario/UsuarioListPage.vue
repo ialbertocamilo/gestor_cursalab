@@ -251,7 +251,7 @@ export default {
                 open: false,
                 base_endpoint: '/usuarios',
                 resource: 'Usuario',
-                confirmLabel: 'Guardar',
+                confirmLabel: 'Confirmar',
             },
             modalDeleteOptions: {
                 ref: 'UsuarioDeleteModal',
