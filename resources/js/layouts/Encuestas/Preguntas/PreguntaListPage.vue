@@ -77,7 +77,7 @@ export default {
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
-                    
+
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',

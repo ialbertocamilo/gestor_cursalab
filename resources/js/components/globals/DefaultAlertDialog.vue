@@ -9,16 +9,15 @@
         <v-card>
             <v-card-title class="default-dialog-title">
                 <span v-html="options.title"></span>
-                <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </v-card-title>
-            <v-card-text class="py-8 text-center">
+            <v-card-text class="py-8 text-center pb-0">
                 <slot name="content"/>
             </v-card-text>
-            <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
+            <v-card-actions>
                 <DefaultModalActionButton
                     @cancel="closeModal"
                     @confirm="confirmModal"
@@ -43,7 +42,7 @@ export default {
         },
         cancelLabel: {
             type: String,
-            default: 'Cancelar'
+            default: 'Retroceder'
         },
         confirmLabel: {
             type: String,
@@ -70,3 +69,26 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.v-card__title.default-dialog-title {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding-right: 60px !important;
+}
+.v-card__title.default-dialog-title > button {
+    position: absolute;
+    right: 20px;
+}
+.v-card__title.default-dialog-title > span {
+    text-align: center;
+    font-family: "Nunito", sans-serif;
+    font-size: 18px;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-weight: 400;
+}
+.v-card__title.default-dialog-title > span b {
+    font-weight: 700;
+}
+</style>

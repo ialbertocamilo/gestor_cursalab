@@ -19,7 +19,7 @@
             <v-card-text class="py-8 text-center">
                 <div v-html="subtitle"></div>
             </v-card-text>
-            <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
+            <v-card-actions>
                 <DefaultModalActionButton
                     @cancel="closeModal"
                     @confirm="confirmModal"/>

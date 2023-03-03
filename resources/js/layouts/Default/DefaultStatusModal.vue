@@ -3,10 +3,10 @@
         :options="options"
         @onCancel="onCancel"
         @onConfirm="onConfirm"
-        width="30vw"
+        width="25vw"
     >
         <template v-slot:content>
-            <div class="bx_content" v-if="options.title_modal">
+            <div class="bx_content" v-if="options.content_modal">
                 <div class="bx_header">
                     <div class="img"><img src="/img/modal_alert.png"></div>
                     <div class="cont">
@@ -132,6 +132,8 @@ export default {
     font-family: "Nunito", sans-serif;
     font-weight: 700;
     margin-left: 29px;
+    text-align: left;
+    line-height: 25px;
 }
 .bx_details {
     border-top: 1px solid #D9D9D9;

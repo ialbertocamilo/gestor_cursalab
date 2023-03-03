@@ -148,6 +148,7 @@
                                                 :rules="rules.nota_aprobatoria"
                                                 show-required
                                                 dense
+                                                @onFocus="alertNotaMinima()"
                                             />
                                         </v-col>
                                         <v-col cols="6">
@@ -271,6 +272,14 @@
                     `${base_endpoint}?${addParamsToURL(base_endpoint, getAllUrlParams(url))}`,
                     confirmModal(false))"
             />
+            <DialogConfirm
+                v-model="deleteConfirmationDialog.open"
+                width="450px"
+                title="Cambiar de estado del Curso"
+                subtitle="¡Estas a punto cambiar la configuración de un Curso!"
+                @onConfirm="confirmDelete"
+                @onCancel="deleteConfirmationDialog.open = false"
+            />
         </v-card>
     </section>
 </template>
@@ -283,9 +292,10 @@ const fields = [
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
-    components: {CursoValidacionesModal},
+    components: {CursoValidacionesModal,DialogConfirm},
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         const route_school = (this.categoria_id !== '')
@@ -383,6 +393,9 @@ export default {
                 showCloseIcon: true,
                 type: null
             },
+            deleteConfirmationDialog: {
+                open: false,
+            },
         }
     },
     computed: {
@@ -416,6 +429,14 @@ export default {
         }
     },
     methods: {
+        alertNotaMinima(){
+            let vue = this
+            vue.deleteConfirmationDialog.open = true
+        },
+        confirmDelete(validateForm = true) {
+            let vue = this
+            vue.deleteConfirmationDialog.open = false
+        },
         closeModal() {
             let vue = this
 

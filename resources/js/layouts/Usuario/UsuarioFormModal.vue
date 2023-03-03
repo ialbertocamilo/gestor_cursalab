@@ -99,10 +99,31 @@
                     </v-col>
                 </v-row>
 
+                <!-- <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="d-flex justify-content-between pb-0">
+                        <strong>Criterios obligatorios para la creación de un usuario.</strong>
+                    </v-col>
+                    <v-col cols="12" class="py-0">
+                        <DefaultDivider/>
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="d-flex justify-content-center pt-0">
+                            <UsuarioCriteriaSection
+                                v-show="sections.showCriteria"
+                                ref="CriteriaSection"
+                                :options="options"
+                                :user="resource"
+                                :criterion_list="criterion_list"
+                            />
+                    </v-col>
+                </v-row> -->
+
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
-                           @click="sections.showCriteria = !sections.showCriteria"
-                           style="cursor: pointer">
+                        @click="sections.showCriteria = !sections.showCriteria"
+                        style="cursor: pointer">
                         <strong>Criterios</strong>
                         <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
                     </v-col>

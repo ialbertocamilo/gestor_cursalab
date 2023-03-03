@@ -23,9 +23,10 @@
         :suffix="suffix"
         :prefix="prefix"
         :loading="loading"
+        @focus="onFocus"
     >
         <template v-slot:append>
-            <v-btn v-if="type == 'password'" width="32" height="32" plain icon 
+            <v-btn v-if="type == 'password'" width="32" height="32" plain icon
                    @click="onClickSeePassword">
                 <span :class="`far ${iconSeePass ? 'fa-eye' : 'fa-eye-slash' } fa-lg`"></span>
             </v-btn>
@@ -142,6 +143,9 @@ export default {
         }
     },
     methods: {
+        onFocus() {
+            this.$emit('onFocus')
+        },
         updateValue(value) {
             let vue = this
             vue.$emit('input', value || null)

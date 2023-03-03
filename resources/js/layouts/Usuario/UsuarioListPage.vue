@@ -76,51 +76,26 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
-                    <!--                    <v-col cols="3">-->
-                    <!--                        <DefaultSelect-->
-                    <!--                            clearable dense-->
-                    <!--                            :items="selects.workspaces"-->
-                    <!--                            v-model="filters.workspace_id"-->
-                    <!--                            label="Workspace"-->
-                    <!--                            @onChange="refreshDefaultTable(dataTable, filters, 1)"-->
-                    <!--                            item-text="name"-->
-                    <!--                        />-->
-                    <!--                    </v-col>-->
-                    <v-col cols="3">
-                        <DefaultSelect
-                            clearable dense
-                            :items="selects.sub_workspaces"
-                            v-model="filters.subworkspace_id"
-                            label="Módulos"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
-                            item-text="name"
-                        />
-                    </v-col>
                     <v-col cols="3">
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar por nombre o DNI..."
+                            label="Buscar Usuarios"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="3">
-                        <DefaultSelect
-                            clearable dense
-                            :items="selects.statuses"
-                            v-model="filters.active"
-                            label="Estado"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
-                            item-text="name"
-                        />
+                    <v-col cols="6">
                     </v-col>
                     <v-col cols="3" class="d-flex justify-end">
                         <DefaultButton
-                            label="Ver Filtros"
+                            text
+                            label="Aplicar Filtros"
                             icon="mdi-filter"
-                            @click="open_advanced_filter = !open_advanced_filter"/>
+                            @click="open_advanced_filter = !open_advanced_filter"
+                            class="btn_filter"
+                            />
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -130,7 +105,7 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>Usuario</b>')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>usuario</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
@@ -303,7 +278,6 @@ export default {
                 open: false,
                 base_endpoint: '/usuarios',
                 contentText: '¿Desea cambiar de estado a este registro?',
-                title_modal: 'Cambio de estado de <b>Usuario</b>',
                 content_modal: {
                     inactive: {
                         title: '¡Estás por desactivar un Usuario!',
