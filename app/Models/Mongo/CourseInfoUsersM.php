@@ -29,7 +29,7 @@ class CourseInfoUsersM extends Model
                 if(count($users_having_course)>0){
                     $summaries_count = SummaryCourse::where('course_id',$course->id)
                                         ->whereIn('user_id',$users_having_course->pluck('id'))
-                                        ->where('passed', true)
+                                        ->where('advanced_percentage', 100)
                                         ->count();
                 }
                 self::insert([
