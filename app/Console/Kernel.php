@@ -48,6 +48,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('errores:eliminar-antiguos')->dailyAt('00:00');
 
         $schedule->command('report:users-quantity')->dailyAt('23:58');
+
+        $schedule->command('mongo:save-data')->dailyAt('02:00');
     }
 
     /**
