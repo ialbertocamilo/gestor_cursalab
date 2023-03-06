@@ -23,10 +23,11 @@
             v-on:vdropzone-error="uploadError"
             v-on:vdropzone-removed-file="fileRemoved"
         >
-            <div class="dropzone-custom-content">
-                <v-icon>mdi-upload</v-icon>
-                <div class="subtitle">{{ hint }}</div>
-                <br>
+            <div class="dropzone-custom-content" >
+                <div class="icon_upload">
+                    <img src="/img/upload.png">
+                </div>
+                <div class="subtitle">Sube o arrastra el archivo</div><br>
             </div>
         </vue-dropzone>
     </div>
@@ -68,9 +69,10 @@ export default {
                 },
                 thumbnailWidth: 250,
                 addRemoveLinks: true,
-                dictRemoveFile: 'Remover archivo',
+                dictRemoveFile: 'Reemplazar archivo',
                 dictCancelUpload: 'Cancelar',
                 maxFiles: 1,
+                previewTemplate: this.template(),
                 timeout: {
                     default: 0
                 }
@@ -135,11 +137,30 @@ export default {
         },
         removeAll() {
             this.$refs.myVueDropzone.removeAllFiles()
+        },
+        template: function () {
+            return `<div class="dz-preview dz-file-preview">
+                    <div class="dz-image">
+                        <div data-dz-thumbnail-bg></div>
+                        <div class="icon_upload">
+                            <img src="/img/upload_load.png">
+                        </div>
+                    </div>
+                    <div class="dz-details">
+                        <div class="dz-filename"><span data-dz-name></span></div>
+                        <div class="dz-size"><span data-dz-size></span></div>
+                    </div>
+                    <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+                    <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                    <div class="dz-success-mark"><i class="fa fa-check"></i></div>
+                    <div class="dz-error-mark"><i class="fa fa-close"></i></div>
+                </div>
+            `;
         }
     }
 }
 </script>
-
+<!--
 <style lang="scss">
 #dropzone {
     display: flex;
@@ -148,4 +169,107 @@ export default {
 .dz-progress{
     display: none !important;
 }
+</style> -->
+<style lang="scss">
+    .icon_upload {
+        margin-bottom: 30px;
+    }
+    .icon_upload img {
+        max-width: 60px;
+        height: auto;
+    }
+    .dropzone-custom-content .subtitle {
+        font-family: "Nunito", sans-serif;
+        font-size: 16px;
+    }
+    .dropzone .dz-preview {
+        width: 100%;
+        min-height: 240px;
+        margin: 0;
+        padding: 30px 20px;
+    }
+    .dropzone.dz-clickable.dz-started.dz-max-files-reached {
+        padding: 0 !important;
+    }
+    .dropzone .dz-preview.dz-file-preview,
+    .dropzone .dz-preview.dz-image-preview {
+        .dz-progress {
+            display: none !important;
+        }
+        .dz-details {
+            background: none;
+            text-align: center;
+            color: #2A3649;
+            font-family: "Nunito", sans-serif;
+            position: relative;
+            padding-top: 20px;
+            padding-bottom: 0 !important;
+            opacity: 1;
+            .dz-filename {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+            .dz-size {
+                font-size: 15px;
+                font-weight: 400;
+                strong {
+                    font-weight: 400;
+                }
+            }
+            .dz-inf {
+                font-size: 16px;
+                font-weight: 400;
+            }
+        }
+        .dz-image {
+            background: none;
+            min-height: 40px;
+            margin-top: 10px;
+            .icon_upload {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 0;
+            }
+        }
+    }
+    .vue-dropzone>.dz-preview .dz-remove {
+        background: rgba(42, 54, 73, 0.91);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0;
+        padding-top: 150px;
+        font-family: "Nunito", sans-serif;
+        color: #fff;
+        text-transform: inherit;
+        font-size: 14px;
+        text-decoration: none !important;
+        outline: none;
+        border: none;
+        font-weight: 400;
+    }
+    .vue-dropzone>.dz-preview:hover .dz-remove:before {
+        background-image: url('/img/upload_ree.png');
+        content: '';
+        width: 60px;
+        height: 60px;
+        position: absolute;
+        top: 80px;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .dropzone .dz-preview:hover  {
+        .dz-image, .dz-details{
+            filter: blur(5px);
+        }
+    }
+    .dz-success-mark, .dz-error-message {
+        display: none !important;
+    }
 </style>

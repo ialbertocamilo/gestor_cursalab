@@ -145,7 +145,7 @@
                                 v-model="resource.score"
                                 class="mt-2"
                             />
-                        
+
                     </v-col>
                     <v-col cols="4">
                         <div class="row ml-0">
@@ -153,10 +153,20 @@
                         </div>
                     </v-col>
                     <v-col cols="4">
-                        <DefaultToggle v-model="resource.active"/>
+                        <DefaultToggle v-model="resource.active" @onChange="alertStatus"/>
                     </v-col>
                 </v-row>
             </v-form>
+            <DialogConfirm
+                :ref="questionUpdateStatusModal.ref"
+                v-model="questionUpdateStatusModal.open"
+                :options="questionUpdateStatusModal"
+                width="450px"
+                title="Cambiar de estado al curso"
+                subtitle="¿Está seguro de cambiar de estado al curso?"
+                @onConfirm="confirmUpdateStatus"
+                @onCancel="questionUpdateStatusModal.open = false"
+            />
         </template>
     </DefaultDialog>
 
@@ -165,6 +175,7 @@
 <script>
 // import DefaultRichText from "../../components/globals/DefaultRichText";
 import Editor from "@tinymce/tinymce-vue";
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 const validaciones = [
     'Debe de registrar más de 2 respuestas',
@@ -172,7 +183,7 @@ const validaciones = [
 ]
 export default {
     components: {
-        editor: Editor,
+        editor: Editor, DialogConfirm
     },
     props: {
         options: {
@@ -217,6 +228,19 @@ export default {
                 tipo_alert: "info",
                 message_alert: "",
                 alert: false,
+            },
+            questionUpdateStatusModal: {
+                open: false,
+                title_modal: 'Cambio de estado de una <b>pregunta</b>',
+                type_modal: 'delete',
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por desactivar una pregunta!',
+                        details: [
+                            'Si tu evaluación no tiene suficientes puntos, para completar un examen, se inhabilita.'
+                        ],
+                    }
+                },
             },
         }
     }
@@ -398,6 +422,15 @@ export default {
                 vue.alert_frontend.alert = false;
             }, 10000);
         },
+
+        alertStatus(){
+            let vue = this
+            vue.questionUpdateStatusModal.open = !vue.resource.active
+        },
+        async confirmUpdateStatus(){
+            let vue = this
+            vue.questionUpdateStatusModal.open = false
+        }
     }
 }
 </script>

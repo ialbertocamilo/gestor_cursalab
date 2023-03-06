@@ -20,17 +20,17 @@
                     <div class="bx_header">
                         <div class="img"><img src="/img/modal_alert.png"></div>
                         <div class="cont">
-                            <span v-if="resource.active">{{ options.content_modal.inactive.title }}</span>
-                            <span v-if="!resource.active">{{ options.content_modal.active.title }}</span>
+                            <span v-if="options.status_item_modal">{{ options.content_modal.inactive.title }}</span>
+                            <span v-if="!options.status_item_modal">{{ options.content_modal.active.title }}</span>
                         </div>
                     </div>
                     <div class="bx_details">
-                        <ul v-if="resource.active">
+                        <ul v-if="options.status_item_modal">
                             <li v-for="(item, index) in options.content_modal.inactive.details" :key="index">
                                 <span>{{ item }}</span>
                             </li>
                         </ul>
-                        <ul v-if="!resource.active">
+                        <ul v-if="!options.status_item_modal">
                             <li v-for="(item, index) in options.content_modal.active.details" :key="index">
                                 <span>{{ item }}</span>
                             </li>

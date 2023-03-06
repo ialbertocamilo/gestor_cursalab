@@ -200,7 +200,7 @@ export default {
                 {text: "Nombre", value: "custom_meeting_name", sortable: false},
                 {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
                 {text: "Participantes", value: "attendants_count", sortable: false, align: 'center'},
-                {text: "Código", value: "prefix", sortable: false, align: 'center'},
+                {text: "Código", value: "prefix", sortable: false, align: 'center',tooltip: 'Puedes ingresar este código para validar que el usuario ingreso a la reunión desde nuestra plataforma.'},
                 {text: "Estado", value: "status_meeting", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
                 {text: "Fecha de inicio", value: "starts_at", align: 'center',},

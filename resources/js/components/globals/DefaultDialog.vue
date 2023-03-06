@@ -8,7 +8,14 @@
         @click:outside="closeModalOutside"
     >
         <v-card>
-            <v-card-title class="default-dialog-title" v-show="showTitle">
+            <v-card-title class="default-dialog-title mod_head" v-if="options.title_modal">
+                <span v-html="options.title_modal ? options.title_modal : options.title"></span>
+                <v-btn icon :ripple="false" color="white"
+                       @click="closeModal">
+                    <v-icon v-text="'mdi-close'"/>
+                </v-btn>
+            </v-card-title>
+            <v-card-title class="default-dialog-title" v-show="showTitle" v-else>
                 <div v-html="options.title"></div>
                 <v-spacer/>
                 <v-btn
@@ -19,8 +26,22 @@
                 </v-btn>
             </v-card-title>
             <v-card-text :class="{'py-5': !noPaddingCardText}">
-                <slot name="content"/>
-                <slot name="more-content"/>
+                <div class="bx_content" v-if="options.type_modal == 'requirement'">
+                    <div class="bx_header">
+                        <div class="img"><img src="/img/modal_alert.png"></div>
+                        <div class="cont">
+                            <span>{{ options.content_modal.requirement.title }}</span>
+                        </div>
+                    </div>
+                    <div class="bx_details">
+                        <slot name="content"/>
+                        <slot name="more-content"/>
+                    </div>
+                </div>
+                <div v-else>
+                    <slot name="content"/>
+                    <slot name="more-content"/>
+                </div>
             </v-card-text>
             <v-card-actions
                 :style="showCardActionsBorder ? { 'border-top': '1px solid rgba(0,0,0,.12)' } : null"
@@ -124,5 +145,55 @@ export default {
     border-radius: 50%;
     box-shadow: 0 2px 6px 0px rgba(0,0,0,0.75);
     z-index: 999;
+}
+</style>
+
+<style lang="scss">
+.bx_header {
+    display: flex;
+    align-items: center;
+}
+.bx_header .cont span {
+    color: #2A3649;
+    font-size: 20px;
+    font-family: "Nunito", sans-serif;
+    font-weight: 700;
+    margin-left: 29px;
+    text-align: left;
+    line-height: 25px;
+}
+.bx_details {
+    border-top: 1px solid #D9D9D9;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+.bx_details ul li {
+    text-align: left;
+    font-family: "Nunito", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #2A3649;
+}
+.mod_head.v-card__title.default-dialog-title {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding-right: 60px !important;
+}
+.mod_head.v-card__title.default-dialog-title > button {
+    position: absolute;
+    right: 20px;
+}
+.mod_head.v-card__title.default-dialog-title > span {
+    text-align: center;
+    font-family: "Nunito", sans-serif;
+    font-size: 18px;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-weight: 400;
+}
+.mod_head.v-card__title.default-dialog-title > span b {
+    font-weight: 700;
 }
 </style>

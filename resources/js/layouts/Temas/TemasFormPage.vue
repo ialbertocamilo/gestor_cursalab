@@ -206,6 +206,16 @@
             @onConfirm="sendForm"
             :resource="resource"
         />
+        <DialogConfirm
+            :ref="mediaDeleteModal.ref"
+            v-model="mediaDeleteModal.open"
+            :options="mediaDeleteModal"
+            width="450px"
+            title="Eliminación de un archivo multimedia"
+            subtitle="¡Estás por eliminar un archivo multimedia!"
+            @onConfirm="confirmDeleteMedia"
+            @onCancel="mediaDeleteModal.open = false"
+        />
     </section>
 </template>
 <script>
@@ -216,6 +226,7 @@ import TemaMultimediaTypes from "./TemaMultimediaTypes";
 import draggable from 'vuedraggable'
 import TemaValidacionesModal from "./TemaValidacionesModal";
 import Editor from "@tinymce/tinymce-vue";
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'course_id'];
@@ -223,7 +234,7 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal},
+    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal,DialogConfirm},
     props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
     data() {
         return {
@@ -281,6 +292,20 @@ export default {
                 resource: 'TemasValidaciones',
                 persistent: false,
                 showCloseIcon: true
+            },
+            mediaDeleteModal: {
+                open: false,
+                title_modal: 'Eliminación de un <b>archivo multimedia</b>',
+                type_modal: 'delete',
+                media_index: null,
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar un archivo multimedia!',
+                        details: [
+                            'Este archivo se eliminará para todos los temas asignados y lugares que haya sido asignado.'
+                        ],
+                    }
+                },
             },
         }
     },
@@ -444,7 +469,9 @@ export default {
         },
         deleteMedia(media_index) {
             let vue = this
-            vue.resource.media.splice(media_index, 1)
+            // vue.resource.media.splice(media_index, 1)
+            vue.mediaDeleteModal.media_index = media_index
+            vue.mediaDeleteModal.open = true
         },
         async loadData() {
             let vue = this
@@ -531,6 +558,11 @@ export default {
             vue.topicsValidationModal.cancelLabel = 'Entendido'
             await vue.openFormModal(vue.topicsValidationModal, data, 'showAlertEvaluacion', 'Debes de tener en cuenta')
         },
+        async confirmDeleteMedia(){
+            let vue = this
+            vue.resource.media.splice(vue.mediaDeleteModal.media_index, 1)
+            vue.mediaDeleteModal.open = false
+        }
     }
 }
 </script>

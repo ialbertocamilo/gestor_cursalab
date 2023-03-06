@@ -78,6 +78,7 @@
             <DialogConfirm
                 :ref="topicUpdateStatusModal.ref"
                 v-model="topicUpdateStatusModal.open"
+                :options="topicUpdateStatusModal"
                 width="450px"
                 title="Cambiar de estado al curso"
                 subtitle="¿Está seguro de cambiar de estado al curso?"
@@ -195,7 +196,31 @@ export default {
                 title: 'Actualizar Curso',
                 contentText: '¿Desea actualizar este registro?',
                 open: false,
-                endpoint: ''
+                endpoint: '',
+                title_modal: 'Cambio de estado de un <b>tema</b>',
+                type_modal: 'status',
+                status_item_modal: null,
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un tema!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios no podrán acceder al tema.',
+                            'No podrás ver el tema como opción para descargar reportes.',
+                            'El detalle del tema inactivo aparecerá en “Notas de usuario”.',
+                            'Si es el único tema, se desactivará el curso.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un tema!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios ahora podrán acceder al tema.',
+                            'Podrás ver el tema como opción para descargar reportes.',
+                            'Si es el único tema, se activará también el curso.'
+                        ]
+                    }
+                },
             },
             topicValidationModalUpdateStatus: {
                 ref: 'TopicListValidationModalUpdateStatus',
@@ -281,6 +306,7 @@ export default {
             let vue = this
             vue.update_model = course
             vue.topicUpdateStatusModal.open = true
+            vue.topicUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
         },
         async confirmUpdateStatus(validateForm = true) {
             let vue = this
