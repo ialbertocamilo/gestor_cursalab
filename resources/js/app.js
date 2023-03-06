@@ -206,6 +206,8 @@ const app = new Vue({
     el: "#app",
     data: {
         adminId: 0,
+        isSuperUser: false,
+        superUserRoleId : 1,
         workspaceId: 0
     },
     mounted() {
@@ -218,14 +220,14 @@ const app = new Vue({
             let socket = window.io(this.getReportsBaseUrl());
             socket.on('report-finished', (e) => {
 
-                if (vue.adminId === e.adminId) {
+                if (vue.adminId === e.adminId || vue.isSuperUser) {
                     vue.notifyReportHasFinished(e)
                 }
             })
 
             socket.on('report-started', (e) => {
 
-                if (vue.adminId === e.adminId) {
+                if (vue.adminId === e.adminId || vue.isSuperUser) {
                     vue.notifyReportHasStarted(e.report)
                 }
             })
@@ -292,6 +294,17 @@ const app = new Vue({
             })
             vue.adminId = response.data.user.id
             vue.workspaceId = response.data.session.workspace.id
+
+            if (response.data.user) {
+                response.data
+                    .user
+                    .roles.forEach(r => {
+                        if (r.role_id === vue.superUserRoleId) {
+                            vue.isSuperUser = true;
+                        }
+                    })
+            }
+
         },
         downloadReport(url, name) {
             url = `${this.getReportsBaseUrl()}/${url}`

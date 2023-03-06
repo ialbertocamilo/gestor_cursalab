@@ -122,7 +122,7 @@ if (isset($fullScreen)) {
             </div>
             <div class="box-item-val hide" id="box_val_stars">
                 <div class="itemb">
-                    <p id="box_val_stars_question">¿Cómo valoras esta funcionalidad?</p>
+                    <p id="box_val_stars_question"></p>
                 </div>
                 <div class="box-stars">
                     @for ($i = 1; $i < 11; $i++)
@@ -137,32 +137,32 @@ if (isset($fullScreen)) {
             </div>
             <div class="box-item-val hide" id="box_val_icons">
                 <div class="itemb">
-                    <p id="box_val_icons_question">¿Qué factor tuvo más impacto al usar esta funcionalidad?</p>
+                    <p id="box_val_icons_question"></p>
                 </div>
                 <div class="box-icons">
                     <div id="box_val_icons_item_btn1" class="i-icon" data-char="" onclick="showComment(this)">
                         <div class="i-img">
                             <img id="box_val_icons_item_icon1" src="{{ asset('img/valoracion/automatica.png') }}" alt="automatica">
                         </div>
-                        <span id="box_val_icons_item_text1">Automática</span>
+                        <span id="box_val_icons_item_text1"></span>
                     </div>
                     <div id="box_val_icons_item_btn2" class="i-icon" data-char="" onclick="showComment(this)">
                         <div class="i-img">
                             <img id="box_val_icons_item_icon2" src="{{ asset('img/valoracion/didactica.png') }}" alt="didactica">
                         </div>
-                        <span id="box_val_icons_item_text2">Didáctica</span>
+                        <span id="box_val_icons_item_text2"></span>
                     </div>
                     <div id="box_val_icons_item_btn3" class="i-icon" data-char="" onclick="showComment(this)">
                         <div class="i-img">
                             <img id="box_val_icons_item_icon3" src="{{ asset('img/valoracion/innovadora.png') }}" alt="innovadora">
                         </div>
-                        <span id="box_val_icons_item_text3">Innovadora</span>
+                        <span id="box_val_icons_item_text3"></span>
                     </div>
                     <div id="box_val_icons_item_btn4" class="i-icon" data-char="" onclick="showComment(this)">
                         <div class="i-img">
                             <img id="box_val_icons_item_icon4" src="{{ asset('img/valoracion/practica.png') }}" alt="practica">
                         </div>
-                        <span id="box_val_icons_item_text4">Práctica</span>
+                        <span id="box_val_icons_item_text4"></span>
                     </div>
                 </div>
                 <div class="box-saved">
@@ -171,10 +171,10 @@ if (isset($fullScreen)) {
             </div>
             <div class="box-item-val hide" id="box_val_comment">
                 <div class="itemb">
-                    <p id="box_val_comment_question">¿Cómo podemos mejorar?</p>
+                    <p id="box_val_comment_question"></p>
                 </div>
                 <div class="box-comment">
-                    <textarea class="form-control txtarea_val" rows="4" placeholder="Coméntanos en qué podemos mejorar" id="box_val_comment_hint"></textarea>
+                    <textarea class="form-control txtarea_val" rows="4" placeholder="" id="box_val_comment_hint"></textarea>
                 </div>
                 <div class="box-send">
                     <button type="button" class="btn-send" id="btn_send_val" onclick="sendComment()">
@@ -210,7 +210,7 @@ if (isset($fullScreen)) {
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
     <script src="{{ asset('js/app.js?v=' . date('Y-W')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=2' . date('Y-W-m')) }}"></script>
     <script>
         $(document).ready(function () {
             $('#content_polls').css('display','block');
