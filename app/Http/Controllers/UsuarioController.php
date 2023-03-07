@@ -878,4 +878,17 @@ class UsuarioController extends Controller
         ]);
     }
 
+    public function resetPassword(User $user, Request $request)
+    {
+        $data = [
+            'password' => $user->document,
+            'last_pass_updated_at' => now(),
+            'attempts' => 0,
+            'attempts_lock_time' => NULL,
+        ];
+
+        $user->update($data);
+
+        return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
+    }
 }

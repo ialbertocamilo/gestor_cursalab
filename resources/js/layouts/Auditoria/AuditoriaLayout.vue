@@ -128,17 +128,17 @@ export default {
                 ref: 'AuditoriaTable',
                 endpoint: '/auditoria/search',
                 headers: [
-                    {text: "Fecha", value: "created_at", align: 'center', sortable: true},
                     {text: "Usuario", value: "user", align: 'center', sortable: false},
                     {text: "Acción", value: "event", align: 'center', sortable: false},
-                    // {text: "Sección", value: "model", align: 'center', sortable: false},
-                    // {text: "Registro", value: "name", align: 'center', sortable: false},
+                    {text: "Sección", value: "model", align: 'center', sortable: false},
+                    {text: "Registro", value: "name", align: 'center', sortable: false},
                     {text: '# Modificados', align: 'center', value: 'modified_fields_count', sortable: false},
-                    {text: "Detalle", value: "actions", align: 'center', sortable: false},
+                    {text: "Fecha", value: "created_at", align: 'center', sortable: true},
+                    {text: "Acciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
-                        text: 'Ver',
+                        text: 'Detalles',
                         icon: 'mdi mdi-file-document-multiple',
                         type: 'action',
                         method_name: 'showdetails',

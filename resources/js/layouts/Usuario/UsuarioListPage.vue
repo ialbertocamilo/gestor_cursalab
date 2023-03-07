@@ -134,6 +134,7 @@
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
+                @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
             />
             <UsuarioFormModal
                 width="60vw"
@@ -154,6 +155,13 @@
                 :options="modalReiniciosOptions"
                 @onReinicioTotal="refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalReiniciosOptions)"
+            />
+            <UsuarioResetPasswordModal
+                width="45vw"
+                :ref="modalResetPasswordOptions.ref"
+                :options="modalResetPasswordOptions"
+                @onConfirm="closeFormModal(modalResetPasswordOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalResetPasswordOptions)"
             />
             <UsuarioCursosModal
                 width="55vw"
@@ -179,13 +187,14 @@ import UsuarioFormModal from "./UsuarioFormModal";
 import UsuarioStatusModal from "./UsuarioStatusModal";
 import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
+import UsuarioResetPasswordModal from "./UsuarioResetPasswordModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 
 
 
 
 export default {
-    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal},
+    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal},
     props: {
         workspace_id: {
             type: Number|String,
@@ -245,10 +254,16 @@ export default {
                         route_type: 'external'
                     },
                     {
-                        text: "Actualizar Estado",
+                        text: "Actualizar estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Restaurar contraseña",
+                        icon: 'fa fa-key',
+                        type: 'action',
+                        method_name: 'reset_password'
                     },
                 ]
             },
@@ -297,6 +312,13 @@ export default {
                 base_endpoint: '/usuarios',
                 cancelLabel: 'Cerrar',
                 hideConfirmBtn: true,
+            },
+            modalResetPasswordOptions: {
+                ref: 'UsuarioResetPasswordModal',
+                open: false,
+                base_endpoint: '/usuarios',
+                // cancelLabel: 'Cerrar',
+                // hideConfirmBtn: true,
             },
             modalStatusOptions: {
                 ref: 'UsuarioStatusModal',
