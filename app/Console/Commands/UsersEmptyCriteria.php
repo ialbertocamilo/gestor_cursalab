@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\EmailTemplate;
 use App\Models\CriterionValue;
 use App\Models\SegmentValue;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class UsersEmptyCriteria extends Command
 {
@@ -31,10 +33,14 @@ class UsersEmptyCriteria extends Command
     {
         $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds(25);
         $users =  CriterionValue::findUsersWithIncompleteCriteriaValues(25, $criteriaIds);
+        $data = [
+          'subject' => 'This is a test',
+          'usersCount' => count($users)
+        ];
 
-        dd(count($users));
+        Mail::to('elvis@cursalab.io')
+            ->send(new EmailTemplate('emails.empty_criteria_notification', $data));
 
-        //$this->info();
         return Command::SUCCESS;
     }
 }
