@@ -9,7 +9,7 @@
                           border-radius:4px;
                           background: #FFCD0C;"></div>
 
-                This is the title
+                Reporte de criterios
 
                 <div style="margin-left: 8%;
                           width: 9px;
@@ -21,12 +21,28 @@
     </tr>
     <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
-            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
-            Existen {{ $data['usersCount'] }} usuarios con criterios vacios, puedes
-            descargar el <a href="">reporte aquí.</a>
+            <p style="text-align:center; margin-bottom:3px;margin-top:3px; font-weight:bold;">
+                <span style="color: #CD0033; font-size: 32px">{{ $data['usersCount'] }}</span>
+                <br>
+                <span style="color: #CD0033; font-size: 16px">Usuarios detectados</span>
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
-            Este es un mensaje automático, por favor no responder.
+                Se han reportado <strong>{{ $data['usersCount'] }} usuarios</strong>
+                con al menos un criterio vacío.
+            </p>
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
+                Descarga ahora el reporte.<br>
+                Usa los filtros para una búsqueda más efectiva.
+            </p>
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
+                <a
+                    href="{{ $data['reports-url'] }}"
+                    style="background: #5457E7; text-decoration: none; color: white; border-radius: 15px; border: none; padding: 5px 40px 5px 40px">
+                    Ir a reportes
+                </a>
+            </p>
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
+                Este es un mensaje automático, por favor no responder.
             </p>
         </td>
     </tr>

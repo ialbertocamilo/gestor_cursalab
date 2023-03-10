@@ -5,7 +5,7 @@
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
                 Descarga la lista de usuarios que no cuentan con algunos de los
-                valores que usan para segmentación
+                valores que usan para segmentación en cursos.
             </template>
 
             <list-item>

@@ -117,6 +117,15 @@
                         />
                     </v-col>
                     <v-col cols="3" class="d-flex justify-end">
+                        <div class="user-count-wrapper">
+                            <v-icon
+                                size="32"
+                                color="#E01717">
+                                mdi-account
+                            </v-icon>
+                            <span class="count">12000</span>
+                        </div>
+
                         <DefaultButton
                             label="Ver Filtros"
                             icon="mdi-filter"
@@ -180,9 +189,6 @@ import UsuarioStatusModal from "./UsuarioStatusModal";
 import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
-
-
-
 
 export default {
     components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal},
@@ -360,3 +366,26 @@ export default {
 
 }
 </script>
+
+<style>
+.user-count-wrapper {
+    position: relative;
+    width: 200px;
+}
+
+.count {
+    height: 15px;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 5px;
+    bottom: 2px;
+    font-size: 11px;
+    padding: 0 5px 0 5px;
+    border-radius: 14px;
+    border: 1px solid white;
+    color: white;
+    background-color: #E01717;
+}
+</style>

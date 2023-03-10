@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 
 class AssignedRole extends Model
 {
@@ -44,5 +44,24 @@ class AssignedRole extends Model
                     ->first();
 
         return (bool)$role;
+    }
+
+    /**
+     * Load all workspaces' admin users
+     *
+     * @param $workspaceId
+     * @return Builder[]|Collection
+     */
+    public static function loadAllAdmins($workspaceId): Collection|array
+    {
+
+        return User::query()
+            ->join('assigned_roles as ar', 'ar.entity_id', 'users.id')
+            ->where('ar.entity_type', self::USER_ENTITY)
+            ->where('ar.scope', $workspaceId)
+            ->where('ar.role_id', Role::ADMIN)
+            ->where('users.active', 1)
+            ->select('users.*')
+            ->get();
     }
 }
