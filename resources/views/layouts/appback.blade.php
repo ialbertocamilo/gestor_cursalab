@@ -47,6 +47,16 @@ if (isset($fullScreen)) {
 </div>
 
 <div id="app">
+    @impersonating($guard = null)
+        <div class="d-flex align-items-stretch bg-red text-center">
+        
+            <div class="col text-center">
+                <a class="text-center text-white" href="{{ route('impersonate.leave') }}">Leave impersonation</a>
+            </div>
+
+        </div>  
+    @endImpersonating
+
     <div class="d-flex align-items-stretch">
 
         <div class="nav-container <?= $sidebarClasses ?>">

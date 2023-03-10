@@ -55,6 +55,9 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
 });
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
+
+    // Route::impersonate();
+    
     Route::post('/usuario_upload_file', [RestController::class, 'usuario_upload_file']);
     Route::post('/guardar_token_firebase', [FirebaseController::class, 'guardarToken']);
 

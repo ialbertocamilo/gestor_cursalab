@@ -40,6 +40,9 @@ use Spatie\Image\Manipulations;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailTemplate;
+use Lab404\Impersonate\Models\Impersonate;
+use Lab404\Impersonate\Services\ImpersonateManager;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use Bouncer;
 
@@ -58,6 +61,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     use Cachable;
 
     use SoftDeletes;
+
+    use Impersonate;
 
     use Cachable {
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
@@ -1409,5 +1414,55 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         else $current->email = $document;
 
         $current->save();
+    }
+
+    public function canImpersonate()
+    {
+        return $this->isAn('super-user');
+    }
+
+    public function canBeImpersonated()
+    {
+        return $this->isNotAn('super-user');
+    }
+
+    protected function findUserToImpersonate($value, $field, $guardName)
+    {
+        $user = User::whereNotNull('subworkspace_id')->where($field, $value)->first();
+
+        if (!$user) {
+            throw (new ModelNotFoundException())->setModel(
+                User::class,
+                $value
+            );
+        }
+
+        // if (empty($guardName)) {
+        //     $guardName = $this->app['config']->get('auth.default.guard', 'web');
+        // }
+
+        // $providerName = $this->app['config']->get("auth.guards.$guardName.provider");
+
+        // if (empty($providerName)) {
+        //     throw new MissingUserProvider($guardName);
+        // }
+
+        // try {
+        //     /** @var UserProvider $userProvider */
+        //     $userProvider = $this->app['auth']->createUserProvider($providerName);
+        // } catch (\InvalidArgumentException $e) {
+        //     throw new InvalidUserProvider($guardName);
+        // // }
+
+        // if (!($modelInstance = $userProvider->retrieveById($id))) {
+        //     $model = $this->app['config']->get("auth.providers.$providerName.model");
+
+        //     throw (new ModelNotFoundException())->setModel(
+        //         $model,
+        //         $id
+        //     );
+        // }
+
+        return $user;
     }
 }
