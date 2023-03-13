@@ -117,13 +117,28 @@
                         />
                     </v-col>
                     <v-col cols="3" class="d-flex justify-end">
-                        <div class="user-count-wrapper">
-                            <v-icon
-                                size="32"
-                                color="#E01717">
-                                mdi-account
-                            </v-icon>
-                            <span class="count">12000</span>
+
+                        <div
+                            v-if="usersWithEmptyCriteria"
+                            class="user-count-wrapper">
+
+                            <v-tooltip
+                                :top="true"
+                                attach
+                            >
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-icon
+                                        v-bind="attrs"
+                                        v-on="on"
+                                        size="32"
+                                        color="#E01717">
+                                        mdi-account
+                                    </v-icon>
+                                </template>
+                                <span v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
+                            </v-tooltip>
+
+                            <span class="count">{{ usersWithEmptyCriteria }}</span>
                         </div>
 
                         <DefaultButton
@@ -224,6 +239,7 @@ export default {
         }
 
         return {
+            usersWithEmptyCriteria: 0,
             dataTable: {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
@@ -333,6 +349,7 @@ export default {
                     vue.selects.sub_workspaces = data.data.sub_workspaces;
                     vue.filters.subworkspace_id = parseInt(param_subworkspace);
                     vue.criteria_template = data.data.criteria_template;
+                    vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
 
                     data.data.criteria_workspace.forEach(criteria => {
 
@@ -379,7 +396,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    right: 5px;
+    left: 20px;
     bottom: 2px;
     font-size: 11px;
     padding: 0 5px 0 5px;

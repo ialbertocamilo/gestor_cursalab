@@ -33,11 +33,11 @@
         </div>
 
         <div class="row">
-            <div class="col-12">
+            <div v-for="(criterion, index) in criteriaInSegmentation"
+                 class="col-5">
                 <v-checkbox
-                    v-for="(criterion, index) in criteriaInSegmentation"
                     v-model="selectedCriteria[index]"
-                    class="my-0 mb-3"
+                    class="my-0 mb-1"
                     :key="criterion.id"
                     :label="criterion.name"
                     color="primary"
@@ -145,6 +145,11 @@ export default {
                 })
 
                 this.criteriaInSegmentation = response.data
+
+                setTimeout(() => {
+                    console.log(this.selectedCriteria)
+                }, 3000)
+
             } catch (ex) {
                 console.log(ex)
             }

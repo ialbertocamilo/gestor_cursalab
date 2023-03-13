@@ -80,12 +80,13 @@ class UsersEmptyCriteria extends Command
                 $data = [
                     'subject' => 'Reporte de criterios',
                     'reports-url' => env('APP_URL') . '/exportar/node',
-                    'usersCount' => $usersWithEmptyCriteria
+                    'usersCount' => $usersWithEmptyCriteria,
+                    'workspaceName' => $workspace->name
                 ];
 
-                //Mail::to(['elvis@cursalab.io'])
-                //    ->send(new EmailTemplate('emails.empty_criteria_notification', $data));
-
+                Mail::to(['elvis@cursalab.io'])
+                    ->send(new EmailTemplate('emails.empty_criteria_notification', $data));
+                exit;
             }
         }
     }

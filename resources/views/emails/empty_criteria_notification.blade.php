@@ -20,18 +20,27 @@
         </td>
     </tr>
     <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
+        <td align="center" style="font-family: 'Poppins', sans-serif; ">
+            <div style="width: 60%; background: white; border-radius: 10px; padding: 20px 0 5px 0; margin-bottom: 20px">
+                <p style="text-align:center; margin-bottom:3px;margin-top:3px; font-weight:bold;">
+                    <span style="color: #CD0033; font-size: 42px">{{ $data['usersCount'] }}</span>
+                </p>
+                <p style="text-align:center; margin-top:10px; font-weight:bold;">
+                    <span style="color: #CD0033; font-size: 16px">Usuarios detectados</span>
+                </p>
+            </div>
+
+        </td>
+    </tr>
+    <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
-            <p style="text-align:center; margin-bottom:3px;margin-top:3px; font-weight:bold;">
-                <span style="color: #CD0033; font-size: 32px">{{ $data['usersCount'] }}</span>
-                <br>
-                <span style="color: #CD0033; font-size: 16px">Usuarios detectados</span>
-            </p>
+
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
                 Se han reportado <strong>{{ $data['usersCount'] }} usuarios</strong>
-                con al menos un criterio vacío.
+                con al menos un dato vacío de segmentación en el workspace {{ $data['workspaceName'] }}.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
-                Descarga ahora el reporte.<br>
+                Obtén el detalle descargando el reporte de <strong>Criterios vacíos</strong>.<br>
                 Usa los filtros para una búsqueda más efectiva.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
