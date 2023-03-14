@@ -6,6 +6,8 @@ use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Resources\Usuario\UsuarioSearchResource;
+use App\Http\Requests\ResetPasswordRequest;
+use Illuminate\Validation\ValidationException;
 use App\Models\Abconfig;
 use App\Models\AssignedRole;
 use App\Models\Botica;
@@ -204,7 +206,6 @@ class UsuarioController extends Controller
     public function store(UserStoreRequest $request)
     {
         $data = $request->validated();
-
         // $data['subworkspace_id'] = get_current_workspace()?->id;
 
         User::storeRequest($data);
@@ -215,9 +216,8 @@ class UsuarioController extends Controller
     public function update(UserStoreRequest $request, User $user)
     {
         $data = $request->validated();
-
         // $data['subworkspace_id'] = get_current_workspace()?->id;
-//        info($data);
+        // info($data);
         User::storeRequest($data, $user);
 
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);
@@ -838,4 +838,44 @@ class UsuarioController extends Controller
             );
         }
     }
+
+    public function updatePasswordUser(ResetPasswordRequest $request)
+    {
+        $data = $request->validated();
+
+        // dd($data);
+        
+        $actualPassword = $request->currpassword;
+        $currentPassword = $request->password;
+        $currentRePassword = $request->repassword;
+
+        $user = auth()->user();
+        // verficamos su actual contraseña
+        // if(!Auth::attempt([ 'email' => $user->email, 
+        //                     'password' => $actualPassword])) {
+
+        //     throw ValidationException::withMessages([
+        //         'currpassword' => 'La contraseña actual no coincide.'
+        //     ]);
+        // }
+        // verficamos que no sea la misma
+        if($actualPassword === $currentPassword) {
+            throw ValidationException::withMessages([
+                'password' => 'La nueva contraseña debe ser distinta a la actual.',
+            ]);
+        }
+
+        if($currentPassword === $currentRePassword) {
+            $user->updatePasswordUser($currentPassword);
+
+            return redirect('/reset_password')
+                             ->with('info', 'Contraseña actualizada correctamente');
+        }
+
+        throw ValidationException::withMessages([
+            'password' => 'El campo nueva contraseña no coincide.',
+            'repassword' => 'El campo repetir nueva contraseña no coincide.'
+        ]);
+    }
+
 }

@@ -73,10 +73,13 @@ function showIcons( star ){
                 let icons = [];
                 if(star < 7){
                     icons = element.detractor.caracteristicas;
+                    box_val_icons_question.innerHTML = element.detractor.pregunta;
                 }else if(star > 6 && star < 9){
                     icons = element.neutral.caracteristicas;
+                    box_val_icons_question.innerHTML = element.neutral.pregunta;
                 }else if(star > 8){
                     icons = element.promotor.caracteristicas;
+                    box_val_icons_question.innerHTML = element.promotor.pregunta;
                 }
                 icons.forEach((value, index) => {
                     let i = index + 1;
@@ -89,7 +92,6 @@ function showIcons( star ){
                     item_btn.dataset.char = value.id
                 });
             }
-            box_val_icons_question.innerHTML = element.pregunta
         });
 
     }

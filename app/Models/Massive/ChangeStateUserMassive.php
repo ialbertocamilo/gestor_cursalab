@@ -52,6 +52,8 @@ class ChangeStateUserMassive extends Massive implements ToCollection
     private function validateLimitAllowedUsers(): bool
     {
         $current_workspace = get_current_workspace();
+        $workspace_limit = $current_workspace->getLimitAllowedUsers();
+        if (!$workspace_limit) return true;
 
         $documents_to_activate = $this->rows->pluck(0)->toArray();
 //        dd($documents_to_activate);
@@ -69,7 +71,6 @@ class ChangeStateUserMassive extends Massive implements ToCollection
             ->where('active', ACTIVE)
             ->count();
 
-        $workspace_limit = $current_workspace->getLimitAllowedUsers();
 
 //        dd($users_active_count, $users_to_activate_count, $workspace_limit);
 //        dd(($users_active_count + $users_to_activate_count) <= $workspace_limit);

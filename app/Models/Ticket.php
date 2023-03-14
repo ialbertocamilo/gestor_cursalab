@@ -47,11 +47,13 @@ class Ticket extends BaseModel
 
     protected function search($request)
     {
-        $workspace = get_current_workspace();
-
-        $query = self::with(['workspace', 'user']);
-
-        $query->where('workspace_id', $workspace->id);
+        // $workspace = get_current_workspace();
+        $subworkspaces = get_current_workspace_indexes();
+        $query = self::with(['user','user.subworkspace:id,logo']);
+        $query->whereHas('user', function ($q) use ($request, $subworkspaces){
+            $q->whereIn('subworkspace_id', $subworkspaces['ids']);
+        });
+        // $query->where('workspace_id', $workspace->id);
 
         if ($request->q || $request->modulo) {
 

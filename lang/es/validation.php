@@ -29,6 +29,7 @@ return [
     ],
     'boolean'              => 'El campo :attribute debe tener un valor verdadero o falso.',
     'confirmed'            => 'La confirmación de :attribute no coincide.',
+    'current_password'     => 'La contraseña actual es incorrecta.',
     'date'                 => 'El campo :attribute no es una fecha válida.',
     'date_format'          => 'El campo :attribute no corresponde al formato :format.',
     'different'            => 'El campo :attribute y :other deben ser diferentes.',
@@ -80,6 +81,13 @@ return [
     'unique'               => 'El campo :attribute ya ha sido registrado.',
     'url'                  => 'El formato :attribute es inválido.',
 
+    'password' => [
+        'letters' => 'El campo :attribute debe contener una letra.',
+        'mixed' => 'El campo :attribute debe contener al menos una letra mayúscula y una minúscula.',
+        'numbers' => 'El campo :attribute debe contener al menos un número.',
+        'symbols' => 'El campo :attribute debe contener al menos un símbolo.',
+        'uncompromised' => 'La :attribute proporcinada no es segura. Por favor cambia la :attribute.',
+    ],
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines

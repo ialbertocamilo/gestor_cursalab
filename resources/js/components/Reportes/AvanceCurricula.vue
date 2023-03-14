@@ -170,7 +170,7 @@ export default {
 
         generateReport() {
             const vue = this
-            vue.$emit('generateReport', {callback: vue.exportUsuariosDW(), type: vue.reportType})
+            vue.$emit('generateReport', {callback: vue.exportUsuariosDW, type: vue.reportType})
         },
         async exportUsuariosDW(reportName) {
 
@@ -206,6 +206,12 @@ export default {
                         careers: this.career
                     }
                 })
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_avance");
+                    }, 500);
+                }
 
             } catch (ex) {
                 console.log(ex.message)

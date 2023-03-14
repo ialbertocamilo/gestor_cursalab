@@ -394,9 +394,9 @@ export default {
                         permission: "entrenadores",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO"
+                            "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     },
                     {

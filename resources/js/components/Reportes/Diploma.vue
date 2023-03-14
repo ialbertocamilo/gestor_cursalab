@@ -340,6 +340,11 @@ export default {
                     method: 'post',
                     data: reqPayload
                 })
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_diplomas");
+                    }, 500);
+                }
             } catch (ex) {
                 console.log(ex.message)
             }
