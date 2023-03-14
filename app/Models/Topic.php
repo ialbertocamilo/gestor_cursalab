@@ -503,6 +503,14 @@ class Topic extends BaseModel
                         }
                     }
                 }
+                $media_embed = array();
+                $media_not_embed = array();
+                foreach ($media_topics as $med) {
+                    if($med->embed)
+                        array_push($media_embed, $med);
+                    else
+                        array_push($media_not_embed, $med);
+                }
 
 
                 $last_media_access = $summary_topic?->last_media_access;
@@ -522,7 +530,8 @@ class Topic extends BaseModel
                         'requirements' => NULL,
                         'imagen' => $topic->imagen,
                         'contenido' => $topic->content,
-                        'media' => $media_topics,
+                        'media' => $media_embed,
+                        'media_not_embed' => $media_not_embed,
                         'media_topic_progress'=>$media_topic_progress,
                         'evaluable' => 'no',
                         'tipo_ev' => NULL,
@@ -546,7 +555,8 @@ class Topic extends BaseModel
                     'requirements' => $topic_status['requirements'],
                     'imagen' => $topic->imagen,
                     'contenido' => $topic->content,
-                    'media' => $media_topics,
+                    'media' => $media_embed,
+                    'media_not_embed' => $media_not_embed,
                     'media_topic_progress'=>$media_topic_progress,
                     'evaluable' => $topic->assessable ? 'si' : 'no',
                     'tipo_ev' => $topic->evaluation_type->code ?? NULL,
