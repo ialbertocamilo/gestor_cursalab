@@ -24,6 +24,7 @@ class EscuelaSearchResource extends JsonResource
             'nombre' => $this->name,
             'name' => $this->name,
             'image' => FileService::generateUrl($this->imagen),
+            'images' => $this->getModulesImages(),
             'modules' => implode(', ', $modules),
             'active' => $this->active,
             'orden' => $this->position,
@@ -40,5 +41,20 @@ class EscuelaSearchResource extends JsonResource
 
             'cursos_route' => route('cursos.list', [$this->id]),
         ];
+    }
+
+    public function getModulesImages()
+    {
+        $data = [];
+
+        foreach($this->subworkspaces AS $module)
+        {
+            $data[] = [
+                'name' => $module->name,
+                'image' => space_url($module->logo)
+            ];
+        }
+
+        return $data;
     }
 }
