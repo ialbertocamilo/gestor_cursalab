@@ -204,7 +204,8 @@ export default {
                     {text: "Portada", value: "medium_image", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
                     {text: "Escuela", value: "schools", sortable: false},
-                    {text: "Módulos", value: "modules", sortable: false},
+                    // {text: "Módulos", value: "modules", sortable: false},
+                    {text: "Módulos", value: "images", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [

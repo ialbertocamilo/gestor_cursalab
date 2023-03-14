@@ -30,6 +30,8 @@ class CursoSearchResource extends JsonResource
             $modules = $modules->merge($school->subworkspaces);
         }
 
+        $all_modules = $modules->unique();
+
         $modules = array_unique($modules->pluck('name')->toArray());
 
         return [
@@ -40,6 +42,7 @@ class CursoSearchResource extends JsonResource
             'nombre' => $this->name,
             'schools' => implode(', ', $schools),
             'modules' => implode(', ', $modules),
+            'images' => $this->getModulesImages($all_modules),
             'first_school_id' => $first_school,
             'image' => FileService::generateUrl($this->imagen),
             // 'medium_image' => FileService::generateUrl($this->imagen),
@@ -62,5 +65,20 @@ class CursoSearchResource extends JsonResource
             // 'compatibilities_count' => 1,
             'compatibility_available' => get_current_workspace()->id == 25,
         ];
+    }
+
+    public function getModulesImages($modules)
+    {
+        $data = [];
+
+        foreach($modules AS $module)
+        {
+            $data[] = [
+                'name' => $module->name,
+                'image' => space_url($module->logo)
+            ];
+        }
+
+        return $data;
     }
 }
