@@ -65,7 +65,7 @@ class ImpersonateController extends Controller
 
         if ($field == 'id') {
 
-            $userToImpersonate = $this->manager->findUserById($id, $guardName);
+            $userToImpersonate = $this->manager->findUserById($value, $guardName);
             
         } else {
 

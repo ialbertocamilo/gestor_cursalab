@@ -90,7 +90,7 @@ class Audit extends Ledger
             try {
                 
                 // obtener modelo
-                $model = $this->extract();
+                $model = $this->extract(false);
 
                 // traer relaciones
                 $model->loadDefaultRelationships();
