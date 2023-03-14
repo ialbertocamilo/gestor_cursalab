@@ -342,7 +342,9 @@ export default {
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    if (param_subworkspace) {
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    }
                 })
 
         },

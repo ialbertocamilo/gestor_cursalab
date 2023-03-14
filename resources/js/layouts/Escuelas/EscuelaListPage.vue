@@ -138,17 +138,6 @@ export default {
     data() {
         let vue = this
 
-        // let uri = window.location.search.substring(1); 
-        // let params = new URLSearchParams(uri);
-        // let param_module_id = params.get("module_id");
-
-        // if (param_dni)
-        // {
-        //     vue.search = param_dni
-
-        //     this.buscarNotasUsuario()
-        // }
-
         return {
             breadcrumbs: [
                 {title: 'Escuelas', text: null, disabled: true, href: ''},
@@ -251,24 +240,17 @@ export default {
     mounted() {
         let vue = this
         vue.getSelects();
-
-        // vue.filters.module = vue.workspace_id
+        // vue.selectDefaultModule(vue.selects.modules)
     },
     methods: {
         getSelects() {
             let vue = this
-            let uri = window.location.search.substring(1); 
-            let params = new URLSearchParams(uri);
-            let param_module_id = params.get("module_id");
 
             const url = `/escuelas/form-selects`
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.modules = data.data.modules
-
-                    console.log('param_module_id')
-                    console.log(param_module_id)
-                    vue.filters.module = param_module_id
+                    vue.selectDefaultModule(vue.selects.modules)
                 })
         },
         activity() {
@@ -278,6 +260,30 @@ export default {
             // let vue = this
             // vue.delete_model = school
             // vue.modalDeleteOptions.open = true
+        },
+        selectDefaultModule(modules) {
+            let vue = this
+
+            let uri = window.location.search.substring(1); 
+            let params = new URLSearchParams(uri);
+            let param_module_id = params.get("module_id");
+
+            // await vue.$nextTick(() => {
+                if (param_module_id) {
+
+                    let module_idx = null
+
+                    modules.forEach(row => {
+
+                        if ( row.id == param_module_id ) {
+
+                            vue.filters.modules.push(row)
+
+                            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                        }
+                    });
+                }
+            // })
         },
         async cleanModalEscuelasValidaciones() {
             let vue = this
