@@ -169,7 +169,7 @@ export default {
                     uppercase: {
                         name: 'Mayúsculas',
                         active: true,
-                        disabled: true,
+                        disabled: false,
                         values: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
                     },
                     numbers: {

@@ -77,7 +77,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      */
     protected $fillable = [
         'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'attempts', 'attempts_lock_time', 'attempts_times_locks', 'slug', 'alias', 'person_number', 'phone_number',
-        'email', 'password', 'active', 'phone', 'telephone', 'birthdate',
+        'email', 'password', 'old_passwords', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
@@ -108,7 +108,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $casts = [
         'email_verified_at' => 'datetime',
         'active' => 'boolean',
-        'user_relations' => 'array'
+        'user_relations' => 'array',
+        'old_passwords' => 'array',
     ];
 
     public function getIdentifier()
@@ -404,6 +405,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
+    protected function setPasswordData(&$data, $update_password, $user = null)
+    {
+        if ($update_password && isset($data['password'])) {
+            $data['last_pass_updated_at'] = now();
+            $data['attempts'] = 0;
+            $data['attempts_lock_time'] = NULL;
+        }
+
+        if ($update_password && $user && isset($data['password'])) {
+
+            $old_passwords = $user->old_passwords;
+
+            $old_passwords[] = ['password' => bcrypt($data['password']), 'added_at' => now()];
+
+            if (count($old_passwords) > 4) {
+                array_shift($old_passwords);
+            }
+
+            $data['old_passwords'] = $old_passwords;
+        } 
+    }
+
     protected function storeRequest($data, $user = null, $update_password = true, $from_massive = false)
     {
         try {
@@ -414,11 +437,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
-                if ($update_password && isset($data['password'])) {
-                    $data['last_pass_updated_at'] = now();
-                    $data['attempts'] = 0;
-                    $data['attempts_lock_time'] = NULL;
-                }
+
+                $this->setPasswordData($data, $update_password, $user);
+  
                 $user->update($data);
 
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
@@ -431,11 +452,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     }
                 endif;
             else :
-                if ($update_password && isset($data['password'])) {
-                    $data['last_pass_updated_at'] = now();
-                    $data['attempts'] = 0;
-                    $data['attempts_lock_time'] = NULL;
-                }
+       
+                $this->setPasswordData($data, $update_password, $user);
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);
@@ -1191,8 +1209,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function updatePasswordUser($password)
     {
         $user = $this;
-        $data = [ 'last_pass_updated_at' => now(),
-                  'password' => $password ];
+        $data = ['password' => $password];
+        User::setPasswordData($data, true, $user);
 
         $user->update($data);
     }
