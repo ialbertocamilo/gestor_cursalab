@@ -1,5 +1,13 @@
 @extends('emails.plantilla_email')
 @section('body')
+    <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
+        <td style="font-family: 'Poppins', sans-serif; ">
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
+                Ingresa el siguiente código para completar el inicio de sesión. El código de verificación será válido por {{ $data['minutes'] }} minutos.
+            </p>
+            
+        </td>
+    </tr>
     <tr style="background-color:#F9FAFB;margin-top:10px">
         <td style="font-family: 'Poppins', sans-serif;">
             <h1 style="text-align:center; color:#2A3649; margin-top:2rem;font-weight:bold;font-size: 25px; padding: 0px 46px;">
@@ -36,7 +44,7 @@
     </tr>
     <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
-            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">El código de verificación será válido por {{ $data['minutes'] }} minutos. Por favor no compartas este código con nadie.
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">Por favor, no compartas este código con nadie.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
             ¿No reconoces esta actividad?. Por favor contáctate inmediatamente con el equipo de Customer Experience.
