@@ -95,19 +95,19 @@
                                 <v-col cols="12">
                                     <DefaultAutocomplete
                                         dense
-                                        label="Duración"
+                                        label="Duración (hrs.)"
                                         v-model="resource.duration"
                                         :items="selects.duration"
                                         item-text="name"
                                         item-value="id"
-                                        placeholder="Ej. 2:00 h."
+                                        placeholder="Ej. 2:00"
                                     />
                                 </v-col>
                                 <v-col cols="12">
                                     <DefaultInput
                                         numbersOnly
                                         dense
-                                        label="Inversión (S/)"
+                                        label="Inversión (S/.)"
                                         placeholder="Ej. 2000"
                                         v-model="resource.investment"
                                     />
@@ -352,14 +352,14 @@ export default {
                 lista_escuelas: [],
                 types: [],
                 duration: [
-                    { 'id':'0.50', 'name':'0:30 h.' },
-                    { 'id':'1.00', 'name':'1:00 h.' },
-                    { 'id':'1.50', 'name':'1:30 h.' },
-                    { 'id':'2.00', 'name':'2:00 h.' },
-                    { 'id':'3.00', 'name':'3:00 h.' },
-                    { 'id':'4.00', 'name':'4:00 h.' },
-                    { 'id':'5.00', 'name':'5:00 h.' },
-                    { 'id':'6.00', 'name':'6:00 h.' },
+                    { 'id':'0.50', 'name':'0:30' },
+                    { 'id':'1.00', 'name':'1:00' },
+                    { 'id':'1.50', 'name':'1:30' },
+                    { 'id':'2.00', 'name':'2:00' },
+                    { 'id':'3.00', 'name':'3:00' },
+                    { 'id':'4.00', 'name':'4:00' },
+                    { 'id':'5.00', 'name':'5:00' },
+                    { 'id':'6.00', 'name':'6:00' },
                 ],
             },
             loadingActionBtn: false,

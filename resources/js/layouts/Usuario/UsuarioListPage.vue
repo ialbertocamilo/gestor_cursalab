@@ -91,7 +91,7 @@
                     <v-col cols="3" class="d-flex justify-end">
                         <DefaultButton
                             text
-                            label="Aplicar Filtros"
+                            label="Aplicar filtros"
                             icon="mdi-filter"
                             @click="open_advanced_filter = !open_advanced_filter"
                             class="btn_filter"

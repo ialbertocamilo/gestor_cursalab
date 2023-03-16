@@ -104,7 +104,7 @@
 
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
-                        <strong>Criterios obligatorios para la creación de un usuario.</strong>
+                        <strong>Criterios obligatorios para la creación de un usuario</strong>
                     </v-col>
                     <v-col cols="12" class="py-0">
                         <DefaultDivider/>
