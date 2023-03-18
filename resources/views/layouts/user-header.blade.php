@@ -48,7 +48,7 @@
                         <div class="dropdown-icon-width">
                             <span class="fas fa-sign-out-alt"></span>
                         </div>
-                        <span>Cerrar sesiòn</span>
+                        <span>Cerrar sesión</span>
                         <form id="logout-form" action="{{ route('logout') }}"
                               method="POST" style="display: none;">
                             @csrf
