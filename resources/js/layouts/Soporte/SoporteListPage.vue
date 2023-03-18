@@ -35,7 +35,7 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar por DNI, nombre, ticket..."
+                            label="Buscar por documento, nombre, ticket..."
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
@@ -71,8 +71,8 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="openFormModal(modalOptions, $event, null, 'Editar Ticket')"
-                @show="openFormModal(modalShowOptions, $event, null, 'Detalle de Ticket')"
+                @edit="openFormModal(modalOptions, $event, null, `Editar Ticket - #${$event.id}`)"
+                @show="openFormModal(modalShowOptions, $event, null, `Detalle de Ticket - #${$event.id}`)"
             />
 
             <SoporteFormModal
