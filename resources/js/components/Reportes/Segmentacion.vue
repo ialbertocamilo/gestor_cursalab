@@ -156,6 +156,12 @@ export default {
                         cursos: this.filters.course,
                     }
                 })
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_segmentacion");
+                    }, 500);
+                }
 
             } catch (ex) {
                 console.log(ex.message)

@@ -201,6 +201,12 @@ export default {
                         UsuariosInactivos: UFC.UsuariosInactivos
                     }
                 })
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_ranking");
+                    }, 500);
+                }
 
             } catch (ex) {
                 console.log(ex.message)

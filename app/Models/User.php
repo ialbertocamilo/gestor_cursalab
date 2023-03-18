@@ -382,13 +382,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function updateStatusUser($active = null, $termination_date = null)
     {
         $user = $this;
-        $user->active = $active ? $active : !$user->active;
+        $user->active = $active;
         $user->save();
         $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
         if (!$criterion) {
             return true;
         }
-        $user_criterion = $user->criterion_values()->where('criterion_id', $criterion->id)->detach();
+        $user_criterion_termination_date = $user->criterion_values()->where('criterion_id', $criterion->id)->first();
+        if($user_criterion_termination_date){
+            $user->criterion_values()->detach($user_criterion_termination_date->id);
+        }
         if ($termination_date && !$user->active) {
             $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where('value_text', trim($termination_date))->select('id', 'value_text')->first();
             $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
@@ -400,7 +403,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $data_criterion_value['workspace_id'] = $user->subworkspace?->parent?->id;
                 $criterion_value = CriterionValue::storeRequest($data_criterion_value);
             }
-            $user_criterion = $user->criterion_values()->where('criterion_id', $criterion->id)->detach();
             $user->criterion_values()->syncWithoutDetaching([$criterion_value->id]);
         }
     }
