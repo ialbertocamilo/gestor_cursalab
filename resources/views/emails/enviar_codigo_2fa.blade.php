@@ -46,7 +46,7 @@
     <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-            ¿No reconoces esta actividad?. Contáctate inmediatamente con el equipo de Customer Experience.
+            ¿No reconoces esta actividad? Contáctate inmediatamente con el equipo de Customer Experience.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
             Este es un mensaje automático, por favor no responder.
