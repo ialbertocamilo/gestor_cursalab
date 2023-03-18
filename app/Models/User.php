@@ -1134,7 +1134,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->expires_code = now()->addMinutes($currentMinutes);
 
         //enviar codigo al email
-        $mail_data = [ 'subject' => 'Código de verificación: '.$currentCode,
+        $mail_data = [ 'subject' => 'Código de verificación:',
                        'code' => $currentCode,
                        'minutes' => $currentMinutes,
                        'user' => $user->name.' '.$user->lastname ];
