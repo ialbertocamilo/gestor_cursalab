@@ -184,7 +184,7 @@ export default {
             filters: {
                 q: '',
                 module: null,
-                active: null,
+                active: 1,
             },
             modalEscuelasValidaciones: {},
             modalEscuelasValidacionesDefault: {
