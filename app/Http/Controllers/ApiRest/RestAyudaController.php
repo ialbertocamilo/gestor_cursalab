@@ -69,7 +69,7 @@ class RestAyudaController extends Controller
                 'email' => $email,
                 'contact' => $phone,
                 'detail' => $details,
-                'user_id' => $user_id,
+                'user_id' => $user->id,
                 'workspace_id' => $user->subworkspace?->parent_id,
                 'name' => $user->fullname,
                 'reason' => 'Soporte Login',
