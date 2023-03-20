@@ -25,7 +25,7 @@
 
             <v-row justify="space-around">
                 <v-col cols="4" class="d-flex justify-content-start">
-                    <strong>DNI</strong>
+                    <strong>Doc. de identidad</strong>
                 </v-col>
                 <v-col cols="8" class="d-flex justify-content-center">
                     {{ resource.dni }}
@@ -60,12 +60,40 @@
             </v-row>
             <v-row justify="space-around">
                 <v-col cols="4" class="d-flex justify-content-start">
-                    <strong>Contacto</strong>
+                    <strong>Teléfono de contacto</strong>
                 </v-col>
                 <v-col cols="8" class="d-flex justify-content-center">
                     <a target="_blank" :href="`https://wa.me/51${resource.contact}?text=¡Hola!,%20Vimos%20tu%20solicitud%20enviada%20desde%20la%20plataforma%20de%20capacitación`">{{resource.contact}}</a> <v-icon small color="green" class="ml-2 pb-2">fab fa-whatsapp</v-icon>
                 </v-col>
             </v-row>
+
+            <v-row justify="space-around" v-if="resource.email_user || resource.email_ticket">
+                <v-col cols="4" class="d-flex justify-content-start">
+                    <strong>Correo de contacto</strong>
+                </v-col>
+                <v-col cols="8" class="--d-flex --justify-content-center">
+                    <v-row class="text-center">
+                        <v-col v-if="resource.email_user" cols="12" class="py-0">
+                            {{ resource.email_user }}
+                            <strong> (registrado)</strong>
+                        </v-col>
+                        <v-col v-if="resource.email_ticket" cols="12" class="py-0">
+                            {{ resource.email_ticket }}
+                            <strong> (proporcionado)</strong>
+                        </v-col>
+                    </v-row>
+                </v-col>
+            </v-row>
+
+           <!--  <v-row justify="space-around">
+                <v-col cols="4" class="d-flex justify-content-start">
+                    <strong>Info Soporte</strong>
+                </v-col>
+                <v-col cols="8" class="d-flex justify-content-center">
+                    {{ resource.info_support }}
+                </v-col>
+            </v-row> -->
+
             <v-row justify="space-around">
                 <v-col cols="4" class="d-flex justify-content-start">
                     <strong>Info Soporte</strong>

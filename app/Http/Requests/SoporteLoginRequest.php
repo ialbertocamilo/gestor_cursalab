@@ -27,8 +27,9 @@ class SoporteLoginRequest extends FormRequest
             //'name' => "required|max:255",
             //'workspace_id' => "required",
             'details' => 'required',
-            'dni' => 'required|numbers',
-            'phone' => 'required|numbers'
+            'dni' => 'required',
+            'phone' => 'nullable',
+            'email' => 'nullable',
         ];
     }
 }
