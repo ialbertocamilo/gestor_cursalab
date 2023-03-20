@@ -207,7 +207,7 @@ export default {
             filters: {
                 q: '',
                 modules: [],
-                active: null,
+                active: 1,
             },
             modalEscuelasValidaciones: {},
             modalEscuelasValidacionesDefault: {
