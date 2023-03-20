@@ -37,7 +37,8 @@
 
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
                 Se han reportado <strong>{{ $data['usersCount'] }} usuarios</strong>
-                con al menos un dato vacío de segmentación en el workspace {{ $data['workspaceName'] }}.
+                con al menos un dato vacío de segmentación en el workspace
+                <strong>{{ $data['workspaceName'] }}</strong>.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
                 Obtén el detalle descargando el reporte de <strong>Criterios vacíos</strong>.<br>

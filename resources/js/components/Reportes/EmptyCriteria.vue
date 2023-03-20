@@ -51,7 +51,7 @@
             <div class="col-sm-12 mb-3 mt-4">
                 <div class="col-sm-8 pl-0">
                     <button
-                        :disabled="selectedModules.length === 0"
+                        :disabled="selectedModules.length === 0 || !atLeastOneCriteriaIsSelected()"
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
@@ -153,7 +153,12 @@ export default {
             } catch (ex) {
                 console.log(ex)
             }
+        }
+        ,
+        atLeastOneCriteriaIsSelected () {
+            if (this.selectedCriteria.length === 0) return false
 
+            return this.selectedCriteria.includes(true)
         }
     }
 };
