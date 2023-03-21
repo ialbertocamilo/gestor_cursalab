@@ -23,9 +23,6 @@
                     <li class="mt-2">
                         Colocar en la columna <b>Módulo</b> los módulos existentes
                     </li>
-                    <li class="mt-2">
-                        El archivo debe pesar menos de <b>XXX Mb</b>
-                    </li>
                 </ul>
             </v-card-text>
             <div class="btn_download_template">
@@ -37,12 +34,12 @@
             <div class="separador-v"></div>
         </v-col>
         <v-col cols="12" md="5" class="">
-            <v-row class="d-flex justify-content-center my-2" style="width: 100%;">
+            <v-row class="d-flex justify-content-center my-2">
                 <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta"/>
             </v-row>
             <v-row class="d-flex justify-content-center align-items-start">
                 <v-card-actions>
-                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)">Confirmar</v-btn>
+                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)" class="btn_conf">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -152,5 +149,13 @@ export default {
 }
 .mt-100{
     margin-top: 100px !important;
+}
+button.btn_conf {
+    min-width: 172px !important;
+}
+button.btn_conf span.v-btn__content {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
 }
 </style>

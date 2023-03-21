@@ -8,16 +8,13 @@
                 <v-card-text class="instructivo">
                     <ul>
                         <li class="mt-2">
-                            <b>La cantidad máxima de filas por excel es de 2500.</b>
+                            La cantidad máxima de filas por excel es de <b>2500</b>.
                         </li>
                         <li class="mt-2">
                             Columnas del excel: <b>DNI - Fecha de cese (opcional)</b>.
                         </li>
                         <li class="mt-2">
                             La fecha de cese debe tener el formato <b>(yyyy/mm/dd)</b> o <b>(dd/mm/yyyy)</b>.
-                        </li>
-                        <li class="mt-2">
-                            El archivo debe pesar menos de <b>XXX Mb</b>
                         </li>
                     </ul>
                 </v-card-text>
@@ -35,7 +32,7 @@
             </v-row>
             <v-row class="d-flex justify-content-center">
                 <v-card-actions>
-                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)">Confirmar</v-btn>
+                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)" class="btn_conf">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -138,5 +135,13 @@
 }
 .mt-100{
     margin-top: 100px !important;
+}
+button.btn_conf {
+    min-width: 172px !important;
+}
+button.btn_conf span.v-btn__content {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
 }
 </style>

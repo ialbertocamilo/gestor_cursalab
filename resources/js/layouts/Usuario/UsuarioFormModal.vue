@@ -117,7 +117,7 @@
                                 ref="CriteriaSection"
                                 :options="options"
                                 :user="resource"
-                                :criterion_list="criterion_list"
+                                :criterion_list="criterion_list_req"
                                 :only_req="true"
                             />
                     </v-col>
@@ -146,7 +146,7 @@
                                 ref="CriteriaSection"
                                 :options="options"
                                 :user="resource"
-                                :criterion_list="criterion_list"
+                                :criterion_list="criterion_list_opt"
                                 :only_req="false"
                             />
                         </v-expand-transition>
@@ -186,6 +186,8 @@ export default {
                 showCriteria: false
             },
             criterion_list: [],
+            criterion_list_req: [],
+            criterion_list_opt: [],
             resourceDefault: {
                 id: null,
                 name: '',
@@ -322,12 +324,20 @@ export default {
             let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/edit` : `form-selects`}`
             await vue.$http.get(url)
                 .then(({data}) => {
+                    vue.criterion_list_req = [];
+                    vue.criterion_list_opt = [];
+
                     vue.criterion_list = data.data.criteria
                     vue.criterion_list.forEach(criterion => {
                         // console.log(criterion)
                         // vue.resource.criterion_list[`${criterion.code}`] = null
                         let criterion_default_value = criterion.multiple ? [] : null
                         Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
+
+                        if(criterion.required)
+                            vue.criterion_list_req.push(criterion)
+                        else
+                            vue.criterion_list_opt.push(criterion)
                     })
 
                     if (resource)

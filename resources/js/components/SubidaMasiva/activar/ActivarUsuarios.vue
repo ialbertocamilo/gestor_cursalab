@@ -13,9 +13,6 @@
                     <li class="mt-2">
                         Columnas del excel: <b>DNI</b>.
                     </li>
-                    <li class="mt-2">
-                        El archivo debe pesar menos de <b>XXX Mb</b>
-                    </li>
                 </ul>
             </v-card-text>
             <div class="btn_download_template">
@@ -32,7 +29,7 @@
             </v-row>
             <v-row class="d-flex justify-content-center">
                 <v-card-actions>
-                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)">Confirmar</v-btn>
+                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)" class="btn_conf">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -145,5 +142,13 @@ export default {
 }
 .mt-100{
     margin-top: 100px !important;
+}
+button.btn_conf {
+    min-width: 172px !important;
+}
+button.btn_conf span.v-btn__content {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
 }
 </style>
