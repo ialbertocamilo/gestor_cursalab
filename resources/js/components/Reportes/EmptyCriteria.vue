@@ -8,9 +8,9 @@
                 valores que usan para segmentación en cursos.
             </template>
 
-            <list-item>
-
-            </list-item>
+            <list-item titulo="Nombre completo" subtitulo="Nombre completo del usuario que tiene criterios vacíos" />
+            <list-item titulo="Documento de identidad" subtitulo="Documento de identidad del usuario que tiene criterios vacíos" />
+            <list-item titulo="Criterios" subtitulo="Criterios usados para segmentación en los que se realizó la búsqueda" />
         </ResumenExpand>
 
         <!-- Report form -->
