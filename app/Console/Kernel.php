@@ -27,10 +27,10 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('buscar:incidencias {desde_back}')->dailyAt('06:00');
 
-        $schedule->command('reinicios:programados')->everyMinute();
+        // $schedule->command('reinicios:programados')->everyMinute();
         // $schedule->command('delete:err_masivos')->dailyAt('03:00');
         
-        $schedule->command('summary:update-data')->everyFifteenMinutes();
+        // $schedule->command('summary:update-data')->everyFifteenMinutes();
         // $schedule->command('resumen:update_resumen_general')->everyFifteenMinutes();
         $schedule->command('notificaciones:enviar')->everyMinute();
         
