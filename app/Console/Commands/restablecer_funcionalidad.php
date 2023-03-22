@@ -99,7 +99,7 @@ class restablecer_funcionalidad extends Command
         $admins = AssignedRole::select('entity_id')->where('entity_type', 'App\Models\User')
         ->groupBy('entity_id')->get();
         foreach ($admins as $admin) {
-            $user = User::where('id',$admin->entity_id)->first();
+            $user = User::where('id',$admin->entity_id)->whereNull('secret_key')->first();
             if($user && $user->email){
                 $user->email_gestor = $user->email;
                 $user->email = null;
