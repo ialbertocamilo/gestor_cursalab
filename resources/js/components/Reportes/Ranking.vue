@@ -22,7 +22,7 @@
             <list-item titulo="Nota"
                        subtitulo="En caso de empate, la ultima evaluación definará el orden; es decir el usuario que ha resuelto primero su última evaluación tendrá una mejor posición con respecto a los demás usuarios con el mismo puntaje"/>
         </ResumenExpand>
-        <form @submit.prevent="exportNotasCurso" class="row">
+        <form @submit.prevent="generateReport" class="row">
             <!-- Modulo -->
             <div class="col-sm-4 mb-3">
                 <DefaultAutocomplete
@@ -101,7 +101,9 @@
                 class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
 
                 <i class="fas fa-download"></i>
-                <span>Descargar</span>
+
+                <span>Generar reporte</span>
+
             </button>
         </form>
     </v-main>
@@ -117,11 +119,13 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem},
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
     data() {
         return {
+            reportType: 'ranking',
             areas: [],
             sedes: [],
             modulo: [],
@@ -161,25 +165,35 @@ export default {
 
                 })
         },
-        async exportNotasCurso() {
-            let vue = this
-
-            // show loading spinner
-
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport',{callback: vue.exportNotasCurso, type: vue.reportType})
+        },
+        async exportNotasCurso(reportName) {
 
             let UFC = this.$refs.EstadoFiltroComponent;
-            //let fechaFiltro = this.$refs.FechasFiltros;
 
             // Perform request to generate report
+            this.$emit('reportStarted')
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
+                "Sedes" : this.generateNamesArray(this.sedes, this.sede)
+            }
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/ranking`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
+
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName: reportName,
+                        filtersDescriptions: filtersDescriptions,
                         modulos: this.modulo ? this.modulo : [],
                         areas: this.area,
                         sedes: this.sede,
@@ -187,29 +201,16 @@ export default {
                         UsuariosInactivos: UFC.UsuariosInactivos
                     }
                 })
-
-                // When there are no results notify
-                // user, download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_ranking");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Ranking',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    this.$emit('emitir-reporte', response)
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_ranking");
+                    }, 500);
                 }
 
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
     }
 }

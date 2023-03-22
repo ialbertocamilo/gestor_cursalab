@@ -33,7 +33,7 @@
             <list-item titulo="Respuesta" subtitulo="Respuesta del usuario" />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportEvaAbiertas" class="row">
+        <form @submit.prevent="generateReport" class="row">
             <div class="col-12">
                 <div class="row px-3">
                    <!-- Modulo -->
@@ -171,7 +171,7 @@
                     type="submit"
                     class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
-                    <span>Descargar</span>
+                    <span>Generar reporte</span>
                 </button>
             </div>
         </form>
@@ -200,11 +200,13 @@ export default {
     },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
     data() {
         return {
+            reportType: 'evaluaciones_abiertas',
             schools: [],
             courses: [],
             topics: [],
@@ -239,26 +241,42 @@ export default {
             this.schools = responseSchools.data
         }
         ,
-        async exportEvaAbiertas() {
-            let vue = this;
-
-            // show loading spinner
-
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue.exportUsuariosDW, type: vue.reportType})
+        },
+        async exportUsuariosDW(reportName) {
 
             let UFC = this.$refs.EstadoFiltroComponent;
             let fechaFiltro = this.$refs.FechasFiltros;
 
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.escuela),
+                "Cursos": this.generateNamesArray(this.courses, this.curso),
+                "Temas": this.generateNamesArray(this.topics, this.tema),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                'Fecha inicial': fechaFiltro.start,
+                'Fecha final': fechaFiltro.end,
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
+                "Cursos libres": this.yesOrNo(this.tipocurso)
+            }
+
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas_v2`
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/evaluaciones_abiertas`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: this.modulo,
                         escuelas: this.escuela,
                         cursos: this.curso,
@@ -273,29 +291,16 @@ export default {
                         end: fechaFiltro.end
                     }
                 })
-
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_eva_abiertas");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Evaluaciones abiertas',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    this.$emit('emitir-reporte', response)
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_eva_abiertas");
+                    }, 500);
                 }
 
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
         /**
          * Fetch courses

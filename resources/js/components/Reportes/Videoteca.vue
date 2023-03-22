@@ -38,7 +38,8 @@
             />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form class="row col-md-8 col-xl-5" @submit.prevent="ExportarVideoteca">
+        <form class="row col-md-8 col-xl-5"
+              @submit.prevent="generateReport">
             <!-- Grupos
             <div class="col-12">
                 <b-form-text text-variant="muted">Videoteca</b-form-text>
@@ -62,7 +63,7 @@
                 <div class="col-sm-8 pl-0">
                     <button type="submit" class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -76,41 +77,46 @@ export default {
     components: { ResumenExpand, ListItem },
     props: {
         workspaceId:{ type: Number, required: true },
+        adminId:{ type: Number, required: true },
         reportsBaseUrl: { type: String, required: true }
     },
+    data() {
+      return {
+          reportType: 'videoteca',
+      }
+    },
     methods: {
-        ExportarVideoteca() {
-            let vue = this
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue.ExportarVideoteca, type: vue.reportType})
+        },
+        async ExportarVideoteca(reportName) {
 
-            let params = {
-                workspaceId: this.workspaceId
-            };
 
-            axios
-                .post(`${this.reportsBaseUrl}/exportar/videoteca`, params)
-                .then((res) => {
+            this.$emit('reportStarted', {})
 
-                    if (res.data.alert) {
-                        this.showAlert(res.data.alert, 'warning');
-                    } else {
-                        vue.queryStatus("reportes", "descargar_reporte_videoteca");
-                        res.data.new_name = this.generateFilename(
-                            'Videoteca',
-                            ''
-                        )
-                        this.$emit("emitir-reporte", res);
+
+            const url = `${this.reportsBaseUrl}/exportar/${this.reportType}`
+            try {
+                let response = await axios({
+                    url: url,
+                    method: 'post',
+                    data: {
+                        workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions: {}
                     }
-                    this.hideLoader();
-
-                }, (err) => {
-                    console.log(err);
-                    console.log(err.message);
-
-                    alert("Se ha encontrado el siguiente error : " + err);
-
-                    this.hideLoader();
-                });
+                })
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_videoteca");
+                    }, 500);
+                }
+            } catch (ex) {
+                console.log(ex.message)
+            }
         }
     },
     created() {

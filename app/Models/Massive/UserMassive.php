@@ -26,7 +26,10 @@ class UserMassive extends Massive implements ToCollection
     public $rows = [];
     public $error_message = null;
     public $rows_to_activate = 0;
-
+    private $user_states=[
+        'active',
+        'inactive'
+    ];
     public function __construct($data = [])
     {
         $this->name_socket = $this->formatNameSocket('upload-massive', $data['number_socket'] ?? null);
@@ -151,7 +154,17 @@ class UserMassive extends Massive implements ToCollection
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];
+                            
             if ($dt['code'] == 'active') {
+                if(!in_array(strtolower($dt['value_excel']),$this->user_states)){
+                    $has_error = true;
+                    $errors_index[] = [
+                        'index' => $dt['index'],
+                        'message' => 'Los valores para el estado son: Active o Inactive.'
+                    ];
+                    continue;
+                }
+                
                 $user[$dt['code']] = (strtolower($dt['value_excel']) == 'active') ? 1 : 0;
             }
         }
@@ -159,8 +172,8 @@ class UserMassive extends Massive implements ToCollection
         $user_username_email = null;
         if (isset($user['document'])) {
             $user_username_email = User::where(function ($q) use ($user) {
-                isset($user['username']) && $q->where('username', $user['username']);
-                isset($user['email']) && $q->where('email', $user['email']);
+                isset($user['username']) && $q->orWhere('username', $user['username']);
+                isset($user['email']) && $q->orWhere('email', $user['email']);
             })->where('document', '<>', $user['document'])->select('email', 'username')->first();
         } else {
             $has_error = true;

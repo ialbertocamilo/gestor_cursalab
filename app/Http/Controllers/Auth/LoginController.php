@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\ResetPasswordRequest;
+use App\Models\User;
 
 
 class LoginController extends Controller
@@ -79,20 +80,20 @@ class LoginController extends Controller
     public function showLoginFormInit()
     {
         if(session()->has('init_2fa')) {
-            //resetear codigo y expiracion
+            // resetear codigo y expiracion
             $user = auth()->user();
             $user->resetToNullCode2FA();
 
-            session()->forget('init_2fa'); 
+            session()->forget('init_2fa');
         }
 
-        /*if(session()->has('init_reset')) {
-            //resetear codigo y expiracion - reset pass
+        if(session()->has('init_reset')) {
+            // resetear codigo y expiracion - reset pass
             $user = auth()->user();
             $user->resetToNullResetPass();
 
             session()->forget('init_reset'); 
-        }*/
+        }
 
         // resetear sessions
         $this->guard()->logout();
@@ -122,47 +123,54 @@ class LoginController extends Controller
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
         // the login attempts for this application. We'll key this by the username and
         // the IP address of the client making these requests into this application.
+
         if (method_exists($this, 'hasTooManyLoginAttempts') &&
             $this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
 
             return $this->sendLockoutResponse($request);
         }
-        if ($this->attemptLogin($request)) {
 
+        $user = new User;
+
+        // === intentos ===
+        $userAttempt = $user->checkAttemptManualGestor($request); 
+        if($userAttempt) return $this->sendAttempsResponse($userAttempt);
+        // === intentos ===
+
+        if ($this->attemptLogin($request)) {
 
             $user = $this->guard()->user();
             $user->resetToNullCode2FA(); // reset 2fa values
 
             if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             {
-
                 if ($request->hasSession()) {
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
 
+                $user->resetAttemptsUser(); // reset attempts
+
                 if($user->enable_2fa) {
                     // verificacion de doble autenticacion
                     $response2FA = (bool) $user->generateCode2FA();
-                    if($response2FA) { 
+                    if($response2FA) {
                         session()->put('init_2fa', $user->id);
                         return redirect('/2fa');
                     }
                     // verificacion de doble autenticacion
 
                 } else {
-                    /*
-                    // verifica si se requiere actualizar contraseña
-                    if($this->checkIfCanResetPassword()) {
+                    
+                    // === reset password ===
+                    if($user->checkIfCanResetPassword()) {
                         return $this->showResetPassword();
                     }
-                    // verifica si se requiere actualizar contraseña
-                    */
+                    // === reset password ===
 
-                    // === iniciar session ===
-                    return $this->sendLoginResponse($request);
+                    return $this->sendLoginResponse($request); // login
                 }
-               
+
             } else {
                 $this->guard()->logout();
 
@@ -171,13 +179,34 @@ class LoginController extends Controller
                 $request->session()->regenerateToken();
             }
         }
+        // verificar intentos   
+        $user->checkTimeToReset($request->email); 
+
+        $user_attempts = $user->incrementAttempts($request->email);
+        if($user_attempts) return $this->sendAttempsResponse($user_attempts);
+        // verificar intentos
 
         // If the login attempt was unsuccessful we will increment the number of attempts
         // to login and redirect the user back to the login form. Of course, when this
         // user surpasses their maximum number of attempts they will get locked out.
-        $this->incrementLoginAttempts($request);
 
+        $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
+    }
+
+    // respuesta de error para intentos fallidos
+    public function sendAttempsResponse($user_attempts)
+    {
+        $errors = [ 'current_time'   => now()->diff($user_attempts->attempts_lock_time)->format("%I:%S"),
+                    'attempts_count' => $user_attempts->attempts,
+                    'attempts_max'   => env('ATTEMPTS_LOGIN_MAX_GESTOR'),
+                    'attempts_fulled'=> $user_attempts->fulled_attempts ];
+
+        if(!$user_attempts->fulled_attempts) {
+            $errors = array_merge( $errors, ['email' => [trans('auth.failed')]] );
+        }
+
+        throw ValidationException::withMessages($errors);
     }
 
     // redireccionar a link de reseteo
@@ -186,34 +215,17 @@ class LoginController extends Controller
         session()->put('init_reset', $user->id);
 
         // crear token 
-        $currentEntropy = env('RESET_PASSWORD_TOKEN_ENTROPY');
+        $currentEntropy = env('RESET_PASSWORD_TOKEN_ENTROPY_GESTOR');
         $token = bin2hex(random_bytes($currentEntropy));
 
         // insertar token 'table';
         $responseToken = (bool) $user->setUserPassUpdateToken($token);
-        
+
         if($responseToken) {
             return redirect('reset/'.$token); // vista resetea token
         }
     }
 
-    // verificar si debe actualizar su contraseña
-    public function checkIfCanResetPassword()
-    {
-        $user = $this->guard()->user();
-        $currentDays = env('RESET_PASSWORD_DAYS');
-        settype($currentDays, "int");
-
-        if(is_null($user->last_pass_updated_at)) {
-            return true;
-        }
-        
-        $diferenceDays = now()->diffInDays($user->last_pass_updated_at);
-
-        return ($diferenceDays >= $currentDays);
-        // return ($diferenceDays >= $currentDays) && $user->enable_resetpass;
-    }
-    
     // actualizar contraseña usuario
     public function reset_pass(ResetPasswordRequest $request)
     {
@@ -223,17 +235,26 @@ class LoginController extends Controller
         $currentPassword = $request->password;
         $currentRePassword = $request->repassword;
 
+        $user = auth()->user();
+
+        // si es igual al email y/o contraseña existente
+        if(Auth::attempt([ 'email' => $user->email, 
+                           'password' => $currentPassword]) ||  $user->email === $currentPassword) {
+            throw ValidationException::withMessages([
+                'password' => 'La nueva contraseña debe ser diferente.'
+            ]);
+        }
+
         if($currentPassword === $currentRePassword) {
-            $user = auth()->user();
-            
+
             // verificar token
-            $checkToken = $user->checkPassUpdateToken($currentToken, $user->id); 
+            $checkToken = $user->checkPassUpdateToken($currentToken, $user->id);
 
             if($checkToken) {
                 $user->updatePasswordUser($currentPassword);
 
                 $user->resetToNullResetPass();
-                session()->forget('init_reset'); 
+                session()->forget('init_reset');
 
                 // === iniciar session ===
                 return $this->sendLoginResponse($request);
@@ -242,35 +263,31 @@ class LoginController extends Controller
         }
 
         throw ValidationException::withMessages([
-            'password' => 'El campo contraseña no coincide.',
-            'repassword' => 'El campo repetir contraseña no coincide.'
+            'password' => 'El campo nueva contraseña no coincide.',
+            'repassword' => 'El campo repetir nueva contraseña no coincide.'
         ]);
     }
 
-
     // verificar el codigo y expiracion 2FA
-    public function auth2fa(Request $request) 
+    public function auth2fa(Request $request)
     {
         $user = $this->guard()->user();
-        $checkCode = ($request->code === $user->code); 
-        $checkExpire = ($user->expires_code > now()); 
-        
+        $checkCode = ($request->code === $user->code);
+        $checkExpire = ($user->expires_code > now());
+
         if($checkCode && $checkExpire) {
-            session()->forget('init_2fa'); 
+            session()->forget('init_2fa');
             $user->resetToNullCode2FA();
 
-            /*
-            // verifica si se requiere actualizar contraseña
-            if($this->checkIfCanResetPassword()) {
+            // === reset password ===
+            if($user->checkIfCanResetPassword()) {
                 return $this->showResetPassword();
             }
-            // verifica si se requiere actualizar contraseña
-            */
+            // === reset password ===
 
-            // === iniciar session ===
-            return $this->sendLoginResponse($request);
+            return $this->sendLoginResponse($request); // login
         }
-        
+
         throw ValidationException::withMessages([
             'code' => ['Código incorrecto y/o expirado.']
         ]);
@@ -281,10 +298,8 @@ class LoginController extends Controller
     {
         $user = $this->guard()->user();
         $user->generateCode2FA();
-            
-        throw ValidationException::withMessages([
-            'resend' => 'Re-enviamos'
-        ]);
+         
+        return back()->with('resend', 'Re-enviamos');
     }
 
     protected function sendLoginResponse(Request $request)

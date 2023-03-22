@@ -23,7 +23,7 @@
              <list-item titulo="Link ver diploma" subtitulo="Enlace para ver el diploma" />
              <list-item titulo="Link descarga diploma" subtitulo="Enlace para descargar el diploma" />
         </ResumenExpand>
-        <form @submit.prevent="_exportDiplomas" class="row col-12">
+        <form @submit.prevent="generateReport" class="row col-12">
         <!-- Modulo -->
             <div class="col-md-6 mb-3">
                    <DefaultAutocomplete
@@ -179,7 +179,7 @@
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar </span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -199,10 +199,12 @@ export default {
     props: {
         modules:{ type: Array, required: true },
         workspaceId:{ type: Number, required: true },
+        adminId:{ type: Number, required: true },
         reportsBaseUrl:{ type: String, required: true }
     },
     data() {
         return {
+            reportType: 'diplomas',
             schools: [],
             courses: [],
 
@@ -254,8 +256,10 @@ export default {
                     estados_curso:estados_curso
                 })
                 .then((res) => {
-                    if (!res.data.error) vue.$emit("emitir-reporte", res);
-                    else {
+                    if (!res.data.error) {
+
+                        vue.$emit("emitir-reporte", res);
+                    } else {
                         alert(res.data.error);
                         vue.hideLoader()
                     }
@@ -267,9 +271,12 @@ export default {
                     vue.hideLoader()
                 });
         },
-        _exportDiplomas() {
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue._exportDiplomas, type: vue.reportType})
+        },
+        async _exportDiplomas(reportName) {
             const vue = this;
-            vue.showLoader();
 
             const pushDataStates = (states) => {
                 let stackTemporal = [];
@@ -285,6 +292,24 @@ export default {
             const estados_escuela = pushDataStates(vue.$refs.EstadoEscuelaFiltroComponent);
             const estados_curso = pushDataStates(vue.$refs.EstadoCursoFiltroComponent);
 
+            this.$emit('reportStarted', {})
+            const filtersDescriptions =  {
+                "Módulos": this.generateNamesArray(this.modules, this.filters.module),
+                "Escuelas": this.generateNamesArray(this.schools, this.filters.school),
+                "Cursos": this.generateNamesArray(this.courses, this.filters.course),
+                "Fecha de emisión": this.filters.date.length > 0
+                    ? this.filters.date
+                    : '',
+                "Usuarios activos" : this.yesOrNo(estados_usuario.includes(1)),
+                "Usuarios inactivos" : this.yesOrNo(estados_usuario.includes(0)),
+
+                "Escuelas activas" : this.yesOrNo(estados_escuela.includes(1)),
+                "Escuelas inactivas" : this.yesOrNo(estados_escuela.includes(0)),
+
+                "Cursos activos" : this.yesOrNo(estados_curso.includes(1)),
+                "Cursos inactivos" : this.yesOrNo(estados_curso.includes(0)),
+            }
+
             const reqPayload = {
                 //data
                 data : {
@@ -299,31 +324,28 @@ export default {
                     estados_usuario,
                     estados_escuela,
                     estados_curso
-                }
+                },
+                workspaceId: vue.workspaceId,
+                adminId: vue.adminId,
+                reportName,
+                filtersDescriptions
             };
 
-            axios.post(`${vue.reportsBaseUrl}/exportar/diplomas`, reqPayload)
-                .then((res) => {
-                    //console.log(res);
-                    if (res.data.alert) {
-                        this.showAlert(res.data.alert, 'warning');
-                    } else {
-                        vue.queryStatus("reportes", "descargar_reporte_diplomas");
-                        res.data.new_name = this.generateFilename(
-                            'Diploma',
-                            this.generateNamesString(this.modules, this.modulo)
-                        )
-                        this.$emit("emitir-reporte", res);
-                    }
-                    this.hideLoader();
-
-                }, (err) => {
-                    console.log(err);
-                    console.log(err.message);
-                    alert("Se ha encontrado el siguiente err : " + err);
-
-                    vue.hideLoader();
+            const urlReport = `${vue.reportsBaseUrl}/exportar/${this.reportType}`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: reqPayload
                 })
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_diplomas");
+                    }, 500);
+                }
+            } catch (ex) {
+                console.log(ex.message)
+            }
         },
         schoolsInit() {
             const vue = this;
@@ -429,7 +451,6 @@ export default {
     },
     mounted() {
         const vue = this;
-        console.log('mounted Diplomas')
         vue.schoolsInit();// schools by workpaceId
     }
 };

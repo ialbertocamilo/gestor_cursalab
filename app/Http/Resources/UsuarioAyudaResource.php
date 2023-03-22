@@ -20,7 +20,8 @@ class UsuarioAyudaResource extends JsonResource
         $colors = config('constantes.soporte-estados-colors');
         $image = '';
         if($this->reason != 'Soporte Login'){
-            $image =  $this->workspace ? ($this->workspace->logo ? space_url($this->workspace->logo) : '') : '';
+            // $image =  $this->workspace ? ($this->workspace->logo ? space_url($this->workspace->logo) : '') : '';
+            $image = $this->user?->subworkspace?->logo ? ($this->user->subworkspace?->logo ? space_url($this->user->subworkspace?->logo) : '') : '';
         }
         $data = [
             'id' => $this->id,
@@ -32,13 +33,16 @@ class UsuarioAyudaResource extends JsonResource
             'reason' => clean_html($this->reason, 60),
             'detail' => $this->detail,
             'dni' => $this->dni ?? '',
+            'email_ticket' => $this->email,
+            'email_user' => $this->user?->email,
             'nombre' => $this->name ?? '',
             'image' => $image,
             'info_support' => $this->info_support ?? '',
             'msg_to_user' => $this->msg_to_user ?? '',
             'contact' => $this->contact ?? '',
-            'created_at' => Carbon::parse($this->created_at)->subHours(5)->format('d/m/Y g:i A'),
-            'updated_at' => $this->updated_at?->format('d/m/Y g:i a'),
+            // 'created_at' => Carbon::parse($this->created_at)->subHours(5)->format('d/m/Y g:i a'),
+            'created_at' => $this->created_at ? ($this->created_at > $this->updated_at ? $this->created_at->subHours(5)->format('d/m/Y G:i a') : $this->created_at->format('d/m/Y G:i a')) : NULL,
+            'updated_at' => $this->updated_at ? $this->updated_at->format('d/m/Y G:i a') : NULL,
         ];
 
         if ($request->view == 'show') {

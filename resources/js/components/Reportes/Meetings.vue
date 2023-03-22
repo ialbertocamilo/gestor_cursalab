@@ -138,7 +138,6 @@ export default {
             let vue = this
             vue.queryStatus("reportes", "descargar_reporte_meetings");
 
-
             const start = this.start
             const end = this.end
 
@@ -150,7 +149,10 @@ export default {
                 'Meetings',
                 ''
             )
-
+            res.data.selectedFilters = {
+                'Fecha inicial': this.start,
+                'Fecha final': this.end
+            }
             this.$emit('emitir-reporte', res)
         },
     }

@@ -19,6 +19,7 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 use Altek\Accountant\Contracts\Identifiable;
 use Altek\Accountant\Contracts\Recordable;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 use Silber\Bouncer\Database\Models;
 
@@ -38,7 +39,7 @@ use Illuminate\Support\Str;
 use Spatie\Image\Manipulations;
 
 use Illuminate\Support\Facades\Mail;
-use App\Mail\EmailTemplate;    
+use App\Mail\EmailTemplate;
 
 use Bouncer;
 
@@ -57,7 +58,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     use Cachable;
 
     use SoftDeletes;
-    
 
     use Cachable {
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
@@ -71,8 +71,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      * @var array
      */
     protected $fillable = [
-        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'slug', 'alias', 'person_number', 'phone_number',
-        'email', 'email_gestor','password', 'active', 'phone', 'telephone', 'birthdate',
+        'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'attempts', 'attempts_lock_time', 'attempts_times_locks', 'slug', 'alias', 'person_number', 'phone_number',
+        'email','email_gestor','password', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
@@ -99,7 +99,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     ];
 
     protected $ledgerThreshold = 100;
-
 
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -265,6 +264,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return Criterion::whereIn('id', $criterion_ids)->get();
     }
 
+    public function getCriterionValueCode($criterion_code)
+    {
+        $criterion = Criterion::where('code', $criterion_code)->first();
+        return $this->criterion_values()->where('criterion_id', $criterion->id)->first();
+    }
+
     // public function post()
     // {
     //     return $this->hasMany(Post::class);
@@ -372,13 +377,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function updateStatusUser($active = null, $termination_date = null)
     {
         $user = $this;
-        $user->active = $active ? $active : !$user->active;
+        $user->active = $active;
         $user->save();
         $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
         if (!$criterion) {
             return true;
         }
-        $user_criterion = $user->criterion_values()->where('criterion_id', $criterion->id)->detach();
+        $user_criterion_termination_date = $user->criterion_values()->where('criterion_id', $criterion->id)->first();
+        if($user_criterion_termination_date){
+            $user->criterion_values()->detach($user_criterion_termination_date->id);
+        }
         if ($termination_date && !$user->active) {
             $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where('value_text', trim($termination_date))->select('id', 'value_text')->first();
             $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
@@ -390,7 +398,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $data_criterion_value['workspace_id'] = $user->subworkspace?->parent?->id;
                 $criterion_value = CriterionValue::storeRequest($data_criterion_value);
             }
-            $user_criterion = $user->criterion_values()->where('criterion_id', $criterion->id)->detach();
             $user->criterion_values()->syncWithoutDetaching([$criterion_value->id]);
         }
     }
@@ -405,9 +412,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
-                
+                if ($update_password && isset($data['password'])) {
+                    $data['last_pass_updated_at'] = now();
+                    $data['attempts'] = 0;
+                    $data['attempts_lock_time'] = NULL;
+                }
                 $user->update($data);
-   
+
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
                     $user_document = $this->syncDocumentCriterionValue(old_document: $old_document, new_document: $data['document']);
                 else:
@@ -418,6 +429,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     }
                 endif;
             else :
+                if ($update_password && isset($data['password'])) {
+                    $data['last_pass_updated_at'] = now();
+                    $data['attempts'] = 0;
+                    $data['attempts_lock_time'] = NULL;
+                }
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);
@@ -1010,6 +1026,29 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $this->notify(new UserResetPasswordNotification($token));
     }
 
+    public function sendPasswordRecoveryNotification($user, $token)
+    {
+
+        $url = url(route('password.reset', [
+                    'token' => $token,
+                    'email' => $user->email
+                    ], false));
+
+        $url_recovery = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url.'&recovery=true');
+        $url_recovery = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim($url_recovery, '/');
+
+        $url_coordinador = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim('/ayuda-coordinador', '/');
+
+        $mail_data = [ 'subject' => 'Link de verificación',
+                       'user' => $user->name.' '.$user->lastname,
+                       'time' => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire'),
+                       'link_recovery' => $url_recovery,
+                       'link_coordinador' => $url_coordinador ];
+
+        Mail::to($user->email)->send(new EmailTemplate('emails.reestablecer_pass', $mail_data));
+
+    }
+
     public static function countActiveUsersInWorkspace($workspaceId)
     {
 
@@ -1080,13 +1119,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         ];
     }
 
+    // === 2FA ===
     public function generateCode2FA()
     {
         $user = $this;
         $currentRange = env('AUTH2FA_CODE_DIGITS');
         $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
 
-        $start = '1'.str_repeat('0', $currentRange - 1);  
+        $start = '1'.str_repeat('0', $currentRange - 1);
         $end = str_repeat('9', $currentRange);
         $currentCode = rand($start, $end);
 
@@ -1095,7 +1135,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->expires_code = now()->addMinutes($currentMinutes);
 
         //enviar codigo al email
-        $mail_data = [ 'subject' => 'Código de verificación: '.$currentCode,
+        $mail_data = [ 'subject' => 'Código de verificación',
                        'code' => $currentCode,
                        'minutes' => $currentMinutes,
                        'user' => $user->name.' '.$user->lastname ];
@@ -1107,7 +1147,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $user->save();
     }
 
-    public function resetToNullCode2FA() 
+    public function resetToNullCode2FA()
     {
         $user = $this;
 
@@ -1117,7 +1157,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $user->save();
     }
+    // === 2FA ===
 
+    // === RESET PASSWORD ===
     public function resetToNullResetPass()
     {
         $user = $this;
@@ -1128,27 +1170,247 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->save();
     }
 
-    public function setUserPassUpdateToken($token) {
+    public function setUserPassUpdateToken($token)
+    {
         $user = $this;
-        
+
         $user->timestamps = false; // no actualizar el usuario
         $user->pass_token_updated = $token;
         return $user->save();
     }
 
-    // validamos el token para la vista 'auth.passwords.reset.blae.php'
-    public function checkPassUpdateToken($token, $id_user) {
+    public function checkPassUpdateToken($token, $id_user)
+    {
+        // validamos el token para la vista 'auth.passwords.reset.blae.php'
         return $this->where('pass_token_updated', $token)
                     ->where('id', $id_user)->count();
     }
 
-    // actualizar contraseña usuario
-    public function updatePasswordUser($password) {
+    public function updatePasswordUser($password)
+    {
         $user = $this;
         $data = [ 'last_pass_updated_at' => now(),
                   'password' => $password ];
-        
+
         $user->update($data);
     }
 
+    public function checkIfCanResetPassword($keyenv = 'GESTOR')
+    {
+        $user = $this;
+
+        $currentDays = env('RESET_PASSWORD_DAYS_'.$keyenv);
+        settype($currentDays, "int");
+
+        if(is_null($user->last_pass_updated_at)) {
+            return true;
+        }
+        //verficar la vigencia de dias
+        $diferenceDays = now()->diffInDays($user->last_pass_updated_at);
+        return ($diferenceDays >= $currentDays);
+    }
+    // === RESET PASSWORD ===
+
+    // === INTENTOS APP/GESTOR ===
+    public function userIncrementAttempts($current, $currentAttempts, $currentMinutes, $permanent = false)
+    {
+        $userAttempts = $current->attempts;
+        $fulledAttempts = false;
+
+        // nro de bloqueos
+        if($userAttempts >= $currentAttempts) {
+            $current->attempts = $currentAttempts;
+            $fulledAttempts = true;
+        } else {
+            $current->attempts = $userAttempts + 1;
+            $fulledAttempts = (($userAttempts + 1) == $currentAttempts);
+        }
+
+        // nro de bloqueos
+        if($fulledAttempts) {
+            $current->attempts_times_locks = $current->attempts_times_locks + 1;
+        }
+
+        $current->attempts_lock_time = now()->addMinutes($currentMinutes);
+        $current->timestamps = false;
+
+        $current->save();
+
+        if($permanent) {
+            $current->timestamps = false;
+            $current->attempts_lock_time = NULL;
+            $current->save();
+        }
+
+        $current['fulled_attempts'] = $fulledAttempts; 
+        return $current;
+    }
+
+    public function currentUserByEnviroment($keyenv, $value)
+    {
+        $user = $this;
+        if ($keyenv == 'GESTOR') {
+            return $user->where('email', $value)->first();
+        }
+
+        return $user->where('document', $value)
+                    ->orWhere('username', $value)->first();
+    }
+
+    public function incrementAttempts($value, $keyenv = 'GESTOR', $permanent = false)
+    {
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX_'.$keyenv);
+        $currentMinutes = env('ATTEMPTS_LOGIN_TIME_LOCK_'.$keyenv);
+
+        // existe ese data-usuario
+        $current = $this->currentUserByEnviroment($keyenv, $value);
+        if(!$current) return NULL; // null o vacio
+
+        $userAttempts = $current->attempts;
+        $current_user = $current;
+
+        // intentos completos
+        if ($userAttempts == $currentAttempts) {
+            $current_user['fulled_attempts'] = true;
+            return $current_user;
+        }
+
+        return $this->userIncrementAttempts($current_user, $currentAttempts, $currentMinutes, $permanent);
+    }
+
+    public function checkTimeToReset($value, $keyenv = 'GESTOR')
+    {
+        $current_user = $this->currentUserByEnviroment($keyenv, $value);
+        if(!$current_user) return NULL; // null o vacio
+
+        $staticMinTime = now();
+        $staticUserTime = $current_user->attempts_lock_time;
+
+        if($staticUserTime && $staticMinTime >= $staticUserTime){
+            $current_user->timestamps = false;
+            $current_user->attempts = 0;
+            $current_user->attempts_lock_time = NULL;
+
+            $current_user->save();
+
+            return $current_user;
+        }
+
+        return NULL;
+    }
+
+    public function resetAttemptsUser()
+    {
+        $user = $this;
+
+        $user->timestamps = false;
+        $user->attempts = 0;
+        $user->attempts_lock_time = NULL;
+
+        $user->save();
+    }
+
+    public function checkCredentialsAttempts($current, $currentAttempts, $permanent = false)
+    {
+        $availablePermanentBlock = ($current->attempts == $currentAttempts && is_null($current->attempts_lock_time));
+
+        if($availablePermanentBlock && $permanent) {
+            $current['fulled_attempts'] = true;
+            return $current;
+        }
+
+        if($availablePermanentBlock && !$permanent) {
+            $current->timestamps = false;
+            $current->attempts = 0; 
+            $current->attempts_lock_time = NULL;
+
+            $current->save();
+            
+            return false;
+        }
+
+        $timeCondition = (now() <= $current->attempts_lock_time);
+                                
+
+        if($current->attempts == $currentAttempts && $timeCondition) {
+            $current['fulled_attempts'] = true;
+            return $current;
+        }
+
+        if($current->attempts >= $currentAttempts && $timeCondition) {
+
+            $current->attempts = $currentAttempts;
+            $current->timestamps = false;
+
+            $current->save();
+            $current['fulled_attempts'] = true;
+
+            return $current;
+        }
+        return false;
+    }
+
+    public function checkAttemptManualGestor($request)
+    {
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX_GESTOR');
+
+        $user = $this;
+        $current = $user->where('email', $request->email)
+                        ->where('active', 1)->first();
+
+        if(!$current) return false;
+
+        $checkEmail = ($current->email == $request->email);
+        $checkPassword = Hash::check($request->password, $current->password);
+
+        if($checkEmail && $checkPassword) {
+            return $this->checkCredentialsAttempts($current, $currentAttempts);
+        }
+        return false;
+    }
+
+    public function checkAttemptManualApp($credentials, $permanent = false)
+    {
+        ['username' => $req_username,
+         'password' => $req_password] = $credentials[0];
+
+        ['document' => $req_document] = $credentials[1];
+
+        $currentAttempts = env('ATTEMPTS_LOGIN_MAX_APP');
+
+        $current = $this->currentUserByEnviroment('APP', $req_document);
+        if(!$current) return false;
+
+        $checkUserDoc = ($current->document == $req_document) || ($current->username == $req_username);
+        $checkPassword = Hash::check($req_password, $current->password);
+
+        if($checkUserDoc && $checkPassword) {
+            return $this->checkCredentialsAttempts($current, $currentAttempts, $permanent);
+        }
+        return false;
+    }
+    // === INTENTOS APP/GESTOR ===
+
+    public function setInitialEmail()
+    {
+        $user = $this;
+        
+        $user->timestamps = false;
+        $user->email = '';
+
+        $user->save();
+    }
+
+    public function setDocumentAsEmail($document, $revert = false)
+    {
+        $user = $this;
+        $current = $user->where('document', $document)->first();
+    
+        $current->timestamps = false;
+     
+        if($revert) $current->email = '';
+        else $current->email = $document;
+
+        $current->save();
+    }
 }

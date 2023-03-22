@@ -1,10 +1,13 @@
 require("./bootstrap");
+const FileSaver = require("file-saver");
 
 window.Vue = require("vue");
 import vuetify from "./plugins/vuetify";
 import mixin from "./mixin";
 import snackbar from "./mixins/snackbar";
 import VueNotification from "@kugatsu/vuenotification";
+
+
 import store from "./store";
 // MIXIN
 Vue.mixin(mixin);
@@ -12,6 +15,8 @@ Vue.mixin(snackbar);
 
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import ApexCharts from "apexcharts";
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 import VueApexCharts from "vue-apexcharts";
 import globalComponents from "./global-components";
 import common_http_request from "./mixins/common_http_request";
@@ -38,6 +43,22 @@ Vue.use(VueNotification, {
         background: "#d4edda",
         color: "#0f5132"
     }
+});
+
+Vue.use(Toast, {
+    position: "bottom-right",
+    transition: "Vue-Toastification__slideBlurred",
+    timeout: 10000,
+    closeOnClick: false,
+    pauseOnFocusLoss: true,
+    pauseOnHover: false,
+    draggable: true,
+    draggablePercent: 0.6,
+    showCloseButtonOnHover: false,
+    hideProgressBar: false,
+    closeButton: "button",
+    icon: false,
+    newestOnTop: true
 });
 // Vue.use(axiosDefault)
 Vue.prototype.$http = axiosDefault;
@@ -182,5 +203,116 @@ Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
 const app = new Vue({
     vuetify,
     store,
-    el: "#app"
+    el: "#app",
+    data: {
+        adminId: 0,
+        isSuperUser: false,
+        superUserRoleId : 1,
+        workspaceId: 0
+    },
+    mounted() {
+        this.fetchSessionData()
+        this.listenReportsNotifications()
+    },
+    methods: {
+        listenReportsNotifications() {
+            const vue = this
+            let socket = window.io(this.getReportsBaseUrl());
+            socket.on('report-finished', (e) => {
+
+                if (vue.adminId === e.adminId || vue.isSuperUser) {
+                    vue.notifyReportHasFinished(e)
+                }
+            })
+
+            socket.on('report-started', (e) => {
+
+                if (vue.adminId === e.adminId || vue.isSuperUser) {
+                    vue.notifyReportHasStarted(e.report)
+                }
+            })
+        }
+        ,
+        notifyReportHasFinished (e) {
+
+            const vue = this
+
+            // Notify user that report is ready to donwload
+
+            if (e.success) {
+
+                this.$toast.warning({
+                    component: Vue.component('comp', {
+                        template: `
+                                    <div>${e.message} <a href="javascript:"
+                                                         @click.stop="clicked">Descargar</a>
+                                    </div>`,
+                        methods: {
+                            clicked() { this.$emit('download') }
+                        }
+                    }),
+                    listeners: {
+                        download: () => this.downloadReport(e.url, e.name)
+                    }
+                });
+            } else {
+
+                // Notify user that report has no results
+
+                this.$toast.error({
+                    component: Vue.component('comp', {
+                        template: `
+                                    <div>${e.message} <a href="javascript:"
+                                                         @click.stop="clicked">Revisalo aquí</a>
+                                    </div>`,
+                        methods: {
+                            clicked() { this.$emit('redirect') }
+                        }
+                    }),
+                    listeners: {
+                        redirect: () => { window.location.href = '/exportar/node' }
+                    }
+                });
+            }
+        }
+        ,
+        notifyReportHasStarted (report) {
+
+            const message = `Tu reporte "${report.name}" se encuentra en proceso.`
+            this.$toast.warning(message)
+        }
+        ,
+        async fetchSessionData() {
+            let vue = this;
+
+            // Fetch current session workspace
+
+            let url = `/usuarios/session`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+            vue.adminId = response.data.user.id
+            vue.workspaceId = response.data.session.workspace.id
+
+            if (response.data.user) {
+                response.data
+                    .user
+                    .roles.forEach(r => {
+                        if (r.role_id === vue.superUserRoleId) {
+                            vue.isSuperUser = true;
+                        }
+                    })
+            }
+
+        },
+        downloadReport(url, name) {
+            url = `${this.getReportsBaseUrl()}/${url}`
+            try {
+                FileSaver.saveAs(url, name)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
 });

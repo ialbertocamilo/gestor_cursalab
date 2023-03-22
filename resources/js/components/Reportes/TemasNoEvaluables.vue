@@ -35,7 +35,7 @@
             <list-item titulo="Cantidad de visitas por tema" subtitulo="Total de visitas por cada tema" />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportNotasTema" class="row formu">
+        <form @submit.prevent="generateReport" class="row formu">
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-lg-6 col-xl-4 mb-3">
@@ -184,7 +184,7 @@
                     type="submit"
                     class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
-                    <span>Descargar</span>
+                    <span>Generar reporte</span>
                 </button>
             </div>
         </form>
@@ -203,11 +203,13 @@ export default {
     components: {FiltersNotification, EstadoFiltro, FechaFiltro, ResumenExpand, ListItem, CheckTemas },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
     data() {
         return {
+            reportType: 'temas_no_evaluables',
             schools: [],
             courses: [],
             topics: [],
@@ -255,26 +257,45 @@ export default {
 
             this.schools = responseSchools.data
         },
-        async exportNotasTema() {
-            let vue = this;
-            // show loading spinner
-
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue.exportNotasTema, type: vue.reportType})
+        },
+        async exportNotasTema(reportName) {
 
             let userStatusFilter = this.$refs.EstadoFiltroComponent;
             let topicStatusFilter = this.$refs.EstadoFiltroTemasComponent;
             let fechaFiltro = this.$refs.FechasFiltros;
 
+            this.$emit('reportStarted')
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.escuela),
+                "Cursos": this.generateNamesArray(this.courses, this.curso),
+                "Temas": this.generateNamesArray(this.topics, this.tema),
+
+                "Usuarios activos" : this.yesOrNo(userStatusFilter.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(userStatusFilter.UsuariosInactivos),
+                "Temas activos": this.yesOrNo(topicStatusFilter.UsuariosActivos),
+                "Temas inactivos": this.yesOrNo(topicStatusFilter.UsuariosInactivos),
+                'Fecha inicial': this.start,
+                'Fecha final': this.end,
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
+                "Cursos libres": this.yesOrNo(this.tipocurso)
+            }
+
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables_v2`
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/temas_no_evaluables`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: this.modulo,
                         escuelas: this.escuela,
                         cursos: this.curso,
@@ -291,29 +312,16 @@ export default {
                         inactiveTopics: topicStatusFilter.UsuariosInactivos
                     }
                 })
-
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_temas_no_eval");
-                    response.data.new_name = this.generateFilename(
-                        'Temas no evaluables',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    // Emit event to parent component
-                    this.$emit('emitir-reporte', response)
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_temas_no_eval");
+                    }, 500);
                 }
 
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
 
         /**
