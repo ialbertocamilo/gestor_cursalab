@@ -25,9 +25,7 @@
                     item-text="name"
                     item-value="id"
                     multiple
-                    :showSelectAll="false"
                     placeholder="Seleccione los módulos"
-                    :maxValuesSelected="1"
                 />
             </div>
         </div>
@@ -145,10 +143,12 @@ export default {
                 })
 
                 this.criteriaInSegmentation = response.data
-
-                setTimeout(() => {
-                    console.log(this.selectedCriteria)
-                }, 3000)
+                if (this.selectedCriteria.length === 0) {
+                    this.criteriaInSegmentation.forEach(() => {
+                        this.selectedCriteria.push(true);
+                    })
+                    console.log( this.selectedCriteria)
+                }
 
             } catch (ex) {
                 console.log(ex)

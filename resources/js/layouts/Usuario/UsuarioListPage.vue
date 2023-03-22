@@ -119,7 +119,7 @@
                     <v-col cols="3" class="d-flex justify-end">
 
                         <div
-                            v-if="usersWithEmptyCriteria"
+
                             class="user-count-wrapper">
 
                             <v-tooltip
@@ -139,6 +139,7 @@
                             </v-tooltip>
 
                             <span class="count">{{ usersWithEmptyCriteria }}</span>
+                            <span class="description">Criterios vacíos</span>
                         </div>
 
                         <DefaultButton
@@ -390,7 +391,7 @@ export default {
     width: 200px;
 }
 
-.count {
+.user-count-wrapper .count {
     height: 15px;
     position: absolute;
     display: flex;
@@ -405,4 +406,9 @@ export default {
     color: white;
     background-color: #E01717;
 }
+
+.user-count-wrapper .description {
+    color: #E01717;
+}
+
 </style>
