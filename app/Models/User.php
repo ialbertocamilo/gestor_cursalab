@@ -1355,14 +1355,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $currentAttempts = env('ATTEMPTS_LOGIN_MAX_GESTOR');
 
         $user = $this;
-        $current = $user->where('email', $request->email)
+        $current = $user->where('email_gestor', $request->email)
                         ->where('active', 1)->first();
 
         if(!$current) return false;
 
-        $checkEmail = ($current->email == $request->email);
+        $checkEmail = ($current->email_gestor == $request->email);
         $checkPassword = Hash::check($request->password, $current->password);
-
         if($checkEmail && $checkPassword) {
             return $this->checkCredentialsAttempts($current, $currentAttempts);
         }
