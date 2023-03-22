@@ -238,8 +238,8 @@ class LoginController extends Controller
         $user = auth()->user();
 
         // si es igual al email y/o contraseña existente
-        if(Auth::attempt([ 'email' => $user->email, 
-                           'password' => $currentPassword]) ||  $user->email === $currentPassword) {
+        if(Auth::attempt([ 'email_gestor' => $user->email_gestor, 
+                           'password' => $currentPassword]) ||  $user->email_gestor === $currentPassword) {
             throw ValidationException::withMessages([
                 'password' => 'La nueva contraseña debe ser diferente.'
             ]);
