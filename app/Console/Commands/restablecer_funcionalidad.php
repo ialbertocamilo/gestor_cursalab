@@ -107,9 +107,6 @@ class restablecer_funcionalidad extends Command
             }
         }
         cache_clear_model(User::class);
-        $this->restore_career();
-        $this->info("\n Fin: " . now());
-        info(" \n Fin: " . now());
     }
     public function restore_career(){
         $users_affected_json = public_path() . "/json/users_carreras.json"; // ie: /var/www/laravel/app/storage/json/filename.json
