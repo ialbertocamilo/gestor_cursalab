@@ -119,7 +119,7 @@
                     <v-col cols="3" class="d-flex justify-end">
 
                         <div
-
+                            v-if="usersWithEmptyCriteria"
                             class="user-count-wrapper">
 
                             <v-tooltip
