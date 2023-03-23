@@ -38,12 +38,10 @@ class SetSchoolSubworkspace2 extends Command
         $schools = School::whereRelation('workspaces', 'id', $workspaceId)
             ->get();
 
-
         $bar = $this->output->createProgressBar($schools->count());
 
-
         $subworkspaces = Workspace::query()
-            ->where('active', 1)
+            // ->where('active', 1)
             ->where('parent_id', $workspaceId)
             ->get();
 
@@ -51,17 +49,32 @@ class SetSchoolSubworkspace2 extends Command
 
             if (!$this->thereIsACourseWithoutModuleSegmentation($school->id)) {
                 // Load subworkspaces used in segmentation
-                $subworkspaces = $this->loadSubworkspaces($school->id);
-            }
+                $_subworkspaces = $this->loadSubworkspaces($school->id);
 
-            foreach ($subworkspaces as $subworkspace) {
-                $subworkspace->schools()->attach($school);
+                if (!$_subworkspaces->count()){
+                 
+                    $this->setSchoolToSubworkspaces($subworkspaces, $school);
+                } else {
+
+                    $this->setSchoolToSubworkspaces($_subworkspaces, $school);
+                }
+
+            } else {
+                
+                $this->setSchoolToSubworkspaces($subworkspaces, $school);
             }
 
             $bar->advance();
         }
 
         $bar->finish();
+    }
+
+    public function setSchoolToSubworkspaces($subworkspaces, $school)
+    {
+        foreach ($subworkspaces as $subworkspace) {
+            $subworkspace->schools()->attach($school);
+        }
     }
 
     /**
@@ -81,6 +94,7 @@ class SetSchoolSubworkspace2 extends Command
             where
                 s.model_type = 'App\\\\Models\\\\Course'
                 and s.active = 1
+                and s.deleted_at IS NULL
                 and s.model_id in (
                     select
                         course_id
@@ -104,7 +118,6 @@ class SetSchoolSubworkspace2 extends Command
      */
     public function loadSubworkspaces($schoolId): Collection
     {
-
         // Load courses segments
 
         $segments = DB::select(DB::raw("
@@ -113,9 +126,10 @@ class SetSchoolSubworkspace2 extends Command
             from
                 segments s
             where
-                model_type = 'App\\\\Models\\\\Course'
-                and active = 1
-                and model_id in (
+                s.model_type = 'App\\\\Models\\\\Course'
+                and s.active = 1
+                and s.deleted_at IS NULL
+                and s.model_id in (
                     select
                         course_id
                     from
@@ -124,18 +138,19 @@ class SetSchoolSubworkspace2 extends Command
                         school_id = :schoolId
                 )
         "), [ 'schoolId' => $schoolId ]);
-        $segmentsIds = collect($segments)->pluck('id')->toArray();
 
+        $segmentsIds = collect($segments)->pluck('id')->toArray();
 
         $segmentsValues = SegmentValue::query()
             ->where('criterion_id', 1) //  -- module criterion
             ->whereIn('segment_id', $segmentsIds)
             ->select(DB::raw('distinct criterion_value_id as module_id'))
             ->get();
+
         $modulesIds = $segmentsValues->pluck('module_id')->toArray();
 
         return Workspace::query()
-            ->where('active', 1)
+            // ->where('active', 1)
             ->whereIn('criterion_value_id', $modulesIds)
             ->get();
     }
