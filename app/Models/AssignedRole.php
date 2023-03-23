@@ -45,4 +45,20 @@ class AssignedRole extends Model
 
         return (bool)$role;
     }
+
+    /**
+     * Load superusers ids from a specific workspace
+     *
+     * @param $workspaceId
+     * @return mixed[]
+     */
+    public static function getSuperusersIds ($workspaceId) {
+        $items =  AssignedRole::query()
+            ->where('entity_type', self::USER_ENTITY)
+            ->where('scope', $workspaceId)
+            ->where('role_id', Role::SUPER_USER)
+            ->get();
+
+        return $items->pluck('entity_id')->toArray();
+    }
 }

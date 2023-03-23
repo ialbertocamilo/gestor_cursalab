@@ -29,7 +29,7 @@
                 :items="new_criteria"
                 multiple
                 item-text="name"
-                :ready-only-codes="['module']"
+                :ready-only-codes="selectedCriteriaIncludesModule() ? ['module'] : []"
                 item-id="id"
                 :count-show-values="4"
                 :showSelectAll="false"
@@ -138,6 +138,10 @@ export default {
 
             vue.$emit("borrar_segment", segment);
             vue.dialog_eliminar = false;
+        },
+        selectedCriteriaIncludesModule() {
+            let result = this.segment.criteria_selected.find(i => i.code === 'module')
+            return !!result
         }
     }
 };
