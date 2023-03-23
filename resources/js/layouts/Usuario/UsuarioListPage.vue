@@ -121,25 +121,26 @@
                         <div
                             v-if="usersWithEmptyCriteria"
                             class="user-count-wrapper">
+                            <a href="/exportar/node">
+                                <v-tooltip
+                                    :top="true"
+                                    attach
+                                >
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-icon
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            size="32"
+                                            color="#E01717">
+                                            mdi-account
+                                        </v-icon>
+                                    </template>
+                                    <span v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
+                                </v-tooltip>
 
-                            <v-tooltip
-                                :top="true"
-                                attach
-                            >
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-icon
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        size="32"
-                                        color="#E01717">
-                                        mdi-account
-                                    </v-icon>
-                                </template>
-                                <span v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
-                            </v-tooltip>
-
-                            <span class="count">{{ usersWithEmptyCriteria }}</span>
-                            <span class="description">Criterios vacíos</span>
+                                <span class="count">{{ usersWithEmptyCriteria }}</span>
+                                <span class="description">Criterios vacíos</span>
+                            </a>
                         </div>
 
                         <DefaultButton
@@ -409,6 +410,10 @@ export default {
 
 .user-count-wrapper .description {
     color: #E01717;
+}
+
+.user-count-wrapper a {
+    text-decoration: none;
 }
 
 </style>
