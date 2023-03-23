@@ -22,6 +22,7 @@
                     v-model="selectedModules"
                     :items="modules"
                     label="Módulo"
+                    :show-select-all="false"
                     item-text="name"
                     item-value="id"
                     multiple
@@ -147,7 +148,6 @@ export default {
                     this.criteriaInSegmentation.forEach(() => {
                         this.selectedCriteria.push(true);
                     })
-                    console.log( this.selectedCriteria)
                 }
 
             } catch (ex) {
