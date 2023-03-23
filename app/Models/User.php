@@ -457,6 +457,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             else :
        
                 $this->setPasswordData($data, $update_password, $user);
+
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);
@@ -1385,6 +1386,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $checkEmail = ($current->email_gestor == $request->email);
         $checkPassword = Hash::check($request->password, $current->password);
+
         if($checkEmail && $checkPassword) {
             return $this->checkCredentialsAttempts($current, $currentAttempts);
         }

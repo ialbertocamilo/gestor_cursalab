@@ -7,6 +7,8 @@ use Illuminate\Validation\Rule;
 use App\Rules\VerifyLimitAllowedUsers;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
 
 use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;

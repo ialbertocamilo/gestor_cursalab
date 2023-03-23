@@ -46,6 +46,9 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
+Route::post('/quizz', [AuthController::class, 'quizz']);
+Route::post('/reset', [AuthController::class, 'reset_password']);
+
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
