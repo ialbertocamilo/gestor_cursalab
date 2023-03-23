@@ -116,7 +116,7 @@
                             item-text="name"
                         />
                     </v-col>
-                    <v-col cols="3" class="d-flex justify-end">
+                    <v-col cols="4" class="d-flex justify-end">
 
                         <div
                             v-if="usersWithEmptyCriteria"
