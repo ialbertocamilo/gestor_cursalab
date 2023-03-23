@@ -86,11 +86,10 @@ class UsersEmptyCriteria extends Command
 
                 Mail::to([
                     'elvis@cursalab.io',
-//                    'tecnologia@cursalab.io',
-//                    'kevin@cursalab.io'
+                    'tecnologia@cursalab.io',
+                    'kevin@cursalab.io'
                 ])
                     ->send(new EmailTemplate('emails.empty_criteria_notification', $data));
-                exit;
             }
         }
     }
