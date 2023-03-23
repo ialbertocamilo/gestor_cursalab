@@ -41,6 +41,7 @@ class ResetPasswordRequest extends FormRequest
                                 // ->mixedCase()->symbols()->uncompromised(3),
 
                         new ContextSpecificWords($user->email),
+                        new ContextSpecificWords($user->email_gestor),
                         new ContextSpecificWords($user->document),
                         new ContextSpecificWords($user->name),
                         new ContextSpecificWords($user->lastname),

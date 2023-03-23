@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
+use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
+
 class ResetPasswordApiController extends Controller
 {
     /*
@@ -45,10 +51,28 @@ class ResetPasswordApiController extends Controller
      */
     protected function rules()
     {
+        $passwordRules = [
+            "required", 'confirmed', 'max:100',
+            Password::min(8)->letters()->numbers()->symbols(),
+
+            "password_available:{$id}",
+            // ->mixedCase()->uncompromised(3),
+
+            new ContextSpecificWords($this->email),
+            new ContextSpecificWords($this->document),
+            // new ContextSpecificWords($this->name),
+            // new ContextSpecificWords($this->lastname),
+            // new ContextSpecificWords($this->surname),
+            
+            // new RepetitiveCharacters(),
+            // new SequentialCharacters(),
+        ];
+
         return [
             'token' => 'required',
             'email' => 'required|email',
-            'password' => ['required', 'confirmed'],
+            'password' => $passwordRules,
+            // 'password' => ['required', 'confirmed'],
         ];
     }
 

@@ -37,27 +37,28 @@ class UserStoreRequest extends FormRequest
         $pass = $this->isMethod('post') ? 'required' : 'nullable';
 
         // $piecesPass = stringConcatEqualNum([$this->document, $this->email], 4);
-        $passwordRules = $this->isMethod('post') ? 
-                    ['max:100', "{$pass}", 'min:8'] : 
-                    ['max:100', "{$pass}", 
-                        Password::min(8)->letters()->numbers()->symbols(),
-                                // ->mixedCase()->uncompromised(3),
+        $passwordRules = [
+            "{$pass}", 'max:100',  
+            Password::min(8)->letters()->numbers()->symbols(),
 
-                         new ContextSpecificWords($this->email),
-                        new ContextSpecificWords($this->document),
-                        new ContextSpecificWords($this->name),
-                        new ContextSpecificWords($this->lastname),
-                        new ContextSpecificWords($this->surname),
-                        // new RepetitiveCharacters(),
-                        // new SequentialCharacters(),
-                    ];
+            "password_available:{$id}",
+            // ->mixedCase()->uncompromised(3),
+
+            new ContextSpecificWords($this->email),
+            new ContextSpecificWords($this->document),
+            new ContextSpecificWords($this->name),
+            new ContextSpecificWords($this->lastname),
+            new ContextSpecificWords($this->surname),
+            // new RepetitiveCharacters(),
+            // new SequentialCharacters(),
+        ];
 
         $rules = [
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
-            'password' => "{$pass}|max:255|password_available:{$id}",
-            // 'password' => $passwordRules,
+            // 'password' => "{$pass}|max:255|password_available:{$id}",
+            'password' => $passwordRules,
             'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
             'username' => 'nullable',
             'phone_number' => 'nullable',
