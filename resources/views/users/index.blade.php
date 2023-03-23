@@ -54,7 +54,7 @@
                                 <tr>
                                     <th scope="row">{{ $user->id }}</th>
                                     <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
+                                    <td>{{ $user->email_gestor }}</td>
                                     @if ($super_user)
                                         <td width="10px">
                                             <a href="{{ route('impersonate', $user->id) }}" class="btn btn-sm bg-orange"><i

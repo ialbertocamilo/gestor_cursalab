@@ -107,7 +107,7 @@ class LoginController extends Controller
     {
         // In maintenance mode, stop login process
 
-        if ($request->email != 'kevin@cursalab.io') {
+        if ($request->email_gestor != 'kevin@cursalab.io') {
 
             if (env('MAINTENANCE_MODE')) {
 
@@ -238,8 +238,8 @@ class LoginController extends Controller
         $user = auth()->user();
 
         // si es igual al email y/o contraseña existente
-        if(Auth::attempt([ 'email' => $user->email, 
-                           'password' => $currentPassword]) ||  $user->email === $currentPassword) {
+        if(Auth::attempt([ 'email_gestor' => $user->email_gestor, 
+                           'password' => $currentPassword]) ||  $user->email_gestor === $currentPassword) {
             throw ValidationException::withMessages([
                 'password' => 'La nueva contraseña debe ser diferente.'
             ]);
@@ -360,7 +360,7 @@ class LoginController extends Controller
         // return $this->guard()->attempt(
         //     $this->credentials($request), $request->boolean('remember')
         // );
-        return (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'active' => 1]));
+        return (Auth::attempt(['email_gestor' => $request->email, 'password' => $request->password, 'active' => 1]));
     }
 
     protected function credentials(Request $request)
@@ -371,7 +371,7 @@ class LoginController extends Controller
     protected function getPollsNps($user = null)
     {
         $curl = curl_init();
-        $email = isset($user->email) ? $user->email : null;
+        $email = isset($user->email_gestor) ? $user->email_gestor : null;
         $dni = isset($user->dni) ? $user->dni : null;
 
         curl_setopt_array($curl, array(

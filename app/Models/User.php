@@ -77,7 +77,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      */
     protected $fillable = [
         'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'attempts', 'attempts_lock_time', 'attempts_times_locks', 'slug', 'alias', 'person_number', 'phone_number',
-        'email', 'password', 'old_passwords', 'active', 'phone', 'telephone', 'birthdate',
+        'email', 'email_gestor', 'password', 'old_passwords', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
@@ -209,6 +209,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $q->whereRaw('document like ?', ["%{$filter}%"]);
             $q->orWhereRaw('name like ?', ["%{$filter}%"]);
             $q->orWhereRaw('email like ?', ["%{$filter}%"]);
+            $q->orWhereRaw('email_gestor like ?', ["%{$filter}%"]);
             $q->orWhereRaw('lastname like ?', ["%{$filter}%"]);
             $q->orWhereRaw('surname like ?', ["%{$filter}%"]);
         });
@@ -1163,7 +1164,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                        'user' => $user->name.' '.$user->lastname ];
 
         // enviar email
-        Mail::to($user->email)
+        Mail::to($user->email_gestor)
             ->send(new EmailTemplate('emails.enviar_codigo_2fa', $mail_data));
 
         return $user->save();
@@ -1377,14 +1378,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $currentAttempts = env('ATTEMPTS_LOGIN_MAX_GESTOR');
 
         $user = $this;
-        $current = $user->where('email', $request->email)
+        $current = $user->where('email_gestor', $request->email)
                         ->where('active', 1)->first();
 
         if(!$current) return false;
 
-        $checkEmail = ($current->email == $request->email);
+        $checkEmail = ($current->email_gestor == $request->email);
         $checkPassword = Hash::check($request->password, $current->password);
-
         if($checkEmail && $checkPassword) {
             return $this->checkCredentialsAttempts($current, $currentAttempts);
         }

@@ -21,6 +21,7 @@ use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
 use Faker\Factory as Faker;
+use App\Models\AssignedRole;
 use App\Models\SummaryTopic;
 use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
@@ -90,9 +91,22 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValuesFromJsonV2();
         // $this->deleteDuplicatesInSummaryCourses();
         // $this->restoreUserIdInTickets();
-        $this->restore_career();
+        $this->setEmailGestorAdmins();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function setEmailGestorAdmins(){
+        $admins = AssignedRole::select('entity_id')->where('entity_type', 'App\Models\User')
+        ->groupBy('entity_id')->get();
+        foreach ($admins as $admin) {
+            $user = User::where('id',$admin->entity_id)->whereNull('secret_key')->first();
+            if($user && $user->email){
+                $user->email_gestor = $user->email;
+                $user->email = null;
+                $user->save();
+            }
+        }
+        cache_clear_model(User::class);
     }
     public function restore_career(){
         $users_affected_json = public_path() . "/json/users_carreras.json"; // ie: /var/www/laravel/app/storage/json/filename.json
