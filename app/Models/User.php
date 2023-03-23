@@ -445,6 +445,43 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->first()
                 ?->id;
 
+            $criterion_list_final = [];
+
+            foreach($data['criterion_list'] as $key => $val) {
+                if(!is_numeric($val)) {
+                    $id_criterio = Criterion::where('code', $key)->first();
+                    $id_crit_val = CriterionValue::where('value_text', $val)->where('criterion_id', $id_criterio?->id)->select('id')->first();
+                    if ($id_crit_val){
+                        $data['criterion_list'][$key] = $id_crit_val->id;
+                    } else {
+                        $current_workspace_id = get_current_workspace();
+                        $data_cr['workspace_id'] = $current_workspace_id?->id;
+
+                        $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($id_criterio);
+                        $data_cr[$colum_name] = $val;
+                        $data_cr['value_text'] = $val;
+                        $data_cr['criterion_id'] = $id_criterio?->id;
+                        $data_cr['active'] = 1;
+
+                        CriterionValue::storeRequest($data_cr);
+                        $id_crit_vala = CriterionValue::where('value_text', $val)->where('criterion_id', $id_criterio?->id)->select('id')->first();
+                        $data['criterion_list'][$key] = $id_crit_vala->id;
+                    }
+                }
+            }
+
+            foreach($data['criterion_list_final'] as $crr) {
+                if(is_numeric($crr)) {
+                    array_push($criterion_list_final, $crr);
+                }
+            }
+
+            foreach (array_diff($data['criterion_list'],$data['criterion_list_final']) as $key => $value) {
+                array_push($criterion_list_final, $value);
+            }
+
+            $data['criterion_list_final'] = $criterion_list_final;
+
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
 
@@ -1242,7 +1279,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $current->save();
         }
 
-        $current['fulled_attempts'] = $fulledAttempts; 
+        $current['fulled_attempts'] = $fulledAttempts;
         return $current;
     }
 
@@ -1321,16 +1358,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if($availablePermanentBlock && !$permanent) {
             $current->timestamps = false;
-            $current->attempts = 0; 
+            $current->attempts = 0;
             $current->attempts_lock_time = NULL;
 
             $current->save();
-            
+
             return false;
         }
 
         $timeCondition = (now() <= $current->attempts_lock_time);
-                                
+
 
         if($current->attempts == $currentAttempts && $timeCondition) {
             $current['fulled_attempts'] = true;
@@ -1393,7 +1430,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function setInitialEmail()
     {
         $user = $this;
-        
+
         $user->timestamps = false;
         $user->email = '';
 
@@ -1404,9 +1441,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         $current = $user->where('document', $document)->first();
-    
+
         $current->timestamps = false;
-     
+
         if($revert) $current->email = '';
         else $current->email = $document;
 
