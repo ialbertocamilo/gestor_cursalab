@@ -69,6 +69,7 @@
                     @click="goToReiniciosMasivos"/>
                 <DefaultModalButton
                     :label="'Usuario'"
+                    class="btn_add_user"
                     @click="openFormModal(modalOptions, null, 'create')"/>
             </v-card-title>
         </v-card>
@@ -352,3 +353,21 @@ export default {
 
 }
 </script>
+<style lang="scss">
+button.btn_add_user {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+button.btn_add_user .v-btn__content {
+    align-items: flex-end;
+    justify-content: center;
+    vertical-align: bottom;
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+    font-weight: 400;
+    line-height: 1;
+}
+button.btn_add_user .v-btn__content i {
+    font-size: 13px;
+}
+</style>

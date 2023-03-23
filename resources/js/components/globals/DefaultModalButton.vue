@@ -1,6 +1,7 @@
 <template>
     <v-btn
         class="mx-1"
+        :class="{}"
         elevation="0"
         :ripple="false"
         color="primary"

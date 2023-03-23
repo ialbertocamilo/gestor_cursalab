@@ -9,19 +9,19 @@
             <v-card-text class="instructivo">
                 <ul>
                     <li class="mt-2">
-                        La máxima cantidad de filas por Excel es de <b>2500</b>
+                        La máxima cantidad de filas por Excel es de <b>2500</b>.
                     </li>
                     <li class="mt-2">
-                        Las columnas <b>“Número de Teléfono”</b> y <b>“Email”</b> son opcionales
+                        Las columnas <b>“Número de Teléfono”</b> y <b>“Email”</b> son opcionales.
                     </li>
                     <li class="mt-2">
-                        Colocar en la columna de <b>Estado</b> los términos <b>Active</b> e <b>Inactive</b>
+                        Colocar en la columna de <b>Estado</b> los términos <b>Active</b> e <b>Inactive</b>.
                     </li>
                     <li class="mt-2">
-                        Para los campos de las fechas se puede usar dos formatos: <b>yyyy / mm / dd</b> o <b>dd / mm / yyyy</b>
+                        Para los campos de las fechas se puede usar dos formatos: <b>yyyy / mm / dd</b> o <b>dd / mm / yyyy</b>.
                     </li>
                     <li class="mt-2">
-                        Colocar en la columna <b>Módulo</b> los módulos existentes
+                        Colocar en la columna <b>Módulo</b> los módulos existentes.
                     </li>
                 </ul>
             </v-card-text>
