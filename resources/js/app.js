@@ -287,7 +287,7 @@ const app = new Vue({
 
             // Fetch current session workspace
 
-            let url = `../usuarios/session`
+            let url = `/usuarios/session`
             let response = await axios({
                 url: url,
                 method: 'get'

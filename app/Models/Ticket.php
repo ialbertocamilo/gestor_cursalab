@@ -11,14 +11,12 @@ class Ticket extends BaseModel
         'reason',
         'detail',
         'dni',
+        'email',
         'name',
         'contact',
         'info_support',
         'msg_to_user',
         'status',
-        'created_at',
-        'updated_at',
-        'deleted_at'
     ];
 
     /*
@@ -57,7 +55,8 @@ class Ticket extends BaseModel
 
         if ($request->q || $request->modulo) {
 
-            $subworkspaceId = Workspace::getWorkspaceIdFromModule($request->modulo);
+            $subworkspaceId = $request->modulo;
+            // $subworkspaceId = Workspace::getWorkspaceIdFromModule($request->modulo);
 
             $query->where(function ($qu) use ($request, $subworkspaceId) {
 
@@ -65,8 +64,6 @@ class Ticket extends BaseModel
 
                     if ($request->q) {
                         $q->where('name', 'like', "%$request->q%");
-
-                        //                        if (strlen($request->q) > 4)
                         $q->orWhere('dni', 'like', "%$request->q%");
                     }
 

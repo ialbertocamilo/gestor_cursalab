@@ -245,7 +245,7 @@ export default {
             filters: {
                 q: '',
                 subworkspace_id: null,
-                active: null,
+                active: 1,
             },
             criteria_template: [],
             modalOptions: {
