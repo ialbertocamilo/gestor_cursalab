@@ -77,17 +77,18 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
-                    <v-col cols="3">
+                    <v-col cols="4">
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar Usuarios"
+                            label="Buscar usuario"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
+                            class="btn_search_user"
                         />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="5">
                     </v-col>
                     <v-col cols="3" class="d-flex justify-end">
                         <DefaultButton
@@ -369,5 +370,32 @@ button.btn_add_user .v-btn__content {
 }
 button.btn_add_user .v-btn__content i {
     font-size: 13px;
+}
+.btn_search_user {
+    max-width: 320px;
+}
+.btn_search_user .v-text-field__slot label.v-label {
+    color: #434D56;
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    font-weight: 400;
+}
+.btn_search_user span.v-btn__content i.v-icon.mdi.mdi-magnify {
+    color: #434D56;
+    font-size: 20px;
+}
+.btn_search_user.v-text-field--outlined:not(.v-input--is-focused):not(.v-input--has-state)>.v-input__control>.v-input__slot fieldset {
+    border-color: #C4C4C4;
+}
+.btn_filter span.v-btn__content {
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    font-weight: 400;
+}
+.btn_filter span.v-btn__content i {
+    font-size: 16px;
+    margin: 0 !important;
 }
 </style>
