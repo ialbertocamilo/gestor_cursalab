@@ -50,14 +50,16 @@ class FileService {
 
         if (str_starts_with($path, 'https://')) return $path;
 
-        $full_url = Storage::url($path);
+        $full_url = Storage::disk('cdn')->url($path);
+        // $base = config('app.storage_base_url');
+
+        // $full_url = $base . '/' . $path;
         // $full_path = Storage::path($path);
 
         $full_url = str_replace("%5C", '/', $full_url);
 
         return $full_url;
 
-        // $base = env('BUCKET_BASE_URL', '');
         // $base = rtrim($base, '/');
         // $base = rtrim($base, '\\');
 

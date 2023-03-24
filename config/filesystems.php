@@ -55,6 +55,22 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => true,
             'root' => env('AWS_CURSALAB_CLIENT_NAME_FOLDER'),
+            'options' => [
+                'CacheControl' => 'max-age=25920000, no-transform, public', 
+                // 'ContentEncoding' => 'gzip'
+            ]
+        ],
+
+        'cdn' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            // 'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            // 'root' => storage_path('app/public'),
+            'url' => env('BUCKET_BASE_URL') . '/' . env('AWS_CURSALAB_CLIENT_NAME_FOLDER'),
+            // 'visibility' => 'public',
+            // 'throw' => false,
         ],
 
     ],
