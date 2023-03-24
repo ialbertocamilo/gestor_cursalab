@@ -84,9 +84,11 @@
                                             <v-divider class="mx-12"/>
 
                                             <segment
+                                                :is-course-segmentation="isCourseSegmentation()"
                                                 :segments="segments"
                                                 :segment="row"
                                                 :criteria="criteria"
+                                                :course-modules="courseModules"
                                                 class="mx-5"
                                                 :options="options"
                                                 @borrar_segment="borrarBloque"
@@ -200,6 +202,7 @@ export default {
             segments: [],
             segment_by_document: null,
             criteria: [],
+            courseModules: [],
             modulesSchools: [],
 
             modalInfoOptions: {
@@ -485,7 +488,38 @@ export default {
                     };
                 }
                 vue.criteria = _data.criteria;
+                vue.courseModules = _data.courseModules;
                 vue.total = _data.users_count;
+
+                // Replace modules with course's school modules
+
+                if (vue.isCourseSegmentation()) {
+
+                    let courseModulesIds = [];
+                    vue.courseModules.forEach(cm => courseModulesIds.push(cm.module_id))
+
+                    // Replace modules in criteria collection
+                    let modules = [];
+                    vue.criteria.forEach((c, index, collection) => {
+                        if (c.code === 'module') {
+                            collection[index].values = c.values.filter(v => {
+                                return courseModulesIds.includes(v.id)
+                            })
+                            modules = collection[index].values
+                        }
+                    })
+
+                    // Replace modules in existing segments
+
+                    vue.segments.forEach(s => {
+                        s.criteria_selected.forEach((cs, index, collection) => {
+                            if (cs.code === 'module') {
+                                collection[index].values = modules;
+                            }
+                        })
+                    })
+
+                }
             });
 
             // When model type is course, load module ids
