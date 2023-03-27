@@ -34,7 +34,7 @@
 
         <v-card v-if="activeTab === 'history'" flat class="elevation-0 --mb-4">
             <ReportsHistory
-                is-super-user="isSuperUser"
+                :is-super-user="isSuperUser"
                 :workspaceId="workspaceId"
                 :reportsBaseUrl="reportsBaseUrl"
                 :adminId="adminId"/>
@@ -595,9 +595,9 @@ export default {
     ,
     methods: {
         isSuper () {
-            let isSuper = false;
             let vue = this;
-            if (!vue.userSession.user) return isSuper;
+            this.isSuperUser = false
+            if (!vue.userSession.user) return this.isSuperUser;
             vue.userSession
                 .user
                 .roles.forEach(r => {
@@ -605,11 +605,11 @@ export default {
                     r.role_id === vue.superUserRoleId
                 );
                 if (isSuperInOneRole) {
-                    isSuper = true;
+                    this.isSuperUser = true;
                 }
             })
 
-            this.isSuperUser = isSuper
+            return this.isSuperUser
         },
         async fetchData() {
             let vue = this;
