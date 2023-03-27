@@ -32,6 +32,7 @@
         </div>
 
         <div class="row">
+            <!--
             <div v-for="(criterion, index) in criteriaInSegmentation"
                  class="col-5">
                 <v-checkbox
@@ -43,6 +44,7 @@
                     hide-details="false"
                 />
             </div>
+            -->
         </div>
         <form class="row col-md-8 col-xl-5"
               @submit.prevent="generateReport">
