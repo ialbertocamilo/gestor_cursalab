@@ -59,7 +59,7 @@
 
             <DialogConfirm
                 v-model="deleteConfirmationDialog.open"
-                width="450px"
+                width="408px"
                 title="Eliminar Tema"
                 subtitle="¿Está seguro de eliminar el tema?"
                 @onConfirm="confirmDelete"
@@ -79,7 +79,7 @@
                 :ref="topicUpdateStatusModal.ref"
                 v-model="topicUpdateStatusModal.open"
                 :options="topicUpdateStatusModal"
-                width="450px"
+                width="408px"
                 title="Cambiar de estado al curso"
                 subtitle="¿Está seguro de cambiar de estado al curso?"
                 @onConfirm="confirmUpdateStatus"

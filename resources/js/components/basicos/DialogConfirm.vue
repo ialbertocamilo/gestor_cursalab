@@ -6,6 +6,7 @@
         scrollable
         persistent
         @click:outside="closeModal"
+        :class="{}"
     >
         <v-card v-if="options">
             <v-card-title class="default-dialog-title mod_head">
@@ -15,7 +16,7 @@
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </v-card-title>
-            <v-card-text class="py-8 text-center">
+            <v-card-text class="py-8 text-center pbrmv">
                 <div class="bx_content" v-if="options.type_modal == 'status'">
                     <div class="bx_header">
                         <div class="img"><img src="/img/modal_alert.png"></div>
@@ -60,7 +61,11 @@
                         </div>
                     </div>
                     <div class="bx_details">
-                        <span v-for="(item, index) in options.content_modal.confirm.details" :key="index">{{ item }}</span>
+                        <ul>
+                            <li v-for="(item, index) in options.content_modal.confirm.details" :key="index">
+                                <span>{{ item }}</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </v-card-text>
@@ -146,6 +151,9 @@ export default {
     padding-top: 20px;
     margin-top: 20px;
 }
+.bx_details ul{
+    margin-bottom: 0;
+}
 .bx_details ul li {
     text-align: left;
     font-family: "Nunito", sans-serif;
@@ -153,6 +161,19 @@ export default {
     font-weight: 400;
     line-height: 20px;
     color: #2A3649;
+    position: relative;
+    list-style: none;
+    margin-bottom: 4px;
+}
+.bx_details ul li:before {
+    content: '';
+    position: absolute;
+    height: 5px;
+    width: 5px;
+    background: black;
+    left: -17px;
+    top: 8px;
+    border-radius: 50%;
 }
 .mod_head.v-card__title.default-dialog-title {
     display: flex;
@@ -174,5 +195,11 @@ export default {
 }
 .mod_head.v-card__title.default-dialog-title > span b {
     font-weight: 700;
+}
+.v-card__text.pbrmv {
+    padding-bottom: 5px !important;
+}
+.mod_head.v-card__title.default-dialog-title .v-btn:not(.v-btn--text):not(.v-btn--outlined):focus:before {
+    background: none !important;
 }
 </style>

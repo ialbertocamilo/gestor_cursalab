@@ -58,7 +58,7 @@
         <DialogConfirm
             :ref="modalDeleteOptions.ref"
             v-model="modalDeleteOptions.open"
-            width="450px"
+            width="408px"
             title="Eliminar Multimedia"
             subtitle="¿Está seguro de eliminar el archivo multimedia?"
             @onConfirm="confirmDelete"

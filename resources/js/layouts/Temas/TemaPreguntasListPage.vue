@@ -137,7 +137,7 @@
             <DialogConfirm
                 v-model="modalDeleteOptions.open"
                 :options="modalDeleteOptions"
-                width="450px"
+                width="408px"
                 title="Eliminar pregunta"
                 subtitle="¿Está seguro de eliminar la pregunta?"
                 @onConfirm="confirmDelete"

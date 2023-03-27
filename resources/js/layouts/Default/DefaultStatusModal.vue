@@ -3,7 +3,7 @@
         :options="options"
         @onCancel="onCancel"
         @onConfirm="onConfirm"
-        width="25vw"
+        :width="(options.width)? options.width :'25vw'"
     >
         <template v-slot:content>
             <div class="bx_content" v-if="options.content_modal">
@@ -140,6 +140,9 @@ export default {
     padding-top: 20px;
     margin-top: 20px;
 }
+.bx_details ul{
+    margin-bottom: 0;
+}
 .bx_details ul li {
     text-align: left;
     font-family: "Nunito", sans-serif;
@@ -147,5 +150,18 @@ export default {
     font-weight: 400;
     line-height: 20px;
     color: #2A3649;
+    position: relative;
+    list-style: none;
+    margin-bottom: 4px;
+}
+.bx_details ul li:before {
+    content: '';
+    position: absolute;
+    height: 5px;
+    width: 5px;
+    background: black;
+    left: -17px;
+    top: 8px;
+    border-radius: 50%;
 }
 </style>

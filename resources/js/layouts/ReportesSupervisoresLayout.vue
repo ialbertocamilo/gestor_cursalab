@@ -127,7 +127,7 @@
         </v-card>
         <DialogConfirm
             v-model="deleteDialog"
-            width="450px"
+            width="408px"
             title="Eliminar Supervisor"
             subtitle="¿Está seguro de remover al supervisor?"
             @onConfirm="confirmDeleteSupervisor"

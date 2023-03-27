@@ -298,6 +298,7 @@ export default {
                     }
                 },
                 endpoint: '',
+                width: '408px'
             },
         }
     },

@@ -210,7 +210,7 @@
             :ref="mediaDeleteModal.ref"
             v-model="mediaDeleteModal.open"
             :options="mediaDeleteModal"
-            width="450px"
+            width="408px"
             title="Eliminación de un archivo multimedia"
             subtitle="¡Estás por eliminar un archivo multimedia!"
             @onConfirm="confirmDeleteMedia"

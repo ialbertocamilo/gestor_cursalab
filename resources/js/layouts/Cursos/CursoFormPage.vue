@@ -107,7 +107,7 @@
                                     <DefaultInput
                                         numbersOnly
                                         dense
-                                        label="Inversión (S/.)"
+                                        label="Inversión"
                                         placeholder="Ej. 2000"
                                         v-model="resource.investment"
                                     />
@@ -276,9 +276,9 @@
             <DialogConfirm
                 v-model="deleteConfirmationDialog.open"
                 :options="deleteConfirmationDialog"
-                width="450px"
-                title="Cambiar de estado del Curso"
-                subtitle="¡Estas a punto cambiar la configuración de un Curso!"
+                width="408px"
+                title="Cambiar de estado del curso"
+                subtitle="¡Estás a punto cambiar la configuración de un curso!"
                 @onConfirm="confirmDelete"
                 @onCancel="deleteConfirmationDialog.open = false"
             />
@@ -382,13 +382,13 @@ export default {
             },
             deleteConfirmationDialog: {
                 open: false,
-                title_modal: 'Cambiar de estado del <b>Curso</b>',
+                title_modal: 'Cambiar de estado del <b>curso</b>',
                 type_modal: 'confirm',
                 content_modal: {
                     confirm: {
-                        title: '¡Estas a punto cambiar la configuración de un Curso!',
+                        title: '¡Estas a punto cambiar la configuración de un curso!',
                         details: [
-                            'Los usuarios con historico se mantendrán con la información y no se recalculará su status'
+                            'Los usuarios con historico se mantendrán con la información y no se recalculará su status.'
                         ],
                     }
                 },

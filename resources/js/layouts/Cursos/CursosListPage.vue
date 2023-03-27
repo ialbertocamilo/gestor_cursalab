@@ -104,7 +104,7 @@
             <DialogConfirm
                 :ref="deleteConfirmationDialog.ref"
                 v-model="deleteConfirmationDialog.open"
-                width="450px"
+                width="408px"
                 title="Eliminar Curso"
                 subtitle="¿Está seguro de eliminar el curso?"
                 @onConfirm="confirmDelete"
@@ -123,7 +123,7 @@
                 :ref="courseUpdateStatusModal.ref"
                 v-model="courseUpdateStatusModal.open"
                 :options="courseUpdateStatusModal"
-                width="450px"
+                width="408px"
                 title="Cambiar de estado al curso"
                 subtitle="¿Está seguro de cambiar de estado al curso?"
                 @onConfirm="confirmUpdateStatus"

@@ -132,7 +132,7 @@
                 :ref="courseUpdateStatusModal.ref"
                 v-model="courseUpdateStatusModal.open"
                 :options="courseUpdateStatusModal"
-                width="450px"
+                width="408px"
                 title="Cambiar de estado al curso"
                 subtitle="¿Está seguro de cambiar de estado al curso?"
                 @onConfirm="confirmUpdateStatus"

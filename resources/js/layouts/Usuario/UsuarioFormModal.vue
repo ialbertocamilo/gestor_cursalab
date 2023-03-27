@@ -13,11 +13,11 @@
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
                         <div class="header_inf">
-                            <strong>Información del usuario</strong>
+                            <strong class="cg">Información del usuario</strong>
                             <span>*Criterios obligatorios</span>
                         </div>
                     </v-col>
-                    <v-col cols="12" class="py-0">
+                    <v-col cols="12" class="py-0 separated">
                         <DefaultDivider/>
                     </v-col>
                 </v-row>
@@ -104,9 +104,9 @@
 
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
-                        <strong>Criterios obligatorios para la creación de un usuario</strong>
+                        <strong class="cg">Criterios obligatorios para la creación de un usuario</strong>
                     </v-col>
-                    <v-col cols="12" class="py-0">
+                    <v-col cols="12" class="py-0 separated">
                         <DefaultDivider/>
                     </v-col>
                 </v-row>
@@ -127,10 +127,10 @@
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                         @click="sections.showCriteria = !sections.showCriteria"
                         style="cursor: pointer">
-                        <strong>Más Criterios</strong>
+                        <strong class="cg">Más Criterios</strong>
                         <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
                     </v-col>
-                    <v-col cols="12" class="py-0">
+                    <v-col cols="12" class="py-0 separated">
                         <DefaultDivider/>
                     </v-col>
                 </v-row>
@@ -383,5 +383,62 @@ span.lbl_mas_cri {
 }
 .v-application .error--text .v-text-field__details {
     display: none;
+}
+.separated hr.v-divider {
+    border-color: #94DDDB !important;
+    margin-top: 1px !important;
+}
+.cg {
+    color: #434D56;
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+}
+.v-dialog .v-text-field .v-input__control,
+.v-dialog .v-text-field .v-input__slot,
+.v-dialog .v-text-field fieldset{
+    border-radius: 10px;
+    border-color: #D9D9D9;
+}
+.v-dialog .v-input .v-label {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+}
+.v-dialog .theme--light.v-input,
+.v-dialog .theme--light.v-input input,
+.v-dialog .theme--light.v-input textarea {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+}
+.v-dialog.v-dialog--active.v-dialog--scrollable .v-card__actions {
+    border-color: #94DDDB !important;
+}
+.v-dialog button.v-icon.notranslate.v-icon--link.mdi.mdi-close.theme--light {
+    font-size: 18px;
+}
+.v-dialog .v-card__title.default-dialog-title ::-webkit-scrollbar-thumb {
+    background-color: #7DDBD8E5 !important;
+}
+.v-dialog .v-text-field--filled>.v-input__control>.v-input__slot,
+.v-dialog .v-text-field--full-width>.v-input__control>.v-input__slot,
+.v-dialog .v-text-field--outlined>.v-input__control>.v-input__slot {
+    min-height: 50px;
+}
+.v-dialog .v-text-field--outlined .v-label {
+    top: 16px;
+}
+.v-dialog .v-list-item .v-list-item__subtitle,
+.v-dialog .v-list-item .v-list-item__title {
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+}
+.v-dialog .v-text-field--outlined .v-label--active {
+    color: #434D56 !important;
+}
+.v-dialog .v-text-field.error--text fieldset {
+    border-color: #ff5252;
+}
+.v-text-field--enclosed .v-input__append-inner button.v-icon.mdi.mdi-close{
+    top: -3px;
 }
 </style>
