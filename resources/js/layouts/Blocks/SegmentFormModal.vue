@@ -1,4 +1,4 @@
-<template>
+ <template>
     <DefaultDialog
         :options="options"
         :width="width"
@@ -13,17 +13,37 @@
                 <!--
                 Module-School breadcrumbs
                 ======================================== -->
+                <div class="row justify-center">   
 
-                <div v-if="isCourseSegmentation() && modulesSchools.length"
-                     class="card p-2">
+                    <div v-if="isCourseSegmentation() && modulesSchools.length"
+                         class="col-10">
+    <!-- 
+                         <v-expansion-panels>
+                          <v-expansion-panel
+                            title="Item"
+                            text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                          ></v-expansion-panel>
+                        </v-expansion-panels> -->
 
-                    <DefaultSimpleBreadcrumbs
-                        v-for="moduleSchool of modulesSchools"
-                        :key="moduleSchool.subworkspace_id"
-                        :breadcrumbs="[
-                        {title: moduleSchool.module_name, disabled: true},
-                        {title: moduleSchool.school_name, disabled: true},
-                    ]"/>
+                        <v-expansion-panels class="school-breadcrumb">
+                            <v-expansion-panel>
+                              <v-expansion-panel-header>
+                                Escuelas asignadas
+                              </v-expansion-panel-header>
+                              <v-expansion-panel-content>
+                                <DefaultSimpleBreadcrumbs
+                                    v-for="moduleSchool of modulesSchools"
+                                    :key="moduleSchool.subworkspace_id"
+                                    :breadcrumbs="[
+                                    {title: moduleSchool.module_name, disabled: true},
+                                    {title: moduleSchool.school_name, disabled: true},
+                                ]"/>
+                              </v-expansion-panel-content>
+                            </v-expansion-panel>
+                        </v-expansion-panels>
+
+                    </div>
+
                 </div>
 
                 <!--
@@ -34,6 +54,8 @@
                     v-model="tabs"
                     fixed-tabs
                     slider-color="primary"
+
+                    class="col-10 offset-1"
                 >
                     <v-tab>
                         {{ tabs_title }} Directa
@@ -48,9 +70,9 @@
                     <v-tab-item>
 
                         <v-row justify="space-around" v-if="!limitOne">
-                            <v-col cols="12" class="d-flex justify-content-end pr-3">
+                            <v-col cols="10" class="d-flex justify-content-end">
                                 <v-btn
-                                    class="- add-button"
+                                    class="--add-button"
                                     color="primary"
                                     @click="addSegmentation('direct-segmentation')"
                                 >
@@ -61,7 +83,7 @@
                         </v-row>
 
                         <v-row justify="space-around">
-                            <v-col cols="10" class="d-flex justify-content-center">
+                            <v-col cols="11" class="d-flex justify-content-center">
                                 <!-- hide-delimiter-background -->
                                 <v-carousel
                                     height="100%"
