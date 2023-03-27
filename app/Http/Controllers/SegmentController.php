@@ -43,7 +43,12 @@ class SegmentController extends Controller
         // $users_count = Segment::usersReached($request->model_type, $request->model_id);
         $users_count = [];
 
-        return $this->success(compact('criteria', 'segments', 'users_count'));
+        $courseModules = [];
+        if ($request->model_type === 'App\Models\Course') {
+            $courseModules = Course::getModulesFromCourseSchools($request->model_id);
+        }
+
+        return $this->success(compact('criteria', 'segments', 'users_count', 'courseModules'));
     }
 
     public function loadModulesFromCourseSchools(Request $request) {
@@ -70,9 +75,16 @@ class SegmentController extends Controller
 
         $segments = Segment::getSegmentsByModel($criteria, $request->model_type, $request->model_id);
 
+        $courseModules = [];
+        if ($request->model_type === 'App\Models\Course') {
+            $courseModules = Course::getModulesFromCourseSchools($request->model_id);
+        }
+
         // SegmentResource::collection($blocks);
 
-        return $this->success(compact('criteria', 'segments'));
+        return $this->success(
+            compact('criteria', 'segments', 'courseModules')
+        );
     }
 
     public function store(Request $request)

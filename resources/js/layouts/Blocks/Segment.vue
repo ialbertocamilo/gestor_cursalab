@@ -79,7 +79,14 @@ export default {
     components: {
         SegmentValues
     },
-    props: ["segment", "segments", "criteria", "options"],
+    props: [
+        "segment",
+        "segments",
+        "criteria",
+        "courseModules",
+        'isCourseSegmentation',
+        "options"
+    ],
     data() {
         return {
             new_criteria: [],
@@ -129,6 +136,9 @@ export default {
 
                 // vue.segments = _data.segments
                 vue.new_criteria = _data.criteria;
+
+                // console.log(vue.new_criteria)
+                // console.log(vue.courseModules)
             });
 
             return 0;
