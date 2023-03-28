@@ -26,7 +26,7 @@ class CourseObserver
      */
     public function updated(Course $course)
     {
-        if ( $course->isDirty('active') ) {
+        if ( $course->wasChanged('active') ) {
             Summary::updateUsersByCourse($course);
             // $action = $course->active ? 'actived' : 'inactived';
 

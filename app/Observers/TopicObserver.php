@@ -15,7 +15,7 @@ class TopicObserver
      */
     public function created(Topic $topic)
     {
-        if($topic->estado){
+        if($topic->active){
             Summary::updateUsersByCourse($topic->course);
         }
     }
@@ -28,7 +28,7 @@ class TopicObserver
      */
     public function updated(Topic $topic)
     {
-        if ($topic->isDirty('active') || $topic->isDirty('type_evaluation_id')) {
+        if ($topic->wasChanged('active') || $topic->wasChanged('type_evaluation_id')) {
             Summary::updateUsersByCourse($topic->course);
         }
     }
