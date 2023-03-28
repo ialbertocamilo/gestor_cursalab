@@ -595,29 +595,57 @@ class Course extends BaseModel
                     ];
                 }
 
-                $school_courses[] = [
-                    'id' => $course->id,
-//                    'nombre' => $course->name,
-                    'nombre' => $course_name,
-                    'descripcion' => $course->description,
-                    'imagen' => $course->imagen,
-                    'c_evaluable' => $course->assessable,
-                    'disponible' => ($course->compatible) ? true : $course_status['available'],
-                    'status' => ($course->compatible) ? 'aprobado' : $course_status['status'],
-                    'requirements' => $course_status['requirements'],
-                    'encuesta' => $course_status['available_poll'],
-                    'encuesta_habilitada' => $course_status['enabled_poll'],
-                    'encuesta_resuelta' => $course_status['solved_poll'],
-                    'encuesta_id' => $course_status['poll_id'],
-                    'temas_asignados' => $course_status['exists_summary_course'] ?
-                        $course_status['assigned_topics']
-                        : $topics->count(),
-                    'temas_completados' => $course_status['completed_topics'],
-                    'porcentaje' => $course_status['progress_percentage'],
-                    'tags' => $tags,
-                    'ultimo_tema_visto' => $last_topic_reviewed,
-                    'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
-                ];
+                if ($course->compatible) {
+
+                    $school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'descripcion' => $course->description,
+                        'imagen' => $course->imagen,
+                        'requisito_id' => NULL,
+                        'c_evaluable' => 0,
+                        'disponible' => true,
+                        'status' => 'aprobado',
+                        'requirements' => null,
+
+                        'encuesta' => false,
+                        'encuesta_habilitada' => false,
+                        'encuesta_resuelta' => false,
+                        'encuesta_id' => null,
+
+                        'temas_asignados' => $topics->count(),
+                        'temas_completados' => $topics->count(),
+
+                        'porcentaje' => '100.00',
+                        'ultimo_tema_visto' => $last_topic_reviewed,
+                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                    ];
+                }
+                else
+                {
+                    $school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'descripcion' => $course->description,
+                        'imagen' => $course->imagen,
+                        'c_evaluable' => $course->assessable,
+                        'disponible' => $course_status['available'],
+                        'status' => $course_status['status'],
+                        'requirements' => $course_status['requirements'],
+                        'encuesta' => $course_status['available_poll'],
+                        'encuesta_habilitada' => $course_status['enabled_poll'],
+                        'encuesta_resuelta' => $course_status['solved_poll'],
+                        'encuesta_id' => $course_status['poll_id'],
+                        'temas_asignados' => $course_status['exists_summary_course'] ?
+                            $course_status['assigned_topics']
+                            : $topics->count(),
+                        'temas_completados' => $course_status['completed_topics'],
+                        'porcentaje' => $course_status['progress_percentage'],
+                        'tags' => $tags,
+                        'ultimo_tema_visto' => $last_topic_reviewed,
+                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                    ];
+                }
             }
 
             if ($school_completed > 0) :
