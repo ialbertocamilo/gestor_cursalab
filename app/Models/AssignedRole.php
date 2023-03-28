@@ -22,9 +22,9 @@ class AssignedRole extends Model
     {
 
         return AssignedRole::query()
-            ->where('entity_type', self::USER_ENTITY)
-            ->where('entity_id', $userId)
-            ->get();
+                           ->where('entity_type', self::USER_ENTITY)
+                           ->where('entity_id', $userId)
+                           ->get();
     }
 
     /**
@@ -38,10 +38,10 @@ class AssignedRole extends Model
     {
 
         $role = DB::table('assigned_roles')
-            ->where('entity_type', self::USER_ENTITY)
-            ->where('entity_id', $userId)
-            ->where('role_id', $roleId)
-            ->first();
+                    ->where('entity_type', self::USER_ENTITY)
+                    ->where('entity_id', $userId)
+                    ->where('role_id', $roleId)
+                    ->first();
 
         return (bool)$role;
     }

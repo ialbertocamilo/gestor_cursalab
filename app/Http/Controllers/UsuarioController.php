@@ -136,7 +136,8 @@ class UsuarioController extends Controller
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
-            'criteria_template' => $criteria_template
+            'criteria_template' => $criteria_template,
+            'users_with_empty_criteria' => $workspace->users_with_empty_criteria
         ]);
     }
 
@@ -842,14 +843,14 @@ class UsuarioController extends Controller
     public function updatePasswordUser(ResetPasswordRequest $request)
     {
         $request->validated();
-        
+
         $actualPassword = $request->currpassword;
         $currentPassword = $request->password;
         $currentRePassword = $request->repassword;
 
         $user = auth()->user();
         // verficamos su actual contraseña
-        if(!Auth::attempt([ 'email' => $user->email, 
+        if(!Auth::attempt([ 'email' => $user->email,
                             'password' => $actualPassword])) {
 
             throw ValidationException::withMessages([
