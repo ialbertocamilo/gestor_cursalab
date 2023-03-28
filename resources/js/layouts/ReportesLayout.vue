@@ -590,26 +590,24 @@ export default {
         const vue = this
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData();
-        this.isSuper();
     }
     ,
     methods: {
         isSuper () {
             let vue = this;
-            this.isSuperUser = false
-            if (!vue.userSession.user) return this.isSuperUser;
+            let isSuper = false
+            if (!vue.userSession) return isSuper;
             vue.userSession
                 .user
                 .roles.forEach(r => {
-                let isSuperInOneRole = (
-                    r.role_id === vue.superUserRoleId
-                );
+                let isSuperInOneRole = (r.role_id === vue.superUserRoleId);
+
                 if (isSuperInOneRole) {
-                    this.isSuperUser = true;
+                    isSuper = true
                 }
             })
 
-            return this.isSuperUser
+            return isSuper
         },
         async fetchData() {
             let vue = this;
@@ -651,6 +649,7 @@ export default {
                 console.log(ex)
             }
 
+            vue.isSuperUser = vue.isSuper();
         },
         async crearReporte(res) {
 
