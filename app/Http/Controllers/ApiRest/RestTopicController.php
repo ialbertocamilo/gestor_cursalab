@@ -79,6 +79,8 @@ class RestTopicController extends Controller
             foreach($media_progress as $med_pro)
             {
                 $status = ($med_pro->media_topic_id == $media->id) ? 'revisado' : $med_pro->status;
+                $status_med = MediaTema::where('id',$med_pro->media_topic_id)->first();
+                $status = ($status_med->embed) ? $status : 'revisado';
                 $last_media_duration = ($med_pro->media_topic_id == $media->id) ? $request->last_media_duration : $med_pro->last_media_duration;
                 array_push($user_progress_media, (object) array('media_topic_id' => $med_pro->media_topic_id,
                 'status' => $status,
@@ -92,6 +94,8 @@ class RestTopicController extends Controller
             foreach($medias as $med)
             {
                 $status = ($med->id == $media->id) ? 'revisado' : 'por-iniciar';
+                $status_med = MediaTema::where('id',$med->id)->first();
+                $status = ($status_med->embed) ? $status : 'revisado';
                 $last_media_duration = ($med->id == $media->id) ? $request->last_media_duration : $med->last_media_duration;
                 array_push($user_progress_media, (object) array('media_topic_id' => $med->id,
                 'status'=> $status,
@@ -162,6 +166,8 @@ class RestTopicController extends Controller
             foreach($media_progress as $med_pro)
             {
                 $status = $med_pro->status ?? 'iniciado';
+                $status_med = MediaTema::where('id',$med_pro->media_topic_id)->first();
+                $status = ($status_med->embed) ? $status : 'revisado';
                 $last_media_duration = ($med_pro->media_topic_id == $media->id) ? $request->last_media_duration : $med_pro->last_media_duration;
                 array_push($user_progress_media, (object) array('media_topic_id' => $med_pro->media_topic_id,
                 'status' => $status,
@@ -175,6 +181,8 @@ class RestTopicController extends Controller
             foreach($medias as $med)
             {
                 $status = $med->status ?? 'iniciado';
+                $status_med = MediaTema::where('id',$med->id)->first();
+                $status = ($status_med->embed) ? $status : 'revisado';
                 $last_media_duration = ($med->id == $media->id) ? $request->last_media_duration : $med->last_media_duration;
                 array_push($user_progress_media, (object) array('media_topic_id' => $med->id,
                 'status'=> $status,
