@@ -172,8 +172,8 @@ class UserMassive extends Massive implements ToCollection
         $user_username_email = null;
         if (isset($user['document'])) {
             $user_username_email = User::where(function ($q) use ($user) {
-                isset($user['username']) && $q->where('username', $user['username']);
-                isset($user['email']) && $q->where('email', $user['email']);
+                isset($user['username']) && $q->orWhere('username', $user['username']);
+                isset($user['email']) && $q->orWhere('email', $user['email']);
             })->where('document', '<>', $user['document'])->select('email', 'username')->first();
         } else {
             $has_error = true;

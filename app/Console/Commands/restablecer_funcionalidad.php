@@ -15,12 +15,14 @@ use App\Models\Ticket;
 use App\Models\Visita;
 use App\Models\Abconfig;
 use App\Models\Criterio;
+use App\Models\Question;
 use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
 use Faker\Factory as Faker;
+use App\Models\AssignedRole;
 use App\Models\SummaryTopic;
 use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
@@ -29,7 +31,9 @@ use Illuminate\Console\Command;
 use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Support\ExternalDatabase;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class restablecer_funcionalidad extends Command
@@ -90,7 +94,105 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValuesFromJsonV2();
         // $this->deleteDuplicatesInSummaryCourses();
         // $this->restoreUserIdInTickets();
-        $this->restore_career();
+        // $this->setEmailGestorAdmins();
+        $this->restoreAnswerUserFromUCFP();
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
+    }
+    public function restoreAnswerUserFromUCFP(){
+        $db = ExternalDatabase::connect();
+        $db->getTable('pruebas')->where('migrado','<>',1)->select('id','posteo_id','usuario_id','usu_rptas','last_ev')
+        ->chunkById(10000, function ($pruebas){
+            $_bar = $this->output->createProgressBar(count($pruebas));
+            $_bar->start();
+            $db_2 = ExternalDatabase::connect();
+            Log::channel('soporte_log')->info("Migrado");
+            foreach ($pruebas as $prueba) {
+                $user = User::where('external_id',$prueba->usuario_id)->select('id')->first();
+                $topic =   Topic::where('external_id',$prueba->posteo_id)->select('id')->first();
+                if($user && $topic){
+                    $summary = DB::table('summary_topics')->select('id','answers','last_time_evaluated_at')
+                    ->where('user_id',$user->id)->where('topic_id',$topic->id)->first();
+                    if($summary){
+                        $summary->answers = str_replace(' ','',$summary->answers);
+                        $prueba->usu_rptas = str_replace(' ','',$prueba->usu_rptas);
+                        if($summary->answers == $prueba->usu_rptas && $summary->last_time_evaluated_at == $prueba->last_ev){
+                            $old_answers = json_decode($prueba->usu_rptas);
+                            if($old_answers){
+                                $new_answers = [];
+                                foreach ($old_answers as $answer) {
+                                    $old_question = $db_2->getTable('preguntas')->where('post_id',$prueba->posteo_id)->select('id','pregunta')->where('id',$answer->preg_id)->first();
+                                    if($old_question){
+                                        $new_id_question = Question::where('topic_id',$topic->id)->where('pregunta',$old_question->pregunta)->first();
+                                        if($new_id_question){
+                                            $new_answers[]=[
+                                                "opc"=> $answer->opc,
+                                                "preg_id" => $new_id_question->id
+                                            ];
+                                        }
+                                    }
+                                }
+                                if(count($new_answers) == count($old_answers)){
+                                    DB::table('summary_topics')->where('id',$summary->id)->update([
+                                        'answers'=> json_encode($new_answers)
+                                    ]);
+                                    $db_2->getTable('pruebas')->where('id',$prueba->id)->update([
+                                        'migrado'=> 1
+                                    ]);
+                                }else{
+                                    // Log::channel('soporte_log')->info("----");
+                                    // Log::channel('soporte_log')->info("cantidad distintos");
+                                    // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                                    // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                                    // Log::channel('soporte_log')->info($summary->answers);
+                                    // Log::channel('soporte_log')->info($prueba->usu_rptas);
+                                    // Log::channel('soporte_log')->info("----");
+                                }
+                            }
+                        }else{
+                            // Log::channel('soporte_log')->info("----");
+                            // Log::channel('soporte_log')->info("registros distintos");
+                            // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                            // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                            // Log::channel('soporte_log')->info($summary->answers);
+                            // Log::channel('soporte_log')->info($prueba->usu_rptas);
+                            // Log::channel('soporte_log')->info($summary->last_time_evaluated_at);
+                            // Log::channel('soporte_log')->info($prueba->last_ev);
+
+                            // Log::channel('soporte_log')->info("----");
+                        }
+                    }else{
+                        // Log::channel('soporte_log')->info("----");
+                        // Log::channel('soporte_log')->info("No existe summary");
+                        // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                        // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                        // Log::channel('soporte_log')->info("----");
+                    }
+                }else{
+                    // Log::channel('soporte_log')->info("----");
+                    // Log::channel('soporte_log')->info("No se encontro usuario");
+                    // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                    // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                    // Log::channel('soporte_log')->info("----");
+                }
+                $_bar->advance();
+            }
+            $_bar->finish();
+        });
+    }
+    public function setEmailGestorAdmins(){
+        $admins = AssignedRole::select('entity_id')->where('entity_type', 'App\Models\User')
+        ->groupBy('entity_id')->get();
+        foreach ($admins as $admin) {
+            $user = User::where('id',$admin->entity_id)->whereNull('secret_key')->first();
+            if($user && $user->email){
+                $user->email_gestor = $user->email;
+                $user->email = null;
+                $user->save();
+            }
+        }
+        cache_clear_model(User::class);
+        // $this->restore_career();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }

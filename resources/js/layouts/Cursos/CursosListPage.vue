@@ -266,7 +266,7 @@ export default {
             },
             filters: {
                 q: '',
-                active: null,
+                active: 1,
                 type: null,
                 // category: null
             },
