@@ -86,7 +86,7 @@
                     <!--                            item-text="name"-->
                     <!--                        />-->
                     <!--                    </v-col>-->
-                    <v-col cols="3">
+                    <!-- <v-col cols="3">
                         <DefaultSelect
                             clearable dense
                             :items="selects.sub_workspaces"
@@ -95,7 +95,7 @@
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="3">
                         <DefaultInput
                             clearable dense
@@ -106,15 +106,15 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="3">
-                        <DefaultSelect
+                    <v-col cols="5">
+                        <!-- <DefaultSelect
                             clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
-                        />
+                        /> -->
                     </v-col>
                     <v-col cols="4" class="d-flex justify-end">
 
