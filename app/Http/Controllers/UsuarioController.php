@@ -136,7 +136,8 @@ class UsuarioController extends Controller
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
-            'criteria_template' => $criteria_template
+            'criteria_template' => $criteria_template,
+            'users_with_empty_criteria' => $workspace->users_with_empty_criteria
         ]);
     }
 
@@ -843,8 +844,8 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
 
-        // dd($data);
-        
+        $request->validated();
+
         $actualPassword = $request->currpassword;
         $currentPassword = $request->password;
         $currentRePassword = $request->repassword;

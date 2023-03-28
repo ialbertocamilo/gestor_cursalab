@@ -21,7 +21,8 @@ class Workspace extends BaseModel
         'mod_evaluaciones',
         'reinicios_programado',
         'contact_support',
-        'limit_allowed_users'
+        'limit_allowed_users',
+        'users_with_empty_criteria'
     ];
 
     public function sluggable(): array

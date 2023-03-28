@@ -28,9 +28,9 @@
 </div>
 
 <div class="form-group row">
-    {{ Form::label('email', 'Email', ['class' => 'col-sm-3 form-control-label']) }}
+    {{ Form::label('email_gestor', 'Email', ['class' => 'col-sm-3 form-control-label']) }}
     <div class="col-sm-9">
-        {{ Form::email('email', null, ['class' => 'form-control']) }}
+        {{ Form::email('email_gestor', null, ['class' => 'form-control']) }}
     </div>
 </div>
 
