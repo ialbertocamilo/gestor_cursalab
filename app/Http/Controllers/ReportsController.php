@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssignedRole;
 use App\Models\GeneratedReport;
+use App\Models\Role;
 use App\Models\Taxonomy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ReportsController extends Controller
 {
@@ -19,19 +22,31 @@ class ReportsController extends Controller
      */
     public function loadReportsQueue(Request $request): JsonResponse
     {
-        // get admin workspace
+        // Checks whether current user is a super user
+
+        Auth::checK();
+        $isSuperUser = AssignedRole::hasRole(Auth::user()->id, Role::SUPER_USER);
+
+        // Gets admin workspace
 
         $workspaceId = session('workspace')->id;
 
         // Load workspace's reports queue
 
-        $reports = GeneratedReport::query()
+        $query = GeneratedReport::query()
             ->with('admin.subworkspace')
             ->where('workspace_id', $workspaceId)
             ->where('created_at', '>=', Carbon::today()->subDays(30)->toDateTimeString())
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->toArray();
+            ->orderBy('created_at', 'desc');
+
+        // Adds a condition to exclude superusers
+
+        if (!$isSuperUser) {
+            $superusersIds = AssignedRole::getSuperusersIds($workspaceId);
+            $query->whereNotIn('admin_id', $superusersIds);
+        }
+
+        $reports = $query->get()->toArray();
 
         // Load report types taxonomies
 
