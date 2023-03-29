@@ -51,18 +51,25 @@ class ResetPasswordApiController extends Controller
      */
     protected function rules()
     {
+        $field = $this->email ? 'email' : 'document';
+        $value = $this->email ? $this->email : $this->document;
+
+        $user = User::where($field, $value)->first(); 
+        $user_id = $user->id ?? NULL; 
+
         $passwordRules = [
             "required", 'confirmed', 'max:100',
             Password::min(8)->letters()->numbers()->symbols(),
 
-            "password_available:{$id}",
+            "password_available:{$user_id}",
             // ->mixedCase()->uncompromised(3),
 
             new ContextSpecificWords($this->email),
             new ContextSpecificWords($this->document),
-            // new ContextSpecificWords($this->name),
-            // new ContextSpecificWords($this->lastname),
-            // new ContextSpecificWords($this->surname),
+
+            new ContextSpecificWords($user->name ?? NULL),
+            new ContextSpecificWords($user->lastname ?? NULL),
+            new ContextSpecificWords($user->surname ?? NULL),
             
             // new RepetitiveCharacters(),
             // new SequentialCharacters(),
