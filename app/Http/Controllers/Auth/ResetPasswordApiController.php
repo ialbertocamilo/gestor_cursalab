@@ -60,11 +60,11 @@ class ResetPasswordApiController extends Controller
         $user = User::where($field, $value)->first(); 
         $user_id = $user->id ?? NULL; 
 
-        info('ResetPasswordApiController');
-        info('request->all()');
-        info(request()->all());
-        info('user');
-        info($user);
+        // info('ResetPasswordApiController');
+        // info('request->all()');
+        // info(request()->all());
+        // info('user');
+        // info($user);
 
         $passwordRules = [
             "required", 'confirmed', 'max:100',
@@ -73,8 +73,8 @@ class ResetPasswordApiController extends Controller
             "password_available:{$user_id}",
             // ->mixedCase()->uncompromised(3),
 
-            new ContextSpecificWords(request()->email),
-            new ContextSpecificWords(request()->document),
+            new ContextSpecificWords($user->email ?? NULL),
+            new ContextSpecificWords($user->document ?? NULL),
 
             new ContextSpecificWords($user->name ?? NULL),
             new ContextSpecificWords($user->lastname ?? NULL),
@@ -117,9 +117,9 @@ class ResetPasswordApiController extends Controller
                 $old_passwords[] = ['password' => bcrypt($password), 'added_at' => now()];
 
 
-                info('old_passwords');
-                info($old_passwords);
-                info(count($old_passwords));
+                // info('old_passwords');
+                // info($old_passwords);
+                // info(count($old_passwords));
 
                 if (count($old_passwords) > 4) {
                     array_shift($old_passwords);
@@ -132,9 +132,9 @@ class ResetPasswordApiController extends Controller
             }
         );
 
-        info('response');
-        info($response);
-        info(Password::PASSWORD_RESET);
+        // info('response');
+        // info($response);
+        // info(Password::PASSWORD_RESET);
 
         return response()->json([
             'success' => $response == Password::PASSWORD_RESET
