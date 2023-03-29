@@ -43,7 +43,7 @@
             	El enlace de verificación será válido por {{ $data['time'] }} minutos. Por favor no compartas este enlace con nadie.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-            	¿No reconoces esta actividad?. Por favor comunícate inmediatamente con tu 
+            	¿No reconoces esta actividad? Por favor comunícate inmediatamente con tu 
             	<a href="{{ $data['link_coordinador'] }}" style="color:#5457E7;" target="_blank"> coordinador.</a>
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
