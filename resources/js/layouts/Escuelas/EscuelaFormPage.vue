@@ -32,6 +32,20 @@
                                 show-required
                             />
                         </v-col> -->
+                        <v-col cols="6">
+                            <DefaultAutocomplete
+                                show-required
+                                :rules="rules.subworkspaces"
+                                dense
+                                label="Módulos"
+                                v-model="resource.subworkspaces"
+                                :items="selects.subworkspaces"
+                                item-text="name"
+                                item-value="id"
+                                multiple
+                                :count-show-values="4"
+                            />
+                        </v-col>
                     </v-row>
                     <v-row justify="center">
                         <v-col cols="6">
@@ -128,7 +142,7 @@
     </section>
 </template>
 <script>
-const fields = ['name', 'nombre_ciclo_0', 'active', 'position', 'config_id',
+const fields = ['name', 'nombre_ciclo_0', 'active', 'position', 'config_id', 'subworkspaces',
     'imagen', 'scheduled_restarts', 'modalidad'];
 const file_fields = ['imagen','plantilla_diploma'];
 export default {
@@ -148,6 +162,7 @@ export default {
                 file_plantilla_diploma:null,
                 position: null,
                 active: true,
+                subworkspaces: [],
                 reinicio_automatico: false,
                 reinicio_automatico_dias: null,
                 reinicio_automatico_horas: null,
@@ -157,9 +172,11 @@ export default {
             rules: {
                 name: this.getRules(['required', 'max:120']),
                 modalidad: this.getRules(['required']),
+                subworkspaces: this.getRules(['required']),
                 position: this.getRules(['number']),
             },
             selects: {
+                subworkspaces: [],
                 modalidad: [
                     {id: 'regular', nombre: 'REGULAR (dentro de malla)'},
                     {id: 'extra', nombre: 'EXTRACURRICULAR (fuera de malla)'},
@@ -250,6 +267,11 @@ export default {
             let url = `${vue.base_endpoint}/${vue.categoria_id === '' ? 'form-selects' : `search/${vue.categoria_id}`}`
             await vue.$http.get(url)
                 .then(({data}) => {
+
+                    let response = data.data ? data.data : data;
+
+                    vue.selects.subworkspaces = response.modules
+
                     if (vue.categoria_id !== '') {
                         vue.resource = Object.assign({}, data.data.escuela)
                     }

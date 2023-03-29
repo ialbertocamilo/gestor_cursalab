@@ -20,6 +20,7 @@ class EscuelaResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'image' => space_url($this->imagen),
+            'images' => $this->getModulesImages(),
             'active' => $this->active ? true : false,
             'orden' => $this->position,
 
@@ -29,5 +30,20 @@ class EscuelaResource extends JsonResource
 
             'cursos_route' => route('modulos.escuelas.cursos', [$this->config_id, $this->id]),
         ];
+    }
+
+    public function getModulesImages()
+    {
+        $data = [];
+
+        foreach($this->subworkspaces AS $module)
+        {
+            $data[] = [
+                'name' => $module->name,
+                'image' => space_url($module->logo)
+            ];
+        }
+
+        return $data;
     }
 }

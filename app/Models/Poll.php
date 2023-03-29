@@ -79,12 +79,14 @@ class Poll extends BaseModel
     }
 
     //  Functions to filters in report poll /resumen_encuesta
-    protected function loadSchools($poll_id){
+    protected function loadSchools($poll_id, $modules_id = []){
         $courses_id = DB::table('course_poll')->where('poll_id',$poll_id)->pluck('course_id');
         if(count($courses_id) == 0){
             return [];
         }
-        $scholls =  School::select('id','name')->whereHas('courses',function($q)use ($courses_id){
+        $scholls =  School::select('id','name')
+        ->whereRelationIn('subworkspaces', 'id', $modules_id)
+        ->whereHas('courses',function($q)use ($courses_id){
             $q->whereIn('id',$courses_id);
         })->get();
         return $scholls;

@@ -132,16 +132,17 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::query()
-            ->with('segments.values', function ($q) {
-                $q
-                    ->withWhereHas('criterion_value', function ($q) {
-                        $q
-                            ->select('id', 'value_text', 'criterion_id')
-                            ->whereRelation('criterion', 'code', 'module');
-                    })
-                    ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
-                    ->whereRelation('criterion', 'code', 'module');
-            })
+            ->with('schools.subworkspaces')
+            // ->with('segments.values', function ($q) {
+            //     $q
+            //         ->withWhereHas('criterion_value', function ($q) {
+            //             $q
+            //                 ->select('id', 'value_text', 'criterion_id')
+            //                 ->whereRelation('criterion', 'code', 'module');
+            //         })
+            //         ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+            //         ->whereRelation('criterion', 'code', 'module');
+            // })
             ->whereHas('workspaces', function ($t) use ($workspace) {
                 $t->where('workspace_id', $workspace->id);
             });
@@ -164,8 +165,8 @@ class Course extends BaseModel
 
             $module_value = $request->segmented_module;
 
-            $q->whereHas('segments.values', function ($q) use ($module_value) {
-                $q->where('criterion_value_id', $module_value);
+            $q->whereHas('schools.subworkspaces', function ($q) use ($module_value) {
+                $q->where('id', $module_value);
             });
 
         }
@@ -1055,5 +1056,26 @@ class Course extends BaseModel
         $compatible = $this->getCourseCompatibilityByUser($user);
 
         return $compatible ? true : false;
+    }
+
+    public static function getModulesFromCourseSchools($courseId): array
+    {
+        $course = Course::find($courseId);
+        $modules = [];
+        if ($course) {
+            $_schooldsIds = $course->schools()->pluck('id')->toArray();
+            $schooldsIds = implode(',', $_schooldsIds);
+            $modules = DB::select(DB::raw("
+                        select w.name module_name,
+                               w.criterion_value_id module_id,
+                               s.name school_name
+                        from school_subworkspace sw
+                            inner join workspaces w on sw.subworkspace_id = w.id
+                            inner join schools s on s.id = sw.school_id
+                        where school_id in ($schooldsIds)
+                    "));
+        }
+
+        return $modules;
     }
 }

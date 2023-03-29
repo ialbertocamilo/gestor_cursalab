@@ -11,7 +11,8 @@
         </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
+                <!-- <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/> -->
+                Cursos
                 <v-spacer/>
 
                 <DefaultModalButton
@@ -32,7 +33,7 @@
                             v-model="filters.segmented_module"
                             item-text="name"
                             item-value="id"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="getSchoolsAndRefreshTable()"
                         />
                     </v-col>
 
@@ -193,7 +194,7 @@ export default {
         return {
             base_endpoint: `/cursos`,
             breadcrumbs: [
-                {title: 'Segmentación', text: 'Cursos', disabled: false, href: null},
+                {title: 'Cursos', text: '', disabled: false, href: null},
                 // {title: 'Cursos', text: null, disabled: true, href: ''},
             ],
             dataTable: {
@@ -202,8 +203,9 @@ export default {
                 headers: [
                     {text: "Portada", value: "medium_image", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
-                    {text: "Módulos", value: "modules", sortable: false},
                     {text: "Escuela", value: "schools", sortable: false},
+                    // {text: "Módulos", value: "modules", sortable: false},
+                    {text: "Módulos", value: "images", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -374,6 +376,29 @@ export default {
 
     },
     methods: {
+        getSchoolsAndRefreshTable(){
+            let vue = this
+
+            vue.getSchoolSelects()
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+        },
+        getSchoolSelects() {
+            let vue = this
+
+            if (!vue.filters.segmented_module) {
+                vue.selects.schools = [];
+                vue.filters.schools = [];
+                return false;
+            }
+
+            const url = `${vue.base_endpoint}/schools/subworkspace/${vue.filters.segmented_module}/get-data`
+
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.filters.schools = [];
+                    vue.selects.schools = data.data.schools;
+                })
+        },
         getSelects() {
             let vue = this
             const url = `${vue.base_endpoint}/schools/get-data`
@@ -385,7 +410,7 @@ export default {
                     vue.selects.schools = data.data.schools;
                     vue.selects.modules = data.data.modules;
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
         },
 

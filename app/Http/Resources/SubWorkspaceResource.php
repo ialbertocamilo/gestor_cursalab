@@ -32,9 +32,11 @@ class SubWorkspaceResource extends JsonResource
             // 'escuelas_count' => (string)$sub_workspace->categorias_count,
             'users_count' => (string)thousandsFormat($sub_workspace->users_count),
             'active_users' => "$active_users / $total_users",
+
+            'schools_count' => $this->schools_count,
             // 'carreras_count' => (string)thousandsFormat($sub_workspace->carreras_count),
 
-            // 'escuelas_route' => route('escuelas.list', $sub_workspace->id),
+            'schools_route' => route('escuelas.list', ['module_id' => $sub_workspace->id]),
             'users_route' => route('usuarios.list', ['subworkspace_id' => $sub_workspace->id]),
             // 'carreras_route' => route('carreras.index'),
         ];
