@@ -36,17 +36,18 @@ class ResetPasswordRequest extends FormRequest
         return [
             'token' => 'nullable',
             'currpassword' => 'nullable|max:100|min:8|current_password',
-            'password' => ['required', 'max:100', 
-                        Password::min(8)->mixedCase()->numbers()
-                                ->symbols()->uncompromised(3),
+            'password' => ['required', 'max:100', "password_available:{$user->id}",
+                        Password::min(8)->letters()->numbers()->symbols(),
+                                // ->mixedCase()->symbols()->uncompromised(3),
 
                         new ContextSpecificWords($user->email),
+                        new ContextSpecificWords($user->email_gestor),
                         new ContextSpecificWords($user->document),
                         new ContextSpecificWords($user->name),
                         new ContextSpecificWords($user->lastname),
                         new ContextSpecificWords($user->surname),
-                        new RepetitiveCharacters(),
-                        new SequentialCharacters(),
+                        // new RepetitiveCharacters(),
+                        // new SequentialCharacters(),
                     ],
             'repassword' => 'required|max:100|min:8'
         ];
