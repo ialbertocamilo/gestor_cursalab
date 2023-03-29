@@ -102,6 +102,17 @@ class ResetPasswordApiController extends Controller
 
         $response = $this->broker()->reset(
             $this->credentials($request), function ($user, $password) {
+
+
+                $old_passwords = $user->old_passwords;
+
+                $old_passwords[] = ['password' => bcrypt($password), 'added_at' => now()];
+
+                if (count($old_passwords) > 4) {
+                    array_shift($old_passwords);
+                }
+
+                $user->old_passwords = $old_passwords;
                 $user->password = $password;
                 $user->setRememberToken(Str::random(60));
                 $user->save();

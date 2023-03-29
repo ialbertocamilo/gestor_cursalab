@@ -529,7 +529,7 @@ class AuthController extends Controller
         $credentials2['document'] = $userinput;
 
         if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
-            return $this->error('Contraseña no válida, asegurate de crear una nueva contraseña.', 422);
+            return $this->error('Contraseña no válida, asegúrate de crear una nueva contraseña.', 422);
         }
         // === prov el email a documento ===
         if(!$request->email) {
@@ -539,6 +539,16 @@ class AuthController extends Controller
         // === prov el email a documento === 
 
         $status = Password::reset($credentials, function($user, $password) {
+
+            $old_passwords = $user->old_passwords;
+
+            $old_passwords[] = ['password' => bcrypt($password), 'added_at' => now()];
+
+            if (count($old_passwords) > 4) {
+                array_shift($old_passwords);
+            }
+
+            $user->old_passwords = $old_passwords;
             $user->password = $password;
             $user->last_pass_updated_at = now(); // actualizacion de contraseña
             $user->setRememberToken(Str::random(60));

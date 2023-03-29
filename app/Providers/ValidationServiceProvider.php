@@ -75,7 +75,7 @@ class ValidationServiceProvider extends ServiceProvider
         });
 
         Validator::replacer('password_available', function($message, $attribute, $rule, $parameters) {
-            return str_replace($message, "La contraseña ya ha sido utlizada anteriormente.", $message);
+            return str_replace($message, "La contraseña ya ha sido utilizada anteriormente.", $message);
         });
 
 
