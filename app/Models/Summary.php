@@ -138,16 +138,20 @@ class Summary extends BaseModel
 
         }
     }
-    protected function updateUsersByCourse($course,$users_id = null){
+    protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false){
+        $users_id_segmented = [];
         // $course->load('segments.values');
-        $users_id_segmented = ($users_id) ? $users_id : $course->usersSegmented($course->segments,'users_id');
-        // $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course->id)->pluck('user_id')->toArray();
+        if($only_users_has_sc){
+            $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course->id)->pluck('user_id')->toArray();
+        }else{
+            $users_id_segmented = ($users_id) ? $users_id : $course->usersSegmented($course->segments,'users_id');
+        }
         $chunk_users = array_chunk($users_id_segmented,80);
         foreach ($chunk_users as $users) {
-            self::setSummaryUpdates($users,[$course->id]);
+            self::setSummaryUpdates($users,[$course->id],$summary_course_update);
         }
     }
-    protected function setSummaryUpdates($user_ids, $course_ids = null)
+    protected function setSummaryUpdates($user_ids, $course_ids = null,$summary_course_update)
     {
         $data = [
             'summary_user_update' => true,
@@ -155,7 +159,7 @@ class Summary extends BaseModel
             'is_updating'=>0
         ];
 
-        if ($course_ids) {
+        if ($course_ids && $summary_course_update) {
             $course_ids = implode(',',$course_ids);
             $data['summary_course_update'] = true;
             User::whereIn('id', $user_ids)->whereNull('summary_course_data')->update(['summary_course_data'=>'0']);

@@ -16,7 +16,7 @@ class TopicObserver
     public function created(Topic $topic)
     {
         if($topic->active){
-            Summary::updateUsersByCourse($topic->course);
+            Summary::updateUsersByCourse($topic->course,null,true,true);
         }
     }
 
@@ -29,7 +29,7 @@ class TopicObserver
     public function updated(Topic $topic)
     {
         if ($topic->wasChanged('active') || $topic->wasChanged('type_evaluation_id')) {
-            Summary::updateUsersByCourse($topic->course);
+            Summary::updateUsersByCourse($topic->course,null,true,true);
         }
     }
 
@@ -41,7 +41,7 @@ class TopicObserver
      */
     public function deleted(Topic $topic)
     {
-        Summary::updateUsersByCourse($topic->course);
+        Summary::updateUsersByCourse($topic->course,null,true,true);
     }
 
     /**

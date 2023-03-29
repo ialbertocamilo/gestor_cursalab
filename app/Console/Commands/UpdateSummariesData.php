@@ -76,7 +76,7 @@ class UpdateSummariesData extends Command
                 foreach ($courses as $course) {
 //                    $now = now();
 //                    $this->line("[{$now}] Updating course => $course->name");
-                    SummaryCourse::getCurrentRowOrCreate($course, $user);
+                    // SummaryCourse::getCurrentRowOrCreate($course, $user);
                     SummaryCourse::updateUserData($course, $user, false,false);
                 }
             }
