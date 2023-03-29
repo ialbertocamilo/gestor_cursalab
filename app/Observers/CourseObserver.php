@@ -26,8 +26,8 @@ class CourseObserver
      */
     public function updated(Course $course)
     {
-        if ( $course->isDirty('active') ) {
-            Summary::updateUsersByCourse($course);
+        if ( $course->wasChanged('active') ) {
+            Summary::updateUsersByCourse($course,null,false);
             // $action = $course->active ? 'actived' : 'inactived';
 
             // if ($course->hasBeenSegmented()) {
@@ -58,7 +58,7 @@ class CourseObserver
     public function deleted(Course $course)
     {
         if($course->active){
-            Summary::updateUsersByCourse($course);
+            Summary::updateUsersByCourse($course,null,false);
         }
         // if ($course->hasBeenSegmented()) {
 

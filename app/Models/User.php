@@ -378,6 +378,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         $user->active = $active;
+        if ($active) {
+            $data['summary_user_update'] = true;
+        }
         $user->save();
         $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
         if (!$criterion) {
@@ -409,6 +412,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
             if ($user) :
+                if ($from_massive) {
+                    $data['summary_user_update'] = true;
+                }
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
