@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Support\ExternalDatabase;
 use App\Http\Controllers\ApiRest\RestAvanceController;
+use App\Models\MediaTema;
+use App\Models\Taxonomy;
 
 class restablecer_funcionalidad extends Command
 {
@@ -96,9 +98,48 @@ class restablecer_funcionalidad extends Command
         // $this->restoreUserIdInTickets();
         // $this->setEmailGestorAdmins();
         $this->restoreAnswerUserFromUCFP();
+        // $this->generateStatusTopics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
+    public function generateStatusTopics(){
+        $status_revisado = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
+        $status_realizado= Taxonomy::getFirstData('topic', 'user-status', 'realizado');
+        $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
+        $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        $status_list = [$status_revisado?->id, $status_realizado?->id, $status_passed?->id, $status_failed?->id];
+
+        SummaryTopic::whereIn('status_id',$status_list)->chunkById(10000, function ($summary_topics) {
+
+            $_bar = $this->output->createProgressBar(count($summary_topics));
+            $_bar->start();
+            foreach ($summary_topics as $sum_top) {
+
+                $medias = MediaTema::where('topic_id', $sum_top->topic_id)->orderBy('position','ASC')->get();
+
+                $user_progress_media = array();
+                foreach($medias as $med)
+                {
+                    array_push($user_progress_media, (object) array(
+                        'media_topic_id' => $med->id,
+                        'status'=> 'revisado',
+                        'last_media_duration' => null
+                    ));
+                }
+                $sum_top->media_progress = json_encode($user_progress_media);
+                $sum_top->last_media_access = null;
+                $sum_top->last_media_duration = null;
+
+                $sum_top->save();
+
+                $_bar->advance();
+            }
+
+            $_bar->finish();
+        });
+
+    }
+
     public function restoreAnswerUserFromUCFP(){
         $db = ExternalDatabase::connect();
         $db->getTable('pruebas')->where('migrado','<>',1)->select('id','posteo_id','usuario_id','usu_rptas','last_ev')
@@ -211,7 +252,7 @@ class restablecer_funcionalidad extends Command
             if($user){
                 foreach ($criteria_to_set as $code) {
                     $criterion_values_by_code=$user->criterion_values()
-                        ->whereHas('criterion',function($q) use($code) { 
+                        ->whereHas('criterion',function($q) use($code) {
                             $q->where('code',$code);
                         })
                         ->first();
@@ -310,7 +351,7 @@ class restablecer_funcionalidad extends Command
             if($user){
                 foreach ($criteria_to_set as $code) {
                     $criterion_values_by_code=$user->criterion_values()
-                        ->whereHas('criterion',function($q) use($code) { 
+                        ->whereHas('criterion',function($q) use($code) {
                             $q->where('code',$code);
                         })
                         ->first();

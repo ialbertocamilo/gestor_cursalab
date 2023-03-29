@@ -5,11 +5,11 @@
             <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
                     Aulas Virtuales
-                    <DefaultInfoTooltip
-                        class="ml-3" 
-                        right
-                        text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
                     <v-spacer/>
+                    <DefaultInfoTooltip
+                        class="mr-5"
+                        bottom
+                        text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
                      <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
 <!--                    <v-btn icon color="primary"-->
@@ -35,7 +35,7 @@
                   />
 
 
-                    
+
 
 
                     <MeetingDirectionsModal
@@ -108,7 +108,7 @@
                                     </v-col>
 
                                 </v-row>
-                                <v-row class="justify-content-start">
+                                <v-row class="justify-content-start tableMeeting">
                                     <v-col cols="12">
                                         <DefaultTable
                                             :ref="dataTable.ref"
@@ -198,12 +198,14 @@ export default {
                 // {text: "Tipo", value: "type", sortable: false},
                 // {text: "Nombre", value: "name"},
                 {text: "Nombre", value: "custom_meeting_name", sortable: false},
-                // {text: "# Invitados", value: "attendants_count", sortable: false, align: 'center'},
                 {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
+                {text: "Participantes", value: "attendants_count", sortable: false, align: 'center'},
                 {text: "Código", value: "prefix", sortable: false, align: 'center'},
-                {text: "Estado", value: "status", sortable: false, align: 'center',},
+                {text: "Estado", value: "status_meeting", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
                 {text: "Fecha de inicio", value: "starts_at", align: 'center',},
+                {text: "Horario", value: "starts_at_horario", align: 'center',},
+                {text: "Duración", value: "starts_at_duracion", align: 'center',},
                 {text: "Opciones", value: "actions", align: 'center', sortable: false},
             ],
             actions: [
@@ -357,3 +359,35 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.tableMeeting table tbody td {
+    font-family: "Nunito", sans-serif;
+    font-weight: 400;
+    font-size: 13px !important;
+}
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:last-child,
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:not(.v-data-table__mobile-row),
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:last-child,
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:not(.v-data-table__mobile-row),
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>thead>tr:last-child>th {
+    border-bottom: 1px solid #94dddb;
+}
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>thead>tr>th {
+    font-family: "Nunito", sans-serif;
+    font-size: 13px !important;
+    font-weight: 700;
+}
+.tableMeeting button.v-icon{
+    color: #008FFB;
+}
+.tableMeeting button.v-icon.v-icon--disabled {
+    color: #94DDDB !important;
+}
+.v-tooltip__content {
+    background-color: #fff;
+    color: #5757EA;
+    border: 1px solid #5757EA;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+}
+</style>

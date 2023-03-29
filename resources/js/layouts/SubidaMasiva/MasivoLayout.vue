@@ -21,6 +21,7 @@
                 <v-row class="justify-content-start">
                     <v-col cols="12" md="5" sm="5">
                         <DefaultSelect
+                            label="Selecciona el proceso a realizar"
                             class="ml-4"
                             @onChange="change_select"
                             item-text="nombre"
@@ -29,22 +30,16 @@
                             v-model="process_id"
                         />
                     </v-col>
-                    <v-col cols="12" md="7" sm="7">
-                        <div class="mr-3 text-right">
-                            <a :href="url_template" class="btn btn-primary" download>Descargar plantilla <i
-                                class="fas fa-download ml-2"></i></a>
-                        </div>
-                    </v-col>
                 </v-row>
-                <mUsuarios :number_socket="number_socket" :key="1" v-show="process_id==1" @emitir-alert="show_alert_msg"
+                <mUsuarios :number_socket="number_socket" :key="1" :url_template="url_template" v-show="process_id==1" @emitir-alert="show_alert_msg"
                            @download-excel-observations="downloadExcelObservations"
                            @show-modal-limit-allowed-users="openModalLimitAllowedUsers($event)"/>
 
-                <ActivarUsuarios :number_socket="number_socket" :key="2" v-show="process_id==2"
+                <ActivarUsuarios :number_socket="number_socket" :key="2" :url_template="url_template" v-show="process_id==2"
                                  @emitir-alert="show_alert_msg"
                                  @show-modal-limit-allowed-users="openModalLimitAllowedUsers($event)"/>
 
-                <InactivarUsuarios :number_socket="number_socket" :key="3" v-show="process_id==3"
+                <InactivarUsuarios :number_socket="number_socket" :key="3" :url_template="url_template" v-show="process_id==3"
                                    @emitir-alert="show_alert_msg"/>
 
                 <DefaultDialog
