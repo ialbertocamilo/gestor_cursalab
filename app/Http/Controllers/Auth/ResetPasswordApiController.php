@@ -62,7 +62,7 @@ class ResetPasswordApiController extends Controller
 
         info('ResetPasswordApiController');
         info('request->all()');
-        info($request->all());
+        info(request()->all());
         info('user');
         info($user);
 
