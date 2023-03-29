@@ -132,6 +132,10 @@ class ResetPasswordApiController extends Controller
             }
         );
 
+        info('response');
+        info($response);
+        info(Password::PASSWORD_RESET);
+
         return response()->json([
             'success' => $response == Password::PASSWORD_RESET
         ]);
