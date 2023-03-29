@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use App\Models\User;
 
+use Illuminate\Validation\Rules\Password AS RulePassword;
+
 use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
@@ -60,7 +62,7 @@ class ResetPasswordApiController extends Controller
 
         $passwordRules = [
             "required", 'confirmed', 'max:100',
-            Password::min(8)->letters()->numbers()->symbols(),
+            RulePassword::min(8)->letters()->numbers()->symbols(),
 
             "password_available:{$user_id}",
             // ->mixedCase()->uncompromised(3),
