@@ -83,7 +83,7 @@
                                             <a target="_blank"
                                                 href="https://www.instagram.com/cursalab.io?utm_source=Mailing&utm_id=Instagram"
                                                 style="text-decoration: none;">
-                                                <img src="{{ url('/img/instagram-icon') }}"
+                                                <img src="{{ url('/img/instagram-icon.png') }}"
                                                     alt="Cursalab" style="max-width: 100%;" width="22px">
                                             </a>
                                         </td>
