@@ -8,6 +8,12 @@ use App\Rules\VerifyLimitAllowedUsers;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Foundation\Http\FormRequest;
 
+use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
+
 class UserStoreRequest extends FormRequest
 {
     /**
@@ -30,14 +36,22 @@ class UserStoreRequest extends FormRequest
         $id = $this->isMethod('post') ? 'NULL' : $this->segment(2);
         $pass = $this->isMethod('post') ? 'required' : 'nullable';
 
-        $piecesPass = stringConcatEqualNum([$this->document, $this->email], 4);
-        // $passwordRules = $this->isMethod('post') ? 
-        //             ['max:100', "{$pass}", 'min:8'] : 
-        //             ['max:100', "{$pass}", 
-        //                     Password::min(8)->mixedCase()
-        //                                     ->numbers()
-        //                                     ->uncompromised(3) ];
-        
+        // $piecesPass = stringConcatEqualNum([$this->document, $this->email], 4);
+        $passwordRules = $this->isMethod('post') ? 
+                    ['max:100', "{$pass}", 'min:8'] : 
+                    ['max:100', "{$pass}", 
+                        Password::min(8)->mixedCase()->numbers()
+                                ->symbols()->uncompromised(3),
+
+                        // new DerivativesOfContextSpecificWords($this->email),
+                        new ContextSpecificWords($this->email),
+                        new ContextSpecificWords($this->document),
+                        new ContextSpecificWords($this->name),
+                        new ContextSpecificWords($this->lastname),
+                        new ContextSpecificWords($this->surname),
+                        new RepetitiveCharacters(),
+                        new SequentialCharacters(),
+                    ];
 
         $rules = [
             'name' => 'required|min:3|max:255',
@@ -75,21 +89,21 @@ class UserStoreRequest extends FormRequest
         return $this->all();
     }
 
-    public function messages()
-    {
-        return [
-            'name.required' => 'El dato "nombre" es requerido',
+    // public function messages()
+    // {
+    //     return [
+    //         'name.required' => 'El campo nombre es requerido',
             
-            'password.required' => 'El dato "contraseña" es requerido',
-            'password.min' => 'El dato "contraseña" debe contener al menos 8 caracteres',
-            'password.max' => 'El dato "contraseña" no debe ser mayor a 100 caracteres',
-            'password.not_regex' => 'El dato "contraseña" no debe ser similar a tu nro de documento y/o email',
+    //         'password.required' => 'El campo contraseña es requerido',
+    //         'password.min' => 'El campo contraseña debe contener al menos 8 caracteres',
+    //         'password.max' => 'El campo contraseña no debe ser mayor a 100 caracteres',
+    //         'password.not_regex' => 'El campo contraseña no debe ser similar a tu nro de documento y/o email',
 
-            'document.unique' => 'Este documento ya ha sido registrado: intente con otro',
+    //         'document.unique' => 'Este documento ya ha sido registrado: intente con otro',
             
-            'email.required' => 'El dato "correo" es requerido',
-            'email.email' => 'El dato "correo" debe tener formato abc@ejemplo.com',
-            'email.unique' => 'Este correo ya ha sido regitrado: intente con otro'
-        ];
-    }
+    //         'email.required' => 'El campo correo es requerido',
+    //         'email.email' => 'El campo correo debe tener formato abc@ejemplo.com',
+    //         'email.unique' => 'Este correo ya ha sido regitrado: intente con otro'
+    //     ];
+    // }
 }

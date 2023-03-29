@@ -138,7 +138,8 @@ class Media extends BaseModel
 
         if (!$uploaded) {
 
-            $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public');
+            $result = Storage::disk('s3')->put($path, file_get_contents($file));
+            // $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public');
             if ($result) {
                 $uploaded = true;
             }
