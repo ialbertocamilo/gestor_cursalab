@@ -86,7 +86,7 @@
                     <!--                            item-text="name"-->
                     <!--                        />-->
                     <!--                    </v-col>-->
-                    <v-col cols="3">
+                    <!-- <v-col cols="3">
                         <DefaultSelect
                             clearable dense
                             :items="selects.sub_workspaces"
@@ -95,7 +95,7 @@
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="3">
                         <DefaultInput
                             clearable dense
@@ -106,17 +106,43 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="3">
-                        <DefaultSelect
+                    <v-col cols="5">
+                        <!-- <DefaultSelect
                             clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
-                        />
+                        /> -->
                     </v-col>
-                    <v-col cols="3" class="d-flex justify-end">
+                    <v-col cols="4" class="d-flex justify-end">
+
+                        <div
+                            v-if="usersWithEmptyCriteria"
+                            class="user-count-wrapper">
+                            <a href="/exportar/node">
+                                <v-tooltip
+                                    :top="true"
+                                    attach
+                                >
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-icon
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            size="32"
+                                            color="#E01717">
+                                            mdi-account
+                                        </v-icon>
+                                    </template>
+                                    <span v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
+                                </v-tooltip>
+
+                                <span class="count">{{ usersWithEmptyCriteria }}</span>
+                                <span class="description">Criterios vacíos</span>
+                            </a>
+                        </div>
+
                         <DefaultButton
                             label="Ver Filtros"
                             icon="mdi-filter"
@@ -181,9 +207,6 @@ import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 
-
-
-
 export default {
     components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal},
     props: {
@@ -218,6 +241,7 @@ export default {
         }
 
         return {
+            usersWithEmptyCriteria: 0,
             dataTable: {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
@@ -327,6 +351,7 @@ export default {
                     vue.selects.sub_workspaces = data.data.sub_workspaces;
                     vue.filters.subworkspace_id = parseInt(param_subworkspace);
                     vue.criteria_template = data.data.criteria_template;
+                    vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
 
                     data.data.criteria_workspace.forEach(criteria => {
 
@@ -342,7 +367,9 @@ export default {
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    if (param_subworkspace) {
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    }
                 })
 
         },
@@ -360,3 +387,35 @@ export default {
 
 }
 </script>
+
+<style>
+.user-count-wrapper {
+    position: relative;
+    width: 200px;
+}
+
+.user-count-wrapper .count {
+    height: 15px;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 20px;
+    bottom: 2px;
+    font-size: 11px;
+    padding: 0 5px 0 5px;
+    border-radius: 14px;
+    border: 1px solid white;
+    color: white;
+    background-color: #E01717;
+}
+
+.user-count-wrapper .description {
+    color: #E01717;
+}
+
+.user-count-wrapper a {
+    text-decoration: none;
+}
+
+</style>

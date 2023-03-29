@@ -22,7 +22,8 @@ class PollReportController extends Controller
     }
 
     public function loadSchools($poll_id){
-        $schools = Poll::loadSchools($poll_id);
+        $modules = request('modules');
+        $schools = Poll::loadSchools($poll_id, $modules);
         return  $this->success(compact('schools'));
     }
 

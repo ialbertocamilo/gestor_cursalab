@@ -176,4 +176,45 @@ class CriterionValue extends BaseModel
 
         return $criteria;
     }
+
+    /**
+     * Find those users who have no complete set of criteria
+     * @param $workspaceId
+     * @param $criteriaIds
+     * @return array
+     */
+    public static function findUsersWithIncompleteCriteriaValues($workspaceId, $criteriaIds): array
+    {
+        $subworkspacesIds = Workspace::loadSubWorkspacesIds($workspaceId)->toArray();
+        $query = '
+            select
+                user_id,
+                sum(criteria_count) total_criteria_count
+            from (
+                select
+                    u.id user_id,
+                    -- when a user has the same criterion with
+                    -- different values, only counts as one
+                    if (count(cv.criterion_id) >= 1, 1, 0) criteria_count
+                from
+                    users u
+                    join criterion_value_user cvu on u.id = cvu.user_id
+                    join criterion_values cv on cv.id = cvu.criterion_value_id
+                where
+                    u.active = 1
+                    and cv.active = 1
+                    and u.deleted_at is null
+                    and cv.deleted_at is null
+                    and u.subworkspace_id in ('.implode(',', $subworkspacesIds).')
+                    and cv.criterion_id in ('.implode(',', $criteriaIds).')
+
+                group by
+                  u.id, cv.criterion_id
+            ) user_criteria_count
+            group by user_id
+            having total_criteria_count < :criteriaCount';
+
+        return DB::select(DB::raw($query), ['criteriaCount' => count($criteriaIds)]);
+    }
+
 }

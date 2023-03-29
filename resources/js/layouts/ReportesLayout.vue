@@ -34,7 +34,7 @@
 
         <v-card v-if="activeTab === 'history'" flat class="elevation-0 --mb-4">
             <ReportsHistory
-                is-super-user="isSuperUser"
+                :is-super-user="isSuperUser"
                 :workspaceId="workspaceId"
                 :reportsBaseUrl="reportsBaseUrl"
                 :adminId="adminId"/>
@@ -42,11 +42,11 @@
         <v-card v-if="activeTab === 'new-report'" flat class="elevation-0 --mb-4">
             <v-tabs vertical class="reports-menu">
 
-<!--
+                <!--
 
-REPORTS TABS
+                REPORTS TABS
 
-============================================================================ -->
+                ============================================================================ -->
 
 
                 <v-tab class="justify-content-start py-7">
@@ -64,8 +64,8 @@ REPORTS TABS
                 </v-tab>
 
                 <v-tab class="justify-content-start py-7">
-                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
-                   <span class="pt-2">
+                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                    <span class="pt-2">
                        Avance de currícula
                    </span>
                 </v-tab>
@@ -98,19 +98,19 @@ REPORTS TABS
                     </span>
                 </v-tab>
 
-               <v-tab class="justify-content-start py-7">
-                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
-                   <span class="pt-2">
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                    <span class="pt-2">
                        Notas por curso
                    </span>
-               </v-tab>
+                </v-tab>
 
-               <v-tab class="justify-content-start py-7">
-                   <v-icon left>fa fa-square</v-icon>
-                   <span class="pt-2">
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>fa fa-square</v-icon>
+                    <span class="pt-2">
                        Segmentación
                    </span>
-               </v-tab>
+                </v-tab>
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
@@ -124,14 +124,14 @@ REPORTS TABS
                         Reinicios
                     </span>
                 </v-tab>
-<!--
-                <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
-                    <span class="pt-2">
-                        Versiones usadas
-                    </span>
-                </v-tab>
--->
+                <!--
+                                <v-tab class="justify-content-start py-7">
+                                    <v-icon left>mdi-access-point</v-icon>
+                                    <span class="pt-2">
+                                        Versiones usadas
+                                    </span>
+                                </v-tab>
+                -->
                 <v-tab class="justify-content-start py-7">
                     <v-icon left>mdi-file-account-outline</v-icon>
                     <span class="pt-2">
@@ -189,11 +189,18 @@ REPORTS TABS
                     </span>
                 </v-tab>
 
-<!--
+                <v-tab class="justify-content-start py-7">
+                    <v-icon left>fa fa-square</v-icon>
+                    <span class="pt-2">
+                        Criterios vacíos
+                    </span>
+                </v-tab>
 
-TABS CONTENT
+                <!--
 
-============================================================================ -->
+                TABS CONTENT
+
+                ============================================================================ -->
 
                 <v-tab-item>
                     <v-card flat>
@@ -220,18 +227,18 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item>
-                   <v-card flat>
-                       <v-card-text>
-                           <AvanceCurricula
-                               :workspaceId="workspaceId"
-                               :adminId="adminId"
-                               :modules="modules"
-                               :reportsBaseUrl="reportsBaseUrl"
-                               @generateReport="generateReport($event)"/>
-                       </v-card-text>
-                   </v-card>
-               </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <AvanceCurricula
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
                 <v-tab-item>
                     <v-card flat>
@@ -285,31 +292,31 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item>
-                   <v-card flat>
-                       <v-card-text>
-                           <NotasCurso
-                               :workspaceId="workspaceId"
-                               :adminId="adminId"
-                               :modules="modules"
-                               :reportsBaseUrl="reportsBaseUrl"
-                               @generateReport="generateReport($event)"/>
-                       </v-card-text>
-                   </v-card>
-               </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <NotasCurso
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
-               <v-tab-item>
-                   <v-card flat>
-                       <v-card-text>
-                           <Segmentacion
-                               :workspaceId="workspaceId"
-                               :adminId="adminId"
-                               :modules="modules"
-                               :reportsBaseUrl="reportsBaseUrl"
-                               @generateReport="generateReport($event)"/>
-                       </v-card-text>
-                   </v-card>
-               </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Segmentacion
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
                 <v-tab-item>
                     <v-card flat>
@@ -336,16 +343,16 @@ TABS CONTENT
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-<!--
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <VersionesUsadas :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                             @emitir-reporte="crearReporte"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
--->
+                <!--
+                                <v-tab-item>
+                                    <v-card flat>
+                                        <v-card-text>
+                                            <VersionesUsadas :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                                             @emitir-reporte="crearReporte"/>
+                                        </v-card-text>
+                                    </v-card>
+                                </v-tab-item>
+                -->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -420,7 +427,7 @@ TABS CONTENT
                                 :reportsBaseUrl="reportsBaseUrl"
 
                                 @generateReport="generateReport($event)"
-                                />
+                            />
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -445,6 +452,21 @@ TABS CONTENT
                                 :reportsBaseUrl="reportsBaseUrl"
                                 :API_REPORTES="API_REPORTES"
                                 @emitir-reporte="crearReporte"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <EmptyCriteria
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -522,9 +544,11 @@ import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
 import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
+import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
 
 export default {
     components: {
+        EmptyCriteria,
         ReportPromptModal,
         ReportsHistory,
         HistorialUsuario,
@@ -590,26 +614,24 @@ export default {
         const vue = this
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData();
-        this.isSuper();
     }
     ,
     methods: {
         isSuper () {
-            let isSuper = false;
             let vue = this;
-            if (!vue.userSession.user) return isSuper;
+            let isSuper = false
+            if (!vue.userSession) return isSuper;
             vue.userSession
                 .user
                 .roles.forEach(r => {
-                let isSuperInOneRole = (
-                    r.role_id === vue.superUserRoleId
-                );
+                let isSuperInOneRole = (r.role_id === vue.superUserRoleId);
+
                 if (isSuperInOneRole) {
-                    isSuper = true;
+                    isSuper = true
                 }
             })
 
-            this.isSuperUser = isSuper
+            return isSuper
         },
         async fetchData() {
             let vue = this;
@@ -651,6 +673,7 @@ export default {
                 console.log(ex)
             }
 
+            vue.isSuperUser = vue.isSuper();
         },
         async crearReporte(res) {
 
@@ -710,7 +733,7 @@ export default {
                 component: Vue.component('comp', {
                     template: `
                         <div>${message} <a href="javascript:"
-                                             @click.stop="clicked">Revisalo aquí</a>
+                                           @click.stop="clicked">Revisalo aquí</a>
                         </div>`,
                     methods: {
                         clicked() { this.$emit('redirect') }
@@ -883,6 +906,9 @@ button.restart-queue {
 
 
 <style scoped>
+.v-tab {
+    text-transform: capitalize !important
+}
 
 .main-tabs-wrapper {
     margin-bottom: 40px;
