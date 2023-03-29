@@ -116,6 +116,11 @@ class ResetPasswordApiController extends Controller
 
                 $old_passwords[] = ['password' => bcrypt($password), 'added_at' => now()];
 
+
+                info('old_passwords');
+                info($old_passwords);
+                info(count($old_passwords));
+
                 if (count($old_passwords) > 4) {
                     array_shift($old_passwords);
                 }
