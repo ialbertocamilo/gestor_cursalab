@@ -60,6 +60,12 @@ class ResetPasswordApiController extends Controller
         $user = User::where($field, $value)->first(); 
         $user_id = $user->id ?? NULL; 
 
+        info('ResetPasswordApiController');
+        info('request->all()');
+        info($request->all());
+        info('user');
+        info($user);
+
         $passwordRules = [
             "required", 'confirmed', 'max:100',
             RulePassword::min(8)->letters()->numbers()->symbols(),
