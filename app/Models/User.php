@@ -454,7 +454,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $criterion_list_final = [];
 
             foreach($data['criterion_list'] as $key => $val) {
-                if(!is_numeric($val)) {
+                if(!is_null($val) && !is_numeric($val) && !is_array($val)) {
                     $id_criterio = Criterion::where('code', $key)->first();
                     $id_crit_val = CriterionValue::where('value_text', $val)->where('criterion_id', $id_criterio?->id)->select('id')->first();
                     if ($id_crit_val){
@@ -476,13 +476,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 }
             }
 
+            $criterion_list_final_date = [];
+
             foreach($data['criterion_list_final'] as $crr) {
-                if(is_numeric($crr)) {
+                if(is_numeric($crr) || is_array($crr)) {
                     array_push($criterion_list_final, $crr);
                 }
             }
 
-            foreach (array_diff($data['criterion_list'],$data['criterion_list_final']) as $key => $value) {
+            foreach($data['criterion_list'] as $fcr) {
+                if(!is_null($fcr) && !is_array($fcr)) {
+                    array_push($criterion_list_final_date, $fcr);
+                }
+            }
+
+            foreach (array_diff($criterion_list_final_date, $data['criterion_list_final']) as $key => $value) {
                 array_push($criterion_list_final, $value);
             }
 
