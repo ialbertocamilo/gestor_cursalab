@@ -1248,7 +1248,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $current->save();
         }
 
-        $current['fulled_attempts'] = $fulledAttempts; 
+        $current['fulled_attempts'] = $fulledAttempts;
         return $current;
     }
 
@@ -1327,16 +1327,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if($availablePermanentBlock && !$permanent) {
             $current->timestamps = false;
-            $current->attempts = 0; 
+            $current->attempts = 0;
             $current->attempts_lock_time = NULL;
 
             $current->save();
-            
+
             return false;
         }
 
         $timeCondition = (now() <= $current->attempts_lock_time);
-                                
+
 
         if($current->attempts == $currentAttempts && $timeCondition) {
             $current['fulled_attempts'] = true;
@@ -1399,7 +1399,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function setInitialEmail()
     {
         $user = $this;
-        
+
         $user->timestamps = false;
         $user->email = '';
 
@@ -1410,9 +1410,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         $current = $user->where('document', $document)->first();
-    
+
         $current->timestamps = false;
-     
+
         if($revert) $current->email = '';
         else $current->email = $document;
 

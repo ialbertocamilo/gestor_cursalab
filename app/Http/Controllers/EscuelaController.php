@@ -39,14 +39,27 @@ class EscuelaController extends Controller
         // $school->nombre_ciclo_0 = $nombre_ciclo_0->nombre ?? null;
         $school->makeHidden('scheduled_restarts');
 
+        $school->load('subworkspaces');
+
+        $workspace = get_current_workspace();
+
+        $modules = Workspace::where('parent_id', $workspace?->id)
+            ->select('id', 'name')->get();
+
         return $this->success([
             'escuela' => $school,
+            'modules' => $modules,
         ]);
     }
 
     public function getFormSelects($compactResponse = false)
     {
-        return $compactResponse ? [] : $this->success([]);
+        $workspace = get_current_workspace();
+
+        $modules = Workspace::where('parent_id', $workspace?->id)
+            ->select('id', 'name')->get();
+
+        return $compactResponse ? [] : $this->success(compact('modules'));
     }
 
     public function store(EscuelaStoreUpdateRequest $request)
@@ -86,13 +99,13 @@ class EscuelaController extends Controller
         return $this->success(['msg' => 'Escuela eliminada correctamente.']);
     }
 
-    public function updateStatus(Abconfig $abconfig, Categoria $categoria)
-    {
-        //        return $categoria;
+    // public function updateStatus(Abconfig $abconfig, Categoria $categoria)
+    // {
+    //     //        return $categoria;
 
-        $estado = ($categoria->estado == 1) ? 0 : 1;
-        $categoria->estado = $estado;
-        $categoria->save();
-        return $this->success(['info' => 'Estado actualizado con éxito.']);
-    }
+    //     $estado = ($categoria->estado == 1) ? 0 : 1;
+    //     $categoria->estado = $estado;
+    //     $categoria->save();
+    //     return $this->success(['info' => 'Estado actualizado con éxito.']);
+    // }
 }
