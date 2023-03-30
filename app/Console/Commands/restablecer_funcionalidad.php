@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Support\ExternalDatabase;
 use App\Http\Controllers\ApiRest\RestAvanceController;
+use App\Models\MediaTema;
+use App\Models\Taxonomy;
 
 class restablecer_funcionalidad extends Command
 {
@@ -79,7 +81,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValues();
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
-        // $this->restoreSummayUser();
+        $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
@@ -95,10 +97,49 @@ class restablecer_funcionalidad extends Command
         // $this->deleteDuplicatesInSummaryCourses();
         // $this->restoreUserIdInTickets();
         // $this->setEmailGestorAdmins();
-        $this->restoreAnswerUserFromUCFP();
+        // $this->restoreAnswerUserFromUCFP();
+        // $this->generateStatusTopics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
+    public function generateStatusTopics(){
+        $status_revisado = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
+        $status_realizado= Taxonomy::getFirstData('topic', 'user-status', 'realizado');
+        $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
+        $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        $status_list = [$status_revisado?->id, $status_realizado?->id, $status_passed?->id, $status_failed?->id];
+
+        SummaryTopic::whereIn('status_id',$status_list)->chunkById(10000, function ($summary_topics) {
+
+            $_bar = $this->output->createProgressBar(count($summary_topics));
+            $_bar->start();
+            foreach ($summary_topics as $sum_top) {
+
+                $medias = MediaTema::where('topic_id', $sum_top->topic_id)->orderBy('position','ASC')->get();
+
+                $user_progress_media = array();
+                foreach($medias as $med)
+                {
+                    array_push($user_progress_media, (object) array(
+                        'media_topic_id' => $med->id,
+                        'status'=> 'revisado',
+                        'last_media_duration' => null
+                    ));
+                }
+                $sum_top->media_progress = json_encode($user_progress_media);
+                $sum_top->last_media_access = null;
+                $sum_top->last_media_duration = null;
+
+                $sum_top->save();
+
+                $_bar->advance();
+            }
+
+            $_bar->finish();
+        });
+
+    }
+
     public function restoreAnswerUserFromUCFP(){
         $db = ExternalDatabase::connect();
         $db->getTable('pruebas')->where('migrado','<>',1)->select('id','posteo_id','usuario_id','usu_rptas','last_ev')
@@ -211,7 +252,7 @@ class restablecer_funcionalidad extends Command
             if($user){
                 foreach ($criteria_to_set as $code) {
                     $criterion_values_by_code=$user->criterion_values()
-                        ->whereHas('criterion',function($q) use($code) { 
+                        ->whereHas('criterion',function($q) use($code) {
                             $q->where('code',$code);
                         })
                         ->first();
@@ -310,7 +351,7 @@ class restablecer_funcionalidad extends Command
             if($user){
                 foreach ($criteria_to_set as $code) {
                     $criterion_values_by_code=$user->criterion_values()
-                        ->whereHas('criterion',function($q) use($code) { 
+                        ->whereHas('criterion',function($q) use($code) {
                             $q->where('code',$code);
                         })
                         ->first();
@@ -772,14 +813,14 @@ class restablecer_funcionalidad extends Command
     }
     public function restoreSummayUser(){
         $i = 'Fin';
-        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])
-            ->where('active',1)
-            ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
+        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[19,20,21,22,23,24,32])
+            // ->where('active',1)
+            // ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
             ->chunkById(2500, function ($users_chunked)use($i){
-            $this->info($i);
             $_bar = $this->output->createProgressBar($users_chunked->count());
             $_bar->start();
             foreach ($users_chunked as $user) {
+                SummaryUser::getCurrentRowOrCreate($user, $user);
                 SummaryUser::updateUserData($user);
                 $_bar->advance();
             }

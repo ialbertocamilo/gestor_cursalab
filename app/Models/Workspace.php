@@ -55,7 +55,7 @@ class Workspace extends BaseModel
 
     public function schools()
     {
-        return $this->belongsToMany(School::class);
+        return $this->belongsToMany(School::class, 'school_subworkspace', 'subworkspace_id');
     }
 
     public function courses()
@@ -309,6 +309,7 @@ class Workspace extends BaseModel
     protected function searchSubWorkspace($request)
     {
         $query = self::withCount([
+            'schools',
             'users' => fn($q) => $q->onlyClientUsers(),
             'users as active_users_count' => fn($q) => $q->onlyClientUsers()->where('active', ACTIVE)
         ]);

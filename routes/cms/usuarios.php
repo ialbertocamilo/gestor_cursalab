@@ -27,6 +27,8 @@ Route::controller(UsuarioController::class)->group(function () {
 	Route::post('{user}/reset_x_tema', 'reset_x_tema')->name('usuarios.reset_x_tema');
 	Route::post('{user}/reset_x_curso', 'reset_x_curso')->name('usuarios.reset_x_curso');
 	Route::post('{user}/reset_total', 'reset_total')->name('usuarios.reset_total');
+	Route::post('{user}/reset-password', 'resetPassword')->name('usuarios.reset.password');
+
 
 	Route::get('/{user}/courses-by-user', 'getCoursesByUser');
 

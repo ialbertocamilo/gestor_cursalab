@@ -25,6 +25,8 @@ class WorkspaceResource extends JsonResource
             'logo_negativo' => FileService::generateUrl($this->logo_negativo),
             'modules_count' => Workspace::countModules($this->id),
             'users_count' => Workspace::countUsers($this->id),
+            // 'schools_count' => Workspace::countUsers($this->id),
+            // 'schools_count' => $this->schools_count,
 
             'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : 'No definido',
             'updated_at' => $this->updated_at ? $this->updated_at->format('d/m/Y g:i a') : 'No definido',

@@ -842,6 +842,8 @@ class UsuarioController extends Controller
 
     public function updatePasswordUser(ResetPasswordRequest $request)
     {
+        $data = $request->validated();
+
         $request->validated();
 
         $actualPassword = $request->currpassword;
@@ -850,17 +852,17 @@ class UsuarioController extends Controller
 
         $user = auth()->user();
         // verficamos su actual contraseña
-        if(!Auth::attempt([ 'email' => $user->email,
-                            'password' => $actualPassword])) {
+        // if(!Auth::attempt([ 'email' => $user->email, 
+        //                     'password' => $actualPassword])) {
 
-            throw ValidationException::withMessages([
-                'currpassword' => 'La contraseña actual no coincide.'
-            ]);
-        }
+        //     throw ValidationException::withMessages([
+        //         'currpassword' => 'La contraseña actual no coincide.'
+        //     ]);
+        // }
         // verficamos que no sea la misma
-        if($actualPassword === $currentPassword || $user->email === $currentPassword) {
+        if($actualPassword === $currentPassword) {
             throw ValidationException::withMessages([
-                'password' => 'La nueva contraseña debe ser diferente.',
+                'password' => 'La nueva contraseña debe ser distinta a la actual.',
             ]);
         }
 
@@ -877,4 +879,17 @@ class UsuarioController extends Controller
         ]);
     }
 
+    public function resetPassword(User $user, Request $request)
+    {
+        $data = [
+            'password' => $user->document,
+            'last_pass_updated_at' => now(),
+            'attempts' => 0,
+            'attempts_lock_time' => NULL,
+        ];
+
+        $user->update($data);
+
+        return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
+    }
 }

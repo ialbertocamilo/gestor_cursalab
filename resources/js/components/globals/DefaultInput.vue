@@ -23,6 +23,7 @@
         :suffix="suffix"
         :prefix="prefix"
         :loading="loading"
+        :autocomplete="autocomplete"
     >
         <template v-slot:append>
             <v-btn v-if="type == 'password'" width="32" height="32" plain icon 
@@ -48,6 +49,10 @@ export default {
         type: {
             type: String,
             default: 'text',
+        },
+        autocomplete: {
+            type: String,
+            default: null,
         },
         suffix: {
             type: String,

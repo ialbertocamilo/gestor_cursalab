@@ -86,7 +86,7 @@
                     <!--                            item-text="name"-->
                     <!--                        />-->
                     <!--                    </v-col>-->
-                    <v-col cols="3">
+                    <!-- <v-col cols="3">
                         <DefaultSelect
                             clearable dense
                             :items="selects.sub_workspaces"
@@ -95,7 +95,7 @@
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="3">
                         <DefaultInput
                             clearable dense
@@ -106,15 +106,15 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="3">
-                        <DefaultSelect
+                    <v-col cols="5">
+                        <!-- <DefaultSelect
                             clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
-                        />
+                        /> -->
                     </v-col>
                     <v-col cols="4" class="d-flex justify-end">
 
@@ -160,6 +160,7 @@
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
+                @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
             />
             <UsuarioFormModal
                 width="60vw"
@@ -180,6 +181,13 @@
                 :options="modalReiniciosOptions"
                 @onReinicioTotal="refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalReiniciosOptions)"
+            />
+            <UsuarioResetPasswordModal
+                width="45vw"
+                :ref="modalResetPasswordOptions.ref"
+                :options="modalResetPasswordOptions"
+                @onConfirm="closeFormModal(modalResetPasswordOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalResetPasswordOptions)"
             />
             <UsuarioCursosModal
                 width="55vw"
@@ -205,10 +213,11 @@ import UsuarioFormModal from "./UsuarioFormModal";
 import UsuarioStatusModal from "./UsuarioStatusModal";
 import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
+import UsuarioResetPasswordModal from "./UsuarioResetPasswordModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 
 export default {
-    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal},
+    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal},
     props: {
         workspace_id: {
             type: Number|String,
@@ -269,10 +278,16 @@ export default {
                         route_type: 'external'
                     },
                     {
-                        text: "Actualizar Estado",
+                        text: "Actualizar estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Restaurar contraseña",
+                        icon: 'fa fa-key',
+                        type: 'action',
+                        method_name: 'reset_password'
                     },
                 ]
             },
@@ -322,6 +337,13 @@ export default {
                 cancelLabel: 'Cerrar',
                 hideConfirmBtn: true,
             },
+            modalResetPasswordOptions: {
+                ref: 'UsuarioResetPasswordModal',
+                open: false,
+                base_endpoint: '/usuarios',
+                // cancelLabel: 'Cerrar',
+                // hideConfirmBtn: true,
+            },
             modalStatusOptions: {
                 ref: 'UsuarioStatusModal',
                 open: false,
@@ -367,7 +389,9 @@ export default {
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    if (param_subworkspace) {
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    }
                 })
 
         },

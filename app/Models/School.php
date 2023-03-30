@@ -22,6 +22,11 @@ class School extends BaseModel
         return $this->belongsToMany(Workspace::class);
     }
 
+    public function subworkspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'school_subworkspace', 'school_id', 'subworkspace_id');
+    }
+
     public function courses()
     {
         return $this->belongsToMany(Course::class);
@@ -35,13 +40,17 @@ class School extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $escuelas = School::whereRelation('workspaces', 'workspace_id', $workspace->id)
-            // whereHas('courses', function ($j) use ($courses) {
-            //     $j->whereIn('course_id', $courses->pluck('id'));
-            // })->
-            ->withCount(['courses' => function ($c) use ($workspace) {
-                $c->whereRelation('workspaces', 'id', $workspace->id);
-            }]);
+        $modules_id = $request->modules ?? $workspace->subworkspaces->pluck('id')->toArray();
+
+        $escuelas = School::
+            // whereRelation('workspaces', 'workspace_id', $workspace->id)
+            whereHas('subworkspaces', function ($j) use ($modules_id) {
+                $j->whereIn('subworkspace_id', $modules_id);
+            })
+            ->withCount(['courses']);
+            // ->withCount(['courses' => function ($c) use ($workspace) {
+            //     $c->whereRelation('workspaces', 'id', $workspace->id);
+            // }]);
 
         if ($request->q)
             $escuelas->where('name', 'like', "%$request->q%");
@@ -85,17 +94,15 @@ class School extends BaseModel
     {
         try {
 
-            $workspace = get_current_workspace();
-
             DB::beginTransaction();
 
             if ($school) :
                 $school->update($data);
             else :
                 $school = self::create($data);
-
-                $workspace->schools()->attach($school);
             endif;
+            
+            $school->subworkspaces()->sync($data['subworkspaces'] ?? []);
 
             // Generate code when is not defined
 
@@ -105,6 +112,7 @@ class School extends BaseModel
             }
 
             DB::commit();
+
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -117,5 +125,22 @@ class School extends BaseModel
         cache_clear_model(Course::class);
 
         return $school;
+    }
+
+    public function setSelectSuffixes($active_suffix = true, $subworkspaces_suffix = true)
+    {
+        if ($subworkspaces_suffix) {
+
+            $subworkspaces = implode(', ', $this->subworkspaces->pluck('codigo_matricula')->toArray());
+            
+            $this->name .= " [{$subworkspaces}]";
+        }
+
+        if ($active_suffix) {
+
+            $active = !$this->active ? " [Inactivo]" : "";
+            
+            $this->name .= "{$active}";
+        }
     }
 }
