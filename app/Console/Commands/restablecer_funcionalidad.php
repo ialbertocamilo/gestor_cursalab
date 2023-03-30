@@ -81,7 +81,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValues();
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
-        // $this->restoreSummayUser();
+        $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
@@ -97,7 +97,7 @@ class restablecer_funcionalidad extends Command
         // $this->deleteDuplicatesInSummaryCourses();
         // $this->restoreUserIdInTickets();
         // $this->setEmailGestorAdmins();
-        $this->restoreAnswerUserFromUCFP();
+        // $this->restoreAnswerUserFromUCFP();
         // $this->generateStatusTopics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
@@ -813,14 +813,14 @@ class restablecer_funcionalidad extends Command
     }
     public function restoreSummayUser(){
         $i = 'Fin';
-        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])
+        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[15,17])
             ->where('active',1)
             ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
             ->chunkById(2500, function ($users_chunked)use($i){
-            $this->info($i);
             $_bar = $this->output->createProgressBar($users_chunked->count());
             $_bar->start();
             foreach ($users_chunked as $user) {
+                SummaryUser::getCurrentRowOrCreate($user, $user);
                 SummaryUser::updateUserData($user);
                 $_bar->advance();
             }
