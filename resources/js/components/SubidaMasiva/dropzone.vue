@@ -37,7 +37,7 @@
                     accept: function(file, done) {
                         console.log(file);
                         if (file.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-                            done("Error! Files of this type are not accepted");
+                            done("El archivo no es del formato permitido");
                         }
                         else { done(); }
                     },
@@ -61,11 +61,11 @@
                 this.$emit("emitir-archivo", file);
             },
             uploadError(file, message) {
-                this.$emit("emitir-alerta", 'Ocurrió un error');
+                // this.$emit("emitir-alerta", 'Ocurrió un error');
             },
             fileRemoved() {
                 this.$emit("emitir-archivo", null);
-                this.$emit("emitir-alerta", 'Archivo removido');
+                // this.$emit("emitir-alerta", 'Archivo removido');
             },
             template: function () {
                 return `<div class="dz-preview dz-file-preview">
@@ -81,7 +81,13 @@
                             <div class="dz-inf"><span>Archivo listo para ser cargado, haz clic en confirmar</span></div>
                         </div>
                         <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-                        <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                        <div class="dz-error-message">
+                            <div class="icon_upload_error">
+                                <img src="/img/upload_error.png">
+                            </div>
+                            <div class="text_error_upload">El archivo no se ha podido cargar correctamente.</div>
+                            <span class="label_error_upload" data-dz-errormessage></span>
+                        </div>
                         <div class="dz-success-mark"><i class="fa fa-check"></i></div>
                         <div class="dz-error-mark"><i class="fa fa-close"></i></div>
                     </div>
@@ -194,6 +200,44 @@
         }
     }
     .dz-success-mark, .dz-error-message {
+        display: none !important;
+    }
+    .dropzone .dz-preview.dz-error .dz-image {
+        display: none;
+    }
+    .dropzone .dz-preview.dz-error .dz-error-message {
+        opacity: 1;
+        background: none;
+        color: red;
+        text-align: center;
+        height: 100%;
+        top: 0;
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .dropzone .dz-preview.dz-error .dz-error-message .icon_upload_error {
+        margin-top: 25px;
+    }
+    .dropzone .dz-preview.dz-error .dz-error-message .text_error_upload {
+        font-family: "Nunito", sans-serif;
+        margin-top: 25px;
+        display: flex;
+        font-size: 16px;
+        color: #FF4560;
+        line-height: 20px;
+    }
+    .dropzone .dz-preview.dz-error .dz-error-message span.label_error_upload {
+        font-family: "Nunito", sans-serif;
+        margin-top: 6px;
+        display: flex;
+        font-size: 12px;
+        color: #A9B2B9;
+        line-height: 20px;
+        font-weight: 400;
+    }
+    .dropzone .dz-preview.dz-error:hover .dz-error-message {
         display: none !important;
     }
 </style>
