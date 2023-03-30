@@ -2,7 +2,7 @@
 
 return [
     'max-uploads'=>collect([
-        ['type'=>'user_update_massive','max'=>2500],
+        ['type'=>'user_update_massive','max'=>500],
         ['type'=>'change_status_massive','max'=>2500],
         ['type'=>'upload_topic_grades_massive','max'=>6000],
     ]),
