@@ -88,9 +88,35 @@
                             class="btn_search_user"
                         />
                     </v-col>
-                    <v-col cols="5">
+                    <v-col cols="4">
                     </v-col>
-                    <v-col cols="3" class="d-flex justify-end">
+                    <v-col cols="4" class="d-flex justify-end">
+
+                        <div
+                            v-if="usersWithEmptyCriteria"
+                            class="user-count-wrapper">
+                            <a href="/exportar/node">
+                                <v-tooltip
+                                    :top="true"
+                                    attach
+                                >
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-icon
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            size="32"
+                                            color="#E01717">
+                                            mdi-account
+                                        </v-icon>
+                                    </template>
+                                    <span v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
+                                </v-tooltip>
+
+                                <span class="count">{{ usersWithEmptyCriteria }}</span>
+                                <span class="description">Criterios vacíos</span>
+                            </a>
+                        </div>
+
                         <DefaultButton
                             text
                             label="Aplicar filtros"
@@ -111,6 +137,7 @@
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
+                @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
             />
             <UsuarioFormModal
                 width="60vw"
@@ -131,6 +158,13 @@
                 :options="modalReiniciosOptions"
                 @onReinicioTotal="refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalReiniciosOptions)"
+            />
+            <UsuarioResetPasswordModal
+                width="45vw"
+                :ref="modalResetPasswordOptions.ref"
+                :options="modalResetPasswordOptions"
+                @onConfirm="closeFormModal(modalResetPasswordOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalResetPasswordOptions)"
             />
             <UsuarioCursosModal
                 width="55vw"
@@ -156,13 +190,11 @@ import UsuarioFormModal from "./UsuarioFormModal";
 import UsuarioStatusModal from "./UsuarioStatusModal";
 import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
+import UsuarioResetPasswordModal from "./UsuarioResetPasswordModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 
-
-
-
 export default {
-    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal},
+    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal},
     props: {
         workspace_id: {
             type: Number|String,
@@ -195,6 +227,7 @@ export default {
         }
 
         return {
+            usersWithEmptyCriteria: 0,
             dataTable: {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
@@ -222,10 +255,16 @@ export default {
                         route_type: 'external'
                     },
                     {
-                        text: "Actualizar Estado",
+                        text: "Actualizar estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Restaurar contraseña",
+                        icon: 'fa fa-key',
+                        type: 'action',
+                        method_name: 'reset_password'
                     },
                 ]
             },
@@ -275,6 +314,13 @@ export default {
                 cancelLabel: 'Cerrar',
                 hideConfirmBtn: true,
             },
+            modalResetPasswordOptions: {
+                ref: 'UsuarioResetPasswordModal',
+                open: false,
+                base_endpoint: '/usuarios',
+                // cancelLabel: 'Cerrar',
+                // hideConfirmBtn: true,
+            },
             modalStatusOptions: {
                 ref: 'UsuarioStatusModal',
                 open: false,
@@ -322,6 +368,7 @@ export default {
                     vue.selects.sub_workspaces = data.data.sub_workspaces;
                     vue.filters.subworkspace_id = parseInt(param_subworkspace);
                     vue.criteria_template = data.data.criteria_template;
+                    vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
 
                     data.data.criteria_workspace.forEach(criteria => {
 
@@ -337,7 +384,9 @@ export default {
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    if (param_subworkspace) {
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    }
                 })
 
         },
@@ -355,6 +404,38 @@ export default {
 
 }
 </script>
+
+<style>
+.user-count-wrapper {
+    position: relative;
+    width: 200px;
+}
+
+.user-count-wrapper .count {
+    height: 15px;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 20px;
+    bottom: 2px;
+    font-size: 11px;
+    padding: 0 5px 0 5px;
+    border-radius: 14px;
+    border: 1px solid white;
+    color: white;
+    background-color: #E01717;
+}
+
+.user-count-wrapper .description {
+    color: #E01717;
+}
+
+.user-count-wrapper a {
+    text-decoration: none;
+}
+
+</style>
 <style lang="scss">
 button.btn_add_user {
     padding-left: 20px !important;

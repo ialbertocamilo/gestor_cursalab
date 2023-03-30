@@ -11,6 +11,7 @@ use App\Models\Usuario;
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use Validator;
+use Illuminate\Support\Facades\Hash;
 
 class ValidationServiceProvider extends ServiceProvider
 {
@@ -53,6 +54,28 @@ class ValidationServiceProvider extends ServiceProvider
 
         Validator::replacer('case_diff', function($message, $attribute, $rule, $parameters) {
             return str_replace($message, "El campo debe tener minúsculas y mayúsculas.", $message);
+        });
+
+        Validator::extend('password_available', function ($attribute, $value, $parameters, $validator) {
+
+            $user_id = $parameters[0] ?? NULL;
+
+            $user = User::where('id', $user_id)->select('old_passwords')->first();
+
+            if (!$user) return true;
+            if (!$user->old_passwords) return true;
+
+            foreach ($user->old_passwords as $key => $row) {
+                if (Hash::check($value, $row['password'])) {
+                    return false;                    
+                }
+            }
+
+            return true;
+        });
+
+        Validator::replacer('password_available', function($message, $attribute, $rule, $parameters) {
+            return str_replace($message, "La contraseña ya ha sido utilizada anteriormente.", $message);
         });
 
 

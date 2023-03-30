@@ -145,7 +145,7 @@ class UserMassive extends Massive implements ToCollection
             ($dt['code'] == 'email') && $email_index = $dt['index'];
             ($dt['code'] == 'username') && $username_index = $dt['index'];
 
-            if (empty($dt['value_excel']) && $dt['required']) {
+            if (empty($dt['value_excel']) && $dt['required'] && $dt['name']) {
                 $has_error = true;
                 $errors_index[] = [
                     'index' => $dt['index'],

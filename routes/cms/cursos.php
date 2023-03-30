@@ -14,7 +14,7 @@ Route::controller(CursosController::class)->group(function() {
 	// ->middleware('permission:cursos.edit');
 
 	Route::get('/search/{course}', 'searchCurso')->name('cursos.search');
-	Route::get('/form-selects', 'getFormSelects')->name('cursos.search');
+	Route::get('/form-selects', 'getFormSelects');
 
 	Route::post('/store', 'storeCurso')->name('cursos.storeCurso');
 	Route::put('/update/{course}', 'updateCurso')->name('cursos.updateCurso');

@@ -86,7 +86,7 @@ class RestAyudaController extends Controller
                 'data' => null
             ];
 
-        } else if (is_null($name) || is_null($workspace_id) || is_null($dni) || is_null($phone)) {
+        } else if (is_null($dni) || is_null($phone)) {
 
             $response = [
                 'error' => true,

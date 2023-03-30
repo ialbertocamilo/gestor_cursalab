@@ -51,35 +51,6 @@
 
                 <v-row justify="space-around">
                     <v-col cols="4" class="d-flex justify-content-center">
-                        <!-- :rules="rules.email" -->
-                        <DefaultInput
-                            clearable
-                            v-model="resource.email"
-                            label="Correo electrónico"
-                        />
-                    </v-col>
-                    <v-col cols="4" class="d-flex justify-content-center">
-                        <DefaultInput
-                            clearable
-                            v-model="resource.document"
-                            label="Identificador*"
-                            :rules="rules.document"
-                        />
-                    </v-col>
-                    <v-col cols="4" class="d-flex justify-content-center">
-                        <DefaultInput
-                            clearable
-                            v-model="resource.password"
-                            label="Contraseña*"
-                            type="password"
-                            ref="passwordRefModal"
-                            :rules="options.action === 'edit' ? rules.password_not_required : rules.password"
-                        />
-                    </v-col>
-                </v-row>
-
-                <v-row justify="space-around">
-                    <v-col cols="4" class="d-flex justify-content-center">
                         <DefaultInput
                             clearable
                             v-model="resource.username"
@@ -99,6 +70,45 @@
                             v-model="resource.person_number"
                             label="Número de colaborador"
                         />
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around">
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <!-- :rules="rules.email" -->
+                        <DefaultInput
+                            clearable
+                            v-model="resource.email"
+                            label="Correo electrónico"
+                            autocomplete="new-email"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.document"
+                            label="Identificador"
+                            autocomplete="new-document"
+                            :rules="rules.document"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-content-center">
+                        <DefaultInput
+                            clearable
+                            v-model="resource.password"
+                            label="Contraseña"
+                            autocomplete="new-password"
+                            type="password"
+                            ref="passwordRefModal"
+                            :rules="options.action === 'edit' ? rules.password_not_required : rules.password"
+                        />
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around">
+
+                    <v-col cols="12" class="d-flex justify-content-end py-0">
+                        <a href="javascript:;" @click="openFormModal(modalPasswordOptions, null, 'status', 'Generador de contraseñas')">¿Generar contraseña?</a>
                     </v-col>
                 </v-row>
 
@@ -163,15 +173,25 @@
                 </v-row>
 
             </v-form>
+
+            <PasswordGeneratorModal
+                width="40vw"
+                :ref="modalPasswordOptions.ref"
+                :options="modalPasswordOptions"
+                @onConfirm="closeFormModal(modalPasswordOptions)"
+                @onCancel="closeFormModal(modalPasswordOptions)"
+            />
+
         </template>
     </DefaultDialog>
 </template>
 
 <script>
 import UsuarioCriteriaSection from "./UsuarioCriteriaSection";
+import PasswordGeneratorModal from "./PasswordGeneratorModal";
 
 export default {
-    components: {UsuarioCriteriaSection},
+    components: {UsuarioCriteriaSection, PasswordGeneratorModal},
     props: {
         options: {
             type: Object,
@@ -214,8 +234,16 @@ export default {
                 // email: this.getRules(['required', 'min:8']),
                 password_not_required: this.getRules([]),
             },
-            show_lbl_error_cri: false
-        }
+            show_lbl_error_cri: false,
+            modalPasswordOptions: {
+                ref: 'PasswordFormModal',
+                open: false,
+                base_endpoint: '/password',
+                resource: 'Password',
+                confirmLabel: 'Cerrar',
+                showCloseIcon: true,
+            },
+       }
     },
     mounted() {
         let vue = this

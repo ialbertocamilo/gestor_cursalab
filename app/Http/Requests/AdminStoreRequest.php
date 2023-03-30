@@ -4,6 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
+
 class AdminStoreRequest extends FormRequest
 {
     /**
@@ -26,11 +32,28 @@ class AdminStoreRequest extends FormRequest
         $id = $this->isMethod('post') ? 'NULL' : $this->segment(2);
         $pass = $this->isMethod('post') ? 'required' : 'nullable';
 
+        $passwordRules = [
+            "{$pass}", 'max:100',  
+            Password::min(8)->letters()->numbers()->symbols(),
+
+            "password_available:{$id}",
+            // ->mixedCase()->uncompromised(3),
+
+            new ContextSpecificWords($this->email_gestor),
+            // new ContextSpecificWords($this->document),
+            new ContextSpecificWords($this->name),
+            new ContextSpecificWords($this->lastname),
+            new ContextSpecificWords($this->surname),
+            // new RepetitiveCharacters(),
+            // new SequentialCharacters(),
+        ];
+
         $rules = [
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
-            'password' => "{$pass}|max:255",
+            // 'password' => "{$pass}|max:255",
+            'password' => $passwordRules,
 
             'email_gestor' => "required|email|max:255|unique:users,email_gestor,{$id},id,deleted_at,NULL",
             // 'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",

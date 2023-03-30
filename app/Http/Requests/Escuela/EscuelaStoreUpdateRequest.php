@@ -30,6 +30,7 @@ class EscuelaStoreUpdateRequest extends FormRequest
             // 'nombre_ciclo_0' => 'nullable',
             'position' => 'nullable',
             'active' => 'required',
+            'subworkspaces' => 'required',
 
             'scheduled_restarts' => 'nullable',
 

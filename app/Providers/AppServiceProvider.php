@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\Role;
 use Carbon\Carbon;
 use Bouncer;
+use \Illuminate\Database\Eloquent\Builder;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,5 +33,9 @@ class AppServiceProvider extends ServiceProvider
         //Bouncer::cache();
         // Passport::loadKeysFrom(base_path(config('passport.key_path')));
         Bouncer::useRoleModel(Role::class);
+
+        Builder::macro('whereRelationIn', function($relation, $column, $array) {
+            return $this->whereHas($relation, fn($q) => $q->whereIn($column, $array));
+        });
     }
 }

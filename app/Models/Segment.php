@@ -197,7 +197,6 @@ Segment extends BaseModel
 
             $this->storeSegmentationByDocument($request->all());
 
-            $this->updateSegmentToLaunchObeserver($request);
             DB::commit();
         } catch (\Exception $e) {
 
@@ -237,6 +236,8 @@ Segment extends BaseModel
 
     public function storeDirectSegmentation($data)
     {
+        $this->updateSegmentToLaunchObeserver($data);
+
         $segments_id = array_column($data->segments, 'id');
 
         Segment::where('model_type', $data->model_type)->where('model_id', $data->model_id)

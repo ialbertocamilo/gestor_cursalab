@@ -23,6 +23,7 @@
         :suffix="suffix"
         :prefix="prefix"
         :loading="loading"
+        :autocomplete="autocomplete"
         @focus="onFocus"
     >
         <template v-slot:append>
@@ -49,6 +50,10 @@ export default {
         type: {
             type: String,
             default: 'text',
+        },
+        autocomplete: {
+            type: String,
+            default: null,
         },
         suffix: {
             type: String,

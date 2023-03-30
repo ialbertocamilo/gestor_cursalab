@@ -90,7 +90,7 @@ class Audit extends Ledger
             try {
                 
                 // obtener modelo
-                $model = $this->extract();
+                $model = $this->extract(false);
 
                 // traer relaciones
                 $model->loadDefaultRelationships();
@@ -247,8 +247,8 @@ class Audit extends Ledger
             $query->where('recordable_type', $request->models);
         }
 
-        $field = $request->sortBy ?? 'created_at';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+        $field = $request->sortBy ?? 'id';
+        $sort = $request->sortDesc == 'true' ? 'ASC' : 'DESC';
 
         $query->orderBy($field, $sort)
               ->orderBy('id', $sort);

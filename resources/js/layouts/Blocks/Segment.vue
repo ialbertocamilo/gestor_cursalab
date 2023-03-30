@@ -29,9 +29,10 @@
                 :items="new_criteria"
                 multiple
                 item-text="name"
+                :ready-only-codes="selectedCriteriaIncludesModule() ? ['module'] : []"
                 item-id="id"
                 :count-show-values="4"
-
+                :showSelectAll="false"
                 :loading-state="true"
                 :clearable-state="true"
             />
@@ -78,7 +79,14 @@ export default {
     components: {
         SegmentValues
     },
-    props: ["segment", "segments", "criteria", "options"],
+    props: [
+        "segment",
+        "segments",
+        "criteria",
+        "courseModules",
+        'isCourseSegmentation',
+        "options"
+    ],
     data() {
         return {
             new_criteria: [],
@@ -105,7 +113,7 @@ export default {
 
             if (criterion){
                 const hasValuesSelected = criterion.hasOwnProperty('values_selected');
-                if(!hasValuesSelected) 
+                if(!hasValuesSelected)
                     criterion = Object.assign(criterion, {values_selected: []});
                 // criterion.values_selected = data.date_range_selected;
                 console.log(`CRITERION`, criterion);
@@ -128,6 +136,9 @@ export default {
 
                 // vue.segments = _data.segments
                 vue.new_criteria = _data.criteria;
+
+                // console.log(vue.new_criteria)
+                // console.log(vue.courseModules)
             });
 
             return 0;
@@ -137,6 +148,10 @@ export default {
 
             vue.$emit("borrar_segment", segment);
             vue.dialog_eliminar = false;
+        },
+        selectedCriteriaIncludesModule() {
+            let result = this.segment.criteria_selected.find(i => i.code === 'module')
+            return !!result
         }
     }
 };

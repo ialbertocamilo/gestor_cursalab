@@ -52,6 +52,8 @@ class CursosController extends Controller
     {
         $workspace = get_current_workspace();
 
+        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+
         $query = Course::whereRelation('workspaces', 'id', $workspace->id)->where('active', ACTIVE);
 
         if ($course)
@@ -59,13 +61,14 @@ class CursosController extends Controller
 
         $req_cursos = $query->get();
 
-        $escuelas = School::
-            whereRelation('workspaces', 'workspace_id', $workspace->id)
-            ->get()->map(function ($school, $key) {
-            $suffix = !$school->active ? " [Inactivo]" : "";
-            $school->name = $school->name . "{$suffix}";
-            return $school;
-        });
+        $escuelas = School::with('subworkspaces:id,name,codigo_matricula')
+            ->whereRelationIn('subworkspaces', 'id', $modules_id)
+            ->select('id', 'name', 'active')
+            ->get()
+            ->map(function ($school, $key) {
+                $school->setSelectSuffixes();
+                return $school;
+            });
 
         $requisitos = collect();
 
@@ -358,12 +361,15 @@ class CursosController extends Controller
         $workspace = get_current_workspace();
 
         $modules = Workspace::where('parent_id', $workspace->id)
-            ->select('criterion_value_id as id', 'name')
-            ->get();
+            // ->select('criterion_value_id as id', 'name')
+            ->select('id', 'name', 'codigo_matricula')
+            ->get()
+            ->map(function ($module, $key) {
+                $module->name = $module->name . " [{$module->codigo_matricula}]";
+                return $module;
+            });
 
-        $schools = School::whereRelation('workspaces', 'id', $workspace->id)
-            ->select('id', 'name')
-            ->get();
+        $schools = [];
 
         return $this->success(compact('modules', 'schools'));
     }
@@ -392,6 +398,20 @@ class CursosController extends Controller
         $school = $course->schools()->first();
 
         return $this->updateCurso($school, $course, $request);
+    }
+
+    public function getSchoolsBySubworkspace(Workspace $subworkspace)
+    {
+        $schools = School::with('subworkspaces:id,name,codigo_matricula')
+            ->whereRelation('subworkspaces', 'id', $subworkspace->id)
+            ->select('id', 'name', 'active')
+            ->get()
+            ->map(function ($school, $key) {
+                $school->setSelectSuffixes();
+                return $school;
+            });
+
+        return $this->success(compact('schools'));
     }
 
 }

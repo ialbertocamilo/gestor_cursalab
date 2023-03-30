@@ -40,6 +40,9 @@ use Spatie\Image\Manipulations;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailTemplate;
+use Lab404\Impersonate\Models\Impersonate;
+use Lab404\Impersonate\Services\ImpersonateManager;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use Bouncer;
 
@@ -59,6 +62,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     use SoftDeletes;
 
+    use Impersonate;
+
     use Cachable {
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
         Cachable::newBelongsToMany insteadof \Altek\Eventually\Eventually, CustomAudit;
@@ -72,7 +77,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
      */
     protected $fillable = [
         'name', 'lastname', 'surname', 'username', 'fullname', 'enable_2fa','last_pass_updated_at', 'attempts', 'attempts_lock_time', 'attempts_times_locks', 'slug', 'alias', 'person_number', 'phone_number',
-        'email','email_gestor','password', 'active', 'phone', 'telephone', 'birthdate',
+        'email', 'email_gestor', 'password', 'old_passwords', 'active', 'phone', 'telephone', 'birthdate',
         'type_id', 'subworkspace_id', 'job_position_id', 'area_id', 'gender_id', 'document_type_id',
         'document', 'ruc',
         'country_id', 'district_id', 'address', 'description', 'quote',
@@ -103,7 +108,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected $casts = [
         'email_verified_at' => 'datetime',
         'active' => 'boolean',
-        'user_relations' => 'array'
+        'user_relations' => 'array',
+        'old_passwords' => 'array',
     ];
 
     public function getIdentifier()
@@ -378,6 +384,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         $user->active = $active;
+        if ($active) {
+            $data['summary_user_update'] = true;
+        }
         $user->save();
         $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
         if (!$criterion) {
@@ -402,6 +411,28 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
+    protected function setPasswordData(&$data, $update_password, $user = null)
+    {
+        if ($update_password && isset($data['password'])) {
+            $data['last_pass_updated_at'] = now();
+            $data['attempts'] = 0;
+            $data['attempts_lock_time'] = NULL;
+        }
+
+        if ($update_password && $user && isset($data['password'])) {
+
+            $old_passwords = $user->old_passwords;
+
+            $old_passwords[] = ['password' => bcrypt($data['password']), 'added_at' => now()];
+
+            if (count($old_passwords) > 4) {
+                array_shift($old_passwords);
+            }
+
+            $data['old_passwords'] = $old_passwords;
+        } 
+    }
+
     protected function storeRequest($data, $user = null, $update_password = true, $from_massive = false)
     {
         try {
@@ -409,14 +440,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
             if ($user) :
+                if ($from_massive) {
+                    $data['summary_user_update'] = true;
+                }
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
-                if ($update_password && isset($data['password'])) {
-                    $data['last_pass_updated_at'] = now();
-                    $data['attempts'] = 0;
-                    $data['attempts_lock_time'] = NULL;
-                }
+
+                $this->setPasswordData($data, $update_password, $user);
+  
                 $user->update($data);
 
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
@@ -429,11 +461,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     }
                 endif;
             else :
-                if ($update_password && isset($data['password'])) {
-                    $data['last_pass_updated_at'] = now();
-                    $data['attempts'] = 0;
-                    $data['attempts_lock_time'] = NULL;
-                }
+       
+                $this->setPasswordData($data, $update_password, $user);
+
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);
@@ -1189,8 +1219,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function updatePasswordUser($password)
     {
         $user = $this;
-        $data = [ 'last_pass_updated_at' => now(),
-                  'password' => $password ];
+        $data = ['password' => $password];
+        User::setPasswordData($data, true, $user);
 
         $user->update($data);
     }
@@ -1242,7 +1272,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $current->save();
         }
 
-        $current['fulled_attempts'] = $fulledAttempts; 
+        $current['fulled_attempts'] = $fulledAttempts;
         return $current;
     }
 
@@ -1321,16 +1351,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if($availablePermanentBlock && !$permanent) {
             $current->timestamps = false;
-            $current->attempts = 0; 
+            $current->attempts = 0;
             $current->attempts_lock_time = NULL;
 
             $current->save();
-            
+
             return false;
         }
 
         $timeCondition = (now() <= $current->attempts_lock_time);
-                                
+
 
         if($current->attempts == $currentAttempts && $timeCondition) {
             $current['fulled_attempts'] = true;
@@ -1362,6 +1392,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $checkEmail = ($current->email_gestor == $request->email);
         $checkPassword = Hash::check($request->password, $current->password);
+
         if($checkEmail && $checkPassword) {
             return $this->checkCredentialsAttempts($current, $currentAttempts);
         }
@@ -1393,7 +1424,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function setInitialEmail()
     {
         $user = $this;
-        
+
         $user->timestamps = false;
         $user->email = '';
 
@@ -1404,12 +1435,62 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         $current = $user->where('document', $document)->first();
-    
+
         $current->timestamps = false;
-     
+
         if($revert) $current->email = '';
         else $current->email = $document;
 
         $current->save();
+    }
+
+    public function canImpersonate()
+    {
+        return $this->isAn('super-user');
+    }
+
+    public function canBeImpersonated()
+    {
+        return $this->isNotAn('super-user');
+    }
+
+    protected function findUserToImpersonate($value, $field, $guardName)
+    {
+        $user = User::whereNotNull('subworkspace_id')->where($field, $value)->first();
+
+        if (!$user) {
+            throw (new ModelNotFoundException())->setModel(
+                User::class,
+                $value
+            );
+        }
+
+        // if (empty($guardName)) {
+        //     $guardName = $this->app['config']->get('auth.default.guard', 'web');
+        // }
+
+        // $providerName = $this->app['config']->get("auth.guards.$guardName.provider");
+
+        // if (empty($providerName)) {
+        //     throw new MissingUserProvider($guardName);
+        // }
+
+        // try {
+        //     /** @var UserProvider $userProvider */
+        //     $userProvider = $this->app['auth']->createUserProvider($providerName);
+        // } catch (\InvalidArgumentException $e) {
+        //     throw new InvalidUserProvider($guardName);
+        // // }
+
+        // if (!($modelInstance = $userProvider->retrieveById($id))) {
+        //     $model = $this->app['config']->get("auth.providers.$providerName.model");
+
+        //     throw (new ModelNotFoundException())->setModel(
+        //         $model,
+        //         $id
+        //     );
+        // }
+
+        return $user;
     }
 }

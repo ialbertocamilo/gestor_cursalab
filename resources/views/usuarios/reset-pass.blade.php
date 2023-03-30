@@ -66,14 +66,21 @@
 
           <p> 
             <span class="text-primary">
-              {{ auth()->user()->name.' '.auth()->user()->lastname  }}
+              {{ auth()->user()->fullname }}
             </span>, elige una contraseña segura y no la utilices en otras cuentas ni la compartas con nadie.
           </p>
 
-          <p>
+        {{--   <p>
             Seguridad de la contraseña:
             Utiliza al menos <b>8</b> caracteres, varia entre <b>mayúsculas</b> y <b>minúsculas</b>, caracteres especiales <b>(#&¡!$)</b> y evita usar un nombre demasiado obvio, como el de tu mascota o un familiar.
-          </p>
+          </p> --}}
+
+          {{-- <p> --}}
+            <ul>
+              <li>Mínimo 8 caracteres, debe incluir al menos una letra, un número y un caracter especial.</li>
+              {{-- <li>No debe incluir caracteres consecutivos o repetidos (Ej: aaaa,1234,abcd).</li> --}}
+              <li>No debe incluir ningún dato personal (Ej: correo, doc. de identidad, nombres o apellidos).</li>
+            </ul>
 
         </div>
 
