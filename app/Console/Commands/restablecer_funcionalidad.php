@@ -813,7 +813,7 @@ class restablecer_funcionalidad extends Command
     }
     public function restoreSummayUser(){
         $i = 'Fin';
-        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[15,17])
+        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[19,20,21,22,23,24,32])
             // ->where('active',1)
             // ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
             ->chunkById(2500, function ($users_chunked)use($i){
