@@ -56,7 +56,7 @@
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-lg-6 col-xl-4 mb-3">
-                          <DefaultAutocomplete
+                        <DefaultAutocomplete
                             dense
                             v-model="modulo"
                             :items="modules"
@@ -67,6 +67,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
+                            @onChange="moduloChange"
                             :maxValuesSelected="4"
                         />
                     </div>
@@ -75,8 +76,8 @@
                         <DefaultAutocomplete
                             dense
                             v-model="escuela"
-                            :items="schools"
-                            :disabled="!schools[0]"
+                            :items="filteredSchools"
+                            :disabled="!filteredSchools[0]"
                             label="Escuelas"
                             item-text="name"
                             item-value="id"
@@ -89,7 +90,7 @@
                     </div>
                     <!-- Curso -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                         <DefaultAutocomplete
+                        <DefaultAutocomplete
                             dense
                             v-model="curso"
                             :items="courses"
@@ -164,8 +165,8 @@
             <!-- Fechas -->
             <div class="col-6">
                 <FechaFiltro ref="FechasFiltros"
-                    label-start="Fecha inicial de última actualización"
-                    label-end="Fecha final de última actualización" />
+                             label-start="Fecha inicial de última actualización"
+                             label-end="Fecha final de última actualización" />
             </div>
 
             <div class="col-12 pt-0">
@@ -317,6 +318,7 @@ export default {
     },
     data() {
         return {
+            filteredSchools: [],
             reportType: 'consolidado_temas',
             schools: [],
             courses: [],
@@ -433,6 +435,26 @@ export default {
             } catch (ex) {
                 console.log(ex.message)
             }
+        },
+        async moduloChange() {
+
+            let vue = this;
+
+            vue.escuela = [];
+            vue.curso = [];
+            vue.tema = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+
+                if (vue.modulo.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
         },
         /**
          * Fetch courses

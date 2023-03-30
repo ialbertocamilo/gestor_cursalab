@@ -74,6 +74,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
+                            @onChange="moduloChange"
                             :maxValuesSelected="4"
                         />
                     </div>
@@ -82,8 +83,8 @@
                         <DefaultAutocomplete
                             dense
                             v-model="escuela"
-                            :items="schools"
-                            :disabled="!schools[0]"
+                            :items="filteredSchools"
+                            :disabled="!filteredSchools[0]"
                             label="Escuelas"
                             item-text="name"
                             item-value="id"
@@ -233,13 +234,13 @@
                 <!-- Fechas -->
                 <div class="col-4 ml-auto">
                     <FechaFiltro ref="FechasFiltros"
-                        label-start="Fecha inicial de última actualización"
-                        label-end="Fecha final de última actualización"/>
+                                 label-start="Fecha inicial de última actualización"
+                                 label-end="Fecha final de última actualización"/>
                 </div>
             </div>
             <v-divider class="col-12 mb-5 p-0"></v-divider>
             <div class="col-12">
-               <FiltersNotification></FiltersNotification>
+                <FiltersNotification></FiltersNotification>
             </div>
             <div class="col-12 px-6">
                 <button
@@ -273,6 +274,7 @@ export default {
     },
     data() {
         return {
+            filteredSchools: [],
             reportType: 'consolidado_cursos',
             schools: [],
             courses: [],
@@ -383,6 +385,26 @@ export default {
             })
 
             this.areas = response.data
+        },
+        async moduloChange() {
+
+            let vue = this;
+
+            vue.escuela = [];
+            vue.curso = [];
+            vue.tema = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+
+                if (vue.modulo.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
         },
         async escuelaChange() {
             this.curso = [];
