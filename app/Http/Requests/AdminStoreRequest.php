@@ -10,6 +10,8 @@ use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWor
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
 
+use Illuminate\Validation\Rules\Password;
+
 class AdminStoreRequest extends FormRequest
 {
     /**
