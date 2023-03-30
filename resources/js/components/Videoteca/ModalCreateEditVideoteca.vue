@@ -94,7 +94,7 @@
                             />
                         </div>
 
-                        <div class="d-flex flex-column" v-else>
+                        <div class="d-flex flex-column h-dropzone" v-else>
 
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputMedia"
@@ -113,7 +113,7 @@
                             v-model="resource.preview"
                             label="Previsualización"
                             :file-types="['image']"
-                            description="Esta publicación tendrá una imagen de portada por defecto, pero si deseas puedes subir una imagen personalizada (Recomendado: 500x350 píxeles)"
+                            description="Tiene una portada por defecto. Puedes asignar otra de <b>500 x 350 px - max. 10 Mb.</b>"
                             @onSelect="setFile($event, resource, 'preview')"/>
                     </v-col>
 
@@ -413,3 +413,8 @@ export default {
 
 };
 </script>
+<style lang="scss">
+.h-dropzone .editor .dropzone{
+    max-height: 190px;
+}
+</style>

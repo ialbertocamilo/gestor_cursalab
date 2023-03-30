@@ -164,8 +164,13 @@ export default {
 }
 .bx_details {
     border-top: 1px solid #D9D9D9;
-    padding-top: 20px;
+    padding-top: 15px;
     margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.bx_details ul{
+    margin-bottom: 0;
 }
 .bx_details ul li {
     text-align: left;
@@ -174,6 +179,16 @@ export default {
     font-weight: 400;
     line-height: 20px;
     color: #2A3649;
+}
+.bx_details ul li:before {
+    content: '';
+    position: absolute;
+    height: 5px;
+    width: 5px;
+    background: black;
+    left: -17px;
+    top: 8px;
+    border-radius: 50%;
 }
 .mod_head.v-card__title.default-dialog-title {
     display: flex;

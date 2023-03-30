@@ -100,7 +100,7 @@
                                             clearable
                                             v-model="filters.q"
                                             dense
-                                            label="Buscar por nombre..."
+                                            label="Buscar por nombre"
                                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                                             append-icon="mdi-magnify"
@@ -203,9 +203,9 @@ export default {
                 {text: "Código", value: "prefix", sortable: false, align: 'center',tooltip: 'Puedes ingresar este código para validar que el usuario ingreso a la reunión desde nuestra plataforma.'},
                 {text: "Estado", value: "status_meeting", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
-                {text: "Fecha de inicio", value: "starts_at", align: 'center',},
-                {text: "Horario", value: "starts_at_horario", align: 'center',},
-                {text: "Duración", value: "starts_at_duracion", align: 'center',},
+                {text: "Fecha de inicio", value: "starts_at", align: 'center', sortable: false,},
+                {text: "Horario", value: "starts_at_horario", align: 'center', sortable: false,},
+                {text: "Duración", value: "starts_at_duracion", align: 'center', sortable: false,},
                 {text: "Opciones", value: "actions", align: 'center', sortable: false},
             ],
             actions: [

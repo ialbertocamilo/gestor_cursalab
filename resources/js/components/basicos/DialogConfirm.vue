@@ -148,8 +148,10 @@ export default {
 }
 .bx_details {
     border-top: 1px solid #D9D9D9;
-    padding-top: 20px;
+    padding-top: 15px;
     margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 .bx_details ul{
     margin-bottom: 0;

@@ -175,6 +175,7 @@ export default {
                         ]
                     }
                 },
+                width: '408px'
             },
             modalDeleteOptions: {
                 ref: 'AnuncioDeleteModal',
@@ -191,6 +192,7 @@ export default {
                         ],
                     }
                 },
+                width: '408px'
             },
         }
     },

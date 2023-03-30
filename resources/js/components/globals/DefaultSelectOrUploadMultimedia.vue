@@ -4,7 +4,7 @@
             <legend>{{ label }}</legend>
 
             <v-card elevation="0" class="mx-4" v-if="description">
-                <small v-text="description"/>
+                <small class="text_desc" v-html="description"/>
             </v-card>
 
             <!-- AAAA {{ fileSelected }}  -->
@@ -215,5 +215,12 @@ span.media-tag {
     cursor: pointer !important;
     border-radius: 3px;
 }
-
+.text_desc {
+    font-family: "Nunito", sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    color: #434D56;
+    min-height: 45px;
+    display: inline-block;
+}
 </style>

@@ -58,6 +58,12 @@ body::-webkit-scrollbar-thumb {
 .minw408 {
     min-width: 408px;
 }
+.theme--light.v-text-field--outlined:not(.v-input--is-focused):not(.v-input--has-state) > .v-input__control > .v-input__slot fieldset {
+    border-color: #D9D9D9;
+}
+.v-chip .v-chip__content button.v-icon.mdi-close-circle{
+    top: -2px;
+}
 .v-date-picker-table {
 	height: auto !important;
 }
