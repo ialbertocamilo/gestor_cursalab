@@ -156,7 +156,8 @@ export default {
 .bx_details ul{
     margin-bottom: 0;
 }
-.bx_details ul li {
+.bx_details ul li,
+.bx_details ul li a {
     text-align: left;
     font-family: "Nunito", sans-serif;
     font-size: 16px;
@@ -166,6 +167,9 @@ export default {
     position: relative;
     list-style: none;
     margin-bottom: 4px;
+}
+.bx_details ul li a {
+    color: #5558EA;
 }
 .bx_details ul li:before {
     content: '';

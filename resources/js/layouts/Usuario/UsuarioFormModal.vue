@@ -168,7 +168,7 @@
                         <span class="lbl_error_cri" v-show="show_lbl_error_cri">*Debes completar todos los criterios obligatorios.</span>
                     </v-col>
                     <v-col cols="3" class="rem-m">
-                        <DefaultToggle v-model="resource.active" pre_label="Usuario"/>
+                        <DefaultToggle v-model="resource.active" pre_label="Usuario" @onChange="modalStatusEdit"/>
                     </v-col>
                 </v-row>
 
@@ -182,6 +182,18 @@
                 @onCancel="closeFormModal(modalPasswordOptions)"
             />
 
+
+            <DialogConfirm
+                :ref="updateStatusModal.ref"
+                v-model="updateStatusModal.open"
+                :options="updateStatusModal"
+                width="408px"
+                title="Cambiar de estado al usuario"
+                subtitle="¿Está seguro de cambiar de estado al usuario?"
+                @onConfirm="updateStatusModal.open = false"
+                @onCancel="closeModalStatusEdit"
+            />
+
         </template>
     </DefaultDialog>
 </template>
@@ -189,9 +201,10 @@
 <script>
 import UsuarioCriteriaSection from "./UsuarioCriteriaSection";
 import PasswordGeneratorModal from "./PasswordGeneratorModal";
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
-    components: {UsuarioCriteriaSection, PasswordGeneratorModal},
+    components: {UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm},
     props: {
         options: {
             type: Object,
@@ -243,6 +256,33 @@ export default {
                 confirmLabel: 'Cerrar',
                 showCloseIcon: true,
             },
+            updateStatusModal: {
+                ref: 'UsuarioUpdateStatusModal',
+                title: 'Actualizar usuario',
+                open: false,
+                endpoint: '',
+                title_modal: 'Cambio de estado de <b>usuario</b>',
+                type_modal: 'status',
+                status_item_modal: null,
+                contentText: '¿Desea cambiar de estado a este registro?',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un usuario!',
+                        details: [
+                            'El usuario no podrá ingresar a la plataforma.',
+                            'Podrá enviar solicitudes desde la sección de ayuda del Log in.',
+                            'Aparecerá en los reportes y consultas con el estado inactivo.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un usuario!',
+                        details: [
+                            'El usuario ahora podrá ingresar a la plataforma.',
+                            'Podrá rendir los cursos, de estar segmentado.'
+                        ]
+                    }
+                },
+            },
        }
     },
     mounted() {
@@ -262,6 +302,19 @@ export default {
             vue.resetFormValidation('UsuarioForm');
             vue.errors = [];
             vue.$refs.passwordRefModal.resetTypePassword();
+        },
+        closeModalStatusEdit(){
+            let vue = this
+            vue.updateStatusModal.open = false
+            vue.resource.active = !vue.resource.active
+        },
+        modalStatusEdit(){
+            let vue = this
+            const edit = vue.options.action === 'edit'
+            if(edit){
+                vue.updateStatusModal.open = true
+                vue.updateStatusModal.status_item_modal = !vue.resource.active
+            }
         },
         async confirmModal() {
             let vue = this

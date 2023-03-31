@@ -130,7 +130,7 @@
                 @onCancel="courseUpdateStatusModal.open = false"
             />
             <CourseValidationsUpdateStatus
-                width="50vw"
+                width="408px"
                 :ref="courseValidationModalUpdateStatus.ref"
                 :options="courseValidationModalUpdateStatus"
                 @onCancel="closeFormModal(courseValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
@@ -470,6 +470,16 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(error => {
+                    if (error && error.errors){
+                        if(error.data.validations.list){
+                            error.data.validations.list.forEach(element => {
+                                if(element.type == "has_active_topics" && error.data.validations.list.length == 1){
+                                    vue.courseValidationModalUpdateStatus.title_modal = 'Cambio de estado de un <b>curso</b>';
+                                    vue.courseValidationModalUpdateStatus.content_modal.requirement.title = '¡Estás por desactivar un curso!';
+                                }
+                            });
+                        }
+                    }
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
