@@ -23,7 +23,7 @@ class LoginAppImpersonationRequest extends FormRequest
      */
     public function rules()
     {
-        $fields = config('impersonation.fields');
+        $fields = config('app.impersonation.fields');
 
         $data = [];
 

@@ -15,15 +15,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Hash;
 
 class AuthImpersonationController extends Controller
 {
     public function getData()
     {
         $data = [
-            'enabled' => config('impersonation.enabled'),
-            'fields' => config('impersonation.fields'),
-            'button' => config('impersonation.button'),
+            'enabled' => config('app.impersonation.enabled'),
+            'fields' => config('app.impersonation.fields'),
+            'button' => config('app.impersonation.button'),
         ];
 
         return compact('data');
@@ -35,22 +36,24 @@ class AuthImpersonationController extends Controller
 
             $data = $request->validated();
 
-            $enabled = config('impersonation.enabled');
-            $code = config('impersonation.code') || $this->getDefaultCode();
+            $enabled = config('app.impersonation.enabled');
+            $code = config('app.impersonation.code') ?? $this->getDefaultCode();
 
-            if (!$enabled || $code != $data['code']) return ['status' => 'success', 'message' => Inspiring::quote()];
+            if (!$enabled) return ['status' => 'success', 'message' => Inspiring::quote(), 'step' => 1];
+
+            if ($code != strtolower($data['code'])) return ['status' => 'success', 'message' => Inspiring::quote(), 'step' => 2];
 
             $admin = User::where('email_gestor', $data['username'])->where('active', ACTIVE)->first();
 
-            if (!$admin || $admin->isNotAn('super-user', 'admin')) return ['status' => 'success', 'message' => Inspiring::quote()];
+            if (!$admin || $admin->isNotAn('super-user', 'admin')) return ['status' => 'success', 'message' => Inspiring::quote(), 'step' => 3];
 
             $checkPassword = Hash::check($data['password'], $admin->password);
 
-            if (!$checkPassword) return ['status' => 'success', 'message' => Inspiring::quote()];
+            if (!$checkPassword) return ['status' => 'success', 'message' => Inspiring::quote(), 'step' => 4];
 
             $user = User::where('document', $data['document'])->first();
 
-            if (!$user) return ['status' => 'success', 'message' => Inspiring::quote()];
+            if (!$user) return ['status' => 'success', 'message' => Inspiring::quote(), 'step' => 5];
 
             // Auth::login($user);
 
@@ -60,9 +63,11 @@ class AuthImpersonationController extends Controller
 
             return response()->json($responseUserData); 
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
-            Error::storeAndNotificateException($e, request());
+            dd($e);
+
+            // Error::storeAndNotificateException($e, request());
 
             return ['status' => 'error', 'message' => Inspiring::quote()];
         }
@@ -138,6 +143,19 @@ class AuthImpersonationController extends Controller
             'config_data' => $config_data,
             'usuario' => $user_data
         ];
+    }
+
+    public function getDefaultCode()
+    {
+        $months = config('data.months');
+
+        $current_day = date('j');
+        $current_month = date('n');
+        $current_year = date('Y');
+
+        $month = strtolower($months[$current_month]);
+
+        return "{$current_day}{$month}{$current_year}";
     }
 
 }

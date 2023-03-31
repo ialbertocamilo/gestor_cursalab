@@ -46,7 +46,7 @@ return [
 
     'impersonation' => [
         'enabled' => env('APP_IMPERSONATION_ENABLED', false),
-        'passphrase' => env('APP_IMPERSONATION_CODE'),
+        'code' => env('APP_IMPERSONATION_CODE'),
         'fields' => [
             ['name' => 'username', 'label' => 'Usuario' , 'hidden' => false, 'required' => true],
             ['name' => 'password', 'label' => 'Contraseña' , 'hidden' => true, 'required' => true],
