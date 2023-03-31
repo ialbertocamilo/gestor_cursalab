@@ -42,6 +42,23 @@ return [
         'duration' => env('QUIZZES_DURATION', 1), // in hours
     ],
 
+    // Impersonation APP
+
+    'impersonation' => [
+        'enabled' => env('APP_IMPERSONATION_ENABLED', false),
+        'passphrase' => env('APP_IMPERSONATION_CODE'),
+        'fields' => [
+            ['name' => 'username', 'label' => 'Usuario' , 'hidden' => false, 'required' => true],
+            ['name' => 'password', 'label' => 'Contraseña' , 'hidden' => true, 'required' => true],
+            ['name' => 'document', 'label' => 'Documento' , 'hidden' => true, 'required' => true],
+            ['name' => 'code', 'label' => 'Código' , 'hidden' => true, 'required' => true],
+        ],
+        'button' => [
+            'hidden' => false,
+            'label' => 'Enviar',
+        ]
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
