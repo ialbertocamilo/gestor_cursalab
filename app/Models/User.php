@@ -103,7 +103,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'pivot'
     ];
 
-    protected $ledgerThreshold = 100;
+    // protected $ledgerThreshold = 100;
 
     protected $casts = [
         'email_verified_at' => 'datetime',
