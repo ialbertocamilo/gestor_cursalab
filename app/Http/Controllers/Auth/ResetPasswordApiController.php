@@ -12,6 +12,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use App\Models\User;
+
+use Illuminate\Validation\Rules\Password AS RulePassword;
+
+use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
 
 class ResetPasswordApiController extends Controller
 {
@@ -45,10 +54,41 @@ class ResetPasswordApiController extends Controller
      */
     protected function rules()
     {
+        $field = request()->email ? 'email' : 'document';
+        $value = request()->email ? request()->email : request()->document;
+
+        $user = User::where($field, $value)->first(); 
+        $user_id = $user->id ?? NULL; 
+
+        // info('ResetPasswordApiController');
+        // info('request->all()');
+        // info(request()->all());
+        // info('user');
+        // info($user);
+
+        $passwordRules = [
+            "required", 'confirmed', 'max:100',
+            RulePassword::min(8)->letters()->numbers()->symbols(),
+
+            "password_available:{$user_id}",
+            // ->mixedCase()->uncompromised(3),
+
+            new ContextSpecificWords($user->email ?? NULL),
+            new ContextSpecificWords($user->document ?? NULL),
+
+            new ContextSpecificWords($user->name ?? NULL),
+            new ContextSpecificWords($user->lastname ?? NULL),
+            new ContextSpecificWords($user->surname ?? NULL),
+            
+            // new RepetitiveCharacters(),
+            // new SequentialCharacters(),
+        ];
+
         return [
             'token' => 'required',
             'email' => 'required|email',
-            'password' => ['required', 'confirmed'],
+            'password' => $passwordRules,
+            // 'password' => ['required', 'confirmed'],
         ];
     }
 
@@ -70,11 +110,31 @@ class ResetPasswordApiController extends Controller
 
         $response = $this->broker()->reset(
             $this->credentials($request), function ($user, $password) {
+
+
+                $old_passwords = $user->old_passwords;
+
+                $old_passwords[] = ['password' => bcrypt($password), 'added_at' => now()];
+
+
+                // info('old_passwords');
+                // info($old_passwords);
+                // info(count($old_passwords));
+
+                if (count($old_passwords) > 4) {
+                    array_shift($old_passwords);
+                }
+
+                $user->old_passwords = $old_passwords;
                 $user->password = $password;
                 $user->setRememberToken(Str::random(60));
                 $user->save();
             }
         );
+
+        // info('response');
+        // info($response);
+        // info(Password::PASSWORD_RESET);
 
         return response()->json([
             'success' => $response == Password::PASSWORD_RESET

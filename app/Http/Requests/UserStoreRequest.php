@@ -34,31 +34,39 @@ class UserStoreRequest extends FormRequest
     public function rules()
     {
         $id = $this->isMethod('post') ? 'NULL' : $this->segment(2);
-        $pass = $this->isMethod('post') ? 'required' : 'nullable';
+        // $pass = $this->isMethod('post') ? 'required' : 'nullable';
 
         // $piecesPass = stringConcatEqualNum([$this->document, $this->email], 4);
-        $passwordRules = $this->isMethod('post') ? 
-                    ['max:100', "{$pass}", 'min:8'] : 
-                    ['max:100', "{$pass}", 
-                        Password::min(8)->mixedCase()->numbers()
-                                ->symbols()->uncompromised(3),
 
-                        // new DerivativesOfContextSpecificWords($this->email),
-                        new ContextSpecificWords($this->email),
-                        new ContextSpecificWords($this->document),
-                        new ContextSpecificWords($this->name),
-                        new ContextSpecificWords($this->lastname),
-                        new ContextSpecificWords($this->surname),
-                        new RepetitiveCharacters(),
-                        new SequentialCharacters(),
-                    ];
+        if ($this->isMethod('post')) {
+            $passwordRules = [
+                "required", 'max:100',  
+                Password::min(8),
+            ];
+        } else {
+            $passwordRules = [
+                "nullable", 'max:100',  
+                Password::min(8)->letters()->numbers()->symbols(),
+
+                "password_available:{$id}",
+                // ->mixedCase()->uncompromised(3),
+
+                new ContextSpecificWords($this->email),
+                new ContextSpecificWords($this->document),
+                new ContextSpecificWords($this->name),
+                new ContextSpecificWords($this->lastname),
+                new ContextSpecificWords($this->surname),
+                // new RepetitiveCharacters(),
+                // new SequentialCharacters(),
+            ];
+        }
 
         $rules = [
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
-            'password' => "{$pass}|max:255",
-            // 'password' => $passwordRules,
+            // 'password' => "{$pass}|max:255|password_available:{$id}",
+            'password' => $passwordRules,
             'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
             'username' => 'nullable',
             'phone_number' => 'nullable',

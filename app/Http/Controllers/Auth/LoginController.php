@@ -241,7 +241,7 @@ class LoginController extends Controller
         if(Auth::attempt([ 'email_gestor' => $user->email_gestor, 
                            'password' => $currentPassword]) ||  $user->email_gestor === $currentPassword) {
             throw ValidationException::withMessages([
-                'password' => 'La nueva contraseña debe ser diferente.'
+                'password' => 'La contraseña ya ha sido utilizada anteriormente.'
             ]);
         }
 

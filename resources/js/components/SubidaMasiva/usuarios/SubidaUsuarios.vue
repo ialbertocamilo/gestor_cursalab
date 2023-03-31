@@ -1,39 +1,45 @@
 <template>
     <v-row>
         <v-col cols="12" md="5" height="200px">
-            <v-card-title>Descripción:</v-card-title>
             <v-card-text class="py-0">
                 <!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
-                Se crea o actualiza a los usuarios según los datos indicados en el excel.
+                Se crea o actualiza los usuarios según los datos indicados en el Excel.
             </v-card-text>
-            <v-card-title>Puntos a tomar en cuenta:</v-card-title>
-            <v-card-text>
+            <v-card-title class="tit">Instructivo:</v-card-title>
+            <v-card-text class="instructivo">
                 <ul>
                     <li class="mt-2">
-                        <b>La cantidad máxima de filas por excel es de 2500.</b>
+                        La máxima cantidad de filas por Excel es de <b>500</b>.
                     </li>
                     <li class="mt-2">
-                        <b>Las columnas número de teléfono y email son opcionales.</b>
+                        Las columnas <b>“Número de Teléfono”</b> y <b>“Email”</b> son opcionales.
                     </li>
                     <li class="mt-2">
-                        <b>Colocar en la columna de "Estado" los términos Active o Inactive. (editado)</b>
+                        Colocar en la columna de <b>Estado</b> los términos <b>Active</b> e <b>Inactive</b>.
                     </li>
                     <li class="mt-2">
-                        <b>Para los campos de fechas se pueden usar estos dos formatos (yyyy/mm/dd) o (dd/mm/yyyy).</b>
+                        Para los campos de las fechas se puede usar dos formatos: <b>yyyy / mm / dd</b> o <b>dd / mm / yyyy</b>.
                     </li>
                     <li class="mt-2">
-                        Colocar en la columna de "Módulo" los módulos existentes.
+                        Colocar en la columna <b>Módulo</b> los módulos existentes.
                     </li>
                 </ul>
             </v-card-text>
+            <div class="btn_download_template">
+                <a :href="url_template" class="btn btn-primary" download><i
+                    class="fas fa-download ml-2"></i> Descargar plantilla</a>
+            </div>
         </v-col>
-        <v-col cols="12" md="7" class="d-flex flex-column justify-content-center">
+        <v-col cols="12" md="2" height="200px" class="d-flex justify-content-center">
+            <div class="separador-v"></div>
+        </v-col>
+        <v-col cols="12" md="5" class="d-flex flex-column justify-content-center">
             <v-row class="d-flex justify-content-center my-2">
                 <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta"/>
             </v-row>
             <v-row class="d-flex justify-content-center">
                 <v-card-actions>
-                    <v-btn color="success" @click="enviar_archivo()">Subir</v-btn>
+                    <v-btn color="primary" @click="enviar_archivo()">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -44,7 +50,7 @@ const percentLoader = document.getElementById('percentLoader');
 import vuedropzone from "./../dropzone.vue";
 
 export default {
-    props: ['q_error', 'number_socket'],
+    props: ['q_error', 'number_socket', 'url_template'],
     components: {vuedropzone},
     data() {
         return {
@@ -114,5 +120,31 @@ export default {
 .v-input__slot {
     display: flex;
     align-items: initial !important;
+}
+.separador-v{
+    border-left: 1px solid #94DDDB;
+}
+.tit,
+.instructivo .v-card__text ul li,
+.v-card__text{
+    font-family: "Nunito", sans-serif;
+}
+.tit {
+    font-size: 15px !important;
+    font-weight: 700;
+}
+.instructivo .v-card__text ul li {
+    font-size: 14px;
+    line-height: 20px;
+}
+.btn_download_template {
+    margin-left: 15px;
+}
+.btn_download_template .btn-primary {
+    background-color: #fff !important;
+    color: #5458ea !important;
+    border: 1px solid #5458ea !important;
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
 }
 </style>

@@ -1,16 +1,21 @@
 <template>
-    <vue-dropzone ref="myVueDropzone" id="dropzone"
-                  :options="dropzoneOptions"
-                  :useCustomSlot="true"
-                  v-on:vdropzone-success="uploadSuccess"
-                  v-on:vdropzone-error="uploadError"
-                  v-on:vdropzone-removed-file="fileRemoved"
-    >
-        <div class="dropzone-custom-content" >
-            <v-icon>mdi-upload</v-icon><h3 class="dropzone-custom-title">Subida masiva</h3>
-            <div class="subtitle">Suba o arrastre el archivo</div><br>
-        </div>
-    </vue-dropzone>
+    <div>
+        <span class="mb-4">Subida de archivos de base de datos.</span>
+        <vue-dropzone ref="myVueDropzone" id="dropzone"
+                    :options="dropzoneOptions"
+                    :useCustomSlot="true"
+                    v-on:vdropzone-success="uploadSuccess"
+                    v-on:vdropzone-error="uploadError"
+                    v-on:vdropzone-removed-file="fileRemoved"
+        >
+            <div class="dropzone-custom-content" >
+                <div class="icon_upload">
+                    <img src="/img/upload.png">
+                </div>
+                <div class="subtitle">Sube o arrastra el archivo<br><b>excel</b> con los datos</div><br>
+            </div>
+        </vue-dropzone>
+    </div>
 </template>
 <script>
     import vue2Dropzone from 'vue2-dropzone'
@@ -66,6 +71,15 @@
 </script>
 <style>
     .vue-dropzone{
-        border:2px solid #e5e5e5 !important;
+        border: 1px solid #2A3649 !important;
+        border-radius: 5px;
+        min-width: 360px;
+    }
+    .icon_upload {
+        margin-bottom: 30px;
+    }
+    .icon_upload img {
+        max-width: 60px;
+        height: auto;
     }
 </style>

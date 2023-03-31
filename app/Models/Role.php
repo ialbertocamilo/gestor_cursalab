@@ -23,7 +23,7 @@ class Role extends BaseModel
 
 
     public $defaultRelationships = [];
-    protected $ledgerThreshold = 100;
+    // protected $ledgerThreshold = 100;
     protected $morphClass = 'MorphOrder';
     protected $fillable = ['name', 'title', 'level', 'scope', 'active', 'description'];
 

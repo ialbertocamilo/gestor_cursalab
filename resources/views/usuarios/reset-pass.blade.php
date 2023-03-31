@@ -78,10 +78,9 @@
           {{-- <p> --}}
             <ul>
               <li>Mínimo 8 caracteres, debe incluir al menos una letra, un número y un caracter especial.</li>
-              <li>No debe incluir caracteres consecutivos o repetidos (Ej: aaaa,1234,abcd).</li>
+              {{-- <li>No debe incluir caracteres consecutivos o repetidos (Ej: aaaa,1234,abcd).</li> --}}
               <li>No debe incluir ningún dato personal (Ej: correo, doc. de identidad, nombres o apellidos).</li>
             </ul>
-          {{-- </p> --}}
 
         </div>
 
