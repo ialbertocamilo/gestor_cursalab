@@ -396,7 +396,7 @@ class Media extends BaseModel
 
         $response = response()->streamDownload(function () {
 
-            $path = Storage::url($this->file);
+            $path = get_media_url($this->file);
 
             if ($stream = fopen($path, 'r')) {
 
