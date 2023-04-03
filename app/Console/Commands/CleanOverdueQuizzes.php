@@ -48,7 +48,8 @@ class CleanOverdueQuizzes extends Command
                     ->where('current_quiz_finishes_at', '<=', now())
                     ->orderBy('updated_at','desc')
                     ->limit(1000)->get();
-
+        $bar = $this->output->createProgressBar($rows->count());
+        $bar->start();
         foreach ($rows as $key => $row) {
 
             try {
@@ -88,6 +89,8 @@ class CleanOverdueQuizzes extends Command
 
                 info($e);
             }
+            $bar->advance();
         }
+        $bar->finish();
     }
 }
