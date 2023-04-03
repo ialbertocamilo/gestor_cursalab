@@ -7,6 +7,7 @@
         persistent
         @click:outside="closeModal"
         :class="{}"
+        content-class="br-dialog"
     >
         <v-card v-if="options">
             <v-card-title class="default-dialog-title mod_head">
@@ -207,5 +208,8 @@ export default {
 }
 .mod_head.v-card__title.default-dialog-title .v-btn:not(.v-btn--text):not(.v-btn--outlined):focus:before {
     background: none !important;
+}
+.br-dialog, .br-dialog .v-sheet.v-card{
+    border-radius: 16px !important;
 }
 </style>

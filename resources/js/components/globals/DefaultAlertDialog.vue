@@ -5,6 +5,7 @@
         :width="width"
         scrollable
         @click:outside="closeModal"
+        content-class="br-dialog"
     >
         <v-card>
             <v-card-title class="default-dialog-title">
@@ -90,5 +91,8 @@ export default {
 }
 .v-card__title.default-dialog-title > span b {
     font-weight: 700;
+}
+.br-dialog, .br-dialog .v-sheet.v-card{
+    border-radius: 16px !important;
 }
 </style>
