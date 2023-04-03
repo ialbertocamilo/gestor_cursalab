@@ -46,7 +46,8 @@ class CleanOverdueQuizzes extends Command
         $rows = SummaryTopic::with('topic.course', 'user.subworkspace', 'status')
                     ->where('taking_quiz', ACTIVE)
                     ->where('current_quiz_finishes_at', '<=', now())
-                    ->get();
+                    ->orderBy('updated_at','desc')
+                    ->limit(1000)->get();
 
         foreach ($rows as $key => $row) {
 

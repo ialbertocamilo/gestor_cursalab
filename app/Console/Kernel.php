@@ -34,7 +34,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('resumen:update_resumen_general')->everyFifteenMinutes();
         $schedule->command('notificaciones:enviar')->everyMinute();
 
-        $schedule->command('quizzes:finish-summary-overdue')->everyMinute();
+        $schedule->command('quizzes:finish-summary-overdue')->everyTenMinutes();
 
         // Meetings
         $schedule->command('meeting:update-status')->hourly();
