@@ -814,8 +814,8 @@ class restablecer_funcionalidad extends Command
     public function restoreSummayUser(){
         $i = 'Fin';
         User::select('id','subworkspace_id')
-            // ->whereHas('subworkspace')
-            ->whereIn('subworkspace_id',[17,19,20,21,22])
+            ->whereHas('subworkspace')
+            // ->whereIn('subworkspace_id',[17,19,20,21,22])
             ->where('active',1)
             ->whereDoesntHave('summary')
             // ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
