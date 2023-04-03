@@ -117,6 +117,7 @@ class SummaryCourse extends Summary
             ->join('topics', 'topics.id', 'summary_topics.topic_id')
             ->join('courses', 'courses.id', 'topics.course_id')
             ->where('courses.id', $courseId)
+            ->groupBy('topic_id')
             ->pluck('summary_topics.topic_id');
 
         SummaryTopic::resetFailedTopicsAttemptsAllUsers(
