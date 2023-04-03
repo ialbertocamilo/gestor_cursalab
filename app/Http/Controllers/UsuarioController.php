@@ -2,48 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\ApiRest\HelperController;
-use App\Http\Controllers\ApiRest\RestAvanceController;
-use App\Http\Requests\UserStoreRequest;
-use App\Http\Resources\Usuario\UsuarioSearchResource;
-use App\Http\Requests\ResetPasswordRequest;
-use Illuminate\Validation\ValidationException;
-use App\Models\Abconfig;
-use App\Models\AssignedRole;
-use App\Models\Botica;
+use App\Models\User;
 use App\Models\Cargo;
-use App\Models\Carrera;
-use App\Models\Categoria;
 use App\Models\Ciclo;
-use App\Models\Course;
-use App\Models\Criterio;
-use App\Models\Criterion;
-use App\Models\CriterionValue;
 use App\Models\Curso;
 use App\Models\Grupo;
-use App\Models\Ingreso;
-use App\Models\Matricula;
+use App\Models\Topic;
+use App\Models\Botica;
+use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\School;
+use App\Models\Carrera;
+use App\Models\Ingreso;
+use App\Models\Usuario;
+use App\Models\Abconfig;
+use App\Models\Criterio;
 use App\Models\Reinicio;
+use App\Models\Taxonomy;
+use App\Models\Categoria;
+use App\Models\Criterion;
+use App\Models\Matricula;
+use App\Models\Workspace;
+use App\Models\AssignedRole;
+use App\Models\SegmentValue;
+use App\Models\SummaryTopic;
+use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
+use App\Services\FileService;
+use App\Models\CriterionValue;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
-use App\Models\School;
-use App\Models\SummaryCourse;
-use App\Models\SummaryTopic;
-use App\Models\Topic;
-use App\Models\Taxonomy;
-use App\Models\User;
-use App\Models\Usuario;
-use App\Models\Workspace;
 use App\Services\CourseService;
-use App\Services\FileService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UserStoreRequest;
 use Illuminate\Support\Facades\Session;
+use App\Http\Requests\ResetPasswordRequest;
+use Illuminate\Validation\ValidationException;
+use App\Http\Controllers\ApiRest\HelperController;
+use App\Http\Resources\Usuario\UsuarioSearchResource;
+use App\Http\Controllers\ApiRest\RestAvanceController;
 
 // use App\Perfil;
 
@@ -132,12 +133,14 @@ class UsuarioController extends Controller
             ->whereIn('id', $criteria_workspace->pluck('id'))
             ->orderBy('name')
             ->get();
-        $workspace = Workspace::select('users_with_empty_criteria')->where('id',$workspace?->id)->first();
+        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
+        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
+        $usersWithEmptyCriteria = count($users);
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
             'criteria_template' => $criteria_template,
-            'users_with_empty_criteria' => $workspace->users_with_empty_criteria
+            'users_with_empty_criteria' => $usersWithEmptyCriteria
         ]);
     }
 
