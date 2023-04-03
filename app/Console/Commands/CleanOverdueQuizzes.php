@@ -54,7 +54,15 @@ class CleanOverdueQuizzes extends Command
 
             try {
 
-                if ($row->hasNoAttemptsLeft(null, $row->topic->course_id)) continue;
+                if ($row->hasNoAttemptsLeft(null, $row->topic->course_id)){
+                    $data_ev = [
+                        'current_quiz_started_at' => NULL,
+                        'current_quiz_finishes_at' => NULL,
+                        'taking_quiz' => NULL,
+                    ];
+                    $row->update($data_ev);
+                    continue;
+                }
 
                 $total_questions = Question::where('topic_id', $row->topic_id)->count();
 
