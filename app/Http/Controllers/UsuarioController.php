@@ -108,7 +108,7 @@ class UsuarioController extends Controller
     public function getListSelects()
     {
         $workspace = get_current_workspace();
-
+        
         $sub_workspaces = Workspace::where('parent_id', $workspace?->id)
             ->select('id', 'name')->get();
 
@@ -132,7 +132,7 @@ class UsuarioController extends Controller
             ->whereIn('id', $criteria_workspace->pluck('id'))
             ->orderBy('name')
             ->get();
-
+        $workspace = Workspace::select('users_with_empty_criteria')->where('id',$workspace?->id)->first();
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
