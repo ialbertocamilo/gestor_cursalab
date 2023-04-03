@@ -11,7 +11,7 @@
                             La cantidad máxima de filas por excel es de <b>2500</b>.
                         </li>
                         <li class="mt-2">
-                            Columnas del excel: <b>DNI - Fecha de cese (opcional)</b>.
+                            Columnas del excel: <b>Doc. de identidad - Fecha de cese (opcional)</b>.
                         </li>
                         <li class="mt-2">
                             La fecha de cese debe tener el formato <b>(yyyy/mm/dd)</b> o <b>(dd/mm/yyyy)</b>.

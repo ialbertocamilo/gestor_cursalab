@@ -10,7 +10,9 @@
         >
             <div class="dropzone-custom-content" >
                 <div class="icon_upload">
-                    <img src="/img/upload.png">
+                    <img class="img_init" src="/img/upload.png">
+                    <img class="img_load" style="display:none;" src="/img/upload_load.png">
+                    <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
                 </div>
                 <div class="subtitle">Sube o arrastra el archivo<br><b>excel</b> con los datos</div><br>
             </div>
@@ -72,7 +74,9 @@
                         <div class="dz-image">
                             <div data-dz-thumbnail-bg></div>
                             <div class="icon_upload">
-                                <img src="/img/upload_load.png">
+                                <img class="img_init" src="/img/upload.png">
+                                <img class="img_load" style="display:none;" src="/img/upload_load.png">
+                                <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
                             </div>
                         </div>
                         <div class="dz-details">
@@ -103,8 +107,18 @@
         width: 360px;
         max-width: 360px;
     }
+    .vue-dropzone:hover {
+        border: 1px dashed #5458EA !important;
+        background: none !important;
+    }
     .icon_upload {
         margin-bottom: 30px;
+    }
+    .vue-dropzone:hover .icon_upload  .img_init{
+        display: none;
+    }
+    .vue-dropzone:hover .icon_upload  .img_hover{
+        display: initial  !important;
     }
     .icon_upload img {
         max-width: 60px;
@@ -113,6 +127,9 @@
     .dropzone-custom-content .subtitle {
         font-family: "Nunito", sans-serif;
         font-size: 16px;
+    }
+    .vue-dropzone:hover .dropzone-custom-content .subtitle {
+        color: #5458EA;
     }
     .dropzone .dz-preview {
         width: 100%;
@@ -160,6 +177,12 @@
                 display: flex;
                 justify-content: center;
                 margin-bottom: 0;
+                .img_init {
+                    display: none !important;
+                }
+                .img_load {
+                    display: initial !important;
+                }
             }
         }
     }

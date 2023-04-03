@@ -11,7 +11,7 @@
                         La cantidad máxima de filas por excel es de <b>2500</b>.
                     </li>
                     <li class="mt-2">
-                        Columnas del excel: <b>DNI</b>.
+                        Columnas del excel: <b>Doc. de identidad</b>.
                     </li>
                 </ul>
             </v-card-text>

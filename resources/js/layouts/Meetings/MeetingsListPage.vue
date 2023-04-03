@@ -21,6 +21,9 @@
 
                 <DefaultModalButton v-if="superuser"
                     label="Configurar Anfitriones"
+                    template="anfitriones"
+                    :icon=false
+                    class="btn_anf"
                     @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
 
                 <SegmentFormModal
@@ -46,6 +49,8 @@
 
                     <DefaultModalButton
                         label="Crear reunión"
+                        :icon=false
+                        class="btn_crear"
                         @click="openFormModal(modalFormOptions)"/>
                 </v-card-title>
             </div>
@@ -389,5 +394,29 @@ export default {
     border: 1px solid #5757EA;
     border-radius: 10px;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+}
+button.btn_anf.primary {
+    background-color: #fff !important;
+    color: #5458ea !important;
+    border-color: #5458ea !important;
+    border: 1px solid;
+    font-family: "Nunito", sans-serif;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    height: 42px !important;
+}
+button.btn_anf.primary .icon_tmp {
+    margin-right: 5px;
+    max-width: 20px;
+}
+button.btn_anf.primary .icon_tmp img{
+    max-width: 20px;
+}
+button.btn_crear {
+    font-family: "Nunito", sans-serif;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    min-width: 175px !important;
+    height: 42px !important;
 }
 </style>

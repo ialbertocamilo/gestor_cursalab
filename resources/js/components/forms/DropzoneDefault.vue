@@ -25,7 +25,9 @@
         >
             <div class="dropzone-custom-content" >
                 <div class="icon_upload">
-                    <img src="/img/upload.png">
+                    <img class="img_init" src="/img/upload.png">
+                    <img class="img_load" style="display:none;" src="/img/upload_load.png">
+                    <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
                 </div>
                 <div class="subtitle">Sube o arrastra el archivo</div><br>
             </div>
@@ -140,21 +142,30 @@ export default {
         },
         template: function () {
             return `<div class="dz-preview dz-file-preview">
-                    <div class="dz-image">
-                        <div data-dz-thumbnail-bg></div>
-                        <div class="icon_upload">
-                            <img src="/img/upload_load.png">
+                        <div class="dz-image">
+                            <div data-dz-thumbnail-bg></div>
+                            <div class="icon_upload">
+                                <img class="img_init" src="/img/upload.png">
+                                <img class="img_load" style="display:none;" src="/img/upload_load.png">
+                                <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
+                            </div>
                         </div>
+                        <div class="dz-details">
+                            <div class="dz-filename"><span data-dz-name></span></div>
+                            <div class="dz-size"><span data-dz-size></span></div>
+                            <div class="dz-inf"><span>Archivo listo para ser cargado, haz clic en confirmar</span></div>
+                        </div>
+                        <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+                        <div class="dz-error-message">
+                            <div class="icon_upload_error">
+                                <img src="/img/upload_error.png">
+                            </div>
+                            <div class="text_error_upload">El archivo no se ha podido cargar correctamente.</div>
+                            <span class="label_error_upload" data-dz-errormessage></span>
+                        </div>
+                        <div class="dz-success-mark"><i class="fa fa-check"></i></div>
+                        <div class="dz-error-mark"><i class="fa fa-close"></i></div>
                     </div>
-                    <div class="dz-details">
-                        <div class="dz-filename"><span data-dz-name></span></div>
-                        <div class="dz-size"><span data-dz-size></span></div>
-                    </div>
-                    <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-                    <div class="dz-error-message"><span data-dz-errormessage></span></div>
-                    <div class="dz-success-mark"><i class="fa fa-check"></i></div>
-                    <div class="dz-error-mark"><i class="fa fa-close"></i></div>
-                </div>
             `;
         }
     }
@@ -171,8 +182,18 @@ export default {
 }
 </style> -->
 <style lang="scss">
+    .vue-dropzone:hover {
+        border: 1px dashed #5458EA !important;
+        background: none !important;
+    }
     .icon_upload {
         margin-bottom: 30px;
+    }
+    .vue-dropzone:hover .icon_upload  .img_init{
+        display: none;
+    }
+    .vue-dropzone:hover .icon_upload  .img_hover{
+        display: initial  !important;
     }
     .icon_upload img {
         max-width: 60px;
@@ -181,6 +202,9 @@ export default {
     .dropzone-custom-content .subtitle {
         font-family: "Nunito", sans-serif;
         font-size: 16px;
+    }
+    .vue-dropzone:hover .dropzone-custom-content .subtitle {
+        color: #5458EA;
     }
     .dropzone .dz-preview {
         width: 100%;
@@ -230,6 +254,12 @@ export default {
                 display: flex;
                 justify-content: center;
                 margin-bottom: 0;
+                .img_init {
+                    display: none !important;
+                }
+                .img_load {
+                    display: initial !important;
+                }
             }
         }
     }

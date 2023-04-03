@@ -9,7 +9,7 @@
             <v-card-text class="instructivo">
                 <ul>
                     <li class="mt-2">
-                        La máxima cantidad de filas por Excel es de <b>500</b>.
+                        La máxima cantidad de filas por Excel es de <b>2500</b>.
                     </li>
                     <li class="mt-2">
                         Las columnas <b>“Número de Teléfono”</b> y <b>“Email”</b> son opcionales.
