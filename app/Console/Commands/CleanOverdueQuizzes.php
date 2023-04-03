@@ -46,8 +46,8 @@ class CleanOverdueQuizzes extends Command
         $rows = SummaryTopic::with('topic.course', 'user.subworkspace', 'status')
                     ->where('taking_quiz', ACTIVE)
                     ->where('current_quiz_finishes_at', '<=', now())
-                    ->orderBy('updated_at','desc')
-                    ->limit(1000)->get();
+                    // ->orderBy('updated_at','desc')
+                    ->get();
         $bar = $this->output->createProgressBar($rows->count());
         $bar->start();
         foreach ($rows as $key => $row) {
