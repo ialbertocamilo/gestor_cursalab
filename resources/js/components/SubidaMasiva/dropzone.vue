@@ -106,6 +106,7 @@
         border-radius: 5px;
         width: 360px;
         max-width: 360px;
+        padding: 0;
     }
     .vue-dropzone:hover {
         border: 1px dashed #5458EA !important;
@@ -119,6 +120,10 @@
     }
     .vue-dropzone:hover .icon_upload  .img_hover{
         display: initial  !important;
+    }
+    .vue-dropzone:hover .dz-preview.dz-file-preview .icon_upload  .img_hover,
+    .vue-dropzone:hover .dz-preview.dz-image-preview .icon_upload  .img_hover {
+        display: none !important;
     }
     .icon_upload img {
         max-width: 60px;
@@ -225,7 +230,8 @@
     .dz-success-mark, .dz-error-message {
         display: none !important;
     }
-    .dropzone .dz-preview.dz-error .dz-image {
+    .dropzone .dz-preview.dz-error .dz-image,
+    .dropzone .dz-preview.dz-error .dz-details {
         display: none;
     }
     .dropzone .dz-preview.dz-error .dz-error-message {
@@ -259,6 +265,7 @@
         color: #A9B2B9;
         line-height: 20px;
         font-weight: 400;
+        min-height: 42px;
     }
     .dropzone .dz-preview.dz-error:hover .dz-error-message {
         display: none !important;

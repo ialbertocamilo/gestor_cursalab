@@ -26,8 +26,8 @@
         <v-col cols="12" md="2" height="200px" class="d-flex justify-content-center">
             <div class="separador-v"></div>
         </v-col>
-        <v-col cols="12" md="5" class="d-flex flex-column justify-content-center">
-            <v-row class="d-flex justify-content-center my-2">
+        <v-col cols="12" md="5" class="">
+            <v-row class="d-flex justify-content-center my-2 drop_mas">
                 <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta" />
             </v-row>
             <v-row class="d-flex justify-content-center">
@@ -143,5 +143,10 @@ button.btn_conf span.v-btn__content {
     font-family: "Nunito", sans-serif;
     font-size: 14px;
     font-weight: 400;
+}
+.drop_mas .dropzone {
+    min-height: 240px;
+    display: grid;
+    align-items: center;
 }
 </style>

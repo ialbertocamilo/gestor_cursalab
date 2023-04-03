@@ -1,16 +1,5 @@
 <template>
     <div>
-        <v-alert
-            border="left"
-            dense
-            outlined
-            class="m-1"
-            type="warning"
-            v-if="errorFileType"
-            transition="scale-transition"
-        >
-            Tipo de contenido no permitido
-        </v-alert>
         <vue-dropzone
             ref="myVueDropzone" id="dropzone"
             :options="dropzoneOptions"
@@ -24,12 +13,22 @@
             v-on:vdropzone-removed-file="fileRemoved"
         >
             <div class="dropzone-custom-content" >
-                <div class="icon_upload">
-                    <img class="img_init" src="/img/upload.png">
-                    <img class="img_load" style="display:none;" src="/img/upload_load.png">
-                    <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
+                <div class="error_upload" v-if="error_upload">
+                    <div class="icon_upload_error">
+                        <img src="/img/upload_error.png">
+                    </div>
+                    <div class="text_error_upload">El archivo no se ha podido cargar correctamente.</div>
+                    <span class="label_error_upload" v-if="error_size">El archivo supera el peso maximo<br>permitido. (máximo 200 Mb)</span>
+                    <span class="label_error_upload" v-else>El archivo no es del formato permitido</span>
                 </div>
-                <div class="subtitle">Sube o arrastra el archivo</div><br>
+                <div class="init_upload" v-else>
+                    <div class="icon_upload">
+                        <img class="img_init" src="/img/upload.png">
+                        <img class="img_load" style="display:none;" src="/img/upload_load.png">
+                        <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
+                    </div>
+                    <div class="subtitle">Sube o arrastra el archivo</div><br>
+                </div>
             </div>
         </vue-dropzone>
     </div>
@@ -54,9 +53,10 @@ export default {
     },
     data() {
         return {
-            errorFileType: false,
             types: this.typesAllowed,
             archivo: null,
+            error_size: false,
+            error_upload: false,
             dropzoneOptions: {
                 maxFilesize: 0,
 
@@ -108,17 +108,27 @@ export default {
             // this.$emit("onUpload", file);
         },
         addedFile(file) {
-            let validExt = this.validatedFileExtension(file, this.typesAllowed)
 
-            if (!validExt) {
+            let validExt = (this.typesAllowed[0] != '') ? this.validatedFileExtension(file, this.typesAllowed) : true;
+            let vue = this;
+
+            if(file.size > 0 && (file.size/1024/1024) > 60) {
+                vue.error_upload = true;
+                vue.error_size = true;
                 this.$refs.myVueDropzone.removeAllFiles()
-                this.errorFileType = true
-                setTimeout(() => this.errorFileType = false, 10000)
-            } else {
-                this.errorFileType = false
-                this.$emit("onUpload", file);
-                // this.$refs.myVueDropzone.manuallyAddFile(file)
             }
+            else {
+                if (!validExt) {
+                    vue.error_upload = true;
+                    this.$refs.myVueDropzone.removeAllFiles()
+                } else {
+                    vue.error_upload = false;
+                    vue.error_size = false;
+                    this.$emit("onUpload", file);
+                    // this.$refs.myVueDropzone.manuallyAddFile(file)
+                }
+            }
+
         },
         limpiarArchivo() {
             this.$refs.myVueDropzone.removeAllFiles()
@@ -135,12 +145,11 @@ export default {
         },
         fileRemoved() {
             this.$emit("onUpload", null);
-            this.$emit("emitir-alerta", 'Archivo removido');
         },
         removeAll() {
             this.$refs.myVueDropzone.removeAllFiles()
         },
-        template: function () {
+        template() {
             return `<div class="dz-preview dz-file-preview">
                         <div class="dz-image">
                             <div data-dz-thumbnail-bg></div>
@@ -194,6 +203,10 @@ export default {
     }
     .vue-dropzone:hover .icon_upload  .img_hover{
         display: initial  !important;
+    }
+    .vue-dropzone:hover .dz-preview.dz-file-preview .icon_upload  .img_hover,
+    .vue-dropzone:hover .dz-preview.dz-image-preview .icon_upload  .img_hover {
+        display: none !important;
     }
     .icon_upload img {
         max-width: 60px;
@@ -301,5 +314,38 @@ export default {
     }
     .dz-success-mark, .dz-error-message {
         display: none !important;
+    }
+    .dropzone .error_upload {
+        opacity: 1;
+        background: none;
+        color: red;
+        text-align: center;
+        height: 100%;
+        top: 0;
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .dropzone .error_upload .icon_upload_error {
+        margin-top: 25px;
+    }
+    .dropzone .error_upload .text_error_upload {
+        font-family: "Nunito", sans-serif;
+        margin-top: 25px;
+        display: flex;
+        font-size: 16px;
+        color: #FF4560;
+        line-height: 20px;
+    }
+    .dropzone .error_upload span.label_error_upload {
+        font-family: "Nunito", sans-serif;
+        margin-top: 6px;
+        display: flex;
+        font-size: 12px;
+        color: #A9B2B9;
+        line-height: 20px;
+        font-weight: 400;
+        min-height: 42px;
     }
 </style>

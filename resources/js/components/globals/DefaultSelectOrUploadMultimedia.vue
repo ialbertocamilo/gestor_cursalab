@@ -3,7 +3,7 @@
         <fieldset class="editor">
             <legend>{{ label }}</legend>
 
-            <v-card elevation="0" class="mx-4" v-if="description">
+            <v-card elevation="0" class="mx-4 mtb-10" v-if="description">
                 <small class="text_desc" v-html="description"/>
             </v-card>
 
@@ -47,7 +47,6 @@
         <transition name="fade" v-if="showButton">
             <v-btn class="mt-1" color="primary" block elevation="0"
                    @click="openSelectPreviewMultimediaModal"
-                   v-show="!fileSelected"
             >
                 <v-icon class="mx-2" style="font-size: 0.95em;">fas fa-photo-video</v-icon>
                 Seleccionar multimedia
@@ -222,5 +221,9 @@ span.media-tag {
     color: #434D56;
     min-height: 45px;
     display: inline-block;
+}
+.mtb-10 {
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 </style>
