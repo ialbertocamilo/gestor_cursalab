@@ -112,7 +112,7 @@ export default {
             let validExt = (this.typesAllowed[0] != '') ? this.validatedFileExtension(file, this.typesAllowed) : true;
             let vue = this;
 
-            if(file.size > 0 && (file.size/1024/1024) > 60) {
+            if(file.size > 0 && (file.size/1024/1024) > 200) {
                 vue.error_upload = true;
                 vue.error_size = true;
                 this.$refs.myVueDropzone.removeAllFiles()
