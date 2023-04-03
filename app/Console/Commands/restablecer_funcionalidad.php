@@ -81,7 +81,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValues();
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
-        $this->restoreSummayUser();
+        // $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
@@ -98,7 +98,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreUserIdInTickets();
         // $this->setEmailGestorAdmins();
         // $this->restoreAnswerUserFromUCFP();
-        // $this->generateStatusTopics();
+        $this->generateStatusTopics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }

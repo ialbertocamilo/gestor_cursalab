@@ -151,7 +151,11 @@ class UsuarioController extends Controller
             $user_criterion_value = $criterion->multiple ?
                 $value->pluck('id') : $value?->first()?->id;
 
-            $user_criteria[$criterion->code] = $user_criterion_value;
+            if ($criterion->field_type?->code == 'date') {
+                $user_criteria[$criterion->code] = $value?->first()?->value_text;
+            } else {
+                $user_criteria[$criterion->code] = $user_criterion_value;
+            }
         }
 
 
@@ -195,7 +199,7 @@ class UsuarioController extends Controller
                 'field_type:id,code'
             ])
             ->whereRelation('workspaces', 'id', $current_workspace?->id)
-            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required')
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
             ->orderBy('position')
             ->get();
 
@@ -852,7 +856,7 @@ class UsuarioController extends Controller
 
         $user = auth()->user();
         // verficamos su actual contraseña
-        // if(!Auth::attempt([ 'email' => $user->email, 
+        // if(!Auth::attempt([ 'email' => $user->email,
         //                     'password' => $actualPassword])) {
 
         //     throw ValidationException::withMessages([
