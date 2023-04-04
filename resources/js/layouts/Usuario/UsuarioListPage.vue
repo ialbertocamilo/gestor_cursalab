@@ -121,7 +121,7 @@
                         <div
                             v-if="usersWithEmptyCriteria"
                             class="user-count-wrapper">
-                            <a href="/exportar/node">
+                            <a href="/exportar/node?tab=new-report&section=19">
                                 <v-tooltip
                                     :top="true"
                                     attach
