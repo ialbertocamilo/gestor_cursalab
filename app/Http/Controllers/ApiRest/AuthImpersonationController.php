@@ -75,7 +75,7 @@ class AuthImpersonationController extends Controller
 
     private function respondWithDataAndToken($user)
     {
-        $user->tokens('accessTokenImpersonation')->delete();
+        // $user->tokens('accessTokenImpersonation')->delete();
         $token = $user->createToken('accessTokenImpersonation')->accessToken;
 
         if (!$user->active)
