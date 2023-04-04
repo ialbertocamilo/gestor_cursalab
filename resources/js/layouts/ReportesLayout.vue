@@ -40,7 +40,7 @@
                 :adminId="adminId"/>
         </v-card>
         <v-card v-if="activeTab === 'new-report'" flat class="elevation-0 --mb-4">
-            <v-tabs vertical class="reports-menu">
+            <v-tabs vertical class="reports-menu" v-model="selectedTab">
 
                 <!--
 
@@ -49,118 +49,118 @@
                 ============================================================================ -->
 
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" :key="'#notas-de-usuario'">
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Notas de usuario
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='usuarios'>
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='avance-de-currícula'>
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        Avance de currícula
                    </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='diplomas'>
                     <v-icon left>mdi-certificate</v-icon>
                     <span class="pt-2">
                         Diplomas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='visitas'>
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Visitas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='notas-por-tema'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Notas por tema
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='temas-no-evaluables'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Temas no evaluables
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='notas-por-curso'>
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        Notas por curso
                    </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='segmentacion'>
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
                        Segmentación
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='evaluaciones-abiertas'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Evaluaciones abiertas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='reinicios'>
                     <v-icon left>mdi-restart</v-icon>
                     <span class="pt-2">
                         Reinicios
                     </span>
                 </v-tab>
                 <!--
-                                <v-tab class="justify-content-start py-7">
+                                <v-tab class="justify-content-start py-7" key='first'>
                                     <v-icon left>mdi-access-point</v-icon>
                                     <span class="pt-2">
                                         Versiones usadas
                                     </span>
                                 </v-tab>
                 -->
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='usuarios-uploads'>
                     <v-icon left>mdi-file-account-outline</v-icon>
                     <span class="pt-2">
                         Usuario Uploads
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='vademecum'>
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Vademecum
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='videoteca'>
                     <v-icon left>mdi-play-box-outline</v-icon>
                     <span class="pt-2">
                         Videoteca
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='checklist-detallado'>
                     <v-icon left>mdi-playlist-check</v-icon>
                     <span class="pt-2">
                         Checklist Detallado
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='checklist-general'>
                     <v-icon left>mdi-playlist-check</v-icon>
                     <span class="pt-2">
                         Checklist General
@@ -168,28 +168,28 @@
                 </v-tab>
 
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='ranking'>
                     <v-icon left>mdi-numeric</v-icon>
                     <span class="pt-2">
                         Ranking
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='reuniones'>
                     <v-icon left>mdi-monitor-account</v-icon>
                     <span class="pt-2">
                         Reuniones
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='historial-de-usuario'>
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Historial de usuario
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='criterios-vacios'>
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
                         Criterios vacíos
@@ -600,6 +600,7 @@ export default {
             adminRoleId : 3,
 
             activeTab: 'history',
+            selectedTab: 0,
 
             selectedFilters: {},
             filenameDialog: false,
@@ -614,6 +615,18 @@ export default {
         const vue = this
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData();
+
+        let uri = window.location.search.substring(1); 
+        let params = new URLSearchParams(uri);
+        let tab = params.get("tab");
+        let section = params.get("section");
+
+        if (tab) {
+
+            this.activeTab = tab
+            this.selectedTab = parseInt(section)
+        }
+
     }
     ,
     methods: {

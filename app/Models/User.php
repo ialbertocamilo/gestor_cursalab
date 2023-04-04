@@ -475,6 +475,51 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->first()
                 ?->id;
 
+            $criterion_list_final = [];
+
+            foreach($data['criterion_list'] as $key => $val) {
+                if(!is_null($val) && !is_numeric($val) && !is_array($val)) {
+                    $id_criterio = Criterion::where('code', $key)->first();
+                    $id_crit_val = CriterionValue::where('value_text', $val)->where('criterion_id', $id_criterio?->id)->select('id')->first();
+                    if ($id_crit_val){
+                        $data['criterion_list'][$key] = $id_crit_val->id;
+                    } else {
+                        $current_workspace_id = get_current_workspace();
+                        $data_cr['workspace_id'] = $current_workspace_id?->id;
+
+                        $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($id_criterio);
+                        $data_cr[$colum_name] = $val;
+                        $data_cr['value_text'] = $val;
+                        $data_cr['criterion_id'] = $id_criterio?->id;
+                        $data_cr['active'] = 1;
+
+                        CriterionValue::storeRequest($data_cr);
+                        $id_crit_vala = CriterionValue::where('value_text', $val)->where('criterion_id', $id_criterio?->id)->select('id')->first();
+                        $data['criterion_list'][$key] = $id_crit_vala->id;
+                    }
+                }
+            }
+
+            $criterion_list_final_date = [];
+
+            foreach($data['criterion_list_final'] as $crr) {
+                if(is_numeric($crr) || is_array($crr)) {
+                    array_push($criterion_list_final, $crr);
+                }
+            }
+
+            foreach($data['criterion_list'] as $fcr) {
+                if(!is_null($fcr) && !is_array($fcr)) {
+                    array_push($criterion_list_final_date, $fcr);
+                }
+            }
+
+            foreach (array_diff($criterion_list_final_date, $data['criterion_list_final']) as $key => $value) {
+                array_push($criterion_list_final, $value);
+            }
+
+            $data['criterion_list_final'] = $criterion_list_final;
+
             $user->criterion_values()
                 ->sync(array_values($data['criterion_list_final']) ?? []);
 

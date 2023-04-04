@@ -813,8 +813,11 @@ class restablecer_funcionalidad extends Command
     }
     public function restoreSummayUser(){
         $i = 'Fin';
-        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[19,20,21,22,23,24,32])
-            // ->where('active',1)
+        User::select('id','subworkspace_id')
+            ->whereHas('subworkspace')
+            // ->whereIn('subworkspace_id',[17,19,20,21,22])
+            ->where('active',1)
+            ->whereDoesntHave('summary')
             // ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
             ->chunkById(2500, function ($users_chunked)use($i){
             $_bar = $this->output->createProgressBar($users_chunked->count());

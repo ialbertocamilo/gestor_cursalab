@@ -60,17 +60,12 @@ class UsersEmptyCriteria extends Command
 
         $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspaceId, $criteriaIds);
         $usersWithEmptyCriteria = count($users);
-
+        // Update users count in workspace
+        $workspace = Workspace::find($workspaceId);
+        $workspace->users_with_empty_criteria = $usersWithEmptyCriteria;
+        $workspace->save();
         if ($usersWithEmptyCriteria) {
-
-            // Update users count in workspace
-
-            $workspace = Workspace::find($workspaceId);
-            $workspace->users_with_empty_criteria = $usersWithEmptyCriteria;
-            $workspace->save();
-
             // Load admins email addresses
-
             $admins = AssignedRole::loadAllAdmins($workspaceId);
             $adminsEmails = $admins->pluck('email')->toArray();
 
