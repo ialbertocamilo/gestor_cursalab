@@ -35,7 +35,14 @@
         </v-col>
         <v-col cols="12" md="5" class="">
             <v-row class="d-flex justify-content-center my-2 drop_mas">
-                <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta"/>
+                <vuedropzone
+                    @emitir-archivo="cambio_archivo"
+                    @emitir-alerta="enviar_alerta"
+                    :error_file="error_file"
+                    :error_text="error_text"
+                    :success_file="success_file"
+                    :success_text="success_text"
+                />
             </v-row>
             <v-row class="d-flex justify-content-center align-items-start">
                 <v-card-actions>
@@ -55,6 +62,10 @@ export default {
     data() {
         return {
             archivo: null,
+            error_file: false,
+            error_text: '',
+            success_file: false,
+            success_text: ''
         }
     },
     methods: {
@@ -86,14 +97,16 @@ export default {
                             <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
                         </ul>`
                     vue.queryStatus("subida_masiva", "subir_archivo");
+                    vue.success_file = true
+                    vue.success_text = message
                     this.hideLoader();
-                    this.enviar_alerta(message);
                 }).catch(err => {
                     if (err.response.data.message === 'Has superado el límite de usuarios activos.') {
                         this.mostrarModalLimiteUsuarios(err.response.data.data);
                     }
+                    vue.error_file = true
+                    vue.error_text = err.response.data.message
                     this.hideLoader();
-                    this.enviar_alerta(err.response.data.message);
                 });
             }
         },

@@ -9,12 +9,29 @@
                     v-on:vdropzone-removed-file="fileRemoved"
         >
             <div class="dropzone-custom-content" >
-                <div class="icon_upload">
-                    <img class="img_init" src="/img/upload.png">
-                    <img class="img_load" style="display:none;" src="/img/upload_load.png">
-                    <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
+                <div class="error_upload" v-if="error_file">
+                    <div class="icon_upload_error">
+                        <img src="/img/upload_error.png">
+                    </div>
+                    <div class="text_error_upload">El archivo no se ha podido cargar correctamente.</div>
+                    <span class="label_error_upload">{{error_text}}</span>
                 </div>
-                <div class="subtitle">Sube o arrastra el archivo<br><b>excel</b> con los datos</div><br>
+                <div class="success_upload" v-else-if="success_file">
+                    <div class="icon_upload_success">
+                        <img src="/img/upload_success.png">
+                    </div>
+                    <div class="text_success_upload">El archivo se ha cargado correctamente.</div>
+                    <span class="label_success_upload" v-html="success_text"></span>
+                </div>
+                <div class="init_upload" v-else>
+                    <div class="icon_upload">
+                        <img class="img_init" src="/img/upload.png">
+                        <img class="img_load" style="display:none;" src="/img/upload_load.png">
+                        <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
+                    </div>
+                    <div class="subtitle">Sube o arrastra el archivo</div><br>
+                </div>
+                <br>
             </div>
         </vue-dropzone>
     </div>
@@ -24,6 +41,24 @@
     import 'vue2-dropzone/dist/vue2Dropzone.min.css'
     export default {
         components:{ vueDropzone: vue2Dropzone},
+        props: {
+            error_file: {
+                type: Boolean,
+                default: false
+            },
+            error_text: {
+                type: String,
+                default: ''
+            },
+            success_file: {
+                type: Boolean,
+                default: false
+            },
+            success_text: {
+                type: String,
+                default: ''
+            }
+        },
         data () {
             return {
                 archivo:null,
@@ -52,14 +87,22 @@
                 },
             }
         },
+        watch: {
+            error_file: function(newVal, oldVal) {
+                this.$refs.myVueDropzone.removeAllFiles()
+                this.archivo = null;
+            },
+            success_file: function(newVal, oldVal) {
+                this.$refs.myVueDropzone.removeAllFiles()
+                this.archivo = null;
+            }
+        },
         methods: {
             limpiarArchivo() {
                 this.$refs.myVueDropzone.removeAllFiles()
                 this.archivo = null;
             },
             uploadSuccess(file, response) {
-                console.log();
-                console.log(file.response);
                 this.$emit("emitir-archivo", file);
             },
             uploadError(file, message) {
@@ -69,7 +112,7 @@
                 this.$emit("emitir-archivo", null);
                 // this.$emit("emitir-alerta", 'Archivo removido');
             },
-            template: function () {
+            template() {
                 return `<div class="dz-preview dz-file-preview">
                         <div class="dz-image">
                             <div data-dz-thumbnail-bg></div>
@@ -269,5 +312,54 @@
     }
     .dropzone .dz-preview.dz-error:hover .dz-error-message {
         display: none !important;
+    }
+    .dropzone .success_upload,
+    .dropzone .error_upload {
+        opacity: 1;
+        background: none;
+        color: red;
+        text-align: center;
+        height: 100%;
+        top: 0;
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .dropzone .success_upload .icon_upload_success,
+    .dropzone .error_upload .icon_upload_error {
+        margin-top: 25px;
+    }
+    .dropzone .success_upload .text_success_upload,
+    .dropzone .error_upload .text_error_upload {
+        font-family: "Nunito", sans-serif;
+        margin-top: 25px;
+        display: flex;
+        font-size: 16px;
+        color: #FF4560;
+        line-height: 20px;
+        max-width: 80%;
+    }
+    .dropzone .success_upload,
+    .dropzone .success_upload .text_success_upload{
+        color: #4CAF50;
+    }
+    .dropzone .success_upload span.label_success_upload,
+    .dropzone .error_upload span.label_error_upload {
+        font-family: "Nunito", sans-serif;
+        margin-top: 6px;
+        display: flex;
+        font-size: 12px;
+        color: #A9B2B9;
+        line-height: 20px;
+        font-weight: 400;
+        min-height: 42px;
+        max-width: 80%;
+    }
+    .dropzone .success_upload span.label_success_upload ul {
+        text-align: left;
+    }
+    .init_upload {
+        margin-top: 35px;
     }
 </style>
