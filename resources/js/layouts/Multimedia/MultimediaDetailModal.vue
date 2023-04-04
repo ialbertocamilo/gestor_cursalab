@@ -58,6 +58,7 @@
         <DialogConfirm
             :ref="modalDeleteOptions.ref"
             v-model="modalDeleteOptions.open"
+            :options="modalDeleteOptions"
             width="408px"
             title="Eliminar Multimedia"
             subtitle="¿Está seguro de eliminar el archivo multimedia?"
@@ -88,6 +89,17 @@ export default {
                 title: 'Eliminar Media',
                 contentText: '¿Desea eliminar este registro?',
                 open: false,
+                title_modal: 'Eliminación de un <b>archivo multimedia</b>',
+                type_modal: 'delete',
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar un archivo multimedia!',
+                        details: [
+                            'Este archivo se eliminará para todos los temas asignados y lugares que haya sido asignado.'
+                        ],
+                    }
+                },
+                width: '408px'
             },
             resourceDefault: {
                 created_at: null,
