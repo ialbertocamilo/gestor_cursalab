@@ -122,10 +122,11 @@ class AuthController extends Controller
                 // === validacion de intentos ===
                 $userInstance->checkTimeToReset(trim($userinput), 'APP'); 
                 $user_attempts = $userInstance->incrementAttempts(trim($userinput), 'APP');
-                $responseAttempts['credentials1'] = $credentials1;
-                $responseAttempts['credentials2'] = $credentials2;
+                
                 if($user_attempts) {
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+                    $responseAttempts['credentials1'] = $credentials1;
+                    $responseAttempts['credentials2'] = $credentials2;
                     // custom message
                     if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
