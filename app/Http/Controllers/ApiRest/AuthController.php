@@ -62,7 +62,7 @@ class AuthController extends Controller
                 if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                     return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
                 } 
-                return $this->error('Intento fallido.', 400, $responseAttempts);
+                return $this->error('Intento fallido A.', 400, $responseAttempts);
             }
             // === validacion de intentos ===
 
@@ -129,7 +129,7 @@ class AuthController extends Controller
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
                     } 
 
-                    return $this->error('Intento fallido.', 400, $responseAttempts);
+                    return $this->error('Intento fallido B.', 400, $responseAttempts);
                 }
                 // === validacion de intentos ===
 
