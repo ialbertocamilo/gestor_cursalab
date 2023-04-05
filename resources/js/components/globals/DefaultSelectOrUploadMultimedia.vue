@@ -22,7 +22,7 @@
             </v-card>
 
             <v-card v-else elevation="0">
-                <v-card-text class="d-flex justify-content-center align-items-center flex-column">
+                <v-card-text class="d-flex justify-content-center align-items-center flex-column content_hover_file">
                     <!--     <span class="media-tag" @click="removeMediaPreview">
                             &nbsp;<v-icon small color="red" title="Quitar" v-text="'mdi-close-circle-outline'" style="font-size: 30px;"/>&nbsp;
                         </span>
@@ -31,14 +31,16 @@
                         />
                         <v-img v-else contain width="276" height="200"
                                :src="bucketBaseUrl + '/' + fileSelected" -->
-                    <span class="media-tag"
-                          @click="removeMediaPreview"
-                    >&nbsp;<v-icon small color="red" title="Quitar" v-text="'mdi-close-circle-outline'"
-                                   style="font-size: 30px;"/>&nbsp;</span>
                     <v-img contain width="276" height="200"
                            :src="getMediaPreview"
                            v-if="TypeOf(fileSelected) !== 'undefined'"
                     />
+                    <div class="hover_upload" style="display: none;" @click="removeMediaPreview">
+                        <div class="icon_upload">
+                            <img class="img_hover" src="/img/upload_ree.png">
+                        </div>
+                        <span class="txt">Reemplazar archivo</span>
+                    </div>
                 </v-card-text>
             </v-card>
 
@@ -225,5 +227,28 @@ span.media-tag {
 .mtb-10 {
     margin-top: 16px;
     margin-bottom: 16px;
+}
+.content_hover_file {
+    position: relative;
+}
+.content_hover_file:hover .hover_upload {
+    display: flex !important;
+}
+.content_hover_file .hover_upload {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    background: rgba(42, 54, 73, 0.91);
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+    flex-direction: column;
+}
+.content_hover_file .hover_upload .icon_upload {
+    margin-bottom: 10px;
+    margin-top: 20px;
 }
 </style>
