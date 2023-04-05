@@ -43,7 +43,7 @@ class AuthController extends Controller
             // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
-            $password = strip_tags($data['password']);
+            $password = $data['password'];
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
             $credentials1 = $credentials2 = ['password' => $password];
