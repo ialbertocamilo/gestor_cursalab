@@ -106,7 +106,8 @@ class reinicios_programado extends Command
         $_courses = collect($courses)->whereIn('courseId',$courses_id)->all();
 
         // info($_courses);
-
+        $bar = $this->output->createProgressBar(count($_courses));
+        $bar->start();
         foreach ($_courses as $course) {
 
             $workspaceId = $course['workspaceId'];
@@ -156,7 +157,9 @@ class reinicios_programado extends Command
                 //     SummaryTopic::updateTopicRestartsCount($topicId);
                 // }
             // }
+            $bar->advance();
         }
+        $bar->finish();
 
         $this->info(" Fin: " . now());
     }
