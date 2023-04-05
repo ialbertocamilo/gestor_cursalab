@@ -194,6 +194,44 @@ class CheckList extends BaseModel
         return $response;
     }
 
+    protected function getChecklistsByTrainer($trainer_id): array
+    {
+        $checklists = CheckList::where('workspace_id',25)->where('active',1)->paginate(request('paginate', 5));
+        $list_checklist = collect();
+
+        if(count($checklists) > 0) {
+            $i = 0;
+            foreach ($checklists as $check) {
+                $list_checklist->push((object)array(
+                    'id' => $check->id,
+                    'title'  => $check->title,
+                    'description'  => $check->description,
+                    'percentage'  => 16 * (rand(1,5)),
+                    'status'  => $i % 2 == 0 ? 'realizado': 'pendiente',
+                    'courses' => collect()
+                ));
+                $i++;
+            }
+        }
+
+        $response['data'] = $list_checklist;
+        $response['lastPage'] = $checklists->lastPage();
+
+        $response['current_page'] = $checklists->currentPage();
+        $response['first_page_url'] = $checklists->url(1);
+        $response['from'] = $checklists->firstItem();
+        $response['last_page'] = $checklists->lastPage();
+        $response['last_page_url'] = $checklists->url($checklists->lastPage());
+        $response['next_page_url'] = $checklists->nextPageUrl();
+        $response['path'] = $checklists->getOptions()['path'];
+        $response['per_page'] = $checklists->perPage();
+        $response['prev_page_url'] = $checklists->previousPageUrl();
+        $response['to'] = $checklists->lastItem();
+        $response['total'] = $checklists->total();
+
+        return $response;
+    }
+
     public function getProgresoActividadesFeedback(ChecklistRpta $checklistRpta, $actividades)
     {
 
