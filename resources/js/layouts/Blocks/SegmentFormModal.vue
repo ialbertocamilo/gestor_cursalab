@@ -13,11 +13,11 @@
                 <!--
                 Module-School breadcrumbs
                 ======================================== -->
-                <div class="row justify-center">   
+                <div class="row justify-center">
 
                     <div v-if="isCourseSegmentation() && modulesSchools.length"
                          class="col-10">
-    <!-- 
+    <!--
                          <v-expansion-panels>
                           <v-expansion-panel
                             title="Item"
@@ -145,8 +145,8 @@
                 <SegmentAlertModal
                     :options="modalInfoOptions"
                     :ref="modalInfoOptions.ref"
-                    @onConfirm="continueRegister($event)"
-                    @onCancel="closeFormModal(modalInfoOptions), backRegister()"
+                    @onConfirm="closeFormModal(modalInfoOptions)"
+                    @onCancel="closeFormModal(modalInfoOptions)"
                 />
             </v-form>
         </template>
@@ -232,12 +232,11 @@ export default {
                 open: false,
                 title: null,
                 resource:'data',
-                hideConfirmBtn: false,
+                hideConfirmBtn: true,
                 persistent: true,
-                cancelLabel: 'Cerrar'
+                cancelLabel: 'Aceptar'
             },
-            stackModals: { continues: [],
-                           backers: [] },
+            stackModals: { continues: [], backers: [] },
             criteriaIndexModal: 0,
 
             segment_by_document_clean: false,
@@ -319,7 +318,7 @@ export default {
                 const state = (!cri_state || !cri_data);
                 let message;
 
-                if(!cri_state) message = `${noexist} en la segmentación ${segIndex}, ¿Desea continuar?`;
+                if(!cri_state) message = `${noexist} en la segmentación ${segIndex}`;
                 else if(!cri_data) message = `${nodata} en la segmentación ${segIndex}, para continuar.`;
                 else message = null;
 
@@ -332,7 +331,7 @@ export default {
                 const stateVerify = VerifyCodeAndValues(criteria_selected, current);
                 const stateMessage = SetMessageByCurrent(CustomMessages[current], stateVerify, i + 1);
 
-                if(stateMessage.state) stackMessage.push(stateMessage);
+                if (stateMessage.state) stackMessage.push(stateMessage);
             }
 
             return stackMessage;
@@ -350,9 +349,9 @@ export default {
                 const { cri_state, cri_data } = responseData.detail;
 
                 if(cri_state && !cri_data) vue.modalInfoOptions.hideConfirmBtn = true;
-                else vue.modalInfoOptions.hideConfirmBtn = false;
+                else vue.modalInfoOptions.hideConfirmBtn = true;
 
-                if(vue.criteriaIndexModal === i) {
+                if (vue.criteriaIndexModal === i) {
                     vue.criteriaIndexModal = i + 1;
                     vue.openFormModal(vue.modalInfoOptions, null, null, title);
                     break;
@@ -388,8 +387,8 @@ export default {
 
             let state = true;
 
-            if(responseCheck.length) {
-                if(vue.criteriaIndexModal) {
+            if (responseCheck.length) {
+                if (vue.criteriaIndexModal) {
                     const continuesCount = vue.stackModals.continues.length;
 
                     if(vue.criteriaIndexModal === continuesCount){
@@ -408,12 +407,10 @@ export default {
         },
         confirmModal() {
             let vue = this;
-
+            vue.criteriaIndexModal = 0;
             vue.errors = [];
 
             this.showLoader();
-
-            // console.log(vue.options);
 
             const validateForm = vue.validateForm("segmentForm");
             const edit = vue.options.action === "edit";
@@ -433,7 +430,7 @@ export default {
             // === check criteria and open alert === SEGMENTACION DIRECTA ===
 
             // if (validateForm && validateSelectedModules) {
-           if (validateForm) {
+            if (validateForm) {
                 // let formData = vue.getMultipartFormData(method, vue.segments, fields);
                 let formData = JSON.stringify({
                     model_type: vue.model_type,
@@ -571,13 +568,13 @@ export default {
                     // module criteria and select modules from
                     // course schools
 
-                    let moduleCriteria = this.criteria.find(c => c.code === 'module')
-                    if (moduleCriteria) {
-                        if (this.segments[0].criteria_selected.length === 0) {
-                            moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
-                            this.segments[0].criteria_selected.push(moduleCriteria)
-                        }
-                    }
+                    // let moduleCriteria = this.criteria.find(c => c.code === 'module')
+                    // if (moduleCriteria) {
+                    //     if (this.segments[0].criteria_selected.length === 0) {
+                    //         moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
+                    //         this.segments[0].criteria_selected.push(moduleCriteria)
+                    //     }
+                    // }
                 }
             } catch (ex) {
                 console.log(ex)
