@@ -1,4 +1,4 @@
- <template>
+<template>
     <DefaultDialog
         :options="options"
         :width="width"
@@ -17,28 +17,28 @@
 
                     <div v-if="isCourseSegmentation() && modulesSchools.length"
                          class="col-10">
-    <!--
-                         <v-expansion-panels>
-                          <v-expansion-panel
-                            title="Item"
-                            text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                          ></v-expansion-panel>
-                        </v-expansion-panels> -->
+                        <!--
+                                             <v-expansion-panels>
+                                              <v-expansion-panel
+                                                title="Item"
+                                                text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                                              ></v-expansion-panel>
+                                            </v-expansion-panels> -->
 
                         <v-expansion-panels class="school-breadcrumb">
                             <v-expansion-panel>
-                              <v-expansion-panel-header>
-                                Escuelas asignadas
-                              </v-expansion-panel-header>
-                              <v-expansion-panel-content>
-                                <DefaultSimpleBreadcrumbs
-                                    v-for="moduleSchool of modulesSchools"
-                                    :key="moduleSchool.subworkspace_id"
-                                    :breadcrumbs="[
+                                <v-expansion-panel-header>
+                                    Escuelas asignadas
+                                </v-expansion-panel-header>
+                                <v-expansion-panel-content>
+                                    <DefaultSimpleBreadcrumbs
+                                        v-for="moduleSchool of modulesSchools"
+                                        :key="moduleSchool.subworkspace_id"
+                                        :breadcrumbs="[
                                     {title: moduleSchool.module_name, disabled: true},
                                     {title: moduleSchool.school_name, disabled: true},
                                 ]"/>
-                              </v-expansion-panel-content>
+                                </v-expansion-panel-content>
                             </v-expansion-panel>
                         </v-expansion-panels>
 
@@ -168,8 +168,8 @@ const fields = [
 
 const CustomMessages = {
     module: {
-        title: 'Advertencia para módulo',
-        noexist: 'No existe el "módulo" como criterio',
+        title: '¡Ups! Olvidaste seleccionar un módulo',
+        noexist: 'Recuerda que cuando segmentas por criterios, es necesario que selecciones mínimo un módulo.',
         nodata: 'Selecciona uno o varios modulos'
     }
 }
@@ -234,9 +234,10 @@ export default {
                 resource:'data',
                 hideConfirmBtn: true,
                 persistent: true,
-                cancelLabel: 'Aceptar'
+                cancelLabel: 'Entendido'
             },
-            stackModals: { continues: [], backers: [] },
+            stackModals: { continues: [],
+                backers: [] },
             criteriaIndexModal: 0,
 
             segment_by_document_clean: false,
@@ -318,7 +319,7 @@ export default {
                 const state = (!cri_state || !cri_data);
                 let message;
 
-                if(!cri_state) message = `${noexist} en la segmentación ${segIndex}`;
+                if(!cri_state) message = `${noexist}`;
                 else if(!cri_data) message = `${nodata} en la segmentación ${segIndex}, para continuar.`;
                 else message = null;
 
@@ -331,7 +332,7 @@ export default {
                 const stateVerify = VerifyCodeAndValues(criteria_selected, current);
                 const stateMessage = SetMessageByCurrent(CustomMessages[current], stateVerify, i + 1);
 
-                if (stateMessage.state) stackMessage.push(stateMessage);
+                if(stateMessage.state) stackMessage.push(stateMessage);
             }
 
             return stackMessage;
@@ -351,7 +352,7 @@ export default {
                 if(cri_state && !cri_data) vue.modalInfoOptions.hideConfirmBtn = true;
                 else vue.modalInfoOptions.hideConfirmBtn = true;
 
-                if (vue.criteriaIndexModal === i) {
+                if(vue.criteriaIndexModal === i) {
                     vue.criteriaIndexModal = i + 1;
                     vue.openFormModal(vue.modalInfoOptions, null, null, title);
                     break;
@@ -387,8 +388,8 @@ export default {
 
             let state = true;
 
-            if (responseCheck.length) {
-                if (vue.criteriaIndexModal) {
+            if(responseCheck.length) {
+                if(vue.criteriaIndexModal) {
                     const continuesCount = vue.stackModals.continues.length;
 
                     if(vue.criteriaIndexModal === continuesCount){
@@ -407,10 +408,12 @@ export default {
         },
         confirmModal() {
             let vue = this;
-            vue.criteriaIndexModal = 0;
+
             vue.errors = [];
 
             this.showLoader();
+
+            // console.log(vue.options);
 
             const validateForm = vue.validateForm("segmentForm");
             const edit = vue.options.action === "edit";
