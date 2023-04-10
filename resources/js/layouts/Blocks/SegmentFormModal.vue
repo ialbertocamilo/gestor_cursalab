@@ -408,7 +408,7 @@ export default {
         },
         confirmModal() {
             let vue = this;
-
+            vue.criteriaIndexModal = 0;
             vue.errors = [];
 
             this.showLoader();
