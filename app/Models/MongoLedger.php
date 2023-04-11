@@ -24,12 +24,6 @@ class MongoLedger extends Model implements \Altek\Accountant\Contracts\Ledger
     /**
      * {@inheritdoc}
      */
-    protected $casts = [
-        'properties' => 'json',
-        'modified' => 'json',
-        'pivot' => 'json',
-        'extra' => 'json',
-    ];
 
     /**
      * {@inheritdoc}

@@ -1,11 +1,11 @@
 <template>
     <section class="section-list ">
-        <DefaultFilter v-model="open_advanced_filter"
-                       @filter="advanced_filter(dataTable, filters, 1)"
+        <DefaultFilter
+            v-model="open_advanced_filter"
+            @filter="advanced_filter(dataTable, filters, 1)"
         >
             <template v-slot:content>
                 <v-row justify="center">
-
                     <!--                    <v-col cols="12">-->
                     <!--                        <DefaultAutocomplete-->
                     <!--                            clearable-->
@@ -20,14 +20,17 @@
         </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
-                <v-spacer/>
+                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs" />
+                <v-spacer />
                 <!--                <DefaultActivityButton-->
                 <!--                    :label="'Actividad'"-->
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
-                    @click="openCRUDPage(`/${ruta}cursos/${course_id}/temas/create`)"
-                    :label="'Tema'"/>
+                    @click="
+                        openCRUDPage(`/${ruta}cursos/${course_id}/temas/create`)
+                    "
+                    :label="'Tema'"
+                />
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -36,15 +39,19 @@
                 <v-row>
                     <v-col cols="4">
                         <DefaultInput
-                            learable dense
+                            learable
+                            dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            @onEnter="
+                                refreshDefaultTable(dataTable, filters, 1)
+                            "
+                            @clickAppendIcon="
+                                refreshDefaultTable(dataTable, filters, 1)
+                            "
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-
                 </v-row>
             </v-card-text>
 
@@ -52,7 +59,14 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del tema - ${$event.nombre}`
+                    )
+                "
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
             />
@@ -70,8 +84,17 @@
                 width="50vw"
                 :ref="topicValidationModal.ref"
                 :options="topicValidationModal"
-                @onCancel="closeFormModal(topicValidationModal); closeFormModal(deleteConfirmationDialog)"
-                @onConfirm="confirmValidationModal(topicValidationModal,  null, confirmDelete(false))"
+                @onCancel="
+                    closeFormModal(topicValidationModal);
+                    closeFormModal(deleteConfirmationDialog);
+                "
+                @onConfirm="
+                    confirmValidationModal(
+                        topicValidationModal,
+                        null,
+                        confirmDelete(false)
+                    )
+                "
                 :resource="{}"
             />
 
@@ -88,11 +111,27 @@
                 width="50vw"
                 :ref="topicValidationModalUpdateStatus.ref"
                 :options="topicValidationModalUpdateStatus"
-                @onCancel="closeFormModal(topicValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
-                @onConfirm="confirmValidationModal(topicValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
+                @onCancel="
+                    closeFormModal(topicValidationModalUpdateStatus);
+                    closeFormModal(deleteConfirmationDialog);
+                "
+                @onConfirm="
+                    confirmValidationModal(
+                        topicValidationModalUpdateStatus,
+                        null,
+                        confirmUpdateStatus(false)
+                    )
+                "
                 :resource="{}"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Topic"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -100,66 +139,100 @@
 <script>
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import TemaValidacionesModal from "./TemaValidacionesModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
         DialogConfirm,
-        'TopicValidationsDelete': TemaValidacionesModal,
-        'TopicValidationsUpdateStatus': TemaValidacionesModal,
+        LogsModal,
+        TopicValidationsDelete: TemaValidacionesModal,
+        TopicValidationsUpdateStatus: TemaValidacionesModal
     },
-    props: ['school_id', 'school_name', 'course_id', 'course_name', 'ruta'],
+    props: ["school_id", "school_name", "course_id", "course_name", "ruta"],
     data() {
-        let vue = this
+        let vue = this;
         return {
             breadcrumbs: [
-                {title: 'Escuelas', text: `${this.school_name}`, disabled: false, href: `/escuelas`},
                 {
-                    title: 'Cursos',
+                    title: "Escuelas",
+                    text: `${this.school_name}`,
+                    disabled: false,
+                    href: `/escuelas`
+                },
+                {
+                    title: "Cursos",
                     text: `${this.course_name}`,
                     disabled: false,
                     href: `/escuelas/${this.school_id}/cursos`
                 },
-                {title: 'Temas', text: null, disabled: true, href: ''},
+                { title: "Temas", text: null, disabled: true, href: "" }
             ],
             dataTable: {
                 endpoint: `/${vue.ruta}cursos/${vue.course_id}/temas/search`,
-                ref: 'cursosTable',
+                ref: "cursosTable",
                 headers: [
-                    {text: "Orden", value: "position", align: 'center', model: 'Topic', sortable: false},
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombre", value: "nombre", sortable: false},
-                    {text: "Evaluable", value: "assessable", sortable: false},
-                    {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
-                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                    {
+                        text: "Orden",
+                        value: "position",
+                        align: "center",
+                        model: "Topic",
+                        sortable: false
+                    },
+                    {
+                        text: "Portada",
+                        value: "image",
+                        align: "center",
+                        sortable: false
+                    },
+                    { text: "Nombre", value: "nombre", sortable: false },
+                    { text: "Evaluable", value: "assessable", sortable: false },
+                    {
+                        text: "Tipo de evaluación",
+                        value: "tipo_evaluacion",
+                        sortable: false
+                    },
+                    {
+                        text: "Opciones",
+                        value: "actions",
+                        align: "center",
+                        sortable: false
+                    }
                 ],
                 actions: [
                     {
                         text: "Evaluación",
-                        icon: 'fas fa-tasks',
-                        show_condition: 'es_evaluable',
-                        type: 'route',
-                        count: 'preguntas_count',
-                        route: 'evaluacion_route'
+                        icon: "fas fa-tasks",
+                        show_condition: "es_evaluable",
+                        type: "route",
+                        count: "preguntas_count",
+                        route: "evaluacion_route"
                     },
                     {
                         text: "Editar",
-                        icon: 'mdi mdi-pencil',
-                        type: 'route',
-                        route: 'edit_route'
+                        icon: "mdi mdi-pencil",
+                        type: "route",
+                        route: "edit_route"
                     },
                     {
                         text: "Eliminar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
+                        icon: "far fa-trash-alt",
+                        type: "action",
+                        method_name: "delete"
                     },
                     {
                         text: "Actualizar Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
+                        icon: "fa fa-circle",
+                        type: "action",
+                        method_name: "status"
                     },
-                ],
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
+                ]
                 // more_actions: [
                 //     {
                 //         text: "Actividad",
@@ -172,8 +245,16 @@ export default {
             selects: {
                 modules: []
             },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
+
             filters: {
-                q: '',
+                q: "",
                 module: null,
                 category: null,
                 curso: null
@@ -182,146 +263,166 @@ export default {
             update_model: null,
 
             deleteConfirmationDialog: {
-                open: false,
+                open: false
             },
 
             topicValidationModal: {
-                ref: 'TopicListValidationModal',
-                open: false,
+                ref: "TopicListValidationModal",
+                open: false
             },
 
             topicUpdateStatusModal: {
-                ref: 'CourseUpdateStatusModal',
-                title: 'Actualizar Curso',
-                contentText: '¿Desea actualizar este registro?',
+                ref: "CourseUpdateStatusModal",
+                title: "Actualizar Curso",
+                contentText: "¿Desea actualizar este registro?",
                 open: false,
-                endpoint: ''
+                endpoint: ""
             },
             topicValidationModalUpdateStatus: {
-                ref: 'TopicListValidationModalUpdateStatus',
-                open: false,
+                ref: "TopicListValidationModalUpdateStatus",
+                open: false
             },
 
             topicValidationModalDefault: {
-                ref: 'TopicListValidationModal',
+                ref: "TopicListValidationModal",
                 action: null,
                 open: false,
-                base_endpoint: '',
+                base_endpoint: "",
                 hideConfirmBtn: false,
                 hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'TemasValidaciones',
-            },
-        }
+                confirmLabel: "Confirmar",
+                cancelLabel: "Cancelar",
+                resource: "TemasValidaciones"
+            }
+        };
     },
     mounted() {
-        let vue = this
+        let vue = this;
         // vue.getSelects();
 
         // vue.filters.module = vue.modulo_id
-        vue.filters.category = vue.school_id
-        vue.filters.curso = vue.course_id
+        vue.filters.category = vue.school_id;
+        vue.filters.curso = vue.course_id;
     },
     methods: {
         getSelects() {
-            let vue = this
-            const url = `/escuelas/get-selects`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.modules = data.data.modules
-                    vue.modalOptions.selects.modules = data.data.modules
-                })
+            let vue = this;
+            const url = `/escuelas/get-selects`;
+            vue.$http.get(url).then(({ data }) => {
+                vue.selects.modules = data.data.modules;
+                vue.modalOptions.selects.modules = data.data.modules;
+            });
         },
         activity() {
-            console.log('activity')
+            console.log("activity");
         },
         deleteTema(tema) {
-            let vue = this
-            vue.delete_model = tema
-            vue.deleteConfirmationDialog.open = true
+            let vue = this;
+            vue.delete_model = tema;
+            vue.deleteConfirmationDialog.open = true;
         },
         confirmDelete(validateForm = true) {
-            let vue = this
-            vue.showLoader()
-            vue.deleteConfirmationDialog.open = false
+            let vue = this;
+            vue.showLoader();
+            vue.deleteConfirmationDialog.open = false;
 
-            if (validateForm)
-                vue.topicValidationModal.action = null;
+            if (validateForm) vue.topicValidationModal.action = null;
 
-            if (vue.topicValidationModal.action === 'validations-after-update') {
+            if (
+                vue.topicValidationModal.action === "validations-after-update"
+            ) {
                 vue.hideLoader();
                 vue.topicValidationModal.open = false;
                 return;
             }
 
-            let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.delete_model.id}`
-            const bodyData = {validateForm}
+            let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.delete_model.id}`;
+            const bodyData = { validateForm };
 
-            vue.$http.post(url, bodyData)
-                .then(async ({data}) => {
-                    vue.hideLoader()
-                    const has_info_messages = data.data.messages.list.length > 0
+            vue.$http
+                .post(url, bodyData)
+                .then(async ({ data }) => {
+                    vue.hideLoader();
+                    const has_info_messages =
+                        data.data.messages.list.length > 0;
                     if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(data.data, vue.topicValidationModal, vue.topicValidationModalDefault);
+                        await vue.handleValidationsAfterUpdate(
+                            data.data,
+                            vue.topicValidationModal,
+                            vue.topicValidationModalDefault
+                        );
                     else {
                         vue.showAlert(data.data.msg);
                         vue.topicValidationModal.open = false;
                     }
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
                 })
                 .catch(async error => {
-                    await vue.handleValidationsBeforeUpdate(error, vue.topicValidationModal, vue.topicValidationModalDefault);
-                    vue.loadingActionBtn = false
-                })
+                    await vue.handleValidationsBeforeUpdate(
+                        error,
+                        vue.topicValidationModal,
+                        vue.topicValidationModalDefault
+                    );
+                    vue.loadingActionBtn = false;
+                });
         },
 
         updateTopicStatus(course) {
-            let vue = this
-            vue.update_model = course
-            vue.topicUpdateStatusModal.open = true
+            let vue = this;
+            vue.update_model = course;
+            vue.topicUpdateStatusModal.open = true;
         },
         async confirmUpdateStatus(validateForm = true) {
-            let vue = this
-            vue.topicUpdateStatusModal.open = false
-            vue.showLoader()
+            let vue = this;
+            vue.topicUpdateStatusModal.open = false;
+            vue.showLoader();
 
             if (validateForm)
                 vue.topicValidationModalUpdateStatus.action = null;
 
-
-            if (vue.topicValidationModalUpdateStatus.action === 'validations-after-update') {
+            if (
+                vue.topicValidationModalUpdateStatus.action ===
+                "validations-after-update"
+            ) {
                 vue.hideLoader();
                 vue.topicValidationModalUpdateStatus.open = false;
                 return;
             }
 
-
             let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.update_model.id}/status`;
-            const bodyData = {validateForm}
+            const bodyData = { validateForm };
 
-            vue.$http.put(url, bodyData)
-                .then(async ({data}) => {
-                    vue.hideLoader()
-                    const has_info_messages = data.data.messages.list.length > 0;
-                    console.log("has_info_messages :: ", has_info_messages)
+            vue.$http
+                .put(url, bodyData)
+                .then(async ({ data }) => {
+                    vue.hideLoader();
+                    const has_info_messages =
+                        data.data.messages.list.length > 0;
+                    console.log("has_info_messages :: ", has_info_messages);
 
                     if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(data.data, vue.topicValidationModalUpdateStatus, vue.topicValidationModalDefault);
+                        await vue.handleValidationsAfterUpdate(
+                            data.data,
+                            vue.topicValidationModalUpdateStatus,
+                            vue.topicValidationModalDefault
+                        );
                     else {
-                        vue.showAlert(data.data.msg)
+                        vue.showAlert(data.data.msg);
                         vue.topicValidationModalUpdateStatus.open = false;
                     }
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
                 })
                 .catch(error => {
-                    vue.handleValidationsBeforeUpdate(error, vue.topicValidationModalUpdateStatus, vue.topicValidationModalDefault);
-                    vue.loadingActionBtn = false
-                })
-        },
+                    vue.handleValidationsBeforeUpdate(
+                        error,
+                        vue.topicValidationModalUpdateStatus,
+                        vue.topicValidationModalDefault
+                    );
+                    vue.loadingActionBtn = false;
+                });
+        }
     }
-
-}
+};
 </script>

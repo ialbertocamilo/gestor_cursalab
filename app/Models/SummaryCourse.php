@@ -22,6 +22,13 @@ class SummaryCourse extends Summary
         'certification_accepted_at' => 'datetime',
     ];
 
+    // Relationships
+    public $defaultRelationships = [
+        'user_id' => 'user',
+        'course_id' => 'course',
+        'status_id' => 'status',
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class);

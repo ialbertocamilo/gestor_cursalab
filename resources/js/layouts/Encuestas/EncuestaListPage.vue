@@ -5,12 +5,13 @@
             <!--            TODO: Add breadcumb-->
             <v-card-title>
                 Encuestas
-                <v-spacer/>
+                <v-spacer />
                 <!-- <DefaultActivityButton :label="'Actividad'"
                                        @click="activity"/> -->
                 <DefaultModalButton
                     :label="'Encuesta'"
-                    @click="openFormModal(modalOptions)"/>
+                    @click="openFormModal(modalOptions)"
+                />
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -27,12 +28,17 @@
                     </v-col> -->
                     <v-col cols="4">
                         <DefaultInput
-                            clearable dense
+                            clearable
+                            dense
                             v-model="filters.q"
                             label="Buscar por título..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @onEnter="
+                                refreshDefaultTable(dataTable, filters, 1)
+                            "
                             append-icon="mdi-magnify"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="
+                                refreshDefaultTable(dataTable, filters, 1)
+                            "
                         />
                     </v-col>
                 </v-row>
@@ -43,8 +49,30 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event)"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', `Eliminar encuesta: ${$event.titulo}` )"
+                @status="
+                    openFormModal(
+                        modalStatusOptions,
+                        $event,
+                        'status',
+                        'Actualizar estado'
+                    )
+                "
+                @delete="
+                    openFormModal(
+                        modalDeleteOptions,
+                        $event,
+                        'delete',
+                        `Eliminar encuesta: ${$event.titulo}`
+                    )
+                "
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs de Encuesta - ${$event.titulo}`
+                    )
+                "
             />
 
             <EncuestaFormModal
@@ -58,60 +86,108 @@
             <DefaultStatusModal
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
-                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+                @onConfirm="
+                    closeFormModal(modalStatusOptions, dataTable, filters)
+                "
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
 
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
-                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+                @onConfirm="
+                    closeFormModal(modalDeleteOptions, dataTable, filters)
+                "
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Poll"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
-
-
 <script>
 import EncuestaFormModal from "./EncuestaFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {EncuestaFormModal, DefaultStatusModal, DefaultDeleteModal},
+    components: {
+        EncuestaFormModal,
+        DefaultStatusModal,
+        DefaultDeleteModal,
+        LogsModal
+    },
     data() {
         return {
             dataTable: {
-                endpoint: '/encuestas/search',
-                ref: 'EncuestaTable',
+                endpoint: "/encuestas/search",
+                ref: "EncuestaTable",
                 headers: [
-                    {text: "Orden", value: "position",  align: 'center', model: "Poll", sortable: false},
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Título", value: "titulo", sortable: false},
-                    {text: "Sección", value: "tipo", align: 'center', sortable: false},
-                    {text: "Tipo", value: "anonima", align: 'center', sortable: false},
+                    {
+                        text: "Orden",
+                        value: "position",
+                        align: "center",
+                        model: "Poll",
+                        sortable: false
+                    },
+                    {
+                        text: "Portada",
+                        value: "image",
+                        align: "center",
+                        sortable: false
+                    },
+                    { text: "Título", value: "titulo", sortable: false },
+                    {
+                        text: "Sección",
+                        value: "tipo",
+                        align: "center",
+                        sortable: false
+                    },
+                    {
+                        text: "Tipo",
+                        value: "anonima",
+                        align: "center",
+                        sortable: false
+                    },
                     // {text: "Módulo", value: "module"},
-                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                    {
+                        text: "Opciones",
+                        value: "actions",
+                        align: "center",
+                        sortable: false
+                    }
                 ],
                 actions: [
                     {
                         text: "Preguntas",
-                        icon: 'mdi mdi-comment-question-outline',
+                        icon: "mdi mdi-comment-question-outline",
                         // type: 'action',
                         // method_name: 'edit'
-                        type: 'route',
+                        type: "route",
                         // method_name: 'reset',
-                        count: 'preguntas_count',
-                        route: 'encuestas_preguntas_route'
+                        count: "preguntas_count",
+                        route: "encuestas_preguntas_route"
                     },
                     {
                         text: "Editar",
-                        icon: 'mdi mdi-pencil',
-                        type: 'action',
-                        method_name: 'edit'
+                        icon: "mdi mdi-pencil",
+                        type: "action",
+                        method_name: "edit"
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -122,50 +198,57 @@ export default {
                     // },
                     {
                         text: "Actualizar Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
+                        icon: "fa fa-circle",
+                        type: "action",
+                        method_name: "status"
                     },
                     {
                         text: "Eliminar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
-                    },
+                        icon: "far fa-trash-alt",
+                        type: "action",
+                        method_name: "delete"
+                    }
                 ]
             },
             selects: {
                 modules: []
             },
             filters: {
-                q: '',
+                q: "",
                 module: null
             },
-            modalOptions: {
-                ref: 'EncuestaFormModal',
+            modalLogsOptions: {
+                ref: "LogsModal",
                 open: false,
-                base_endpoint: '/encuestas',
-                resource: 'Encuesta',
-                confirmLabel: 'Guardar',
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
+            modalOptions: {
+                ref: "EncuestaFormModal",
+                open: false,
+                base_endpoint: "/encuestas",
+                resource: "Encuesta",
+                confirmLabel: "Guardar"
             },
             modalStatusOptions: {
-                ref: 'EncuestaStatusModal',
+                ref: "EncuestaStatusModal",
                 open: false,
-                base_endpoint: '/encuestas',
-                contentText: '¿Desea cambiar de estado a este registro?',
-                endpoint: '',
+                base_endpoint: "/encuestas",
+                contentText: "¿Desea cambiar de estado a este registro?",
+                endpoint: ""
             },
             modalDeleteOptions: {
-                ref: 'EncuestaDeleteModal',
+                ref: "EncuestaDeleteModal",
                 open: false,
-                base_endpoint: '/encuestas',
-                contentText: '¿Desea eliminar este registro?',
-                endpoint: '',
-            },
-        }
+                base_endpoint: "/encuestas",
+                contentText: "¿Desea eliminar este registro?",
+                endpoint: ""
+            }
+        };
     },
     mounted() {
-        let vue = this
+        let vue = this;
         // vue.getSelects();
     },
     methods: {
@@ -182,12 +265,11 @@ export default {
         //     vue.consoleObjectTable(user, 'User to Reset')
         // },
         activity() {
-            console.log('activity')
+            console.log("activity");
         },
         confirmModal() {
             // TODO: Call store or update USER
-        },
+        }
     }
-
-}
+};
 </script>

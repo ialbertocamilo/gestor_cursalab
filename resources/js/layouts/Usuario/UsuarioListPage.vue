@@ -3,7 +3,10 @@
         <DefaultFilter
             v-model="open_advanced_filter"
             @filter="advanced_filter(dataTable, filters, 1)"
-            @cleanFilters="clearObject(filters)"
+            @cleanFilters="
+                clearObject(filters) &&
+                    refreshDefaultTable(dataTable, filters, 1)
+            "
             :disabled-confirm-btn="isValuesObjectEmpty(filters)"
         >
             <template v-slot:content>
@@ -24,23 +27,32 @@
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="
+                                refreshDefaultTable(dataTable, filters, 1)
+                            "
                             item-text="name"
                         />
                     </v-col>
 
                     <template v-for="(value, selectKey, index) in selects">
-
-                        <v-col cols="12"
-                               v-if="!['sub_workspaces', 'active'].includes(selectKey) && criteria_template[index-2]">
-
+                        <v-col
+                            cols="12"
+                            v-if="
+                                !['sub_workspaces', 'active'].includes(
+                                    selectKey
+                                ) && criteria_template[index - 2]
+                            "
+                        >
                             <DefaultInputDate
-                                v-if="criteria_template[index-2].field_type.code === 'date'"
+                                v-if="
+                                    criteria_template[index - 2].field_type
+                                        .code === 'date'
+                                "
                                 clearable
                                 :referenceComponent="'modalDateFilter1'"
-                                :options="{ open: false, }"
+                                :options="{ open: false }"
                                 v-model="filters[selectKey]"
-                                :label="criteria_template[index-2].name"
+                                :label="criteria_template[index - 2].name"
                             />
 
                             <DefaultAutocomplete
@@ -48,79 +60,62 @@
                                 clearable
                                 :items="value"
                                 v-model="filters[selectKey]"
-                                :label="criteria_template[index-2].name"
+                                :label="criteria_template[index - 2].name"
                                 item-text="name"
-                                :multiple="criteria_template[index-2].multiple"
+                                :multiple="
+                                    criteria_template[index - 2].multiple
+                                "
                                 :show-select-all="false"
                             />
                         </v-col>
-
                     </template>
-
                 </v-row>
             </template>
         </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Usuarios
-                <v-spacer/>
+                <v-spacer />
                 <DefaultActivityButton
                     :label="'Reinicios masivos'"
-                    @click="goToReiniciosMasivos"/>
+                    @click="goToReiniciosMasivos"
+                />
                 <DefaultModalButton
                     :label="'Usuario'"
-                    @click="openFormModal(modalOptions, null, 'create')"/>
+                    @click="openFormModal(modalOptions, null, 'create')"
+                />
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
-                    <!--                    <v-col cols="3">-->
-                    <!--                        <DefaultSelect-->
-                    <!--                            clearable dense-->
-                    <!--                            :items="selects.workspaces"-->
-                    <!--                            v-model="filters.workspace_id"-->
-                    <!--                            label="Workspace"-->
-                    <!--                            @onChange="refreshDefaultTable(dataTable, filters, 1)"-->
-                    <!--                            item-text="name"-->
-                    <!--                        />-->
-                    <!--                    </v-col>-->
-                    <v-col cols="3">
-                        <DefaultSelect
-                            clearable dense
-                            :items="selects.sub_workspaces"
-                            v-model="filters.subworkspace_id"
-                            label="Módulos"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
-                            item-text="name"
-                        />
-                    </v-col>
                     <v-col cols="3">
                         <DefaultInput
-                            clearable dense
+                            clearable
+                            dense
                             v-model="filters.q"
-                            label="Buscar por nombre o DNI..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            label="Buscar Usuarios"
+                            @onEnter="
+                                refreshDefaultTable(dataTable, filters, 1)
+                            "
+                            @clickAppendIcon="
+                                refreshDefaultTable(dataTable, filters, 1)
+                            "
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="3">
-                        <DefaultSelect
-                            clearable dense
-                            :items="selects.statuses"
-                            v-model="filters.active"
-                            label="Estado"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
-                            item-text="name"
-                        />
-                    </v-col>
+                    <v-col cols="6"> </v-col>
                     <v-col cols="3" class="d-flex justify-end">
                         <DefaultButton
-                            label="Ver Filtros"
+                            text
+                            label="Aplicar Filtros"
                             icon="mdi-filter"
-                            @click="open_advanced_filter = !open_advanced_filter"/>
+                            @click="
+                                open_advanced_filter = !open_advanced_filter
+                            "
+                            class="btn_filter"
+                        />
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -130,10 +125,46 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
-                @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
-                @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
+                @status="
+                    openFormModal(
+                        modalStatusOptions,
+                        $event,
+                        'status',
+                        'Cambio de estado de <b>usuario</b>'
+                    )
+                "
+                @delete="
+                    openFormModal(
+                        modalDeleteOptions,
+                        $event,
+                        'delete',
+                        'Confirmación de cambio de estado'
+                    )
+                "
+                @cursos="
+                    openFormModal(
+                        modalCursosOptions,
+                        $event,
+                        'cursos',
+                        `Cursos de ${$event.nombre} - ${$event.document}`
+                    )
+                "
+                @reset="
+                    openFormModal(
+                        modalReiniciosOptions,
+                        $event,
+                        'cursos',
+                        `Reiniciar avance de ${$event.nombre}`
+                    )
+                "
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Usuario - ${$event.name}`
+                    )
+                "
             />
             <UsuarioFormModal
                 width="60vw"
@@ -145,7 +176,9 @@
             <UsuarioStatusModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
-                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+                @onConfirm="
+                    closeFormModal(modalDeleteOptions, dataTable, filters)
+                "
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
             <UsuarioReiniciosModal
@@ -165,14 +198,22 @@
             <DefaultStatusModal
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
-                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+                @onConfirm="
+                    closeFormModal(modalStatusOptions, dataTable, filters)
+                "
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\User"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
-
 
 <script>
 import UsuarioFormModal from "./UsuarioFormModal";
@@ -181,84 +222,125 @@ import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 
-
-
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal},
+    components: {
+        UsuarioFormModal,
+        UsuarioStatusModal,
+        UsuarioCursosModal,
+        UsuarioReiniciosModal,
+        DefaultStatusModal,
+        LogsModal
+    },
     props: {
         workspace_id: {
-            type: Number|String,
+            type: Number | String,
             required: true
-        },
+        }
         // show_meeting_section: {
         //     type: String,
         //     required: true
         // }
-
     },
     data() {
-
         let headers = [
-            {text: "Nombres y Apellidos", value: "name"},
-            {text: "Módulo", value: "module", sortable: false},
-            {text: "Documento", value: "document", align: 'left', sortable: false},
-            {text: "Opciones", value: "actions", align: 'center', sortable: false},
+            { text: "Nombres y Apellidos", value: "name" },
+            { text: "Módulo", value: "module", sortable: false },
+            {
+                text: "Documento",
+                value: "document",
+                align: "left",
+                sortable: false
+            },
+            {
+                text: "Opciones",
+                value: "actions",
+                align: "center",
+                sortable: false
+            }
         ];
 
         if (this.workspace_id == 25) {
             headers = [
-                {text: "Nombres y Apellidos", value: "name"},
-                {text: "Módulo", value: "module", sortable: false},
-                {text: "Carrera", value: "career", sortable: false},
-                {text: "Ciclo", value: "cycle", sortable: false},
-                {text: "Documento", value: "document", align: 'left', sortable: false},
-                {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                { text: "Nombres y Apellidos", value: "name" },
+                { text: "Módulo", value: "module", sortable: false },
+                { text: "Carrera", value: "career", sortable: false },
+                { text: "Ciclo", value: "cycle", sortable: false },
+                {
+                    text: "Documento",
+                    value: "document",
+                    align: "left",
+                    sortable: false
+                },
+                {
+                    text: "Opciones",
+                    value: "actions",
+                    align: "center",
+                    sortable: false
+                }
             ];
         }
 
         return {
             dataTable: {
-                endpoint: '/usuarios/search',
-                ref: 'UsuarioTable',
+                endpoint: "/usuarios/search",
+                ref: "UsuarioTable",
                 headers: headers,
                 actions: [
-                    {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
+                    {
+                        text: "Cursos",
+                        icon: "mdi mdi-notebook-multiple",
+                        type: "action",
+                        method_name: "cursos"
+                    },
 
                     {
                         text: "Reiniciar",
-                        icon: 'fas fa-history',
-                        type: 'action',
-                        method_name: 'reset',
-                        show_condition: 'pruebas_desaprobadas',
-                        count: 'failed_topics_count',
+                        icon: "fas fa-history",
+                        type: "action",
+                        method_name: "reset",
+                        show_condition: "pruebas_desaprobadas",
+                        count: "failed_topics_count"
                     },
 
-                    {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
+                    {
+                        text: "Editar",
+                        icon: "mdi mdi-pencil",
+                        type: "action",
+                        method_name: "edit"
+                    },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     {
                         text: "Reporte",
-                        type: 'route',
-                        icon: 'mdi mdi-file-document-multiple',
-                        route: 'reporte_route',
-                        route_type: 'external'
+                        type: "route",
+                        icon: "mdi mdi-file-document-multiple",
+                        route: "reporte_route",
+                        route_type: "external"
                     },
                     {
                         text: "Actualizar Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
-                    },
+                        icon: "fa fa-circle",
+                        type: "action",
+                        method_name: "status"
+                    }
                 ]
             },
             selects: {
                 sub_workspaces: [],
                 statuses: [
-                    {id: null, name: 'Todos'},
-                    {id: 1, name: 'Activos'},
-                    {id: 2, name: 'Inactivos'},
-                ],
+                    { id: null, name: "Todos" },
+                    { id: 1, name: "Activos" },
+                    { id: 2, name: "Inactivos" }
+                ]
                 // statuses: [
                 //     null => 'Todos',
                 //     1 => 'Activos',
@@ -266,97 +348,123 @@ export default {
                 // ],
             },
             filters: {
-                q: '',
+                q: "",
                 subworkspace_id: null,
-                active: null,
+                active: null
             },
             criteria_template: [],
-            modalOptions: {
-                ref: 'UsuarioFormModal',
+            modalLogsOptions: {
+                ref: "LogsModal",
                 open: false,
-                base_endpoint: '/usuarios',
-                resource: 'Usuario',
-                confirmLabel: 'Guardar',
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
+            modalOptions: {
+                ref: "UsuarioFormModal",
+                open: false,
+                base_endpoint: "/usuarios",
+                resource: "Usuario",
+                confirmLabel: "Confirmar"
             },
             modalDeleteOptions: {
-                ref: 'UsuarioDeleteModal',
+                ref: "UsuarioDeleteModal",
                 open: false,
-                base_endpoint: '/usuarios',
-                contentText: '¿Desea eliminar este registro?',
+                base_endpoint: "/usuarios",
+                contentText: "¿Desea eliminar este registro?"
             },
             modalCursosOptions: {
-                ref: 'UsuarioCursosModal',
+                ref: "UsuarioCursosModal",
                 open: false,
-                base_endpoint: '/usuarios',
-                cancelLabel: 'Cerrar',
-                hideConfirmBtn: true,
+                base_endpoint: "/usuarios",
+                cancelLabel: "Cerrar",
+                hideConfirmBtn: true
             },
             modalReiniciosOptions: {
-                ref: 'UsuarioReiniciosModal',
+                ref: "UsuarioReiniciosModal",
                 open: false,
-                base_endpoint: '/usuarios',
-                cancelLabel: 'Cerrar',
-                hideConfirmBtn: true,
+                base_endpoint: "/usuarios",
+                cancelLabel: "Cerrar",
+                hideConfirmBtn: true
             },
             modalStatusOptions: {
-                ref: 'UsuarioStatusModal',
+                ref: "UsuarioStatusModal",
                 open: false,
-                base_endpoint: '/usuarios',
-                contentText: '¿Desea cambiar de estado a este registro?',
-                endpoint: '',
-            },
-        }
+                base_endpoint: "/usuarios",
+                contentText: "¿Desea cambiar de estado a este registro?",
+                content_modal: {
+                    inactive: {
+                        title: "¡Estás por desactivar un usuario!",
+                        details: [
+                            "El usuario no podrá ingresar a la plataforma.",
+                            "Podrá enviar solicitudes desde la sección de ayuda del Log in.",
+                            "Aparecerá en los reportes y consultas con el estado inactivo."
+                        ]
+                    },
+                    active: {
+                        title: "¡Estás por activar un usuario!",
+                        details: [
+                            "El usuario ahora podrá ingresar a la plataforma.",
+                            "Podrá rendir los cursos, de estar segmentado."
+                        ]
+                    }
+                },
+                endpoint: ""
+            }
+        };
     },
     mounted() {
-        let vue = this
+        let vue = this;
         vue.getSelects();
     },
 
     methods: {
         getSelects() {
-            let vue = this
+            let vue = this;
 
             let uri = window.location.search.substring(1);
             let params = new URLSearchParams(uri);
             let param_subworkspace = params.get("subworkspace_id");
 
-            const url = `/usuarios/get-list-selects`
-            vue.$http.get(url)
-                .then(({data}) => {
+            const url = `/usuarios/get-list-selects`;
+            vue.$http.get(url).then(({ data }) => {
+                vue.selects.sub_workspaces = data.data.sub_workspaces;
+                vue.filters.subworkspace_id = parseInt(param_subworkspace);
+                vue.criteria_template = data.data.criteria_template;
 
-                    vue.selects.sub_workspaces = data.data.sub_workspaces;
-                    vue.filters.subworkspace_id = parseInt(param_subworkspace);
-                    vue.criteria_template = data.data.criteria_template;
+                data.data.criteria_workspace.forEach(criteria => {
+                    const new_select_obj = { [criteria.code]: criteria.values };
+                    vue.selects = Object.assign(
+                        {},
+                        vue.selects,
+                        new_select_obj
+                    );
 
-                    data.data.criteria_workspace.forEach(criteria => {
+                    const value = criteria.multiple ? [] : null;
+                    const new_filter_obj = { [criteria.code]: value };
+                    vue.filters = Object.assign(
+                        {},
+                        vue.filters,
+                        new_filter_obj
+                    );
+                });
 
-                        const new_select_obj = {[criteria.code]: criteria.values,};
-                        vue.selects = Object.assign({}, vue.selects, new_select_obj);
+                // if (param_subworkspace)
+                //     vue.filters.subworkspace_id = param_subworkspace
 
-                        const value = criteria.multiple ? [] : null;
-                        const new_filter_obj = {[criteria.code]: value};
-                        vue.filters = Object.assign({}, vue.filters, new_filter_obj);
-
-                    });
-
-                    // if (param_subworkspace)
-                    //     vue.filters.subworkspace_id = param_subworkspace
-
-                    // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
-                })
-
+                // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+            });
         },
         reset(user) {
-            let vue = this
-            vue.consoleObjectTable(user, 'User to Reset')
+            let vue = this;
+            vue.consoleObjectTable(user, "User to Reset");
         },
         goToReiniciosMasivos() {
             window.location.href = "/masivo/usuarios/index_reinicios";
         },
         activity() {
-            console.log('activity')
-        },
+            console.log("activity");
+        }
     }
-
-}
+};
 </script>

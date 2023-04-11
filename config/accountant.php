@@ -100,7 +100,17 @@ return [
     |
     */
 
-    'events' => ['created', 'updated', 'restored', 'deleted', 'forceDeleted'],
+    'events' => [
+        'created',
+        'updated',
+        'restored',
+        'deleted',
+        'forceDeleted',
+        'synced',
+        'existingPivotUpdated',
+        'attached',
+        'detached',
+    ],
 
     /*
     |--------------------------------------------------------------------------

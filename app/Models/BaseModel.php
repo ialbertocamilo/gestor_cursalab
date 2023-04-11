@@ -43,7 +43,6 @@ class BaseModel extends Model implements Recordable
         'active' => 'boolean',
     ];
 
-    protected $ledgerThreshold = 100;
 
     protected $defaultRelationships = [];
 

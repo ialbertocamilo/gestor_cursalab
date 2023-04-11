@@ -101,6 +101,8 @@ class CheckList extends BaseModel
             }
 
             $checklist->active = $checklist->active;
+            $checklist->is_super_user = auth()->user()->isAn('super-user');
+
         }
 
         $response['data'] = $checklists->items();

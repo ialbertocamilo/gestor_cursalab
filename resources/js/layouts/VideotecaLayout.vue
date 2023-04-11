@@ -3,30 +3,24 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Videoteca
-                <v-spacer/>
-                <v-btn
-                    elevation="0"
-                    class="mx-2"
-                    @click="openTags"
-                >
-                    <v-icon v-text="'mdi-notebook-edit'"/>
+                <v-spacer />
+                <v-btn elevation="0" class="mx-2" @click="openTags">
+                    <v-icon v-text="'mdi-notebook-edit'" />
                     Tags
                 </v-btn>
-                <v-btn
-                    elevation="0"
-                    class="mx-2"
-                    @click="openCategorias"
-                >
-                    <v-icon v-text="'mdi-notebook-edit'"/>
+                <v-btn elevation="0" class="mx-2" @click="openCategorias">
+                    <v-icon v-text="'mdi-notebook-edit'" />
                     Categorías
                 </v-btn>
-                <DefaultModalButton label="Nuevo"
-                                    @click="openFormModal(modalOptions)"/>
+                <DefaultModalButton
+                    label="Nuevo"
+                    @click="openFormModal(modalOptions)"
+                />
             </v-card-title>
         </v-card>
 
         <v-card elevation="0" class="mb-4">
-        <!--     <v-card-text class="pb-0">
+            <!--     <v-card-text class="pb-0">
                 <v-row>
                     <v-col cols="12" md="12" lg="12">
                         <v-btn
@@ -58,44 +52,78 @@
                 </v-row>
             </v-card-text> -->
             <v-card-text class="--pt-0">
-               
-                <DefaultTable :ref="dataTable.ref"
-                          :data-table="dataTable"
-                          :filters="filters"
-                          @edit="openFormModal(modalOptions, $event)"
-                          @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                          @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar')"
+                <DefaultTable
+                    :ref="dataTable.ref"
+                    :data-table="dataTable"
+                    :filters="filters"
+                    @edit="openFormModal(modalOptions, $event)"
+                    @status="
+                        openFormModal(
+                            modalStatusOptions,
+                            $event,
+                            'status',
+                            'Actualizar estado'
+                        )
+                    "
+                    @logs="
+                        openFormModal(
+                            modalLogsOptions,
+                            $event,
+                            'logs',
+                            `Logs de Videos - ${$event.title}`
+                        )
+                    "
+                    @delete="
+                        openFormModal(
+                            modalDeleteOptions,
+                            $event,
+                            'delete',
+                            'Eliminar'
+                        )
+                    "
                 />
-            
             </v-card-text>
         </v-card>
 
         <ModalTags
             ref="modalTags"
             :modal-data="modalTags"
-            @onClose="closeTagModal"/>
+            @onClose="closeTagModal"
+        />
         <ModalCategorias
             ref="modalCategorias"
             :modal-data="modalCategorias"
-            @onClose="closeCategoriasModal"/>
-
-        <ModalCreateEditVideoteca width="60vw"
-                              :ref="modalOptions.ref"
-                              :options="modalOptions"
-                              @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
-                              @onCancel="closeFormModal(modalOptions)"
-            />
-
-        <DefaultStatusModal :options="modalStatusOptions"
-                                :ref="modalStatusOptions.ref"
-                                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
-                                @onCancel="closeFormModal(modalStatusOptions)"
+            @onClose="closeCategoriasModal"
         />
 
-        <DefaultDeleteModal :options="modalDeleteOptions"
-                            :ref="modalDeleteOptions.ref"
-                            @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
-                            @onCancel="closeFormModal(modalDeleteOptions)"
+        <ModalCreateEditVideoteca
+            width="60vw"
+            :ref="modalOptions.ref"
+            :options="modalOptions"
+            @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
+            @onCancel="closeFormModal(modalOptions)"
+        />
+
+        <DefaultStatusModal
+            :options="modalStatusOptions"
+            :ref="modalStatusOptions.ref"
+            @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+            @onCancel="closeFormModal(modalStatusOptions)"
+        />
+
+        <DefaultDeleteModal
+            :options="modalDeleteOptions"
+            :ref="modalDeleteOptions.ref"
+            @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+            @onCancel="closeFormModal(modalDeleteOptions)"
+        />
+        <LogsModal
+            :options="modalLogsOptions"
+            width="55vw"
+            :model_id="null"
+            model_type="App\Models\Videoteca"
+            :ref="modalLogsOptions.ref"
+            @onCancel="closeSimpleModal(modalLogsOptions)"
         />
     </section>
 </template>
@@ -108,6 +136,8 @@ import ModalCategorias from "../components/Videoteca/ModalCategorias";
 import DefaultStatusModal from "./Default/DefaultStatusModal";
 import DefaultDeleteModal from "./Default/DefaultDeleteModal";
 
+import LogsModal from "../components/globals/Logs";
+
 export default {
     components: {
         ModalCreateEditVideoteca,
@@ -115,37 +145,60 @@ export default {
         ModalCategorias,
         DefaultStatusModal,
         DefaultDeleteModal,
+        LogsModal
     },
     data() {
         return {
             dataTable: {
-                endpoint: '/videoteca/search',
-                ref: 'VideotecaTable',
+                endpoint: "/videoteca/search",
+                ref: "VideotecaTable",
                 headers: [
-                    {text: "Media", value: "image", align: 'center', sortable: false},
-                    {text: "Título", value: "title"},
-                    {text: "Tags", value: "tags", align: 'center', sortable: false},
-                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                    {
+                        text: "Media",
+                        value: "image",
+                        align: "center",
+                        sortable: false
+                    },
+                    { text: "Título", value: "title" },
+                    {
+                        text: "Tags",
+                        value: "tags",
+                        align: "center",
+                        sortable: false
+                    },
+                    {
+                        text: "Opciones",
+                        value: "actions",
+                        align: "center",
+                        sortable: false
+                    }
                 ],
                 actions: [
                     {
                         text: "Editar",
-                        icon: 'mdi mdi-pencil',
-                        type: 'action',
-                        method_name: 'edit'
+                        icon: "mdi mdi-pencil",
+                        type: "action",
+                        method_name: "edit"
                     },
                     {
                         text: "Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
+                        icon: "fa fa-circle",
+                        type: "action",
+                        method_name: "status"
                     },
                     {
                         text: "Eliminar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
+                        icon: "far fa-trash-alt",
+                        type: "action",
+                        method_name: "delete"
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -156,27 +209,34 @@ export default {
                     // },
                 ]
             },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
             modalOptions: {
                 // ref: 'VideotecaFormModal',
-                ref: 'ModalCreateEditVideoteca',
+                ref: "ModalCreateEditVideoteca",
                 open: false,
-                base_endpoint: '/videoteca',
-                resource: 'Videoteca',
-                confirmLabel: 'Guardar',
+                base_endpoint: "/videoteca",
+                resource: "Videoteca",
+                confirmLabel: "Guardar"
             },
             modalStatusOptions: {
-                ref: 'VideotecaStatusModal',
+                ref: "VideotecaStatusModal",
                 open: false,
-                base_endpoint: '/videoteca',
-                contentText: '¿Desea cambiar de estado a este registro?',
-                endpoint: '',
+                base_endpoint: "/videoteca",
+                contentText: "¿Desea cambiar de estado a este registro?",
+                endpoint: ""
             },
             modalDeleteOptions: {
-                ref: 'VideotecaDeleteModal',
+                ref: "VideotecaDeleteModal",
                 open: false,
-                base_endpoint: '/videoteca',
-                contentText: '¿Desea eliminar este registro?',
-                endpoint: '',
+                base_endpoint: "/videoteca",
+                contentText: "¿Desea eliminar este registro?",
+                endpoint: ""
             },
             btn_reload_data: false,
             mostrarFiltros: true,
@@ -204,8 +264,8 @@ export default {
                 open: false
             },
             filters: {
-                q: '',
-            },
+                q: ""
+            }
         };
     },
     mounted() {
@@ -216,12 +276,12 @@ export default {
     methods: {
         openTags() {
             let vue = this;
-            vue.$refs.modalTags.getData()
+            vue.$refs.modalTags.getData();
             vue.modalTags.open = true;
         },
         openCategorias() {
             let vue = this;
-            vue.$refs.modalCategorias.getData()
+            vue.$refs.modalCategorias.getData();
             vue.modalCategorias.open = true;
         },
         closeTagModal() {
@@ -239,39 +299,38 @@ export default {
         //     vue.txt_filter = "";
         //     vue.getData();
         // },
-        getData() {
-
-        },
+        getData() {},
         // cambiar_pagina(page) {
         //     let vue = this;
         //     vue.getData(page);
         // },
         edit(recurso) {
             let vue = this;
-            this.showLoader()
-            let url = `/videoteca/show/${recurso.id}`
-            vue.$http.get(url)
-                .then((res) => {
+            this.showLoader();
+            let url = `/videoteca/show/${recurso.id}`;
+            vue.$http
+                .get(url)
+                .then(res => {
                     vue.formResource = res.data.videoteca;
                     vue.modalData.open = true;
-                    this.hideLoader()
+                    this.hideLoader();
                     if (vue.$refs.modalCreateEdit)
-                        vue.$refs.modalCreateEdit.resetForm()
+                        vue.$refs.modalCreateEdit.resetForm();
                 })
-                .catch((err) => {
-                    this.hideLoader()
-                    console.log(err)
-                })
+                .catch(err => {
+                    this.hideLoader();
+                    console.log(err);
+                });
         },
         openDeleteModal(recurso) {
             let vue = this;
-            vue.modalDelete.open = true
-            vue.deleteItem = recurso
+            vue.modalDelete.open = true;
+            vue.deleteItem = recurso;
         },
         deleteResource() {
             let vue = this;
-            let url = `/videoteca/delete/${vue.deleteItem.id}`
-        },
+            let url = `/videoteca/delete/${vue.deleteItem.id}`;
+        }
         // openDeleteModal(recurso) {
         //     let vue = this;
         //     vue.modalDelete.open = true
@@ -343,7 +402,7 @@ v-text-field .v-input__control,
 }
 
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */
-{
+ {
     opacity: 0;
 }
 </style>

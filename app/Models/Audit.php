@@ -80,7 +80,7 @@ class Audit extends MongoLedger
 
     public function getDataFiltered(): array
     {
-        return Arr::except($this->getData(), $this->excluded_fields);
+        return Arr::except($this->getData(true), $this->excluded_fields);
     }
 
     public function isBasicEvent()
@@ -102,8 +102,7 @@ class Audit extends MongoLedger
         if ($this->isBasicEvent()) {
             try {
                 // obtener modelo
-                $model = $this->extract();
-
+                $model = $this->extract(false);
                 // traer relaciones
                 $model->loadDefaultRelationships();
 
@@ -184,7 +183,7 @@ class Audit extends MongoLedger
                 ($item['alias'] ?? ($item['name'] ?? 'ND'));
         }
 
-        if (is_date($item)) {
+        if (is_date($item) && !is_numeric($item)) {
             $item = Carbon::parse($item)->setTimezone('America/Lima');
 
             return $item->format('d/m/Y g:i a');
@@ -207,12 +206,16 @@ class Audit extends MongoLedger
         return $name;
     }
 
+    // Registros Nombre
     public function getRecordableName()
     {
         return $this->recordable->title ??
             ($this->recordable->fullname ??
                 ($this->recordable->name ??
-                    '#ID ' . ($this->recordable->id ?? 'No definido')));
+                    ($this->recordable->titulo ??
+                        ($this->recordable->nombre ??
+                            '#ID ' .
+                                ($this->recordable->id ?? 'No definido')))));
     }
 
     public function getModifiedLabels($modified)
@@ -240,11 +243,19 @@ class Audit extends MongoLedger
 
         if ($request->date_range) {
             if (isset($request->date_range[1])) {
-                $starDate = $request->date_range[0] . ' 00:00';
-                $endDate = $request->date_range[1] . ' 23:59';
-                $query->whereBetween('created_at', [$starDate, $endDate]);
+                $startDate = new Carbon($request->date_range[0]);
+                $endDate = new Carbon($request->date_range[1]);
+                $query->whereBetween('created_at', [
+                    $startDate,
+                    $endDate->addDay(1),
+                ]);
             } else {
-                $query->whereDate('created_at', '=', $request->date_range[0]);
+                $startDate = new Carbon($request->date_range[0]);
+                $endDate = new Carbon($request->date_range[0]);
+                $query->whereBetween('created_at', [
+                    $startDate,
+                    $endDate->addDay(1),
+                ]);
             }
         }
 
@@ -263,13 +274,28 @@ class Audit extends MongoLedger
 
         // Models filter
 
-        if ($request->models) {
-            $query->where('recordable_type', $request->models);
+        if ($request->model_type) {
+            $query->where('recordable_type', $request->model_type);
         }
-        $sort = $request->sortDesc == 'true' ? 'ASC' : 'DESC';
 
-        return $query
-            ->orderBy('created_at', $sort)
-            ->paginate($request->paginate);
+        if ($request->model_id) {
+            $model_id = intval($request->model_id);
+            $query->where('recordable_id', $model_id);
+        }
+
+        // Sort by date
+        $field = $request->sortBy ?? 'created_at';
+
+        $sort = $request->sortBy ? 'asc' : 'desc';
+        $sort2 = $request->sortDesc ? 'desc' : 'asc';
+
+        if ($request->sortBy && $request->sortDesc) {
+            $query->orderBy($field, $sort2);
+        } else {
+            $query->orderBy($field, $sort);
+        }
+
+        // Paginate
+        return $query->paginate($request->paginate);
     }
 }
