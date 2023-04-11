@@ -20,7 +20,7 @@
             </v-col>
         </v-row>
         <v-row justify="start" v-else>
-            <v-col cols="4" v-for="criterion in criterion_list" :key="criterion.id"
+            <v-col cols="4" v-for="(criterion, index) in criterion_list" :key="criterion.id"
                         v-show="!criterion.required">
                 <div v-if="TypeOf(user.criterion_list[criterion.code]) !== 'undefined'">
                     <div v-if="criterion.field_type != null && criterion.field_type.code == 'date'">
