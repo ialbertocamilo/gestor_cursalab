@@ -24,7 +24,7 @@
         </ResumenExpand>
 
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportSegmentacion" class="row">
+        <form @submit.prevent="generateReport" class="row">
             <!-- Escuela -->
             <div class="col-sm-6 mb-3">
 
@@ -67,7 +67,7 @@
                         :disabled="filters.school.length === 0"
                         class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
-                    <span>Descargar</span>
+                    <span>Generar reporte</span>
                 </button>
             </div>
         </form>
@@ -87,11 +87,13 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
     data() {
         return {
+            reportType: 'segmentation',
             schools: [],
             courses: [],
             //
@@ -115,7 +117,7 @@ export default {
 
             // Fetch schools
 
-            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}`
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}?grouped=0`
             let responseSchools = await axios({
                 url: urlSchools,
                 method: 'get'
@@ -125,45 +127,45 @@ export default {
 
         }
         ,
-        async exportSegmentacion() {
-            let vue = this;
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue.exportSegmentacion, type: vue.reportType})
+        },
+        async exportSegmentacion(reportName) {
 
-            // show loading spinner
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Escuelas": this.generateNamesArray(this.schools, this.filters.school),
+                "Cursos": this.generateNamesArray(this.courses, [this.filters.course]),
+            }
 
-            this.showLoader()
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/segmentation`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: this.modulo ? [this.modulo] : [],
                         escuelas: this.filters.school,
                         cursos: this.filters.course,
                     }
                 })
-                // When there are no results notify user,
-                // download report otherwise
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_segmentacion");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Segmentación',
-                        this.generateNamesString(this.schools, this.filters.school)
-                    )
-                    this.$emit('emitir-reporte', response)
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_segmentacion");
+                    }, 500);
                 }
 
             } catch (ex) {
                 console.log(ex.message)
             }
-            // Hide loading spinner
-            this.hideLoader()
         }
         ,
         /**

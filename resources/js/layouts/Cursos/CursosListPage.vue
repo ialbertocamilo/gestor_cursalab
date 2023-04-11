@@ -399,9 +399,9 @@ export default {
                 ]
             },
             filters: {
-                q: "",
-                active: null,
-                type: null
+                q: '',
+                active: 1,
+                type: null,
                 // category: null
             },
 

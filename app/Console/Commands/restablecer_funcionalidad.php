@@ -15,12 +15,14 @@ use App\Models\Ticket;
 use App\Models\Visita;
 use App\Models\Abconfig;
 use App\Models\Criterio;
+use App\Models\Question;
 use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
 use Faker\Factory as Faker;
+use App\Models\AssignedRole;
 use App\Models\SummaryTopic;
 use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
@@ -29,8 +31,12 @@ use Illuminate\Console\Command;
 use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Support\ExternalDatabase;
 use App\Http\Controllers\ApiRest\RestAvanceController;
+use App\Models\MediaTema;
+use App\Models\Taxonomy;
 
 class restablecer_funcionalidad extends Command
 {
@@ -73,9 +79,9 @@ class restablecer_funcionalidad extends Command
         // $this->restablecer_matricula();
         // $this->restablecer_preguntas();
         // $this->restoreCriterionValues();
-        $this->restoreCriterionDocument();
+        // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
-        // $this->restoreSummayUser();
+        $this->restoreSummayUser();
         // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
@@ -90,8 +96,207 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionValuesFromJsonV2();
         // $this->deleteDuplicatesInSummaryCourses();
         // $this->restoreUserIdInTickets();
+        // $this->setEmailGestorAdmins();
+        // $this->restoreAnswerUserFromUCFP();
+        // $this->generateStatusTopics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function generateStatusTopics(){
+        $status_revisado = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
+        $status_realizado= Taxonomy::getFirstData('topic', 'user-status', 'realizado');
+        $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
+        $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        $status_list = [$status_revisado?->id, $status_realizado?->id, $status_passed?->id, $status_failed?->id];
+
+        SummaryTopic::whereIn('status_id',$status_list)->chunkById(10000, function ($summary_topics) {
+
+            $_bar = $this->output->createProgressBar(count($summary_topics));
+            $_bar->start();
+            foreach ($summary_topics as $sum_top) {
+
+                $medias = MediaTema::where('topic_id', $sum_top->topic_id)->orderBy('position','ASC')->get();
+
+                $user_progress_media = array();
+                foreach($medias as $med)
+                {
+                    array_push($user_progress_media, (object) array(
+                        'media_topic_id' => $med->id,
+                        'status'=> 'revisado',
+                        'last_media_duration' => null
+                    ));
+                }
+                $sum_top->media_progress = json_encode($user_progress_media);
+                $sum_top->last_media_access = null;
+                $sum_top->last_media_duration = null;
+
+                $sum_top->save();
+
+                $_bar->advance();
+            }
+
+            $_bar->finish();
+        });
+
+    }
+
+    public function restoreAnswerUserFromUCFP(){
+        $db = ExternalDatabase::connect();
+        $db->getTable('pruebas')->where('migrado','<>',1)->select('id','posteo_id','usuario_id','usu_rptas','last_ev')
+        ->chunkById(10000, function ($pruebas){
+            $_bar = $this->output->createProgressBar(count($pruebas));
+            $_bar->start();
+            $db_2 = ExternalDatabase::connect();
+            Log::channel('soporte_log')->info("Migrado");
+            foreach ($pruebas as $prueba) {
+                $user = User::where('external_id',$prueba->usuario_id)->select('id')->first();
+                $topic =   Topic::where('external_id',$prueba->posteo_id)->select('id')->first();
+                if($user && $topic){
+                    $summary = DB::table('summary_topics')->select('id','answers','last_time_evaluated_at')
+                    ->where('user_id',$user->id)->where('topic_id',$topic->id)->first();
+                    if($summary){
+                        $summary->answers = str_replace(' ','',$summary->answers);
+                        $prueba->usu_rptas = str_replace(' ','',$prueba->usu_rptas);
+                        if($summary->answers == $prueba->usu_rptas && $summary->last_time_evaluated_at == $prueba->last_ev){
+                            $old_answers = json_decode($prueba->usu_rptas);
+                            if($old_answers){
+                                $new_answers = [];
+                                foreach ($old_answers as $answer) {
+                                    $old_question = $db_2->getTable('preguntas')->where('post_id',$prueba->posteo_id)->select('id','pregunta')->where('id',$answer->preg_id)->first();
+                                    if($old_question){
+                                        $new_id_question = Question::where('topic_id',$topic->id)->where('pregunta',$old_question->pregunta)->first();
+                                        if($new_id_question){
+                                            $new_answers[]=[
+                                                "opc"=> $answer->opc,
+                                                "preg_id" => $new_id_question->id
+                                            ];
+                                        }
+                                    }
+                                }
+                                if(count($new_answers) == count($old_answers)){
+                                    DB::table('summary_topics')->where('id',$summary->id)->update([
+                                        'answers'=> json_encode($new_answers)
+                                    ]);
+                                    $db_2->getTable('pruebas')->where('id',$prueba->id)->update([
+                                        'migrado'=> 1
+                                    ]);
+                                }else{
+                                    // Log::channel('soporte_log')->info("----");
+                                    // Log::channel('soporte_log')->info("cantidad distintos");
+                                    // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                                    // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                                    // Log::channel('soporte_log')->info($summary->answers);
+                                    // Log::channel('soporte_log')->info($prueba->usu_rptas);
+                                    // Log::channel('soporte_log')->info("----");
+                                }
+                            }
+                        }else{
+                            // Log::channel('soporte_log')->info("----");
+                            // Log::channel('soporte_log')->info("registros distintos");
+                            // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                            // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                            // Log::channel('soporte_log')->info($summary->answers);
+                            // Log::channel('soporte_log')->info($prueba->usu_rptas);
+                            // Log::channel('soporte_log')->info($summary->last_time_evaluated_at);
+                            // Log::channel('soporte_log')->info($prueba->last_ev);
+
+                            // Log::channel('soporte_log')->info("----");
+                        }
+                    }else{
+                        // Log::channel('soporte_log')->info("----");
+                        // Log::channel('soporte_log')->info("No existe summary");
+                        // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                        // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                        // Log::channel('soporte_log')->info("----");
+                    }
+                }else{
+                    // Log::channel('soporte_log')->info("----");
+                    // Log::channel('soporte_log')->info("No se encontro usuario");
+                    // Log::channel('soporte_log')->info("user_id".$prueba->usuario_id);
+                    // Log::channel('soporte_log')->info("posteo_id".$prueba->posteo_id);
+                    // Log::channel('soporte_log')->info("----");
+                }
+                $_bar->advance();
+            }
+            $_bar->finish();
+        });
+    }
+    public function setEmailGestorAdmins(){
+        $admins = AssignedRole::select('entity_id')->where('entity_type', 'App\Models\User')
+        ->groupBy('entity_id')->get();
+        foreach ($admins as $admin) {
+            $user = User::where('id',$admin->entity_id)->whereNull('secret_key')->first();
+            if($user && $user->email){
+                $user->email_gestor = $user->email;
+                $user->email = null;
+                $user->save();
+            }
+        }
+        cache_clear_model(User::class);
+        // $this->restore_career();
+        $this->info("\n Fin: " . now());
+        info(" \n Fin: " . now());
+    }
+    public function restore_career(){
+        $users_affected_json = public_path() . "/json/users_carreras.json"; // ie: /var/www/laravel/app/storage/json/filename.json
+        $users_affected = json_decode(file_get_contents($users_affected_json), true);
+        $_bar = $this->output->createProgressBar(count($users_affected));
+        $users_not_modified = [];
+        $_bar->start();
+        $criteria_to_set = ['career'];
+        $criterion_career = Criterion::where('code','career')->first();
+        $workspace = Workspace::where('slug','farmacias-peruanas')->whereNull('parent_id')->first();
+        foreach ($users_affected as $user_affected) {
+            $has_modified = false;
+            $user = User::where('document',$user_affected['documento'])->first();
+            if($user){
+                foreach ($criteria_to_set as $code) {
+                    $criterion_values_by_code=$user->criterion_values()
+                        ->whereHas('criterion',function($q) use($code) {
+                            $q->where('code',$code);
+                        })
+                        ->first();
+                    if($criterion_values_by_code){
+                        CriterionValueUser::where('user_id',$user->id)->where('criterion_value_id',$criterion_values_by_code->id)->delete();
+                    }
+                    $criterion_to_set = $this->getCriterionValueId('value_text',$criterion_career,trim($user_affected[$code]),$workspace);
+                    DB::table('criterion_value_user')->insert([
+                        'criterion_value_id'=>$criterion_to_set->id,
+                        'user_id'=>$user->id
+                    ]);
+                }
+                SummaryUser::updateUserData($user);
+            }else{
+                $users_not_modified[] = $user;
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/users_not_modified.json', json_encode($users_not_modified,JSON_UNESCAPED_UNICODE));
+        cache_clear_model(CriterionValueUser::class);
+        cache_clear_model(CriterionValue::class);
+    }
+    private function getCriterionValueId($colum_name,$criterion,$value_excel,$workspace){
+        $has_error = false;
+        $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
+        if (!$criterion_value) {
+            $criterion_value = new CriterionValue();
+            $criterion_value[$colum_name] = $value_excel;
+            $criterion_value['value_text'] = $value_excel;
+            $criterion_value->criterion_id = $criterion->id;
+            $criterion_value->active = 1;
+            $criterion_value->save();
+        }
+        $workspace_value = DB::table('criterion_value_workspace')->where([
+            'workspace_id' => $workspace->id,
+            'criterion_value_id' => $criterion_value->id
+        ])->first();
+        if (!$workspace_value) {
+            DB::table('criterion_value_workspace')->insert([
+                'workspace_id' => $workspace->id,
+                'criterion_value_id' => $criterion_value->id
+            ]);
+        }
+        return $criterion_value;
     }
     public function restoreUserIdInTickets(){
         $tickets = Ticket::whereNull('user_id')->get();
@@ -146,7 +351,7 @@ class restablecer_funcionalidad extends Command
             if($user){
                 foreach ($criteria_to_set as $code) {
                     $criterion_values_by_code=$user->criterion_values()
-                        ->whereHas('criterion',function($q) use($code) { 
+                        ->whereHas('criterion',function($q) use($code) {
                             $q->where('code',$code);
                         })
                         ->first();
@@ -608,14 +813,17 @@ class restablecer_funcionalidad extends Command
     }
     public function restoreSummayUser(){
         $i = 'Fin';
-        User::select('id','subworkspace_id')->whereIn('subworkspace_id',[26,27,28,29])
+        User::select('id','subworkspace_id')
+            ->whereHas('subworkspace')
+            // ->whereIn('subworkspace_id',[17,19,20,21,22])
             ->where('active',1)
-            ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
+            ->whereDoesntHave('summary')
+            // ->whereRelation('summary', 'updated_at','<','2022-11-09 20:00:00')
             ->chunkById(2500, function ($users_chunked)use($i){
-            $this->info($i);
             $_bar = $this->output->createProgressBar($users_chunked->count());
             $_bar->start();
             foreach ($users_chunked as $user) {
+                SummaryUser::getCurrentRowOrCreate($user, $user);
                 SummaryUser::updateUserData($user);
                 $_bar->advance();
             }

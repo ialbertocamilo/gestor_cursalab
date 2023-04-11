@@ -18,18 +18,23 @@
             <v-card-text>
                 <v-row class="justify-content-start">
                     <v-col cols="3">
-                        <DefaultInput
-                            learable
+                        <!-- <DefaultSelect
+                            clearable dense
+                            :items="selects.modules"
+                            v-model="filters.module"
+                            label="Módulo"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        /> -->
+                        <DefaultAutocomplete
                             dense
-                            v-model="filters.q"
-                            label="Buscar por nombre..."
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            append-icon="mdi-magnify"
+                            label="Módulos"
+                            :items="selects.modules"
+                            v-model="filters.modules"
+                            item-text="name"
+                            item-value="id"
+                            multiple
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -57,6 +62,16 @@
                             @onChange="
                                 refreshDefaultTable(dataTable, filters, 1)
                             "
+                        />
+                    </v-col>
+                    <v-col cols="3">
+                        <DefaultInput
+                            learable dense
+                            v-model="filters.q"
+                            label="Buscar por nombre..."
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            append-icon="mdi-magnify"
                         />
                     </v-col>
                 </v-row>
@@ -113,21 +128,17 @@
                 :resource="delete_model"
             />
 
-            <DefaultStatusModal
+         <!--    <DefaultStatusModal
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
-                @onConfirm="
-                    closeFormModal(modalStatusOptions, dataTable, filters)
-                "
-                @onCancel="
-                    closeFormModal(modalStatusOptions, dataTable, filters)
-                "
-            />
-            <DuplicarCursos
+                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalStatusOptions, dataTable, filters)"
+            /> -->
+          <!--   <DuplicarCursos
                 :ref="modalCursosDuplicar.ref"
                 :modalCursosDuplicar="modalCursosDuplicar"
-                @onCancel="closeFormModalDuplicarCursos"
-            />
+                @onCancel='closeFormModalDuplicarCursos'
+            /> -->
 
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
@@ -170,7 +181,8 @@ export default {
         LogsModal
     },
     data() {
-        let vue = this;
+        let vue = this
+
         return {
             breadcrumbs: [
                 { title: "Escuelas", text: null, disabled: true, href: "" }
@@ -180,25 +192,12 @@ export default {
                 ref: "escuelasTable",
                 headers: [
                     // {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
-                    {
-                        text: "Portada",
-                        value: "image",
-                        align: "center",
-                        sortable: false
-                    },
-                    { text: "Nombres", value: "name" },
-                    {
-                        text: "Fecha de creación",
-                        value: "created_at",
-                        align: "center",
-                        sortable: true
-                    },
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    {text: "Nombres", value: "name"},
+                    // {text: "Módulos", value: "modules", sortable: false},
+                    {text: "Módulos", value: "images", align: 'center', sortable: false},
+                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
@@ -267,9 +266,9 @@ export default {
                 ]
             },
             filters: {
-                q: "",
-                module: null,
-                active: null
+                q: '',
+                modules: [],
+                active: 1,
             },
             modalEscuelasValidaciones: {},
             modalEscuelasValidacionesDefault: {
@@ -283,13 +282,13 @@ export default {
                 resource: "TemasValidaciones"
             },
             delete_model: null,
-            modalStatusOptions: {
-                ref: "EscuelaStatusModal",
-                open: false,
-                base_endpoint: "/modulos/" + vue.workspace_id + "/escuelas",
-                contentText: "¿Desea cambiar de estado a este registro?",
-                endpoint: ""
-            },
+            // modalStatusOptions: {
+            //     ref: 'EscuelaStatusModal',
+            //     open: false,
+            //     base_endpoint: '/modulos/' + vue.workspace_id + '/escuelas',
+            //     contentText: '¿Desea cambiar de estado a este registro?',
+            //     endpoint: '',
+            // },
             modalCursosDuplicar: {
                 categoria_id: 0,
                 dialog: false,
@@ -301,18 +300,20 @@ export default {
         };
     },
     mounted() {
-        let vue = this;
-        // vue.getSelects();
-
-        vue.filters.module = vue.workspace_id;
+        let vue = this
+        vue.getSelects();
+        // vue.selectDefaultModule(vue.selects.modules)
     },
     methods: {
         getSelects() {
-            let vue = this;
-            const url = `/escuelas/get-selects`;
-            vue.$http.get(url).then(({ data }) => {
-                vue.selects.modules = data.data.modules;
-            });
+            let vue = this
+
+            const url = `/escuelas/form-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.modules = data.data.modules
+                    vue.selectDefaultModule(vue.selects.modules)
+                })
         },
         activity() {
             console.log("activity");
@@ -321,6 +322,30 @@ export default {
             // let vue = this
             // vue.delete_model = school
             // vue.modalDeleteOptions.open = true
+        },
+        selectDefaultModule(modules) {
+            let vue = this
+
+            let uri = window.location.search.substring(1);
+            let params = new URLSearchParams(uri);
+            let param_module_id = params.get("module_id");
+
+            // await vue.$nextTick(() => {
+                if (param_module_id) {
+
+                    let module_idx = null
+
+                    modules.forEach(row => {
+
+                        if ( row.id == param_module_id ) {
+
+                            vue.filters.modules.push(row)
+
+                            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                        }
+                    });
+                }
+            // })
         },
         async cleanModalEscuelasValidaciones() {
             let vue = this;

@@ -264,16 +264,22 @@ export default {
                 active: false,
                 items: [
                     {
-                        title: "Cursos",
-                        icon: "mdi mdi-notebook",
-                        path: "/cursos",
-                        subpaths: ["cursos"],
+                        title: "Módulos",
+                        icon: "fas fa-th-large",
+                        path: "/modulos",
+                        subpaths: [
+                            "modulos",
+                            // "abconfigs",
+                            // "categorias",
+                            // "cursos"
+                        ],
                         selected: false,
-                        permission: "cursos",
+                        permission: "modulos",
                         role: [
                             "super-user",
                             "admin",
                             "content-manager",
+                            "trainer"
                         ]
                     },
                     {
@@ -289,7 +295,20 @@ export default {
                             "content-manager",
                             "trainer"
                         ]
-                    }
+                    },
+                    {
+                        title: "Cursos",
+                        icon: "mdi mdi-notebook",
+                        path: "/cursos",
+                        subpaths: ["cursos"],
+                        selected: false,
+                        permission: "cursos",
+                        role: [
+                            "super-user",
+                            "admin",
+                            "content-manager",
+                        ]
+                    },
                     // {
                     //     title:"Cursos",
                     //     icon:"fas fa-map-signs",
@@ -375,9 +394,9 @@ export default {
                         permission: "entrenadores",
                         role: [
                             "super-user",
-                            "admin-TEMPORAL_INACTIVO",
-                            "content-manager-TEMPORAL_INACTIVO",
-                            "trainer-TEMPORAL_INACTIVO"
+                            "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     },
                     {

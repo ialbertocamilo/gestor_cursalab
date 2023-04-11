@@ -15,7 +15,7 @@
         @keypress="isNumber($event)"
         :rules="rules"
         :counter="counter"
-        :type="type"
+        :type="localType"
         :max="max"
         :min="min"
         :step="step"
@@ -23,10 +23,14 @@
         :suffix="suffix"
         :prefix="prefix"
         :loading="loading"
-
+        :autocomplete="autocomplete"
     >
-        <template v-slot:append v-if="appendIcon">
-            <v-btn plain icon :ripple="false" @click="onClickAppendIcon">
+        <template v-slot:append>
+            <v-btn v-if="type == 'password'" width="32" height="32" plain icon 
+                   @click="onClickSeePassword">
+                <span :class="`far ${iconSeePass ? 'fa-eye' : 'fa-eye-slash' } fa-lg`"></span>
+            </v-btn>
+            <v-btn v-if="appendIcon" plain icon :ripple="false" @click="onClickAppendIcon">
                 <v-icon>{{ appendIcon }}</v-icon>
             </v-btn>
         </template>
@@ -45,6 +49,10 @@ export default {
         type: {
             type: String,
             default: 'text',
+        },
+        autocomplete: {
+            type: String,
+            default: null,
         },
         suffix: {
             type: String,
@@ -116,7 +124,10 @@ export default {
     },
     data() {
         return {
-            localText: null
+            localText: null,
+            localType: this.type,
+
+            iconSeePass: true
         }
     },
     created() {
@@ -127,6 +138,12 @@ export default {
     watch: {
         value(val) {
             this.localText = val // watch change from parent component
+        }
+    },
+    computed:{
+        enableBtnSeePassword() {
+            const vue = this;
+            return (vue.type == 'password');
         }
     },
     methods: {
@@ -148,8 +165,7 @@ export default {
             let vue = this
             // console.log('onClickAppendIcon')
             vue.$emit('clickAppendIcon')
-        }
-        ,
+        },
         isNumber: function(evt) {
 
             if (!this.numbersOnly) return true;
@@ -162,6 +178,18 @@ export default {
             } else {
                 return true;
             }
+        },
+        resetTypePassword() {
+            const vue = this;
+
+            vue.localType = 'password';
+            vue.iconSeePass = true;
+        },
+        onClickSeePassword() {
+            const vue = this;
+
+            vue.iconSeePass = !vue.iconSeePass;
+            vue.localType = !vue.iconSeePass ? 'text' : 'password';
         }
     }
 }

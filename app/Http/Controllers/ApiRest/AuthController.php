@@ -1,17 +1,20 @@
 <?php
 
 namespace App\Http\Controllers\ApiRest;
+
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginAppRequest;
+use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest, 
+                        PasswordResetAppRequest };
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\Usuario;
+use App\Models\{ Usuario, User };
 use Exception;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SubworkspaceInMaintenance extends Exception {};
 
@@ -31,47 +34,16 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
 
-            $currentOS = $data['os'] ?? '';
-            $availableRecaptcha = true;
-
-            if($currentOS and $currentOS == 'android' ) {
-                $currentVersion = $data['version'];
-                settype($currentVersion, "float");
-
-                $mobilesVersion = ['android' => 3.3];
-
-                if($currentVersion >= $mobilesVersion[$currentOS]) {
-                    $availableRecaptcha = true;
-                }else{
-                    $availableRecaptcha = false;
-                }
-            }
-
-            // verificar el sitetoken - recapcha
+            // === validacion de recaptcha ===
+            $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
             if($availableRecaptcha) {
-                $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
-                $recaptcha_response = NULL;
-
-                if($g_recaptcha_response) {
-                    //validar token recaptcha
-                    $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
-                    if(!$recaptcha_response['success']) {
-                        return $this->error('error-recaptcha', 500, $recaptcha_response);
-                    }
-                    //validar el score de recaptcha
-                    if(!$recaptcha_response['score'] >= 0.5) {
-                        return $this->error('error-recaptcha', 500, [
-                                'score' => $recaptcha_response['score'],
-                                'error-codes' => ['score-is-low']
-                            ]);
-                    }
-                }else {
-                    return $this->error('error-recaptcha', 500);
-                }
+                $responseRecaptcha = $this->checkRecaptchaData($data);
+                if($responseRecaptcha !== true) return $responseRecaptcha;
             }
+            // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
-            $password = strip_tags($data['password']);
+            $password = $data['password'];
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
             $credentials1 = $credentials2 = ['password' => $password];
@@ -79,7 +51,32 @@ class AuthController extends Controller
             $credentials1['username'] = trim($userinput);
             $credentials2['document'] = trim($userinput);
 
+            $userInstance = new User;
+
+            // === validacion de intentos ===
+            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2], true); //permanent
+            if($user_attempts) {
+                $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+
+                // custom message
+                if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
+                    return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+                } 
+                return $this->error('Intento fallido A.', 400, $responseAttempts);
+            }
+            // === validacion de intentos ===
+
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+
+                // === verificar el dni como password ===
+                if (trim($userinput) === $password) {
+                    $responseResetPass = [];
+                    Auth::user()->resetAttemptsUser(); // resetea intentos
+                
+                    $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
+                    return response()->json($responseResetPass);
+                }
+                // === verificar el dni como password ===
 
                 // When "Show message" variable is true and
                 // company is Farmacias Peruanas
@@ -106,11 +103,39 @@ class AuthController extends Controller
                     }
                 }
 
+                $user = Auth::user();
+                $user->resetAttemptsUser(); // resetea intentos
+                
+                // === validar si debe reestablecer contraseña ===
+                $canResetPassWord = $user->checkIfCanResetPassword('APP');
+                if($canResetPassWord) {
+                    return $this->resetPasswordBuildToken($user);
+                }
+                // === validar si debe reestablecer contraseña === 
+
                 $responseUserData = $this->respondWithDataAndToken($data);
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
-                return response()->json($responseUserData);
+
+                return response()->json($responseUserData); 
 
             } else {
+                // === validacion de intentos ===
+                $userInstance->checkTimeToReset(trim($userinput), 'APP'); 
+                $user_attempts = $userInstance->incrementAttempts(trim($userinput), 'APP');
+                
+                if($user_attempts) {
+                    $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+                    $responseAttempts['credentials1'] = $credentials1;
+                    $responseAttempts['credentials2'] = $credentials2;
+                    // custom message
+                    if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
+                        return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+                    } 
+
+                    return $this->error('Intento fallido.', 400, $responseAttempts);
+                }
+                // === validacion de intentos ===
+
                 return $this->error('No autorizado.', 401);
             }
 
@@ -134,7 +159,7 @@ class AuthController extends Controller
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
-        $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
+        // $this->checkForMaintenanceModeSubworkspace($user->subworkspace_id);
 
         // if ($user->subworkspace_id == 29 AND $user->external_id) {
 
@@ -234,7 +259,9 @@ class AuthController extends Controller
 
         $user = auth()->user();
 
-        $user->tokens()->delete();
+        // $user->tokens()->delete();
+        $user->token()->revoke();
+        // $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Successfully logged out']);
     }
@@ -287,11 +314,85 @@ class AuthController extends Controller
         }
     }
 
-    public function validateRecaptcha($siteToken) {
-        $secretKey = env('RECAPTCHA_TOKEN');
+    // === ATTEMPTS ===
+    public function sendAttempsAppResponse($user_attempts, $user_time = true)
+    {
+        $errors = [ 'attempts_count' => $user_attempts->attempts,
+                    'attempts_max'   => env('ATTEMPTS_LOGIN_MAX_APP'),
+                    'attempts_fulled'=> $user_attempts->fulled_attempts ];
+
+        if($user_time) {
+            $current_time = is_null($user_attempts->attempts_lock_time) ? false 
+                          : now()->diff($user_attempts->attempts_lock_time)->format("%I:%S");
+
+            return array_merge(['current_time' => $current_time], $errors);
+        }
+        return $errors;
+    }
+
+    public function incrementAttemptsOnly($user, $returned = false)
+    {
+        $user_attempts = $user->incrementAttempts($user->document, 'APP', true); // permanent
+        if($user_attempts) {
+            // $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
+            $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+            if($returned) return $responseAttempts;
+            return $this->error('Intento fallido.', 400, $responseAttempts);
+        }
+    }
+    // === ATTEMPTS ===
+
+    // === RECAPTCHA === 
+    public function checkVersionMobileRecaptcha($data)
+    {
+        $currentOS = $data['os'] ?? '';
+        $availableRecaptcha = true; // estado de recaptcha
+
+        if($currentOS && $currentOS == 'android' ) {
+            $currentVersion = $data['version'];
+            settype($currentVersion, "float");
+
+            $mobilesVersion = ['android' => 3.3];
+
+            if($currentVersion >= $mobilesVersion[$currentOS]) $availableRecaptcha = true;
+            else $availableRecaptcha = false;
+        }
+
+        return $availableRecaptcha; 
+    }
+
+    public function checkRecaptchaData($data)
+    {
+        $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
+        $recaptcha_response = NULL;
+                
+        if ($g_recaptcha_response) {
+            //validar token recaptcha
+            $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
+            if(!$recaptcha_response['success']) {
+                return $this->error('error-recaptcha', 500, $recaptcha_response);
+            }
+            //validar el score de recaptcha
+            if(!$recaptcha_response['score'] >= 0.5) {
+                return $this->error('error-recaptcha', 500, [ 
+                        'score' => $recaptcha_response['score'],
+                        'error-codes' => ['score-is-low']
+                ]);
+            }
+     
+            return true;
+
+        } else { 
+            return $this->error('error-recaptcha', 500); 
+        }
+    }
+
+    public function validateRecaptcha($siteToken) 
+    {
+        $secretKey = env('RECAPTCHA_TOKEN'); 
         $recaptchaUrl = env('RECAPTCHA_BASE_URL');
 
-        // validamo token recaptcha
+        // validamos token recaptcha
         $responseRecaptcha = Http::asForm()->post($recaptchaUrl, [
             'secret' => $secretKey,
             'response' => $siteToken
@@ -299,4 +400,185 @@ class AuthController extends Controller
 
         return $responseRecaptcha->json();
     }
+    // === RECAPTCHA ===
+
+    public function checkSameDataCredentials($userinput, $password)
+    {
+        $user = auth()->user();
+        $checkCredentials['require_quizz'] = ($userinput === $password) && !((bool) $user->email);
+        $checkCredentials['id_user'] = $user->id;
+
+        if(!$checkCredentials['require_quizz']) {
+            return $this->sendEmailResetPassword($user, $checkCredentials);
+        }
+        return $checkCredentials;
+        // return $this->sendQuizzQuestionsValidate($user, $checkCredentials);
+    }
+
+    public function sendEmailResetPassword($user, $checkCredentials)
+    {
+        $workspaceName = Workspace::find($user->subworkspace->parent_id)->name;
+        $subWorkspaceName = $user->subworkspace->name;
+
+        $mail_data = [ 'email' =>  $user->email,
+                       'workspace' => $workspaceName,
+                       'subworkspace' => $subWorkspaceName,
+                       'fullname' => $user->name.' '.$user->lastname ];
+
+        $userCallback = function ($user_instance, $token) {
+            // enviar email
+            $user_instance->sendPasswordRecoveryNotification($user_instance, $token);
+        };
+
+        $status = Password::sendResetLink(['email' => $user->email], $userCallback);
+
+        $checkCredentials['recovery_email']['success'] = ($status === Password::RESET_LINK_SENT);
+        $checkCredentials['recovery_email']['data'] = $mail_data;
+
+        return $checkCredentials;
+    }
+
+    public function sendQuizzQuestionsValidate($user, $checkCredentials)
+    {
+        $criteriaCodeStack = ['birthday_date', 'gender'];
+        $callBackCode = function ($code) use ($user) {
+            return [ $code => $user->getCriterionValueCode($code)->value_text ];
+        };
+        $stackAnswers = array_map($callBackCode, $criteriaCodeStack);
+        $date = $user->getCriterionValueCode('birthday_date')->value_text;
+
+        return [ 'user' => $stackAnswers, 
+                 'birht_date' => date('d-m-Y', strtotime($date)),
+                 'checkCredentials' => $checkCredentials ];
+        // dd(['user' => $user, 'checkCredentials' => $checkCredentials]);
+    }
+
+    // === QUIZZ ===
+    public function quizz(QuizzAppRequest $request)
+    {
+        $request->validated();
+        $user = User::find($request->id_user);
+
+        // === validacion de intentos ===
+        // $user_attempts = $user->checkTimeToReset($user->document, 'APP'); // reset intentos
+        if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
+            $user['fulled_attempts'] = true;
+            $responseAttempts = $this->sendAttempsAppResponse($user);
+            return $this->error('Intento fallido.', 400, $responseAttempts);
+        }
+        // === validacion de intentos ===
+
+        if($request->birthday_date) {
+            $user_birth_date = $user->getCriterionValueCode('birthday_date');
+            
+            if(is_null($user_birth_date)){
+                return $this->incrementAttemptsOnly($user);
+                // no tiene fecha de nacimiento 
+                // $response = $this->incrementAttemptsOnly($user, true); 
+                // $response['birthday_date'] = 'No existe la fecha de nacimiento en este usuario';
+                // return $this->error('Intento fallido', 400, $response);
+            }
+
+            $user_state_date = (date('d-m-Y', strtotime($user_birth_date->value_text)) == $request->birthday_date);
+            if($user_state_date && !$request->gender) return $this->success(true, 'Respuesta correcta');
+            if(!$user_state_date) return $this->incrementAttemptsOnly($user);
+        }
+
+        if($request->gender) {
+            $user_prev_gender = $user->getCriterionValueCode('gender')->value_text;
+            $user_gender = strtoupper(str_split($user_prev_gender)[0]); // primera letra
+            $user_state_gender = ($user_gender == $request->gender);
+
+            if($user_state_gender && $user_state_date) {
+                $user->resetAttemptsUser(); // resetear intentos
+                return $this->resetPasswordBuildToken($user);
+            } 
+            return $this->incrementAttemptsOnly($user);
+        }
+
+        return $this->incrementAttemptsOnly($user);  
+    }
+    // === QUIZZ ===
+
+    // === RESET ===
+    public function resetPasswordBuildToken($user, $returned = false)
+    {
+        $user['email'] = empty($user->email) ? $user->document : $user->email;
+        $token = Password::createToken($user);
+
+        $response = [ 'user_data'   => [ 'fullname' => $user->getFullnameAttribute(),
+                                         'identifier' => $user->email ], 
+                      'user_token'  => $token,
+                      'reset_days'  => env('RESET_PASSWORD_DAYS_APP'),
+                      'first_reset' => is_null($user->last_pass_updated_at) ];
+
+        return $this->success($response, 'Resetear Contraseña');
+    }
+
+    public function reset_password(PasswordResetAppRequest $request)
+    {
+        $data = $request->validated();
+
+        if(!$request->email && !$request->document) return $this->error('no-auth', 503);
+
+        $data_input['os'] = strip_tags($data['os'] ?? '');
+        $data_input['version'] = strip_tags($data['version'] ?? '');
+
+        $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
+                                         : $request->only('document', 'password', 'password_confirmation', 'token');
+        
+        $credentials1 = $credentials2 = ['password' => $request->password];
+        $userinput = $request->email ? $credentials['email'] : $credentials['document'];
+        
+        $credentials1['email'] = $userinput;
+        $credentials2['document'] = $userinput;
+
+        if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            return $this->error('Contraseña no válida, asegúrate de crear una nueva contraseña.', 422);
+        }
+        // === prov el email a documento ===
+        if(!$request->email) {
+            $instance = new User;
+            $instance->setDocumentAsEmail($request->document);
+        }
+        // === prov el email a documento === 
+
+        $status = Password::reset($credentials, function($user, $password) {
+
+            $old_passwords = $user->old_passwords;
+
+            $old_passwords[] = ['password' => bcrypt($password), 'added_at' => now()];
+
+            if (count($old_passwords) > 4) {
+                array_shift($old_passwords);
+            }
+
+            $user->old_passwords = $old_passwords;
+            $user->password = $password;
+            $user->last_pass_updated_at = now(); // actualizacion de contraseña
+            $user->setRememberToken(Str::random(60));
+            $user->save();
+        });
+
+        if($status == Password::PASSWORD_RESET) {
+
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+                $user = Auth::user();
+
+                if(!$request->email) $user->setInitialEmail();
+                $user->resetAttemptsUser();
+
+                return $this->respondWithDataAndToken($data_input);
+            }
+        } else {
+
+            if(!$request->email) {
+                $instance = new User;
+                $instance->setDocumentAsEmail($request->document, true);
+            }
+        }
+
+        return $this->error('invalid-token', 503, $status);
+    }
+    // === RESET ===
 }

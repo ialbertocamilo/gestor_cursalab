@@ -23,6 +23,7 @@ Route::controller(CursosController::class)->group(function () {
     // Segmentation List Page Routes
 
     Route::get('/schools/get-data', 'getFiltersSelects')->name('segmentation.filters_selects');
+    Route::get('/schools/subworkspace/{subworkspace}/get-data', 'getSchoolsBySubworkspace')->name('segmentation.filters_selects');
     Route::get('/form-selects', 'getFormSelects')->name('curso.form_selects_segmentation');
 
     Route::get('/{course}/encuesta', 'getEncuestaSegmentation')->name('curso.encuesta_segmentation');

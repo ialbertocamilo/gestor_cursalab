@@ -29,7 +29,7 @@
 
         <!-- Formulario del reporte -->
         <form class="row"
-              @submit.prevent="exportUsuariosDW">
+              @submit.prevent="generateReport">
             <div class="col-6 px-6">
                   <DefaultAutocomplete
                     dense
@@ -103,7 +103,7 @@
                             :disabled="modulo.length === 0"
                             class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -121,11 +121,13 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
     data() {
         return {
+            reportType: 'usuarios',
             careers:[],
             areas:[],
 
@@ -135,17 +137,27 @@ export default {
         };
     },
     methods: {
-        async exportUsuariosDW() {
-            let vue = this
-            // show loading spinner
 
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', { callback: vue.exportUsuariosDW, type: vue.reportType})
+        },
+        async exportUsuariosDW(reportName) {
 
             let UFC = this.$refs.EstadoFiltroComponent;
 
+            this.$emit('reportStarted', {})
+            const filtersDescriptions = {
+                "Módulos" : this.generateNamesArray(this.modules, this.modulo),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Carreras" : this.generateNamesArray(this.careers, this.career),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
+            }
+
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/usuarios`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
 
             try {
                 let response = await axios({
@@ -153,6 +165,9 @@ export default {
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        filtersDescriptions,
+                        reportName,
                         modulos: this.modulo,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
@@ -160,31 +175,16 @@ export default {
                         areas: this.area
                     }
                 })
-
-                // When there are no results notify
-                // user, download report otherwise
-
-                if (response.data.alert) {
-
-                    this.showAlert(response.data.alert, 'warning')
-
-                } else {
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Usuarios',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    vue.queryStatus("reportes", "descargar_reporte_usuarios");
-                    this.$emit('emitir-reporte', response)
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_usuarios");
+                    }, 500);
                 }
 
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         },
         async fetchFiltersCareerData() {
             this.careers = [];

@@ -1,4 +1,4 @@
-<template>
+ <template>
     <DefaultDialog
         :options="options"
         :width="width"
@@ -10,10 +10,52 @@
             <v-form ref="segmentForm" class="---mb-6">
                 <DefaultErrors :errors="errors"/>
 
+                <!--
+                Module-School breadcrumbs
+                ======================================== -->
+                <div class="row justify-center">
+
+                    <div v-if="isCourseSegmentation() && modulesSchools.length"
+                         class="col-10">
+    <!--
+                         <v-expansion-panels>
+                          <v-expansion-panel
+                            title="Item"
+                            text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                          ></v-expansion-panel>
+                        </v-expansion-panels> -->
+
+                        <v-expansion-panels class="school-breadcrumb">
+                            <v-expansion-panel>
+                              <v-expansion-panel-header>
+                                Escuelas asignadas
+                              </v-expansion-panel-header>
+                              <v-expansion-panel-content>
+                                <DefaultSimpleBreadcrumbs
+                                    v-for="moduleSchool of modulesSchools"
+                                    :key="moduleSchool.subworkspace_id"
+                                    :breadcrumbs="[
+                                    {title: moduleSchool.module_name, disabled: true},
+                                    {title: moduleSchool.school_name, disabled: true},
+                                ]"/>
+                              </v-expansion-panel-content>
+                            </v-expansion-panel>
+                        </v-expansion-panels>
+
+                    </div>
+
+                </div>
+
+                <!--
+                Tabs
+                ======================================== -->
+
                 <v-tabs
                     v-model="tabs"
                     fixed-tabs
                     slider-color="primary"
+
+                    class="col-10 offset-1"
                 >
                     <v-tab>
                         {{ tabs_title }} Directa
@@ -28,9 +70,9 @@
                     <v-tab-item>
 
                         <v-row justify="space-around" v-if="!limitOne">
-                            <v-col cols="12" class="d-flex justify-content-end pr-3">
+                            <v-col cols="10" class="d-flex justify-content-end">
                                 <v-btn
-                                    class="- add-button"
+                                    class="--add-button"
                                     color="primary"
                                     @click="addSegmentation('direct-segmentation')"
                                 >
@@ -41,7 +83,7 @@
                         </v-row>
 
                         <v-row justify="space-around">
-                            <v-col cols="10" class="d-flex justify-content-center">
+                            <v-col cols="11" class="d-flex justify-content-center">
                                 <!-- hide-delimiter-background -->
                                 <v-carousel
                                     height="100%"
@@ -64,9 +106,11 @@
                                             <v-divider class="mx-12"/>
 
                                             <segment
+                                                :is-course-segmentation="isCourseSegmentation()"
                                                 :segments="segments"
                                                 :segment="row"
                                                 :criteria="criteria"
+                                                :course-modules="courseModules"
                                                 class="mx-5"
                                                 :options="options"
                                                 @borrar_segment="borrarBloque"
@@ -101,8 +145,8 @@
                 <SegmentAlertModal
                     :options="modalInfoOptions"
                     :ref="modalInfoOptions.ref"
-                    @onConfirm="continueRegister($event)"
-                    @onCancel="closeFormModal(modalInfoOptions), backRegister()"
+                    @onConfirm="closeFormModal(modalInfoOptions)"
+                    @onCancel="closeFormModal(modalInfoOptions)"
                 />
             </v-form>
         </template>
@@ -180,18 +224,19 @@ export default {
             segments: [],
             segment_by_document: null,
             criteria: [],
+            courseModules: [],
+            modulesSchools: [],
 
             modalInfoOptions: {
                 ref: 'SegmentAlertModal',
                 open: false,
                 title: null,
                 resource:'data',
-                hideConfirmBtn: false,
+                hideConfirmBtn: true,
                 persistent: true,
-                cancelLabel: 'Cerrar'
+                cancelLabel: 'Aceptar'
             },
-            stackModals: { continues: [],
-                           backers: [] },
+            stackModals: { continues: [], backers: [] },
             criteriaIndexModal: 0,
 
             segment_by_document_clean: false,
@@ -273,7 +318,7 @@ export default {
                 const state = (!cri_state || !cri_data);
                 let message;
 
-                if(!cri_state) message = `${noexist} en la segmentación ${segIndex}, ¿Desea continuar?`;
+                if(!cri_state) message = `${noexist} en la segmentación ${segIndex}`;
                 else if(!cri_data) message = `${nodata} en la segmentación ${segIndex}, para continuar.`;
                 else message = null;
 
@@ -286,7 +331,7 @@ export default {
                 const stateVerify = VerifyCodeAndValues(criteria_selected, current);
                 const stateMessage = SetMessageByCurrent(CustomMessages[current], stateVerify, i + 1);
 
-                if(stateMessage.state) stackMessage.push(stateMessage);
+                if (stateMessage.state) stackMessage.push(stateMessage);
             }
 
             return stackMessage;
@@ -304,9 +349,9 @@ export default {
                 const { cri_state, cri_data } = responseData.detail;
 
                 if(cri_state && !cri_data) vue.modalInfoOptions.hideConfirmBtn = true;
-                else vue.modalInfoOptions.hideConfirmBtn = false;
+                else vue.modalInfoOptions.hideConfirmBtn = true;
 
-                if(vue.criteriaIndexModal === i) {
+                if (vue.criteriaIndexModal === i) {
                     vue.criteriaIndexModal = i + 1;
                     vue.openFormModal(vue.modalInfoOptions, null, null, title);
                     break;
@@ -342,8 +387,8 @@ export default {
 
             let state = true;
 
-            if(responseCheck.length) {
-                if(vue.criteriaIndexModal) {
+            if (responseCheck.length) {
+                if (vue.criteriaIndexModal) {
                     const continuesCount = vue.stackModals.continues.length;
 
                     if(vue.criteriaIndexModal === continuesCount){
@@ -362,12 +407,10 @@ export default {
         },
         confirmModal() {
             let vue = this;
-
+            vue.criteriaIndexModal = 0;
             vue.errors = [];
 
             this.showLoader();
-
-            // console.log(vue.options);
 
             const validateForm = vue.validateForm("segmentForm");
             const edit = vue.options.action === "edit";
@@ -387,7 +430,7 @@ export default {
             // === check criteria and open alert === SEGMENTACION DIRECTA ===
 
             // if (validateForm && validateSelectedModules) {
-           if (validateForm) {
+            if (validateForm) {
                 // let formData = vue.getMultipartFormData(method, vue.segments, fields);
                 let formData = JSON.stringify({
                     model_type: vue.model_type,
@@ -464,10 +507,78 @@ export default {
                     };
                 }
                 vue.criteria = _data.criteria;
+                vue.courseModules = _data.courseModules;
                 vue.total = _data.users_count;
+
+                // Replace modules with course's school modules
+
+                if (vue.isCourseSegmentation()) {
+
+                    let courseModulesIds = [];
+                    vue.courseModules.forEach(cm => courseModulesIds.push(cm.module_id))
+
+                    // Replace modules in criteria collection
+                    let modules = [];
+                    vue.criteria.forEach((c, index, collection) => {
+                        if (c.code === 'module') {
+                            collection[index].values = c.values.filter(v => {
+                                return courseModulesIds.includes(v.id)
+                            })
+                            modules = collection[index].values
+                        }
+                    })
+
+                    // Replace modules in existing segments
+
+                    vue.segments.forEach(s => {
+                        s.criteria_selected.forEach((cs, index, collection) => {
+                            if (cs.code === 'module') {
+                                collection[index].values = modules;
+                            }
+                        })
+                    })
+
+                }
             });
 
+            // When model type is course, load module ids
+
+            if (resource.id && vue.isCourseSegmentation()) {
+                await vue.loadModulesFromCourseSchools(resource.id)
+            }
+
             return 0;
+        },
+        /**
+         * Load modules ids from schools the course belongs to
+         * @param courseId
+         * @returns {Promise<void>}
+         */
+        async loadModulesFromCourseSchools(courseId) {
+            if (!this.resource) return
+            let url = `${this.options.base_endpoint}/modules/course/${courseId}`;
+            try {
+                const response = await this.$http.get(url);
+                let modulesIds = []
+                if (response.data.data) {
+                    modulesIds = response.data.data.modulesIds
+                    this.modulesSchools = response.data.data.modulesSchools
+
+                    // When there is no criteria selected, adds
+                    // module criteria and select modules from
+                    // course schools
+
+                    // let moduleCriteria = this.criteria.find(c => c.code === 'module')
+                    // if (moduleCriteria) {
+                    //     if (this.segments[0].criteria_selected.length === 0) {
+                    //         moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
+                    //         this.segments[0].criteria_selected.push(moduleCriteria)
+                    //     }
+                    // }
+                }
+            } catch (ex) {
+                console.log(ex)
+            }
         },
         loadSelects() {
             let vue = this;
@@ -495,6 +606,9 @@ export default {
 
                 // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
             }
+        },
+        isCourseSegmentation() {
+            return this.model_type === 'App\\Models\\Course'
         }
     }
 };

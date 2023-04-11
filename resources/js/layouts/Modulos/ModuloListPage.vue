@@ -132,14 +132,14 @@ export default {
                     }
                 ],
                 actions: [
-                    // {
-                    //     text: "Escuelas",
-                    //     icon: 'fas fa-school',
-                    //     type: 'route',
-                    //     // method_name: 'reset',
-                    //     count: 'escuelas_count',
-                    //     route: 'escuelas_route'
-                    // },
+                    {
+                        text: "Escuelas",
+                        icon: 'fas fa-school',
+                        type: 'route',
+                        // method_name: 'reset',
+                        count: 'schools_count',
+                        route: 'schools_route'
+                    },
                     {
                         text: "Usuarios",
                         icon: "fas fa-user",

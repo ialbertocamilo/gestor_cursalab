@@ -90,6 +90,26 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
+                    <!--                    <v-col cols="3">-->
+                    <!--                        <DefaultSelect-->
+                    <!--                            clearable dense-->
+                    <!--                            :items="selects.workspaces"-->
+                    <!--                            v-model="filters.workspace_id"-->
+                    <!--                            label="Workspace"-->
+                    <!--                            @onChange="refreshDefaultTable(dataTable, filters, 1)"-->
+                    <!--                            item-text="name"-->
+                    <!--                        />-->
+                    <!--                    </v-col>-->
+                    <!-- <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.sub_workspaces"
+                            v-model="filters.subworkspace_id"
+                            label="Módulos"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col> -->
                     <v-col cols="3">
                         <DefaultInput
                             clearable
@@ -105,8 +125,43 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="6"> </v-col>
-                    <v-col cols="3" class="d-flex justify-end">
+                    <v-col cols="5">
+                        <!-- <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        /> -->
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-end">
+
+                        <div
+                            v-if="usersWithEmptyCriteria"
+                            class="user-count-wrapper">
+                            <a href="/exportar/node?tab=new-report&section=19">
+                                <v-tooltip
+                                    :top="true"
+                                    attach
+                                >
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-icon
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            size="32"
+                                            color="#E01717">
+                                            mdi-account
+                                        </v-icon>
+                                    </template>
+                                    <span v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
+                                </v-tooltip>
+
+                                <span class="count">{{ usersWithEmptyCriteria }}</span>
+                                <span class="description">Criterios vacíos</span>
+                            </a>
+                        </div>
+
                         <DefaultButton
                             text
                             label="Aplicar Filtros"
@@ -125,46 +180,12 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
-                @status="
-                    openFormModal(
-                        modalStatusOptions,
-                        $event,
-                        'status',
-                        'Cambio de estado de <b>usuario</b>'
-                    )
-                "
-                @delete="
-                    openFormModal(
-                        modalDeleteOptions,
-                        $event,
-                        'delete',
-                        'Confirmación de cambio de estado'
-                    )
-                "
-                @cursos="
-                    openFormModal(
-                        modalCursosOptions,
-                        $event,
-                        'cursos',
-                        `Cursos de ${$event.nombre} - ${$event.document}`
-                    )
-                "
-                @reset="
-                    openFormModal(
-                        modalReiniciosOptions,
-                        $event,
-                        'cursos',
-                        `Reiniciar avance de ${$event.nombre}`
-                    )
-                "
-                @logs="
-                    openFormModal(
-                        modalLogsOptions,
-                        $event,
-                        'logs',
-                        `Logs del Usuario - ${$event.name}`
-                    )
-                "
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
+                @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
+                @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
+                @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
+                @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Usuario - ${$event.name}`)"
             />
             <UsuarioFormModal
                 width="60vw"
@@ -187,6 +208,13 @@
                 :options="modalReiniciosOptions"
                 @onReinicioTotal="refreshDefaultTable(dataTable, filters)"
                 @onCancel="closeFormModal(modalReiniciosOptions)"
+            />
+            <UsuarioResetPasswordModal
+                width="45vw"
+                :ref="modalResetPasswordOptions.ref"
+                :options="modalResetPasswordOptions"
+                @onConfirm="closeFormModal(modalResetPasswordOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalResetPasswordOptions)"
             />
             <UsuarioCursosModal
                 width="55vw"
@@ -220,19 +248,12 @@ import UsuarioFormModal from "./UsuarioFormModal";
 import UsuarioStatusModal from "./UsuarioStatusModal";
 import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
+import UsuarioResetPasswordModal from "./UsuarioResetPasswordModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
-
 import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {
-        UsuarioFormModal,
-        UsuarioStatusModal,
-        UsuarioCursosModal,
-        UsuarioReiniciosModal,
-        DefaultStatusModal,
-        LogsModal
-    },
+    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal, LogsModal},
     props: {
         workspace_id: {
             type: Number | String,
@@ -283,6 +304,7 @@ export default {
         }
 
         return {
+            usersWithEmptyCriteria: 0,
             dataTable: {
                 endpoint: "/usuarios/search",
                 ref: "UsuarioTable",
@@ -327,11 +349,17 @@ export default {
                         route_type: "external"
                     },
                     {
-                        text: "Actualizar Estado",
-                        icon: "fa fa-circle",
-                        type: "action",
-                        method_name: "status"
-                    }
+                        text: "Actualizar estado",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
+                    },
+                    {
+                        text: "Restaurar contraseña",
+                        icon: 'fa fa-key',
+                        type: 'action',
+                        method_name: 'reset_password'
+                    },
                 ]
             },
             selects: {
@@ -350,7 +378,7 @@ export default {
             filters: {
                 q: "",
                 subworkspace_id: null,
-                active: null
+                active: 1,
             },
             criteria_template: [],
             modalLogsOptions: {
@@ -386,6 +414,13 @@ export default {
                 base_endpoint: "/usuarios",
                 cancelLabel: "Cerrar",
                 hideConfirmBtn: true
+            },
+            modalResetPasswordOptions: {
+                ref: 'UsuarioResetPasswordModal',
+                open: false,
+                base_endpoint: '/usuarios',
+                // cancelLabel: 'Cerrar',
+                // hideConfirmBtn: true,
             },
             modalStatusOptions: {
                 ref: "UsuarioStatusModal",
@@ -426,34 +461,34 @@ export default {
             let params = new URLSearchParams(uri);
             let param_subworkspace = params.get("subworkspace_id");
 
-            const url = `/usuarios/get-list-selects`;
-            vue.$http.get(url).then(({ data }) => {
-                vue.selects.sub_workspaces = data.data.sub_workspaces;
-                vue.filters.subworkspace_id = parseInt(param_subworkspace);
-                vue.criteria_template = data.data.criteria_template;
+            const url = `/usuarios/get-list-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
 
-                data.data.criteria_workspace.forEach(criteria => {
-                    const new_select_obj = { [criteria.code]: criteria.values };
-                    vue.selects = Object.assign(
-                        {},
-                        vue.selects,
-                        new_select_obj
-                    );
+                    vue.selects.sub_workspaces = data.data.sub_workspaces;
+                    vue.filters.subworkspace_id = parseInt(param_subworkspace);
+                    vue.criteria_template = data.data.criteria_template;
+                    vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
 
-                    const value = criteria.multiple ? [] : null;
-                    const new_filter_obj = { [criteria.code]: value };
-                    vue.filters = Object.assign(
-                        {},
-                        vue.filters,
-                        new_filter_obj
-                    );
-                });
+                    data.data.criteria_workspace.forEach(criteria => {
 
-                // if (param_subworkspace)
-                //     vue.filters.subworkspace_id = param_subworkspace
+                        const new_select_obj = {[criteria.code]: criteria.values,};
+                        vue.selects = Object.assign({}, vue.selects, new_select_obj);
 
-                // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
-            });
+                        const value = criteria.multiple ? [] : null;
+                        const new_filter_obj = {[criteria.code]: value};
+                        vue.filters = Object.assign({}, vue.filters, new_filter_obj);
+
+                    });
+
+                    // if (param_subworkspace)
+                    //     vue.filters.subworkspace_id = param_subworkspace
+
+                    if (param_subworkspace) {
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    }
+                })
+
         },
         reset(user) {
             let vue = this;
@@ -468,3 +503,35 @@ export default {
     }
 };
 </script>
+
+<style>
+.user-count-wrapper {
+    position: relative;
+    width: 200px;
+}
+
+.user-count-wrapper .count {
+    height: 15px;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 20px;
+    bottom: 2px;
+    font-size: 11px;
+    padding: 0 5px 0 5px;
+    border-radius: 14px;
+    border: 1px solid white;
+    color: white;
+    background-color: #E01717;
+}
+
+.user-count-wrapper .description {
+    color: #E01717;
+}
+
+.user-count-wrapper a {
+    text-decoration: none;
+}
+
+</style>

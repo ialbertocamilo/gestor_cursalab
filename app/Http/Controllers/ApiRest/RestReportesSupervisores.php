@@ -38,12 +38,24 @@ class RestReportesSupervisores extends Controller
 
         // Generate list of courses statuses
 
-        $_courseStatuses = Taxonomy::where('group', 'course')
-                                  ->where('type', 'user-status')
-                                  ->get();
+        $_courseStatuses = Taxonomy::query()
+            ->where('group', 'course')
+            ->where('type', 'user-status')
+            ->get();
         $courseStatuses = new \stdClass();
         foreach ($_courseStatuses as $status) {
             $courseStatuses->{$status->code} = $status->name;
+        }
+
+        // Generate lsit of topics
+
+        $_topicStatuses = Taxonomy::query()
+            ->where('group', 'topic')
+            ->where('type', 'user-status')
+            ->get();
+        $topicStatuses = new \stdClass();
+        foreach ($_topicStatuses as $status) {
+            $topicStatuses->{$status->code} = $status->name;
         }
 
         // Calculates totals
@@ -63,11 +75,13 @@ class RestReportesSupervisores extends Controller
             'supervisorId' => $supervisorWithSegment['user']->id,
             'workspaceId' => $workspaceId,
             'reportes' => [
-                'supervisores_avance_curricula' => 'Reporte de avance de currícula',
-                'supervisores_notas' => 'Reporte de notas'
+                'supervisores_notas' => 'Reporte de notas por curso',
+                'supervisores_notas_temas' => 'Reporte de notas por tema',
+                'supervisores_avance_curricula' => 'Reporte de avance de currícula'
             ],
 
             'estados' => $courseStatuses,
+            'estados_temas' => $topicStatuses,
 
             'usuarios_activos' => $totals['users'] ?? 0,
             'aprobados' => $aprobados ?? 0,

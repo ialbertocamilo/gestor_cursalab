@@ -6,47 +6,34 @@
             >
                 <v-card-title>
                     Aulas Virtuales
-                    <v-spacer />
+                    <v-spacer/>
                     <DefaultInfoTooltip
                         class="mr-5"
                         bottom
-                        text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión."
-                    />
-                    <!-- {{ usuario_id }} - {{ workspace_id }} -->
+                        text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
+                     <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
-                    <!--                    <v-btn icon color="primary"-->
-                    <!--                           @click="openFormModal(modalDirectionsOptions, null, null, 'Recomendaciones')"-->
-                    <!--                    >-->
-                    <!--                        <v-icon v-text="'mdi-dots-vertical'"/>-->
-                    <!--                    </v-btn>-->
+<!--                    <v-btn icon color="primary"-->
+<!--                           @click="openFormModal(modalDirectionsOptions, null, null, 'Recomendaciones')"-->
+<!--                    >-->
+<!--                        <v-icon v-text="'mdi-dots-vertical'"/>-->
+<!--                    </v-btn>-->
 
-                    <DefaultModalButton
-                        v-if="superuser"
-                        label="Configurar Anfitriones"
-                        @click="
-                            openFormModal(
-                                modalFormSegmentationOptions,
-                                { id: workspace_id },
-                                'segmentation',
-                                `Segmentación de Anfitriones`
-                            )
-                        "
-                    />
 
-                    <SegmentFormModal
-                        :options="modalFormSegmentationOptions"
-                        width="55vw"
-                        for_section="aulas_virtuales"
-                        model_type="App\Models\Workspace"
-                        :model_id="null"
-                        :ref="modalFormSegmentationOptions.ref"
-                        @onCancel="
-                            closeSimpleModal(modalFormSegmentationOptions)
-                        "
-                        @onConfirm="
-                            closeSimpleModal(modalFormSegmentationOptions)
-                        "
-                    />
+                <DefaultModalButton v-if="superuser"
+                    label="Configurar Anfitriones"
+                    @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
+
+                <SegmentFormModal
+                    :options="modalFormSegmentationOptions"
+                    width="55vw"
+                    for_section="aulas_virtuales"
+                    model_type="App\Models\Workspace"
+                    :model_id="null"
+                    :ref="modalFormSegmentationOptions.ref"
+                    @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                    @onConfirm="closeSimpleModal(modalFormSegmentationOptions)"
+                  />
 
                     <MeetingDirectionsModal
                         :options="modalDirectionsOptions"
@@ -143,9 +130,7 @@
                                         />
                                     </v-col>
                                 </v-row>
-                                <v-row
-                                    class="justify-content-start tableMeeting"
-                                >
+                                <v-row class="justify-content-start tableMeeting">
                                     <v-col cols="12">
                                         <DefaultTable
                                             :ref="dataTable.ref"
@@ -310,57 +295,16 @@ export default {
                 // {text: "ID", value: "id", align: 'center', sortable: false},
                 // {text: "Tipo", value: "type", sortable: false},
                 // {text: "Nombre", value: "name"},
-                {
-                    text: "Nombre",
-                    value: "custom_meeting_name",
-                    sortable: false
-                },
-                {
-                    text: "Anfitrión",
-                    value: "host",
-                    sortable: false,
-                    align: "center"
-                },
-                {
-                    text: "Participantes",
-                    value: "attendants_count",
-                    sortable: false,
-                    align: "center"
-                },
-                {
-                    text: "Código",
-                    value: "prefix",
-                    sortable: false,
-                    align: "center"
-                },
-                {
-                    text: "Estado",
-                    value: "status_meeting",
-                    sortable: false,
-                    align: "center"
-                },
+                {text: "Nombre", value: "custom_meeting_name", sortable: false},
+                {text: "Anfitrión", value: "host", sortable: false, align: 'center'},
+                {text: "Participantes", value: "attendants_count", sortable: false, align: 'center'},
+                {text: "Código", value: "prefix", sortable: false, align: 'center'},
+                {text: "Estado", value: "status_meeting", sortable: false, align: 'center',},
                 // {text: "Duración", value: "duration", align: 'center', sortable: false},
-                {
-                    text: "Fecha de inicio",
-                    value: "starts_at",
-                    align: "center"
-                },
-                {
-                    text: "Horario",
-                    value: "starts_at_horario",
-                    align: "center"
-                },
-                {
-                    text: "Duración",
-                    value: "starts_at_duracion",
-                    align: "center"
-                },
-                {
-                    text: "Opciones",
-                    value: "actions",
-                    align: "center",
-                    sortable: false
-                }
+                {text: "Fecha de inicio", value: "starts_at", align: 'center',},
+                {text: "Horario", value: "starts_at_horario", align: 'center',},
+                {text: "Duración", value: "starts_at_duracion", align: 'center',},
+                {text: "Opciones", value: "actions", align: 'center', sortable: false},
             ],
             actions: [
                 {
@@ -537,58 +481,28 @@ export default {
     font-weight: 400;
     font-size: 13px !important;
 }
-.tableMeeting
-    .v-data-table
-    > .v-data-table__wrapper
-    > table
-    > tbody
-    > tr:not(:last-child)
-    > td:last-child,
-.tableMeeting
-    .v-data-table
-    > .v-data-table__wrapper
-    > table
-    > tbody
-    > tr:not(:last-child)
-    > td:not(.v-data-table__mobile-row),
-.tableMeeting
-    .v-data-table
-    > .v-data-table__wrapper
-    > table
-    > tbody
-    > tr:not(:last-child)
-    > th:last-child,
-.tableMeeting
-    .v-data-table
-    > .v-data-table__wrapper
-    > table
-    > tbody
-    > tr:not(:last-child)
-    > th:not(.v-data-table__mobile-row),
-.tableMeeting
-    .v-data-table
-    > .v-data-table__wrapper
-    > table
-    > thead
-    > tr:last-child
-    > th {
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:last-child,
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:not(.v-data-table__mobile-row),
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:last-child,
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:not(.v-data-table__mobile-row),
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>thead>tr:last-child>th {
     border-bottom: 1px solid #94dddb;
 }
-.tableMeeting .v-data-table > .v-data-table__wrapper > table > thead > tr > th {
+.tableMeeting .v-data-table>.v-data-table__wrapper>table>thead>tr>th {
     font-family: "Nunito", sans-serif;
     font-size: 13px !important;
     font-weight: 700;
 }
-.tableMeeting button.v-icon {
-    color: #008ffb;
+.tableMeeting button.v-icon{
+    color: #008FFB;
 }
 .tableMeeting button.v-icon.v-icon--disabled {
-    color: #94dddb !important;
+    color: #94DDDB !important;
 }
 .v-tooltip__content {
     background-color: #fff;
-    color: #5757ea;
-    border: 1px solid #5757ea;
+    color: #5757EA;
+    border: 1px solid #5757EA;
     border-radius: 10px;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
 }

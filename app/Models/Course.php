@@ -132,16 +132,17 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::query()
-            ->with('segments.values', function ($q) {
-                $q
-                    ->withWhereHas('criterion_value', function ($q) {
-                        $q
-                            ->select('id', 'value_text', 'criterion_id')
-                            ->whereRelation('criterion', 'code', 'module');
-                    })
-                    ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
-                    ->whereRelation('criterion', 'code', 'module');
-            })
+            ->with('schools.subworkspaces')
+            // ->with('segments.values', function ($q) {
+            //     $q
+            //         ->withWhereHas('criterion_value', function ($q) {
+            //             $q
+            //                 ->select('id', 'value_text', 'criterion_id')
+            //                 ->whereRelation('criterion', 'code', 'module');
+            //         })
+            //         ->select('id', 'segment_id', 'criterion_id', 'criterion_value_id')
+            //         ->whereRelation('criterion', 'code', 'module');
+            // })
             ->whereHas('workspaces', function ($t) use ($workspace) {
                 $t->where('workspace_id', $workspace->id);
             });
@@ -164,8 +165,8 @@ class Course extends BaseModel
 
             $module_value = $request->segmented_module;
 
-            $q->whereHas('segments.values', function ($q) use ($module_value) {
-                $q->where('criterion_value_id', $module_value);
+            $q->whereHas('schools.subworkspaces', function ($q) use ($module_value) {
+                $q->where('id', $module_value);
             });
 
         }
@@ -468,6 +469,7 @@ class Course extends BaseModel
             $school_assigned = 0;
             $school_percentage = 0;
             $last_course_reviewed = null;
+            $last_school_courses = [];
 
             $courses = $courses->sortBy('position');
 
@@ -518,6 +520,56 @@ class Course extends BaseModel
 
                 $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
 
+
+                $media_topics = MediaTema::where('topic_id',$last_topic_reviewed)->orderBy('position')->get();
+
+                $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+                ->where('topic_id', $last_topic_reviewed)
+                ->where('user_id', $user->id)
+                ->first();
+
+                $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+
+                foreach ($media_topics as $media) {
+                    unset($media->created_at, $media->updated_at, $media->deleted_at);
+                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                        ? route('media.download.media_topic', [$media->id]) : null;
+
+                    $media->status_progress = 'por-iniciar';
+                    $media->last_media_duration = null;
+
+                    if(!is_null($media_progress)){
+                        foreach($media_progress as $medp){
+                            if($medp->media_topic_id == $media->id){
+                                $media->status_progress = $medp->status;
+                                $media->last_media_duration = $medp->last_media_duration;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                $last_media_access = null;
+                $last_media_duration = null;
+                $last_media_status = null;
+
+                if($media_topics){
+                    foreach($media_topics as $medt){
+                        if($medt->status_progress == 'iniciado'){
+                            $last_media_access = $medt->id;
+                            $last_media_status = $medt->status_progress;
+                            $last_media_duration = $medt->last_media_duration;
+                            break;
+                        }
+                        else if($medt->status_progress == 'por-iniciar'){
+                            $last_media_access = $medt->id;
+                            $last_media_status = $medt->status_progress;
+                            $last_media_duration = $medt->last_media_duration;
+                            break;
+                        }
+                    }
+                }
+
                 if (is_null($last_course_reviewed) && $course_status['status'] != 'completado') {
                     $last_course_reviewed = [
                         'id' => $course->id,
@@ -528,28 +580,73 @@ class Course extends BaseModel
                     ];
                 }
 
-                $school_courses[] = [
-                    'id' => $course->id,
-//                    'nombre' => $course->name,
-                    'nombre' => $course_name,
-                    'descripcion' => $course->description,
-                    'imagen' => $course->imagen,
-                    'c_evaluable' => $course->assessable,
-                    'disponible' => $course_status['available'],
-                    'status' => $course_status['status'],
-                    'encuesta' => $course_status['available_poll'],
-                    'encuesta_habilitada' => $course_status['enabled_poll'],
-                    'encuesta_resuelta' => $course_status['solved_poll'],
-                    'encuesta_id' => $course_status['poll_id'],
-                    'temas_asignados' => $course_status['exists_summary_course'] ?
-                        $course_status['assigned_topics']
-                        : $topics->count(),
-                    'temas_completados' => $course_status['completed_topics'],
-                    'porcentaje' => $course_status['progress_percentage'],
-                    'tags' => $tags,
-                    'ultimo_tema_visto' => $last_topic_reviewed,
-                    'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
-                ];
+                if ($course_status['status'] != 'completado' && $course_status['status'] != 'bloqueado') {
+                    $last_school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'imagen' => $course->imagen,
+                        'porcentaje' => $course_status['progress_percentage'],
+                        // 'ultimo_tema_visto' => $last_topic_reviewed,
+                        'ultimo_tema_visto' => [
+                            'id' => $last_topic_reviewed,
+                            'last_media_access' => $last_media_access,
+                            'last_media_status' => $last_media_status,
+                            'last_media_duration' => $last_media_duration
+                        ],
+                    ];
+                }
+
+                if ($course->compatible) {
+
+                    $school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'descripcion' => $course->description,
+                        'imagen' => $course->imagen,
+                        'requisito_id' => NULL,
+                        'c_evaluable' => 0,
+                        'disponible' => true,
+                        'status' => 'aprobado',
+                        'requirements' => null,
+
+                        'encuesta' => false,
+                        'encuesta_habilitada' => false,
+                        'encuesta_resuelta' => false,
+                        'encuesta_id' => null,
+
+                        'temas_asignados' => $topics->count(),
+                        'temas_completados' => $topics->count(),
+
+                        'porcentaje' => '100.00',
+                        'ultimo_tema_visto' => $last_topic_reviewed,
+                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                    ];
+                }
+                else
+                {
+                    $school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'descripcion' => $course->description,
+                        'imagen' => $course->imagen,
+                        'c_evaluable' => $course->assessable,
+                        'disponible' => $course_status['available'],
+                        'status' => $course_status['status'],
+                        'requirements' => $course_status['requirements'],
+                        'encuesta' => $course_status['available_poll'],
+                        'encuesta_habilitada' => $course_status['enabled_poll'],
+                        'encuesta_resuelta' => $course_status['solved_poll'],
+                        'encuesta_id' => $course_status['poll_id'],
+                        'temas_asignados' => $course_status['exists_summary_course'] ?
+                            $course_status['assigned_topics']
+                            : $topics->count(),
+                        'temas_completados' => $course_status['completed_topics'],
+                        'porcentaje' => $course_status['progress_percentage'],
+                        'tags' => $tags,
+                        'ultimo_tema_visto' => $last_topic_reviewed,
+                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                    ];
+                }
             }
 
             if ($school_completed > 0) :
@@ -575,6 +672,7 @@ class Course extends BaseModel
                 'porcentaje' => $school_percentage,
                 'estado' => $school_status,
                 'ultimo_curso' => $last_course_reviewed,
+                'ultimos_cursos' => $last_school_courses,
                 'orden' => $school->position,
                 "cursos" => $school_courses,
             ];
@@ -590,6 +688,7 @@ class Course extends BaseModel
     {
 //        if ($course->compatible)
 //            dd($course->compatible);
+        $workspace_id = $user->subworkspace->parent_id;
 
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
@@ -600,6 +699,7 @@ class Course extends BaseModel
         $solved_poll = false;
         $assigned_topics = 0;
         $completed_topics = 0;
+        $requirement_list = null;
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
         $status_approved = $statuses->where('code', 'aprobado')->first();
@@ -634,6 +734,59 @@ class Course extends BaseModel
                 if (!$compatible_course_req):
                     $available_course = false;
                     $status = 'bloqueado';
+                    if($requirement_course?->requirement_id){
+                        $req = Course::where('id',$requirement_course?->requirement_id)->first();
+
+                        $available_course_req = true;
+                        $requirement_course_req = $req->requirements->first();
+
+                        if ($requirement_course_req) {
+
+                            $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+
+                            if (!$summary_requirement_course_req) {
+
+                                $req_course_req = $requirement_course_req->model_course;
+
+                                $req_course_req->load([
+                                    'summaries' => function ($q) use ($user) {
+                                        $q
+                                            ->with('status:id,name,code')
+                                            ->where('user_id', $user->id);
+                                    },
+                                    'compatibilities_a:id',
+                                    'compatibilities_b:id',
+                                ]);
+
+                                $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+
+                                if (!$compatible_course_req_req):
+                                    $available_course_req = false;
+                                endif;
+                            }else{
+                                try {
+                                    if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                                        $available_course_req = false;
+                                    }
+                                } catch (\Throwable $th) {
+                                    //throw $th;
+                                }
+                            }
+                        }
+
+                        $req_school = $req->schools->first();
+                        $course_name_req = $req->name;
+                        if ($workspace_id === 25) {
+                            $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                        }
+                        $requirement_list = [
+                            'id' => $requirement_course?->requirement_id,
+                            'name' => $course_name_req,
+                            'school_id' => $req_school?->id,
+                            'disponible' => $available_course_req,
+                            'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                        ];
+                    }
                 endif;
 
             }else{
@@ -641,6 +794,59 @@ class Course extends BaseModel
                     if(!in_array($summary_requirement_course?->status?->code,['aprobado', 'realizado', 'revisado'])){
                         $available_course = false;
                         $status = 'bloqueado';
+                        if($requirement_course?->requirement_id){
+                            $req = Course::where('id',$requirement_course?->requirement_id)->first();
+
+                            $requirement_course_req = $req->requirements->first();
+                            $available_course_req = true;
+
+                            if ($requirement_course_req) {
+
+                                $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+
+                                if (!$summary_requirement_course_req) {
+
+                                    $req_course_req = $requirement_course_req->model_course;
+
+                                    $req_course_req->load([
+                                        'summaries' => function ($q) use ($user) {
+                                            $q
+                                                ->with('status:id,name,code')
+                                                ->where('user_id', $user->id);
+                                        },
+                                        'compatibilities_a:id',
+                                        'compatibilities_b:id',
+                                    ]);
+
+                                    $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+
+                                    if (!$compatible_course_req_req):
+                                        $available_course_req = false;
+                                    endif;
+                                }else{
+                                    try {
+                                        if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                                            $available_course_req = false;
+                                        }
+                                    } catch (\Throwable $th) {
+                                        //throw $th;
+                                    }
+                                }
+                            }
+
+                            $req_school = $req->schools->first();
+                            $course_name_req = $req->name;
+                            if ($workspace_id === 25) {
+                                $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                            }
+                            $requirement_list = [
+                                'id' => $requirement_course?->requirement_id,
+                                'name' => $course_name_req,
+                                'school_id' => $req_school?->id,
+                                'disponible' => $available_course_req,
+                                'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                            ];
+                        }
                     }
                 } catch (\Throwable $th) {
                     //throw $th;
@@ -654,6 +860,7 @@ class Course extends BaseModel
 
                 return [
                     'status' => 'aprobado',
+                    'requirements' => null,
                     'progress_percentage' => 100,
                     'available' => true,
                     'poll_id' => null,
@@ -707,6 +914,7 @@ class Course extends BaseModel
 
         return [
             'status' => $status,
+            'requirements' => $requirement_list,
             'progress_percentage' => $course_progress_percentage,
             'available' => $available_course,
             'poll_id' => $poll_id,
@@ -1055,5 +1263,109 @@ class Course extends BaseModel
         $compatible = $this->getCourseCompatibilityByUser($user);
 
         return $compatible ? true : false;
+    }
+
+    public static function getModulesFromCourseSchools($courseId): array
+    {
+        $course = Course::find($courseId);
+        $modules = [];
+        if ($course) {
+            $_schooldsIds = $course->schools()->pluck('id')->toArray();
+            $schooldsIds = implode(',', $_schooldsIds);
+            $modules = DB::select(DB::raw("
+                        select w.name module_name,
+                               w.criterion_value_id module_id,
+                               s.name school_name
+                        from school_subworkspace sw
+                            inner join workspaces w on sw.subworkspace_id = w.id
+                            inner join schools s on s.id = sw.school_id
+                        where school_id in ($schooldsIds)
+                    "));
+        }
+
+        return $modules;
+    }
+
+    protected function ultimoTemaVisto( Course $curso, User $user ): array
+    {
+        $topics_user = $curso->topics->pluck('id')->toArray();
+
+        $topics = $curso->topics->sortBy('position')->where('active', ACTIVE);
+        $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id);
+
+        $last_topic = null;
+        if ($summary_topics->count() > 0) {
+            foreach ($topics as $topic) {
+                $topics_view = $summary_topics->where('topic_id', $topic->id)->first();
+                $last_item = ($topic->id == $topics->last()->id);
+                if ($topics_view?->views) {
+                    $passed_tests = $summary_topics->where('topic_id', $topic->id)->where('passed', 1)->first();
+                    if ($topic->evaluation_type?->code == 'qualified' && $passed_tests && !$last_item) continue;
+                    $last_topic = ($topic->id);
+                    break;
+                }
+                if (is_null($last_topic) && $last_item) {
+                    $last_topic = $topic->id;
+                    break;
+                }
+            }
+        }
+
+        $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
+
+        $media_topics = MediaTema::where('topic_id',$last_topic_reviewed)->orderBy('position')->get();
+
+        $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+        ->where('topic_id', $last_topic_reviewed)
+        ->where('user_id', $user->id)
+        ->first();
+
+        $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+
+        foreach ($media_topics as $media) {
+            unset($media->created_at, $media->updated_at, $media->deleted_at);
+            $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                ? route('media.download.media_topic', [$media->id]) : null;
+
+            $media->status_progress = 'por-iniciar';
+            $media->last_media_duration = null;
+
+            if(!is_null($media_progress)){
+                foreach($media_progress as $medp){
+                    if($medp->media_topic_id == $media->id){
+                        $media->status_progress = $medp->status;
+                        $media->last_media_duration = $medp->last_media_duration;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $last_media_access = null;
+        $last_media_duration = null;
+        $last_media_status = null;
+
+        if($media_topics){
+            foreach($media_topics as $medt){
+                if($medt->status_progress == 'iniciado'){
+                    $last_media_access = $medt->id;
+                    $last_media_status = $medt->status_progress;
+                    $last_media_duration = $medt->last_media_duration;
+                    break;
+                }
+                else if($medt->status_progress == 'por-iniciar'){
+                    $last_media_access = $medt->id;
+                    $last_media_status = $medt->status_progress;
+                    $last_media_duration = $medt->last_media_duration;
+                    break;
+                }
+            }
+        }
+        return [
+            'id' => $last_topic_reviewed,
+            'last_media_access' => $last_media_access,
+            'last_media_status' => $last_media_status,
+            'last_media_duration' => $last_media_duration
+        ];
     }
 }

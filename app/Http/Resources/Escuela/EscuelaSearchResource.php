@@ -17,11 +17,15 @@ class EscuelaSearchResource extends JsonResource
     {
         $modalidades = config('constantes.modalidad');
 
+        $modules = $this->subworkspaces->pluck('name')->toArray();
+
         return [
             'id' => $this->id,
             'nombre' => $this->name,
             'name' => $this->name,
             'image' => FileService::generateUrl($this->imagen),
+            'images' => $this->getModulesImages(),
+            'modules' => implode(', ', $modules),
             'active' => $this->active,
             'orden' => $this->position,
             'position' => $this->position,
@@ -40,5 +44,20 @@ class EscuelaSearchResource extends JsonResource
 
 
         ];
+    }
+
+    public function getModulesImages()
+    {
+        $data = [];
+
+        foreach($this->subworkspaces AS $module)
+        {
+            $data[] = [
+                'name' => $module->name,
+                'image' => space_url($module->logo)
+            ];
+        }
+
+        return $data;
     }
 }

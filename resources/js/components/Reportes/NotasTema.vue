@@ -52,11 +52,11 @@
         </ResumenExpand>
 
         <!-- Formulario del reporte -->
-        <form @submit.prevent="exportNotasTema" class="row form">
+        <form @submit.prevent="generateReport" class="row form">
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-lg-6 col-xl-4 mb-3">
-                          <DefaultAutocomplete
+                        <DefaultAutocomplete
                             dense
                             v-model="modulo"
                             :items="modules"
@@ -67,6 +67,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
+                            @onChange="moduloChange"
                             :maxValuesSelected="4"
                         />
                     </div>
@@ -75,8 +76,8 @@
                         <DefaultAutocomplete
                             dense
                             v-model="escuela"
-                            :items="schools"
-                            :disabled="!schools[0]"
+                            :items="filteredSchools"
+                            :disabled="!filteredSchools[0]"
                             label="Escuelas"
                             item-text="name"
                             item-value="id"
@@ -89,7 +90,7 @@
                     </div>
                     <!-- Curso -->
                     <div class="col-lg-6 col-xl-4 mb-3">
-                         <DefaultAutocomplete
+                        <DefaultAutocomplete
                             dense
                             v-model="curso"
                             :items="courses"
@@ -164,8 +165,8 @@
             <!-- Fechas -->
             <div class="col-6">
                 <FechaFiltro ref="FechasFiltros"
-                    label-start="Fecha inicial de última actualización"
-                    label-end="Fecha final de última actualización" />
+                             label-start="Fecha inicial de última actualización"
+                             label-end="Fecha final de última actualización" />
             </div>
 
             <div class="col-12 pt-0">
@@ -281,7 +282,7 @@
                     type="submit"
                     class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
-                    <span>Descargar</span>
+                    <span>Generar reporte</span>
                 </button>
             </div>
         </form>
@@ -311,11 +312,14 @@ export default {
     },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
     data() {
         return {
+            filteredSchools: [],
+            reportType: 'consolidado_temas',
             schools: [],
             courses: [],
             topics: [],
@@ -347,36 +351,57 @@ export default {
          */
         async fetchFiltersData () {
 
-            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}`
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}?grouped=0`
             let responseSchools = await axios({
                 url: urlSchools,
                 method: 'get'
             })
 
             this.schools = responseSchools.data
+        },
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue.exportNotasTema, type: vue.reportType})
         }
         ,
-        async exportNotasTema() {
-            let vue = this;
-
-            // show loading spinner
-
-            this.showLoader()
-
+        async exportNotasTema(reportName) {
             let UFC = this.$refs.EstadoFiltroComponent;
             let TEMAS = this.$refs.EstadoFiltroTemasComponent;
             let DATES = this.$refs.FechasFiltros;
 
+            this.$emit('reportStarted')
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.escuela),
+                "Cursos": this.generateNamesArray(this.courses, this.curso),
+                "Temas": this.generateNamesArray(this.topics, this.tema),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Temas activos": this.yesOrNo(TEMAS.UsuariosActivos),
+                "Temas inactivos": this.yesOrNo(TEMAS.UsuariosInactivos),
+                'Fecha inicial': DATES.start,
+                'Fecha final': DATES.end,
+                'Revisados': this.yesOrNo(this.revisados),
+                'Aprobados': this.yesOrNo(this.aprobados),
+                'Desaprobados': this.yesOrNo(this.desaprobados),
+                'Realizados': this.yesOrNo(this.realizados),
+                'Por iniciar': this.yesOrNo(this.porIniciar),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
+                "Cursos libres": this.yesOrNo(this.tipocurso)
+            }
+
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas_v3`
-            // let urlReport = `${this.$props.reportsBaseUrl}/exportar/consolidado_temas`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: this.modulo,
                         escuelas: this.escuela,
                         cursos: this.curso,
@@ -400,29 +425,36 @@ export default {
                         porIniciar: this.porIniciar
                     }
                 })
-
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_temas");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Notas Tema',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    this.$emit('emitir-reporte', response)
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_temas");
+                    }, 500);
                 }
 
             } catch (ex) {
                 console.log(ex.message)
             }
+        },
+        async moduloChange() {
 
-            // Hide loading spinner
+            let vue = this;
 
-            this.hideLoader()
+            vue.escuela = [];
+            vue.curso = [];
+            vue.tema = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+
+                if (vue.modulo.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
         },
         /**
          * Fetch courses

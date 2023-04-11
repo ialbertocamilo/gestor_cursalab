@@ -1,6 +1,6 @@
 <template>
-    <v-row>
-        <v-col cols="12">
+    <v-row justify="space-around">
+        <v-col cols="10">
             <v-row>
                 <v-col cols="8" class="d-flex justify-content-center flex-row">
                     <DefaultInput

@@ -20,7 +20,6 @@
                         item-value="id"
                         dense
                         returnObject
-                        @onChange="loadSchools"
                     />
                 </div>
                 <div class="col-sm-6">
@@ -33,6 +32,8 @@
                       item-value="id"
                       dense
                       multiple
+                      :count-show-values="3"
+                      @onChange="loadSchools"
                     />
                 </div>
                 <div class="col-sm-6 mb-3">
@@ -214,7 +215,11 @@ export default {
       vue.filters.courses = [];
       vue.filters.schools = [];
 
-      await axios.get('/resumen_encuesta/schools/'+vue.filters.poll.id).then(({data})=>{
+      if (vue.filters.modules.length == 0) return false;
+
+      await axios.post('/resumen_encuesta/schools/'+vue.filters.poll.id, {
+        modules: vue.filters.modules
+      }).then(({data})=>{
         vue.schools = data.data.schools;
         if(vue.schools.length==0){
           vue.showAlert('Esta encuesta no tiene ningún curso asociado.','warning');
@@ -228,6 +233,10 @@ export default {
       if(vue.filters.schools ==0){
         return true;
       }
+      
+      if (vue.filters.modules.length == 0) return false;
+      if (vue.filters.schools.length == 0) return false;
+
       await axios.post('/resumen_encuesta/courses',{
         poll_id:vue.filters.poll.id,
         schools: vue.filters.schools

@@ -23,7 +23,7 @@
              <list-item titulo="Link ver diploma" subtitulo="Enlace para ver el diploma" />
              <list-item titulo="Link descarga diploma" subtitulo="Enlace para descargar el diploma" />
         </ResumenExpand>
-        <form @submit.prevent="_exportDiplomas" class="row col-12">
+        <form @submit.prevent="generateReport" class="row col-12">
         <!-- Modulo -->
             <div class="col-md-6 mb-3">
                    <DefaultAutocomplete
@@ -37,6 +37,7 @@
                     :showSelectAll="false"
                     placeholder="Seleccione los módulos"
                     :maxValuesSelected="4"
+                    @onChange="moduloChange"
                 />
 
                 <!--DefaultSelect
@@ -54,9 +55,9 @@
             <div class="col-md-6 mb-3">
 
                 <DefaultAutocomplete
-                    :disabled="!schools[0]"
+                    :disabled="!filteredSchools[0]"
                     v-model="filters.school"
-                    :items="schools"
+                    :items="filteredSchools"
                     label="Escuela"
                     item-text="name"
                     item-value="id"
@@ -179,7 +180,7 @@
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar </span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -199,10 +200,13 @@ export default {
     props: {
         modules:{ type: Array, required: true },
         workspaceId:{ type: Number, required: true },
+        adminId:{ type: Number, required: true },
         reportsBaseUrl:{ type: String, required: true }
     },
     data() {
         return {
+            filteredSchools: [],
+            reportType: 'diplomas',
             schools: [],
             courses: [],
 
@@ -254,8 +258,10 @@ export default {
                     estados_curso:estados_curso
                 })
                 .then((res) => {
-                    if (!res.data.error) vue.$emit("emitir-reporte", res);
-                    else {
+                    if (!res.data.error) {
+
+                        vue.$emit("emitir-reporte", res);
+                    } else {
                         alert(res.data.error);
                         vue.hideLoader()
                     }
@@ -267,9 +273,12 @@ export default {
                     vue.hideLoader()
                 });
         },
-        _exportDiplomas() {
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue._exportDiplomas, type: vue.reportType})
+        },
+        async _exportDiplomas(reportName) {
             const vue = this;
-            vue.showLoader();
 
             const pushDataStates = (states) => {
                 let stackTemporal = [];
@@ -285,6 +294,24 @@ export default {
             const estados_escuela = pushDataStates(vue.$refs.EstadoEscuelaFiltroComponent);
             const estados_curso = pushDataStates(vue.$refs.EstadoCursoFiltroComponent);
 
+            this.$emit('reportStarted', {})
+            const filtersDescriptions =  {
+                "Módulos": this.generateNamesArray(this.modules, this.filters.module),
+                "Escuelas": this.generateNamesArray(this.schools, this.filters.school),
+                "Cursos": this.generateNamesArray(this.courses, this.filters.course),
+                "Fecha de emisión": this.filters.date.length > 0
+                    ? this.filters.date
+                    : '',
+                "Usuarios activos" : this.yesOrNo(estados_usuario.includes(1)),
+                "Usuarios inactivos" : this.yesOrNo(estados_usuario.includes(0)),
+
+                "Escuelas activas" : this.yesOrNo(estados_escuela.includes(1)),
+                "Escuelas inactivas" : this.yesOrNo(estados_escuela.includes(0)),
+
+                "Cursos activos" : this.yesOrNo(estados_curso.includes(1)),
+                "Cursos inactivos" : this.yesOrNo(estados_curso.includes(0)),
+            }
+
             const reqPayload = {
                 //data
                 data : {
@@ -299,31 +326,28 @@ export default {
                     estados_usuario,
                     estados_escuela,
                     estados_curso
-                }
+                },
+                workspaceId: vue.workspaceId,
+                adminId: vue.adminId,
+                reportName,
+                filtersDescriptions
             };
 
-            axios.post(`${vue.reportsBaseUrl}/exportar/diplomas`, reqPayload)
-                .then((res) => {
-                    //console.log(res);
-                    if (res.data.alert) {
-                        this.showAlert(res.data.alert, 'warning');
-                    } else {
-                        vue.queryStatus("reportes", "descargar_reporte_diplomas");
-                        res.data.new_name = this.generateFilename(
-                            'Diploma',
-                            this.generateNamesString(this.modules, this.modulo)
-                        )
-                        this.$emit("emitir-reporte", res);
-                    }
-                    this.hideLoader();
-
-                }, (err) => {
-                    console.log(err);
-                    console.log(err.message);
-                    alert("Se ha encontrado el siguiente err : " + err);
-
-                    vue.hideLoader();
+            const urlReport = `${vue.reportsBaseUrl}/exportar/${this.reportType}`
+            try {
+                let response = await axios({
+                    url: urlReport,
+                    method: 'post',
+                    data: reqPayload
                 })
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_diplomas");
+                    }, 500);
+                }
+            } catch (ex) {
+                console.log(ex.message)
+            }
         },
         schoolsInit() {
             const vue = this;
@@ -373,38 +397,22 @@ export default {
             }, (err) => console.log(err));
         },
         async moduloChange() {
+
             let vue = this;
 
-            vue.filters.escuela = "";
-            vue.filters.curso = "";
-            vue.Escuelas = [];
-            vue.Cursos = [];
+            vue.filters.school = [];
+            vue.filters.course = [];
 
-            const estado_escuela_filtro = this.$refs.EstadoEscuelaFiltroComponent;
-            if (!vue.filters.modulo) return false;
-
-            /*let res = await axios.post(`${vue.reportsBaseUrl}filtros/cambia_modulo_multiple_carga_escuela`, {
-                mod: vue.filters.modulo,
-                escuela_active : estado_escuela_filtro.UsuariosActivos,
-                escuela_inactive : estado_escuela_filtro.UsuariosInactivos,
-            });*/
-
-            const requestPayload = {
-                modulo: vue.filters.modulo,
-                workspaceId: vue.workspaceId,
-                escuela_active : estado_escuela_filtro.UsuariosActivos,
-                escuela_inactive : estado_escuela_filtro.UsuariosInactivos,
-            };
-
-            /*let res = await axios.post(`${vue.reportsBaseUrl}/filtros/cambia_modulo_multiple_carga_escuela`, requestPayload);
-
-            console.log(res);
-
-            this.Escuelas = res.data;
-
-            if(vue.Escuelas.length == 0){
-                alert('No se encontrarón escuelas.');
-            }*/
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+                if (vue.filters.module.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
         },
         async escuelaChange() {
             let vue = this;
@@ -429,7 +437,6 @@ export default {
     },
     mounted() {
         const vue = this;
-        console.log('mounted Diplomas')
         vue.schoolsInit();// schools by workpaceId
     }
 };

@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GestorController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\ImpersonateController;
 use App\Http\Middleware\CheckRol;
 use Illuminate\Support\Facades\Route;
 
@@ -33,15 +34,15 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // custom reset pass
-/*Route::get('reset/{token}', [ResetPasswordController::class, 'showResetFormInit'])->name('reset');
-Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('password_reset');*/
+Route::get('reset/{token}', [ResetPasswordController::class, 'showResetFormInit'])->name('reset');
+Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('password_reset');
 
 
 Route::get('home', [DashboardController::class, 'index'])->name('home');
 
 // DESCARGAS
-Route::get('dnx/{id}', 'GestorController@descargaArchivo');
-Route::get('dnv/{id}', 'GestorController@descargaVideo');
+Route::get('dnx/{id}', [GestorController::class, 'descargaArchivo']);
+Route::get('dnv/{id}', [GestorController::class, 'descargaVideo']);
 
 //Route::get('tools/ver_diploma/{iduser}/{idvideo}', 'GestorController@verCertificado');
 Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 'verCertificado']);
@@ -51,8 +52,8 @@ Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descarg
 Route::get('multimedia/topic/{media_topic_id}/download', [\App\Http\Controllers\MediaController::class, 'downloadMediaTopicExternalFile'])->name('media.download.media_topic');
 
 
-Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', 'GestorController@verCertificadoEscuela');
-Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', 'GestorController@descargaCertificadoEscuela');
+Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', [GestorController::class, 'verCertificadoEscuela']);
+Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', [GestorController::class, 'descargaCertificadoEscuela']);
 /**************************** ADJUNTAR ARCHIVOS **************************************/
 Route::middleware(['web'])->group(function () {
     Route::get('adjuntar_archivo', [AdjuntarArchivosController::class, 'index'])->name('adjuntar_archivo');
@@ -63,12 +64,19 @@ Route::get('informacion_app', function () {
 });
 
 Route::middleware(['auth_2fa','auth'])->group(function () {
+
+    Route::get('/impersonate/leave', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
+    Route::get('/impersonate/take/{value}', [ImpersonateController::class, 'take'])->name('impersonate')->middleware('checkrol:super-user');
+
     Route::view('welcome', 'welcome');
-    // Route::view('/reset_password','layouts.user-reset-pass')->name('reset_password');
 
     Route::get('/workspaces/search', [WorkspaceController::class, 'search']);
     Route::put('/usuarios/session/workspace/{workspace}', [UsuarioController::class, 'updateWorkspaceInSession']);
     Route::get('/usuarios/session', [UsuarioController::class, 'session']);
+
+    // cambiar contraseña gestor
+    Route::view('/reset_password', 'usuarios.reset-pass');
+    Route::post('/user_password_reset', [UsuarioController::class, 'updatePasswordUser'])->name('usuarios.user_password_reset');
 
     Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
 
@@ -98,7 +106,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::prefix('errores')->middleware('checkrol:admin')->group(base_path('routes/cms/errores.php'));
     Route::prefix('incidencias')->middleware('checkrol:admin')->group(base_path('routes/cms/incidencias.php'));
-    Route::prefix('auditoria')->middleware('checkrol:admin')->group(base_path('routes/cms/audits.php'));
+    Route::prefix('auditoria')->middleware('checkrol:super-user')->group(base_path('routes/cms/audits.php'));
 
 
     Route::prefix('usuarios')->middleware('checkrol:admin')->group(base_path('routes/cms/usuarios.php'));

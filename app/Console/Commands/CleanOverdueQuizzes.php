@@ -46,13 +46,23 @@ class CleanOverdueQuizzes extends Command
         $rows = SummaryTopic::with('topic.course', 'user.subworkspace', 'status')
                     ->where('taking_quiz', ACTIVE)
                     ->where('current_quiz_finishes_at', '<=', now())
+                    // ->orderBy('updated_at','desc')
                     ->get();
-
+        $bar = $this->output->createProgressBar($rows->count());
+        $bar->start();
         foreach ($rows as $key => $row) {
 
             try {
 
-                if ($row->hasNoAttemptsLeft(null, $row->topic->course_id)) continue;
+                if ($row->hasNoAttemptsLeft(null, $row->topic->course_id)){
+                    $data_ev = [
+                        'current_quiz_started_at' => NULL,
+                        'current_quiz_finishes_at' => NULL,
+                        'taking_quiz' => NULL,
+                    ];
+                    $row->update($data_ev);
+                    continue;
+                }
 
                 $total_questions = Question::where('topic_id', $row->topic_id)->count();
 
@@ -87,6 +97,8 @@ class CleanOverdueQuizzes extends Command
 
                 info($e);
             }
+            $bar->advance();
         }
+        $bar->finish();
     }
 }

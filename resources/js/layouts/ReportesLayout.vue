@@ -1,128 +1,166 @@
 <template>
     <v-app class="--section-list">
 
-        <v-card flat class="elevation-0 --mb-4">
-            <v-tabs vertical class="reports-menu">
+        <ReportPromptModal
+            :prefix="reportName"
+            :isOpen="isAskingForNewReport"
+            @cancel="isAskingForNewReport = false"
+            @confirm="confirmNewReport($event)"/>
 
-<!--
+        <v-row class="pl-3 pr-3" style="flex: 0 1 auto">
+            <v-col cols="12" class="main-tabs-wrapper">
+                <button
+                    @click="activeTab = 'history'"
+                    :class="{ active: activeTab === 'history' }"
+                    type="button">
+                    <v-icon :color="activeTab === 'history' ? 'white' : '#5457E7'">
+                        mdi-folder-file-outline
+                    </v-icon>
+                    Mis reportes
+                </button>
+                <button
+                    @click="activeTab = 'new-report'"
+                    :class="{ active: activeTab === 'new-report' }"
+                    type="button">
+                    <v-icon :color="activeTab === 'new-report' ? 'white' : '#5457E7'">
+                        mdi-file-chart
+                    </v-icon>
+                    Generar nuevo reporte
+                </button>
 
-TABS
 
-============================================================================ -->
+            </v-col>
+        </v-row>
+
+        <v-card v-if="activeTab === 'history'" flat class="elevation-0 --mb-4">
+            <ReportsHistory
+                :is-super-user="isSuperUser"
+                :workspaceId="workspaceId"
+                :reportsBaseUrl="reportsBaseUrl"
+                :adminId="adminId"/>
+        </v-card>
+        <v-card v-if="activeTab === 'new-report'" flat class="elevation-0 --mb-4">
+            <v-tabs vertical class="reports-menu" v-model="selectedTab">
+
+                <!--
+
+                REPORTS TABS
+
+                ============================================================================ -->
 
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" :key="'#notas-de-usuario'">
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Notas de usuario
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='usuarios'>
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
-                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
-                   <span class="pt-2">
+                <v-tab class="justify-content-start py-7" key='avance-de-currícula'>
+                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                    <span class="pt-2">
                        Avance de currícula
                    </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='diplomas'>
                     <v-icon left>mdi-certificate</v-icon>
                     <span class="pt-2">
                         Diplomas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='visitas'>
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Visitas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='notas-por-tema'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Notas por tema
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='temas-no-evaluables'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Temas no evaluables
                     </span>
                 </v-tab>
 
-               <v-tab class="justify-content-start py-7">
-                   <v-icon left>mdi-book-open-page-variant-outline</v-icon>
-                   <span class="pt-2">
+                <v-tab class="justify-content-start py-7" key='notas-por-curso'>
+                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                    <span class="pt-2">
                        Notas por curso
                    </span>
-               </v-tab>
+                </v-tab>
 
-               <v-tab class="justify-content-start py-7">
-                   <v-icon left>fa fa-square</v-icon>
-                   <span class="pt-2">
+                <v-tab class="justify-content-start py-7" key='segmentacion'>
+                    <v-icon left>fa fa-square</v-icon>
+                    <span class="pt-2">
                        Segmentación
                    </span>
-               </v-tab>
-                <v-tab class="justify-content-start py-7">
+                </v-tab>
+                <v-tab class="justify-content-start py-7" key='evaluaciones-abiertas'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Evaluaciones abiertas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='reinicios'>
                     <v-icon left>mdi-restart</v-icon>
                     <span class="pt-2">
                         Reinicios
                     </span>
                 </v-tab>
-<!--
-                <v-tab class="justify-content-start py-7">
-                    <v-icon left>mdi-access-point</v-icon>
-                    <span class="pt-2">
-                        Versiones usadas
-                    </span>
-                </v-tab>
--->
-                <v-tab class="justify-content-start py-7">
+                <!--
+                                <v-tab class="justify-content-start py-7" key='first'>
+                                    <v-icon left>mdi-access-point</v-icon>
+                                    <span class="pt-2">
+                                        Versiones usadas
+                                    </span>
+                                </v-tab>
+                -->
+                <v-tab class="justify-content-start py-7" key='usuarios-uploads'>
                     <v-icon left>mdi-file-account-outline</v-icon>
                     <span class="pt-2">
                         Usuario Uploads
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='vademecum'>
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Vademecum
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='videoteca'>
                     <v-icon left>mdi-play-box-outline</v-icon>
                     <span class="pt-2">
                         Videoteca
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='checklist-detallado'>
                     <v-icon left>mdi-playlist-check</v-icon>
                     <span class="pt-2">
                         Checklist Detallado
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='checklist-general'>
                     <v-icon left>mdi-playlist-check</v-icon>
                     <span class="pt-2">
                         Checklist General
@@ -130,38 +168,46 @@ TABS
                 </v-tab>
 
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='ranking'>
                     <v-icon left>mdi-numeric</v-icon>
                     <span class="pt-2">
                         Ranking
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='reuniones'>
                     <v-icon left>mdi-monitor-account</v-icon>
                     <span class="pt-2">
                         Reuniones
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7">
+                <v-tab class="justify-content-start py-7" key='historial-de-usuario'>
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Historial de usuario
                     </span>
                 </v-tab>
 
-<!--
+                <v-tab class="justify-content-start py-7" key='criterios-vacios'>
+                    <v-icon left>fa fa-square</v-icon>
+                    <span class="pt-2">
+                        Criterios vacíos
+                    </span>
+                </v-tab>
 
-TABS CONTENT
+                <!--
 
-============================================================================ -->
+                TABS CONTENT
+
+                ============================================================================ -->
 
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
                             <NotasUsuario
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 :API_REPORTES="API_REPORTES"/>
                         </v-card-text>
@@ -171,34 +217,38 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Usuarios :workspaceId="workspaceId"
-                                      :modules="modules"
-                                      :reportsBaseUrl="reportsBaseUrl"
-                                      @emitir-reporte="crearReporte"/>
+                            <Usuarios
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item>
-                   <v-card flat>
-                       <v-card-text>
-                           <AvanceCurricula
-                               :workspaceId="workspaceId"
-                               :modules="modules"
-                               :reportsBaseUrl="reportsBaseUrl"
-                               @emitir-reporte="crearReporte"/>
-                       </v-card-text>
-                   </v-card>
-               </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <AvanceCurricula
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
                             <Diploma
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte" />
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -208,9 +258,10 @@ TABS CONTENT
                         <v-card-text>
                             <Visitas
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -218,10 +269,12 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <NotasTema :workspaceId="workspaceId"
-                                       :modules="modules"
-                                       :reportsBaseUrl="reportsBaseUrl"
-                                       @emitir-reporte="crearReporte"/>
+                            <NotasTema
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -231,45 +284,49 @@ TABS CONTENT
                         <v-card-text>
                             <TemasNoEvaluables
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
 
-               <v-tab-item>
-                   <v-card flat>
-                       <v-card-text>
-                           <NotasCurso
-                               :workspaceId="workspaceId"
-                               :modules="modules"
-                               :reportsBaseUrl="reportsBaseUrl"
-                               @emitir-reporte="crearReporte"/>
-                       </v-card-text>
-                   </v-card>
-               </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <NotasCurso
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
-               <v-tab-item>
-                   <v-card flat>
-                       <v-card-text>
-                           <Segmentacion
-                               :workspaceId="workspaceId"
-                               :modules="modules"
-                               :reportsBaseUrl="reportsBaseUrl"
-                               @emitir-reporte="crearReporte"/>
-                       </v-card-text>
-                   </v-card>
-               </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Segmentacion
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
                             <EvaAbiertas
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -277,30 +334,33 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Renicios :workspaceId="workspaceId"
-                                      :admins="admins"
-                                      :reportsBaseUrl="reportsBaseUrl"
-                                      @emitir-reporte="crearReporte"/>
+                            <Renicios
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :admins="admins"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-<!--
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <VersionesUsadas :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
-                                             @emitir-reporte="crearReporte"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
--->
+                <!--
+                                <v-tab-item>
+                                    <v-card flat>
+                                        <v-card-text>
+                                            <VersionesUsadas :API_FILTROS="API_FILTROS" :API_REPORTES="API_REPORTES"
+                                                             @emitir-reporte="crearReporte"/>
+                                        </v-card-text>
+                                    </v-card>
+                                </v-tab-item>
+                -->
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
                             <UsuarioUploads
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -308,10 +368,12 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Vademecum :workspaceId="workspaceId"
-                                       :vademecumList="VademecumList"
-                                       :reportsBaseUrl="reportsBaseUrl"
-                                       @emitir-reporte="crearReporte"/>
+                            <Vademecum
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :vademecumList="VademecumList"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -319,9 +381,11 @@ TABS CONTENT
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Videoteca :workspaceId="workspaceId"
-                                       :reportsBaseUrl="reportsBaseUrl"
-                                       @emitir-reporte="crearReporte"/>
+                            <Videoteca
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -331,9 +395,10 @@ TABS CONTENT
                         <v-card-text>
                             <ChecklistDetallado
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -343,9 +408,10 @@ TABS CONTENT
                         <v-card-text>
                             <ChecklistGeneral
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+                                @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -355,9 +421,13 @@ TABS CONTENT
                         <v-card-text>
                             <Ranking
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
+
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-                                @emitir-reporte="crearReporte"/>
+
+                                @generateReport="generateReport($event)"
+                            />
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
@@ -366,6 +436,8 @@ TABS CONTENT
                     <v-card flat>
                         <v-card-text>
                             <Meetings
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 @emitir-reporte="crearReporte"/>
                         </v-card-text>
                     </v-card>
@@ -376,6 +448,7 @@ TABS CONTENT
                         <v-card-text>
                             <HistorialUsuario
                                 :workspaceId="workspaceId"
+                                :adminId="adminId"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 :API_REPORTES="API_REPORTES"
                                 @emitir-reporte="crearReporte"/>
@@ -383,10 +456,23 @@ TABS CONTENT
                     </v-card>
                 </v-tab-item>
 
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <EmptyCriteria
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
             </v-tabs>
         </v-card>
-        <!-- </v-app> -->
-
 
         <!--
         Report's filename dialog
@@ -422,10 +508,15 @@ TABS CONTENT
 
             </v-card>
         </v-dialog>
+
     </v-app>
+
 </template>
+
+
 <script>
 
+import ReportPromptModal from "../components/Reportes/ReportPromptModal.vue";
 
 const FileSaver = require("file-saver");
 const moment = require("moment");
@@ -452,9 +543,14 @@ import ChecklistGeneral from "../components/Reportes/ChecklistGeneral.vue";
 import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
+import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
+import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
 
 export default {
     components: {
+        EmptyCriteria,
+        ReportPromptModal,
+        ReportsHistory,
         HistorialUsuario,
         NotasUsuario,
         Usuarios,
@@ -478,9 +574,16 @@ export default {
     },
     data() {
         return {
+
             workspaceId: 0,
+            adminId: 0,
+            isSuperUser: false,
+            isAskingForNewReport: false,
+            generateReportCallback: () => {},
+
             modules: [],
             admins: [],
+            reportTypes: [],
             reportsBaseUrl: '',
 
             value: "",
@@ -496,33 +599,52 @@ export default {
             configRoleId: 2,
             adminRoleId : 3,
 
+            activeTab: 'history',
+            selectedTab: 0,
+
+            selectedFilters: {},
             filenameDialog: false,
+            reportName: '',
+            isBeingProcessedNotification: false,
+            isReadyNotification: false,
             reportDownloadUrl: null,
             reportFilename: null
-        };
+        }
     },
     mounted () {
+        const vue = this
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData();
+
+        let uri = window.location.search.substring(1); 
+        let params = new URLSearchParams(uri);
+        let tab = params.get("tab");
+        let section = params.get("section");
+
+        if (tab) {
+
+            this.activeTab = tab
+            this.selectedTab = parseInt(section)
+        }
+
     }
     ,
     methods: {
-        isAdmin () {
-            let isAdmin = false;
+        isSuper () {
             let vue = this;
-            if (!vue.userSession.user) return isAdmin;
+            let isSuper = false
+            if (!vue.userSession) return isSuper;
             vue.userSession
                 .user
                 .roles.forEach(r => {
-                let isAdminOrSuper = (
-                    r.role_id === vue.superUserRoleId
-                );
-                if (isAdminOrSuper) {
-                    isAdmin = true;
+                let isSuperInOneRole = (r.role_id === vue.superUserRoleId);
+
+                if (isSuperInOneRole) {
+                    isSuper = true
                 }
             })
 
-            return isAdmin;
+            return isSuper
         },
         async fetchData() {
             let vue = this;
@@ -534,6 +656,7 @@ export default {
                 method: 'get'
             })
             vue.userSession = response.data;
+            this.adminId = response.data.user.id
             this.workspaceId = response.data.session.workspace.id
 
             // Fetch modules and admins
@@ -549,7 +672,21 @@ export default {
             this.admins = response2.data.admins
             this.VademecumList = response2.data.vademecums
 
-            // console.log(response2.data);
+            // Fetch report types
+
+            let reportTypesUrl = '../reports/types'
+            try {
+                let response3 = await axios({
+                    url: reportTypesUrl,
+                    method: 'get'
+                })
+
+                vue.reportTypes = response3.data.data
+            } catch (ex) {
+                console.log(ex)
+            }
+
+            vue.isSuperUser = vue.isSuper();
         },
         async crearReporte(res) {
 
@@ -560,14 +697,16 @@ export default {
             this.reportDownloadUrl = res.data.excludeBaseUrl
                 ? res.data.ruta_descarga
                 : `${this.reportsBaseUrl}/${res.data.ruta_descarga}`
+
+            this.selectedFilters = res.data.selectedFilters;
             this.reportFilename = res.data.new_name;
             this.filenameDialog = true;
+
         },
         async downloadReport() {
             this.showLoader()
 
             try {
-
                 FileSaver.saveAs(
                     this.reportDownloadUrl,
                     this.reportFilename
@@ -576,10 +715,47 @@ export default {
                 this.hideLoader()
 
             } catch (error) {
-                console.log(error);
-
+                console.log(error)
                 this.hideLoader()
             }
+        },
+        generateReport(report) {
+            this.generateReportCallback = report.callback
+            this.isAskingForNewReport = true
+
+            // Generate report name
+            const reportType = this.reportTypes.find(rt => rt.code === report.type)
+
+            if (reportType) {
+                this.reportName = reportType.name + ' ' +
+                    moment(new Date).format('MM-DD')
+            }
+        },
+        confirmNewReport(event) {
+
+            this.generateReportCallback(event.reportName)
+            this.isAskingForNewReport = false
+
+            // notify that the report has been added
+
+            const message = event.reportName
+                ? `Tu solicitud de reporte "${event.reportName}" se añadió correctamente.`
+                : `Tu solicitud de reporte se añadió correctamente.`
+
+            this.$toast.warning({
+                component: Vue.component('comp', {
+                    template: `
+                        <div>${message} <a href="javascript:"
+                                           @click.stop="clicked">Revisalo aquí</a>
+                        </div>`,
+                    methods: {
+                        clicked() { this.$emit('redirect') }
+                    }
+                }),
+                listeners: {
+                    redirect: () => { window.location.href = '/exportar/node' }
+                }
+            });
         }
     },
     computed: {
@@ -593,7 +769,14 @@ export default {
     }
 };
 </script>
+
 <style>
+
+.main-tabs-wrapper  button.active {
+    background: green;
+    color: white;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator {
     -webkit-appearance: none;
     display: none;
@@ -633,6 +816,10 @@ color: #ffffff !important;
 .info-icon {
     color: darkgrey !important;
     font-size: 20px !important;
+}
+
+button.restart-queue {
+
 }
 
 
@@ -728,4 +915,39 @@ color: #ffffff !important;
 [tooltip]:hover::before {
     opacity: 1;
 }
+</style>
+
+
+<style scoped>
+.v-tab {
+    text-transform: capitalize !important
+}
+
+.main-tabs-wrapper {
+    margin-bottom: 40px;
+    margin-top: -25px;
+    padding-left: 25px;
+    background: white;
+    height: 52px;
+}
+
+.main-tabs-wrapper  button {
+    display: block;
+    float: left;
+    height: 40px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    color: #5457E7;
+    background: white;
+    border: 1px solid #5457E7;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 0;
+
+}
+.main-tabs-wrapper  button.active {
+    background: #5457E7;
+    color: white;
+}
+
 </style>

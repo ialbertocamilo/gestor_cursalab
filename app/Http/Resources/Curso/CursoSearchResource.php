@@ -16,32 +16,23 @@ class CursoSearchResource extends JsonResource
     public function toArray($request)
     {
         $first_school = $this->schools->first();
-        if (is_null($request->school_id)) {
-//            $route_edit = route('curso.editCurso', [$this->id]);
-//            $route_topics = route('tema.list', [$this->id]);
-            $route_edit = route('cursos.editCurso', [$first_school->id, $this->id]);
-            $route_topics = route('temas.list', [$first_school->id, $this->id]);
-        } else {
-            $route_edit = route('cursos.editCurso', [$request->school_id, $this->id]);
-            $route_topics = route('temas.list', [$request->school_id, $this->id]);
-        }
+
+        $school_id = $request->school_id ?? $first_school->id ?? NULL;
+
+        $route_edit = route('cursos.editCurso', [$school_id, $this->id]);
+        $route_topics = route('temas.list', [$school_id, $this->id]);
 
         $schools = $this->schools->pluck('name')->toArray();
 
+        $modules = collect([]);
 
-        $modules = [];
-
-        foreach ($this->segments as $segment) {
-
-            foreach ($segment->values as $segment_value) {
-                if ($segment_value?->criterion_value?->value_text)
-                    $modules[] = $segment_value->criterion_value->value_text;
-
-            }
+        foreach ($this->schools as $school) {
+            $modules = $modules->merge($school->subworkspaces);
         }
 
-        $modules = array_unique($modules);
+        $all_modules = $modules->unique();
 
+        $modules = array_unique($modules->pluck('name')->toArray());
 
         return [
             'id' => $this->id,
@@ -49,8 +40,9 @@ class CursoSearchResource extends JsonResource
             'orden' => $this->position,
             // 'position' => $this->position,
             'nombre' => $this->name,
-            'schools' => implode(',', $schools),
-            'modules' => implode(',', $modules),
+            'schools' => implode(', ', $schools),
+            'modules' => implode(', ', $modules),
+            'images' => $this->getModulesImages($all_modules),
             'first_school_id' => $first_school,
             'image' => FileService::generateUrl($this->imagen),
             // 'medium_image' => FileService::generateUrl($this->imagen),
@@ -74,5 +66,20 @@ class CursoSearchResource extends JsonResource
             'compatibility_available' => get_current_workspace()->id == 25,
             'is_super_user'=>auth()->user()->isAn('super-user')
         ];
+    }
+
+    public function getModulesImages($modules)
+    {
+        $data = [];
+
+        foreach($modules AS $module)
+        {
+            $data[] = [
+                'name' => $module->name,
+                'image' => space_url($module->logo)
+            ];
+        }
+
+        return $data;
     }
 }

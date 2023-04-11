@@ -3851,7 +3851,7 @@ class RestController extends Controller
 
             $path = 'usuario_archivos/' . $fileName;
 
-            if (Storage::put($path, file_get_contents($file), 'public')) {
+            if (Storage::disk('s3')->put($path, file_get_contents($file))) {
 
                 #set subwokspaces index
                 $subworkspace_id = $user->subworkspace_id;

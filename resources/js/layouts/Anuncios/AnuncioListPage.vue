@@ -218,7 +218,7 @@ export default {
             filters: {
                 q: "",
                 module: null,
-                active: null
+                active: 1
             },
             modalLogsOptions: {
                 ref: "LogsModal",
@@ -226,6 +226,7 @@ export default {
                 showCloseIcon: true,
                 persistent: true,
                 base_endpoint: "/search"
+
             },
             modalOptions: {
                 ref: "AnuncioFormModal",

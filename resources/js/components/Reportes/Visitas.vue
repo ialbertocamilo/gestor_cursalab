@@ -34,12 +34,11 @@
             <list-item titulo="Cantidad de visitas por tema" subtitulo="Total de visitas por cada tema" />
         </ResumenExpand>
         <!-- Formulario del reporte -->
-        <form class="row" @submit.prevent="exportVisitas">
+        <form class="row" @submit.prevent="generateReport">
             <!-- Ya que cuando se usa el axios de laravel, por defecto envia el token -->
             <div class="col-12">
                 <div class="row px-3">
                     <div class="col-6 mt-2">
-
                         <DefaultAutocomplete
                             dense
                             v-model="modulo"
@@ -52,6 +51,7 @@
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersCareerData"
                             :maxValuesSelected="4"
+                            @onChange="moduloChange"
                         />
 
                     </div>
@@ -68,7 +68,7 @@
                             :show-select-all="false"
                             hide-details="false"
                             v-model="school"
-                            :items="schools"
+                            :items="filteredSchools"
                             item-value="id"
                             item-text="name"
                             label="Selecciona un #Módulo"
@@ -180,7 +180,7 @@
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
-                        <span>Descargar</span>
+                        <span>Generar reporte</span>
                     </button>
                 </div>
             </div>
@@ -198,16 +198,19 @@ export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem },
     props: {
         workspaceId: 0,
+        adminId: 0,
         modules: Array,
         reportsBaseUrl: ''
     },
     data() {
         return {
+            reportType: 'visitas',
             careers: [],
             areas: [],
             career: [],
             area: [],
 
+            filteredSchools: [],
             schools: [],
             courses: [],
             school: [],
@@ -221,20 +224,39 @@ export default {
         };
     },
     methods: {
-        async exportVisitas() {
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue.exportVisitas, type: vue.reportType})
+        },
+        async exportVisitas(reportName) {
             const vue = this;
-            vue.showLoader();
+
             let UFC = vue.$refs.EstadoFiltroComponent;
+
+            this.$emit('reportStarted')
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Escuelas": this.generateNamesArray(this.schools, this.school),
+                "Cursos": this.generateNamesArray(this.courses, this.course),
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+                "Carreras" : this.generateNamesArray(this.careers, this.career),
+                "Áreas" : this.generateNamesArray(this.areas, this.area),
+                "Cursos libres": this.yesOrNo(this.tipocurso)
+            }
 
             // Perform request to generate report
 
-            let urlReport = `${vue.$props.reportsBaseUrl}/exportar/visitas`
+            let urlReport = `${vue.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: vue.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         modulos: vue.modulo,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
@@ -247,16 +269,10 @@ export default {
                         courses: vue.course
                     }
                 })
-
-                if (response.data.alert) {
-                    vue.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_visitas");
-                    response.data.new_name = this.generateFilename(
-                        'Visitas',
-                        this.generateNamesString(this.modules, this.modulo)
-                    )
-                    vue.$emit('emitir-reporte', response)
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_visitas");
+                    }, 500);
                 }
 
             } catch (ex) {
@@ -312,10 +328,28 @@ export default {
         async fetchFiltersData() {
             const vue = this;
 
-            let urlSchools = `${vue.$props.reportsBaseUrl}/filtros/schools/${vue.$props.workspaceId}`;
+            let urlSchools = `${vue.$props.reportsBaseUrl}/filtros/schools/${vue.$props.workspaceId}?grouped=0`;
             let responseSchools = await axios({ url: urlSchools, method: 'get'});
             vue.schools = responseSchools.data;
-        }
+        },
+        async moduloChange() {
+
+            let vue = this;
+
+            vue.school = [];
+            vue.courses = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+                if (vue.modulo.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
+        },
     },
     mounted() {
         const vue = this;

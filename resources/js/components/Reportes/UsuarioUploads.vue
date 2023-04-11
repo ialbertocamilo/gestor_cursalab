@@ -30,11 +30,11 @@
         </div>
         <div class="px-4">
             <button
-                @click="descargarUsuarioUploads"
+                @click="generateReport"
                 class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2 mt-5"
             >
                 <i class="fas fa-download"></i>
-                <span>Descargar</span>
+                <span>Generar reporte</span>
             </button>
         </div>
     </v-main>
@@ -49,13 +49,28 @@ export default {
     components: { EstadoFiltro, ResumenExpand, ListItem },
     props: {
         workspaceId: 0,
+        adminId: 0,
         reportsBaseUrl: ''
     },
+    data() {
+        return {
+            reportType: 'user_uploads',
+        }
+    },
     methods: {
-        async descargarUsuarioUploads() {
-            let vue = this
-            this.showLoader()
+        generateReport() {
+            const vue = this
+            vue.$emit('generateReport', {callback: vue.descargarUsuarioUploads, type: vue.reportType})
+        },
+        async descargarUsuarioUploads(reportName) {
+
             let UFC = this.$refs.EstadoFiltroComponent;
+
+            this.$emit('reportStarted', {})
+            const filtersDescriptions =  {
+                "Usuarios activos" : this.yesOrNo(UFC.UsuariosActivos),
+                "Usuarios inactivos" : this.yesOrNo(UFC.UsuariosInactivos),
+            }
 
             // Get bucket base url
 
@@ -64,41 +79,31 @@ export default {
 
             // Perform request to generate report
 
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/user_uploads`
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
                         workspaceId: this.workspaceId,
+                        adminId: this.adminId,
+                        reportName,
+                        filtersDescriptions,
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
                         baseUrl: baseUrl
                     }
                 })
-
-                // When there are no results notify user,
-                // download report otherwise
-
-                if (response.data.alert) {
-                    this.showAlert(response.data.alert, 'warning')
-                } else {
-                    vue.queryStatus("reportes", "descargar_reporte_usuario_uploads");
-                    // Emit event to parent component
-                    response.data.new_name = this.generateFilename(
-                        'Usuarios uploads',
-                        ''
-                    )
-                    this.$emit('emitir-reporte', response)
+                const vue = this
+                if(response.statusText == "OK"){
+                    setTimeout(() => {
+                        vue.queryStatus("reportes", "descargar_reporte_usuario_uploads");
+                    }, 500);
                 }
 
             } catch (ex) {
                 console.log(ex.message)
             }
-
-            // Hide loading spinner
-
-            this.hideLoader()
         }
     }
 };

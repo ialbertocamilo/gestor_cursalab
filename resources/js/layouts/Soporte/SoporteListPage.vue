@@ -44,10 +44,8 @@
                             clearable
                             dense
                             v-model="filters.q"
-                            label="Buscar por DNI, nombre, ticket..."
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            label="Buscar por documento, nombre, ticket..."
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="
                                 refreshDefaultTable(dataTable, filters, 1)
@@ -88,33 +86,17 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="
-                    openFormModal(modalOptions, $event, null, 'Editar Ticket')
-                "
-                @show="
-                    openFormModal(
-                        modalShowOptions,
-                        $event,
-                        null,
-                        'Detalle de Ticket'
-                    )
-                "
-                @logs="
-                    openFormModal(
-                        modalLogsOptions,
-                        $event,
-                        'logs',
-                        `Logs de Ticket - ${$event.detail}`
-                    )
-                "
-            /><LogsModal
+                @edit="openFormModal(modalOptions, $event, null, `Editar Ticket - #${$event.id}`)"
+                @show="openFormModal(modalShowOptions, $event, null, `Detalle de Ticket - #${$event.id}`)"
+                @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs de Ticket - ${$event.detail}`)"
+            />
+            <LogsModal
                 :options="modalLogsOptions"
                 width="55vw"
                 :model_id="null"
                 model_type="App\Models\Post"
                 :ref="modalLogsOptions.ref"
-                @onCancel="closeSimpleModal(modalLogsOptions)"
-            />
+                @onCancel="closeSimpleModal(modalLogsOptions)"/>
 
             <SoporteFormModal
                 width="40vw"

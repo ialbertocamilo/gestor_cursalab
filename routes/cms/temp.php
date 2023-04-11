@@ -34,6 +34,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportesSupervisoresController;
 use App\Http\Controllers\MigrarAvanceController;
 use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\ConvalidacionesController;
+use App\Http\Controllers\MigracionController;
 
 // Route::get('dashboard_pbi', function () {
 //     return view('powerbi.index');

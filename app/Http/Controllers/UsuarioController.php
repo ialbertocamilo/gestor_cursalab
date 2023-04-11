@@ -2,46 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\ApiRest\HelperController;
-use App\Http\Controllers\ApiRest\RestAvanceController;
-use App\Http\Requests\UserStoreRequest;
-use App\Http\Resources\Usuario\UsuarioSearchResource;
-use App\Models\Abconfig;
-use App\Models\AssignedRole;
-use App\Models\Botica;
+use App\Models\User;
 use App\Models\Cargo;
-use App\Models\Carrera;
-use App\Models\Categoria;
 use App\Models\Ciclo;
-use App\Models\Course;
-use App\Models\Criterio;
-use App\Models\Criterion;
-use App\Models\CriterionValue;
 use App\Models\Curso;
 use App\Models\Grupo;
-use App\Models\Ingreso;
-use App\Models\Matricula;
+use App\Models\Topic;
+use App\Models\Botica;
+use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\School;
+use App\Models\Carrera;
+use App\Models\Ingreso;
+use App\Models\Usuario;
+use App\Models\Abconfig;
+use App\Models\Criterio;
 use App\Models\Reinicio;
+use App\Models\Taxonomy;
+use App\Models\Categoria;
+use App\Models\Criterion;
+use App\Models\Matricula;
+use App\Models\Workspace;
+use App\Models\AssignedRole;
+use App\Models\SegmentValue;
+use App\Models\SummaryTopic;
+use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
+use App\Services\FileService;
+use App\Models\CriterionValue;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
-use App\Models\School;
-use App\Models\SummaryCourse;
-use App\Models\SummaryTopic;
-use App\Models\Topic;
-use App\Models\Taxonomy;
-use App\Models\User;
-use App\Models\Usuario;
-use App\Models\Workspace;
 use App\Services\CourseService;
-use App\Services\FileService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UserStoreRequest;
 use Illuminate\Support\Facades\Session;
+use App\Http\Requests\ResetPasswordRequest;
+use Illuminate\Validation\ValidationException;
+use App\Http\Controllers\ApiRest\HelperController;
+use App\Http\Resources\Usuario\UsuarioSearchResource;
+use App\Http\Controllers\ApiRest\RestAvanceController;
 
 // use App\Perfil;
 
@@ -63,6 +66,7 @@ class UsuarioController extends Controller
 
             return [
                 'user' => [
+                    'id' => $user->id,
                     'username' => $user->username,
                     'fullname' => $user->fullname,
                     'roles' => $roles
@@ -105,7 +109,7 @@ class UsuarioController extends Controller
     public function getListSelects()
     {
         $workspace = get_current_workspace();
-
+        
         $sub_workspaces = Workspace::where('parent_id', $workspace?->id)
             ->select('id', 'name')->get();
 
@@ -129,11 +133,14 @@ class UsuarioController extends Controller
             ->whereIn('id', $criteria_workspace->pluck('id'))
             ->orderBy('name')
             ->get();
-
+        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
+        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
+        $usersWithEmptyCriteria = count($users);
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
-            'criteria_template' => $criteria_template
+            'criteria_template' => $criteria_template,
+            'users_with_empty_criteria' => $usersWithEmptyCriteria
         ]);
     }
 
@@ -147,7 +154,11 @@ class UsuarioController extends Controller
             $user_criterion_value = $criterion->multiple ?
                 $value->pluck('id') : $value?->first()?->id;
 
-            $user_criteria[$criterion->code] = $user_criterion_value;
+            if ($criterion->field_type?->code == 'date') {
+                $user_criteria[$criterion->code] = $value?->first()?->value_text;
+            } else {
+                $user_criteria[$criterion->code] = $user_criterion_value;
+            }
         }
 
 
@@ -191,7 +202,7 @@ class UsuarioController extends Controller
                 'field_type:id,code'
             ])
             ->whereRelation('workspaces', 'id', $current_workspace?->id)
-            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required')
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
             ->orderBy('position')
             ->get();
 
@@ -203,7 +214,6 @@ class UsuarioController extends Controller
     public function store(UserStoreRequest $request)
     {
         $data = $request->validated();
-
         // $data['subworkspace_id'] = get_current_workspace()?->id;
 
         User::storeRequest($data);
@@ -214,9 +224,8 @@ class UsuarioController extends Controller
     public function update(UserStoreRequest $request, User $user)
     {
         $data = $request->validated();
-
         // $data['subworkspace_id'] = get_current_workspace()?->id;
-//        info($data);
+        // info($data);
         User::storeRequest($data, $user);
 
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);
@@ -836,5 +845,58 @@ class UsuarioController extends Controller
                 $topicId, $userId, $adminId
             );
         }
+    }
+
+    public function updatePasswordUser(ResetPasswordRequest $request)
+    {
+        $data = $request->validated();
+
+        $request->validated();
+
+        $actualPassword = $request->currpassword;
+        $currentPassword = $request->password;
+        $currentRePassword = $request->repassword;
+
+        $user = auth()->user();
+        // verficamos su actual contraseña
+        // if(!Auth::attempt([ 'email' => $user->email,
+        //                     'password' => $actualPassword])) {
+
+        //     throw ValidationException::withMessages([
+        //         'currpassword' => 'La contraseña actual no coincide.'
+        //     ]);
+        // }
+        // verficamos que no sea la misma
+        if($actualPassword === $currentPassword) {
+            throw ValidationException::withMessages([
+                'password' => 'La nueva contraseña debe ser distinta a la actual.',
+            ]);
+        }
+
+        if($currentPassword === $currentRePassword) {
+            $user->updatePasswordUser($currentPassword);
+
+            return redirect('/reset_password')
+                             ->with('info', 'Contraseña actualizada correctamente');
+        }
+
+        throw ValidationException::withMessages([
+            'password' => 'El campo nueva contraseña no coincide.',
+            'repassword' => 'El campo repetir nueva contraseña no coincide.'
+        ]);
+    }
+
+    public function resetPassword(User $user, Request $request)
+    {
+        $data = [
+            'password' => $user->document,
+            'last_pass_updated_at' => now(),
+            'attempts' => 0,
+            'attempts_lock_time' => NULL,
+        ];
+
+        $user->update($data);
+
+        return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
     }
 }

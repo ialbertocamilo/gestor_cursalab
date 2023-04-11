@@ -18,6 +18,19 @@ class MeetingResource extends JsonResource
     {
         // $usuario_id = $request->usuario_id;
         // $attendants = $this->attendants->where('type.code', 'cohost')->where('usuario_id', $usuario_id)->first();
+        switch($this->status->color){
+            case 'primary':
+                $color = "#00E396";
+                break;
+            case 'warning':
+                $color = "#9696F2";
+                break;
+            case 'error':
+                $color = "#FF4560";
+                break;
+            default:
+                $color = "#2A3649";
+        }
         return [
             'id' => $this->id,
             // 'attendants' => $attendants,
@@ -29,11 +42,13 @@ class MeetingResource extends JsonResource
             'type' => $this->type->name,
             'host' => $this->host->name ?? 'No definido',
             // 'duration' => $this->duration . ' min.',
-            'status' => [
+            'status_meeting' => [
                 'text' => $this->status->name,
-                'color' => $this->status->color,
+                'color' => $color,
             ],
-            'starts_at' => $this->starts_at->format('d/m/Y g:i a') . ' (' . $this->duration . ' min)',
+            'starts_at' => $this->starts_at->format('d/m/Y'),
+            'starts_at_horario' => $this->starts_at->format('g:i a'),
+            'starts_at_duracion' => $this->duration . ' min',
 
             'attendants_count' => $this->attendants_count,
             'prefix' => $this->buildPrefix(),

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiRest\AuthController;
+use App\Http\Controllers\ApiRest\AuthImpersonationController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
 use App\Http\Controllers\ApiRest\RestController;
 use App\Http\Controllers\ApiRest\RestMeetingController;
@@ -46,7 +47,13 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
-Route::group(['prefix' => 'auth'], function () {
+Route::post('/quizz', [AuthController::class, 'quizz']);
+Route::post('/reset', [AuthController::class, 'reset_password']);
+
+Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
+Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
+
+Route::group(['prefix' => 'auth', 'middleware' => 'throttle:800'], function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
@@ -55,6 +62,9 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
 });
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
+
+    // Route::impersonate();
+    
     Route::post('/usuario_upload_file', [RestController::class, 'usuario_upload_file']);
     Route::post('/guardar_token_firebase', [FirebaseController::class, 'guardarToken']);
 
