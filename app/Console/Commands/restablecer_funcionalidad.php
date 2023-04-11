@@ -101,7 +101,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreAnswerUserFromUCFP();
         // $this->generateStatusTopics();
         // $this->deleteDuplicateUserCriterionValues();
-        $this->restoreStatusSummaryTopics();
+        // $this->restoreStatusSummaryTopics();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
