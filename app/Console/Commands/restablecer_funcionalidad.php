@@ -106,16 +106,16 @@ class restablecer_funcionalidad extends Command
         info(" \n Fin: " . now());
     }
     public function restoreStatusSummaryTopics(){
-        $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
-        // $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        // $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
+        $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
         $status_reviewved = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
-        $summaries = SummaryTopic::where('passed',1)->where('status_id',$status_reviewved->id)->with(['topic:id,course_id'])->whereHas('topic', function ($q) {
+        $summaries = SummaryTopic::where('passed',0)->where('answers','like','%[{"%')->where('status_id',$status_reviewved->id)->with(['topic:id,course_id'])->whereHas('topic', function ($q) {
             $q->whereRelation('evaluation_type', 'code', 'qualified');
         })->where('last_time_evaluated_at','>','2023-03-29 00:00:00')->get();
         $_bar = $this->output->createProgressBar(count($summaries));
         $_bar->start();
         foreach ($summaries as $key => $summary) {
-            $summary->status_id = $status_passed->id;
+            $summary->status_id = $status_failed->id;
             $summary->save();
             $course = Course::where('id',$summary->topic->course_id)->first();
             // SummaryCourse::updateUserData($course, $summary->user, false,false);
