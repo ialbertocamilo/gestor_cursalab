@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiRest\AuthController;
+use App\Http\Controllers\ApiRest\AuthImpersonationController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
 use App\Http\Controllers\ApiRest\RestController;
 use App\Http\Controllers\ApiRest\RestMeetingController;
@@ -48,6 +49,9 @@ Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
 Route::post('/quizz', [AuthController::class, 'quizz']);
 Route::post('/reset', [AuthController::class, 'reset_password']);
+
+Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
+Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
 
 Route::group(['prefix' => 'auth', 'middleware' => 'throttle:800'], function () {
     Route::post('/login', [AuthController::class, 'login']);

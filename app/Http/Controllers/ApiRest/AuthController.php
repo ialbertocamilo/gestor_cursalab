@@ -43,7 +43,7 @@ class AuthController extends Controller
             // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
-            $password = strip_tags($data['password']);
+            $password = $data['password'];
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
             $credentials1 = $credentials2 = ['password' => $password];
@@ -62,7 +62,7 @@ class AuthController extends Controller
                 if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                     return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
                 } 
-                return $this->error('Intento fallido.', 400, $responseAttempts);
+                return $this->error('Intento fallido A.', 400, $responseAttempts);
             }
             // === validacion de intentos ===
 
@@ -122,8 +122,11 @@ class AuthController extends Controller
                 // === validacion de intentos ===
                 $userInstance->checkTimeToReset(trim($userinput), 'APP'); 
                 $user_attempts = $userInstance->incrementAttempts(trim($userinput), 'APP');
+                
                 if($user_attempts) {
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
+                    $responseAttempts['credentials1'] = $credentials1;
+                    $responseAttempts['credentials2'] = $credentials2;
                     // custom message
                     if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
@@ -256,7 +259,9 @@ class AuthController extends Controller
 
         $user = auth()->user();
 
-        $user->tokens()->delete();
+        // $user->tokens()->delete();
+        $user->token()->revoke();
+        // $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Successfully logged out']);
     }
