@@ -54,7 +54,7 @@ class Videoteca extends BaseModel
             Media::class,
             'id'
         )->select('id', 'title', 'file', 'ext'); */
-        
+
         return $this->belongsTo(
             Media::class,
             //'id',
@@ -289,7 +289,7 @@ class Videoteca extends BaseModel
     {
         $videoteca = $videoteca ?? $this;
 
-        if (!$videoteca->preview_id) {
+        if (is_null($videoteca->preview)) {
 
             if (in_array($videoteca->media_type, ['youtube', 'vimeo', 'video'], true)) {
 
