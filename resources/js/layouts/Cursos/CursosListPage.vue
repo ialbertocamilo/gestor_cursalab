@@ -68,20 +68,6 @@
                     </v-col>
 
                     <v-col cols="3">
-                        <DefaultSelect
-                            clearable
-                            dense
-                            :items="selects.statuses"
-                            v-model="filters.active"
-                            label="Estado de curso"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            item-text="name"
-                        />
-                    </v-col>
-
-                    <v-col cols="3">
                         <DefaultInputDate
                             clearable
                             dense
