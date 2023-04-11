@@ -13,11 +13,14 @@ use App\Models\Posteo;
 use App\Models\Prueba;
 use App\Models\Ticket;
 use App\Models\Visita;
+use App\Models\Summary;
 use App\Models\Abconfig;
 use App\Models\Criterio;
 use App\Models\Question;
+use App\Models\Taxonomy;
 use App\Models\Criterion;
 use App\Models\Matricula;
+use App\Models\MediaTema;
 use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
@@ -35,8 +38,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Support\ExternalDatabase;
 use App\Http\Controllers\ApiRest\RestAvanceController;
-use App\Models\MediaTema;
-use App\Models\Taxonomy;
 
 class restablecer_funcionalidad extends Command
 {
@@ -108,7 +109,7 @@ class restablecer_funcionalidad extends Command
         $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
         // $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
         $status_reviewved = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
-        $summaries = SummaryTopic::where('passed',1)->where('status_id',$status_reviewved->id)->with(['topic:id,course_id','user'])->whereHas('topic', function ($q) {
+        $summaries = SummaryTopic::where('passed',1)->where('status_id',$status_reviewved->id)->with(['topic:id,course_id'])->whereHas('topic', function ($q) {
             $q->whereRelation('evaluation_type', 'code', 'qualified');
         })->where('last_time_evaluated_at','>','2023-03-29 00:00:00')->get();
         $_bar = $this->output->createProgressBar(count($summaries));
@@ -117,8 +118,9 @@ class restablecer_funcionalidad extends Command
             $summary->status_id = $status_passed->id;
             $summary->save();
             $course = Course::where('id',$summary->topic->course_id)->first();
-            SummaryCourse::updateUserData($course, $summary->user, false,false);
-            SummaryUser::updateUserData($summary->user);
+            // SummaryCourse::updateUserData($course, $summary->user, false,false);
+            // SummaryUser::updateUserData($summary->user);
+            Summary::updateUsersByCourse($course,[$summary->user_id],true);
             $_bar->advance();
         }
         $_bar->finish();
