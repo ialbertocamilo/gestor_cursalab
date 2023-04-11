@@ -77,7 +77,8 @@ export default {
                 previewTemplate: this.template(),
                 timeout: {
                     default: 0
-                }
+                },
+                uploadMultiple: false
                 // accept: function (file, done) {
                 //     // console.log(file);
                 //     if (file.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
@@ -142,6 +143,7 @@ export default {
         },
         uploadError(file, message) {
             // console.log(file, message)
+            this.limpiarArchivo()
         },
         fileRemoved() {
             this.$emit("onUpload", null);

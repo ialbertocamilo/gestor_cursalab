@@ -111,7 +111,7 @@
                 @onCancel="deleteConfirmationDialog.open = false"
             />
             <CourseValidationsDelete
-                width="50vw"
+                width="408px"
                 :ref="courseValidationModal.ref"
                 :options="courseValidationModal"
                 @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
@@ -308,6 +308,7 @@ export default {
             courseValidationModal: {
                 ref: 'CourseListValidationModal',
                 open: false,
+                width: '408px'
             },
 
             courseUpdateStatusModal: {

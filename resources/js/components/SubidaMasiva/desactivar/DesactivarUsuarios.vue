@@ -29,6 +29,7 @@
         <v-col cols="12" md="5" class="">
             <v-row class="d-flex justify-content-center my-2 drop_mas">
                 <vuedropzone
+                    :ref="myVueDropzone"
                     @emitir-archivo="cambio_archivo"
                     @emitir-alerta="enviar_alerta"
                     :error_file="error_file"
@@ -39,7 +40,8 @@
             </v-row>
             <v-row class="d-flex justify-content-center">
                 <v-card-actions>
-                    <v-btn color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)" class="btn_conf">Confirmar</v-btn>
+                    <v-btn v-if="error_file||success_file" color="primary" @click="nuevo_archivo()" class="btn_conf">Subir otro archivo</v-btn>
+                    <v-btn v-else color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)" class="btn_conf">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -57,12 +59,21 @@
                 error_file: false,
                 error_text: '',
                 success_file: false,
-                success_text: ''
+                success_text: '',
+                myVueDropzone: 'myVueDropzone',
             }
         },
         methods:{
             cambio_archivo(res){
                 this.archivo = res;
+            },
+            nuevo_archivo() {
+                let vue = this
+                if (vue.$refs.myVueDropzone)
+                    vue.$refs.myVueDropzone.limpiarArchivo()
+                this.archivo = null;
+                this.error_file = false;
+                this.success_file = false;
             },
             enviar_archivo(){
                 let vue = this;

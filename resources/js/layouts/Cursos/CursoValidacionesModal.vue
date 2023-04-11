@@ -9,7 +9,7 @@
             <div
                 v-for="(validation,i) in validations.list" :key="i">
                 <div v-if="validation.type == 'has_active_topics'">
-                    <span class="lbl_pre">También, desactivarán todos los temas del curso:</span>
+                    <span class="lbl_pre">Al desactivar el curso, los usuarios tampoco podrán acceder a los temas. Ten en cuenta, que con esta acción, los estados de los temas no cambiarán.</span>
                 </div>
                 <div v-else-if="validation.type == 'check_if_is_required_course'">
                     <span class="lbl_pre">Para desactivarlo, no debe ser requisito de:</span>
@@ -81,6 +81,7 @@ export default {
 <style lang="scss">
 span.lbl_pre {
     margin-top: 10px;
+    margin-bottom: 10px;
     font-family: "Nunito", sans-serif;
     font-size: 16px;
     color: #2A3649;
