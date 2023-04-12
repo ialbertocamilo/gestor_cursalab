@@ -34,9 +34,19 @@ class RestChecklistController extends Controller
         return response()->json($response, 200);
     }
 
-    public function getChecklistsByTrainer(User $trainer)
+    public function getChecklistsByTrainer()
     {
+        $trainer = Auth::user();
         $response = CheckList::getChecklistsByTrainer($trainer->id);
+
+        return response()->json($response, 200);
+    }
+
+    public function getStudentsByChecklist(CheckList $checklist)
+    {
+        $trainer = Auth::user();
+        // $response = CheckList::getStudentsByChecklist($checklist->id,$trainer->id);
+        $response = CheckList::getStudentsByChecklist($checklist->id, 60704);
 
         return response()->json($response, 200);
     }

@@ -232,6 +232,42 @@ class CheckList extends BaseModel
         return $response;
     }
 
+    protected function getStudentsByChecklist($checklist_id, $trainer_id): array
+    {
+        $alumnos_ids = EntrenadorUsuario::entrenador($trainer_id)->where('active', 1)->limit(20)->get();
+
+        $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
+            ->paginate(request('paginate', 5));
+
+        if(count($list_students) > 0) {
+            $i = 0;
+            foreach ($list_students as $check) {
+                $check->percentage = 16 * (rand(1,5));
+                $check->makeHidden(['abilities', 'roles', 'age', 'fullname']);
+                $i++;
+            }
+        }
+
+        $response['data'] = $list_students->items();
+        $response['lastPage'] = $list_students->lastPage();
+
+        $response['current_page'] = $list_students->currentPage();
+        $response['first_page_url'] = $list_students->url(1);
+        $response['from'] = $list_students->firstItem();
+        $response['last_page'] = $list_students->lastPage();
+        $response['last_page_url'] = $list_students->url($list_students->lastPage());
+        $response['next_page_url'] = $list_students->nextPageUrl();
+        $response['path'] = $list_students->getOptions()['path'];
+        $response['per_page'] = $list_students->perPage();
+        $response['prev_page_url'] = $list_students->previousPageUrl();
+        $response['to'] = $list_students->lastItem();
+        $response['total'] = $list_students->total();
+
+        return $response;
+    }
+
     public function getProgresoActividadesFeedback(ChecklistRpta $checklistRpta, $actividades)
     {
 
