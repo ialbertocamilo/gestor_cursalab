@@ -44,9 +44,10 @@
                     
                     <v-col cols="6">
                         <v-icon left color="primary">fa-solid fa-th-large</v-icon>
-                        <v-img
-                            max-height="50"
-                            max-width="50"
+                        <span v-text="resource.module"></span>
+                        <!-- <v-img
+                            max-height="60"
+                            max-width="60"
                             :src="resource.image"
                         >
                             <template v-slot:placeholder>
@@ -61,7 +62,7 @@
                                     ></v-progress-circular>
                                 </v-row>
                             </template>
-                        </v-img>
+                        </v-img> -->
 
                     </v-col>
                     
@@ -173,7 +174,7 @@
                             elevation="0"
                             :ripple="false"
                             color="primary"
-                            @click="openFormModal(modalResetPasswordOptions, resource.user, 'user', `Restaurar contraseña de ${resource.user.fullname} - ${resource.user.document}`)"
+                            @click="openFormModal(modalResetPasswordOptions, resource.user, 'user', `Restaurar contraseña de ${resource.user.name} - ${resource.user.document}`)"
                         >
                             <!-- :disabled="loading" -->
                             <v-icon left color="primary" small>fa-solid fa-key</v-icon>
@@ -186,7 +187,7 @@
                             elevation="0"
                             :ripple="false"
                             color="primary"
-                            @click="openFormModal(modalStatusOptions, resource.user, 'status', `Actualizar estado de ${resource.user.fullname} - ${resource.user.document}`)"
+                            @click="openFormModal(modalStatusOptions, resource.user, 'status', `Actualizar estado de ${resource.user.name} - ${resource.user.document}`)"
                         >
                             <!-- :disabled="loading" -->
                             <v-icon left color="primary" small>fa-solid fa-circle</v-icon>
@@ -199,7 +200,7 @@
                             elevation="0"
                             :ripple="false"
                             color="primary"
-                            @click="openFormModal(modalOptions, resource.user, 'edit', `Editar usuario ${resource.user.fullname} - ${resource.user.document}`)"
+                            @click="openFormModal(modalOptions, resource.user, 'edit', `Editar usuario ${resource.user.name} - ${resource.user.document}`)"
                         >
                             <!-- :disabled="loading" -->
                             <v-icon left color="primary" small>fa-solid fa-pen</v-icon>
@@ -212,7 +213,7 @@
                             elevation="0"
                             :ripple="false"
                             color="primary"
-                            @click="openFormModal(modalReiniciosOptions, resource.user, 'cursos', `Reiniciar avance de ${resource.user.fullname} - ${resource.user.document}`)"
+                            @click="openFormModal(modalReiniciosOptions, resource.user, 'cursos', `Reiniciar avance de ${resource.user.name} - ${resource.user.document}`)"
                         >
                             <v-icon left color="primary" small>fa-solid fa-history</v-icon>
                             <!-- :disabled="loading" -->
@@ -235,7 +236,7 @@
                 @onCancel="closeFormModal(modalResetPasswordOptions)"
             />
             <UsuarioFormModal
-                width="50vw"
+                width="45vw"
                 :ref="modalOptions.ref"
                 :options="modalOptions"
                 @onConfirm="closeFormModal(modalOptions); loadData(resource)"
@@ -249,7 +250,7 @@
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
             <UsuarioReiniciosModal
-                width="35vw"
+                width="40vw"
                 :ref="modalReiniciosOptions.ref"
                 :options="modalReiniciosOptions"
                 @onReinicioTotal="closeFormModal(modalReiniciosOptions)"

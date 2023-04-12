@@ -84,7 +84,7 @@
             />
 
             <SoporteShowModal
-                width="45vw"
+                width="50vw"
                 :ref="modalShowOptions.ref"
                 :options="modalShowOptions"
                 @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
