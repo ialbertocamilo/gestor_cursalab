@@ -95,18 +95,33 @@
                         <v-row justify="space-around" v-if="!limitOne">
                             <v-col cols="10" class="d-flex justify-content-end">
                                 <v-btn
-                                    class="--add-button"
-                                    color="primary"
+                                    :variant="'text'"
+                                    :color="'white'"
+                                    class="add-segment-button"
                                     @click="addSegmentation('direct-segmentation')"
                                 >
-                                    <v-icon class="" v-text="'mdi-plus'"/>
+                                    <v-icon
+                                        size="14"
+                                        color="primary"
+                                        class="mr-1"
+                                        v-text="'mdi-plus'"/>
                                     Segmento
                                 </v-btn>
                             </v-col>
                         </v-row>
 
                         <v-row justify="space-around">
+                            <v-col
+                                v-if="getSegmentWithModuleCriteria()"
+                                cols="9">
+                                <segment-values
+                                    :criterion="getSegmentWithModuleCriteria().criteria_selected[0]"
+                                />
+                            </v-col>
+
                             <v-col cols="11" class="d-flex justify-content-center">
+
+
                                 <!-- hide-delimiter-background -->
                                 <v-carousel
                                     height="100%"
@@ -134,6 +149,7 @@
                                                 :segment="row"
                                                 :criteria="criteria"
                                                 :course-modules="courseModules"
+                                                :hideModule="true"
                                                 class="mx-5"
                                                 :options="options"
                                                 @borrar_segment="borrarBloque"
@@ -210,9 +226,11 @@ const CustomMessages = {
 import Segment from "./Segment";
 import SegmentAlertModal from "./SegmentAlertModal";
 import SegmentByDocument from "./SegmentByDocument";
+import SegmentValues from "./SegmentValues.vue";
 
 export default {
     components: {
+        SegmentValues,
         SegmentModuleModal,
         Segment, SegmentByDocument, SegmentAlertModal
     },
@@ -333,6 +351,19 @@ export default {
         },
         closeSegmentModuleModal() {
             this.modalModuleOptions.open = false;
+        },
+        getSegmentWithModuleCriteria() {
+            let segmentWithModuleSegmentation;
+            this.segments.forEach(segment => {
+                let moduleCriteria = segment.criteria_selected.find(c => {
+                    return c.code === 'module'
+                })
+                if (moduleCriteria) {
+                    segmentWithModuleSegmentation = segment
+                }
+            });
+
+            return segmentWithModuleSegmentation
         },
         resetValidation() {
             let vue = this;
@@ -682,6 +713,10 @@ export default {
     text-align: center;
 }
 
-
+.add-segment-button {
+    border: none !important;
+    color: #5458ea !important;
+    box-shadow: none !important;
+}
 
 </style>

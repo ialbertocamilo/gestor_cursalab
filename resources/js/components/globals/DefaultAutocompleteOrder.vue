@@ -62,7 +62,11 @@
 
 
             <template v-slot:selection="{ item, index }" v-if="multiple">
-                <v-chip small class="flex justify-content-between mt-1" v-if="index < countShowValues">
+                <v-chip
+                    small
+                    class="flex justify-content-between mt-1"
+                    :class="hideCodes.includes(item.code) ? 'hidden-chip' : ''"
+                    v-if="index < countShowValues">
                     <span> {{ String(item[itemText]) }}
                         <v-btn
                             v-if="!readyOnlyCodes.includes(item.code)"
@@ -105,6 +109,10 @@
 export default {
     props: {
         readyOnlyCodes: {
+            type: Array,
+            default: function() { return [] }
+        },
+        hideCodes: {
             type: Array,
             default: function() { return [] }
         },
@@ -455,6 +463,10 @@ export default {
     .v-scroll-auto-complete::-webkit-scrollbar-thumb {
         background: #afafaf;
         border-radius: 3rem;
+    }
+
+    .hidden-chip {
+        display: none !important;
     }
 
     .readonly-list-item {
