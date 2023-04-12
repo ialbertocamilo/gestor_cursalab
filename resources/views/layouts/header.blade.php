@@ -48,3 +48,4 @@
     @stack('css')
   </head>
   <body>
+    @include('layouts.gtag-manager-body')
