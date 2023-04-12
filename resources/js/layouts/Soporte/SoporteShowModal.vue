@@ -187,7 +187,7 @@
                             elevation="0"
                             :ripple="false"
                             color="primary"
-                            @click="openFormModal(modalStatusOptions, resource.user, 'status', `Actualizar estado de ${resource.user.name} - ${resource.user.document}`)"
+                            @click="openFormModal(modalStatusOptions, resource.user, 'status', `Actualizar estado de usuario ${resource.user.name} - ${resource.user.document}`)"
                         >
                             <!-- :disabled="loading" -->
                             <v-icon left color="primary" small>fa-solid fa-circle</v-icon>
@@ -243,7 +243,7 @@
                 @onCancel="closeFormModal(modalOptions)"
             />
             <DefaultStatusModal
-                width="35vw"
+                width="40vw"
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
                 @onConfirm="closeFormModal(modalStatusOptions); loadData(resource)"
@@ -362,8 +362,9 @@ export default {
                 ref: 'UsuarioStatusModal',
                 open: false,
                 base_endpoint: '/usuarios',
-                contentText: '¿Desea cambiar de estado a este registro?',
+                contentText: '¿Desea cambiar de estado a este usuario?',
                 endpoint: '',
+                width: '35vw'
             },
         }
     },
