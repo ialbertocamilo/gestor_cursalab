@@ -152,6 +152,7 @@
             </v-card-text>
 
             <DefaultTable
+                :avoid_first_data_load="getUrlParamsTotal() > 0"
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
@@ -354,7 +355,6 @@ export default {
         }
     },
     mounted() {
-        console.log('usuariolist mounted')
         let vue = this
         vue.getSelects();
     },
@@ -363,18 +363,23 @@ export default {
         getSelects() {
             let vue = this
 
-            let uri = window.location.search.substring(1);
-            let params = new URLSearchParams(uri);
-            let param_subworkspace = params.get("subworkspace_id");
-            let param_document = params.get("document");
+            let params = vue.getAllUrlParams(window.location.search);
+
+            let param_subworkspace = params.subworkspace_id;
+            let param_document = params.document;
+           
+            vue.filters.subworkspace_id = parseInt(param_subworkspace);
+            vue.filters.q = param_document;
+            
+            if (param_subworkspace || param_document) {
+                vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+            }
 
             const url = `/usuarios/get-list-selects`
             vue.$http.get(url)
                 .then(({data}) => {
 
                     vue.selects.sub_workspaces = data.data.sub_workspaces;
-                    vue.filters.subworkspace_id = parseInt(param_subworkspace);
-                    vue.filters.q = param_document;
                     vue.criteria_template = data.data.criteria_template;
                     vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
 
@@ -392,9 +397,6 @@ export default {
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    if (param_subworkspace || param_document) {
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
-                    }
                 })
 
         },

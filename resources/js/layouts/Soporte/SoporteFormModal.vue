@@ -20,28 +20,28 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" v-show="resource.estado.id == 'solucionado'">
+               <!--  <v-row justify="space-around" v-show="resource.status.id == 'solucionado'">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput clearable
                                       v-model="resource.info_soporte"
                                       label="Info Soporte"
-                                      :rules="resource.estado.id == 'solucionado' ? rules.info_soporte : []"
+                                      :rules="resource.status.id == 'solucionado' ? rules.info_soporte : []"
                         />
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" v-show="resource.estado.id == 'solucionado'">
+                <v-row justify="space-around" v-show="resource.status.id == 'solucionado'">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput clearable
                                       v-model="resource.msg_to_user"
                                       label="Mensaje al usuario"
-                                      :rules="resource.estado.id == 'solucionado' ? rules.msg_to_user : []"
+                                      :rules="resource.status.id == 'solucionado' ? rules.msg_to_user : []"
                         />
                     </v-col>
-                </v-row>
+                </v-row> -->
 
                 <v-row justify="space-around">
-                    <img src="/svg/ticket_status.svg" width="350" class="my-7">
+                    <img src="/svg/ticket_status.svg" width="300" class="my-7">
                 </v-row>
 
             </v-form>

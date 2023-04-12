@@ -2,6 +2,7 @@
     <DefaultAlertDialog :options="options"
                          @onCancel="onCancel"
                          @onConfirm="onConfirm"
+                         :width="width"
     >
         <template v-slot:content> {{ options.contentText }}</template>
     </DefaultAlertDialog>
@@ -13,7 +14,10 @@ export default {
         options: {
             type: Object,
             required: true
-        }
+        },
+        width: {
+            default: '40vw'
+        },
     },
     data() {
         return {
