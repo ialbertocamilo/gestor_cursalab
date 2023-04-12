@@ -43,7 +43,7 @@ export default {
         },
         cancelLabel: {
             type: String,
-            default: 'Retroceder'
+            default: 'Cancelar'
         },
         confirmLabel: {
             type: String,
