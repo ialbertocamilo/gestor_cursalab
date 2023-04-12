@@ -370,13 +370,13 @@ export default {
     font-weight: 400;
     font-size: 13px !important;
 }
-.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:last-child,
-.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:not(.v-data-table__mobile-row),
-.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:last-child,
-.tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:not(.v-data-table__mobile-row),
-.tableMeeting .v-data-table>.v-data-table__wrapper>table>thead>tr:last-child>th {
-    border-bottom: 1px solid #94dddb;
-}
+// .tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:last-child,
+// .tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>td:not(.v-data-table__mobile-row),
+// .tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:last-child,
+// .tableMeeting .v-data-table>.v-data-table__wrapper>table>tbody>tr:not(:last-child)>th:not(.v-data-table__mobile-row),
+// .tableMeeting .v-data-table>.v-data-table__wrapper>table>thead>tr:last-child>th {
+//     border-bottom: 1px solid #94dddb;
+// }
 .tableMeeting .v-data-table>.v-data-table__wrapper>table>thead>tr>th {
     font-family: "Nunito", sans-serif;
     font-size: 13px !important;
@@ -385,9 +385,9 @@ export default {
 .tableMeeting button.v-icon{
     color: #008FFB;
 }
-.tableMeeting button.v-icon.v-icon--disabled {
-    color: #94DDDB !important;
-}
+// .tableMeeting button.v-icon.v-icon--disabled {
+//     color: #94DDDB !important;
+// }
 .v-tooltip__content {
     background-color: #fff;
     color: #5757EA;

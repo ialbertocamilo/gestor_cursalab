@@ -50,10 +50,12 @@ body::-webkit-scrollbar-thumb {
 }
 
 .v-dialog .v-card__text::-webkit-scrollbar-track{
-    background-color: rgba(125, 219, 216, 0.2);
+    background-color: rgba(181, 181, 181, 0.2);
+    // background-color: rgba(125, 219, 216, 0.2);
 }
 .v-dialog .v-card__text::-webkit-scrollbar-thumb{
-	background-color: rgba(125, 219, 216, 0.9);
+	background-color: rgba(181, 181, 181, 0.9);
+    // background-color: rgba(125, 219, 216, 0.9);
 }
 .minw408 {
     min-width: 408px;
