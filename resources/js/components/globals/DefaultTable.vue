@@ -23,7 +23,7 @@
         >
             <template v-for="h in dataTable.headers" v-slot:[`header.${h.value}`]="{ header }">
                 {{ h.text }}
-                <v-tooltip bottom attach v-if="h.tooltip">
+                <v-tooltip top attach v-if="h.tooltip">
                     <template v-slot:activator="{ on, attrs }">
                         <v-icon
                             small
@@ -32,6 +32,7 @@
                             v-bind="attrs"
                             v-on="on"
                             v-text="'mdi-information'"
+                            class="icon_tooltip"
                         />
                     </template>
                     <span v-text="h.tooltip"/>
@@ -633,6 +634,10 @@ export default {
         defaultSortDesc: {
             type: Boolean,
             default: false
+        },
+        avoid_first_data_load: {
+            type: Boolean,
+            default: false,
         }
     },
     data() {
@@ -662,9 +667,12 @@ export default {
         // ),
     },
     mounted() {
-        // let vue = this;
-        let filters = this.addParamsToURL(this.dataTable.filters, this.filters)
-        this.getData(filters)
+        let vue = this;
+
+        if (!vue.avoid_first_data_load){
+            let filters = this.addParamsToURL(this.dataTable.filters, this.filters)
+            this.getData(filters)
+        }
     },
     watch: {
         sortParams: {
@@ -869,5 +877,11 @@ export default {
 </script>
 
 <style lang="scss">
-
+thead.v-data-table-header .v-tooltip__content {
+    max-width: 300px;
+    top: -70px !important;
+}
+i.v-icon.icon_tooltip {
+    color: #000 !important;
+}
 </style>

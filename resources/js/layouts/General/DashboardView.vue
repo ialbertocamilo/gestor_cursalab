@@ -3,8 +3,8 @@
         <v-card flat class="elevation-0 mb-4">
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
-            <v-card-title>
-                Estadísticas
+            <v-card-title class="title_prim">
+                Dashboard
                 <v-spacer/>
             </v-card-title>
         </v-card>
@@ -344,3 +344,12 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.v-card__title.title_prim {
+    font-family: "Nunito", sans-serif;
+    font-size: 20px !important;
+    font-weight: 700;
+    color:#1A2128;
+    letter-spacing: 0.1px;
+}
+</style>

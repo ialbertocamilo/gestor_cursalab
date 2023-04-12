@@ -27,7 +27,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('buscar:incidencias {desde_back}')->dailyAt('06:00');
 
-        $schedule->command('reinicios:programados')->everyFifteenMinutes();
+        // $schedule->command('reinicios:programados')->everyFifteenMinutes();
+        $schedule->command('summary:reset-user-attempts')->everyFiveMinutes();
         // $schedule->command('delete:err_masivos')->dailyAt('03:00');
 
         $schedule->command('summary:update-data')->everyFifteenMinutes();

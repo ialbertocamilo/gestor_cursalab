@@ -94,7 +94,7 @@
                             />
                         </div>
 
-                        <div class="d-flex flex-column" v-else>
+                        <div class="d-flex flex-column h-dropzone" v-else>
 
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputMedia"
@@ -107,13 +107,13 @@
                     </v-col>
 
 
-                    <v-col cols="12" md="6" lg="6" class="d-flex-- justify-content-center">
+                    <v-col cols="12" md="6" lg="6" class="d-flex-- justify-content-center p-dropzone">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputImage"
                             v-model="resource.preview"
                             label="Previsualización"
                             :file-types="['image']"
-                            description="Esta publicación tendrá una imagen de portada por defecto, pero si deseas puedes subir una imagen personalizada (Recomendado: 500x350 píxeles)"
+                            description="Tiene una portada por defecto. Puedes asignar otra de <b>500 x 350 px - max. 10 Mb.</b>"
                             @onSelect="setFile($event, resource, 'preview')"/>
                     </v-col>
 
@@ -413,3 +413,48 @@ export default {
 
 };
 </script>
+<style lang="scss">
+.h-dropzone .editor .dropzone .dz-preview,
+.p-dropzone .editor .dropzone .dz-preview {
+    min-height: 210px;
+    padding: 20px 20px;
+}
+.h-dropzone .dropzone.dz-clickable,
+.p-dropzone .dropzone.dz-clickable {
+    min-height: 220px;
+    align-items: center;
+    display: grid;
+}
+.h-dropzone .dropzone.dz-clickable.dz-started.dz-max-files-reached,
+.p-dropzone .dropzone.dz-clickable.dz-started.dz-max-files-reached {
+    max-height: initial;
+}
+.h-dropzone .dropzone.dz-clickable.dz-started.dz-max-files-reached:hover,
+.p-dropzone .dropzone.dz-clickable.dz-started.dz-max-files-reached:hover {
+    border: none !important;
+}
+.h-dropzone .dropzone .dz-message,
+.p-dropzone .dropzone .dz-message {
+    margin: 10px 0;
+}
+.h-dropzone .vue-dropzone > .dz-preview .dz-remove,
+.p-dropzone .vue-dropzone > .dz-preview .dz-remove {
+    padding-top: 135px;
+}
+.h-dropzone .vue-dropzone > .dz-preview:hover .dz-remove:before,
+.p-dropzone .vue-dropzone > .dz-preview:hover .dz-remove:before {
+    top: 70px;
+}
+.h-dropzone .dropzone .dz-preview.dz-file-preview .dz-details .dz-inf,
+.h-dropzone .dropzone .dz-preview.dz-image-preview .dz-details .dz-inf,
+.p-dropzone .dropzone .dz-preview.dz-file-preview .dz-details .dz-inf,
+.p-dropzone .dropzone .dz-preview.dz-image-preview .dz-details .dz-inf {
+    display: none;
+}
+.h-dropzone .dropzone .dz-preview.dz-file-preview .dz-image,
+.h-dropzone .dropzone .dz-preview.dz-image-preview .dz-image,
+.p-dropzone .dropzone .dz-preview.dz-file-preview .dz-image,
+.p-dropzone .dropzone .dz-preview.dz-image-preview .dz-image {
+    margin-top: 36px;
+}
+</style>

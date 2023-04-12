@@ -640,6 +640,10 @@ export default {
         {
             window.location.href = url
         },
+        getUrlParamsTotal() {
+            let params = this.getAllUrlParams(window.location.search)
+            return Object.keys(params).length
+        },
         getAllUrlParams(url) {
 
             // get query string from url (optional) or window

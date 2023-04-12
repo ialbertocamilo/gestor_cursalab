@@ -1,6 +1,6 @@
 <template>
     <v-row >
-        <v-col cols="12" md="5" height="200px">
+        <v-col cols="12" md="5" height="200px" class="mt-100">
 				<v-card-text class="py-0">
 					Se cambia el estado del usuario a 0(inactivo).
 				</v-card-text>
@@ -8,13 +8,13 @@
                 <v-card-text class="instructivo">
                     <ul>
                         <li class="mt-2">
-                            <b>La cantidad máxima de filas por excel es de 2500.</b>
+                            La cantidad máxima de filas por excel es de <b>2500</b>.
                         </li>
                         <li class="mt-2">
-                            <b>Columnas del excel:</b>DNI - Fecha de cese (opcional).
+                            Columnas del excel: <b>Doc. de identidad - Fecha de cese (opcional)</b>.
                         </li>
                         <li class="mt-2">
-                            <b>La fecha de cese debe tener el formato (yyyy/mm/dd) o (dd/mm/yyyy).</b>
+                            La fecha de cese debe tener el formato <b>(yyyy/mm/dd)</b> o <b>(dd/mm/yyyy)</b>.
                         </li>
                     </ul>
                 </v-card-text>
@@ -26,13 +26,22 @@
         <v-col cols="12" md="2" height="200px" class="d-flex justify-content-center">
             <div class="separador-v"></div>
         </v-col>
-        <v-col cols="12" md="5" class="d-flex flex-column justify-content-center">
-            <v-row class="d-flex justify-content-center my-2">
-                <vuedropzone @emitir-archivo="cambio_archivo" @emitir-alerta="enviar_alerta" />
+        <v-col cols="12" md="5" class="">
+            <v-row class="d-flex justify-content-center my-2 drop_mas">
+                <vuedropzone
+                    :ref="myVueDropzone"
+                    @emitir-archivo="cambio_archivo"
+                    @emitir-alerta="enviar_alerta"
+                    :error_file="error_file"
+                    :error_text="error_text"
+                    :success_file="success_file"
+                    :success_text="success_text"
+                />
             </v-row>
             <v-row class="d-flex justify-content-center">
                 <v-card-actions>
-                    <v-btn color="primary" @click="enviar_archivo()">Confirmar</v-btn>
+                    <v-btn v-if="error_file||success_file" color="primary" @click="nuevo_archivo()" class="btn_conf">Subir otro archivo</v-btn>
+                    <v-btn v-else color="primary" @click="enviar_archivo()" :disabled="!(archivo != null)" class="btn_conf">Confirmar</v-btn>
                 </v-card-actions>
             </v-row>
         </v-col>
@@ -47,11 +56,24 @@
         data () {
             return {
                 archivo:null,
+                error_file: false,
+                error_text: '',
+                success_file: false,
+                success_text: '',
+                myVueDropzone: 'myVueDropzone',
             }
         },
         methods:{
             cambio_archivo(res){
                 this.archivo = res;
+            },
+            nuevo_archivo() {
+                let vue = this
+                if (vue.$refs.myVueDropzone)
+                    vue.$refs.myVueDropzone.limpiarArchivo()
+                this.archivo = null;
+                this.error_file = false;
+                this.success_file = false;
             },
             enviar_archivo(){
                 let vue = this;
@@ -81,11 +103,13 @@
                             <li>Cantidad de usuarios con observaciones: ${data.errores.length || 0}</li>
                         </ul>`
                         vue.queryStatus("subida_masiva", "activar_proceso");
+                        vue.success_file = true
+                        vue.success_text = message
                         this.hideLoader();
-                        this.enviar_alerta(message);
                     }).catch(err=>{
+                        vue.error_file = true
+                        vue.error_text = err.response.data.message
                         this.hideLoader();
-                        this.enviar_alerta(err.response.data.message);
                     });
                 }
             },
@@ -102,7 +126,7 @@
         }
     }
 </script>
-<style>
+<style lang="scss">
 .v-input__slot{
     display: flex;
     align-items: initial !important;
@@ -132,5 +156,21 @@
     border: 1px solid #5458ea !important;
     font-family: "Nunito", sans-serif;
     font-size: 14px;
+}
+.mt-100{
+    margin-top: 100px !important;
+}
+button.btn_conf {
+    min-width: 172px !important;
+}
+button.btn_conf span.v-btn__content {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+.drop_mas .dropzone {
+    min-height: 240px;
+    display: grid;
+    align-items: center;
 }
 </style>

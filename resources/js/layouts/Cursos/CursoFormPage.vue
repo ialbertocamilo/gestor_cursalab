@@ -38,77 +38,81 @@
                         </v-col>
                     </v-row>
                     <v-row>
-                        <v-col cols="12">
-                            <DefaultInput
-                                dense
-                                label="Descripción"
-                                placeholder="Ingrese una descripción"
-                                v-model="resource.description"
-                            />
+                        <v-col cols="9">
+                            <v-row>
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        dense
+                                        label="Descripción"
+                                        placeholder="Ingrese una descripción"
+                                        v-model="resource.description"
+                                    />
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultAutocomplete
+                                        dense
+                                        label="Requisito"
+                                        v-model="resource.requisito_id"
+                                        :items="selects.requisito_id"
+                                        custom-items
+                                        item-text="name"
+                                        item-value="id"
+                                        clearable
+                                    >
+                                        <template v-slot:customItems="{item}">
+                                            <v-list-item-content>
+                                                <v-list-item-title v-html="item.name"/>
+                                                <v-list-item-subtitle class="list-cursos-carreras" v-html="item.escuelas"/>
+                                            </v-list-item-content>
+                                        </template>
+                                    </DefaultAutocomplete>
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultAutocomplete
+                                        show-required
+                                        :rules="rules.types"
+                                        dense
+                                        label="Tipo de curso"
+                                        v-model="resource.type_id"
+                                        :items="selects.types"
+                                        item-text="name"
+                                        item-value="id"
+                                    />
+                                </v-col>
+                            </v-row>
                         </v-col>
-
-                    </v-row>
-                    <v-row>
-                        <v-col cols="6">
-                            <DefaultAutocomplete
-                                dense
-                                label="Requisito"
-                                v-model="resource.requisito_id"
-                                :items="selects.requisito_id"
-                                custom-items
-                                item-text="name"
-                                item-value="id"
-                                clearable
-                            >
-                                <template v-slot:customItems="{item}">
-                                    <v-list-item-content>
-                                        <v-list-item-title v-html="item.name"/>
-                                        <v-list-item-subtitle class="list-cursos-carreras" v-html="item.escuelas"/>
-                                    </v-list-item-content>
-                                </template>
-                            </DefaultAutocomplete>
-                        </v-col>
-                        <v-col cols="6">
-                            <DefaultAutocomplete
-                                show-required
-                                :rules="rules.types"
-                                dense
-                                label="Tipo de curso"
-                                v-model="resource.type_id"
-                                :items="selects.types"
-                                item-text="name"
-                                item-value="id"
-                            />
-                        </v-col>
-                        <v-col cols="4">
-                            <DefaultInput
-                                dense
-                                type="number"
-                                label="Orden"
-                                placeholder="Orden"
-                                v-model="resource.position"
-                            />
-                                <!-- :rules="rules.position" -->
-                                <!-- show-required -->
-
-                        </v-col>
-                        <v-col cols="4">
-                            <DefaultInput
-                                numbersOnly
-                                dense
-                                label="Duración (en horas)"
-                                placeholder="Ingrese la duración del curso"
-                                v-model="resource.duration"
-                            />
-                        </v-col>
-                        <v-col cols="4">
-                            <DefaultInput
-                                numbersOnly
-                                dense
-                                label="Inversión (en soles)"
-                                placeholder="Ingrese la inversión"
-                                v-model="resource.investment"
-                            />
+                        <v-col cols="3" class="sep-left">
+                            <v-row>
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        dense
+                                        type="number"
+                                        label="Orden"
+                                        placeholder="Orden"
+                                        v-model="resource.position"
+                                    />
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultAutocomplete
+                                        dense
+                                        label="Duración (hrs.)"
+                                        v-model="resource.duration"
+                                        :items="selects.duration"
+                                        item-text="name"
+                                        item-value="id"
+                                        placeholder="Ej. 2:00"
+                                    />
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        numbersOnly
+                                        dense
+                                        label="Inversión"
+                                        placeholder="Ej. 2000"
+                                        v-model="resource.investment"
+                                    />
+                                </v-col>
+                            </v-row>
                         </v-col>
                     </v-row>
                     <v-row justify="center">
@@ -145,6 +149,7 @@
                                                 :rules="rules.nota_aprobatoria"
                                                 show-required
                                                 dense
+                                                @onFocus="curso_id && conf_focus ? alertNotaMinima() : null"
                                             />
                                         </v-col>
                                         <v-col cols="6">
@@ -244,7 +249,7 @@
 
                     <v-row>
                         <v-col cols="2">
-                            <DefaultToggle v-model="resource.active"/>
+                            <DefaultToggle v-model="resource.active" @onChange="modalStatusEdit"/>
                         </v-col>
                     </v-row>
 
@@ -258,7 +263,7 @@
                 />
             </v-card-actions>
             <CursoValidacionesModal
-                width="50vw"
+                width="408px"
                 :ref="courseValidationModal.ref"
                 :options="courseValidationModal"
                 :resource="resource"
@@ -267,6 +272,25 @@
                     courseValidationModal,
                     `${base_endpoint}?${addParamsToURL(base_endpoint, getAllUrlParams(url))}`,
                     confirmModal(false))"
+            />
+            <DialogConfirm
+                v-model="deleteConfirmationDialog.open"
+                :options="deleteConfirmationDialog"
+                width="408px"
+                title="Cambiar de estado del curso"
+                subtitle="¡Estás a punto cambiar la configuración de un curso!"
+                @onConfirm="confirmDelete"
+                @onCancel="deleteConfirmationDialog.open = false"
+            />
+            <DialogConfirm
+                :ref="courseUpdateStatusModal.ref"
+                v-model="courseUpdateStatusModal.open"
+                :options="courseUpdateStatusModal"
+                width="408px"
+                title="Cambiar de estado al curso"
+                subtitle="¿Está seguro de cambiar de estado al curso?"
+                @onConfirm="courseUpdateStatusModal.open = false"
+                @onCancel="closeModalStatusEdit"
             />
         </v-card>
     </section>
@@ -280,9 +304,10 @@ const fields = [
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
-    components: {CursoValidacionesModal},
+    components: {CursoValidacionesModal,DialogConfirm},
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         const route_school = (this.categoria_id !== '')
@@ -296,6 +321,7 @@ export default {
         return {
             url: window.location.search,
             errors: [],
+            conf_focus: true,
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
             resourceDefault: {
@@ -335,11 +361,28 @@ export default {
                 requisito_id: [],
                 lista_escuelas: [],
                 types: [],
+                duration: [
+                    { 'id':'0.50', 'name':'0:30' },
+                    { 'id':'1.00', 'name':'1:00' },
+                    { 'id':'1.50', 'name':'1:30' },
+                    { 'id':'2.00', 'name':'2:00' },
+                    { 'id':'3.00', 'name':'3:00' },
+                    { 'id':'4.00', 'name':'4:00' },
+                    { 'id':'5.00', 'name':'5:00' },
+                    { 'id':'6.00', 'name':'6:00' },
+                ],
             },
             loadingActionBtn: false,
             courseValidationModal: {
                 ref: 'CursoValidacionesModal',
                 open: false,
+                title_modal: 'El curso es prerrequisito',
+                type_modal:'requirement',
+                content_modal: {
+                    requirement: {
+                        title: '¡El curso que deseas desactivar es un prerrequisito!'
+                    },
+                }
             },
             courseValidationModalDefault: {
                 ref: 'CursoValidacionesModal',
@@ -353,6 +396,50 @@ export default {
                 persistent: false,
                 showCloseIcon: true,
                 type: null
+            },
+            deleteConfirmationDialog: {
+                open: false,
+                title_modal: 'Cambiar de estado del <b>curso</b>',
+                type_modal: 'confirm',
+                content_modal: {
+                    confirm: {
+                        title: '¡Estas a punto cambiar la configuración de un curso!',
+                        details: [
+                            'Los usuarios con historico se mantendrán con la información y no se recalculará su status.'
+                        ],
+                    }
+                },
+            },
+            courseUpdateStatusModal: {
+                ref: 'CourseUpdateStatusModal',
+                title: 'Actualizar Curso',
+                contentText: '¿Desea actualizar este registro?',
+                open: false,
+                endpoint: '',
+                title_modal: 'Cambio de estado de un <b>curso</b>',
+                type_modal: 'status',
+                status_item_modal: null,
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un curso!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios no podrán acceder al curso.',
+                            'El diploma del curso no aparecerá para descargar desde el app.',
+                            'No podrás ver el curso como opción para la descarga de reportes.',
+                            'El detalle del curso activos/inactivos aparecerá en “Notas de usuario”.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un curso!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios ahora podrán acceder al curso.',
+                            'El diploma del curso ahora aparecerá para descargar desde el app.',
+                            'Podrás ver el curso como opción para descargar reportes.'
+                        ]
+                    }
+                },
             },
         }
     },
@@ -387,6 +474,15 @@ export default {
         }
     },
     methods: {
+        alertNotaMinima(){
+            let vue = this
+            vue.deleteConfirmationDialog.open = true
+        },
+        confirmDelete(validateForm = true) {
+            let vue = this
+            vue.deleteConfirmationDialog.open = false
+            vue.conf_focus = false
+        },
         closeModal() {
             let vue = this
 
@@ -398,6 +494,19 @@ export default {
             // return;
 
             window.location.href = temp;
+        },
+        closeModalStatusEdit(){
+            let vue = this
+            vue.courseUpdateStatusModal.open = false
+            vue.resource.active = !vue.resource.active
+        },
+        modalStatusEdit(){
+            let vue = this
+            const edit = vue.curso_id !== ''
+            if(edit){
+                vue.courseUpdateStatusModal.open = true
+                vue.courseUpdateStatusModal.status_item_modal = !vue.resource.active
+            }
         },
         confirmModal(validateForm = true) {
             let vue = this
@@ -441,9 +550,18 @@ export default {
                     }
                 })
                 .catch(error => {
-                    if (error && error.errors)
+                    if (error && error.errors){
                         vue.errors = error.errors
 
+                        if(error.data.validations.list){
+                            error.data.validations.list.forEach(element => {
+                                if(element.type == "has_active_topics" && error.data.validations.list.length == 1){
+                                    vue.courseValidationModal.title_modal = 'Cambio de estado de un <b>curso</b>';
+                                    vue.courseValidationModal.content_modal.requirement.title = '¡Estás por desactivar un curso!';
+                                }
+                            });
+                        }
+                    }
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
@@ -566,5 +684,16 @@ export default {
         width: 50px;
         height: 30px;
     }
+}
+.sep-left {
+    position: relative;
+}
+.sep-left:before {
+    border-left: 1px solid #D9D9D9;
+    position: absolute;
+    left: 0;
+    content: '';
+    top: 25px;
+    bottom: 25px;
 }
 </style>

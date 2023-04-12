@@ -37,6 +37,7 @@ class UsuarioAyudaResource extends JsonResource
             'email_user' => $this->user?->email,
             'nombre' => $this->name ?? '',
             'image' => $image,
+            'module' => $this->user?->subworkspace?->name ?? 'No definido',
             'info_support' => $this->info_support ?? '',
             'msg_to_user' => $this->msg_to_user ?? '',
             'contact' => $this->contact ?? '',
@@ -53,6 +54,7 @@ class UsuarioAyudaResource extends JsonResource
             $data['reason'] = $this->reason;
             $data['info_support'] = $this->info_support;
             $data['msg_to_user'] = $this->msg_to_user;
+            $data['user'] = $this->user;
         }
         return $data;
     }

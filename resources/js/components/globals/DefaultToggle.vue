@@ -2,7 +2,7 @@
     <v-switch
         class="default-toggle"
         inset
-        :label="new_label"
+        :label="pre_label ? pre_label+' '+new_label : new_label"
         hide-details="auto"
         v-model="localSwitch"
         @change="updateValue"
@@ -41,6 +41,10 @@ export default {
             type: String,
             default: 'Inactivo'
         },
+        pre_label: {
+            type: String,
+            required: false
+        },
     },
     data() {
         return {
@@ -78,3 +82,20 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.v-application--is-ltr .v-input--switch--inset.v-input--is-dirty .v-input--selection-controls__ripple,
+.v-application--is-ltr .v-input--switch--inset.v-input--is-dirty .v-input--switch__thumb {
+    color: white !important;
+    caret-color: white !important;
+}
+.theme--light.v-input--switch .v-input--switch__track {
+    color: #D9D9D9;
+    opacity: 1;
+}
+.v-input.default-toggle.v-input--is-label-active.v-input--switch--inset .v-input--switch__track {
+    opacity: 1;
+}
+.v-input--selection-controls .v-input--selection-controls__input:hover .v-input--selection-controls__ripple:before {
+    opacity: .08;
+}
+</style>

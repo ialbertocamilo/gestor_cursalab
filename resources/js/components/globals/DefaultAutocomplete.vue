@@ -22,6 +22,7 @@
             @blur="onBlur"
             :no-data-text="noDataText"
             :rules="rules"
+            append-icon="mdi-chevron-down"
         >
             <template v-slot:prepend-item v-if="multiple && showSelectAll">
                 <v-list-item ripple dense @click="toggle">

@@ -49,22 +49,8 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event)"
-                @status="
-                    openFormModal(
-                        modalStatusOptions,
-                        $event,
-                        'status',
-                        'Actualizar estado'
-                    )
-                "
-                @delete="
-                    openFormModal(
-                        modalDeleteOptions,
-                        $event,
-                        'delete',
-                        `Eliminar encuesta: ${$event.titulo}`
-                    )
-                "
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambiar de estado a las <b>encuestas</b>')"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', `Eliminar encuesta: ${$event.titulo}` )"
                 @logs="
                     openFormModal(
                         modalLogsOptions,
@@ -234,9 +220,24 @@ export default {
             modalStatusOptions: {
                 ref: "EncuestaStatusModal",
                 open: false,
-                base_endpoint: "/encuestas",
-                contentText: "¿Desea cambiar de estado a este registro?",
-                endpoint: ""
+                base_endpoint: '/encuestas',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                endpoint: '',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás a punto de desactivar una encuesta!',
+                        details: [
+                            'Los usuarios no la podrán visualizar en la plataforma ni cursos.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás a punto de activar una encuesta!',
+                        details: [
+                            'Los usuarios la podrán visualizar en la plataforma o cursos.'
+                        ]
+                    }
+                },
+                width: '408px'
             },
             modalDeleteOptions: {
                 ref: "EncuestaDeleteModal",

@@ -82,58 +82,27 @@
                 />
                 <DefaultModalButton
                     :label="'Usuario'"
-                    @click="openFormModal(modalOptions, null, 'create')"
-                />
+                    class="btn_add_user"
+                    @click="openFormModal(modalOptions, null, 'create')"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row>
-                    <!--                    <v-col cols="3">-->
-                    <!--                        <DefaultSelect-->
-                    <!--                            clearable dense-->
-                    <!--                            :items="selects.workspaces"-->
-                    <!--                            v-model="filters.workspace_id"-->
-                    <!--                            label="Workspace"-->
-                    <!--                            @onChange="refreshDefaultTable(dataTable, filters, 1)"-->
-                    <!--                            item-text="name"-->
-                    <!--                        />-->
-                    <!--                    </v-col>-->
-                    <!-- <v-col cols="3">
-                        <DefaultSelect
-                            clearable dense
-                            :items="selects.sub_workspaces"
-                            v-model="filters.subworkspace_id"
-                            label="Módulos"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
-                            item-text="name"
-                        />
-                    </v-col> -->
-                    <v-col cols="3">
+                    <v-col cols="4">
                         <DefaultInput
                             clearable
                             dense
                             v-model="filters.q"
-                            label="Buscar Usuarios"
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            label="Buscar usuario"
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
+                            class="btn_search_user"
                         />
                     </v-col>
-                    <v-col cols="5">
-                        <!-- <DefaultSelect
-                            clearable dense
-                            :items="selects.statuses"
-                            v-model="filters.active"
-                            label="Estado"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
-                            item-text="name"
-                        /> -->
+                    <v-col cols="4">
                     </v-col>
                     <v-col cols="4" class="d-flex justify-end">
 
@@ -164,23 +133,22 @@
 
                         <DefaultButton
                             text
-                            label="Aplicar Filtros"
+                            label="Aplicar filtros"
                             icon="mdi-filter"
-                            @click="
-                                open_advanced_filter = !open_advanced_filter
-                            "
+                            @click="open_advanced_filter = !open_advanced_filter"
                             class="btn_filter"
-                        />
+                            />
                     </v-col>
                 </v-row>
             </v-card-text>
 
             <DefaultTable
+                :avoid_first_data_load="getUrlParamsTotal() > 0"
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>usuario</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
@@ -391,9 +359,9 @@ export default {
             modalOptions: {
                 ref: "UsuarioFormModal",
                 open: false,
-                base_endpoint: "/usuarios",
-                resource: "Usuario",
-                confirmLabel: "Confirmar"
+                base_endpoint: '/usuarios',
+                resource: 'Usuario',
+                confirmLabel: 'Confirmar',
             },
             modalDeleteOptions: {
                 ref: "UsuarioDeleteModal",
@@ -425,28 +393,29 @@ export default {
             modalStatusOptions: {
                 ref: "UsuarioStatusModal",
                 open: false,
-                base_endpoint: "/usuarios",
-                contentText: "¿Desea cambiar de estado a este registro?",
+                base_endpoint: '/usuarios',
+                contentText: '¿Desea cambiar de estado a este registro?',
                 content_modal: {
                     inactive: {
-                        title: "¡Estás por desactivar un usuario!",
+                        title: '¡Estás por desactivar un usuario!',
                         details: [
-                            "El usuario no podrá ingresar a la plataforma.",
-                            "Podrá enviar solicitudes desde la sección de ayuda del Log in.",
-                            "Aparecerá en los reportes y consultas con el estado inactivo."
-                        ]
+                            'El usuario no podrá ingresar a la plataforma.',
+                            'Podrá enviar solicitudes desde la sección de ayuda del Log in.',
+                            'Aparecerá en los reportes y consultas con el estado inactivo.'
+                        ],
                     },
                     active: {
-                        title: "¡Estás por activar un usuario!",
+                        title: '¡Estás por activar un usuario!',
                         details: [
-                            "El usuario ahora podrá ingresar a la plataforma.",
-                            "Podrá rendir los cursos, de estar segmentado."
+                            'El usuario ahora podrá ingresar a la plataforma.',
+                            'Podrá rendir los cursos, de estar segmentado.'
                         ]
                     }
                 },
-                endpoint: ""
-            }
-        };
+                endpoint: '',
+                width: '408px'
+            },
+        }
     },
     mounted() {
         let vue = this;
@@ -457,16 +426,23 @@ export default {
         getSelects() {
             let vue = this;
 
-            let uri = window.location.search.substring(1);
-            let params = new URLSearchParams(uri);
-            let param_subworkspace = params.get("subworkspace_id");
+            let params = vue.getAllUrlParams(window.location.search);
+
+            let param_subworkspace = params.subworkspace_id;
+            let param_document = params.document;
+           
+            vue.filters.subworkspace_id = parseInt(param_subworkspace);
+            vue.filters.q = param_document;
+            
+            if (param_subworkspace || param_document) {
+                vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+            }
 
             const url = `/usuarios/get-list-selects`
             vue.$http.get(url)
                 .then(({data}) => {
 
                     vue.selects.sub_workspaces = data.data.sub_workspaces;
-                    vue.filters.subworkspace_id = parseInt(param_subworkspace);
                     vue.criteria_template = data.data.criteria_template;
                     vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
 
@@ -484,9 +460,6 @@ export default {
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
-                    if (param_subworkspace) {
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
-                    }
                 })
 
         },
@@ -534,4 +507,49 @@ export default {
     text-decoration: none;
 }
 
+</style>
+<style lang="scss">
+button.btn_add_user {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+button.btn_add_user .v-btn__content {
+    align-items: flex-end;
+    justify-content: center;
+    vertical-align: bottom;
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+    font-weight: 400;
+    line-height: 1;
+}
+button.btn_add_user .v-btn__content i {
+    font-size: 13px;
+}
+.btn_search_user {
+    max-width: 320px;
+}
+.btn_search_user .v-text-field__slot label.v-label {
+    color: #434D56;
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    font-weight: 400;
+}
+.btn_search_user span.v-btn__content i.v-icon.mdi.mdi-magnify {
+    color: #434D56;
+    font-size: 20px;
+}
+.btn_search_user.v-text-field--outlined:not(.v-input--is-focused):not(.v-input--has-state)>.v-input__control>.v-input__slot fieldset {
+    border-color: #C4C4C4;
+}
+.btn_filter span.v-btn__content {
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    font-weight: 400;
+}
+.btn_filter span.v-btn__content i {
+    font-size: 16px;
+    margin: 0 !important;
+}
 </style>

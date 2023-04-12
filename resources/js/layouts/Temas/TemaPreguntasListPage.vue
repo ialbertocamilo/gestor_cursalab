@@ -136,7 +136,8 @@
             />
             <DialogConfirm
                 v-model="modalDeleteOptions.open"
-                width="450px"
+                :options="modalDeleteOptions"
+                width="408px"
                 title="Eliminar pregunta"
                 subtitle="¿Está seguro de eliminar la pregunta?"
                 @onConfirm="confirmDelete"
@@ -248,6 +249,16 @@ export default {
             },
             modalDeleteOptions: {
                 open: false,
+                title_modal: 'Eliminación de una <b>pregunta</b>',
+                type_modal: 'delete',
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar una pregunta!',
+                        details: [
+                            'Si tu evaluación no tiene suficientes puntos, para completar un examen, se inhabilita.'
+                        ],
+                    }
+                },
             },
             modalTemaPreguntasImport: {
                 ref: 'TemaPreguntasImport',

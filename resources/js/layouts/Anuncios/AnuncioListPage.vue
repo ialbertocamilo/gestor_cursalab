@@ -63,28 +63,14 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event)"
-                @status="
-                    openFormModal(
-                        modalStatusOptions,
-                        $event,
-                        'status',
-                        'Cambio de estado de un <b>anuncio</b>'
-                    )
-                "
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>anuncio</b>')"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminación de un <b>anuncio</b>')"
                 @logs="
                     openFormModal(
                         modalLogsOptions,
                         $event,
                         'logs',
                         `Logs del Anuncio - ${$event.nombre}`
-                    )
-                "
-                @delete="
-                    openFormModal(
-                        modalDeleteOptions,
-                        $event,
-                        'delete',
-                        'Eliminación de un <b>anuncio</b>'
                     )
                 "
             />
@@ -238,41 +224,43 @@ export default {
             modalStatusOptions: {
                 ref: "AnuncioStatusModal",
                 open: false,
-                base_endpoint: "/anuncios",
-                contentText: "¿Desea cambiar de estado a este registro?",
-                endpoint: "",
+                base_endpoint: '/anuncios',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                endpoint: '',
                 content_modal: {
                     inactive: {
-                        title: "¡Estás por desactivar un anuncio!",
+                        title: '¡Estás por desactivar un anuncio!',
                         details: [
-                            "Este anuncio no podrá ser visto por los usuarios."
-                        ]
+                            'Este anuncio no podrá ser visto por los usuarios.'
+                        ],
                     },
                     active: {
-                        title: "¡Estás por activar un anuncio!",
+                        title: '¡Estás por activar un anuncio!',
                         details: [
-                            "Este anuncio ahora podrá ser visto por los usuarios."
+                            'Este anuncio ahora podrá ser visto por los usuarios.'
                         ]
                     }
-                }
+                },
+                width: '408px'
             },
             modalDeleteOptions: {
                 ref: "AnuncioDeleteModal",
                 open: false,
-                base_endpoint: "/anuncios",
-                contentText: "¿Desea eliminar este registro?",
-                endpoint: "",
+                base_endpoint: '/anuncios',
+                contentText: '¿Desea eliminar este registro?',
+                endpoint: '',
                 content_modal: {
                     delete: {
-                        title: "¡Estás por eliminar un anuncio!",
+                        title: '¡Estás por eliminar un anuncio!',
                         details: [
-                            "Este anuncio no podrá ser visto por los usuarios.",
-                            "No se podrá recuperar."
-                        ]
+                            'Este anuncio no podrá ser visto por los usuarios.',
+                            'No se podrá recuperar.'
+                        ],
                     }
-                }
-            }
-        };
+                },
+                width: '408px'
+            },
+        }
     },
     mounted() {
         let vue = this;
