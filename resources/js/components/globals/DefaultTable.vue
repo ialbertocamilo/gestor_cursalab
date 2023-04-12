@@ -634,6 +634,10 @@ export default {
         defaultSortDesc: {
             type: Boolean,
             default: false
+        },
+        avoid_first_data_load: {
+            type: Boolean,
+            default: false,
         }
     },
     data() {
@@ -663,9 +667,12 @@ export default {
         // ),
     },
     mounted() {
-        // let vue = this;
-        let filters = this.addParamsToURL(this.dataTable.filters, this.filters)
-        this.getData(filters)
+        let vue = this;
+
+        if (!vue.avoid_first_data_load){
+            let filters = this.addParamsToURL(this.dataTable.filters, this.filters)
+            this.getData(filters)
+        }
     },
     watch: {
         sortParams: {

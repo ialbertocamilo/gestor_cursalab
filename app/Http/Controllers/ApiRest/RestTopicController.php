@@ -133,7 +133,7 @@ class RestTopicController extends Controller
                     $pending = true;
             }
         }
-        if(!$pending){
+        if(!$pending && !$topic->type_evaluation_id){
 
             $reviewed_topic_taxonomy = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
             $summary_topic->status_id = $reviewed_topic_taxonomy?->id;

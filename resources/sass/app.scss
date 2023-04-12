@@ -154,3 +154,23 @@ Override Vue Toastification plugin styles
 .password-checkbox label{
     margin-bottom: 0 !important;
 }
+
+.row-support {
+    i.v-icon{
+        top: -4px !important;
+        font-size: 20px !important;
+    }
+
+    margin-bottom: 15px !important;
+
+    // .v-image.v-responsive{
+    //     display: inline-block !important;
+    //     top: 5px !important;
+    // }
+}
+
+.support-card-actions {
+    i.v-icon{
+        top: -3px !important;
+    }
+}

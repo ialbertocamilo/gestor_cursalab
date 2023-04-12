@@ -43,6 +43,7 @@
                     <slot name="more-content"/>
                 </div>
             </v-card-text>
+            <slot name="card-actions"/>
             <v-card-actions
                 :style="showCardActionsBorder ? { 'border-top': '1px solid rgba(0,0,0,.12)' } : null"
                 v-if="showCardActions">
