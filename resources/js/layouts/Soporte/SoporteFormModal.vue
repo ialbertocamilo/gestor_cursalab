@@ -71,9 +71,18 @@ export default {
                 status: {nombre: ''},
                 msg_to_user: '',
                 info_soporte: '',
+                estado: {
+                    id: null,
+                },
             },
             resource: {
-                status: {nombre: ''},},
+                status: {
+                    nombre: '',
+                },
+                estado: {
+                    id: null,
+                },
+            },
             selects: {
                 estados: [],
             },

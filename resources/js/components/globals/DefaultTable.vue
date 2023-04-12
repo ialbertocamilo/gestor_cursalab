@@ -662,6 +662,7 @@ export default {
         // ),
     },
     mounted() {
+        console.log('defaulttable mounted')
         // let vue = this;
         let filters = this.addParamsToURL(this.dataTable.filters, this.filters)
         this.getData(filters)

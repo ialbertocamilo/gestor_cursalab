@@ -27,7 +27,12 @@
                 <v-col cols="4" class="d-flex justify-content-start">
                     <strong>Doc. de identidad</strong>
                 </v-col>
-                <v-col cols="8" class="d-flex justify-content-center">
+                <v-col cols="8" class="d-flex justify-content-center" v-if="resource.user">
+                    <a :href="'/usuarios?document=' + resource.user.document">
+                        {{ resource.dni }}
+                    </a>
+                </v-col>
+                <v-col cols="8" class="d-flex justify-content-center" v-else>
                     {{ resource.dni }}
                 </v-col>
             </v-row>
@@ -151,12 +156,27 @@ export default {
         return {
             resourceDefault: {
                 id: null,
-                user: '',
-                status: null,
+                user: {
+                    id: null,
+                    document: null
+                },
+                status: {
+                    color: null,
+                    text: null,
+                },
                 msg_to_user: '',
                 info_support: '',
             },
-            resource: {}
+            resource: {
+                user: {
+                    id: null,
+                    document: null
+                },
+                status: {
+                    color: null,
+                    text: null,
+                },
+            }
         }
     },
     methods: {

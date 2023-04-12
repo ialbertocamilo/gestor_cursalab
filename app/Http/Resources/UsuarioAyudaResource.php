@@ -53,6 +53,7 @@ class UsuarioAyudaResource extends JsonResource
             $data['reason'] = $this->reason;
             $data['info_support'] = $this->info_support;
             $data['msg_to_user'] = $this->msg_to_user;
+            $data['user'] = $this->user;
         }
         return $data;
     }
