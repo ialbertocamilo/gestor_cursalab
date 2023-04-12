@@ -42,6 +42,7 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
     @yield('morecss')
 
+    @include('layouts.gtag-manager-head')
     @include('layouts.gtag')
 
     @stack('css')

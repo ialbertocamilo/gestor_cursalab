@@ -1,0 +1,7 @@
+
+{{-- Pegue también este código inmediatamente después de la etiqueta <body> de apertura: --}}
+	
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M7JT8H2"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
