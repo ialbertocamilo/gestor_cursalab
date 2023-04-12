@@ -466,7 +466,7 @@ span.lbl_mas_cri {
     display: none;
 }
 .separated hr.v-divider {
-    border-color: #94DDDB !important;
+    // border-color: #94DDDB !important;
     margin-top: 1px !important;
 }
 .cg {
@@ -491,9 +491,9 @@ span.lbl_mas_cri {
     font-family: "Nunito", sans-serif;
     font-size: 14px;
 }
-.v-dialog.v-dialog--active.v-dialog--scrollable .v-card__actions {
-    border-color: #94DDDB !important;
-}
+// .v-dialog.v-dialog--active.v-dialog--scrollable .v-card__actions {
+//     border-color: #94DDDB !important;
+// }
 .v-dialog button.v-icon.notranslate.v-icon--link.mdi.mdi-close.theme--light {
     font-size: 18px;
 }
