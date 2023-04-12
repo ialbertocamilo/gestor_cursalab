@@ -76,7 +76,7 @@
             />
 
             <SoporteFormModal
-                width="40vw"
+                width="35vw"
                 :ref="modalOptions.ref"
                 :options="modalOptions"
                 @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
@@ -84,9 +84,10 @@
             />
 
             <SoporteShowModal
-                width="40vw"
+                width="50vw"
                 :ref="modalShowOptions.ref"
                 :options="modalShowOptions"
+                @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
                 @onCancel="closeFormModal(modalShowOptions)"
             />
 
@@ -181,7 +182,8 @@ export default {
                 base_endpoint: '/soporte',
                 endpoint: '',
                 hideConfirmBtn: true,
-                cancelLabel: "Cerrar"
+                cancelLabel: "Cerrar",
+                showCloseIcon: true
             },
             modalDeleteOptions: {
                 ref: 'SoporteDeleteModal',

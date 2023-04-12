@@ -19,10 +19,10 @@
                     </v-col>
                 </v-row>
                 <v-row class="justify-content-start">
-                    <v-col cols="12" md="5" sm="5">
+                    <v-col cols="12" md="5" sm="5" class="bx_sel">
                         <DefaultSelect
                             label="Selecciona el proceso a realizar"
-                            class="ml-4"
+                            class="ml-4 bx_select"
                             @onChange="change_select"
                             item-text="nombre"
                             item-value="id"
@@ -157,3 +157,13 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.bx_sel{
+    position: relative;
+    padding: 0;
+}
+.bx_select{
+    position: absolute;
+    top: 20px;
+}
+</style>

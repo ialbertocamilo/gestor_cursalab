@@ -36,14 +36,12 @@ body::-webkit-scrollbar {
 	width: 12px; /* width of the entire scrollbar */
 }
 
-.v-dialog .v-card__text::-webkit-scrollbar-track,
 .reports-menu .v-slide-group__wrapper::-webkit-scrollbar-track,
 body::-webkit-scrollbar-track {
 	// background: transparent; /* color of the tracking area */
 	background-color: rgba(0, 0, 0, 0.05); /* color of the scroll thumb */
 }
 
-.v-dialog .v-card__text::-webkit-scrollbar-thumb,
 .reports-menu .v-slide-group__wrapper::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
 	background-color: rgba(0, 0, 0, 0.2); /* color of the scroll thumb */
@@ -51,6 +49,21 @@ body::-webkit-scrollbar-thumb {
 	/* border: 3px solid orange; creates padding around scroll thumb */
 }
 
+.v-dialog .v-card__text::-webkit-scrollbar-track{
+    background-color: rgba(125, 219, 216, 0.2);
+}
+.v-dialog .v-card__text::-webkit-scrollbar-thumb{
+	background-color: rgba(125, 219, 216, 0.9);
+}
+.minw408 {
+    min-width: 408px;
+}
+.theme--light.v-text-field--outlined:not(.v-input--is-focused):not(.v-input--has-state) > .v-input__control > .v-input__slot fieldset {
+    border-color: #D9D9D9;
+}
+.v-chip .v-chip__content button.v-icon.mdi-close-circle{
+    top: -2px;
+}
 .v-date-picker-table {
 	height: auto !important;
 }
@@ -140,4 +153,24 @@ Override Vue Toastification plugin styles
 
 .password-checkbox label{
     margin-bottom: 0 !important;
+}
+
+.row-support {
+    i.v-icon{
+        top: -4px !important;
+        font-size: 20px !important;
+    }
+
+    margin-bottom: 15px !important;
+
+    // .v-image.v-responsive{
+    //     display: inline-block !important;
+    //     top: 5px !important;
+    // }
+}
+
+.support-card-actions {
+    i.v-icon{
+        top: -3px !important;
+    }
 }

@@ -1,4 +1,4 @@
- <template>
+<template>
     <DefaultDialog
         :options="options"
         :width="width"
@@ -13,32 +13,32 @@
                 <!--
                 Module-School breadcrumbs
                 ======================================== -->
-                <div class="row justify-center">   
+                <div class="row justify-center">
 
                     <div v-if="isCourseSegmentation() && modulesSchools.length"
                          class="col-10">
-    <!-- 
-                         <v-expansion-panels>
-                          <v-expansion-panel
-                            title="Item"
-                            text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                          ></v-expansion-panel>
-                        </v-expansion-panels> -->
+                        <!--
+                                             <v-expansion-panels>
+                                              <v-expansion-panel
+                                                title="Item"
+                                                text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                                              ></v-expansion-panel>
+                                            </v-expansion-panels> -->
 
                         <v-expansion-panels class="school-breadcrumb">
                             <v-expansion-panel>
-                              <v-expansion-panel-header>
-                                Escuelas asignadas
-                              </v-expansion-panel-header>
-                              <v-expansion-panel-content>
-                                <DefaultSimpleBreadcrumbs
-                                    v-for="moduleSchool of modulesSchools"
-                                    :key="moduleSchool.subworkspace_id"
-                                    :breadcrumbs="[
+                                <v-expansion-panel-header>
+                                    Escuelas asignadas
+                                </v-expansion-panel-header>
+                                <v-expansion-panel-content>
+                                    <DefaultSimpleBreadcrumbs
+                                        v-for="moduleSchool of modulesSchools"
+                                        :key="moduleSchool.subworkspace_id"
+                                        :breadcrumbs="[
                                     {title: moduleSchool.module_name, disabled: true},
                                     {title: moduleSchool.school_name, disabled: true},
                                 ]"/>
-                              </v-expansion-panel-content>
+                                </v-expansion-panel-content>
                             </v-expansion-panel>
                         </v-expansion-panels>
 
@@ -145,8 +145,8 @@
                 <SegmentAlertModal
                     :options="modalInfoOptions"
                     :ref="modalInfoOptions.ref"
-                    @onConfirm="continueRegister($event)"
-                    @onCancel="closeFormModal(modalInfoOptions), backRegister()"
+                    @onConfirm="closeFormModal(modalInfoOptions)"
+                    @onCancel="closeFormModal(modalInfoOptions)"
                 />
             </v-form>
         </template>
@@ -168,8 +168,8 @@ const fields = [
 
 const CustomMessages = {
     module: {
-        title: 'Advertencia para módulo',
-        noexist: 'No existe el "módulo" como criterio',
+        title: '¡Ups! Olvidaste seleccionar un módulo',
+        noexist: 'Recuerda que cuando segmentas por criterios, es necesario que selecciones mínimo un módulo.',
         nodata: 'Selecciona uno o varios modulos'
     }
 }
@@ -232,12 +232,12 @@ export default {
                 open: false,
                 title: null,
                 resource:'data',
-                hideConfirmBtn: false,
+                hideConfirmBtn: true,
                 persistent: true,
-                cancelLabel: 'Cerrar'
+                cancelLabel: 'Entendido'
             },
             stackModals: { continues: [],
-                           backers: [] },
+                backers: [] },
             criteriaIndexModal: 0,
 
             segment_by_document_clean: false,
@@ -319,7 +319,7 @@ export default {
                 const state = (!cri_state || !cri_data);
                 let message;
 
-                if(!cri_state) message = `${noexist} en la segmentación ${segIndex}, ¿Desea continuar?`;
+                if(!cri_state) message = `${noexist}`;
                 else if(!cri_data) message = `${nodata} en la segmentación ${segIndex}, para continuar.`;
                 else message = null;
 
@@ -350,7 +350,7 @@ export default {
                 const { cri_state, cri_data } = responseData.detail;
 
                 if(cri_state && !cri_data) vue.modalInfoOptions.hideConfirmBtn = true;
-                else vue.modalInfoOptions.hideConfirmBtn = false;
+                else vue.modalInfoOptions.hideConfirmBtn = true;
 
                 if(vue.criteriaIndexModal === i) {
                     vue.criteriaIndexModal = i + 1;
@@ -408,7 +408,7 @@ export default {
         },
         confirmModal() {
             let vue = this;
-
+            vue.criteriaIndexModal = 0;
             vue.errors = [];
 
             this.showLoader();
@@ -433,7 +433,7 @@ export default {
             // === check criteria and open alert === SEGMENTACION DIRECTA ===
 
             // if (validateForm && validateSelectedModules) {
-           if (validateForm) {
+            if (validateForm) {
                 // let formData = vue.getMultipartFormData(method, vue.segments, fields);
                 let formData = JSON.stringify({
                     model_type: vue.model_type,
@@ -571,13 +571,13 @@ export default {
                     // module criteria and select modules from
                     // course schools
 
-                    let moduleCriteria = this.criteria.find(c => c.code === 'module')
-                    if (moduleCriteria) {
-                        if (this.segments[0].criteria_selected.length === 0) {
-                            moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
-                            this.segments[0].criteria_selected.push(moduleCriteria)
-                        }
-                    }
+                    // let moduleCriteria = this.criteria.find(c => c.code === 'module')
+                    // if (moduleCriteria) {
+                    //     if (this.segments[0].criteria_selected.length === 0) {
+                    //         moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
+                    //         this.segments[0].criteria_selected.push(moduleCriteria)
+                    //     }
+                    // }
                 }
             } catch (ex) {
                 console.log(ex)

@@ -66,10 +66,6 @@ export default {
 
             this.showLoader()
 
-            console.log('vue.resource')
-            console.log(vue.resource)
-
-
             let base = `${vue.options.base_endpoint}`
             let url =`${base}/${vue.resource.id}/reset-password`;
 
@@ -112,21 +108,7 @@ export default {
 
             let vue = this
             
-            console.log('resource')
-            console.log(resource)
-
             vue.resource = resource
-
-
-
-            // let url = `${vue.options.base_endpoint}/${resource.id}/reset`
-
-            // vue.$http.get(url).then(({data}) => {
-            //     vue.selects.temas = data.data.topics
-            //     vue.selects.cursos = data.data.courses
-            //     vue.resource = data.data.user
-            //     vue.resetValidation()
-            // });
         },
         loadSelects() {
 
@@ -134,12 +116,3 @@ export default {
     }
 }
 </script>
-<!-- 
-<style>
-    .simple-table .v-data-table__wrapper{
-        min-height: 150px; max-height: 450px;
-        overflow-x: auto;
-        overflow-y: auto;
-    }
-</style>
- -->

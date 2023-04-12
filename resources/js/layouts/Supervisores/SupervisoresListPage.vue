@@ -48,7 +48,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar supervisor')"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar un <b>supervisor</b>')"
                 @asignarUsuarios="openFormModal(modalOptionsAsignarUsuarios, $event, null, 'Asignar usuarios al Supervisor')"
                 @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Supervisor - ${$event.nombre}`)"
             />
@@ -207,7 +207,16 @@ export default {
                 base_endpoint: '/supervisores',
                 contentText: '¿Desea eliminar este registro?',
                 endpoint: '',
-                showCloseIcon: true
+                showCloseIcon: true,
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar un supervisor!',
+                        details: [
+                            'El supervisor ya no podrá descargar reportes.',
+                            'Se eliminará junto con su segmentación de usuarios.'
+                        ],
+                    }
+                },
             },
             modalOptionsSCriteriosGlobales: {
                 ref: 'AsignarCriteriosGlobalesModal',

@@ -82,7 +82,6 @@
             </v-card-text>
 
             <DefaultTable
-                avoid_first_data_load
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
@@ -132,14 +131,15 @@
             <DialogConfirm
                 :ref="courseUpdateStatusModal.ref"
                 v-model="courseUpdateStatusModal.open"
-                width="450px"
+                :options="courseUpdateStatusModal"
+                width="408px"
                 title="Cambiar de estado al curso"
                 subtitle="¿Está seguro de cambiar de estado al curso?"
                 @onConfirm="confirmUpdateStatus"
                 @onCancel="courseUpdateStatusModal.open = false"
             />
             <CourseValidationsUpdateStatus
-                width="50vw"
+                width="408px"
                 :ref="courseValidationModalUpdateStatus.ref"
                 :options="courseValidationModalUpdateStatus"
                 @onCancel="closeFormModal(courseValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
@@ -328,11 +328,42 @@ export default {
                 title: 'Actualizar Curso',
                 contentText: '¿Desea actualizar este registro?',
                 open: false,
-                endpoint: ''
+                endpoint: '',
+                title_modal: 'Cambio de estado de un <b>curso</b>',
+                type_modal: 'status',
+                status_item_modal: null,
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un curso!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios no podrán acceder al curso.',
+                            'El diploma del curso no aparecerá para descargar desde el app.',
+                            'No podrás ver el curso como opción para la descarga de reportes.',
+                            'El detalle del curso activos/inactivos aparecerá en “Notas de usuario”.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un curso!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios ahora podrán acceder al curso.',
+                            'El diploma del curso ahora aparecerá para descargar desde el app.',
+                            'Podrás ver el curso como opción para descargar reportes.'
+                        ]
+                    }
+                },
             },
             courseValidationModalUpdateStatus: {
                 ref: 'CourseListValidationModalUpdateStatus',
                 open: false,
+                title_modal: 'El curso es prerrequisito',
+                type_modal:'requirement',
+                content_modal: {
+                    requirement: {
+                        title: '¡El curso que deseas desactivar es un prerrequisito! '
+                    },
+                }
             },
 
             courseValidationModalDefault: {
@@ -447,6 +478,7 @@ export default {
             let vue = this
             vue.update_model = course
             vue.courseUpdateStatusModal.open = true
+            vue.courseUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
         },
         async confirmUpdateStatus(validateForm = true) {
             let vue = this
@@ -475,6 +507,7 @@ export default {
                     if (has_info_messages)
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     else {
+                        vue.courseValidationModalUpdateStatus.type_modal = null
                         vue.showAlert(data.data.msg)
                         vue.courseValidationModalUpdateStatus.open = false;
                     }
@@ -482,6 +515,16 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(error => {
+                    if (error && error.errors){
+                        if(error.data.validations.list){
+                            error.data.validations.list.forEach(element => {
+                                if(element.type == "has_active_topics" && error.data.validations.list.length == 1){
+                                    vue.courseValidationModalUpdateStatus.title_modal = 'Cambio de estado de un <b>curso</b>';
+                                    vue.courseValidationModalUpdateStatus.content_modal.requirement.title = '¡Estás por desactivar un curso!';
+                                }
+                            });
+                        }
+                    }
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
                 })

@@ -2,7 +2,7 @@
     <v-row justify="center" class="mx-0">
         <v-col cols="4" class="d-flex justify-content-around">
             <v-btn
-                class="default-modal-action-button  mx-1"
+                class="default-modal-action-button  mx-1 btn_back"
                 text
                 elevation="0"
                 :ripple="false"
@@ -67,4 +67,13 @@ export default {
     }
 }
 </script>
-
+<style lang="scss">
+button.default-modal-action-button span {
+    font-family: "Nunito", sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+}
+button.default-modal-action-button.btn_back span {
+    color: #6C757D;
+}
+</style>

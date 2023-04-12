@@ -1368,4 +1368,34 @@ class Course extends BaseModel
             'last_media_duration' => $last_media_duration
         ];
     }
+    public function getScheduleRestartMinutes()
+    {
+        $config = $this->scheduled_restarts;
+
+        if ($config AND $config['activado'] AND $config['tiempo_en_minutos'] > 0) {
+
+            return $config['tiempo_en_minutos'];
+        }
+
+        $minutes = $config = [];
+
+        foreach ($this->schools as $key => $school) {
+
+            $config = json_decode($school->scheduled_restarts, true);
+
+            if ($config AND $config['activado'] AND $config['tiempo_en_minutos'] > 0) {
+
+                $minutes[] = $config['tiempo_en_minutos'];
+            }
+        }
+
+        return count($minutes) ? min($minutes) : 0;
+    }
+
+    public function getAttemptsLimit()
+    {
+        if (!$this->mod_evaluaciones) return null;
+        
+        return isset($this->mod_evaluaciones['nro_intentos']) ? $this->mod_evaluaciones['nro_intentos'] : null;
+    }
 }

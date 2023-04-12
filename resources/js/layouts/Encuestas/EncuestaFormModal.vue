@@ -43,7 +43,7 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex-- justify-content-center">
+                    <v-col cols="12" class="d-flex-- justify-content-center c-dropzone">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputImagen"
                             v-model="resource.imagen"
@@ -55,10 +55,20 @@
 
                 <v-row align="start" align-content="center">
                     <v-col cols="4" class="d-flex justify-content-start">
-                        <DefaultToggle v-model="resource.active"/>
+                        <DefaultToggle v-model="resource.active" @onChange="modalStatusEdit"/>
                     </v-col>
                 </v-row>
             </v-form>
+            <DialogConfirm
+                :ref="encuestaUpdateStatusModal.ref"
+                v-model="encuestaUpdateStatusModal.open"
+                :options="encuestaUpdateStatusModal"
+                width="408px"
+                title="Cambiar de estado al curso"
+                subtitle="¿Está seguro de cambiar de estado al curso?"
+                @onConfirm="encuestaUpdateStatusModal.open = false"
+                @onCancel="closeModalStatusEdit"
+            />
         </template>
 
     </DefaultDialog>
@@ -68,9 +78,11 @@
 
 const fields = ['type_id', 'anonima', 'titulo', 'active', 'imagen'];
 const file_fields = ['imagen'];
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 
 export default {
+    components: {DialogConfirm},
     props: {
         options: {
             type: Object,
@@ -98,7 +110,31 @@ export default {
 
             rules: {
                 titulo: this.getRules(['required', 'max:100']),
-            }
+            },
+            encuestaUpdateStatusModal: {
+                ref: 'encuestaUpdateStatusModal',
+                title: 'Actualizar Encuesta',
+                contentText: '¿Desea actualizar este registro?',
+                open: false,
+                endpoint: '',
+                title_modal: 'Cambiar de estado a las <b>encuestas</b>',
+                type_modal: 'status',
+                status_item_modal: null,
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás a punto de desactivar una encuesta!',
+                        details: [
+                            'Los usuarios no la podrán visualizar en la plataforma ni cursos.',
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás a punto de activar una encuesta!',
+                        details: [
+                            'Los usuarios la podrán visualizar en la plataforma o cursos.',
+                        ]
+                    }
+                },
+            },
         }
     },
     methods: {
@@ -217,6 +253,29 @@ export default {
             // if (vue.resource.botica && vue.resource.botica.criterio)
             //     vue.loadCarreras()
         },
+        closeModalStatusEdit(){
+            let vue = this
+            vue.encuestaUpdateStatusModal.open = false
+            vue.resource.active = !vue.resource.active
+        },
+        modalStatusEdit(){
+            let vue = this
+            const edit = vue.options.action === 'edit'
+            if(edit){
+                vue.encuestaUpdateStatusModal.open = true
+                vue.encuestaUpdateStatusModal.status_item_modal = !vue.resource.active
+            }
+        },
     }
 }
 </script>
+<style lang="scss">
+.c-dropzone .dropzone .dz-preview.dz-file-preview .dz-details .dz-inf,
+.c-dropzone .dropzone .dz-preview.dz-image-preview .dz-details .dz-inf {
+    display: none;
+}
+.c-dropzone .dropzone .dz-preview.dz-file-preview .dz-image,
+.c-dropzone .dropzone .dz-preview.dz-image-preview .dz-image {
+    margin-top: 36px;
+}
+</style>

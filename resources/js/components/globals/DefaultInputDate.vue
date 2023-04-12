@@ -38,10 +38,10 @@
                     <RequiredFieldSymbol/>
                 </template>
                 <template v-slot:append>
-                    <v-btn class="no-background-hover" icon :ripple="false"
+                    <v-btn class="no-background-hover bk_calendar" icon :ripple="false"
                            style="cursor: default"
                            :disabled="disabled">
-                        <v-icon v-text="'mdi-calendar'"/>
+                        <img src="/img/calendar_black.png">
                     </v-btn>
                 </template>
             </v-text-field>
@@ -185,3 +185,9 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+button.bk_calendar span.v-btn__content img {
+    max-width: 16px;
+    height: auto;
+}
+</style>

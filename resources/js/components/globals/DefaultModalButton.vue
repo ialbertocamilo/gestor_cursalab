@@ -1,12 +1,16 @@
 <template>
     <v-btn
         class="mx-1"
+        :class="{}"
         elevation="0"
         :ripple="false"
         color="primary"
         @click="emitClick"
     >
-        <v-icon class="" v-text="'mdi-plus'"/>
+        <div class="icon_tmp" v-if="template">
+            <img src="/img/anfitriones.png">
+        </div>
+        <v-icon class="" v-text="'mdi-plus'" v-if="icon"/>
         {{ label }}
     </v-btn>
 </template>
@@ -18,6 +22,13 @@ export default {
         label: {
             type: String,
             default: 'Botón Modal'
+        },
+        icon: {
+            type: Boolean,
+            default: true
+        },
+        template: {
+            type: String
         }
     },
     methods: {

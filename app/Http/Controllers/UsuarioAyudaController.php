@@ -89,19 +89,19 @@ class UsuarioAyudaController extends Controller
     public function update(Request $request, Ticket $ticket)
     {
         if ($ticket->status == 'solucionado') {
-            return $this->error('El ticket ya ha sido solucionado y no puede modificarse.');
+            return $this->error('El ticket ya ha sido solucionado y no puede modificarse.', 422, [['El ticket ya ha sido solucionado y no puede modificarse.']]);
         }
 
         $ticket->status = $request->all()['status'];
         $ticket->save();
 
-        if ($ticket->status == 'solucionado' && $ticket->user)
-        {
+        // if ($ticket->status == 'solucionado' && $ticket->user)
+        // {
             // $user = $ticket->user;
 
             // $user->notify(new UsuarioAyudaNotification($ticket));
             // return $this->success(['msg' => 'Ticket solucionado y notificado correctamente.']);
-        }
+        // }
 
         return $this->success(['msg' => 'Ticket actualizado correctamente.']);
     }

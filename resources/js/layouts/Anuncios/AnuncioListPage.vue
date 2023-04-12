@@ -51,8 +51,8 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event)"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar anuncio')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>anuncio</b>')"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminación de un <b>anuncio</b>')"
             />
 
             <AnuncioFormModal
@@ -161,6 +161,21 @@ export default {
                 base_endpoint: '/anuncios',
                 contentText: '¿Desea cambiar de estado a este registro?',
                 endpoint: '',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un anuncio!',
+                        details: [
+                            'Este anuncio no podrá ser visto por los usuarios.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un anuncio!',
+                        details: [
+                            'Este anuncio ahora podrá ser visto por los usuarios.'
+                        ]
+                    }
+                },
+                width: '408px'
             },
             modalDeleteOptions: {
                 ref: 'AnuncioDeleteModal',
@@ -168,6 +183,16 @@ export default {
                 base_endpoint: '/anuncios',
                 contentText: '¿Desea eliminar este registro?',
                 endpoint: '',
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar un anuncio!',
+                        details: [
+                            'Este anuncio no podrá ser visto por los usuarios.',
+                            'No se podrá recuperar.'
+                        ],
+                    }
+                },
+                width: '408px'
             },
         }
     },

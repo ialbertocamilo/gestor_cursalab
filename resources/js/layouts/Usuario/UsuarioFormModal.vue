@@ -12,9 +12,12 @@
 
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
-                        <strong>Información de usuario</strong>
+                        <div class="header_inf">
+                            <strong class="cg">Información del usuario</strong>
+                            <span>*Criterios obligatorios</span>
+                        </div>
                     </v-col>
-                    <v-col cols="12" class="py-0">
+                    <v-col cols="12" class="py-0 separated">
                         <DefaultDivider/>
                     </v-col>
                 </v-row>
@@ -24,7 +27,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.name"
-                            label="Nombres"
+                            label="Nombres*"
                             :rules="rules.name"
                         />
                     </v-col>
@@ -32,7 +35,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.lastname"
-                            label="Apellido Paterno"
+                            label="Apellido Paterno*"
                             :rules="rules.lastname"
                         />
                     </v-col>
@@ -40,12 +43,11 @@
                         <DefaultInput
                             clearable
                             v-model="resource.surname"
-                            label="Apellido Materno"
+                            label="Apellido Materno*"
                             :rules="rules.surname"
                         />
                     </v-col>
                 </v-row>
-
 
                 <v-row justify="space-around">
                     <v-col cols="4" class="d-flex justify-content-center">
@@ -104,25 +106,49 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                  
+
                     <v-col cols="12" class="d-flex justify-content-end py-0">
                         <a href="javascript:;" @click="openFormModal(modalPasswordOptions, null, 'status', 'Generador de contraseñas')">¿Generar contraseña?</a>
                     </v-col>
                 </v-row>
 
                 <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="d-flex justify-content-between pb-0"
-                           @click="sections.showCriteria = !sections.showCriteria"
-                           style="cursor: pointer">
-                        <strong>Criterios</strong>
-                        <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
+                    <v-col cols="12" class="d-flex justify-content-between pb-0">
+                        <strong class="cg">Criterios obligatorios para la creación de un usuario</strong>
                     </v-col>
-                    <v-col cols="12" class="py-0">
+                    <v-col cols="12" class="py-0 separated">
                         <DefaultDivider/>
                     </v-col>
                 </v-row>
 
                 <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="d-flex justify-content-center pt-0">
+                            <UsuarioCriteriaSection
+                                ref="CriteriaSection"
+                                :options="options"
+                                :user="resource"
+                                :criterion_list="criterion_list_req"
+                                :only_req="true"
+                            />
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="d-flex justify-content-between pb-0"
+                        @click="sections.showCriteria = !sections.showCriteria"
+                        style="cursor: pointer">
+                        <strong class="cg">Más Criterios</strong>
+                        <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
+                    </v-col>
+                    <v-col cols="12" class="py-0 separated">
+                        <DefaultDivider/>
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
+                        <span class="lbl_mas_cri">Criterios generales para la creación de un usuario.</span>
+                    </v-col>
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                         <v-expand-transition>
                             <UsuarioCriteriaSection
@@ -130,26 +156,42 @@
                                 ref="CriteriaSection"
                                 :options="options"
                                 :user="resource"
-                                :criterion_list="criterion_list"
+                                :criterion_list="criterion_list_opt"
+                                :only_req="false"
                             />
                         </v-expand-transition>
                     </v-col>
                 </v-row>
 
                 <v-row>
-                    <v-col cols="2">
-                        <DefaultToggle v-model="resource.active"/>
+                    <v-col cols="9">
+                        <span class="lbl_error_cri" v-show="show_lbl_error_cri">*Debes completar todos los criterios obligatorios.</span>
+                    </v-col>
+                    <v-col cols="3" class="rem-m">
+                        <DefaultToggle v-model="resource.active" pre_label="Usuario" @onChange="modalStatusEdit"/>
                     </v-col>
                 </v-row>
 
             </v-form>
-            
+
             <PasswordGeneratorModal
                 width="40vw"
                 :ref="modalPasswordOptions.ref"
                 :options="modalPasswordOptions"
                 @onConfirm="closeFormModal(modalPasswordOptions)"
                 @onCancel="closeFormModal(modalPasswordOptions)"
+            />
+
+
+            <DialogConfirm
+                :ref="updateStatusModal.ref"
+                v-model="updateStatusModal.open"
+                :options="updateStatusModal"
+                width="408px"
+                title="Cambiar de estado al usuario"
+                subtitle="¿Está seguro de cambiar de estado al usuario?"
+                @onConfirm="updateStatusModal.open = false"
+                @onCancel="closeModalStatusEdit"
             />
 
         </template>
@@ -159,9 +201,10 @@
 <script>
 import UsuarioCriteriaSection from "./UsuarioCriteriaSection";
 import PasswordGeneratorModal from "./PasswordGeneratorModal";
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
-    components: {UsuarioCriteriaSection, PasswordGeneratorModal},
+    components: {UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm},
     props: {
         options: {
             type: Object,
@@ -176,6 +219,8 @@ export default {
                 showCriteria: false
             },
             criterion_list: [],
+            criterion_list_req: [],
+            criterion_list_opt: [],
             resourceDefault: {
                 id: null,
                 name: '',
@@ -202,6 +247,7 @@ export default {
                 // email: this.getRules(['required', 'min:8']),
                 password_not_required: this.getRules([]),
             },
+            show_lbl_error_cri: false,
             modalPasswordOptions: {
                 ref: 'PasswordFormModal',
                 open: false,
@@ -210,7 +256,34 @@ export default {
                 confirmLabel: 'Cerrar',
                 showCloseIcon: true,
             },
-        }
+            updateStatusModal: {
+                ref: 'UsuarioUpdateStatusModal',
+                title: 'Actualizar usuario',
+                open: false,
+                endpoint: '',
+                title_modal: 'Cambio de estado de <b>usuario</b>',
+                type_modal: 'status',
+                status_item_modal: null,
+                contentText: '¿Desea cambiar de estado a este registro?',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un usuario!',
+                        details: [
+                            'El usuario no podrá ingresar a la plataforma.',
+                            'Podrá enviar solicitudes desde la sección de ayuda del Log in.',
+                            'Aparecerá en los reportes y consultas con el estado inactivo.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un usuario!',
+                        details: [
+                            'El usuario ahora podrá ingresar a la plataforma.',
+                            'Podrá rendir los cursos, de estar segmentado.'
+                        ]
+                    }
+                },
+            },
+       }
     },
     mounted() {
         let vue = this
@@ -230,10 +303,24 @@ export default {
             vue.errors = [];
             vue.$refs.passwordRefModal.resetTypePassword();
         },
+        closeModalStatusEdit(){
+            let vue = this
+            vue.updateStatusModal.open = false
+            vue.resource.active = !vue.resource.active
+        },
+        modalStatusEdit(){
+            let vue = this
+            const edit = vue.options.action === 'edit'
+            if(edit){
+                vue.updateStatusModal.open = true
+                vue.updateStatusModal.status_item_modal = !vue.resource.active
+            }
+        },
         async confirmModal() {
             let vue = this
             vue.showLoader()
             const validateForm = vue.validateForm('UsuarioForm')
+            vue.show_lbl_error_cri = !validateForm
 
             const edit = vue.options.action === 'edit'
             const base = `${vue.options.base_endpoint}`
@@ -262,7 +349,6 @@ export default {
                     })
             } else {
                 vue.hideLoader()
-                vue.sections.showCriteria = true
             }
         }
         ,
@@ -319,12 +405,20 @@ export default {
             let url = `${vue.options.base_endpoint}/${resource ? `${resource.id}/edit` : `form-selects`}`
             await vue.$http.get(url)
                 .then(({data}) => {
+                    vue.criterion_list_req = [];
+                    vue.criterion_list_opt = [];
+
                     vue.criterion_list = data.data.criteria
                     vue.criterion_list.forEach(criterion => {
                         // console.log(criterion)
                         // vue.resource.criterion_list[`${criterion.code}`] = null
                         let criterion_default_value = criterion.multiple ? [] : null
                         Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
+
+                        if(criterion.required)
+                            vue.criterion_list_req.push(criterion)
+                        else
+                            vue.criterion_list_opt.push(criterion)
                     })
 
                     if (resource)
@@ -340,3 +434,92 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.header_inf {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.header_inf span {
+    color: #434D56;
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+}
+span.lbl_mas_cri {
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #434D56;
+}
+.rem-m .v-input.default-toggle {
+    margin-top: 0 !important;
+    width: 100%;
+}
+.lbl_error_cri{
+    color: #FF5252;
+    font-family: "Nunito", sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+}
+.v-application .error--text .v-text-field__details {
+    display: none;
+}
+.separated hr.v-divider {
+    border-color: #94DDDB !important;
+    margin-top: 1px !important;
+}
+.cg {
+    color: #434D56;
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+}
+.v-dialog .v-text-field .v-input__control,
+.v-dialog .v-text-field .v-input__slot,
+.v-dialog .v-text-field fieldset{
+    border-radius: 10px;
+    border-color: #D9D9D9;
+}
+.v-dialog .v-input .v-label {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+}
+.v-dialog .theme--light.v-input,
+.v-dialog .theme--light.v-input input,
+.v-dialog .theme--light.v-input textarea {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+}
+.v-dialog.v-dialog--active.v-dialog--scrollable .v-card__actions {
+    border-color: #94DDDB !important;
+}
+.v-dialog button.v-icon.notranslate.v-icon--link.mdi.mdi-close.theme--light {
+    font-size: 18px;
+}
+.v-dialog .v-card__title.default-dialog-title ::-webkit-scrollbar-thumb {
+    background-color: #7DDBD8E5 !important;
+}
+.v-dialog .v-text-field--filled>.v-input__control>.v-input__slot,
+.v-dialog .v-text-field--full-width>.v-input__control>.v-input__slot,
+.v-dialog .v-text-field--outlined>.v-input__control>.v-input__slot {
+    min-height: 50px;
+}
+.v-dialog .v-text-field--outlined .v-label {
+    top: 16px;
+}
+.v-dialog .v-list-item .v-list-item__subtitle,
+.v-dialog .v-list-item .v-list-item__title {
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+}
+.v-dialog .v-text-field--outlined .v-label--active {
+    color: #434D56 !important;
+}
+.v-dialog .v-text-field.error--text fieldset {
+    border-color: #ff5252;
+}
+.v-text-field--enclosed .v-input__append-inner button.v-icon.mdi.mdi-close{
+    top: -3px;
+}
+</style>
