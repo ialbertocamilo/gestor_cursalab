@@ -6,7 +6,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-M7JT8H2');</script>
 <!-- End Google Tag Manager -->
 
-<script>
+{{-- <script>
 
 var host = window.location.hostname;
 
@@ -24,4 +24,4 @@ if( host == "gestiona.inretail.cursalab.io" )
 	@endif
 }
 
-</script>
+</script> --}}
