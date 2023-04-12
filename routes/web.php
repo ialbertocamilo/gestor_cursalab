@@ -1,18 +1,19 @@
 <?php
 
-use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\TwoFAController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\CursosController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GestorController;
-use App\Http\Controllers\UsuarioController;
-use App\Http\Controllers\WorkspaceController;
-use App\Http\Controllers\ImpersonateController;
 use App\Http\Middleware\CheckRol;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CursosController;
+use App\Http\Controllers\GestorController;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\TwoFAController;
+use App\Http\Controllers\ImpersonateController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 
 Route::redirect('/', 'login', 301);
 
@@ -79,6 +80,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::post('/user_password_reset', [UsuarioController::class, 'updatePasswordUser'])->name('usuarios.user_password_reset');
 
     Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
+    Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView'])->middleware('checkrol:admin,reports');
 
     Route::prefix('general')->middleware('checkrol:admin')->group(base_path('routes/cms/general.php'));
     Route::prefix('common')->middleware('checkrol:admin')->group(base_path('routes/cms/common.php'));
@@ -130,7 +132,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
 
     Route::prefix('workspaces')->middleware('checkrol:admin')->group(base_path('routes/cms/workspaces.php'));
-    Route::prefix('/')->middleware(['checkrol:admin,only-reports'])->group(base_path('routes/cms/reportes.php'));
+    Route::prefix('/')->middleware(['checkrol:admin,reports,only-reports'])->group(base_path('routes/cms/reportes.php'));
 
     Route::prefix('aulas-virtuales')->middleware('checkrol:admin')->group(base_path('routes/cms/meetings.php'));
 
@@ -139,6 +141,6 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 
-    Route::prefix('resumen_encuesta')->middleware('checkrol:admin')->group(base_path('routes/cms/resumen_encuesta.php'));
+    Route::prefix('resumen_encuesta')->middleware('checkrol:admin,reports,only-reports')->group(base_path('routes/cms/resumen_encuesta.php'));
 
 });
