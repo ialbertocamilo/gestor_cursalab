@@ -1371,27 +1371,39 @@ class Course extends BaseModel
     public function getScheduleRestartMinutes()
     {
         $config = $this->scheduled_restarts;
+        
+        $tiempo_en_minutos = $this->parseConfigInMinutes($config);
+        if ($config AND $config['activado'] AND $tiempo_en_minutos > 0) {
 
-        if ($config AND $config['activado'] AND $config['tiempo_en_minutos'] > 0) {
-
-            return $config['tiempo_en_minutos'];
+            return $tiempo_en_minutos;
         }
 
         $minutes = $config = [];
-
         foreach ($this->schools as $key => $school) {
 
             $config = json_decode($school->scheduled_restarts, true);
+            $tiempo_en_minutos = $this->parseConfigInMinutes($config);
+            if ($config AND $config['activado'] AND $tiempo_en_minutos > 0) {
 
-            if ($config AND $config['activado'] AND $config['tiempo_en_minutos'] > 0) {
-
-                $minutes[] = $config['tiempo_en_minutos'];
+                $minutes[] = $tiempo_en_minutos;
             }
         }
 
         return count($minutes) ? min($minutes) : 0;
     }
 
+    public function parseConfigInMinutes($config){
+        $reinicio_dias = isset($config['reinicio_dias']) && $config['reinicio_dias'] != null  
+        ? $config['reinicio_dias']*1440  : 0 ;
+
+        $reinicio_horas = isset($config['reinicio_horas']) && $config['reinicio_horas'] != null  
+                ? $config['reinicio_horas']*60  : 0 ;
+
+        $reinicio_minutos = isset($config['reinicio_minutos']) && $config['reinicio_minutos'] != null  
+                ? $config['reinicio_minutos']  : 0 ;
+
+        return $reinicio_dias + $reinicio_horas + $reinicio_minutos;
+    }
     public function getAttemptsLimit()
     {
         if (!$this->mod_evaluaciones) return null;

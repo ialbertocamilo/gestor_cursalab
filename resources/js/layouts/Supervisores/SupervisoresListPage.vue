@@ -227,7 +227,7 @@ export default {
                 confirmLabel: 'Siguiente',
                 cancelLabel: 'Atras',
                 showCloseIcon: true,
-                loading: true
+                loading: false
             },
             modulos: []
         }
