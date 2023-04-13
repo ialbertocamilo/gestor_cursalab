@@ -3,11 +3,9 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Soporte
-                <v-spacer />
-                <DefaultActivityButton
-                    label="Administrar Formulario APP"
-                    @click="goToCategorias"
-                />
+                <v-spacer/>
+                <DefaultActivityButton label="Administrar Formulario APP"
+                                       @click="goToCategorias"/>
                 <!-- <v-spacer/> -->
             </v-card-title>
         </v-card>
@@ -17,39 +15,30 @@
                 <v-row class="justify-content-start">
                     <v-col>
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.modulos"
                             v-model="filters.modulo"
                             label="Módulos"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col>
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.estados"
                             v-model="filters.status"
                             label="Estados"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col>
                         <DefaultInput
-                            clearable
-                            dense
+                            clearable dense
                             v-model="filters.q"
                             label="Buscar por documento, nombre, ticket..."
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col>
@@ -60,9 +49,7 @@
                             :options="dateFilterStart"
                             v-model="filters.starts_at"
                             label="Fecha inicio"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
 
@@ -74,9 +61,7 @@
                             :options="dateFilterEnd"
                             v-model="filters.ends_at"
                             label="Fecha fin"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                 </v-row>
@@ -137,55 +122,30 @@ export default {
                 open: false
             },
             dataTable: {
-                endpoint: "/soporte/search",
-                ref: "SoporteTable",
+                endpoint: '/soporte/search',
+                ref: 'SoporteTable',
                 headers: [
-                    {
-                        text: "# Ticket",
-                        value: "id",
-                        align: "center",
-                        sortable: true
-                    },
-                    {
-                        text: "Módulo",
-                        value: "image",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "DNI",
-                        value: "dni",
-                        align: "center",
-                        sortable: false
-                    },
-                    { text: "Nombre", value: "nombre", sortable: false },
-                    { text: "Motivo", value: "reason" },
-                    { text: "Estado", value: "status", align: "center" },
-                    {
-                        text: "Fecha de registro",
-                        value: "created_at",
-                        align: "center",
-                        sortable: true
-                    },
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "# Ticket", value: "id", align: 'center', sortable: true},
+                    {text: "Módulo", value: "image", align: 'center', sortable: false},
+                    {text: "DNI", value: "dni", align: 'center', sortable: false},
+                    {text: "Nombre", value: "nombre", sortable: false},
+                    {text: "Motivo", value: "reason"},
+                    {text: "Estado", value: "status", align: 'center',},
+                    {text: "Fecha de registro", value: "created_at", align: 'center', sortable: true},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "action",
-                        method_name: "edit"
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit'
                     },
                     {
                         text: "Detalle",
-                        icon: "mdi mdi-eye",
-                        type: "action",
-                        method_name: "show"
+                        icon: 'mdi mdi-eye',
+                        type: 'action',
+                        method_name: 'show'
                     },
                     {
                         text: "Logs",
@@ -212,27 +172,27 @@ export default {
             },
             selects: {
                 modulos: [],
-                estados: []
+                estados: [],
             },
             filters: {
-                q: "",
+                q: '',
                 modulo: null,
                 status: null,
                 starts_at: null,
                 ends_at: null
             },
             modalOptions: {
-                ref: "SoporteFormModal",
+                ref: 'SoporteFormModal',
                 open: false,
-                base_endpoint: "/soporte",
-                resource: "Soporte",
-                confirmLabel: "Guardar"
+                base_endpoint: '/soporte',
+                resource: 'Soporte',
+                confirmLabel: 'Guardar',
             },
             modalShowOptions: {
-                ref: "SoporteShowModal",
+                ref: 'SoporteShowModal',
                 open: false,
-                base_endpoint: "/soporte",
-                endpoint: "",
+                base_endpoint: '/soporte',
+                endpoint: '',
                 hideConfirmBtn: true,
                 cancelLabel: "Cerrar",
                 showCloseIcon: true
@@ -254,32 +214,33 @@ export default {
         };
     },
     mounted() {
-        let vue = this;
+        let vue = this
         vue.getSelects();
     },
     methods: {
         getSelects() {
-            let vue = this;
-            const url = `/soporte/get-list-selects`;
-            vue.$http.get(url).then(({ data }) => {
-                vue.selects.modulos = data.data.modulos;
-                vue.selects.estados = data.data.estados;
-            });
+            let vue = this
+            const url = `/soporte/get-list-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.modulos = data.data.modulos
+                    vue.selects.estados = data.data.estados
+                })
         },
         goToCategorias() {
-            const url = `/soporte/formulario-ayuda`;
-            window.location.href = url;
+            const url = `/soporte/formulario-ayuda`
+            window.location.href = url
         },
         // reset(user) {
         //     let vue = this
         //     vue.consoleObjectTable(user, 'User to Reset')
         // },
         activity() {
-            console.log("activity");
+            console.log('activity')
         },
         confirmModal() {
             // TODO: Call store or update USER
-        }
+        },
     }
-};
+}
 </script>

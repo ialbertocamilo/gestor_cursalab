@@ -200,7 +200,7 @@ return [
         'title_short' => 'título corto',
         'content' => 'contenido',
 
-
+    
         'status_id' => 'estado',
         'platform_id' => 'plataforma',
         'service_id' => 'servicio',
@@ -212,7 +212,7 @@ return [
         'model_id' => 'modelo',
         'role' => 'rol',
         'role_id' => 'rol / área',
-
+        
         'code' => 'código',
         'storage_id' => 'storage',
         'worker_id' => 'worker',
@@ -220,7 +220,7 @@ return [
         'database_id' => 'base de datos',
         'comments' => 'comentarios',
         'registered_at' => 'fecha de registro',
-
+        
         'ruc' => 'RUC',
         'id' => 'ID',
         'dni' => 'DNI',

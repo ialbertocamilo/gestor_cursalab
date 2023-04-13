@@ -57,11 +57,9 @@ return [
             // 'strict' => true,
             'strict' => false,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql')
-                ? array_filter([
-                    PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                ])
-                : [],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
         'mysql_master' => [
@@ -80,33 +78,29 @@ return [
             // 'strict' => true,
             'strict' => false,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql')
-                ? array_filter([
-                    PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                ])
-                : [],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
         'mysql_external' => [
             'driver' => 'mysql',
-            //            'url' => env('DATABASE_URL'),
+//            'url' => env('DATABASE_URL'),
             'host' => '',
             'port' => '3306',
             'database' => '',
             'username' => '',
             'password' => '',
-            //            'unix_socket' => env('DB_SOCKET', ''),
+//            'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql')
-                ? array_filter([
-                    PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                ])
-                : [],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
         'mysql_uc' => [
@@ -125,14 +119,12 @@ return [
             // 'strict' => true,
             'strict' => false,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql')
-                ? array_filter([
-                    PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                ])
-                : [],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
-        /*        'mysql_master' => array(
+/*        'mysql_master' => array(
             'driver'    => 'mysql',
             'host' => env('DB2_HOST', '127.0.0.1'),
             'port' => env('DB2_PORT', '3306'),
@@ -148,7 +140,7 @@ return [
 
         'pgsql_external' => [
             'driver' => 'pgsql',
-            //            'url' => env('DATABASE_URL'),
+//            'url' => env('DATABASE_URL'),
             'host' => '',
             'port' => '5432',
             'database' => '',

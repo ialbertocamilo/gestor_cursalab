@@ -1,18 +1,17 @@
 <template>
-    <!-- //workspace -->
+
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 <!--                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>-->
                 Módulos
-                <v-spacer />
+                <v-spacer/>
                 <!--                <DefaultActivityButton-->
                 <!--                    :label="'Actividad'"-->
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
                     :label="'Módulo'"
-                    @click="openFormModal(modalOptions, null, 'create')"
-                />
+                    @click="openFormModal(modalOptions, null, 'create')"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -29,28 +28,18 @@
                             </v-col> -->
                     <v-col cols="4">
                         <DefaultInput
-                            clearable
-                            dense
+                            clearable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
                     <v-col cols="4">
                         <v-card class="mr-10 " elevation="0">
                             <v-card-text style="text-align:end;">
-                                <span
-                                    style="font-weight:bolder;"
-                                    v-text="
-                                        `Total de usuarios activos: ${active_users_count} / ${limit_allowed_users}`
-                                    "
-                                ></span>
+                                <span style="font-weight:bolder;" v-text="`Total de usuarios activos: ${active_users_count} / ${limit_allowed_users || '-'}`"></span>
                             </v-card-text>
                         </v-card>
                     </v-col>
@@ -88,11 +77,8 @@
             />
             <DefaultAlertDialog
                 :ref="modalDeleteOptions.ref"
-                :options="modalDeleteOptions"
-            >
-                <template v-slot:content>
-                    {{ modalDeleteOptions.contentText }}</template
-                >
+                :options="modalDeleteOptions">
+                <template v-slot:content> {{ modalDeleteOptions.contentText }}</template>
             </DefaultAlertDialog>
         </v-card>
     </section>
@@ -107,29 +93,19 @@ export default {
     components: { ModuloFormModal, LogsModal },
     data() {
         return {
-            active_users_count: "-",
-            limit_allowed_users: "-",
+            active_users_count: '-',
+            limit_allowed_users: '-',
             breadcrumbs: [
-                { title: "Módulos", text: null, disabled: true, href: "null" }
+                {title: 'Módulos', text: null, disabled: true, href: 'null'},
             ],
             dataTable: {
-                endpoint: "/modulos/search",
-                ref: "modulosTable",
+                endpoint: '/modulos/search',
+                ref: 'modulosTable',
                 headers: [
-                    {
-                        text: "Portada",
-                        value: "image",
-                        align: "center",
-                        sortable: false
-                    },
-                    { text: "Nombres", value: "name" },
-                    { text: "Activos / Total", value: "active_users" },
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    {text: "Nombres", value: "name"},
+                    {text: "Activos / Total", value: "active_users", sortable: false},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
@@ -142,16 +118,16 @@ export default {
                     },
                     {
                         text: "Usuarios",
-                        icon: "fas fa-user",
-                        type: "route",
-                        route: "users_route",
-                        count: "users_count"
+                        icon: 'fas fa-user',
+                        type: 'route',
+                        route: 'users_route',
+                        count: 'users_count'
                     },
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "action",
-                        method_name: "edit"
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit'
                     },
                     {
                         text: "Logs",
@@ -166,19 +142,19 @@ export default {
                 modules: []
             },
             filters: {
-                q: "",
-                module: null
+                q: '',
+                module: null,
             },
             modalOptions: {
-                ref: "ModuloFormModal",
+                ref: 'ModuloFormModal',
                 open: false,
-                base_endpoint: "/modulos",
-                confirmLabel: "Guardar",
-                resource: "Módulo",
-                title: "",
+                base_endpoint: '/modulos',
+                confirmLabel: 'Guardar',
+                resource: 'Módulo',
+                title: '',
                 action: null,
                 selects: {
-                    modules: []
+                    modules: [],
                     // boticas: [],
                     // groups: [],
                     // cargos: [],
@@ -201,28 +177,29 @@ export default {
         };
     },
     mounted() {
-        let vue = this;
+        let vue = this
         vue.getSelects();
 
-        vue.filters.module = vue.config_id;
+        vue.filters.module = vue.config_id
     },
     methods: {
         getSelects() {
-            let vue = this;
-            const url = `/modulos/get-list-selects`;
-            vue.$http.get(url).then(({ data }) => {
-                const { limit_allowed_users, active_users_count } = data.data;
-                vue.active_users_count = active_users_count;
-                vue.limit_allowed_users = limit_allowed_users;
-            });
+            let vue = this
+            const url = `/modulos/get-list-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    const {limit_allowed_users, active_users_count} = data.data;
+                    vue.active_users_count = active_users_count
+                    vue.limit_allowed_users = limit_allowed_users
+                })
         },
         reset(user) {
-            let vue = this;
+            let vue = this
             // vue.consoleObjectTable(user, 'User to Reset')
         },
         activity() {
-            console.log("activity");
-        }
+            console.log('activity')
+        },
     }
-};
+}
 </script>

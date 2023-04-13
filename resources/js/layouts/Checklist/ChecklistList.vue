@@ -3,24 +3,11 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Checklists
-                <v-spacer />
-                <DefaultActivityButton
-                    :label="'Subida masiva'"
-                    @click="modal.subida_masiva = true"
-                />
-                <DefaultModalButton
-                    :label="'Checklist'"
-                    @click="
-                        abrirModalCreateEditChecklist({
-                            id: 0,
-                            title: '',
-                            description: '',
-                            active: true,
-                            checklist_actividades: [],
-                            courses: []
-                        })
-                    "
-                />
+                <v-spacer/>
+                <DefaultActivityButton :label="'Subida masiva'" @click="modal.subida_masiva= true"/>
+                <DefaultModalButton :label="'Checklist'" @click="
+                                abrirModalCreateEditChecklist({ id: 0, title: '', description: '', active: true, checklist_actividades: [], courses: [] })
+                            "/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -28,17 +15,12 @@
                 <v-row justify="start">
                     <v-col cols="4">
                         <DefaultInput
-                            clearable
-                            dense
+                            clearable dense
                             v-model="filters.q"
                             label="Buscar por título o descripción..."
                             append-icon="mdi-magnify"
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                 </v-row>
@@ -123,34 +105,24 @@ export default {
     data() {
         return {
             dataTable: {
-                endpoint: "/entrenamiento/checklists/search",
-                ref: "ChecklistTable",
+                endpoint: '/entrenamiento/checklists/search',
+                ref: 'ChecklistTable',
                 headers: [
-                    {
-                        text: "Título",
-                        value: "title",
-                        align: "start",
-                        sortable: true
-                    },
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "Título", value: "title", align: 'start', sortable: true},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "action",
-                        method_name: "edit"
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit'
                     },
                     {
                         text: "Eliminar",
-                        icon: "far fa-trash-alt",
-                        type: "action",
-                        method_name: "delete"
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
                     },
                     {
                         text: "Logs",
@@ -181,17 +153,17 @@ export default {
                 base_endpoint: "/search"
             },
             modalDeleteOptions: {
-                ref: "ChecklistDeleteModal",
+                ref: 'ChecklistDeleteModal',
                 open: false,
-                base_endpoint: "/entrenamiento/checklists",
-                endpoint: ""
+                base_endpoint: '/entrenamiento/checklists',
+                endpoint: '',
             },
             dataModalChecklist: {},
             dataModalVerItems: {},
             checklists: [],
             txt_filter_checklist: "",
-            file: null
-        };
+            file: null,
+        }
     },
     methods: {
         async closeModalSubidaMasiva() {
@@ -199,61 +171,57 @@ export default {
             vue.modal.subida_masiva = false;
         },
         closeModalFiltroUsuario() {
-            let vue = this;
-            vue.modalDataModalFiltroaLumno.open = false;
-            vue.modalDataModalFiltroaLumno.title = ``;
+            let vue = this
+            vue.modalDataModalFiltroaLumno.open = false
+            vue.modalDataModalFiltroaLumno.title = ``
             vue.filtroAlumnoTemp = {
-                dni: "",
-                nombre: "",
-                cargo: "",
-                bnotica: "",
-                grupo_nombre: "",
+                dni: '',
+                nombre: '',
+                cargo: '',
+                bnotica: '',
+                grupo_nombre: '',
                 checklists: [],
-                entrenador: ""
-            };
+                entrenador: ''
+            }
         },
         async abrirModalCreateEditChecklist(checklist) {
             let vue = this;
             vue.dataModalChecklist = checklist;
-            await vue.$refs.ModalCreateEditChecklist.resetValidation();
+            await vue.$refs.ModalCreateEditChecklist.resetValidation()
 
-            vue.$refs.ModalCreateEditChecklist.setActividadesHasErrorProp();
+            vue.$refs.ModalCreateEditChecklist.setActividadesHasErrorProp()
 
             vue.modal.crear_editar_checklist = true;
         },
         saveChecklist() {
             let vue = this;
             // console.log(vue.dataModalChecklist);
-            this.showLoader();
-            vue.$http
-                .post(
-                    `/entrenamiento/checklists/save_checklist`,
-                    vue.dataModalChecklist
-                )
-                .then(res => {
+            this.showLoader()
+            vue.$http.post(`/entrenamiento/checklists/save_checklist`, vue.dataModalChecklist)
+                .then((res) => {
                     // console.log(res);
                     vue.queryStatus("checklist", "crear_checklist");
                     vue.closeModalCreateEditChecklist();
                     vue.refreshDefaultTable(vue.dataTable, vue.filters);
                     // $("#pageloader").fadeOut();
-                    this.hideLoader();
+                    this.hideLoader()
                 })
-                .catch(err => {
+                .catch((err) => {
                     console.log(err);
-                    this.hideLoader();
+                    this.hideLoader()
                 });
         },
         async closeModalCreateEditChecklist() {
             let vue = this;
             // await vue.getData();
-            vue.$refs.ModalCreateEditChecklist.resetValidation();
+            vue.$refs.ModalCreateEditChecklist.resetValidation()
             vue.dataModalChecklist = {};
             vue.modal.crear_editar_checklist = false;
         },
         closeModalAsignarChecklistCurso() {
             let vue = this;
             vue.modal.asignar = false;
-        }
+        },
     }
 };
 </script>

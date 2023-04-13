@@ -436,7 +436,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
 
             $data['old_passwords'] = $old_passwords;
-        }
+        } 
     }
 
     protected function storeRequest($data, $user = null, $update_password = true, $from_massive = false)
@@ -454,7 +454,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 }
 
                 $this->setPasswordData($data, $update_password, $user);
-
+  
                 $user->update($data);
 
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
@@ -467,7 +467,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     }
                 endif;
             else :
-
+       
                 $this->setPasswordData($data, $update_password, $user);
 
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;

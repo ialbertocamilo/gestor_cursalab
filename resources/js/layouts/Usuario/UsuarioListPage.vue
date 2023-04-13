@@ -3,10 +3,7 @@
         <DefaultFilter
             v-model="open_advanced_filter"
             @filter="advanced_filter(dataTable, filters, 1)"
-            @cleanFilters="
-                clearObject(filters) &&
-                    refreshDefaultTable(dataTable, filters, 1)
-            "
+            @cleanFilters="clearObject(filters)"
             :disabled-confirm-btn="isValuesObjectEmpty(filters)"
         >
             <template v-slot:content>
@@ -27,32 +24,23 @@
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
                     </v-col>
 
                     <template v-for="(value, selectKey, index) in selects">
-                        <v-col
-                            cols="12"
-                            v-if="
-                                !['sub_workspaces', 'active'].includes(
-                                    selectKey
-                                ) && criteria_template[index - 2]
-                            "
-                        >
+
+                        <v-col cols="12"
+                               v-if="!['sub_workspaces', 'active'].includes(selectKey) && criteria_template[index-2]">
+
                             <DefaultInputDate
-                                v-if="
-                                    criteria_template[index - 2].field_type
-                                        .code === 'date'
-                                "
+                                v-if="criteria_template[index-2].field_type.code === 'date'"
                                 clearable
                                 :referenceComponent="'modalDateFilter1'"
-                                :options="{ open: false }"
+                                :options="{ open: false, }"
                                 v-model="filters[selectKey]"
-                                :label="criteria_template[index - 2].name"
+                                :label="criteria_template[index-2].name"
                             />
 
                             <DefaultAutocomplete
@@ -60,11 +48,9 @@
                                 clearable
                                 :items="value"
                                 v-model="filters[selectKey]"
-                                :label="criteria_template[index - 2].name"
+                                :label="criteria_template[index-2].name"
                                 item-text="name"
-                                :multiple="
-                                    criteria_template[index - 2].multiple
-                                "
+                                :multiple="criteria_template[index-2].multiple"
                                 :show-select-all="false"
                             />
                         </v-col>
@@ -75,11 +61,10 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Usuarios
-                <v-spacer />
+                <v-spacer/>
                 <DefaultActivityButton
                     :label="'Reinicios masivos'"
-                    @click="goToReiniciosMasivos"
-                />
+                    @click="goToReiniciosMasivos"/>
                 <DefaultModalButton
                     :label="'Usuario'"
                     class="btn_add_user"
@@ -92,8 +77,7 @@
                 <v-row>
                     <v-col cols="4">
                         <DefaultInput
-                            clearable
-                            dense
+                            clearable dense
                             v-model="filters.q"
                             label="Buscar usuario"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
@@ -165,9 +149,7 @@
             <UsuarioStatusModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
-                @onConfirm="
-                    closeFormModal(modalDeleteOptions, dataTable, filters)
-                "
+                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
             <UsuarioReiniciosModal
@@ -194,9 +176,7 @@
             <DefaultStatusModal
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
-                @onConfirm="
-                    closeFormModal(modalStatusOptions, dataTable, filters)
-                "
+                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
             <LogsModal
@@ -224,9 +204,9 @@ export default {
     components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal, LogsModal},
     props: {
         workspace_id: {
-            type: Number | String,
+            type: Number|String,
             required: true
-        }
+        },
         // show_meeting_section: {
         //     type: String,
         //     required: true
@@ -234,64 +214,39 @@ export default {
     },
     data() {
         let headers = [
-            { text: "Nombres y Apellidos", value: "name" },
-            { text: "Módulo", value: "module", sortable: false },
-            {
-                text: "Documento",
-                value: "document",
-                align: "left",
-                sortable: false
-            },
-            {
-                text: "Opciones",
-                value: "actions",
-                align: "center",
-                sortable: false
-            }
+            {text: "Nombres y Apellidos", value: "name"},
+            {text: "Módulo", value: "module", sortable: false},
+            {text: "Documento", value: "document", align: 'left', sortable: false},
+            {text: "Opciones", value: "actions", align: 'center', sortable: false},
         ];
 
         if (this.workspace_id == 25) {
             headers = [
-                { text: "Nombres y Apellidos", value: "name" },
-                { text: "Módulo", value: "module", sortable: false },
-                { text: "Carrera", value: "career", sortable: false },
-                { text: "Ciclo", value: "cycle", sortable: false },
-                {
-                    text: "Documento",
-                    value: "document",
-                    align: "left",
-                    sortable: false
-                },
-                {
-                    text: "Opciones",
-                    value: "actions",
-                    align: "center",
-                    sortable: false
-                }
+                {text: "Nombres y Apellidos", value: "name"},
+                {text: "Módulo", value: "module", sortable: false},
+                {text: "Carrera", value: "career", sortable: false},
+                {text: "Ciclo", value: "cycle", sortable: false},
+                {text: "Documento", value: "document", align: 'left', sortable: false},
+                {text: "Opciones", value: "actions", align: 'center', sortable: false},
             ];
         }
 
         return {
             usersWithEmptyCriteria: 0,
             dataTable: {
-                endpoint: "/usuarios/search",
-                ref: "UsuarioTable",
+                endpoint: '/usuarios/search',
+                ref: 'UsuarioTable',
                 headers: headers,
                 actions: [
-                    {
-                        text: "Cursos",
-                        icon: "mdi mdi-notebook-multiple",
-                        type: "action",
-                        method_name: "cursos"
-                    },
+                    {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
 
                     {
                         text: "Reiniciar",
-                        icon: "fas fa-history",
-                        type: "action",
-                        method_name: "reset",
-                        show_condition: "pruebas_desaprobadas",
-                        count: "failed_topics_count"
+                        icon: 'fas fa-history',
+                        type: 'action',
+                        method_name: 'reset',
+                        show_condition: 'pruebas_desaprobadas',
+                        count: 'failed_topics_count',
                     },
 
                     {
@@ -311,10 +266,10 @@ export default {
                 more_actions: [
                     {
                         text: "Reporte",
-                        type: "route",
-                        icon: "mdi mdi-file-document-multiple",
-                        route: "reporte_route",
-                        route_type: "external"
+                        type: 'route',
+                        icon: 'mdi mdi-file-document-multiple',
+                        route: 'reporte_route',
+                        route_type: 'external'
                     },
                     {
                         text: "Actualizar estado",
@@ -333,10 +288,10 @@ export default {
             selects: {
                 sub_workspaces: [],
                 statuses: [
-                    { id: null, name: "Todos" },
-                    { id: 1, name: "Activos" },
-                    { id: 2, name: "Inactivos" }
-                ]
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
                 // statuses: [
                 //     null => 'Todos',
                 //     1 => 'Activos',
@@ -344,7 +299,7 @@ export default {
                 // ],
             },
             filters: {
-                q: "",
+                q: '',
                 subworkspace_id: null,
                 active: 1,
             },
@@ -357,31 +312,31 @@ export default {
                 base_endpoint: "/search"
             },
             modalOptions: {
-                ref: "UsuarioFormModal",
+                ref: 'UsuarioFormModal',
                 open: false,
                 base_endpoint: '/usuarios',
                 resource: 'Usuario',
                 confirmLabel: 'Confirmar',
             },
             modalDeleteOptions: {
-                ref: "UsuarioDeleteModal",
+                ref: 'UsuarioDeleteModal',
                 open: false,
-                base_endpoint: "/usuarios",
-                contentText: "¿Desea eliminar este registro?"
+                base_endpoint: '/usuarios',
+                contentText: '¿Desea eliminar este registro?',
             },
             modalCursosOptions: {
-                ref: "UsuarioCursosModal",
+                ref: 'UsuarioCursosModal',
                 open: false,
-                base_endpoint: "/usuarios",
-                cancelLabel: "Cerrar",
-                hideConfirmBtn: true
+                base_endpoint: '/usuarios',
+                cancelLabel: 'Cerrar',
+                hideConfirmBtn: true,
             },
             modalReiniciosOptions: {
-                ref: "UsuarioReiniciosModal",
+                ref: 'UsuarioReiniciosModal',
                 open: false,
-                base_endpoint: "/usuarios",
-                cancelLabel: "Cerrar",
-                hideConfirmBtn: true
+                base_endpoint: '/usuarios',
+                cancelLabel: 'Cerrar',
+                hideConfirmBtn: true,
             },
             modalResetPasswordOptions: {
                 ref: 'UsuarioResetPasswordModal',
@@ -391,7 +346,7 @@ export default {
                 // hideConfirmBtn: true,
             },
             modalStatusOptions: {
-                ref: "UsuarioStatusModal",
+                ref: 'UsuarioStatusModal',
                 open: false,
                 base_endpoint: '/usuarios',
                 contentText: '¿Desea cambiar de estado a este registro?',
@@ -418,13 +373,13 @@ export default {
         }
     },
     mounted() {
-        let vue = this;
+        let vue = this
         vue.getSelects();
     },
 
     methods: {
         getSelects() {
-            let vue = this;
+            let vue = this
 
             let params = vue.getAllUrlParams(window.location.search);
 
@@ -464,17 +419,17 @@ export default {
 
         },
         reset(user) {
-            let vue = this;
-            vue.consoleObjectTable(user, "User to Reset");
+            let vue = this
+            vue.consoleObjectTable(user, 'User to Reset')
         },
         goToReiniciosMasivos() {
             window.location.href = "/masivo/usuarios/index_reinicios";
         },
         activity() {
-            console.log("activity");
-        }
+            console.log('activity')
+        },
     }
-};
+}
 </script>
 
 <style>

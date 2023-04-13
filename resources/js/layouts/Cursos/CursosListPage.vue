@@ -1,22 +1,22 @@
 <template>
     <section class="section-list ">
-        <DefaultFilter
-            v-model="open_advanced_filter"
-            @filter="advanced_filter(dataTable, filters, 1)"
+        <DefaultFilter v-model="open_advanced_filter"
+                       @filter="advanced_filter(dataTable, filters, 1)"
         >
             <template v-slot:content>
-                <v-row justify="center"> </v-row>
+                <v-row justify="center">
+
+                </v-row>
             </template>
         </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs" />
-                <v-spacer />
+                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
+                <v-spacer/>
 
                 <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/${ruta}cursos/create`)"
-                />
+                    @click="openCRUDPage(`/${ruta}cursos/create`)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -25,44 +25,33 @@
                 <v-row>
                     <v-col cols="3">
                         <DefaultInput
-                            clearable
-                            dense
+                            clearable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
 
                     <v-col cols="3">
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.types"
                             v-model="filters.type"
                             label="Tipo de curso"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
                     </v-col>
 
                     <v-col cols="3">
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado de curso"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
                     </v-col>
@@ -76,9 +65,7 @@
                             :options="modalDateFilter1"
                             v-model="filters.dates"
                             label="Fecha de creación"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                 </v-row>
@@ -170,17 +157,8 @@
                 width="408px"
                 :ref="courseValidationModal.ref"
                 :options="courseValidationModal"
-                @onCancel="
-                    closeFormModal(courseValidationModal);
-                    closeFormModal(deleteConfirmationDialog);
-                "
-                @onConfirm="
-                    confirmValidationModal(
-                        courseValidationModal,
-                        null,
-                        confirmDelete(false)
-                    )
-                "
+                @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(courseValidationModal,  null, confirmDelete(false))"
                 :resource="{}"
             />
 
@@ -198,17 +176,8 @@
                 width="408px"
                 :ref="courseValidationModalUpdateStatus.ref"
                 :options="courseValidationModalUpdateStatus"
-                @onCancel="
-                    closeFormModal(courseValidationModalUpdateStatus);
-                    closeFormModal(deleteConfirmationDialog);
-                "
-                @onConfirm="
-                    confirmValidationModal(
-                        courseValidationModalUpdateStatus,
-                        null,
-                        confirmUpdateStatus(false)
-                    )
-                "
+                @onCancel="closeFormModal(courseValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(courseValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
                 :resource="{}"
             />
 
@@ -219,13 +188,7 @@
                 :model_id="null"
                 :ref="modalFormSegmentationOptions.ref"
                 @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
-                @onConfirm="
-                    closeFormModal(
-                        modalFormSegmentationOptions,
-                        dataTable,
-                        filters
-                    )
-                "
+                @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
             />
 
             <CompatibilityFormModal
@@ -233,13 +196,7 @@
                 width="55vw"
                 :ref="modalFormCompatibilityOptions.ref"
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
-                @onConfirm="
-                    closeFormModal(
-                        modalFormCompatibilityOptions,
-                        dataTable,
-                        filters
-                    )
-                "
+                @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
         </v-card>
     </section>
@@ -259,77 +216,52 @@ export default {
         CursosEncuestaModal,
         MoverCursoModal,
         DialogConfirm,
-        CourseValidationsDelete: CursoValidacionesModal,
-        CourseValidationsUpdateStatus: CursoValidacionesModal,
+        'CourseValidationsDelete': CursoValidacionesModal,
+        'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentFormModal,
         CompatibilityFormModal,
         LogsModal
     },
-    props: ["modulo_id", "modulo_name", "escuela_id", "escuela_name", "ruta"],
+    props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
-        let vue = this;
-        let route_school =
-            vue.escuela_id !== "" ? `/escuelas/${vue.escuela_id}` : ``;
+        let vue = this
+        let route_school = (vue.escuela_id !== '') ? `/escuelas/${vue.escuela_id}` : ``;
         return {
             breadcrumbs: [
-                {
-                    title: "Escuelas",
-                    text: `${this.escuela_name}`,
-                    disabled: false,
-                    href: `/escuelas`
-                },
-                { title: "Cursos", text: null, disabled: true, href: "" }
+                {title: 'Escuelas', text: `${this.escuela_name}`, disabled: false, href: `/escuelas`},
+                {title: 'Cursos', text: null, disabled: true, href: ''},
             ],
             dataTable: {
                 endpoint: `${route_school}/cursos/search`,
-                ref: "cursosTable",
+                ref: 'cursosTable',
                 headers: [
-                    {
-                        text: "Orden",
-                        value: "orden",
-                        align: "center",
-                        model: "Course",
-                        sortable: false
-                    },
-                    {
-                        text: "Portada",
-                        value: "image",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "Nombre",
-                        value: "custom_curso_nombre",
-                        sortable: false
-                    },
-                    { text: "Tipo", value: "type", sortable: false },
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "Orden", value: "orden", align: 'center'},
+                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    {text: "Nombre", value: "custom_curso_nombre", sortable: false},
+                    {text: "Tipo", value: "type", sortable: false},
+                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
                         text: "Temas",
-                        icon: "fas fa-book",
-                        type: "route",
-                        count: "temas_count",
-                        route: "temas_route"
+                        icon: 'fas fa-book',
+                        type: 'route',
+                        count: 'temas_count',
+                        route: 'temas_route'
                     },
                     {
                         text: "Segmentación",
-                        icon: "fa fa-square",
-                        type: "action",
-                        count: "segments_count",
-                        method_name: "segmentation"
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'segments_count',
+                        method_name: 'segmentation'
                     },
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "route",
-                        route: "edit_route"
+                        icon: 'mdi mdi-pencil',
+                        type: 'route',
+                        route: 'edit_route'
                     },
                     {
                         text: "Logs",
@@ -349,41 +281,41 @@ export default {
                 more_actions: [
                     {
                         text: "Compatibles",
-                        icon: "fa fa-square",
-                        type: "action",
-                        count: "compatibilities_count",
-                        method_name: "compatibility",
-                        show_condition: "compatibility_available"
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'compatibilities_count',
+                        method_name: 'compatibility',
+                        show_condition: 'compatibility_available'
                     },
                     {
                         text: "Encuesta",
-                        icon: "mdi mdi-poll",
-                        type: "action",
-                        count: "encuesta_count",
-                        method_name: "encuesta"
+                        icon: 'mdi mdi-poll',
+                        type: 'action',
+                        count: 'encuesta_count',
+                        method_name: 'encuesta'
                     },
                     {
                         text: "Actualizar Estado",
-                        icon: "fa fa-circle",
-                        type: "action",
-                        method_name: "status"
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
                     },
                     {
                         text: "Eliminar",
-                        icon: "far fa-trash-alt",
-                        type: "action",
-                        method_name: "delete"
-                    }
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
+                    },
                 ]
             },
             selects: {
                 modules: [],
                 types: [],
                 statuses: [
-                    { id: null, name: "Todos" },
-                    { id: 1, name: "Activos" },
-                    { id: 2, name: "Inactivos" }
-                ]
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
             },
             filters: {
                 q: '',
@@ -396,12 +328,12 @@ export default {
             update_model: null,
 
             modalCursoEncuesta: {
-                ref: "CursoEncuestaModal",
+                ref: 'CursoEncuestaModal',
                 open: false,
-                base_endpoint: `/escuelas/${this.escuela_id}/cursos`
+                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
             },
             modalFormSegmentationOptions: {
-                ref: "SegmentFormModal",
+                ref: 'SegmentFormModal',
                 open: false,
                 persistent: true,
                 base_endpoint: "/segments",
@@ -418,20 +350,20 @@ export default {
             },
 
             modalFormCompatibilityOptions: {
-                ref: "CompatibilityFormModal",
+                ref: 'CompatibilityFormModal',
                 open: false,
                 persistent: true,
-                base_endpoint: "/cursos",
-                confirmLabel: "Guardar",
-                resource: "compatibilidad"
+                base_endpoint: '/cursos',
+                confirmLabel: 'Guardar',
+                resource: 'compatibilidad',
             },
 
             deleteConfirmationDialog: {
-                ref: "CourseDeleteModal",
-                title: "Eliminar Curso",
-                contentText: "¿Desea eliminar este registro?",
+                ref: 'CourseDeleteModal',
+                title: 'Eliminar Curso',
+                contentText: '¿Desea eliminar este registro?',
                 open: false,
-                endpoint: ""
+                endpoint: ''
             },
             courseValidationModal: {
                 ref: 'CourseListValidationModal',
@@ -440,9 +372,9 @@ export default {
             },
 
             courseUpdateStatusModal: {
-                ref: "CourseUpdateStatusModal",
-                title: "Actualizar Curso",
-                contentText: "¿Desea actualizar este registro?",
+                ref: 'CourseUpdateStatusModal',
+                title: 'Actualizar Curso',
+                contentText: '¿Desea actualizar este registro?',
                 open: false,
                 endpoint: '',
                 title_modal: 'Cambio de estado de un <b>curso</b>',
@@ -483,87 +415,79 @@ export default {
             },
 
             courseValidationModalDefault: {
-                ref: "CourseListValidationModal",
+                ref: 'CourseListValidationModal',
                 action: null,
                 open: false,
-                base_endpoint: "",
+                base_endpoint: '',
                 hideConfirmBtn: false,
                 hideCancelBtn: false,
-                confirmLabel: "Confirmar",
-                cancelLabel: "Cancelar",
-                resource: "CursosValidaciones"
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'CursosValidaciones',
             },
 
             modalMoverCurso: {
-                ref: "MoverCursoModal",
+                ref: 'MoverCursoModal',
                 open: false,
-                base_endpoint: `/escuelas/${this.escuela_id}/cursos`
+                base_endpoint: `/escuelas/${this.escuela_id}/cursos`,
             },
 
             modalDateFilter1: {
-                open: false
-            }
-        };
+                open: false,
+            },
+        }
     },
     mounted() {
-        let vue = this;
+        let vue = this
 
-        vue.filters.module = vue.modulo_id;
-        vue.filters.category = vue.escuela_id;
+        vue.filters.module = vue.modulo_id
+        vue.filters.category = vue.escuela_id
 
-        vue.getSelects();
+        vue.getSelects()
     },
     methods: {
         getSelects() {
-            let vue = this;
-            const url = `/cursos/get-selects`;
-            vue.$http.get(url).then(({ data }) => {
-                // vue.selects.modules = data.data.modules
-                vue.selects.types = data.data.types;
-                // vue.modalOptions.selects.modules = data.data.modules
-                // vue.modalOptions.selects.types = data.data.types
-            });
+            let vue = this
+            const url = `/cursos/get-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    // vue.selects.modules = data.data.modules
+                    vue.selects.types = data.data.types
+                    // vue.modalOptions.selects.modules = data.data.modules
+                    // vue.modalOptions.selects.types = data.data.types
+                })
         },
         activity() {
-            console.log("activity");
+            console.log('activity')
         },
 
         deleteCurso(course) {
-            let vue = this;
-            vue.delete_model = course;
-            vue.deleteConfirmationDialog.open = true;
+            let vue = this
+            vue.delete_model = course
+            vue.deleteConfirmationDialog.open = true
         },
         confirmDelete(validateForm = true) {
-            let vue = this;
-            vue.deleteConfirmationDialog.open = false;
-            vue.showLoader();
-            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}/delete`;
-            const bodyData = { validateForm };
+            let vue = this
+            vue.deleteConfirmationDialog.open = false
+            vue.showLoader()
+            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}/delete`
+            const bodyData = {validateForm}
 
-            vue.$http
-                .post(url, bodyData)
-                .then(async ({ data }) => {
-                    this.hideLoader();
-                    const has_info_messages =
-                        data.data.messages.list.length > 0;
+            vue.$http.post(url, bodyData)
+                .then(async ({data}) => {
+                    this.hideLoader()
+                    const has_info_messages = data.data.messages.list.length > 0
                     if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(
-                            data.data,
-                            vue.courseValidationModal,
-                            vue.courseValidationModalDefault
-                        );
-                    else vue.showAlert(data.data.msg);
+                        await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
+                    else
+                        vue.showAlert(data.data.msg)
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(async error => {
-                    await vue.handleValidationsBeforeUpdate(
-                        error,
-                        vue.courseValidationModal,
-                        vue.courseValidationModalDefault
-                    );
-                    vue.loadingActionBtn = false;
-                });
+                    await vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
+                    vue.loadingActionBtn = false
+                })
         },
 
         updateCourseStatus(course) {
@@ -573,9 +497,9 @@ export default {
             vue.courseUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
         },
         async confirmUpdateStatus(validateForm = true) {
-            let vue = this;
-            vue.courseUpdateStatusModal.open = false;
-            vue.showLoader();
+            let vue = this
+            vue.courseUpdateStatusModal.open = false
+            vue.showLoader()
 
             if (validateForm)
                 vue.courseValidationModalUpdateStatus.action = null;
@@ -590,28 +514,22 @@ export default {
             }
 
             let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
-            const bodyData = { validateForm };
+            const bodyData = {validateForm}
 
-            vue.$http
-                .put(url, bodyData)
-                .then(async ({ data }) => {
-                    vue.hideLoader();
-                    const has_info_messages =
-                        data.data.messages.list.length > 0;
+            vue.$http.put(url, bodyData)
+                .then(async ({data}) => {
+                    vue.hideLoader()
+                    const has_info_messages = data.data.messages.list.length > 0;
 
                     if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(
-                            data.data,
-                            vue.courseValidationModalUpdateStatus,
-                            vue.courseValidationModalDefault
-                        );
+                        await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     else {
                         vue.courseValidationModalUpdateStatus.type_modal = null
                         vue.showAlert(data.data.msg)
                         vue.courseValidationModalUpdateStatus.open = false;
                     }
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(error => {
                     if (error && error.errors){
@@ -629,5 +547,5 @@ export default {
                 })
         },
     }
-};
+}
 </script>

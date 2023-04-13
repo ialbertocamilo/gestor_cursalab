@@ -1,11 +1,12 @@
 <template>
     <section class="section-list ">
-        <DefaultFilter
-            v-model="open_advanced_filter"
-            @filter="advanced_filter(dataTable, filters, 1)"
+        <DefaultFilter v-model="open_advanced_filter"
+                       @filter="advanced_filter(dataTable, filters, 1)"
         >
             <template v-slot:content>
-                <v-row justify="center"> </v-row>
+                <v-row justify="center">
+
+                </v-row>
             </template>
         </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
@@ -16,8 +17,7 @@
 
                 <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/cursos/create`)"
-                />
+                    @click="openCRUDPage(`/cursos/create`)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -46,38 +46,28 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
 
                     <v-col cols="3">
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado de curso"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
                     </v-col>
 
                     <v-col cols="3">
                         <DefaultInput
-                            learable
-                            dense
+                            learable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
@@ -95,42 +85,14 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @encuesta="
-                    openFormModal(
-                        modalCursoEncuesta,
-                        $event,
-                        'encuesta',
-                        `Encuesta del Curso - ${$event.name}`
-                    )
-                "
-                @mover_curso="
-                    openFormModal(
-                        modalMoverCurso,
-                        $event,
-                        'mover_curso',
-                        'Mover Curso'
-                    )
-                "
-                @segmentation="
-                    openFormModal(
-                        modalFormSegmentationOptions,
-                        $event,
-                        'segmentation',
-                        `Segmentación del Curso - ${$event.name}`
-                    )
-                "
-                @redirect_to_course_form_page="
-                    redirect_to_course_form_page($event)
-                "
-                @compatibility="
-                    openFormModal(
-                        modalFormCompatibilityOptions,
-                        $event,
-                        'compatibility',
-                        `Compatibilidad del curso - ${$event.name}`
-                    )
-                "
-                @logs="
+                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del Curso - ${$event.name}`)"
+                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
+                @redirect_to_course_form_page="redirect_to_course_form_page($event)"
+                @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
+                @delete="deleteCurso($event)"
+                @status="updateCourseStatus($event)"
+		@logs="
                     openFormModal(
                         modalLogsOptions,
                         $event,
@@ -138,8 +100,6 @@
                         `Logs del Curso - ${$event.name}`
                     )
                 "
-                @delete="deleteCurso($event)"
-                @status="updateCourseStatus($event)"
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -190,17 +150,8 @@
                 width="408px"
                 :ref="courseValidationModalUpdateStatus.ref"
                 :options="courseValidationModalUpdateStatus"
-                @onCancel="
-                    closeFormModal(courseValidationModalUpdateStatus);
-                    closeFormModal(deleteConfirmationDialog);
-                "
-                @onConfirm="
-                    confirmValidationModal(
-                        courseValidationModalUpdateStatus,
-                        null,
-                        confirmUpdateStatus(false)
-                    )
-                "
+                @onCancel="closeFormModal(courseValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(courseValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
                 :resource="{}"
             />
 
@@ -211,13 +162,7 @@
                 :model_id="null"
                 :ref="modalFormSegmentationOptions.ref"
                 @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
-                @onConfirm="
-                    closeFormModal(
-                        modalFormSegmentationOptions,
-                        dataTable,
-                        filters
-                    )
-                "
+                @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
             />
 
             <CompatibilityFormModal
@@ -225,13 +170,7 @@
                 width="55vw"
                 :ref="modalFormCompatibilityOptions.ref"
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
-                @onConfirm="
-                    closeFormModal(
-                        modalFormCompatibilityOptions,
-                        dataTable,
-                        filters
-                    )
-                "
+                @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
             <LogsModal
                 :options="modalLogsOptions"
@@ -259,15 +198,15 @@ export default {
         CursosEncuestaModal,
         MoverCursoModal,
         DialogConfirm,
-        CourseValidationsDelete: CursoValidacionesModal,
-        CourseValidationsUpdateStatus: CursoValidacionesModal,
+        'CourseValidationsDelete': CursoValidacionesModal,
+        'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentFormModal,
         CompatibilityFormModal,
         LogsModal
     },
-    props: ["modulo_id", "modulo_name"],
+    props: ['modulo_id', 'modulo_name',],
     data() {
-        let vue = this;
+        let vue = this
         // let route_school = (vue.escuela_id !== '') ? `/escuelas/${vue.escuela_id}` : ``;
         return {
             base_endpoint: `/cursos`,
@@ -277,7 +216,7 @@ export default {
             ],
             dataTable: {
                 endpoint: `cursos/search`,
-                ref: "cursosTable",
+                ref: 'cursosTable',
                 headers: [
                     {text: "Portada", value: "medium_image", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
@@ -289,23 +228,23 @@ export default {
                 actions: [
                     {
                         text: "Temas",
-                        icon: "fas fa-book",
-                        type: "route",
-                        count: "temas_count",
-                        route: "temas_route"
+                        icon: 'fas fa-book',
+                        type: 'route',
+                        count: 'temas_count',
+                        route: 'temas_route'
                     },
                     {
                         text: "Segmentación",
-                        icon: "fa fa-square",
-                        type: "action",
-                        count: "segments_count",
-                        method_name: "segmentation"
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'segments_count',
+                        method_name: 'segmentation'
                     },
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "action",
-                        method_name: "redirect_to_course_form_page"
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'redirect_to_course_form_page'
                     },
                     {
                         text: "Logs",
@@ -325,25 +264,25 @@ export default {
                 more_actions: [
                     {
                         text: "Compatibles",
-                        icon: "fa fa-square",
-                        type: "action",
-                        count: "compatibilities_count",
-                        method_name: "compatibility",
-                        show_condition: "compatibility_available"
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'compatibilities_count',
+                        method_name: 'compatibility',
+                        show_condition: 'compatibility_available'
                     },
                     {
                         text: "Encuesta",
-                        icon: "mdi mdi-poll",
-                        type: "action",
-                        count: "encuesta_count",
-                        method_name: "encuesta"
+                        icon: 'mdi mdi-poll',
+                        type: 'action',
+                        count: 'encuesta_count',
+                        method_name: 'encuesta'
                     },
                     {
                         text: "Actualizar Estado",
-                        icon: "fa fa-circle",
-                        type: "action",
-                        method_name: "status"
-                    }
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
+                    },
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',
@@ -357,17 +296,17 @@ export default {
                 schools: [],
                 types: [],
                 statuses: [
-                    { id: null, name: "Todos" },
-                    { id: 1, name: "Activos" },
-                    { id: 2, name: "Inactivos" }
-                ]
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
             },
             filters: {
                 q: '',
                 active: 1,
                 type: null,
                 schools: [],
-                segmented_module: null
+                segmented_module: null,
                 // category: null
             },
 
@@ -375,17 +314,17 @@ export default {
             update_model: null,
 
             modalCursoEncuesta: {
-                ref: "CursoEncuestaModal",
+                ref: 'CursoEncuestaModal',
                 open: false,
-                base_endpoint: `/cursos`
+                base_endpoint: `/cursos`,
             },
             modalFormSegmentationOptions: {
-                ref: "SegmentFormModal",
+                ref: 'SegmentFormModal',
                 open: false,
                 persistent: true,
-                base_endpoint: "/segments",
-                confirmLabel: "Guardar",
-                resource: "segmentación"
+                base_endpoint: '/segments',
+                confirmLabel: 'Guardar',
+                resource: 'segmentación'
             },
             modalLogsOptions: {
                 ref: "LogsModal",
@@ -396,30 +335,30 @@ export default {
             },
 
             modalFormCompatibilityOptions: {
-                ref: "CompatibilityFormModal",
+                ref: 'CompatibilityFormModal',
                 open: false,
                 persistent: true,
-                base_endpoint: "/cursos",
-                confirmLabel: "Guardar",
-                resource: "compatibilidad"
+                base_endpoint: '/cursos',
+                confirmLabel: 'Guardar',
+                resource: 'compatibilidad',
             },
 
             deleteConfirmationDialog: {
-                ref: "CourseDeleteModal",
-                title: "Eliminar Curso",
-                contentText: "¿Desea eliminar este registro?",
+                ref: 'CourseDeleteModal',
+                title: 'Eliminar Curso',
+                contentText: '¿Desea eliminar este registro?',
                 open: false,
-                endpoint: ""
+                endpoint: ''
             },
             courseValidationModal: {
-                ref: "CourseListValidationModal",
-                open: false
+                ref: 'CourseListValidationModal',
+                open: false,
             },
 
             courseUpdateStatusModal: {
-                ref: "CourseUpdateStatusModal",
-                title: "Actualizar Curso",
-                contentText: "¿Desea actualizar este registro?",
+                ref: 'CourseUpdateStatusModal',
+                title: 'Actualizar Curso',
+                contentText: '¿Desea actualizar este registro?',
                 open: false,
                 endpoint: '',
                 title_modal: 'Cambio de estado de un <b>curso</b>',
@@ -460,26 +399,26 @@ export default {
             },
 
             courseValidationModalDefault: {
-                ref: "CourseListValidationModal",
+                ref: 'CourseListValidationModal',
                 action: null,
                 open: false,
-                base_endpoint: "",
+                base_endpoint: '',
                 hideConfirmBtn: false,
                 hideCancelBtn: false,
-                confirmLabel: "Confirmar",
-                cancelLabel: "Cancelar",
-                resource: "CursosValidaciones"
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'CursosValidaciones',
             },
 
             modalMoverCurso: {
-                ref: "MoverCursoModal",
+                ref: 'MoverCursoModal',
                 open: false,
-                base_endpoint: `/cursos`
-            }
-        };
+                base_endpoint: `/cursos`,
+            },
+        }
     },
     mounted() {
-        let vue = this;
+        let vue = this
 
         let params = vue.getAllUrlParams(window.location.search);
 
@@ -493,7 +432,8 @@ export default {
         if (param_schools)
             vue.filters.schools = param_schools.map(school => parseInt(school));
 
-        if (param_q) vue.filters.q = param_q;
+        if (param_q)
+            vue.filters.q = param_q;
 
         vue.getSelects();
     },
@@ -522,53 +462,45 @@ export default {
                 })
         },
         getSelects() {
-            let vue = this;
-            const url = `${vue.base_endpoint}/schools/get-data`;
+            let vue = this
+            const url = `${vue.base_endpoint}/schools/get-data`
 
-            vue.$http.get(url).then(({ data }) => {
-                vue.selects.schools = data.data.schools;
-                vue.selects.modules = data.data.modules;
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.schools = data.data.schools;
+                    vue.selects.modules = data.data.modules;
 
                     // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
         },
 
         deleteCurso(course) {
-            let vue = this;
-            vue.delete_model = course;
-            vue.deleteConfirmationDialog.open = true;
+            let vue = this
+            vue.delete_model = course
+            vue.deleteConfirmationDialog.open = true
         },
         confirmDelete(validateForm = true) {
-            let vue = this;
-            vue.deleteConfirmationDialog.open = false;
-            vue.showLoader();
-            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}/delete`;
-            const bodyData = { validateForm };
+            let vue = this
+            vue.deleteConfirmationDialog.open = false
+            vue.showLoader()
+            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}/delete`
+            const bodyData = {validateForm}
 
-            vue.$http
-                .post(url, bodyData)
-                .then(async ({ data }) => {
-                    this.hideLoader();
-                    const has_info_messages =
-                        data.data.messages.list.length > 0;
+            vue.$http.post(url, bodyData)
+                .then(async ({data}) => {
+                    this.hideLoader()
+                    const has_info_messages = data.data.messages.list.length > 0
                     if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(
-                            data.data,
-                            vue.courseValidationModal,
-                            vue.courseValidationModalDefault
-                        );
-                    else vue.showAlert(data.data.msg);
+                        await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
+                    else
+                        vue.showAlert(data.data.msg)
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(async error => {
-                    await vue.handleValidationsBeforeUpdate(
-                        error,
-                        vue.courseValidationModal,
-                        vue.courseValidationModalDefault
-                    );
-                    vue.loadingActionBtn = false;
-                });
+                    await vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
+                    vue.loadingActionBtn = false
+                })
         },
 
         updateCourseStatus(course) {
@@ -578,45 +510,36 @@ export default {
             vue.courseUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
         },
         async confirmUpdateStatus(validateForm = true) {
-            let vue = this;
-            vue.courseUpdateStatusModal.open = false;
-            vue.showLoader();
+            let vue = this
+            vue.courseUpdateStatusModal.open = false
+            vue.showLoader()
 
             if (validateForm)
                 vue.courseValidationModalUpdateStatus.action = null;
 
-            if (
-                vue.courseValidationModalUpdateStatus.action ===
-                "validations-after-update"
-            ) {
+            if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
                 vue.hideLoader();
                 vue.courseValidationModalUpdateStatus.open = false;
                 return;
             }
 
             let url = `/escuelas/${vue.update_model.first_school_id.id}/cursos/${vue.update_model.id}/status`;
-            const bodyData = { validateForm };
+            const bodyData = {validateForm}
 
-            vue.$http
-                .put(url, bodyData)
-                .then(async ({ data }) => {
-                    vue.hideLoader();
-                    const has_info_messages =
-                        data.data.messages.list.length > 0;
+            vue.$http.put(url, bodyData)
+                .then(async ({data}) => {
+                    vue.hideLoader()
+                    const has_info_messages = data.data.messages.list.length > 0;
 
                     if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(
-                            data.data,
-                            vue.courseValidationModalUpdateStatus,
-                            vue.courseValidationModalDefault
-                        );
+                        await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     else {
                         vue.courseValidationModalUpdateStatus.type_modal = null
                         vue.showAlert(data.data.msg)
                         vue.courseValidationModalUpdateStatus.open = false;
                     }
 
-                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(error => {
                     if (error && error.errors){
@@ -648,5 +571,5 @@ export default {
             // win.focus();
         }
     }
-};
+}
 </script>

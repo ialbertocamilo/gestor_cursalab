@@ -127,8 +127,8 @@ export default {
                 open: false
             },
             dataTable: {
-                ref: "AuditoriaTable",
-                endpoint: "/auditoria/search",
+                ref: 'AuditoriaTable',
+                endpoint: '/auditoria/search',
                 headers: [
                     {
                         text: "Usuario",

@@ -7,29 +7,18 @@
                             <li class="breadcrumb-item"><a href="/aulas-virtuales">Anuncios</a></li>
                             <li class="breadcrumb-item active"><a href="/aulas-virtuales/cuentas">Cuentas</a></li>
                         </ul> -->
-                    <a href="/aulas-virtuales">Aulas Virtuales</a> &nbsp; /
-                    Cuentas
-                    <v-spacer />
+                    <a href="/aulas-virtuales">Aulas Virtuales</a> &nbsp; / Cuentas
+                    <v-spacer/>
 
-                    <v-btn
-                        icon
-                        color="primary"
-                        @click="
-                            openFormModal(
-                                modalInfoOptions,
-                                null,
-                                null,
-                                'Información sobre cuentas'
-                            )
-                        "
+                    <v-btn icon color="primary"
+                           @click="openFormModal(modalInfoOptions, null, null, 'Información sobre cuentas')"
                     >
-                        <v-icon v-text="'mdi-information'" />
+                        <v-icon v-text="'mdi-information'"/>
                     </v-btn>
 
                     <DefaultModalButton
                         label="Crear cuenta"
-                        @click="openFormModal(modalOptions)"
-                    />
+                        @click="openFormModal(modalOptions)"/>
                 </v-card-title>
             </div>
         </header>
@@ -40,26 +29,20 @@
                     <v-row class="justify-content-start">
                         <v-col cols="3">
                             <DefaultSelect
-                                clearable
-                                dense
+                                clearable dense
                                 :items="selects.services"
                                 v-model="filters.service"
                                 label="Servicio"
                                 item-text="name"
-                                @onChange="
-                                    refreshDefaultTable(dataTable, filters, 1)
-                                "
+                                @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             />
                         </v-col>
                         <v-col cols="3">
                             <DefaultInput
-                                clearable
-                                dense
+                                clearable dense
                                 v-model="filters.q"
                                 label="Buscar por nombre..."
-                                @onEnter="
-                                    refreshDefaultTable(dataTable, filters, 1)
-                                "
+                                @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             />
                         </v-col>
                     </v-row>
@@ -115,36 +98,28 @@
                     width="50vw"
                     :ref="modalOptions.ref"
                     :options="modalOptions"
-                    @onConfirm="
-                        closeFormModal(modalOptions, dataTable, filters)
-                    "
+                    @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
                     @onCancel="closeFormModal(modalOptions)"
                 />
 
                 <AccountTokenModal
                     :options="modalTokenOptions"
                     :ref="modalTokenOptions.ref"
-                    @onConfirm="
-                        closeFormModal(modalTokenOptions, dataTable, filters)
-                    "
+                    @onConfirm="closeFormModal(modalTokenOptions, dataTable, filters)"
                     @onCancel="closeFormModal(modalTokenOptions)"
                 />
 
                 <DefaultStatusModal
                     :options="modalStatusOptions"
                     :ref="modalStatusOptions.ref"
-                    @onConfirm="
-                        closeFormModal(modalStatusOptions, dataTable, filters)
-                    "
+                    @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
                     @onCancel="closeFormModal(modalStatusOptions)"
                 />
 
                 <DefaultDeleteModal
                     :options="modalDeleteOptions"
                     :ref="modalDeleteOptions.ref"
-                    @onConfirm="
-                        closeFormModal(modalDeleteOptions, dataTable, filters)
-                    "
+                    @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                     @onCancel="closeFormModal(modalDeleteOptions)"
                 />
 
@@ -178,49 +153,24 @@ export default {
     data() {
         return {
             dataTable: {
-                endpoint: "/aulas-virtuales/cuentas/search",
-                ref: "AccountTable",
+                endpoint: '/aulas-virtuales/cuentas/search',
+                ref: 'AccountTable',
                 headers: [
-                    { text: "ID", value: "id" },
-                    { text: "Nombre", value: "name" },
-                    { text: "Correo", value: "email" },
-                    {
-                        text: "Servicio",
-                        value: "service",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "Tipo",
-                        value: "type",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "Plan",
-                        value: "plan",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "Fecha de creación",
-                        value: "created_at",
-                        align: "center",
-                        sortable: true
-                    },
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "ID", value: "id"},
+                    {text: "Nombre", value: "name"},
+                    {text: "Correo", value: "email"},
+                    {text: "Servicio", value: "service", align: 'center', sortable: false},
+                    {text: "Tipo", value: "type", align: 'center', sortable: false},
+                    {text: "Plan", value: "plan", align: 'center', sortable: false},
+                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "action",
-                        method_name: "edit"
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit'
                     },
                     // {
                     //     text: "Generar Token",
@@ -230,15 +180,15 @@ export default {
                     // },
                     {
                         text: "Estado",
-                        icon: "fa fa-circle",
-                        type: "action",
-                        method_name: "status"
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
                     },
                     {
                         text: "Eliminar",
-                        icon: "far fa-trash-alt",
-                        type: "action",
-                        method_name: "delete"
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
                     },
                     {
                         text: "Logs",
@@ -261,21 +211,21 @@ export default {
                 services: []
             },
             filters: {
-                q: "",
+                q: '',
                 service: null
             },
             modalOptions: {
-                ref: "AccountFormModal",
+                ref: 'AccountFormModal',
                 open: false,
-                base_endpoint: "/aulas-virtuales/cuentas",
-                resource: "cuenta",
-                confirmLabel: "Guardar"
+                base_endpoint: '/aulas-virtuales/cuentas',
+                resource: 'cuenta',
+                confirmLabel: 'Guardar',
             },
             modalInfoOptions: {
-                ref: "MeetingInfoModal",
+                ref: 'MeetingInfoModal',
                 open: false,
-                base_endpoint: "/aulas-virtuales/cuentas",
-                resource: "cuenta",
+                base_endpoint: '/aulas-virtuales/cuentas',
+                resource: 'cuenta',
                 hideConfirmBtn: true,
                 cancelLabel: "Cerrar"
             },
@@ -287,39 +237,40 @@ export default {
                 persistent: true
             },
             modalStatusOptions: {
-                ref: "AccountStatusModal",
+                ref: 'AccountStatusModal',
                 open: false,
-                base_endpoint: "/aulas-virtuales/cuentas",
-                contentText: "¿Desea cambiar de estado a este registro?",
-                endpoint: ""
+                base_endpoint: '/aulas-virtuales/cuentas',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                endpoint: '',
             },
             modalTokenOptions: {
-                ref: "AccountTokenModal",
+                ref: 'AccountTokenModal',
                 open: false,
-                base_endpoint: "/aulas-virtuales/cuentas",
-                contentText: "¿Desea generar nuevos tokens a este registro?",
-                endpoint: ""
+                base_endpoint: '/aulas-virtuales/cuentas',
+                contentText: '¿Desea generar nuevos tokens a este registro?',
+                endpoint: '',
             },
             modalDeleteOptions: {
-                ref: "AccountDeleteModal",
+                ref: 'AccountDeleteModal',
                 open: false,
-                base_endpoint: "/aulas-virtuales/cuentas",
-                contentText: "¿Desea eliminar este registro?",
-                endpoint: ""
-            }
-        };
+                base_endpoint: '/aulas-virtuales/cuentas',
+                contentText: '¿Desea eliminar este registro?',
+                endpoint: '',
+            },
+        }
     },
     mounted() {
-        let vue = this;
+        let vue = this
         vue.getSelects();
     },
     methods: {
         getSelects() {
-            let vue = this;
-            const url = `/aulas-virtuales/cuentas/get-list-selects`;
-            vue.$http.get(url).then(({ data }) => {
-                vue.selects.services = data.data.services;
-            });
+            let vue = this
+            const url = `/aulas-virtuales/cuentas/get-list-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.services = data.data.services
+                })
         },
         // reset(user) {
         //     let vue = this
@@ -330,7 +281,7 @@ export default {
         },
         confirmModal() {
             // TODO: Call store or update USER
-        }
+        },
     }
-};
+}
 </script>

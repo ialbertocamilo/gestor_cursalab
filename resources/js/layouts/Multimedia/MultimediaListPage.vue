@@ -1,4 +1,4 @@
-<!-- MultimediaListPage -->
+
 <template>
     <section class="section-list">
         <DefaultFilter
@@ -48,17 +48,10 @@
             <!--            TODO: Add breadcumb-->
             <v-card-title>
                 Multimedia
-                <v-spacer />
+                <v-spacer/>
                 <DefaultModalButton
                     :label="'Subir multimedia'"
-                    @click="
-                        openFormModal(
-                            modalUpdateMultimedia,
-                            null,
-                            'updateMultimedia',
-                            `Subir archivos`
-                        )
-                    "
+                    @click="openFormModal(modalUpdateMultimedia, null, 'updateMultimedia', `Subir archivos`)"
                 />
             </v-card-title>
         </v-card>
@@ -106,17 +99,10 @@
                         <DefaultButton
                             label="Ver Filtros"
                             icon="mdi-filter"
-                            @click="
-                                open_advanced_filter = !open_advanced_filter
-                            "
-                        />
+                            @click="open_advanced_filter = !open_advanced_filter"/>
                     </v-col>
                 </v-row>
-                <v-row
-                    justify="space-between"
-                    class="mx-1"
-                    style="background-color: #F9FAFB; border-radius: 6px"
-                >
+                <v-row justify="space-between" class="mx-1" style="background-color: #F9FAFB; border-radius: 6px">
                     <v-col cols="4">
                         <v-btn
                             elevation="0"
@@ -124,9 +110,8 @@
                             color="primary"
                             :fab="view === 'grid'"
                             :icon="view === 'list'"
-                            @click="view = 'grid'"
-                        >
-                            <v-icon v-text="'mdi-grid'" />
+                            @click="view = 'grid'">
+                            <v-icon v-text="'mdi-grid' "/>
                         </v-btn>
                         <v-btn
                             elevation="0"
@@ -134,9 +119,8 @@
                             color="primary"
                             :fab="view === 'list'"
                             :icon="view === 'grid'"
-                            @click="view = 'list'"
-                        >
-                            <v-icon v-text="'mdi-format-list-bulleted'" />
+                            @click="view = 'list'">
+                            <v-icon v-text="'mdi-format-list-bulleted'"/>
                         </v-btn>
                     </v-col>
                     <v-col cols="2">
@@ -176,33 +160,16 @@
             </transition>
             <section>
                 <v-row class="justify-content-end" no-gutters>
-                    <v-col
-                        cols="1"
-                        class="d-flex align-items-end justify-content-around"
-                    >
+                    <v-col cols="1" class="d-flex align-items-end justify-content-around">
                         <small
-                            v-text="
-                                `${pagination.fromRow} - ${pagination.toRow} de ${pagination.total_rows}`
-                            "
-                        />
+                            v-text="`${pagination.fromRow} - ${pagination.toRow} de ${pagination.total_rows}`"/>
                     </v-col>
-                    <v-col
-                        cols="1"
-                        class="d-flex align-items-center justify-content-around"
-                    >
-                        <v-icon
-                            :disabled="pagination.actual_page === 1"
-                            v-text="'mdi-chevron-left'"
-                            @click="changePage(false)"
-                        />
-                        <v-icon
-                            :disabled="
-                                pagination.actual_page ===
-                                    pagination.total_pages
-                            "
-                            v-text="'mdi-chevron-right'"
-                            @click="changePage(true)"
-                        />
+                    <v-col cols="1" class="d-flex align-items-center justify-content-around">
+                        <v-icon :disabled="pagination.actual_page === 1" v-text="'mdi-chevron-left'"
+                                @click="changePage(false)"/>
+                        <v-icon :disabled="pagination.actual_page === pagination.total_pages"
+                                v-text="'mdi-chevron-right'"
+                                @click="changePage(true)"/>
                     </v-col>
                 </v-row>
             </section>
@@ -211,7 +178,7 @@
             width="60vw"
             :ref="modalOptions.ref"
             :options="modalOptions"
-            @onCancel="closeFormModal(modalOptions)"
+            @onCancel="closeFormModal(modalOptions);"
             @onConfirm="getData"
         />
         <MultimediaUpdateModal
@@ -244,9 +211,9 @@ export default {
         MultimediaUpdateModal,
         MultimediaDetailModal,
         LogsModal,
-        grid: {
-            props: ["data", "loading"],
-            components: { MultimediaGrid },
+        'grid': {
+            props: ['data', 'loading'],
+            components: {MultimediaGrid},
             template: `
                 <MultimediaGrid
                     ref="MultimediaGrid" :data='data' :loading='loading'
@@ -255,18 +222,18 @@ export default {
                 />`,
             methods: {
                 detalles(rowData) {
-                    let vue = this;
-                    vue.$emit("detalles", rowData);
+                    let vue = this
+                    vue.$emit("detalles", rowData)
                 },
                 download(rowData) {
-                    let vue = this;
-                    vue.$emit("download", rowData);
+                    let vue = this
+                    vue.$emit("download", rowData)
                 }
-            }
+            },
         },
-        list: {
-            props: ["data", "loading"],
-            components: { MultimediaListView },
+        'list': {
+            props: ['data', 'loading'],
+            components: {MultimediaListView},
             template: `
                 <MultimediaListView
                     :rows-per-page="12" ref="MultimediaTable" :data-table="dataTable"
@@ -277,8 +244,8 @@ export default {
                 />`,
             methods: {
                 detalles(rowData) {
-                    let vue = this;
-                    vue.$emit("detalles", rowData);
+                    let vue = this
+                    vue.$emit("detalles", rowData)
                 },
                 download(rowData) {
                     let vue = this;
@@ -293,43 +260,25 @@ export default {
                 return {
                     dataTable: {
                         headers: [
-                            {
-                                text: "Preview",
-                                value: "image",
-                                align: "center",
-                                sortable: false
-                            },
-                            { text: "Título", value: "title", sortable: false },
-                            { text: "Tipo", value: "tipo", sortable: false },
-                            {
-                                text: "Fecha de subida",
-                                value: "created_at",
-                                sortable: false
-                            },
-                            {
-                                text: "Peso",
-                                value: "formattedSize",
-                                sortable: false
-                            },
-                            {
-                                text: "Opciones",
-                                value: "actions",
-                                align: "center",
-                                sortable: false
-                            }
+                            {text: "Preview", value: "image", align: 'center', sortable: false},
+                            {text: "Título", value: "title", sortable: false},
+                            {text: "Tipo", value: "tipo", sortable: false},
+                            {text: "Fecha de subida", value: "created_at", sortable: false},
+                            {text: "Peso", value: "formattedSize", sortable: false},
+                            {text: "Opciones", value: "actions", align: 'center', sortable: false},
                         ],
                         actions: [
                             {
                                 text: "Descargar",
-                                icon: "mdi mdi-download",
-                                type: "action",
-                                method_name: "download"
+                                icon: 'mdi mdi-download',
+                                type: 'action',
+                                method_name: 'download'
                             },
                             {
                                 text: "Detalles",
-                                icon: "mdi mdi-clipboard-text",
-                                type: "action",
-                                method_name: "detalles"
+                                icon: 'mdi mdi-clipboard-text',
+                                type: 'action',
+                                method_name: 'detalles'
                             },
                             {
                                 text: "Logs",
@@ -346,7 +295,7 @@ export default {
     },
     data() {
         return {
-            view: "grid",
+            view: 'grid',
             loading: true,
             data: [],
             pagination: {
@@ -355,27 +304,27 @@ export default {
                 rows_per_page: 12,
                 fromRow: 1,
                 toRow: 1,
-                total_rows: 0
+                total_rows: 0,
             },
             sortParams: {
                 sortBy: null,
                 sortDesc: false
             },
             modalOptions: {
-                ref: "MultimediaDetailModal",
+                ref: 'MultimediaDetailModal',
                 open: false,
-                base_endpoint: "/multimedia",
-                cancelLabel: "Cerrar",
-                confirmLabel: "Eliminar",
-                resource: "Multimedia",
-                showCloseIcon: true
+                base_endpoint: '/multimedia',
+                cancelLabel: 'Cerrar',
+                confirmLabel: 'Eliminar',
+                resource: 'Multimedia',
+                showCloseIcon: true,
             },
             modalUpdateMultimedia: {
-                ref: "MultimediaUpdateModal",
+                ref: 'MultimediaUpdateModal',
                 open: false,
-                confirmLabel: "Subir",
-                base_endpoint: "/multimedia",
-                cancelLabel: "Cerrar"
+                confirmLabel: 'Subir',
+                base_endpoint: '/multimedia',
+                cancelLabel: 'Cerrar',
             },
             filters: {
                 q: null,
@@ -385,16 +334,16 @@ export default {
             },
             selects: {
                 tipo: [
-                    { nombre: "Imagen", id: "image" },
-                    { nombre: "Video", id: "video" },
-                    { nombre: "Audio", id: "audio" },
-                    { nombre: "PDF", id: "pdf" },
-                    { nombre: "Scorm", id: "scorm" }
+                    {nombre: 'Imagen', id: 'image'},
+                    {nombre: 'Video', id: 'video'},
+                    {nombre: 'Audio', id: 'audio'},
+                    {nombre: 'PDF', id: 'pdf'},
+                    {nombre: 'Scorm', id: 'scorm'},
                 ],
                 order_by: [
-                    { nombre: "Tamaño", id: "size" },
-                    { nombre: "Nombre", id: "title" },
-                    { nombre: "Fecha de creación", id: "created_at" }
+                    {nombre: 'Tamaño', id: 'size'},
+                    {nombre: 'Nombre', id: 'title'},
+                    {nombre: 'Fecha de creación', id: 'created_at'},
                 ]
             },
             modalLogsOptions: {
@@ -413,70 +362,70 @@ export default {
         };
     },
     mounted() {
-        let vue = this;
+        let vue = this
         // vue.getSelects();
         vue.getData();
     },
     methods: {
         getData(page = null) {
-            let vue = this;
-            vue.loading = true;
-            if (page) vue.pagination.actual_page = page;
+            let vue = this
+            vue.loading = true
+            if (page)
+                vue.pagination.actual_page = page
 
-            let url =
-                `/multimedia/search?` +
+            let url = `/multimedia/search?` +
                 `page=${page || vue.pagination.actual_page}` +
-                `&paginate=${vue.pagination.rows_per_page}`;
+                `&paginate=${vue.pagination.rows_per_page}`
 
-            if (vue.sortParams.sortBy)
-                // Add param to sort result
-                url += `&sortBy=${vue.sortParams.sortBy}`;
+            if (vue.sortParams.sortBy) // Add param to sort result
+                url += `&sortBy=${vue.sortParams.sortBy}`
 
-            if (vue.sortParams.sortDesc)
-                // Add param to sort orientation
-                url += `&sortDesc=${vue.sortParams.sortDesc}`;
+            if (vue.sortParams.sortDesc) // Add param to sort orientation
+                url += `&sortDesc=${vue.sortParams.sortDesc}`
 
-            const filters = vue.addParamsToURL("", vue.filters);
+            const filters = vue.addParamsToURL("", vue.filters)
             // console.log('FILTROS :: ', filters)
 
-            url = url + filters;
-            this.$http.get(url).then(({ data }) => {
-                console.log(data.medias);
-                vue.data = data.medias.data;
-                // console.log(vue.data)
-                if (vue.pagination.actual_page > data.medias.total_pages)
-                    vue.pagination.actual_page = data.medias.total_pages;
+            url = url + filters
+            this.$http.get(url)
+                .then(({data}) => {
+                    console.log(data.medias)
+                    vue.data = data.medias.data
+                    // console.log(vue.data)
+                    if (vue.pagination.actual_page > data.medias.total_pages)
+                        vue.pagination.actual_page = data.medias.total_pages
 
-                vue.pagination.total_pages = data.medias.last_page;
-                vue.pagination.fromRow = data.medias.from || 0;
-                vue.pagination.toRow = data.medias.to || 0;
-                vue.pagination.total_rows = data.medias.total;
-                vue.loading = false;
-            });
+                    vue.pagination.total_pages = data.medias.last_page;
+                    vue.pagination.fromRow = data.medias.from || 0;
+                    vue.pagination.toRow = data.medias.to || 0;
+                    vue.pagination.total_rows = data.medias.total;
+                    vue.loading = false
+                })
         },
         detalles(rowData) {
-            console.log("detalles first parent component :: ", rowData);
+            console.log('detalles first parent component :: ', rowData)
         },
         download(rowData) {
-            const url = `/multimedia/${rowData.id}/download`;
-            this.openInNewTab(url);
+            const url = `/multimedia/${rowData.id}/download`
+            this.openInNewTab(url)
         },
         changePage(sum) {
-            let vue = this;
+            let vue = this
             if (sum) {
                 if (vue.pagination.actual_page < vue.pagination.total_pages)
-                    vue.pagination.actual_page++;
+                    vue.pagination.actual_page++
             } else {
                 if (vue.pagination.actual_page > 1)
-                    vue.pagination.actual_page--;
-                else vue.pagination.actual_page = 1;
+                    vue.pagination.actual_page--
+                else
+                    vue.pagination.actual_page = 1
             }
-            vue.getData();
+            vue.getData()
         },
         filtrar() {
-            let vue = this;
-            vue.open_advanced_filter = false;
-            vue.getData();
+            let vue = this
+            vue.open_advanced_filter = false
+            vue.getData()
         }
         // getSelects() {
         //     let vue = this
@@ -487,5 +436,5 @@ export default {
         //         })
         // },
     }
-};
+}
 </script>

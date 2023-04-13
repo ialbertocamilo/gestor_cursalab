@@ -2,47 +2,32 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Formulario Ayuda APP
-                <v-spacer />
+                Ayuda
+                <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'" @click="activity"/> -->
-                <DefaultModalButton
-                    :label="'Opción'"
-                    @click="openFormModal(modalOptions)"
-                />
+                <DefaultModalButton :label="'Ayuda'" @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
         <v-card flat class="elevation-0 mb-4">
-            <DefaultTable
-                :ref="dataTable.ref"
-                :data-table="dataTable"
-                :filters="filters"
-                @edit="openFormModal(modalOptions, $event)"
-                @status="
-                    openFormModal(
-                        modalStatusOptions,
-                        $event,
-                        'status',
-                        'Actualizar estado'
-                    )
-                "
-                @delete="
-                    openFormModal(
-                        modalDeleteOptions,
-                        $event,
-                        'delete',
-                        'Eliminar registro'
-                    )
-                "
-                @logs="
-                    openFormModal(
-                        modalLogsOptions,
-                        $event,
-                        'logs',
-                        `Logs de Ayuda - ${$event.title}`
-                    )
-                "
-            /><LogsModal
+
+            <DefaultTable :ref="dataTable.ref"
+                          :data-table="dataTable"
+                          :filters="filters"
+                          @edit="openFormModal(modalOptions, $event)"
+                          @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                          @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar registro')"
+			@logs="
+	                    openFormModal(
+        	                modalLogsOptions,
+        	                $event,
+        	                'logs',
+        	                `Logs de Ayuda - ${$event.title}`
+        	            )
+        	        "
+            />
+
+            <LogsModal
                 :options="modalLogsOptions"
                 width="55vw"
                 :model_id="null"
@@ -50,85 +35,67 @@
                 :ref="modalLogsOptions.ref"
                 @onCancel="closeSimpleModal(modalLogsOptions)"
             />
-
-            <AyudaFormModal
-                width="35vw"
-                :ref="modalOptions.ref"
-                :options="modalOptions"
-                @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
-                @onCancel="closeFormModal(modalOptions)"
+            <AyudaFormModal width="35vw"
+                              :ref="modalOptions.ref"
+                              :options="modalOptions"
+                              @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
+                              @onCancel="closeFormModal(modalOptions)"
             />
 
-            <DefaultDeleteModal
-                :options="modalDeleteOptions"
-                :ref="modalDeleteOptions.ref"
-                @onConfirm="
-                    closeFormModal(modalDeleteOptions, dataTable, filters)
-                "
-                @onCancel="closeFormModal(modalDeleteOptions)"
+            <DefaultStatusModal :options="modalStatusOptions"
+                                :ref="modalStatusOptions.ref"
+                                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+                                @onCancel="closeFormModal(modalStatusOptions)"
             />
+
+            <DefaultDeleteModal :options="modalDeleteOptions"
+                                :ref="modalDeleteOptions.ref"
+                                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+                                @onCancel="closeFormModal(modalDeleteOptions)"
+            />
+
         </v-card>
     </section>
 </template>
 
 <script>
 import AyudaFormModal from "./AyudaFormModal";
+import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: { AyudaFormModal, DefaultDeleteModal, LogsModal },
+    components: {AyudaFormModal, DefaultStatusModal, DefaultDeleteModal, LogsModal },
     data() {
         return {
             dataTable: {
-                endpoint: "/soporte/formulario-ayuda/search",
-                ref: "AyudaTable",
+                endpoint: '/ayudas/search',
+                ref: 'AyudaTable',
                 headers: [
-                    {
-                        text: "Orden",
-                        value: "position",
-                        align: "center",
-                        model: "Post",
-                        sortable: false
-                    },
-                    {
-                        text: "Nombre",
-                        value: "title",
-                        align: "left",
-                        sortable: false
-                    },
-                    {
-                        text: "Detalle",
-                        value: "check_text_area",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "Fecha de creación",
-                        value: "created_at",
-                        align: "center",
-                        sortable: false
-                    },
-                    // {text: "Fecha de actualización", value: "updated_at", align: 'center', sortable: true},
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "Orden", value: "orden",  align: 'center', model: "Ayuda"},
+                    {text: "Imagen", value: "image", align: 'center', sortable: false},
+                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
+                    {text: "Fecha de actualización", value: "updated_at", align: 'center', sortable: true},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "action",
-                        method_name: "edit"
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit'
+                    },
+                    {
+                        text: "Estado",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
                     },
                     {
                         text: "Eliminar",
-                        icon: "far fa-trash-alt",
-                        type: "action",
-                        method_name: "delete"
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
                     },
                     {
                         text: "Logs",
@@ -151,39 +118,46 @@ export default {
                 // modules: []
             },
             filters: {
-                q: ""
+                q: '',
                 // module: null
             },
             modalOptions: {
-                ref: "AyudaFormModal",
+                ref: 'AyudaFormModal',
                 open: false,
-                base_endpoint: "/soporte/formulario-ayuda",
-                resource: "Ayuda",
-                confirmLabel: "Guardar"
+                base_endpoint: '/ayudas',
+                resource: 'Ayuda',
+                confirmLabel: 'Guardar',
             },
-            modalLogsOptions: {
+            modalStatusOptions: {
+                ref: 'AyudaStatusModal',
+                open: false,
+                base_endpoint: '/ayudas',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                endpoint: '',
+            },
+            modalDeleteOptions: {
+                ref: 'AyudaDeleteModal',
+                open: false,
+                base_endpoint: '/ayudas',
+                contentText: '¿Desea eliminar este registro?',
+                endpoint: '',
+            },
+	    modalLogsOptions: {
                 ref: "LogsModal",
                 open: false,
                 showCloseIcon: true,
                 base_endpoint: "/search",
                 persistent: true
             },
-            modalDeleteOptions: {
-                ref: "AyudaDeleteModal",
-                open: false,
-                base_endpoint: "/soporte/formulario-ayuda",
-                contentText: "¿Desea eliminar este registro?",
-                endpoint: ""
-            }
-        };
+        }
     },
     mounted() {
-        let vue = this;
+        let vue = this
         vue.getSelects();
     },
     methods: {
         getSelects() {
-            let vue = this;
+            let vue = this
             // const url = `/ayudas/get-list-selects`
             // vue.$http.get(url)
             //     .then(({data}) => {
@@ -195,11 +169,11 @@ export default {
         //     vue.consoleObjectTable(user, 'User to Reset')
         // },
         activity() {
-            console.log("activity");
+            console.log('activity')
         },
         confirmModal() {
             // TODO: Call store or update USER
-        }
+        },
     }
-};
+}
 </script>

@@ -15,12 +15,7 @@ class GeneratedReport extends Model implements Recordable
     protected $connection = 'mysql';
 
     protected $fillable = [
-        'name',
-        'download_url',
-        'admin_id',
-        'workspace_id',
-        'filters',
-        'is_ready',
+        'name', 'download_url', 'admin_id', 'workspace_id', 'filters', 'is_ready'
     ];
 
     protected $table = 'generated_reports';

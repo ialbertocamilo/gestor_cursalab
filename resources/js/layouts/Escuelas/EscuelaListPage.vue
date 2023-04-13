@@ -2,15 +2,14 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs" />
-                <v-spacer />
+                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
+                <v-spacer/>
                 <!--                <DefaultActivityButton-->
                 <!--                    :label="'Actividad'"-->
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
                     :label="'Escuela'"
-                    @click="openCRUDPage(`/escuelas/create`)"
-                />
+                    @click="openCRUDPage(`/escuelas/create`)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -39,14 +38,11 @@
                     </v-col>
                     <v-col cols="3">
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
                     </v-col>
@@ -59,9 +55,7 @@
                             :options="modalDateFilter1"
                             v-model="filters.dates"
                             label="Fecha de creación"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -109,9 +103,9 @@
                 "
                 @duplicate="openDuplicarModal($event)"
             />
-            <!-- @delete="deleteEscuela($event)" -->
+                <!-- @delete="deleteEscuela($event)" -->
 
-            <!--  <DialogConfirm
+           <!--  <DialogConfirm
                 v-model="modalDeleteOptions.open"
                 width="450px"
                 title="Eliminar Escuela"
@@ -143,9 +137,7 @@
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
-                @onConfirm="
-                    closeFormModal(modalDeleteOptions, dataTable, filters)
-                "
+                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
             <LogsModal
@@ -165,7 +157,7 @@ import EscuelaFormModal from "./EscuelaFormModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import EscuelaValidacionesModal from "./EscuelaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
-import DuplicarCursos from "./DuplicarCursos";
+import DuplicarCursos from './DuplicarCursos';
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import LogsModal from "../../components/globals/Logs";
 
@@ -185,11 +177,11 @@ export default {
 
         return {
             breadcrumbs: [
-                { title: "Escuelas", text: null, disabled: true, href: "" }
+                {title: 'Escuelas', text: null, disabled: true, href: ''},
             ],
             dataTable: {
-                endpoint: "/escuelas/search",
-                ref: "escuelasTable",
+                endpoint: '/escuelas/search',
+                ref: 'escuelasTable',
                 headers: [
                     // {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
@@ -202,16 +194,16 @@ export default {
                 actions: [
                     {
                         text: "Cursos",
-                        icon: "fas fa-book",
-                        type: "route",
-                        count: "cursos_count",
-                        route: "cursos_route"
+                        icon: 'fas fa-book',
+                        type: 'route',
+                        count: 'cursos_count',
+                        route: 'cursos_route'
                     },
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "route",
-                        route: "edit_route"
+                        icon: 'mdi mdi-pencil',
+                        type: 'route',
+                        route: 'edit_route'
                     },
                     // {
                     //     text: "Duplicar",
@@ -221,10 +213,10 @@ export default {
                     // },
                     {
                         text: "Eliminar",
-                        icon: "far fa-trash-alt",
-                        type: "action",
-                        show_condition: "has_no_courses",
-                        method_name: "delete"
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        show_condition: 'has_no_courses',
+                        method_name: 'delete'
                     },
                     {
                         text: "Logs",
@@ -241,7 +233,7 @@ export default {
                     //     type: 'action',
                     //     method_name: 'status'
                     // },
-                ]
+                ],
             },
             modalLogsOptions: {
                 ref: "LogsModal",
@@ -251,19 +243,19 @@ export default {
                 base_endpoint: "/search"
             },
             modalDeleteOptions: {
-                ref: "EscuelaDeleteModal",
+                ref: 'EscuelaDeleteModal',
                 open: false,
-                base_endpoint: "/escuelas",
-                contentText: "¿Desea eliminar esta escuela?",
-                endpoint: ""
+                base_endpoint: '/escuelas',
+                contentText: '¿Desea eliminar esta escuela?',
+                endpoint: '',
             },
             selects: {
                 modules: [],
                 statuses: [
-                    { id: null, name: "Todos" },
-                    { id: 1, name: "Activos" },
-                    { id: 2, name: "Inactivos" }
-                ]
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
             },
             filters: {
                 q: '',
@@ -272,14 +264,14 @@ export default {
             },
             modalEscuelasValidaciones: {},
             modalEscuelasValidacionesDefault: {
-                ref: "TemaValidacionesModal",
+                ref: 'TemaValidacionesModal',
                 open: false,
-                base_endpoint: "",
+                base_endpoint: '',
                 hideConfirmBtn: false,
                 hideCancelBtn: false,
-                confirmLabel: "Confirmar",
-                cancelLabel: "Cancelar",
-                resource: "TemasValidaciones"
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'TemasValidaciones',
             },
             delete_model: null,
             // modalStatusOptions: {
@@ -292,12 +284,12 @@ export default {
             modalCursosDuplicar: {
                 categoria_id: 0,
                 dialog: false,
-                ref: "CursosDuplicarModal"
+                ref: 'CursosDuplicarModal',
             },
             modalDateFilter1: {
-                open: false
-            }
-        };
+                open: false,
+            },
+        }
     },
     mounted() {
         let vue = this
@@ -316,7 +308,7 @@ export default {
                 })
         },
         activity() {
-            console.log("activity");
+            console.log('activity')
         },
         deleteEscuela(school) {
             // let vue = this
@@ -326,7 +318,7 @@ export default {
         selectDefaultModule(modules) {
             let vue = this
 
-            let uri = window.location.search.substring(1);
+            let uri = window.location.search.substring(1); 
             let params = new URLSearchParams(uri);
             let param_module_id = params.get("module_id");
 
@@ -348,17 +340,13 @@ export default {
             // })
         },
         async cleanModalEscuelasValidaciones() {
-            let vue = this;
+            let vue = this
             await vue.$nextTick(() => {
-                vue.modalEscuelasValidaciones = Object.assign(
-                    {},
-                    vue.modalEscuelasValidaciones,
-                    vue.modalEscuelasValidacionesDefault
-                );
-            });
+                vue.modalEscuelasValidaciones = Object.assign({}, vue.modalEscuelasValidaciones, vue.modalEscuelasValidacionesDefault)
+            })
         },
         confirmDelete() {
-            let vue = this;
+            let vue = this
             // let url = `/modulos/${vue.workspace_id}/escuelas/${vue.delete_model.id}`
             // let url = `/escuelas/${vue.delete_model.id}`
 
@@ -390,5 +378,5 @@ export default {
             vue.modalCursosDuplicar.categoria_id = 0;
         }
     }
-};
+}
 </script>

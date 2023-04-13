@@ -3,12 +3,11 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Anuncios
-                <v-spacer />
+                <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'" @click="activity"/> -->
                 <DefaultModalButton
                     :label="'Anuncio'"
-                    @click="openFormModal(modalOptions)"
-                />
+                    @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
         <!-- FILTROS-->
@@ -17,41 +16,30 @@
                 <v-row class="justify-content-start">
                     <v-col cols="3">
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.modules"
                             v-model="filters.module"
                             label="Módulos"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col cols="3">
                         <DefaultInput
-                            clearable
-                            dense
+                            clearable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
-                            @clickAppendIcon="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
                     <v-col cols="3">
                         <DefaultSelect
-                            clearable
-                            dense
+                            clearable dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
-                            @onChange="
-                                refreshDefaultTable(dataTable, filters, 1)
-                            "
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                             item-text="name"
                         />
                     </v-col>
@@ -86,18 +74,14 @@
             <DefaultStatusModal
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
-                @onConfirm="
-                    closeFormModal(modalStatusOptions, dataTable, filters)
-                "
+                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
 
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
-                @onConfirm="
-                    closeFormModal(modalDeleteOptions, dataTable, filters)
-                "
+                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
             <LogsModal
@@ -128,53 +112,33 @@ export default {
     data() {
         return {
             dataTable: {
-                endpoint: "/anuncios/search",
-                ref: "AnuncioTable",
+                endpoint: '/anuncios/search',
+                ref: 'AnuncioTable',
                 headers: [
-                    {
-                        text: "Banner",
-                        value: "image",
-                        align: "center",
-                        sortable: false
-                    },
-                    { text: "Nombre", value: "nombre" },
-                    {
-                        text: "Fecha de publicación",
-                        value: "publish_date",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "Venció",
-                        value: "expired",
-                        align: "center",
-                        sortable: false
-                    },
-                    {
-                        text: "Opciones",
-                        value: "actions",
-                        align: "center",
-                        sortable: false
-                    }
+                    {text: "Banner", value: "image", align: 'center', sortable: false},
+                    {text: "Nombre", value: "nombre"},
+                    {text: "Fecha de publicación", value: "publish_date", align: 'center', sortable: false},
+                    {text: "Venció", value: "expired", align: 'center', sortable: false},
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
                         text: "Editar",
-                        icon: "mdi mdi-pencil",
-                        type: "action",
-                        method_name: "edit"
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit'
                     },
                     {
                         text: "Estado",
-                        icon: "fa fa-circle",
-                        type: "action",
-                        method_name: "status"
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
                     },
                     {
                         text: "Eliminar",
-                        icon: "far fa-trash-alt",
-                        type: "action",
-                        method_name: "delete"
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
                     },
                     {
                         text: "Logs",
@@ -196,13 +160,13 @@ export default {
             selects: {
                 modules: [],
                 statuses: [
-                    { id: null, name: "Todos" },
-                    { id: 1, name: "Activos" },
-                    { id: 2, name: "Inactivos" }
-                ]
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
             },
             filters: {
-                q: "",
+                q: '',
                 module: null,
                 active: 1
             },
@@ -215,14 +179,14 @@ export default {
 
             },
             modalOptions: {
-                ref: "AnuncioFormModal",
+                ref: 'AnuncioFormModal',
                 open: false,
-                base_endpoint: "/anuncios",
-                resource: "Anuncio",
-                confirmLabel: "Guardar"
+                base_endpoint: '/anuncios',
+                resource: 'Anuncio',
+                confirmLabel: 'Guardar',
             },
             modalStatusOptions: {
-                ref: "AnuncioStatusModal",
+                ref: 'AnuncioStatusModal',
                 open: false,
                 base_endpoint: '/anuncios',
                 contentText: '¿Desea cambiar de estado a este registro?',
@@ -244,7 +208,7 @@ export default {
                 width: '408px'
             },
             modalDeleteOptions: {
-                ref: "AnuncioDeleteModal",
+                ref: 'AnuncioDeleteModal',
                 open: false,
                 base_endpoint: '/anuncios',
                 contentText: '¿Desea eliminar este registro?',
@@ -263,27 +227,28 @@ export default {
         }
     },
     mounted() {
-        let vue = this;
+        let vue = this
         vue.getSelects();
     },
     methods: {
         getSelects() {
-            let vue = this;
-            const url = `/anuncios/get-list-selects`;
-            vue.$http.get(url).then(({ data }) => {
-                vue.selects.modules = data.data.modules;
-            });
+            let vue = this
+            const url = `/anuncios/get-list-selects`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.modules = data.data.modules
+                })
         },
         // reset(user) {
         //     let vue = this
         //     vue.consoleObjectTable(user, 'User to Reset')
         // },
         activity() {
-            console.log("activity");
+            console.log('activity')
         },
         confirmModal() {
             // TODO: Call store or update USER
-        }
+        },
     }
-};
+}
 </script>
