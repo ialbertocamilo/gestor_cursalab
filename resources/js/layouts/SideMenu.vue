@@ -593,7 +593,7 @@ export default {
                     new_grupos.push(grupo);
                 }
             });
-            console.log(new_grupos);
+            // console.log(new_grupos);
             return new_grupos;
         }
     },
