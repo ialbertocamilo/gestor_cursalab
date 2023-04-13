@@ -105,7 +105,7 @@
                                         color="primary"
                                         class="mr-1"
                                         v-text="'mdi-plus'"/>
-                                    Segmento
+                                    Agregar segmento
                                 </v-btn>
                             </v-col>
                         </v-row>
@@ -113,10 +113,14 @@
                         <v-row justify="space-around">
                             <v-col
                                 v-if="getSegmentWithModuleCriteria()"
-                                cols="9">
-                                <segment-values
-                                    :criterion="getSegmentWithModuleCriteria().criteria_selected[0]"
-                                />
+                                cols="10">
+                                <div class="pr-md-3 pl-md-3
+pr-lg-2 pl-lg-2">
+                                    <segment-values
+                                        :criterion="getSegmentWithModuleCriteria().criteria_selected[0]"
+                                    />
+                                </div>
+
                             </v-col>
 
                             <v-col cols="11" class="d-flex justify-content-center">
@@ -645,7 +649,32 @@ export default {
                 }
             });
 
+            // When model type is course, load module ids
+
+            if (resource.id && vue.isCourseSegmentation()) {
+                await vue.loadModulesFromCourseSchools(resource.id)
+            }
+
             return 0;
+        },
+        /**
+         * Load modules ids from schools the course belongs to
+         * @param courseId
+         * @returns {Promise<void>}
+         */
+        async loadModulesFromCourseSchools(courseId) {
+            if (!this.resource) return
+            let url = `${this.options.base_endpoint}/modules/course/${courseId}`;
+            try {
+                const response = await this.$http.get(url);
+                let modulesIds = []
+                if (response.data.data) {
+                    modulesIds = response.data.data.modulesIds
+                    this.modulesSchools = response.data.data.modulesSchools
+                }
+            } catch (ex) {
+                console.log(ex)
+            }
         },
         loadSelects() {
             let vue = this;
