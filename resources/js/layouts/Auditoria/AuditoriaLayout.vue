@@ -225,8 +225,22 @@ export default {
             }
         };
     },
-
+    mounted() {
+        let vue = this;
+        vue.getSelects();
+    },
     methods: {
+
+        getSelects() {
+            let vue = this;
+            let url = `/auditoria/selects`;
+            vue.filters.model_type = [];
+
+            axios.get(url).then(({ data }) => {
+                vue.selects.model_type = data.data.models;
+            });
+        },
+
         filter() {
             let vue = this;
             vue.page = 1;
