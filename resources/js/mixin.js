@@ -592,7 +592,9 @@ export default {
                     }
                 }
             }
-            this.refreshDefaultTable(table)
+            if (table){
+                this.refreshDefaultTable(table)
+            }
         },
         logFormDataValues(formData) {
             if (formData) {
