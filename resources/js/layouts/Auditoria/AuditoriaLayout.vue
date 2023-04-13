@@ -3,7 +3,7 @@
         <DefaultFilter
             v-model="open_advanced_filter"
             @filter="advanced_filter(dataTable, filters, 1)"
-            @cleanFilters="clearObject(filters)"
+            @cleanFilters="clearObject(filters,dataTable)"
             :disabled-confirm-btn="isValuesObjectEmpty(filters)"
         >
             <template v-slot:content>
