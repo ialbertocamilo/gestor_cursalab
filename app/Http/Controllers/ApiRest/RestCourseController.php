@@ -126,6 +126,9 @@ class RestCourseController extends Controller
 //        $user_courses_id = array_column($user_courses, 'id');
 
         $query = SummaryCourse::query()
+            ->whereHas('course',function($q){
+                $q->whereNotNull('plantilla_diploma');
+            })
             ->where('user_id', $user->id)
             ->whereIn('course_id', $all_courses_id->toArray())
             ->whereNotNull('certification_issued_at');
