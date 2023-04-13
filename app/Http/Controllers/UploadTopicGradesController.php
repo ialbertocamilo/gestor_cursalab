@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\MassiveUploadTopicGradesRequest;
-use App\Imports\MassiveUploadTopicGrades;
 use App\Models\School;
 use App\Models\Taxonomy;
+use App\Models\Workspace;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\MassiveUploadTopicGrades;
+use App\Http\Requests\MassiveUploadTopicGradesRequest;
 
 
 class UploadTopicGradesController extends Controller
@@ -21,7 +22,12 @@ class UploadTopicGradesController extends Controller
         $workspace = get_current_workspace();
 
         $qualified_type = Taxonomy::getFirstData('topic', 'evaluation-type', 'qualified');
-
+        // Load modules
+        $modules = Workspace::where('parent_id', $workspace->id)
+        ->select('id', 'name')
+        ->get();
+        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+        // Load workspace's schools
         $schools = School::with([
             'courses' => function ($q) use ($qualified_type) {
                 $q->with([
@@ -34,9 +40,11 @@ class UploadTopicGradesController extends Controller
                     ->select('id', 'name', 'type_id', 'assessable');
             }
         ])
-            ->whereRelation('workspaces', 'id', $workspace->id)
-            ->select('id', 'name')
-            ->get();
+        ->whereHas('subworkspaces', function ($j) use ($modules_id) {
+            $j->whereIn('subworkspace_id', $modules_id);
+        })
+        ->select('id', 'name')
+        ->get();
 
         $directions = config('massive.upload-topic-grades');
 
