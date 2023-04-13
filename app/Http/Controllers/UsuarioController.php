@@ -599,22 +599,16 @@ class UsuarioController extends Controller
     public function reinicios_data()
     {
         // Get workspace saved in session
-
-        $session = session()->all();
-        $workspace = $session['workspace'];
-
+        $workspace = get_current_workspace();
         // Load modules
-
         $modules = Workspace::where('parent_id', $workspace->id)
             ->select('id', 'name')
             ->get();
-
+        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
         // Load workspace's schools
-
-        $schools = School::whereHas('workspaces', function ($q) use ($workspace) {
-            $q->where('workspace_id', $workspace->id);
+        $schools = School::whereHas('subworkspaces', function ($j) use ($modules_id) {
+            $j->whereIn('subworkspace_id', $modules_id);
         })->get();
-
         return response()->json(compact('schools', 'modules'), 200);
     }
 
