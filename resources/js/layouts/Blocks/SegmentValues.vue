@@ -180,7 +180,7 @@ export default {
 }
 
 .module .v-text-field--outlined fieldset {
-    border: 2px solid #5458ea;
+    border: 2px solid #5458ea !important;
 }
 
 </style>
