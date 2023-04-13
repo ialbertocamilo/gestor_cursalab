@@ -65,7 +65,7 @@
                 <v-chip
                     small
                     class="flex justify-content-between mt-1"
-                    :class="hideCodes.includes(item.code) ? 'hidden-chip' : ''"
+                    :class="[hideCodes.includes(item.code) ? 'hidden-chip' : '', readyOnlyCodes.includes(item.code) ? 'readonly-chip' : '']"
                     v-if="index < countShowValues">
                     <span> {{ String(item[itemText]) }}
                         <v-btn
@@ -74,6 +74,13 @@
                             small
                             @click="removeItem(item.id)">
                             <v-icon color="white">mdi-minus-circle</v-icon>
+                        </v-btn>
+
+                        <v-btn
+                            v-if="readyOnlyCodes.includes(item.code)"
+                            icon
+                            small>
+                            <v-icon size="14" color="white">mdi-lock</v-icon>
                         </v-btn>
                     </span>
                 </v-chip>
@@ -463,6 +470,17 @@ export default {
     .v-scroll-auto-complete::-webkit-scrollbar-thumb {
         background: #afafaf;
         border-radius: 3rem;
+    }
+
+    .readonly-chip {
+        background: white !important;
+        border: 2px solid #5458ea !important;
+    }
+
+    .readonly-chip .v-icon {
+        background: silver;
+        border-radius: 50%;
+        margin-right: -7px;
     }
 
     .hidden-chip {

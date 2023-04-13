@@ -64,24 +64,8 @@
         <v-col cols="12" md="12" lg="12">
             <span class="mb-2">Selecciona valores:</span>
 
-            <!--
-            Show all segment values excluding modules when
-            hideModule prop is true -->
-
             <segment-values
                 v-for="(criterion, index) in segment.criteria_selected"
-                v-if="criterion.code !== 'module' && hideModule"
-                :key="index"
-                :criterion="criterion"
-                @addDateRange="addDateRange($event)"
-            />
-
-            <!--
-            Show all segment values -->
-
-            <segment-values
-                v-for="(criterion, index) in segment.criteria_selected"
-                v-if="!hideModule"
                 :key="index"
                 :criterion="criterion"
                 @addDateRange="addDateRange($event)"

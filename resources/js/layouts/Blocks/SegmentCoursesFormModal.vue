@@ -111,17 +111,6 @@
                         </v-row>
 
                         <v-row justify="space-around">
-                            <v-col
-                                v-if="getSegmentWithModuleCriteria()"
-                                cols="10">
-                                <div class="pr-md-3 pl-md-3
-pr-lg-2 pl-lg-2">
-                                    <segment-values
-                                        :criterion="getSegmentWithModuleCriteria().criteria_selected[0]"
-                                    />
-                                </div>
-
-                            </v-col>
 
                             <v-col cols="11" class="d-flex justify-content-center">
 
@@ -153,7 +142,6 @@ pr-lg-2 pl-lg-2">
                                                 :segment="row"
                                                 :criteria="criteria"
                                                 :course-modules="courseModules"
-                                                :hideModule="true"
                                                 class="mx-5"
                                                 :options="options"
                                                 @borrar_segment="borrarBloque"
@@ -311,6 +299,20 @@ export default {
             }
         };
     },
+    watch: {
+        // Current segmentation index
+        steps: function (newVal) {
+
+            // When segment has been changed, shows modules modal,
+            // for all segments except the first one, sice the first
+            // segment has the "add segment" button
+
+            if (this.moduleIsNotSelected() && newVal > 0) {
+                this.modalModuleOptions.open = true;
+            }
+        }
+    }
+    ,
     mounted () {
 
     },
@@ -333,9 +335,9 @@ export default {
             // vue.$refs["SegmentByDocument"].resetFields();
         },
         moduleIsNotSelected() {
-
-            if (!this.segments[0]) return true
-            if (this.segments[0].criteria_selected.length === 0) return true
+            const currentSegment = this.steps;
+            if (!this.segments[currentSegment]) return true
+            if (this.segments[currentSegment].criteria_selected.length === 0) return true
 
             return false
         },
@@ -347,27 +349,15 @@ export default {
 
             // Adds module to selected criteria, also adds its selected modules
 
+            const currentSegment = this.steps;
             let moduleCriteria = this.criteria.find(c => c.code === 'module')
             if (moduleCriteria) {
                 moduleCriteria.values_selected = checkedModules
-                this.segments[0].criteria_selected.push(moduleCriteria)
+                this.segments[currentSegment].criteria_selected.push(moduleCriteria)
             }
         },
         closeSegmentModuleModal() {
             this.modalModuleOptions.open = false;
-        },
-        getSegmentWithModuleCriteria() {
-            let segmentWithModuleSegmentation;
-            this.segments.forEach(segment => {
-                let moduleCriteria = segment.criteria_selected.find(c => {
-                    return c.code === 'module'
-                })
-                if (moduleCriteria) {
-                    segmentWithModuleSegmentation = segment
-                }
-            });
-
-            return segmentWithModuleSegmentation
         },
         resetValidation() {
             let vue = this;
@@ -729,7 +719,7 @@ export default {
     bottom: 0;
     right: 0;
     z-index: 1;
-    padding-top: 100px;
+    padding-top: 15%;
     background: white;
 }
 

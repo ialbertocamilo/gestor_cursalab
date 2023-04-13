@@ -47,17 +47,19 @@
                             {{ item.name }}
                         </v-chip>
                         <span v-if="index === 3" class="grey--text caption">
-							(+{{ date_range_selected.length - 3 }} seleccionado{{
+                            (+{{ date_range_selected.length - 3 }} seleccionado{{
                                 date_range_selected.length - 3 > 1 ? "s" : ""
                             }})
-						</span>
+                        </span>
                     </template>
                 </default-autocomplete>
             </v-col>
 
         </v-row>
 
-        <v-row style="padding: 10px 0px 10px 0px !important" v-else>
+        <v-row
+            :class="criterion.code === 'module' ? 'module' : ''"
+            style="padding: 10px 0px 10px 0px !important" v-else>
 
             <v-col cols="12" md="12" lg="12" class="p-0 px-3 vertical-align">
 
@@ -69,7 +71,7 @@
                     :items="criterion.values"
                     multiple
                     item-text="value_text"
-                    item-id="id" 
+                    item-id="id"
                     :count-show-values="Infinity"
                     />
 
@@ -176,4 +178,9 @@ export default {
     padding-left: 10px;
     text-transform: uppercase;
 }
+
+.module .v-text-field--outlined fieldset {
+    border: 2px solid #5458ea;
+}
+
 </style>
