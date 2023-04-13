@@ -83,7 +83,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
-        // $this->restoreSummaryCourse();
+        $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
         // $this->restore_surname();
@@ -107,15 +107,16 @@ class restablecer_funcionalidad extends Command
     }
     public function restoreStatusSummaryTopics(){
         // $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
-        $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        // $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        $status_por_iniciar= Taxonomy::getFirstData('topic', 'user-status', 'por-iniciar');
         $status_reviewved = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
-        $summaries = SummaryTopic::where('passed',0)->where('answers','like','%[{"%')->where('status_id',$status_reviewved->id)->with(['topic:id,course_id'])->whereHas('topic', function ($q) {
+        $summaries = SummaryTopic::whereNull('passed')->where('status_id',$status_reviewved->id)->with(['topic:id,course_id'])->whereHas('topic', function ($q) {
             $q->whereRelation('evaluation_type', 'code', 'qualified');
         })->where('last_time_evaluated_at','>','2023-03-29 00:00:00')->get();
         $_bar = $this->output->createProgressBar(count($summaries));
         $_bar->start();
         foreach ($summaries as $key => $summary) {
-            $summary->status_id = $status_failed->id;
+            $summary->status_id = $status_por_iniciar->id;
             $summary->save();
             $course = Course::where('id',$summary->topic->course_id)->first();
             // SummaryCourse::updateUserData($course, $summary->user, false,false);
@@ -834,14 +835,15 @@ class restablecer_funcionalidad extends Command
     }
     // 45671352
     public function restoreSummaryCourse(){
-        User::select('id','subworkspace_id')->whereIn('document',[45671352])->get()->map(function($user){
+        User::select('id','subworkspace_id')->whereIn('document',['MIFAR0404UV','INKFAR0404UV'])->get()->map(function($user){
             $courses = $user->getCurrentCourses();
             $_bar = $this->output->createProgressBar($courses->count());
             $_bar->start();
             foreach ($courses as $course) {
-                SummaryCourse::updateUserData($course, $user, false);
+                SummaryCourse::updateUserData($course, $user, false,false);
                 $_bar->advance();
             }
+            SummaryUser::updateUserData($user);
             $_bar->finish();
         });
 
