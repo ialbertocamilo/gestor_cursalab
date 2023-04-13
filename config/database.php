@@ -196,9 +196,8 @@ return [
             // 'username' => env('DB_MONGO_USERNAME'),
             // 'password' => env('DB_MONGO_PASSWORD'),
             'options' => [
-                //                'replicaSet' => 'rs0',
-                // 'database' => 'admin', // sets the authentication database required by mongo 3
-                'database' => env('DB_MONGO_DATABASE'), // sets the authentication database required by mongo 3
+//                'replicaSet' => 'rs0',
+                'database' => 'admin' // sets the authentication database required by mongo 3
             ],
         ],
     ],
