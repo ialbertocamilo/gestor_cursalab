@@ -69,11 +69,10 @@
 
                     <v-tab-item>
 
-                        <!-- "Add segmentation" when no segmentation has been
-                         selected -->
+                        <!-- "Add segmentation" screen is shown when no module has been selected and is the first segment -->
 
                         <div
-                            v-if="moduleIsNotSelected()"
+                            v-if="moduleIsNotSelected() && steps === 0"
                             class="add-button-wrapper">
                             <v-btn
                                 class="--add-button "
