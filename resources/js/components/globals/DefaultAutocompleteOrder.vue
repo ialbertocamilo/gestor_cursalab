@@ -76,12 +76,9 @@
                             <v-icon color="white">mdi-minus-circle</v-icon>
                         </v-btn>
 
-                        <v-btn
+                        <v-icon
                             v-if="readyOnlyCodes.includes(item.code)"
-                            icon
-                            small>
-                            <v-icon size="14" color="white">mdi-lock</v-icon>
-                        </v-btn>
+                            size="14" color="white">mdi-lock</v-icon>
                     </span>
                 </v-chip>
                 <span
@@ -472,15 +469,29 @@ export default {
         border-radius: 3rem;
     }
 
-    .readonly-chip {
+    .readonly-chip,
+    .readonly-chip:hover  {
         background: white !important;
-        border: 2px solid #5458ea !important;
+        border: 2px solid #d7d6d8 !important;
+
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+        height: 33px !important;
+        border-radius: 14px !important;
+    }
+
+    .readonly-chip span {
+        color: #dbdadb;
+        font-size: 16px;
     }
 
     .readonly-chip .v-icon {
-        background: silver;
+        background: #d7d6d8;
         border-radius: 50%;
-        margin-right: -7px;
+        margin-right: -10px;
+        height: 25px;
+        width: 25px;
+        padding-right: 1px;
     }
 
     .hidden-chip {
