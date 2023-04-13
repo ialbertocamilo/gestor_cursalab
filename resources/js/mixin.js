@@ -560,7 +560,7 @@ export default {
 
             return formData;
         },
-        clearObject(obj,table) {
+        clearObject(obj,table = null) {
             if (typeof obj === "string") {
                 obj = "";
             } else if (typeof obj === "object") {
