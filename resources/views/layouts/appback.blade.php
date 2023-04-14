@@ -5,10 +5,10 @@
     $roles = $user->getRoles();
     $subworkspace = get_current_workspace();
     $accounts_count = \App\Models\Account::where('active', ACTIVE)
-        ->where('workspace_id', $subworkspace->parent_id ?? null)
+        ->where('workspace_id', $subworkspace->id ?? null)
         ->count();
-
     $show_meeting_section = $accounts_count > 0 ? "admin" : "admin_DISABLE";
+    // dd($roles,$show_meeting_section);
     $workspace = get_current_workspace();
 @endphp
 

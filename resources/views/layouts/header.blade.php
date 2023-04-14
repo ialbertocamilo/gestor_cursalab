@@ -43,7 +43,7 @@
     @yield('morecss')
 
     @include('layouts.gtag-manager-head')
-    @include('layouts.gtag')
+    {{-- include('layouts.gtag') --}}
 
     @stack('css')
   </head>
