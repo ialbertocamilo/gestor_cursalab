@@ -357,6 +357,11 @@ export default {
         },
         closeSegmentModuleModal() {
             this.modalModuleOptions.open = false;
+
+            if (this.segments.length > 1) {
+                this.segments.splice(-1, 1);
+                this.steps = this.segments.length - 1;
+            }
         },
         resetValidation() {
             let vue = this;

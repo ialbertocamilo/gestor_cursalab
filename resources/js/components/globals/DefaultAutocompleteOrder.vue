@@ -474,23 +474,24 @@ export default {
         background: white !important;
         border: 2px solid #d7d6d8 !important;
 
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
-        height: 33px !important;
-        border-radius: 14px !important;
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
+        height: 26px !important;
+        border-radius: 13px !important;
     }
 
     .readonly-chip span {
         color: #dbdadb;
-        font-size: 16px;
+        font-size: 14px;
     }
 
     .readonly-chip .v-icon {
         background: #d7d6d8;
         border-radius: 50%;
         margin-right: -10px;
-        height: 25px;
-        width: 25px;
+        margin-top: -2px;
+        height: 20px;
+        width: 20px;
         padding-right: 1px;
     }
 
