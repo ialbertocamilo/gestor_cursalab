@@ -11,15 +11,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Jenssegers\Mongodb\Eloquent\HybridRelations;
 
 class Taxonomy extends Model
 {
-
     use SoftDeletes;
     use Cachable;
+    // Cross Database support
+    use HybridRelations;
 
+    protected $connection = 'mysql';
     // protected $rememberFor = WEEK_MINUTES;
-
+    // use Cachable;
+    use Cachable {
+        Cachable::newEloquentBuilder insteadof HybridRelations;
+    }
     protected $table = 'taxonomies';
 
     protected $fillable = [
@@ -55,7 +61,6 @@ class Taxonomy extends Model
 
     --------------------------------------------------------------------------*/
 
-
     public function parent()
     {
         return $this->belongsTo(Taxonomy::class, 'parent_id')
@@ -81,7 +86,6 @@ class Taxonomy extends Model
         Attributes
 
     --------------------------------------------------------------------------*/
-
 
     public function setCodeAttribute($value = '')
     {
@@ -240,7 +244,6 @@ class Taxonomy extends Model
                           ->where('active', ACTIVE);
 
         foreach ($filters as $field => $filter) {
-
             $statement = is_array($filter) ? 'whereIn' : 'where';
 
             $result->$statement($field, $filter);
@@ -269,7 +272,6 @@ class Taxonomy extends Model
                      ->where('active', ACTIVE);
 
         foreach ($filters as $field => $filter) {
-
             $statement = is_array($filter) ? 'whereIn' : 'where';
 
             $q->$statement($field, $filter);
@@ -298,7 +300,6 @@ class Taxonomy extends Model
                      ->where('active', ACTIVE);
 
         foreach ($filters as $field => $filter) {
-
             $statement = is_array($filter) ? 'whereIn' : 'where';
 
             $q->$statement($field, $filter);
@@ -383,7 +384,6 @@ class Taxonomy extends Model
             ];
 
             $taxonomy = Taxonomy::create($data);
-
         endif;
 
         return $taxonomy;
@@ -410,7 +410,6 @@ class Taxonomy extends Model
             ];
 
             $taxonomy = Taxonomy::create($data);
-
         endif;
 
         return $taxonomy;
@@ -425,20 +424,15 @@ class Taxonomy extends Model
                        ->get();
     }
 
-
-
     protected function searchCharacters($request, $method = 'paginate')
     {
         $query = self::where(['group' => 'game', 'type' => 'character']);
 
-
         if ($request->filters) {
             foreach ($request->filters as $key => $filter) {
-
                 if ($key == 'q') {
                     $query->where('name', 'like', "%{$request->filters['q']}%");
                 }
-
             }
         }
 
@@ -449,7 +443,4 @@ class Taxonomy extends Model
 
         return $query->paginate($request->rowsPerPage);
     }
-
-
-
 }

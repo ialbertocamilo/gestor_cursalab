@@ -94,11 +94,12 @@ class CheckList extends BaseModel
             }
 
             $checklist->active = $checklist->active;
+            $checklist->is_super_user = auth()->user()->isAn('super-user');
+
         }
 
         $response['data'] = $checklists->items();
         $response['lastPage'] = $checklists->lastPage();
-
         $response['current_page'] = $checklists->currentPage();
         $response['first_page_url'] = $checklists->url(1);
         $response['from'] = $checklists->firstItem();

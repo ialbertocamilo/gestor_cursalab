@@ -68,7 +68,6 @@
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
-
                 </v-row>
             </v-card-text>
 
@@ -76,14 +75,58 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del curso - ${$event.name}`)"
-                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover curso')"
-                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del curso - ${$event.name}`)"
-                @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
-
+                @encuesta="
+                    openFormModal(
+                        modalCursoEncuesta,
+                        $event,
+                        'encuesta',
+                        `Encuesta del curso - ${$event.name}`
+                    )
+                "
+                @mover_curso="
+                    openFormModal(
+                        modalMoverCurso,
+                        $event,
+                        'mover_curso',
+                        'Mover curso'
+                    )
+                "
+                @segmentation="
+                    openFormModal(
+                        modalFormSegmentationOptions,
+                        $event,
+                        'segmentation',
+                        `Segmentación del curso - ${$event.name}`
+                    )
+                "
+                @compatibility="
+                    openFormModal(
+                        modalFormCompatibilityOptions,
+                        $event,
+                        'compatibility',
+                        `Compatibilidad del curso - ${$event.name}`
+                    )
+                "
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Curso - ${$event.name}`
+                    )
+                "
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
             />
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Course"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
+
             <CursosEncuestaModal
                 width="50vw"
                 :ref="modalCursoEncuesta.ref"
@@ -155,7 +198,6 @@
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
                 @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
-
         </v-card>
     </section>
 </template>
@@ -167,6 +209,7 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
@@ -176,7 +219,8 @@ export default {
         'CourseValidationsDelete': CursoValidacionesModal,
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentFormModal,
-        CompatibilityFormModal
+        CompatibilityFormModal,
+        LogsModal
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -219,6 +263,14 @@ export default {
                         type: 'route',
                         route: 'edit_route'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
+
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',
@@ -284,9 +336,17 @@ export default {
                 ref: 'SegmentFormModal',
                 open: false,
                 persistent: true,
-                base_endpoint: '/segments',
-                confirmLabel: 'Guardar',
-                resource: 'segmentación',
+                base_endpoint: "/segments",
+                confirmLabel: "Guardar",
+                resource: "segmentación"
+            },
+
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: "/search",
+                persistent: true
             },
 
             modalFormCompatibilityOptions: {
@@ -444,13 +504,14 @@ export default {
             if (validateForm)
                 vue.courseValidationModalUpdateStatus.action = null;
 
-
-            if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
+            if (
+                vue.courseValidationModalUpdateStatus.action ===
+                "validations-after-update"
+            ) {
                 vue.hideLoader();
                 vue.courseValidationModalUpdateStatus.open = false;
                 return;
             }
-
 
             let url = `/escuelas/${vue.escuela_id}/cursos/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
@@ -486,6 +547,5 @@ export default {
                 })
         },
     }
-
 }
 </script>

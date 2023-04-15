@@ -65,6 +65,14 @@
                           @edit="openFormModal(modalOptions, $event)"
                           @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                           @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar')"
+			  @logs="
+		                openFormModal(
+		                    modalLogsOptions,
+		                    $event,
+		                    'logs',
+		                    `Logs de Videos - ${$event.title}`
+		                )
+		            "
                 />
             
             </v-card-text>
@@ -92,10 +100,19 @@
                                 @onCancel="closeFormModal(modalStatusOptions)"
         />
 
-        <DefaultDeleteModal :options="modalDeleteOptions"
-                            :ref="modalDeleteOptions.ref"
-                            @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
-                            @onCancel="closeFormModal(modalDeleteOptions)"
+        <DefaultDeleteModal
+            :options="modalDeleteOptions"
+            :ref="modalDeleteOptions.ref"
+            @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+            @onCancel="closeFormModal(modalDeleteOptions)"
+        />
+        <LogsModal
+            :options="modalLogsOptions"
+            width="55vw"
+            :model_id="null"
+            model_type="App\Models\Videoteca"
+            :ref="modalLogsOptions.ref"
+            @onCancel="closeSimpleModal(modalLogsOptions)"
         />
     </section>
 </template>
@@ -108,6 +125,8 @@ import ModalCategorias from "../components/Videoteca/ModalCategorias";
 import DefaultStatusModal from "./Default/DefaultStatusModal";
 import DefaultDeleteModal from "./Default/DefaultDeleteModal";
 
+import LogsModal from "../components/globals/Logs";
+
 export default {
     components: {
         ModalCreateEditVideoteca,
@@ -115,6 +134,7 @@ export default {
         ModalCategorias,
         DefaultStatusModal,
         DefaultDeleteModal,
+        LogsModal
     },
     data() {
         return {
@@ -146,6 +166,13 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -155,6 +182,13 @@ export default {
                     //     method_name: 'activity'
                     // },
                 ]
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
             modalOptions: {
                 // ref: 'VideotecaFormModal',

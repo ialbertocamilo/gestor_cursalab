@@ -31,6 +31,7 @@ class VideotecaResource extends JsonResource
             // 'orden' => $this->orden,
             // 'publication_date' => $this->getPublicationDate(),
             // 'body' => clean_html($this->content, 30),
+            'is_super_user'=>auth()->user()->isAn('super-user'),
 
             'created_at' => $this->created_at->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at->format('d/m/Y g:i a'),

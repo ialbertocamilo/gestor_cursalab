@@ -28,6 +28,7 @@ class PollQuestionResource extends JsonResource
 
             'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : 'No definido',
             'updated_at' => $this->created_at ? $this->updated_at->format('d/m/Y g:i a') : 'No definido',
+            'is_super_user'=>auth()->user()->isAn('super-user')
         ];
     }
 

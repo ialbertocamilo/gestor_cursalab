@@ -25,7 +25,7 @@ class AuditResource extends JsonResource
             'url' => $this->url,
             'event' => $this->event_name->name ?? '',
             'action' => $this->action_name->name ?? '',
-            'model' => $this->getModelName(),
+            'models' => $this->getModelName(),
             'modified_fields_count' => $modifiedFieldsCount  . ($modifiedFieldsCount > 1 ? ' valores' : ' valor'),
             'modified_fields' => $this->getModifiedFieldsFiltered(),
             'modified' => $dataProcessed['modified'],

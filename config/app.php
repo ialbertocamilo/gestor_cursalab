@@ -240,7 +240,7 @@ return [
         App\Providers\ValidationServiceProvider::class,
         Lab404\Impersonate\ImpersonateServiceProvider::class,
 
-        // Jenssegers\Mongodb\MongodbServiceProvider::class,
+        Jenssegers\Mongodb\MongodbServiceProvider::class,
         // App\Providers\TenancyServiceProvider::class,
 
     ],

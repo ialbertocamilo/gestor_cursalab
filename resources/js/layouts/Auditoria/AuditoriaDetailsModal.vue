@@ -1,22 +1,9 @@
 <template>
-    <DefaultDialog
-        :options="options"
-        :width="width"
-        @onConfirm="confirmModal"
-        @onCancel="closeModal"
-    >
+    <DefaultDialog :options="options" :width="width" :show-card-actions="false">
         <template v-slot:content>
-
-            <v-tabs
-                fixed-tabs
-                v-model="tabs"
-            >
+            <v-tabs fixed-tabs v-model="tabs">
                 <v-tabs-slider></v-tabs-slider>
-                <v-tab
-                    href="#tab-1"
-                    :key="1"
-                    class="primary--text"
-                >
+                <v-tab href="#tab-1" :key="1" class="primary--text">
                     <v-icon>mdi-text-box-outline</v-icon>
                     <span class="ml-3">Registros</span>
                 </v-tab>
@@ -25,6 +12,7 @@
                     href="#tab-2"
                     :key="2"
                     class="primary--text"
+                    v-if="activeAudit.modified.length !== 0"
                 >
                     <v-icon>mdi-text-box-edit-outline</v-icon>
                     <span class="ml-3">Modificados</span>
@@ -34,9 +22,19 @@
                     href="#tab-3"
                     :key="3"
                     class="primary--text"
+                    v-if="activeAudit.total.length !== 0"
                 >
                     <v-icon>mdi-text-box-search-outline</v-icon>
-                    <span class="ml-3">Detalle</span>
+                    <span class="ml-3">Detalles</span>
+                </v-tab>
+                <v-tab
+                    href="#tab-4"
+                    :key="4"
+                    class="primary--text"
+                    v-if="activeAudit.pivot"
+                >
+                    <v-icon>mdi-text-box-search-outline</v-icon>
+                    <span class="ml-3">Pivots</span>
                 </v-tab>
             </v-tabs>
 
@@ -63,57 +61,74 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Sección</strong></td>
-                                    <td>{{ activeAudit.model }}</td>
+                                    <td>{{ activeAudit.models }}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Registro</strong></td>
                                     <td>{{ activeAudit.name }}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong># modificados</strong></td>
-                                    <td>{{ activeAudit.modified_fields_count }}</td>
+                                    <td><strong># Modificados</strong></td>
+                                    <td>
+                                        {{ activeAudit.modified_fields_count }}
+                                    </td>
                                 </tr>
                             </tbody>
                         </template>
                     </v-simple-table>
-
-
                 </v-tab-item>
                 <v-tab-item :key="2" :value="'tab-2'">
                     <v-simple-table class="pt-4">
                         <template v-slot:default>
                             <tbody>
-                            <tr v-for="property of activeAudit.modified">
-                                <td><strong>{{ property.label }}</strong></td>
-                                <td>{{ property.value }}</td>
-                            </tr>
+                                <tr v-for="property of activeAudit.modified">
+                                    <td>
+                                        <strong>{{ property.label }}</strong>
+                                    </td>
+                                    <td>{{ property.value }}</td>
+                                </tr>
                             </tbody>
                         </template>
                     </v-simple-table>
                 </v-tab-item>
                 <v-tab-item :key="3" :value="'tab-3'">
-
                     <v-simple-table class="pt-4">
                         <template v-slot:default>
                             <tbody>
-                            <tr v-for="property of activeAudit.total">
-                                <td><strong>{{ property.label }}</strong></td>
-                                <td>{{ property.value }}</td>
-                            </tr>
+                                <tr v-for="property of activeAudit.total">
+                                    <td>
+                                        <strong>{{ property.label }}</strong>
+                                    </td>
+                                    <td>{{ property.value }}</td>
+                                </tr>
                             </tbody>
                         </template>
                     </v-simple-table>
-
+                </v-tab-item>
+                <v-tab-item :key="4" :value="'tab-4'">
+                    <v-simple-table class="pt-4">
+                        <template v-slot:default>
+                            <tbody>
+                                <tr
+                                    v-for="property of activeAudit.modified_fields"
+                                >
+                                    <td>
+                                        Criterio id
+                                    </td>
+                                    <td>
+                                        {{ property.criterion_value_id }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
                 </v-tab-item>
             </v-tabs-items>
-
-
         </template>
     </DefaultDialog>
 </template>
 
 <script>
-
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import moment from "moment";
 
@@ -141,31 +156,28 @@ export default {
     data() {
         return {
             tabs: null,
-            activeAudit: {}
+            activeAudit: {
+                modified: [],
+                total: [],
+                pivot: []
+            }
         };
     },
-    mounted() {
-
-    },
+    mounted() {},
     methods: {
-        loadData(activeAudit) {
-            this.activeAudit = activeAudit
+        async loadData(activeAudit) {
+            this.activeAudit = activeAudit;
         },
-        resetValidation() {
-
-        },
-        loadSelects() {
-
-        },
+        resetValidation() {},
+        loadSelects() {},
         closeModal() {
-            let vue = this
-            vue.$emit('onCancel')
-        }
-        ,
+            let vue = this;
+            vue.$emit("onCancel");
+        },
         confirmModal() {
             //console.log(this.options.activeAudit.id)
-            this.$emit('onConfirm')
+            this.$emit("onConfirm");
         }
     }
-}
+};
 </script>

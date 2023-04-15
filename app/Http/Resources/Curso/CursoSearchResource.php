@@ -64,6 +64,7 @@ class CursoSearchResource extends JsonResource
             'compatibilities_count' => $this->compatibilities_a_count + $this->compatibilities_b_count,
             // 'compatibilities_count' => 1,
             'compatibility_available' => get_current_workspace()->id == 25,
+            'is_super_user'=>auth()->user()->isAn('super-user')
         ];
     }
 

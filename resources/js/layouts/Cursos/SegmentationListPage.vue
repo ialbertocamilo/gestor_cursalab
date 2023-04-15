@@ -92,6 +92,14 @@
                 @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
+		@logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Curso - ${$event.name}`
+                    )
+                "
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -164,7 +172,14 @@
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
                 @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Course"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -176,6 +191,7 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
@@ -185,7 +201,8 @@ export default {
         'CourseValidationsDelete': CursoValidacionesModal,
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentFormModal,
-        CompatibilityFormModal
+        CompatibilityFormModal,
+        LogsModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -229,6 +246,14 @@ export default {
                         type: 'action',
                         method_name: 'redirect_to_course_form_page'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
+
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',
@@ -299,7 +324,14 @@ export default {
                 persistent: true,
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
-                resource: 'segmentación',
+                resource: 'segmentación'
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
 
             modalFormCompatibilityOptions: {
@@ -404,7 +436,6 @@ export default {
             vue.filters.q = param_q;
 
         vue.getSelects();
-
     },
     methods: {
         getSchoolsAndRefreshTable(){
@@ -433,8 +464,6 @@ export default {
         getSelects() {
             let vue = this
             const url = `${vue.base_endpoint}/schools/get-data`
-
-
 
             vue.$http.get(url)
                 .then(({data}) => {
@@ -488,13 +517,11 @@ export default {
             if (validateForm)
                 vue.courseValidationModalUpdateStatus.action = null;
 
-
             if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
                 vue.hideLoader();
                 vue.courseValidationModalUpdateStatus.open = false;
                 return;
             }
-
 
             let url = `/escuelas/${vue.update_model.first_school_id.id}/cursos/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
@@ -544,6 +571,5 @@ export default {
             // win.focus();
         }
     }
-
 }
 </script>

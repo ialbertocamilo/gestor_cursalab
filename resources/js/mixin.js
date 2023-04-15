@@ -560,7 +560,7 @@ export default {
 
             return formData;
         },
-        clearObject(obj) {
+        clearObject(obj,table = null) {
             if (typeof obj === "string") {
                 obj = "";
             } else if (typeof obj === "object") {
@@ -591,6 +591,9 @@ export default {
                             break;
                     }
                 }
+            }
+            if (table){
+                this.refreshDefaultTable(table)
             }
         },
         logFormDataValues(formData) {
