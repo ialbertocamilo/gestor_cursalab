@@ -102,8 +102,38 @@ class restablecer_funcionalidad extends Command
         // $this->generateStatusTopics();
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
+        $this->setSummarys();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+    public function setSummarys(){
+        $users = User::whereIn('document',[''])->select('id')->get();
+        foreach ($users as $user) {
+            $courses = $user->getCurrentCourses();
+            $_bar = $this->output->createProgressBar($courses->count());
+            $_bar->start();
+            foreach ($courses as $course) {
+                $topics = Topic::with('evaluation_type')
+                ->where('course_id',$course)->where('active',1)->select('id','type_evaluation_id')
+                ->get();
+
+                foreach ($topics as $topic) {
+                    $summary = SummaryTopic::whereIn('topic_id',$topics->pluck('id'))
+                    ->whereRelationIn('status', 'code', ['aprobado'])
+                    ->first();
+                    // if($topic->evaluation_type->code=='aprobado'){
+                    //     $summary_create = 
+                    // }else{
+                    //     $summary_create->status_id = 4576;
+                    // }
+                    $summary_create = SummaryTopic::storeData($topic, $user);
+                }
+                SummaryCourse::updateUserData($course, $user, false,false);
+                $_bar->advance();
+            }
+            SummaryUser::updateUserData($user);
+            $_bar->finish();
+        }
     }
     public function restoreStatusSummaryTopics(){
         // $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
