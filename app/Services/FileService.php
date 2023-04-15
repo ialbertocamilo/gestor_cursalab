@@ -43,14 +43,14 @@ class FileService {
      * @param string|null $path
      * @return string
      */
-    public static function generateUrl($path = ''): string
+    public static function generateUrl($path = '', $cdn = 'cdn'): string
     {
         // Initiliaze path value if it is not set
         if (!$path) $path = '';
 
         if (str_starts_with($path, 'https://')) return $path;
 
-        $full_url = Storage::disk('cdn')->url($path);
+        $full_url = Storage::disk($cdn)->url($path);
         // $base = config('app.storage_base_url');
 
         // $full_url = $base . '/' . $path;
