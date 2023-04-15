@@ -742,7 +742,7 @@ class Course extends BaseModel
 
                         if ($requirement_course_req) {
 
-                            $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+                            $summary_requirement_course_req = $requirement_course_req->summaries_course()->where('user_id',$user->id)->first();
 
                             if (!$summary_requirement_course_req) {
 
@@ -802,7 +802,7 @@ class Course extends BaseModel
 
                             if ($requirement_course_req) {
 
-                                $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+                                $summary_requirement_course_req = $requirement_course_req->summaries_course()->where('user_id',$user->id)->first();
 
                                 if (!$summary_requirement_course_req) {
 
@@ -1291,7 +1291,7 @@ class Course extends BaseModel
         $topics_user = $curso->topics->pluck('id')->toArray();
 
         $topics = $curso->topics->sortBy('position')->where('active', ACTIVE);
-        $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id);
+        $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id)->get();
 
         $last_topic = null;
         if ($summary_topics->count() > 0) {
