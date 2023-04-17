@@ -1,6 +1,6 @@
 <template>
     <div>
-        <span class="mb-4">Subida de archivos de base de datos.</span>
+        <span class="mb-4" v-if="title">{{ title }}</span>
         <vue-dropzone ref="myVueDropzone" id="dropzone"
                     :options="dropzoneOptions"
                     :useCustomSlot="true"
@@ -29,7 +29,7 @@
                         <img class="img_load" style="display:none;" src="/img/upload_load.png">
                         <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
                     </div>
-                    <div class="subtitle">Sube o arrastra el archivo</div><br>
+                    <div class="subtitle" v-html="subtitle"></div><br>
                 </div>
                 <br>
             </div>
@@ -57,6 +57,14 @@
             success_text: {
                 type: String,
                 default: ''
+            },
+            title:{
+                type:String,
+                default: 'Subida de archivos de base de datos.'
+            },
+            subtitle:{
+                type:String,
+                default: 'Sube o arrastra el archivo'
             }
         },
         data () {
