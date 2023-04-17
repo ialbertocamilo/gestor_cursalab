@@ -274,16 +274,17 @@ export default {
             vue.resetFormValidation('temasForm')
         }
         ,
-        loadData(resource) {
-
+        async loadData(resource) {
             let vue = this
+            vue.showLoader()
             let url = `${vue.options.base_endpoint}/${resource.id}/reset`
 
-            vue.$http.get(url).then(({data}) => {
+            await vue.$http.get(url).then(({data}) => {
                 vue.selects.temas = data.data.topics
                 vue.selects.cursos = data.data.courses
                 vue.resource = data.data.user
                 vue.resetValidation()
+                vue.hideLoader()
             });
         },
         loadSelects() {

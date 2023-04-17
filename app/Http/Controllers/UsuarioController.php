@@ -268,9 +268,10 @@ class UsuarioController extends Controller
 
         // $subworkspace = Workspace::find($user->subworkspace_id);
         // $mod_eval = $subworkspace->mod_evaluaciones;
-
+        $courses_id = $user->getCurrentCourses(only_ids:true);
         $topics = SummaryTopic::query()
             ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
+            ->whereIn('topics.course_id',$courses_id)
             ->where('summary_topics.passed', 0)
             // ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'] ?? 3)
             ->where('summary_topics.attempts', '<>', 0)
