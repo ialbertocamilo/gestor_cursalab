@@ -82,8 +82,12 @@ export default {
             let vue = this
 
             let checkedModules = vue.modules.filter(m => m.checked);
-
             vue.$emit('onModulesSelected', checkedModules)
+
+            // reset selected modules
+
+            vue.modules.forEach(m => m.checked = false)
+
             //vue.$emit('onConfirm', true);
         },
         onCancel() {
@@ -127,7 +131,7 @@ label input:before {
     border: 1px solid #5458EA;
     width: 18px;
     height: 18px;
-    border-radius: 50%;
+    border-radius: 4px;
     background: white;
 }
 
@@ -137,7 +141,7 @@ label input:checked:before {
     border: 1px solid #5458EA;
     width: 18px;
     height: 18px;
-    border-radius: 50%;
+    border-radius: 4px;
     background: #5458EA;
 }
 
