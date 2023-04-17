@@ -86,6 +86,14 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @alumnos="abrirModalVerAlumnos($event)"
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Entrenadores - ${$event.name}`
+                    )
+                "
             />
                 <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
             <EntrenadorVerAlumnosModal
@@ -117,6 +125,14 @@
             :modal-data="modalDataModalFiltroaLumno"
             @onClose="closeModalFiltroUsuario"
         />
+        <LogsModal
+            :options="modalLogsOptions"
+            width="55vw"
+            :model_id="null"
+            model_type="App\Models\EntrenadorUsuario"
+            :ref="modalLogsOptions.ref"
+            @onCancel="closeSimpleModal(modalLogsOptions)"
+        />
 
         <v-snackbar
             v-model="snackbar.show"
@@ -130,19 +146,24 @@
             {{ snackbar.text }}
         </v-snackbar>
     </section>
-
 </template>
 
 <script>
-
 import EntrenadorVerAlumnosModal from "./EntrenadorVerAlumnosModal";
-import ModalVerAlumnos from "../../components/Entrenamiento/Entrenadores/ModalVerAlumnos.vue"
+import ModalVerAlumnos from "../../components/Entrenamiento/Entrenadores/ModalVerAlumnos.vue";
 import ModalFiltroUsuario from "../../components/Entrenamiento/Entrenadores/ModalFiltroUsuario";
 import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    props: ['roles'],
-    components: {EntrenadorVerAlumnosModal, StepperSubidaMasiva, ModalVerAlumnos, ModalFiltroUsuario},
+    props: ["roles"],
+    components: {
+        EntrenadorVerAlumnosModal,
+        StepperSubidaMasiva,
+        ModalVerAlumnos,
+        ModalFiltroUsuario,
+        LogsModal
+    },
     mounted() {
         let vue = this;
         vue.validateRoleMaster();
@@ -165,6 +186,13 @@ export default {
                         type: 'action',
                         method_name: 'alumnos'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
             },
             modalOptions: {
@@ -191,6 +219,13 @@ export default {
                 grupo_nombre: '',
                 checklists: [],
                 entrenador: ''
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
             modalDataModalFiltroaLumno: {
                 open: false,
@@ -267,6 +302,5 @@ export default {
             }
         }
     }
-
 };
 </script>

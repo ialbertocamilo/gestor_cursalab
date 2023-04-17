@@ -77,8 +77,30 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar escuela')"
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs de la escuela - ${$event.name}`
+                    )
+                "
+                @status="
+                    openFormModal(
+                        modalStatusOptions,
+                        $event,
+                        'status',
+                        'Actualizar estado'
+                    )
+                "
+                @delete="
+                    openFormModal(
+                        modalDeleteOptions,
+                        $event,
+                        'delete',
+                        'Eliminar escuela'
+                    )
+                "
                 @duplicate="openDuplicarModal($event)"
             />
                 <!-- @delete="deleteEscuela($event)" -->
@@ -118,11 +140,17 @@
                 @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\School"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
-
 
 <script>
 import EscuelaFormModal from "./EscuelaFormModal";
@@ -131,10 +159,19 @@ import EscuelaValidacionesModal from "./EscuelaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DuplicarCursos from './DuplicarCursos';
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    props: ['workspace_id', 'workspace_name'],
-    components: {EscuelaFormModal, EscuelaValidacionesModal, DialogConfirm, DefaultStatusModal, DuplicarCursos, DefaultDeleteModal},
+    props: ["workspace_id", "workspace_name"],
+    components: {
+        EscuelaFormModal,
+        EscuelaValidacionesModal,
+        DialogConfirm,
+        DefaultStatusModal,
+        DuplicarCursos,
+        DefaultDeleteModal,
+        LogsModal
+    },
     data() {
         let vue = this
 
@@ -181,6 +218,15 @@ export default {
                         show_condition: 'has_no_courses',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+
+                        method_name: "logs"
+                    }
+
                     // {
                     //     text: "Actualizar Estado",
                     //     icon: 'fa fa-circle',
@@ -188,6 +234,13 @@ export default {
                     //     method_name: 'status'
                     // },
                 ],
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
             modalDeleteOptions: {
                 ref: 'EscuelaDeleteModal',
@@ -325,6 +378,5 @@ export default {
             vue.modalCursosDuplicar.categoria_id = 0;
         }
     }
-
 }
 </script>

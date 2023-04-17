@@ -53,6 +53,14 @@
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>anuncio</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminación de un <b>anuncio</b>')"
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Anuncio - ${$event.nombre}`
+                    )
+                "
             />
 
             <AnuncioFormModal
@@ -76,24 +84,31 @@
                 @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Announcement"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
 
-
 <script>
-
 import AnuncioFormModal from "./AnuncioFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-
     components: {
-        AnuncioFormModal, DefaultStatusModal, DefaultDeleteModal
-    }
-    ,
+        AnuncioFormModal,
+        DefaultStatusModal,
+        DefaultDeleteModal,
+        LogsModal
+    },
     data() {
         return {
             dataTable: {
@@ -125,6 +140,13 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -146,7 +168,15 @@ export default {
             filters: {
                 q: '',
                 module: null,
-                active: 1,
+                active: 1
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+
             },
             modalOptions: {
                 ref: 'AnuncioFormModal',
@@ -220,6 +250,5 @@ export default {
             // TODO: Call store or update USER
         },
     }
-
 }
 </script>

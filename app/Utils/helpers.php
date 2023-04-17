@@ -242,9 +242,9 @@ function cache_clear_model($model)
     \Artisan::call('modelCache:clear', array('--model' => $model));
 }
 
-function get_media_url($path = '')
+function get_media_url($path = '', $cdn = 'cdn')
 {
-    return FileService::generateUrl($path);
+    return FileService::generateUrl($path, $cdn);
 }
 
 function excelDateToDate($fecha)

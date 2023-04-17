@@ -36,6 +36,7 @@ class VademecumResource extends JsonResource
 
             'category_id' => $this->category->name ?? 'No definido',
             'subcategory_id' => $this->subcategory->name ?? 'No definido',
+            'is_super_user' => auth()->user()->isAn('super-user'),
 
             'scorm_route' => $hasScormRoute ? $file : null,
             'has_scorm_route' => $hasScormRoute,

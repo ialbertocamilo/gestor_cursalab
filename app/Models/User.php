@@ -40,6 +40,7 @@ use Spatie\Image\Manipulations;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EmailTemplate;
+use Jenssegers\Mongodb\Eloquent\HybridRelations;
 use Lab404\Impersonate\Models\Impersonate;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -64,11 +65,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     use Impersonate;
 
+  use HybridRelations;
     use Cachable {
+        Cachable::newEloquentBuilder insteadof HybridRelations;
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
         Cachable::newBelongsToMany insteadof \Altek\Eventually\Eventually, CustomAudit;
         Cachable::newMorphToMany insteadof \Altek\Eventually\Eventually, CustomAudit;
     }
+
+    protected $connection = 'mysql';
 
     /**
      * The attributes that are mass assignable.
@@ -86,7 +91,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating'
     ];
 
-    protected $with = ['roles', 'abilities'];
+    // protected $with = ['roles'
+    // , 'abilities'
+// ];
     protected $appends = ['fullname', 'age'];
     protected $dates = ['birthdate'];
 
@@ -103,7 +110,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'pivot'
     ];
 
-    // protected $ledgerThreshold = 100;
 
     protected $casts = [
         'email_verified_at' => 'datetime',

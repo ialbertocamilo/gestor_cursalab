@@ -21,9 +21,7 @@ class Role extends BaseModel
     public const REPORTS = 6;
     public const USER = 7;
 
-
     public $defaultRelationships = [];
-    // protected $ledgerThreshold = 100;
     protected $morphClass = 'MorphOrder';
     protected $fillable = ['name', 'title', 'level', 'scope', 'active', 'description'];
 

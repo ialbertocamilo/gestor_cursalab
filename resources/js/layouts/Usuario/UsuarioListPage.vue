@@ -54,9 +54,7 @@
                                 :show-select-all="false"
                             />
                         </v-col>
-
                     </template>
-
                 </v-row>
             </template>
         </DefaultFilter>
@@ -139,6 +137,7 @@
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
                 @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
+                @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Usuario - ${$event.name}`)"
             />
             <UsuarioFormModal
                 width="60vw"
@@ -180,11 +179,17 @@
                 @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\User"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
-
 
 <script>
 import UsuarioFormModal from "./UsuarioFormModal";
@@ -193,9 +198,10 @@ import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
 import UsuarioResetPasswordModal from "./UsuarioResetPasswordModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal},
+    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal, LogsModal},
     props: {
         workspace_id: {
             type: Number|String,
@@ -205,10 +211,8 @@ export default {
         //     type: String,
         //     required: true
         // }
-
     },
     data() {
-
         let headers = [
             {text: "Nombres y Apellidos", value: "name"},
             {text: "Módulo", value: "module", sortable: false},
@@ -245,7 +249,19 @@ export default {
                         count: 'failed_topics_count',
                     },
 
-                    {text: "Editar", icon: 'mdi mdi-pencil', type: 'action', method_name: 'edit'},
+                    {
+                        text: "Editar",
+                        icon: "mdi mdi-pencil",
+                        type: "action",
+                        method_name: "edit"
+                    },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     {
@@ -288,6 +304,13 @@ export default {
                 active: 1,
             },
             criteria_template: [],
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
             modalOptions: {
                 ref: 'UsuarioFormModal',
                 open: false,
@@ -406,7 +429,6 @@ export default {
             console.log('activity')
         },
     }
-
 }
 </script>
 

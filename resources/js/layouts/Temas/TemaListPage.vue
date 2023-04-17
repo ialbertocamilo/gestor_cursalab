@@ -5,7 +5,6 @@
         >
             <template v-slot:content>
                 <v-row justify="center">
-
                     <!--                    <v-col cols="12">-->
                     <!--                        <DefaultAutocomplete-->
                     <!--                            clearable-->
@@ -44,7 +43,6 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-
                 </v-row>
             </v-card-text>
 
@@ -52,7 +50,14 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del tema - ${$event.nombre}`
+                    )
+                "
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
             />
@@ -93,7 +98,14 @@
                 @onConfirm="confirmValidationModal(topicValidationModalUpdateStatus,   null , confirmUpdateStatus(false))"
                 :resource="{}"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Topic"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -101,12 +113,14 @@
 <script>
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import TemaValidacionesModal from "./TemaValidacionesModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
         DialogConfirm,
+        LogsModal,
         'TopicValidationsDelete': TemaValidacionesModal,
-        'TopicValidationsUpdateStatus': TemaValidacionesModal,
+        'TopicValidationsUpdateStatus': TemaValidacionesModal
     },
     props: ['school_id', 'school_name', 'course_id', 'course_name', 'ruta'],
     data() {
@@ -160,7 +174,14 @@ export default {
                         type: 'action',
                         method_name: 'status'
                     },
-                ],
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
+                ]
                 // more_actions: [
                 //     {
                 //         text: "Actividad",
@@ -173,6 +194,14 @@ export default {
             selects: {
                 modules: []
             },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
+
             filters: {
                 q: '',
                 module: null,
@@ -316,13 +345,11 @@ export default {
             if (validateForm)
                 vue.topicValidationModalUpdateStatus.action = null;
 
-
             if (vue.topicValidationModalUpdateStatus.action === 'validations-after-update') {
                 vue.hideLoader();
                 vue.topicValidationModalUpdateStatus.open = false;
                 return;
             }
-
 
             let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
@@ -348,6 +375,5 @@ export default {
                 })
         },
     }
-
 }
 </script>

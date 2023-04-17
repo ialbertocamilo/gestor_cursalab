@@ -1,6 +1,5 @@
 <template>
     <section class="section-list">
-
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Checklists
@@ -32,10 +31,24 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="abrirModalCreateEditChecklist($event)"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar Checklist')"
+                @delete="
+                    openFormModal(
+                        modalDeleteOptions,
+                        $event,
+                        'delete',
+                        'Eliminar Checklist'
+                    )
+                "
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Checklist - ${$event.title}`
+                    )
+                "
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
-
         </v-card>
         <StepperSubidaMasiva
             urlPlantilla="/templates/Plantilla_Checklist.xlsx"
@@ -59,25 +72,32 @@
             @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
             @onCancel="closeFormModal(modalDeleteOptions)"
         />
-
+        <LogsModal
+            :options="modalLogsOptions"
+            width="55vw"
+            :model_id="null"
+            model_type="App\Models\CheckList"
+            :ref="modalLogsOptions.ref"
+            @onCancel="closeSimpleModal(modalLogsOptions)"
+        />
     </section>
-
 </template>
 
 <script>
-
 import ModalCreateEditChecklist from "../../components/Entrenamiento/Checklist/ModalCreateEditChecklist.vue";
 import ModalAsignarChecklistCurso from "../../components/Entrenamiento/Checklist/ModalAsignarChecklistCurso.vue";
 
 import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
         ModalCreateEditChecklist,
         ModalAsignarChecklistCurso,
         StepperSubidaMasiva,
-        DefaultDeleteModal
+        DefaultDeleteModal,
+        LogsModal
     },
     mounted() {
         let vue = this;
@@ -104,7 +124,14 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
-                ],
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
+                ]
             },
 
             filters: {
@@ -117,6 +144,13 @@ export default {
                 ver_items: false,
                 asignar: false,
                 subida_masiva: false
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
             modalDeleteOptions: {
                 ref: 'ChecklistDeleteModal',
@@ -135,7 +169,6 @@ export default {
         async closeModalSubidaMasiva() {
             let vue = this;
             vue.modal.subida_masiva = false;
-
         },
         closeModalFiltroUsuario() {
             let vue = this
@@ -190,6 +223,5 @@ export default {
             vue.modal.asignar = false;
         },
     }
-
 };
 </script>

@@ -1,4 +1,5 @@
 <template>
+
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
@@ -49,6 +50,14 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 @reset="reset"
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs de Modulo - ${$event.name}`
+                    )
+                "
                 @edit="openFormModal(modalOptions, $event, 'edit')"
             />
             <ModuloFormModal
@@ -57,6 +66,14 @@
                 :options="modalOptions"
                 @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
                 @onCancel="closeFormModal(modalOptions)"
+            />
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Workspace"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
             />
             <DefaultAlertDialog
                 :ref="modalDeleteOptions.ref"
@@ -67,13 +84,13 @@
     </section>
 </template>
 
-
 <script>
 import ModuloFormModal from "./ModuloFormModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    props: ['config_id'],
-    components: {ModuloFormModal},
+    props: ["config_id"],
+    components: { ModuloFormModal, LogsModal },
     data() {
         return {
             active_users_count: '-',
@@ -112,7 +129,14 @@ export default {
                         type: 'action',
                         method_name: 'edit'
                     },
-                ],
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
+                ]
             },
             selects: {
                 modules: []
@@ -136,15 +160,21 @@ export default {
                     // cargos: [],
                 }
             },
-            modalDeleteOptions: {
-                ref: 'ModuloDeleteModal',
-                title: 'Eliminar Módulo',
-                contentText: '¿Desea eliminar este registro?',
+            modalLogsOptions: {
+                ref: "LogsModal",
                 open: false,
-                endpoint: ''
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
-        }
-
+            modalDeleteOptions: {
+                ref: "ModuloDeleteModal",
+                title: "Eliminar Módulo",
+                contentText: "¿Desea eliminar este registro?",
+                open: false,
+                endpoint: ""
+            }
+        };
     },
     mounted() {
         let vue = this
@@ -171,6 +201,5 @@ export default {
             console.log('activity')
         },
     }
-
 }
 </script>

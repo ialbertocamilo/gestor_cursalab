@@ -8,7 +8,9 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
+use Aws\S3\S3Client;
 use ZipArchive;
+
 
 class Media extends BaseModel
 {
@@ -91,6 +93,7 @@ class Media extends BaseModel
 
         $path = '';
         $uploaded = false;
+        $extracted = false;
 
         $valid_ext1 = ['jpeg', 'jpg', 'png', 'gif', 'svg', 'webp'];
         $valid_ext2 = ['mp4', 'webm', 'mov'];
@@ -110,27 +113,23 @@ class Media extends BaseModel
         } else if (in_array(strtolower($ext), $valid_ext6)) {
             $path = 'office-files/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext5)) {
-            // info('Inicia Nombre');
+
             $name_scorm = $this->verify_scorm($file,$name);
-            // info('Fin Nombre');
-            // Set values for file in S3 bucket
 
-//            $path = 'scorm/' . $fileName;
-//            $ext = 'scorm';
+            $temp_path = 'uploads-temp/scorm/' . $name;
+            $extracted = Media::extractZipToTempFolder($file, $temp_path);
 
-            // Upload to project's uploads folder
-            // and uncompressed file
+            if ($extracted) {
 
-            $localpath = 'uploads/scorm/' . $name;
-            $zip = new ZipArchive();
-            $res = $zip->open($file, ZipArchive::CREATE);
-            if ($res === TRUE) {
-                $zip->extractTo(public_path($localpath));
-                $zip->close();
+                $new_folder = 'scorm/' . $name;
+
+                Media::uploadUnzippedFolderToBucket($temp_path, $new_folder);
+
+                $name = $new_folder . '/' . $name_scorm['nombre'];
+                $path = get_media_url($name, 'cdn_scorm');
+                $ext = 'scorm';
 
                 $uploaded = true;
-                $path = url($localpath);
-                $ext = 'scorm';
             }
         }
 
@@ -139,15 +138,10 @@ class Media extends BaseModel
         if (!$uploaded) {
 
             $result = Storage::disk('s3')->put($path, file_get_contents($file));
-            // $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public');
+
             if ($result) {
                 $uploaded = true;
             }
-        }
-
-        if(isset($name_scorm) && $name_scorm['find_main_file']){
-            $name = $name.'/'.$name_scorm['nombre'];
-            $path = url('uploads/scorm/'.$name);
         }
 
         // Insert Media
@@ -163,11 +157,49 @@ class Media extends BaseModel
         }
 
         // Return media or path;
-        // info('Fin');
         if ($return_media)
             return $media;
 
         return $path;
+    }
+
+    protected function extractZipToTempFolder($file, $temp_path)
+    {
+        $zip = new ZipArchive();
+        $res = $zip->open($file, ZipArchive::CREATE);
+            
+        if ($res === TRUE) {
+
+            $zip->extractTo(public_path($temp_path));
+            $zip->close();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function uploadUnzippedFolderToBucket($temp_path, $new_folder)
+    {
+        $config = config('filesystems.disks.s3');
+
+        $client = new S3Client([
+            'key' => $config['key'],
+            'secret' => $config['secret'],
+            'version' => 'latest',
+            'region' => $config['region'],
+            'options' => [
+                'CacheControl' => 'max-age=25920000, no-transform, public', 
+            ]
+        ]);
+
+        $bucket = $config['scorm']['bucket'];
+        $keyPrefix = $config['scorm']['root'] . '/' . $new_folder . '/';
+        $options = array(
+            'concurrency' => 20,
+        );
+
+        $client->uploadDirectory($temp_path, $bucket, $keyPrefix, $options);
     }
 
     public static function verify_scorm($file,$name){

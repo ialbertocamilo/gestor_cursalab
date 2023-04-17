@@ -17,8 +17,24 @@
                           @edit="openFormModal(modalOptions, $event)"
                           @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                           @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar registro')"
+			@logs="
+	                    openFormModal(
+        	                modalLogsOptions,
+        	                $event,
+        	                'logs',
+        	                `Logs de Ayuda - ${$event.title}`
+        	            )
+        	        "
             />
 
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Post"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
             <AyudaFormModal width="35vw"
                               :ref="modalOptions.ref"
                               :options="modalOptions"
@@ -43,13 +59,13 @@
 </template>
 
 <script>
-
 import AyudaFormModal from "./AyudaFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {AyudaFormModal, DefaultStatusModal, DefaultDeleteModal},
+    components: {AyudaFormModal, DefaultStatusModal, DefaultDeleteModal, LogsModal },
     data() {
         return {
             dataTable: {
@@ -81,6 +97,13 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -119,6 +142,13 @@ export default {
                 contentText: '¿Desea eliminar este registro?',
                 endpoint: '',
             },
+	    modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: "/search",
+                persistent: true
+            },
         }
     },
     mounted() {
@@ -145,6 +175,5 @@ export default {
             // TODO: Call store or update USER
         },
     }
-
 }
 </script>
