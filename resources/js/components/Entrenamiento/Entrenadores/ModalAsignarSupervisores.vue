@@ -25,10 +25,12 @@
                         :ref="myVueDropzone"
                         @emitir-archivo="changeFile"
                         @emitir-alerta="enviar_alerta"
+                        @emitir-download-file="descargarErrores()"
                         :error_file="dropzone_file.error_file"
                         :error_text="dropzone_file.error_text"
                         :success_file="dropzone_file.success_file"
                         :success_text="dropzone_file.success_text"
+                        :hasObservation = "dropzone_file.hasObservation"
                         title=""
                         subtitle='Sube o arrastra el archivo <br><span class="font-weight-black">excel</span> con los datos'
                     />
@@ -85,32 +87,27 @@ export default {
             this.dropzone_file.error_file = false;
             this.dropzone_file.success_file = false;
         },
-        confirmModal() {
-            // let vue = this
-            // this.showLoader()
-
-            // const validateForm = vue.validateForm('cuentaZoomForm')
-            // const edit = vue.options.action === 'edit'
-
-            // let base = `${vue.options.base_endpoint}`
-            // let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
-
-            // let method = edit ? 'PUT' : 'POST';
-
-            // // if (validateForm && validateSelectedModules) {
-            // if (validateForm ) {
-
-            //     let formData = vue.getMultipartFormData(method, vue.resource, fields);
-
-            //     vue.$http.post(url, formData)
-            //         .then(({data}) => {
-            //             vue.closeModal()
-            //             vue.showAlert(data.data.msg)
-                        vue.$emit('onConfirm')
-            //         })
-            // }
-
-            // this.hideLoader()
+        async confirmModal() {
+            let vue = this
+            vue.showLoader()
+            vue.progress_upload = 'cargando'
+            let data = new FormData();
+            data.append("archivo", vue.dropzone_file.file);
+            await axios
+                .post('/entrenamiento/entrenadores/asignar_masivo', data)
+                .then((res) => {
+                    vue.dropzone_file.success_file = true;
+                    if (res.data.info.data_no_procesada.length > 0) {
+                        vue.dropzone_file.hasObservation = true;
+                    }
+                    vue.archivo = null;
+                    vue.hideLoader()
+                    // vue.$emit('onConfirm')
+                })
+                .catch((err) => {
+                    vue.hideLoader();
+                    console.log(err);
+                });
         },
         resetSelects() {
             // Selects independientes
@@ -122,6 +119,17 @@ export default {
         downloadTemplate(){
             let vue = this;
             location.href = vue.template_url;
+        },
+        descargarErrores() {
+            let vue = this
+            let headers = ["DNI ALUMNO", "MENSAJE", "NOMBRES Y APELLIDOS"];
+            let values = ["dni", "msg", "nombre"];
+            vue.descargarExcelDatosNoProcesados(
+                headers,
+                values,
+                vue.errores,
+                "Data no procesada"
+            );
         }
     }
 }

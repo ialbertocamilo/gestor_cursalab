@@ -21,7 +21,7 @@
                         <img src="/img/upload_success.png">
                     </div>
                     <div class="text_success_upload">El archivo se ha cargado correctamente.</div>
-                    <span class="label_success_upload" v-html="success_text"></span>
+                    <span class="label_success_upload" v-if="success_text" v-html="success_text"></span>
                 </div>
                 <div class="init_upload" v-else>
                     <div class="icon_upload">
@@ -29,7 +29,13 @@
                         <img class="img_load" style="display:none;" src="/img/upload_load.png">
                         <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
                     </div>
-                    <div class="subtitle" v-html="subtitle"></div><br>
+                    <div class="subtitle" v-if="subtitle" v-html="subtitle"></div><br>
+                </div>
+                <div v-if="hasObservation" class="mx-8 mt-4">
+                    <div class="text-subtitle-2" style="color:red;">Sin embargo el archivo tuvo observaciones que no se pudieron cargar.</div><br>
+                    <div class="mt-4 text-subtitle-2">
+                        Descargar <span style="color:red;font-weight: bolder;" @click="downloadObservationsFile()">el archivo</span> con observaciones.
+                    </div>
                 </div>
                 <br>
             </div>
@@ -42,6 +48,10 @@
     export default {
         components:{ vueDropzone: vue2Dropzone},
         props: {
+            hasObservation:{
+                type: Boolean,
+                default:false
+            },
             error_file: {
                 type: Boolean,
                 default: false
@@ -119,6 +129,9 @@
             fileRemoved() {
                 this.$emit("emitir-archivo", null);
                 // this.$emit("emitir-alerta", 'Archivo removido');
+            },
+            downloadObservationsFile(){
+                this.$emit("emitir-download-file", null);
             },
             template() {
                 return `<div class="dz-preview dz-file-preview">
