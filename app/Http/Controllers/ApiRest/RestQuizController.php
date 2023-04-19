@@ -46,12 +46,19 @@ class RestQuizController extends Controller
         $passed = SummaryTopic::hasPassed($new_grade,null,$topic->course);
 
         $data_ev = [
+            'active_results' => (bool) $topic->active_results,
             'attempts' => $row->attempts + 1,
             'last_time_evaluated_at' => now(),
             'current_quiz_started_at' => NULL,
             'current_quiz_finishes_at' => NULL,
             'taking_quiz' => NULL,
         ];
+
+        // === tema: mostrar resultados ===
+        if($topic->active_results) {
+            $data_ev['preguntas'] = Topic::evaluateAnswers2($request->respuestas, $topic);
+        }
+        // === tema: mostrar resultados === 
 
         $next_topic = NULL;
 

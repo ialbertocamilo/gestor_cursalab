@@ -179,6 +179,30 @@
                         </v-col>
 
                     </v-row>
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Activar resultados"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+                                        <v-col cols="6" class="d-flex justify-content-center align-items-center">
+                                            <DefaultToggle
+                                                v-model="resource.active_results"
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="6">
+                                            * Al activar resultados se visualizaran las respuestas ingresadas (correctas e incorrectas).
+                                        </v-col>
+
+                                    </v-row>
+
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+
                     <v-row>
                         <v-col cols="5">
                             <!--                            <DefaultToggle v-model="resource.active"/>-->
@@ -229,7 +253,7 @@ import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'course_id'];
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id'];
 
 const file_fields = ['imagen'];
 
@@ -252,6 +276,7 @@ export default {
                 position: null,
                 media: [],
                 active: false,
+                active_results: false,
                 hide_evaluable: null,
                 hide_tipo_ev: null,
                 disabled_estado_toggle: false,
