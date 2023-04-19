@@ -179,7 +179,7 @@
                         </v-col>
 
                     </v-row>
-                    <v-row justify="space-around">
+                    <v-row justify="space-around" v-if="showActiveResults">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Activar resultados"
@@ -339,6 +339,17 @@ export default {
         vue.showLoader()
         await this.loadData()
         vue.hideLoader()
+    },
+    computed: {
+        showActiveResults() {
+            let vue = this;
+
+            if((vue.selects.evaluation_types).length && vue.resource.type_evaluation_id) {
+                const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
+                return (evaluation_type.name === "Calificada")
+            }
+            return false;
+        }
     },
     methods: {
         leavePage() {
@@ -574,6 +585,8 @@ export default {
             const tipo_ev = evaluation_type.name === "Calificada" ? 'Calificada' : 'Abierta';
             const title = `Debe tener una evaluación ${tipo_ev}`;
             const data = {data: [title]}
+
+            vue.resource.active_results = 0;
 
             // await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
             vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
