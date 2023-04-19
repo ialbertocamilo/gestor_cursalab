@@ -36,7 +36,9 @@
                                         :key="moduleSchool.subworkspace_id"
                                         :breadcrumbs="[
                                     {title: moduleSchool.module_name, disabled: true},
-                                    {title: moduleSchool.school_name, disabled: true},
+                                    {
+                                        title: moduleSchool.school_name,
+                                        disabled: false},
                                 ]"/>
                                 </v-expansion-panel-content>
                             </v-expansion-panel>
@@ -85,7 +87,7 @@
                                 Agregar segmento
                             </v-btn>
                             <p class="add-button-description">
-                                Empieza el proceso de segmentación por criterios agregando un segmento o usa la opción de segmentación por dos de identidad.
+                                Empieza el proceso de segmentación por criterios agregando un segmento o usa la opción de segmentación por documento.
                             </p>
                         </div>
 
@@ -309,6 +311,12 @@ export default {
             if (this.moduleIsNotSelected() && newVal > 0) {
                 this.modalModuleOptions.open = true;
             }
+
+            // When no segment exists, adds a new one
+
+            if (!this.segments.length) {
+                this.addSegmentation('direct-segmentation')
+            }
         }
     }
     ,
@@ -419,7 +427,7 @@ export default {
                 let message;
 
                 if(!cri_state) message = `${noexist}`;
-                else if(!cri_data) message = `${nodata} en la segmentación ${segIndex}, para continuar.`;
+                else if(!cri_data) message = `${nodata} en la segmentación ${segIndex} para continuar.`;
                 else message = null;
 
                 return { state, message, title, detail: { cri_data, cri_state } };
@@ -444,7 +452,7 @@ export default {
                 const responseData = responseCheck[i];
                 const { message, title } = responseData;
                 vue.modalInfoOptions.resource = message;
-                vue.modalInfoOptions.title = title;
+                vue.modalInfoOptions.title =  title;
 
                 const { cri_state, cri_data } = responseData.detail;
 
@@ -472,6 +480,9 @@ export default {
 
             vue.stackModals.continues = continues;
             vue.stackModals.backers = backers;
+
+            // When there is at least one message to show, return true
+            return responseCheck.length > 0;
         },
         continueRegister(flag) {
             const vue = this;
@@ -491,8 +502,9 @@ export default {
                 if(vue.criteriaIndexModal) {
                     const continuesCount = vue.stackModals.continues.length;
 
-                    if(vue.criteriaIndexModal === continuesCount){
-                        state = true;
+                    if (vue.criteriaIndexModal === continuesCount) {
+                        const messageShown = vue.setAndOpenAlertModal(responseCheck);
+                        state = messageShown ? false : true;
                     } else {
                         vue.setAndOpenAlertModal(responseCheck);
                         state = false;
