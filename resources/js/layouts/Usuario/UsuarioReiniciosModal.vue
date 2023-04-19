@@ -291,13 +291,13 @@ export default {
             let vue = this
             vue.showLoader()
             let url = `${vue.options.base_endpoint}/${resource.id}/reset`
-            // await vue.$http.get(url).then(({data}) => {
-            //     vue.selects.temas = data.data.topics
-            //     vue.selects.cursos = data.data.courses
-            //     vue.resource = data.data.user
-            //     vue.resetValidation()
-            //     vue.hideLoader()
-            // });
+            await vue.$http.get(url).then(({data}) => {
+                vue.selects.temas = data.data.topics
+                vue.selects.cursos = data.data.courses
+                vue.resource = data.data.user
+                vue.resetValidation()
+                vue.hideLoader()
+            });
         },
         loadSelects() {
 
