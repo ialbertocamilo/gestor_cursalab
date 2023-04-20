@@ -34,7 +34,7 @@ export default {
                                     <ul>
                                         Estáticos:"active","document", "fullname","phone_number", etc.<br>
                                         Dinámicos: "criterions"<br>
-                                        Campos obligatorios: "document","module"<br>
+                                        Campos obligatorios: "document"<br>
                                         Ejemplo:<br>
 <pre class='language-js line-numbers'><code>
     {
@@ -132,11 +132,10 @@ code:
 `
 {
     "data": {
-        "amount_inserted_users": "Cantidad de usuarios insertados.",
         "amount_updated_users": "Cantidad de usuarios actualizados.",
         "amount_errors":"Cantidad de errores encontrados."
         "processed_data": "Cantidad de data recibida.",
-        "inserted_users": "Documento y identificador del workspace de los usuarios insertados."
+        "updated_users": "Documento y identificador del workspace de los usuarios actualizados."
         "errors": "Listado de errores encontrados en la api." 
     }
 }`
