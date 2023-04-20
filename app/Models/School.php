@@ -24,7 +24,7 @@ class School extends BaseModel
 
     public function subworkspaces()
     {
-        return $this->belongsToMany(Workspace::class, 'school_subworkspace', 'school_id', 'subworkspace_id');
+        return $this->belongsToMany(Workspace::class, 'school_subworkspace', 'school_id', 'subworkspace_id')->orderByPivot('orden', 'asc');
     }
 
     public function courses()
@@ -43,7 +43,13 @@ class School extends BaseModel
         $modules_id = $request->modules ?? $workspace->subworkspaces->pluck('id')->toArray();
 
         $escuelas = School::
+        // addSelect('DISTINCT(ss.school_id)')
             // whereRelation('workspaces', 'workspace_id', $workspace->id)
+            
+            // ->whereIn('ss.subworkspace_id',$modules_id)
+            // with(['subworkspaces',function($q){
+            //     $q->select('subworkspace_id','school_id','orden');
+            // }])
             whereHas('subworkspaces', function ($j) use ($modules_id) {
                 $j->whereIn('subworkspace_id', $modules_id);
             })
@@ -70,13 +76,17 @@ class School extends BaseModel
                 $escuelas->whereDate('created_at', '<=', $request->dates[1]);
         }
 
-        if (!is_null($request->sortBy)) {
-            $field = $request->sortBy ?? 'created_at';
-            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
-            $escuelas->orderBy($field, $sort);
-        } else {
-            $escuelas->orderBy('created_at', 'DESC');
+        if($request->canChangePosition){
+            $escuelas->join('school_subworkspace as ss','ss.school_id','schools.id')->orderBy('ss.position', 'ASC')->groupBy('schools.id');
+        } else{
+            if (!is_null($request->sortBy)) {
+                $field = $request->sortBy ?? 'created_at';
+                $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+    
+                $escuelas->orderBy($field, $sort);
+            } else {
+                $escuelas->orderBy('created_at', 'DESC');
+            }
         }
 
 
@@ -84,9 +94,8 @@ class School extends BaseModel
 
         // $field = $field ?? 'position';
         // $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
+        // dd($escuelas->paginate($request->paginate)->pluck('id'));
         // $escuelas->orderBy($field, $sort);
-
         return $escuelas->paginate($request->paginate);
     }
 

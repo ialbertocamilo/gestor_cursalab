@@ -45,7 +45,7 @@
                         text icon
                         color="primary"
                         @click="changeOrder(item, 'up', header.model, header.field)"
-                        v-show="!dataTable.filters && item.position && (!sortParams.sortBy || sortParams.sortBy == 'position')"
+                        v-show="item.canChangePosition || (!dataTable.filters && item.position && (!sortParams.sortBy || sortParams.sortBy == 'position'))"
                         :disabled="pagination.actual_page == 1 && rows.indexOf(item) == 0"
                     >
                         <v-icon v-text="'mdi-chevron-up'"/>
@@ -55,7 +55,7 @@
                         text icon
                         color="primary"
                         @click="changeOrder(item, 'down', header.model, header.field)"
-                        v-show="!dataTable.filters && item.position && (!sortParams.sortBy || sortParams.sortBy == 'position')"
+                        v-show="item.canChangePosition || (!dataTable.filters && item.position && (!sortParams.sortBy || sortParams.sortBy == 'position'))"
                         :disabled="pagination.actual_page == pagination.total_pages && rows.indexOf(item) + 1 == rows.length"
                     >
                         <v-icon v-text="'mdi-chevron-down'"/>

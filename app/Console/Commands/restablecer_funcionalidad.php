@@ -11,6 +11,7 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\School;
 use App\Models\Ticket;
 use App\Models\Visita;
 use App\Models\Summary;
@@ -83,7 +84,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
-        $this->restoreSummaryCourse();
+        // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
         // $this->restore_surname();
@@ -102,9 +103,29 @@ class restablecer_funcionalidad extends Command
         // $this->generateStatusTopics();
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
-        $this->setSummarys();
+        // $this->setSummarys();
+        $this->setSchoolOrden();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
+    }
+
+    public function setSchoolOrden(){
+        $subworkspaces = Workspace::select('id')->whereNotNull('parent_id')->get();
+        foreach ($subworkspaces as $key => $subworkspace) {
+            $schools = School::disableCache()
+                        ->join('school_subworkspace as ss','ss.school_id','schools.id')
+                        ->where('ss.subworkspace_id',$subworkspace->id)
+                        // ->ordenBy('schools.name')
+                        ->get()->sortBy('name');
+            $position = 1;
+            foreach ($schools as $school) {
+                // info($position);
+                Db::table('school_subworkspace')->where('subworkspace_id',$subworkspace->id)->where('school_id',$school->id)->update([
+                    'position'=>$position
+                ]);
+                $position = $position + 1;
+            }
+        }
     }
     public function setSummarys(){
         $users = User::whereIn('document',[''])->select('id')->get();

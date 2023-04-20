@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources\Escuela;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Services\FileService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class EscuelaSearchResource extends JsonResource
 {
@@ -18,7 +19,11 @@ class EscuelaSearchResource extends JsonResource
         $modalidades = config('constantes.modalidad');
 
         $modules = $this->subworkspaces->pluck('name')->toArray();
-
+        // info($this->orden);
+        $position = null;
+        if($request->canChangePosition){
+            $position = DB::table('school_subworkspace')->select('orden')->where('subworkspace_id',$request->modules[0])->where('school_id',$this->id)->first()?->position;
+        }
         return [
             'id' => $this->id,
             'nombre' => $this->name,
@@ -27,8 +32,9 @@ class EscuelaSearchResource extends JsonResource
             'images' => $this->getModulesImages(),
             'modules' => implode(', ', $modules),
             'active' => $this->active,
-            'orden' => $this->position,
-            'position' => $this->position,
+            // 'orden' => $orden,
+            'canChangePosition' => $request->canChangePosition,
+            'position' => $position,
 
             'modalidad' => $modalidades[$this->modalidad] ?? '',
 

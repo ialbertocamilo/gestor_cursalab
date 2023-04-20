@@ -161,7 +161,9 @@ class SortingModel extends Model
 
             $model = "App" . '\\' . "Models" . '\\' . $request->model;
             $model = app($model);
+            // if(){
 
+            // }
             $resource = $model::find($request->id);
 
             $field = $request->field ?? 'position';
@@ -175,7 +177,7 @@ class SortingModel extends Model
             // }
 
             $new_orden = $action == 'up' ? $resource->position + 1 : $resource->position - 1;
-
+            info($request);
             if ($request->model == 'Poll') {
                 $next_resource = $model::where('position', $new_orden)->where('workspace_id', $resource->workspace_id)->first();
             } else if ($request->model == 'Topic') {

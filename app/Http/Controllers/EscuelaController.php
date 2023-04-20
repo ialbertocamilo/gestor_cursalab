@@ -20,9 +20,13 @@ class EscuelaController extends Controller
         // $workspace_id = (is_array($workspace)) ? $workspace['id'] : null;
 
         // $request->workspace_id = $workspace_id;
-
+        $request->canChangePosition =   boolval(
+                                        isset($request->modules) 
+                                        && count($request->modules) == 1 
+                                        && !isset($request->active)
+                                        && !isset($request->dates)
+                                    );
         $escuelas = School::search($request);
-
         EscuelaSearchResource::collection($escuelas);
 
         return $this->success($escuelas);
