@@ -5,7 +5,8 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-                Este proceso permite crear usuarios mediante el envio de sus datos personales y sus criterios correspondientes. 
+                Este proceso permite únicamente crear usuarios mediante el envió de sus datos personales y sus criterios correspondientes. <br>
+                La validación de creación de usuario se hace mediante el valor del documento, en caso el documento ya se encuentre registrado no se creará ni actualizará los datos la api lo retornará dentro del listado de errores.
             </p>
             <descriptionApi :options="api_description_options" />
         </v-card-text>
@@ -47,8 +48,8 @@ export default {
                 "name": text,
                 "lastname": text,
                 "surname": text,
-                "username": text,
-                "phone_number": number,
+                "username": text (Optional),
+                "phone_number": text,
                 "email": text,
                 "criterions": {
                     "module":text,
