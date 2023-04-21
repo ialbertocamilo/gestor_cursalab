@@ -174,6 +174,14 @@
 
             </v-form>
 
+            <UsuarioFormInfoModal
+              width="30vh"
+              :ref="modalUsuarioFormInfoOptions.ref"
+              :options="modalUsuarioFormInfoOptions"
+              @onCancel="closeFormModal(modalUsuarioFormInfoOptions), confirmModalInfo = true"
+              @onConfirm="confirmByModalInfo()"
+            />
+
             <PasswordGeneratorModal
                 width="40vw"
                 :ref="modalPasswordOptions.ref"
@@ -202,9 +210,10 @@
 import UsuarioCriteriaSection from "./UsuarioCriteriaSection";
 import PasswordGeneratorModal from "./PasswordGeneratorModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
+import UsuarioFormInfoModal from './UsuarioFormInfoModal.vue';
 
 export default {
-    components: {UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm},
+    components: { UsuarioFormInfoModal, UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm },
     props: {
         options: {
             type: Object,
@@ -237,6 +246,7 @@ export default {
                 active: true,
             },
             resource_criterion_static: {
+                usuario: {},
                 criterios: [],
                 criterion_values: {}
             },
@@ -259,6 +269,18 @@ export default {
                 resource: 'Password',
                 confirmLabel: 'Cerrar',
                 showCloseIcon: true,
+            },
+            confirmModalInfo: true,
+            modalUsuarioFormInfoOptions: {
+                ref: 'UsuarioFormInfoModal',
+                open: false,
+                confirmLabel: 'Confirmar',
+                subTitle:'¡Estás por actualizar los criterios de un usuario!',
+                showCloseIcon: true,
+                resource: {
+                    changes_criterios: [],
+                    changes_data: []
+                }
             },
             updateStatusModal: {
                 ref: 'UsuarioUpdateStatusModal',
@@ -384,9 +406,15 @@ export default {
             const same_data = (changes_data.length === 0);
             return { same_data, changes_data };
         },
+        confirmByModalInfo() {
+            let vue = this;
+            vue.confirmModalInfo = false;
+            vue.confirmModal();
+        },
         async confirmModal() {
-            let vue = this
-            vue.showLoader()
+            let vue = this;
+            vue.showLoader();
+
             const validateForm = vue.validateForm('UsuarioForm')
             vue.show_lbl_error_cri = !validateForm
 
@@ -400,17 +428,28 @@ export default {
                 vue.parseCriterionValues()
 
                 // === validar cambio de criterios
-                vue.checkChangesAtCriterios(data.criterion_list_final); // criterios
-                // vue.checkChangesAtUserData(data, [{key:'document', label:'Identificador'}]); // documento - dni
-                console.log('data', data);
+                if (vue.confirmModalInfo) {
+                    const checkCriterios = vue.checkChangesAtCriterios(data.criterion_list_final); // criterios
+                    const checkData = vue.checkChangesAtUserData(data, [{key:'document', label:'Identificador'}]); // documento - dni
+
+                    if(!checkCriterios.same_criterios || !checkData.same_data) {
+                        vue.hideLoader();
+                        vue.modalUsuarioFormInfoOptions.resource = { changes_criterios: checkCriterios.changes_criterios , 
+                                                                     changes_data: checkData.changes_data };
+                        vue.openFormModal(vue.modalUsuarioFormInfoOptions, null, 'status', 'Actualización de datos')
+                        return;
+                    }
+                }
                 // === validar cambio de criterios
 
+            /*  console.log('sending form user', data);
                 vue.errors = [];
-                vue.hideLoader();
+                vue.hideLoader(); */
 
-                /*vue.$http[method](url, data)
+                vue.$http[method](url, data)
                     .then(({data}) => {
                         vue.errors = []
+                        vue.confirmModalInfo = true;
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
@@ -423,7 +462,7 @@ export default {
 
                         if (error && error.errors)
                             vue.errors = error.errors
-                    })*/
+                    })
             } else {
                 vue.hideLoader()
             }
