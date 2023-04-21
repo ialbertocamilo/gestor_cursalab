@@ -24,7 +24,7 @@ class School extends BaseModel
 
     public function subworkspaces()
     {
-        return $this->belongsToMany(Workspace::class, 'school_subworkspace', 'school_id', 'subworkspace_id')->orderByPivot('orden', 'asc');
+        return $this->belongsToMany(Workspace::class, 'school_subworkspace', 'school_id', 'subworkspace_id');
     }
 
     public function courses()
@@ -50,7 +50,10 @@ class School extends BaseModel
             // with(['subworkspaces',function($q){
             //     $q->select('subworkspace_id','school_id','orden');
             // }])
-            whereHas('subworkspaces', function ($j) use ($modules_id) {
+            when($request->canChangePosition ?? null, function ($q) use ($modules_id) {
+                $q->join('school_subworkspace as ss','ss.school_id','schools.id')->where('ss.subworkspace_id',$modules_id[0]);
+            })
+            ->whereHas('subworkspaces', function ($j) use ($modules_id) {
                 $j->whereIn('subworkspace_id', $modules_id);
             })
             ->withCount(['courses']);
@@ -75,23 +78,21 @@ class School extends BaseModel
             if (isset($request->dates[1]))
                 $escuelas->whereDate('created_at', '<=', $request->dates[1]);
         }
-
-        if($request->canChangePosition){
-            $escuelas->join('school_subworkspace as ss','ss.school_id','schools.id')->orderBy('ss.position', 'ASC')->groupBy('schools.id');
-        } else{
+        if(!$request->canChangePosition){
             if (!is_null($request->sortBy)) {
                 $field = $request->sortBy ?? 'created_at';
                 $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-    
                 $escuelas->orderBy($field, $sort);
             } else {
                 $escuelas->orderBy('created_at', 'DESC');
             }
+        }else{
+            $escuelas->addSelect('ss.position as school_position')->orderBy('school_position', 'ASC')->groupBy('schools.id');
         }
 
 
         // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
-
+        info($escuelas->toSql());
         // $field = $field ?? 'position';
         // $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
         // dd($escuelas->paginate($request->paginate)->pluck('id'));

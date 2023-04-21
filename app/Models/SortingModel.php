@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\ApiResponse;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
+use Illuminate\Database\Eloquent\Model;
 
 class SortingModel extends Model
 {
@@ -161,15 +161,15 @@ class SortingModel extends Model
 
             $model = "App" . '\\' . "Models" . '\\' . $request->model;
             $model = app($model);
-            // if(){
-
-            // }
-            $resource = $model::find($request->id);
 
             $field = $request->field ?? 'position';
             $action = $request->action;
 
-
+            if($request->model == 'SchoolSubworkspace'){
+                $resource = $model::where('subworkspace_id',$request->subworkspace_id)->where('school_id',$request->id)->first();
+            }else{
+                $resource = $model::find($request->id);
+            }
             // if ($resource->$field === 1)
             // {
             //     if ($action == 'down')
@@ -177,12 +177,14 @@ class SortingModel extends Model
             // }
 
             $new_orden = $action == 'up' ? $resource->position + 1 : $resource->position - 1;
-            info($request);
+
             if ($request->model == 'Poll') {
                 $next_resource = $model::where('position', $new_orden)->where('workspace_id', $resource->workspace_id)->first();
             } else if ($request->model == 'Topic') {
                 $next_resource = $model::where('position', $new_orden)->where('course_id', $resource->course_id)->first();
-            } else {
+            } else if ($request->model == 'SchoolSubworkspace'){
+                $next_resource = $model::where('position', $new_orden)->where('subworkspace_id', $resource->subworkspace_id)->first();
+            }else {
                 $next_resource = $model::where('position', $new_orden)->first();
             }
 
@@ -195,6 +197,9 @@ class SortingModel extends Model
             $resource->save();
 
             DB::commit();
+            if ($request->model == 'SchoolSubworkspace'){
+                cache_clear_model(School::class);
+            }
         } catch (\Exception $e) {
             // info($e->getMessage());
             DB::rollBack();

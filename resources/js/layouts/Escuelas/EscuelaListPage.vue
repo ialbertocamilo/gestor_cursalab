@@ -318,17 +318,21 @@ export default {
         changeHeaders(){
             let vue = this;
             const indexOrden = vue.dataTable.headers.findIndex(h => h.text == 'Orden');
+            console.log('indexOrden',indexOrden);
             if(vue.filters.modules.length ==1 && !vue.filters.q && !vue.filters.active &&  !vue.filters.dates){
+                console.log('entra if');
                 vue.$nextTick(() => {
                     if(indexOrden == -1){
-                        vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'School', sortable: false}, 1);
-                        console.log(vue.dataTable.headers);
+                        vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'SchoolSubworkspace', sortable: false}, 1);
+                        console.log('entra set');
                     }
                 });
             }else{
+                console.log('entra else');
                 if(indexOrden != -1){
                     vue.$nextTick(() => {
                         vue.dataTable.headers.splice(indexOrden, 1);
+                        console.log('entra delete');
                     })
                 }
             }

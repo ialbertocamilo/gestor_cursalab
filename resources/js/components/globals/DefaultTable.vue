@@ -859,6 +859,7 @@ export default {
                 model,
                 action,
                 field,
+                subworkspace_id:item.subworkspace_id_selected || null
             }
 
             vue.$http.put(url, data)

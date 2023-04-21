@@ -22,7 +22,8 @@ class EscuelaSearchResource extends JsonResource
         // info($this->orden);
         $position = null;
         if($request->canChangePosition){
-            $position = DB::table('school_subworkspace')->select('orden')->where('subworkspace_id',$request->modules[0])->where('school_id',$this->id)->first()?->position;
+            // $position = DB::table('school_subworkspace')->select('position')->where('subworkspace_id',$request->modules[0])->where('school_id',$this->id)->first()?->position;
+            $position = $this->school_position;
         }
         return [
             'id' => $this->id,
@@ -31,8 +32,9 @@ class EscuelaSearchResource extends JsonResource
             'image' => FileService::generateUrl($this->imagen),
             'images' => $this->getModulesImages(),
             'modules' => implode(', ', $modules),
+            'subworkspace_id_selected'=> $request->canChangePosition ? $request->modules[0] : null,
             'active' => $this->active,
-            // 'orden' => $orden,
+            // 'orden' => $position,
             'canChangePosition' => $request->canChangePosition,
             'position' => $position,
 
