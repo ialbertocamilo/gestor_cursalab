@@ -82,7 +82,6 @@
             </v-card-text>
 
             <DefaultTable
-                avoid_first_data_load
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
