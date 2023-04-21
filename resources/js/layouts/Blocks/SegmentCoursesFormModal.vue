@@ -69,12 +69,12 @@
 
                 <v-tabs-items v-model="tabs">
 
-                    <v-tab-item>
+                    <v-tab-item class="first-tab">
 
                         <!-- "Add segmentation" screen is shown when no module has been selected and is the first segment -->
 
                         <div
-                            v-if="moduleIsNotSelected() && steps === 0"
+                            v-if="moduleIsNotSelected()"
                             class="add-button-wrapper">
                             <v-btn
                                 class="--add-button "
@@ -311,12 +311,6 @@ export default {
             if (this.moduleIsNotSelected() && newVal > 0) {
                 this.modalModuleOptions.open = true;
             }
-
-            // When no segment exists, adds a new one
-
-            if (!this.segments.length) {
-                this.addSegmentation('direct-segmentation')
-            }
         }
     }
     ,
@@ -350,6 +344,12 @@ export default {
         },
         showModulesInSegmentation(checkedModules) {
 
+            // When no segment exists, adds a new one
+
+            if (!this.segments.length) {
+                this.addSegmentation('direct-segmentation')
+            }
+
             // Hide modules modal
 
             this.modalModuleOptions.open = false;
@@ -358,7 +358,17 @@ export default {
 
             const currentSegment = this.steps;
             let moduleCriteria = this.criteria.find(c => c.code === 'module')
+
+            // Add checked modules to module criteria
+
             if (moduleCriteria) {
+
+                // Deep clone module criteria in order to avoid modifying the original one
+
+                moduleCriteria = JSON.parse(JSON.stringify(moduleCriteria))
+
+                // Add checked modules
+
                 moduleCriteria.values_selected = checkedModules
                 this.segments[currentSegment].criteria_selected.push(moduleCriteria)
             }
@@ -723,6 +733,10 @@ export default {
 
 .group-sheet {
     padding-bottom: 40px;
+}
+
+.first-tab {
+    min-height: 240px;
 }
 
 .add-button-wrapper {
