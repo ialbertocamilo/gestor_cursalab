@@ -42,7 +42,6 @@ export default {
         "users": [
             {
                 "document": text,
-                "email": text,
                 "criterions": {
                     "module":text,
                     "email_type":text,
