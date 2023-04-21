@@ -236,6 +236,10 @@ export default {
                 criterion_list_final: {},
                 active: true,
             },
+            resource_criterion_static: {
+                criterios: [],
+                criterion_values: {}
+            },
             resource: {},
             selects: {},
             rules: {
@@ -316,6 +320,70 @@ export default {
                 vue.updateStatusModal.status_item_modal = !vue.resource.active
             }
         },
+        checkBuildFinalIds() {
+            let vue = this;
+            const { criterios, criterion_values } = vue.resource_criterion_static;
+
+            const criterios_ids = Object.entries(criterios).map(([, ele]) => ele.id);
+            const criterios_array = Object.entries(criterion_values).filter(([, ele]) => criterios_ids.includes(ele.criterion_id) );
+
+            return criterios_array.map(([, ele]) => ele.id );
+        },
+        checkChangesAtArrays(criterion_list_final, criterios_final_ids) {
+            let stack_criterios = [];
+            
+            const { loop, compare } = (criterion_list_final.length >= criterios_final_ids.length) 
+                                ? { loop: criterion_list_final, compare: criterios_final_ids } : 
+                                  { loop: criterios_final_ids, compare: criterion_list_final };
+            loop.forEach((id) => {
+                if(!compare.includes(id)) {
+                    stack_criterios.push(id);
+                }
+            });
+
+            return stack_criterios; 
+        },
+        checkChangesAtCriterios(criterion_list_final) {
+            let vue = this;
+
+            const { criterios, criterion_values } = vue.resource_criterion_static;
+            const criterios_final_ids = vue.checkBuildFinalIds();
+            const stack_criterios = vue.checkChangesAtArrays(criterion_list_final, criterios_final_ids);
+
+            let same_criterios = (stack_criterios.length === 0);
+            let changes_criterios = []; 
+
+            if(!same_criterios) {
+                const criterios_list = Object.entries(criterios);
+
+                for (let i = 0; i < criterios_list.length; i++) {
+                    const [, ele] = criterios_list[i];
+                    const criterio_values = ele.values.map((val) => val.id);
+                    const criterio_match  = stack_criterios.some((id) => criterio_values.includes(id));
+
+                    if(criterio_match) {
+                        const { code, name, id } = ele;
+                        changes_criterios.push({code, name, id});
+                    }
+                }
+            }
+
+            return { same_criterios, changes_criterios };
+        },
+        checkChangesAtUserData(data, stack_keys) {
+            let vue = this;
+            const { usuario } = vue.resource_criterion_static;
+
+            const changes_data = stack_keys.filter((ele) => {
+                const current_value = data[ele.key];
+                const origin_value = usuario[ele.key];
+
+                return (current_value !== origin_value);
+            });
+
+            const same_data = (changes_data.length === 0);
+            return { same_data, changes_data };
+        },
         async confirmModal() {
             let vue = this
             vue.showLoader()
@@ -331,7 +399,16 @@ export default {
                 let data = vue.resource
                 vue.parseCriterionValues()
 
-                vue.$http[method](url, data)
+                // === validar cambio de criterios
+                vue.checkChangesAtCriterios(data.criterion_list_final); // criterios
+                // vue.checkChangesAtUserData(data, [{key:'document', label:'Identificador'}]); // documento - dni
+                console.log('data', data);
+                // === validar cambio de criterios
+
+                vue.errors = [];
+                vue.hideLoader();
+
+                /*vue.$http[method](url, data)
                     .then(({data}) => {
                         vue.errors = []
                         vue.closeModal()
@@ -346,7 +423,7 @@ export default {
 
                         if (error && error.errors)
                             vue.errors = error.errors
-                    })
+                    })*/
             } else {
                 vue.hideLoader()
             }
@@ -408,6 +485,8 @@ export default {
                     vue.criterion_list_req = [];
                     vue.criterion_list_opt = [];
 
+                    console.log('loadData', { url, criterion_list: data.data.usuario.criterion_list });
+
                     vue.criterion_list = data.data.criteria
                     vue.criterion_list.forEach(criterion => {
                         // console.log(criterion)
@@ -421,8 +500,13 @@ export default {
                             vue.criterion_list_opt.push(criterion)
                     })
 
-                    if (resource)
-                        vue.resource = data.data.usuario
+                    if (resource) {
+                        vue.resource = data.data.usuario;
+                        const { document: documento } = data.data.usuario 
+                        vue.resource_criterion_static.usuario = { document: documento }; // copy
+                        vue.resource_criterion_static.criterios = { ...data.data.criteria }; // copy
+                        vue.resource_criterion_static.criterion_values = { ...data.data.usuario.criterion_values }; // copy
+                    }
 
                     return 0;
                 })
