@@ -55,6 +55,7 @@ class RestQuizController extends Controller
         ];
 
         // === tema: mostrar resultados ===
+        $data_ev['preguntas'] = [];
         if($topic->active_results) {
             $data_ev['preguntas'] = Topic::evaluateAnswers2($request->respuestas, $topic);
         }
