@@ -6,24 +6,55 @@
         ======================================== -->
 
         <v-row class="justify-content-center pt-3 pb-3">
-            <div class="col-6">
-                <v-row class="--justify-content-center --pt-3 --pb-3" align="center">
-                    <div class="col-4">
-                        <img src="/img/we-connect-logo.png"
-                             class="logo"
-                            alt="We connect">
-                    </div>
-                    <div class="col-6">
-                        <h1>Workspaces</h1>
-                        <h3>Bienvenido(a) a WeConnect 2.0</h3>
-                        <small>
-                            Ingresa a un workspace para administrar  su contenido
-                        </small>
-                    </div>
-                </v-row>
-            </div>
             <div class="col-4">
+                <img src="/img/we-connect-logo.png"
+                     class="logo"
+                     alt="We connect">
+            </div>
+            <div class="col-6">
                 <div v-html="headerTemplate"></div>
+                <!--
+                <div v-if="userSession.user"
+                    class="user-button-wrapper">
+                    <button class="mr-3">
+                        <v-icon class="icon">mdi-account</v-icon>
+                        {{ userSession.user.fullname }}
+                    </button>
+
+                    <a @click="logout()">
+                        <v-icon class="stats-icon">mdi-logout</v-icon>
+                    </a>
+                </div>
+                -->
+            </div>
+        </v-row>
+
+        <!--
+            Main title
+        ======================================== -->
+
+        <v-row class="justify-content-center">
+            <div class="col-10">
+                <h1>
+                    Bienvenido(a) a WeConnect 2.0
+                </h1>
+                <h3>
+                    Ingresa a un workspace para administrar  su contenido
+                </h3>
+            </div>
+        </v-row>
+
+        <!--
+            Workspaces title
+        ======================================== -->
+
+        <v-row class="justify-content-center mt-3 pt-3 pb-3">
+            <div class="col-10">
+                <h2>
+                    <b>
+                        Workspaces
+                    </b>
+                </h2>
             </div>
         </v-row>
 
@@ -595,7 +626,7 @@ h3 {
 }
 
 .workspaces-wrapper{
-    padding: 26px 40px 26px 40px;
+    padding: 56px 50px 56px 50px;
 }
 
 .configurations-wrapper {

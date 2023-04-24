@@ -11,6 +11,7 @@
     </script>
     <v-app>
         <workspaces-list-layout></workspaces-list-layout>
+        {{-- <workspaces-list-layout></workspaces-list-layout> --}}
     </v-app>
 
 @endsection
