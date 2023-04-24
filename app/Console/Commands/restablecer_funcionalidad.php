@@ -73,7 +73,7 @@ class restablecer_funcionalidad extends Command
     public function handle()
     {
         $this->info(" Inicio: " . now());
-        info(" Inicio: " . now());
+        // info(" Inicio: " . now());
 
         // $this->restablecer_estado_tema();
         // $this->restablecer_estado_tema_2();
@@ -105,7 +105,7 @@ class restablecer_funcionalidad extends Command
         // $this->setSummarys();
         $this->restoSummaryCourseSinceSummaryTopic();
         $this->info("\n Fin: " . now());
-        info(" \n Fin: " . now());
+        // info(" \n Fin: " . now());
     }
 
     public function restoSummaryCourseSinceSummaryTopic(){
