@@ -9,6 +9,7 @@ use App\Models\Role;
 use Carbon\Carbon;
 use Bouncer;
 use \Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,5 +38,9 @@ class AppServiceProvider extends ServiceProvider
         Builder::macro('whereRelationIn', function($relation, $column, $array) {
             return $this->whereHas($relation, fn($q) => $q->whereIn($column, $array));
         });
+
+        if(config('app.env') == 'production') {
+            URL::forceScheme('https');
+        }
     }
 }
