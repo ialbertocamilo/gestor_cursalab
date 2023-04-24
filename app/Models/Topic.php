@@ -433,7 +433,10 @@ class Topic extends BaseModel
         $schools = $user_courses->groupBy('schools.*.id');
         $courses = $schools[$school_id] ?? collect();
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
-
+        $positions_courses = CourseSchool::select('school_id','course_id','position')
+                    ->where('school_id',$school_id)
+                    ->whereIn('course_id',$user_courses->pluck('id'))
+                    ->get();
         // UC
         $school_name = $school?->name;
         if ($workspace_id === 25) {
@@ -456,7 +459,7 @@ class Topic extends BaseModel
             ->groupBy('course_id')
             ->get();
         foreach ($courses as $course) {
-
+            $course_position = $positions_courses->where('course_id',$course->id)->first()?->position;
             // $compatible = $course->getCourseCompatibilityByUser($user);
 
             // UC rule
@@ -716,6 +719,7 @@ class Topic extends BaseModel
 
                 $schools_courses[] = [
                     'id' => $course->id,
+                    'orden' => $course_position,
                     'nombre' => $course_name,
                     'descripcion' => $course->description,
                     'imagen' => $course->imagen,
@@ -746,6 +750,7 @@ class Topic extends BaseModel
 
             $schools_courses[] = [
                 'id' => $course->id,
+                'orden' => $course_position,
 //                'nombre' => $course->name,
                 'nombre' => $course_name,
                 'descripcion' => $course->description,
@@ -768,7 +773,8 @@ class Topic extends BaseModel
                 'mod_evaluaciones' => $course->mod_evaluaciones
             ];
         }
-
+        $columns = array_column($schools_courses, 'orden');
+        array_multisort($columns, SORT_ASC, $schools_courses);
         return [
             'id' => $school?->id,
 //            'nombre' => $school?->name,

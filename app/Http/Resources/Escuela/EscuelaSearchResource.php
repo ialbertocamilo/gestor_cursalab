@@ -32,7 +32,7 @@ class EscuelaSearchResource extends JsonResource
             'image' => FileService::generateUrl($this->imagen),
             'images' => $this->getModulesImages(),
             'modules' => implode(', ', $modules),
-            'subworkspace_id_selected'=> $request->canChangePosition ? $request->modules[0] : null,
+            'pivot_id_selected'=> $request->canChangePosition ? $request->modules[0] : null,
             'active' => $this->active,
             // 'orden' => $position,
             'canChangePosition' => $request->canChangePosition,

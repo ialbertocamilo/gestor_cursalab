@@ -28,8 +28,8 @@
                             clearable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
@@ -40,7 +40,7 @@
                             :items="selects.types"
                             v-model="filters.type"
                             label="Tipo de curso"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             item-text="name"
                         />
                     </v-col>
@@ -51,7 +51,7 @@
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado de curso"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             item-text="name"
                         />
                     </v-col>
@@ -65,7 +65,7 @@
                             :options="modalDateFilter1"
                             v-model="filters.dates"
                             label="Fecha de creación"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1).changeHeaders()"
                         />
                     </v-col>
                 </v-row>
@@ -235,7 +235,8 @@ export default {
                 endpoint: `${route_school}/cursos/search`,
                 ref: 'cursosTable',
                 headers: [
-                    {text: "Orden", value: "orden", align: 'center'},
+                    // {text: "Orden", value: "orden", align: 'center'},
+                    // {text: "Orden", value: "position", align: 'center', model: 'CourseSchool', sortable: false},
                     {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
                     {text: "Tipo", value: "type", sortable: false},
@@ -489,7 +490,24 @@ export default {
                     vue.loadingActionBtn = false
                 })
         },
+        changeHeaders(){
+            let vue = this;
+            const indexOrden = vue.dataTable.headers.findIndex(h => h.text == 'Orden');
 
+            if(vue.filters.category && !vue.filters.type && !vue.filters.q && !vue.filters.active &&  !vue.filters.dates){
+                vue.$nextTick(() => {
+                    if(indexOrden == -1){
+                        vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'CourseSchool', sortable: false}, 1);
+                    }
+                });
+            }else{
+                if(indexOrden != -1){
+                    vue.$nextTick(() => {
+                        vue.dataTable.headers.splice(indexOrden, 1);
+                    })
+                }
+            }
+        },
         updateCourseStatus(course) {
             let vue = this
             vue.update_model = course

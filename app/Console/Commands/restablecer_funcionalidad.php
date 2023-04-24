@@ -104,7 +104,8 @@ class restablecer_funcionalidad extends Command
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
         // $this->setSummarys();
-        $this->setSchoolOrden();
+        // $this->setSchoolOrden();
+        $this->setCourseOrden();
         $this->info("\n Fin: " . now());
         info(" \n Fin: " . now());
     }
@@ -121,6 +122,19 @@ class restablecer_funcionalidad extends Command
             foreach ($schools as $school) {
                 // info($position);
                 Db::table('school_subworkspace')->where('subworkspace_id',$subworkspace->id)->where('school_id',$school->id)->update([
+                    'position'=>$position
+                ]);
+                $position = $position + 1;
+            }
+        }
+    }
+    public function setCourseOrden(){
+        $schools = School::where('id',1)->get();
+        foreach ($schools as $school) {
+            $courses = $school->courses->sortBy('position');
+            $position = 1;
+            foreach ($courses as $course) {
+                Db::table('course_school')->where('school_id',$school->id)->where('course_id',$course->id)->update([
                     'position'=>$position
                 ]);
                 $position = $position + 1;

@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
+use App\Models\Topic;
 use App\Models\Course;
 use App\Models\School;
-use App\Models\SummaryCourse;
 use App\Models\Taxonomy;
-use App\Models\Topic;
+use App\Models\CourseSchool;
 use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
+use App\Models\SchoolSubworkspace;
+use App\Http\Controllers\Controller;
 
 class RestUserProgressController extends Controller
 {
@@ -77,9 +79,20 @@ class RestUserProgressController extends Controller
         $schools = $user_courses->groupBy('schools.*.id');
 
         $data = [];
+        $positions_schools = SchoolSubworkspace::select('school_id','position')
+                                ->where('subworkspace_id',$user->subworkspace_id)
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->get();
+       
+        $positions_courses = CourseSchool::select('school_id','course_id','position')
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->whereIn('course_id',$user_courses->pluck('id'))
+                                ->get();
+                                
         foreach ($schools as $school_id => $courses) {
+            $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
             $school = $courses->first()->schools->where('id', $school_id)->first();
-            $courses_data = $this->getSchoolProgress($courses);
+            $courses_data = $this->getSchoolProgress($courses,$positions_courses);
 
             $school_status = $this->getSchoolProgressByUserV2($courses_data);
             // $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
@@ -100,7 +113,7 @@ class RestUserProgressController extends Controller
 //                'estado_str' => '',
                 'completados' => $school_status['completed'],
                 'asignados' => $courses->count(),
-                'orden' => $school->position,
+                'orden' => $school_position,
                 'courses' => $courses_data
             ];
         }
@@ -159,7 +172,7 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function getSchoolProgress($courses)
+    public function getSchoolProgress($courses,$positions_courses)
     {
         $user = auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
@@ -168,6 +181,7 @@ class RestUserProgressController extends Controller
         $school_courses = collect();
 
         foreach ($courses as $course) {
+            $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
 
             $course_name = $course->name;
             $tags = [];
@@ -213,6 +227,7 @@ class RestUserProgressController extends Controller
 
                 $school_courses->push([
                     'id' => $course->id,
+                    'orden' => $course_position,
                     'name' => $course_name,
                     'position' => $course->position,
                     'nota' => $course->compatible->grade_average,
@@ -221,7 +236,7 @@ class RestUserProgressController extends Controller
                     'tags' => $tags,
                     'tag_ciclo' => $tags[0] ?? null,
                     'compatible' => $course->compatible?->course->only('id', 'name'),
-                    'temas' => $temp_topics
+                    'temas' => $temp_topics,
                 ]);
 
                 continue;
@@ -229,6 +244,7 @@ class RestUserProgressController extends Controller
 
             $school_courses->push([
                 'id' => $course->id,
+                'orden' => $course_position,
                 'name' => $course_name,
                 'position' => $course->position,
                 'nota' => $course_status['average_grade'],
@@ -237,7 +253,7 @@ class RestUserProgressController extends Controller
                 'tags' => $tags,
                 'tag_ciclo' => $tags[0] ?? null,
                 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
-                'temas' => $temp_topics
+                'temas' => $temp_topics,
             ]);
         }
 
@@ -252,7 +268,8 @@ class RestUserProgressController extends Controller
                 ['name', 'asc'],
             ]);
         }
-
+        $columns = array_column($school_courses, 'orden');
+        array_multisort($columns, SORT_ASC, $school_courses);
         return $school_courses->values()->all();
     }
 }

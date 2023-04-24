@@ -92,7 +92,6 @@ class School extends BaseModel
 
 
         // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
-        info($escuelas->toSql());
         // $field = $field ?? 'position';
         // $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
         // dd($escuelas->paginate($request->paginate)->pluck('id'));

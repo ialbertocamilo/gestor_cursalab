@@ -40,7 +40,21 @@ class CursosController extends Controller
     public function search(School $school, Request $request)
     {
         $request->merge(['school_id' => $school->id ?? null]);
-
+        $request->canChangePosition =   boolval(
+            $request->school_id
+            && !isset($request->active)
+            && !isset($request->type)
+            && !isset($request->q)
+            && !isset($request->dates)
+        ) || boolval(
+            isset($request->segmented_module) 
+            && isset($request->schools) 
+            && count($request->schools) == 1
+            && !isset($request->active)
+            && !isset($request->type)
+            && !isset($request->dates)
+            && !isset($request->q)
+        );
         $cursos = Course::search($request);
 
         CursoSearchResource::collection($cursos);

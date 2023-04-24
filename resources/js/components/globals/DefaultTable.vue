@@ -843,7 +843,7 @@ export default {
 
         },
         // changeOrder(model_name, item, subir, prop_name = 'orden') {
-        changeOrder(item, action, model, field = 'position') {
+        async changeOrder(item, action, model, field = 'position') {
 
             let vue = this
 
@@ -859,10 +859,10 @@ export default {
                 model,
                 action,
                 field,
-                subworkspace_id:item.subworkspace_id_selected || null
+                pivot_id_selected:item.pivot_id_selected || null
             }
 
-            vue.$http.put(url, data)
+            await vue.$http.put(url, data)
                 .then(({data}) => {
                     vue.showAlert(data.data.msg)
                     let filters = vue.addParamsToURL(vue.dataTable.filters, vue.filters)
