@@ -249,29 +249,46 @@ class SortingModel extends Model
     public static function reorderItemsInPivotTable($class_model,$pivot_id_selected,$position){
         //event create
         // info($class_model);
-        switch ($class_model) {
-            case 'SchoolSubworkspace':
-                $resource = $class_model::where('subworkspace_id', $pivot_id_selected)
-                            ->where('position', '>=', $position)
-                            ->where('position', '<', function($query) use ($position){
-                                $query->selectRaw('MIN(position)+1')
-                                    ->from('school_subworkspace')
-                                    ->where('position', '>=', $position);
-                            })
-                            ->orderby('position','desc')->first();
-                dd($pivot_id_selected,$position,$resource);
+        // switch ($class_model) {
+        //     case 'SchoolSubworkspace':
+                // $resource = $class_model::where('subworkspace_id', $pivot_id_selected)
+                //             ->where('position', '>=', $position)
+                //             ->where('position', '<', function($query) use ($position){
+                //                 $query->selectRaw('MIN(position)+1')
+                //                     ->from('school_subworkspace')
+                //                     ->where('position', '>=', $position);
+                //             })
+                //             ->orderby('position','desc')->first();
+                $subworkspace = $class_model
+                ::selectRaw('@group := IF(@prev_position + 1 = position, @group, @group + 1) AS pos_group, @prev_position := position as position')
+                ->crossJoin(DB::raw('(SELECT @prev_position := NULL, @group := 0) AS vars'))
+                ->where('position', '>=', $position)
+                ->where('subworkspace_id', $pivot_id_selected)
+                ->orderBy('position', 'ASC')
+                ->get();
+
+            $groups = $subworkspace->groupBy('pos_group')->map(function ($group) {
+                return [ 'start_position' => $group->min('position'), 'end_position' => $group->max('position'),    ];
+            })->values();
+
+            $result = DB::table(DB::raw('(' . $groups->toSql() . ') as groups'))
+                ->mergeBindings($groups)
+                ->select('start_position', 'end_position')
+                ->groupBy('pos_group')
+                ->limit(1);
+            dd($result);
                 $modelKey = 'subworkspace_id';
                 $pivotField = 'school_id';
-                break;
-            case CourseSchool::class:
-                $resource = $model::where('school_id', $request->pivot_id_selected)
-                                ->where('course_id', $request->id)
-                                ->first();
-                $modelKey = 'school_id';
-                $pivotField = 'course_id';
-                break;
-            default:
-                return;
-        }
+        //         break;
+        //     case CourseSchool::class:
+        //         $resource = $model::where('school_id', $request->pivot_id_selected)
+        //                         ->where('course_id', $request->id)
+        //                         ->first();
+        //         $modelKey = 'school_id';
+        //         $pivotField = 'course_id';
+        //         break;
+        //     default:
+        //         return;
+        // }
     }
 }
