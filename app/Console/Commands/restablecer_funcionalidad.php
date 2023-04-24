@@ -113,7 +113,7 @@ class restablecer_funcionalidad extends Command
         ->where('last_time_evaluated_at','>=','2023-04-15 00:00:00')
         ->where('last_time_evaluated_at','<=','2023-04-15 11:30:00')
         ->groupBy('user_id')->get()->map(function($summary){
-            info('start');
+            $this->info('start');
             $user = User::find($summary->user_id);
             $course_id = Topic::where('id',$summary->topic_id)->first()->course_id;
             $course = Course::find('id',$course_id);
