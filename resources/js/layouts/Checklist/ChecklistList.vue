@@ -44,8 +44,8 @@
             @onClose="closeModalSubidaMasiva"
         />
 
-        <ModalCreateEditChecklist
-            ref="ModalCreateEditChecklist"
+        <ModalCreateChecklist
+            ref="ModalCreateChecklist"
             v-model="modal.crear_editar_checklist"
             :width="'65%'"
             @onClose="closeModalCreateEditChecklist"
@@ -66,7 +66,7 @@
 
 <script>
 
-import ModalCreateEditChecklist from "../../components/Entrenamiento/Checklist/ModalCreateEditChecklist.vue";
+import ModalCreateChecklist from "../../components/Entrenamiento/Checklist/ModalCreateChecklist.vue";
 import ModalAsignarChecklistCurso from "../../components/Entrenamiento/Checklist/ModalAsignarChecklistCurso.vue";
 
 import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
@@ -74,7 +74,7 @@ import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
     components: {
-        ModalCreateEditChecklist,
+        ModalCreateChecklist,
         ModalAsignarChecklistCurso,
         StepperSubidaMasiva,
         DefaultDeleteModal
@@ -154,9 +154,9 @@ export default {
         async abrirModalCreateEditChecklist(checklist) {
             let vue = this;
             vue.dataModalChecklist = checklist;
-            await vue.$refs.ModalCreateEditChecklist.resetValidation()
+            await vue.$refs.ModalCreateChecklist.resetValidation()
 
-            vue.$refs.ModalCreateEditChecklist.setActividadesHasErrorProp()
+            vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
 
             vue.modal.crear_editar_checklist = true;
         },
@@ -181,7 +181,7 @@ export default {
         async closeModalCreateEditChecklist() {
             let vue = this;
             // await vue.getData();
-            vue.$refs.ModalCreateEditChecklist.resetValidation()
+            vue.$refs.ModalCreateChecklist.resetValidation()
             vue.dataModalChecklist = {};
             vue.modal.crear_editar_checklist = false;
         },
