@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Escuela\EscuelaStoreUpdateRequest;
-use App\Http\Resources\Escuela\EscuelaSearchResource;
-use App\Models\Abconfig;
-use App\Models\Categoria;
 use App\Models\Media;
 use App\Models\School;
+use App\Models\Abconfig;
+use App\Models\Categoria;
 use App\Models\Workspace;
+use App\Models\SortingModel;
 use Illuminate\Http\Request;
+use App\Models\SchoolSubworkspace;
 use Illuminate\Support\Facades\DB;
+use App\Http\Resources\Escuela\EscuelaSearchResource;
+use App\Http\Requests\Escuela\EscuelaStoreUpdateRequest;
 
 class EscuelaController extends Controller
 {
@@ -98,8 +100,10 @@ class EscuelaController extends Controller
         if ($school->courses()->count() > 0)
             return $this->error('La escuela tiene cursos.', 422, [['Para eliminar la escuela no debe tener cursos.']]);
 
+        SortingModel::deletePositionInPivotTable(SchoolSubworkspace::class,School::class,[
+            'school_id' => $school->id
+        ]);
         $school->delete();
-
         return $this->success(['msg' => 'Escuela eliminada correctamente.']);
     }
 

@@ -242,7 +242,14 @@ class Course extends BaseModel
 
                 $course = self::create($data);
                 $course->workspaces()->sync([$workspace->id]);
-
+                foreach ($data['escuelas'] as  $escuela) {
+                    SortingModel::setLastPositionInPivotTable(CourseSchool::class,Course::class,[
+                        'school_id' => $escuela,
+                        'course_id'=>$course->id,
+                    ],[
+                        'school_id'=>$escuela,
+                    ]);
+                }
             endif;
 
             if ($data['requisito_id']) :

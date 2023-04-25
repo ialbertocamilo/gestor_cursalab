@@ -245,7 +245,27 @@ class SortingModel extends Model
             cache_clear_model(Course::class);
         }
     }
-
+    public static function setLastPositionInPivotTable($pivotModel,$model,$data,$fields_to_search){
+        //example data structure ['subworkspace_id'=>$subworkspace->id,'school_id' => $school->id]
+        $last_postion =  $pivotModel::where(function($q) use ($fields_to_search){
+                            foreach ($fields_to_search as $key => $value) {
+                                $q->where($key,$value);
+                            }
+                        })->orderBy('position','desc')
+                        ->first()?->position;
+        //insert
+        $data['position'] = $last_postion+1 ?? 1;
+        $pivotModel::create($data);
+        cache_clear_model($model);
+    }
+    public static function deletePositionInPivotTable($pivotModel,$model,$fields_to_search){
+        $pivotModel::where(function($q) use ($fields_to_search){
+            foreach ($fields_to_search as $key => $value) {
+                $q->where($key,$value);
+            }
+        })->delete();
+        cache_clear_model($model);
+    }
     public static function reorderItemsInPivotTable($class_model,$pivot_id_selected,$position){
         //event create
         // info($class_model);

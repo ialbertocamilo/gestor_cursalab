@@ -9,7 +9,7 @@ class School extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma',
-        'position', 'scheduled_restarts', 'active'
+         'scheduled_restarts', 'active'
     ];
 
     public function setActiveAttribute($value)
@@ -109,6 +109,14 @@ class School extends BaseModel
                 $school->update($data);
             else :
                 $school = self::create($data);
+                foreach ($data['subworkspaces'] as  $subworkspace) {
+                    SortingModel::setLastPositionInPivotTable(SchoolSubworkspace::class,School::class,[
+                        'subworkspace_id'=>$subworkspace,
+                        'school_id' => $school->id
+                    ],[
+                        'subworkspace_id'=>$subworkspace,
+                    ]);
+                }
             endif;
             
             $school->subworkspaces()->sync($data['subworkspaces'] ?? []);
