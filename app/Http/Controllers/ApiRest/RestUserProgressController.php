@@ -227,9 +227,8 @@ class RestUserProgressController extends Controller
 
                 $school_courses->push([
                     'id' => $course->id,
-                    'orden' => $course_position,
                     'name' => $course_name,
-                    'position' => $course->position,
+                    'position' => $course_position,
                     'nota' => $course->compatible->grade_average,
                     'estado' => 'aprobado',
                     'estado_str' => 'Convalidado',
@@ -244,9 +243,8 @@ class RestUserProgressController extends Controller
 
             $school_courses->push([
                 'id' => $course->id,
-                'orden' => $course_position,
                 'name' => $course_name,
-                'position' => $course->position,
+                'position' => $course_position,
                 'nota' => $course_status['average_grade'],
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
@@ -268,8 +266,8 @@ class RestUserProgressController extends Controller
                 ['name', 'asc'],
             ]);
         }
-        $columns = array_column($school_courses, 'orden');
-        array_multisort($columns, SORT_ASC, $school_courses);
+        // $columns = array_column($school_courses, 'orden');
+        // array_multisort($columns, SORT_ASC, $school_courses);
         return $school_courses->values()->all();
     }
 }
