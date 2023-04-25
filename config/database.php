@@ -197,7 +197,9 @@ return [
             // 'password' => env('DB_MONGO_PASSWORD'),
             'options' => [
 //                'replicaSet' => 'rs0',
-                'database' => 'admin' // sets the authentication database required by mongo 3
+                'database' => 'admin', // sets the authentication database required by mongo 3
+                'tls' => env('DB_MONGO_OPT_TLS', false),
+                'tlsCAFile' => env('DB_MONGO_OPT_TLS_CA', ''),
             ],
         ],
     ],
