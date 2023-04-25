@@ -92,7 +92,7 @@ class RestUserProgressController extends Controller
         foreach ($schools as $school_id => $courses) {
             $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
             $school = $courses->first()->schools->where('id', $school_id)->first();
-            $courses_data = $this->getSchoolProgress($courses,$positions_courses);
+            $courses_data = $this->getSchoolProgress($courses,$positions_courses,$school_id);
 
             $school_status = $this->getSchoolProgressByUserV2($courses_data);
             // $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
@@ -172,7 +172,7 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function getSchoolProgress($courses,$positions_courses)
+    public function getSchoolProgress($courses,$positions_courses,$school_id)
     {
         $user = auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
