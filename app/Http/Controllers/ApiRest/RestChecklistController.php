@@ -50,8 +50,7 @@ class RestChecklistController extends Controller
 
         return response()->json($response, 200);
     }
-
-    public function marcarActividad(Request $request)
+    public function marcarActividadOld(Request $request)
     {
         $alumno_id = $request->alumno_id;
         $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->where('active', 1)->first();
@@ -75,6 +74,58 @@ class RestChecklistController extends Controller
 
         ChecklistRpta::actualizarChecklistRpta($checklistRpta);
 
+        return response()->json([
+            'error' => false,
+            'msg' => 'Actividad actualizada.'
+            /*'checklist_rpta_item' => $checklistRptaItem*/
+        ], 200);
+    }
+    public function marcarActividad(Request $request)
+    {
+        //en caso de todos sacar los usuarios por el auth::user()->id
+        // [
+        //     'actividades' => [
+        //          ['id'=>12,'estado'=>'pendiente'],
+        //          ['id'=>14,'estado'=>'En proceso'],
+        //          ['id'=>15,'estado'=>'Cumple'],
+        //          ['id'=>15,'estado'=>'No Cumple'],
+        //     ],
+        //     'checklist_id'=>45,
+        //     'alumnos_id' => [12,23,34],
+        //     'alumnos_todos'=>true,
+        //      'tipo' => 'entrenador_alumno ' o 'alumno_entrenador'
+        // ]
+        $actividades = $request->actividades;
+        $checklist_id = $request->checklist_id;
+        $alumnos_id = $request->alumnos_id;
+        $alumnos_todos = $request->alumnos_todos;
+        $tipo = $request->tipo;
+
+        
+        $entrenador_id = ($tipo =='entrenador_alumno') 
+                        ? auth()->user()->id 
+                        : EntrenadorUsuario::where('user_id', $alumnos_id[0])->where('active', 1)->first()?->trainer_id;
+                            
+        if($alumnos_todos){
+            $alumnos_id =  EntrenadorUsuario::where('trainer_id',$entrenador_id)->where('active', 1)->pluck('user_id');
+        }
+        foreach ($alumnos_id as $alumno_id) {
+            foreach ($actividades as $key => $actividad) {
+                $checklistRpta = ChecklistRpta::checklist($checklist_id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
+                $checklistRptaItem = ChecklistRptaItem::where('checklist_answer_id', $checklistRpta->id)->where('checklist_item_id', $actividad['id'])->first();
+                if (!$checklistRptaItem) {
+                    $checklistRptaItem = ChecklistRptaItem::create([
+                        'checklist_answer_id' => $checklistRpta->id,
+                        'checklist_item_id' => $actividad['id'],
+                        'qualification' => $actividad['estado']
+                    ]);
+                }
+                $checklistRptaItem->qualification = $actividad['estado'];
+                $checklistRptaItem->save();
+                ChecklistRpta::actualizarChecklistRpta($checklistRpta);
+            }
+        }
+        //Personalizar respuestas.
         return response()->json([
             'error' => false,
             'msg' => 'Actividad actualizada.'
