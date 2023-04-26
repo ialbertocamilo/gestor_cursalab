@@ -83,7 +83,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
-        // $this->restoreSummaryCourse();
+        $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
         // $this->restore_surname();
@@ -103,7 +103,7 @@ class restablecer_funcionalidad extends Command
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
         // $this->setSummarys();
-        $this->restoSummaryCourseSinceSummaryTopic();
+        // $this->restoSummaryCourseSinceSummaryTopic();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
     }
@@ -882,7 +882,7 @@ class restablecer_funcionalidad extends Command
     }
     // 45671352
     public function restoreSummaryCourse(){
-        User::select('id','subworkspace_id')->whereIn('document',['MIFAR0404UV','INKFAR0404UV'])->get()->map(function($user){
+        User::select('id','subworkspace_id')->whereIn('document',[ '76762999', '40878363'])->get()->map(function($user){
             $courses = $user->getCurrentCourses();
             $_bar = $this->output->createProgressBar($courses->count());
             $_bar->start();
