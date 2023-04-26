@@ -271,14 +271,20 @@ class UsuarioController extends Controller
         $courses_id = $user->getCurrentCourses(only_ids:true);
         $topics = SummaryTopic::query()
             ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
-            ->whereIn('topics.course_id',$courses_id)
-            ->where('summary_topics.passed', 0)
+            ->join('courses','courses.id','topics.course_id')
+            // ->where('summary_topics.passed', 0)
             // ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'] ?? 3)
-            ->where('summary_topics.attempts', '<>', 0)
-            ->whereNotNull('summary_topics.attempts')
             ->where('summary_topics.user_id', $user->id)
+            ->whereIn('topics.course_id',$courses_id)
+            ->whereNotNull('summary_topics.attempts')
+            ->where('summary_topics.attempts', '>=', DB::raw('CONVERT(courses.mod_evaluaciones->"$.nro_intentos",UNSIGNED)'))
+            ->whereRelationIn('status', 'code', ['desaprobado', 'por-iniciar'])
             ->select('topics.id', 'topics.name')
             ->get();
+            // ->filter(function ($summary) {
+            //     $course = Course::select('mod_evaluaciones')->where('id',$summary->course_id);
+
+            // });
 
         $courses = [];
 

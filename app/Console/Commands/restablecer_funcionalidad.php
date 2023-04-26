@@ -73,7 +73,7 @@ class restablecer_funcionalidad extends Command
     public function handle()
     {
         $this->info(" Inicio: " . now());
-        info(" Inicio: " . now());
+        // info(" Inicio: " . now());
 
         // $this->restablecer_estado_tema();
         // $this->restablecer_estado_tema_2();
@@ -83,7 +83,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
-        $this->restoreSummaryCourse();
+        // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
         // $this->restore_surname();
@@ -102,9 +102,26 @@ class restablecer_funcionalidad extends Command
         // $this->generateStatusTopics();
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
-        $this->setSummarys();
+        // $this->setSummarys();
+        $this->restoSummaryCourseSinceSummaryTopic();
         $this->info("\n Fin: " . now());
-        info(" \n Fin: " . now());
+        // info(" \n Fin: " . now());
+    }
+
+    public function restoSummaryCourseSinceSummaryTopic(){
+        SummaryTopic::select('user_id','topic_id')
+        ->where('last_time_evaluated_at','>=','2023-04-15 00:00:00')
+        ->where('last_time_evaluated_at','<=','2023-04-15 11:30:00')
+        ->groupBy('user_id')->get()->map(function($summary){
+            $this->info('start');
+            $user = User::find($summary->user_id);
+            $course_id = Topic::where('id',$summary->topic_id)->first()->course_id;
+            $course = Course::find($course_id);
+            SummaryCourse::updateUserData($course, $user, false,false);
+            SummaryUser::updateUserData($user);
+        });
+        cache_clear_model(SummaryUser::class);
+        cache_clear_model(SummaryCourse::class);
     }
     public function setSummarys(){
         $users = User::whereIn('document',[''])->select('id')->get();

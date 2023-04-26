@@ -187,8 +187,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function failed_topics()
     {
         return $this->hasMany(SummaryTopic::class, 'user_id')
-            ->where('passed', 0)
+            // ->where('passed', 0)
             ->whereNotNull('attempts')
+            ->whereRelationIn('status', 'code', ['desaprobado', 'por-iniciar'])
             ->where('attempts', '<>', 0);
     }
 
