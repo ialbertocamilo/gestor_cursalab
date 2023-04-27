@@ -882,7 +882,7 @@ class restablecer_funcionalidad extends Command
     }
     // 45671352
     public function restoreSummaryCourse(){
-        User::select('id','subworkspace_id')->whereIn('document',[ '76762999', '40878363'])->get()->map(function($user){
+        User::select('id','subworkspace_id')->whereIn('document',[ '41264573', '80331413'])->get()->map(function($user){
             $courses = $user->getCurrentCourses();
             $_bar = $this->output->createProgressBar($courses->count());
             $_bar->start();
