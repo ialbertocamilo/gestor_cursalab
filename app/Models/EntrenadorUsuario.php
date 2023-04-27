@@ -167,7 +167,9 @@ class EntrenadorUsuario extends Model
     protected function alumnosApi($data)
     {
         $entrenador_dni = $data['entrenador_dni'];
-        $filtro = $data['filtro'];
+        $filtro_usuario = $data['filtro']['usuario'];
+        $filtro_estado = $data['filtro']['estado'];
+
         $page = $data['page'];
 
         $response['error'] = false;
@@ -190,10 +192,10 @@ class EntrenadorUsuario extends Model
         // ])->whereIn('id', $alumnos_ids->pluck('user_id')->all())
         //     ->select('id', 'name', 'document', 'subworkspace_id');
 
-        if (!empty($filtro)) {
-            $queryDataAlumnos->where(function ($query) use ($filtro) {
-                $query->where('users.name', 'like', "%$filtro%");
-                $query->orWhere('users.document', 'like', "%$filtro%");
+        if (!empty($filtro_usuario)) {
+            $queryDataAlumnos->where(function ($query) use ($filtro_usuario) {
+                $query->where('users.name', 'like', "%$filtro_usuario%");
+                $query->orWhere('users.document', 'like', "%$filtro_usuario%");
             });
         }
         if ($page) {
@@ -222,29 +224,29 @@ class EntrenadorUsuario extends Model
         $response['alumnos'] = $dataAlumnos;
 
         // TODO: Últimos 10 alumnos vistos
-        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id')->all())->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
-        $ultimos_alumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-            ->whereIn('users.id', $ultimos_alumnos_ids->pluck('student_id')->all())
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
-            ->get();
-        // $ultimos_alumnos = Usuario::with([
-        //     'matricula_presente.carrera' => function ($q) {
-        //         $q->select('id', 'nombre');
-        //     }
-        // ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
-        //     ->whereIn('id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
-        //     ->select('id', 'nombre', 'dni', 'botica', 'sexo')
+        // $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id')->all())->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
+        // $ultimos_alumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+        //     ->whereIn('users.id', $ultimos_alumnos_ids->pluck('student_id')->all())
+        //     ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
         //     ->get();
+        // // $ultimos_alumnos = Usuario::with([
+        // //     'matricula_presente.carrera' => function ($q) {
+        // //         $q->select('id', 'nombre');
+        // //     }
+        // // ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
+        // //     ->whereIn('id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
+        // //     ->select('id', 'nombre', 'dni', 'botica', 'sexo')
+        // //     ->get();
 
-        $ultimos_alumnos->each(function ($value, $key) use ($alumnos_ids, $ultimos_alumnos_ids, $entrenador) {
-            // $value->makeHidden('matricula_presente');
-            // $value->carrera = $value->matricula_presente->carrera->nombre;
-            $value->carrera = '';
-            $temp2 = $ultimos_alumnos_ids->where('student_id', $value->id)->where('coach_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
-            $value->ultima_actividad = '';
-            if ($temp2) $value->ultima_actividad = $temp2->updated_at->format('Y-m-d H:i:s');
-        });
-        $response['ultimos_alumnos'] = $ultimos_alumnos;
+        // $ultimos_alumnos->each(function ($value, $key) use ($alumnos_ids, $ultimos_alumnos_ids, $entrenador) {
+        //     // $value->makeHidden('matricula_presente');
+        //     // $value->carrera = $value->matricula_presente->carrera->nombre;
+        //     $value->carrera = '';
+        //     $temp2 = $ultimos_alumnos_ids->where('student_id', $value->id)->where('coach_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
+        //     $value->ultima_actividad = '';
+        //     if ($temp2) $value->ultima_actividad = $temp2->updated_at->format('Y-m-d H:i:s');
+        // });
+        // $response['ultimos_alumnos'] = $ultimos_alumnos;
 
         return $response;
     }

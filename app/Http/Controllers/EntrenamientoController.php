@@ -115,7 +115,7 @@ class EntrenamientoController extends Controller
     {
         $workspace = get_current_workspace();
         // $request->mergeIfMissing(['workspace_id' => $workspace?->id]);
-        // $data = EntrenadorUsuario::gridEntrenadores($request->all());
+        $data = EntrenadorUsuario::gridEntrenadores($request->all());
 
         // $data = $apiResponse['options'];
         // $data['data'] = $apiResponse['data'];
