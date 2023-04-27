@@ -42,7 +42,7 @@
             fixed-tabs
             slider-color="primary"
 
-            class="col-10 offset-1 tabs_title"
+            class="col-10 offset-1 tabs_title pb-0 pt-2"
         >
             <v-tab>
                 <span class="title_sub">Criterios</span>
@@ -57,7 +57,7 @@
             <v-tab-item>
 
                 <v-row justify="space-around" v-if="!limitOne">
-                    <v-col cols="10" class="d-flex justify-content-end">
+                    <v-col cols="10" class="d-flex justify-content-end pb-0 pt-0">
                         <v-btn
                             variant="plain"
                             class="btn_secondary"
@@ -190,7 +190,8 @@ export default {
         for_section: {
             type: String,
             default: null
-        }
+        },
+        list_segments: Array
     },
     data() {
         return {
@@ -238,6 +239,24 @@ export default {
     mounted() {
         let vue = this;
         this.addSegmentation('direct-segmentation');
+    },
+    watch: {
+        segments(){
+                const vue = this;
+                console.log(11111);
+                console.log(vue.segments);
+                vue.$props.options.list_segments = vue.segments;
+                vue.$props.options.list_segments_document = vue.segment_by_document;
+                console.log(vue.tabs);
+                vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
+
+                vue.$props.options.model_type= vue.model_type;
+        },
+        tabs(){
+                const vue = this;
+                console.log(vue.tabs);
+                vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
+        }
     },
     methods: {
         closeModal() {

@@ -8,7 +8,7 @@
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
-                    <v-icon v-text="'mdi-close'"/>
+                    <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
             <v-card-text class="pt-0">
@@ -66,18 +66,18 @@
                                                         <DefaultToggle v-model="checklist.active"/>
                                                     </v-col>
                                                 </v-row>
-                                                <v-row justify="space-around" align="start" align-content="center">
+                                                <v-row justify="space-around" align="start" align-content="center" v-if="type_checklist === 'libre'">
                                                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                                                         @click="sections.showAdvancedOptions = !sections.showAdvancedOptions"
                                                         style="cursor: pointer">
                                                         <span class="text_default cg">Avanzadas (Opcionales)</span>
-                                                        <v-icon v-text="sections.showAdvancedOptions ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
+                                                        <v-icon>{{ sections.showAdvancedOptions ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                                                     </v-col>
                                                     <v-col cols="12" class="py-0 separated">
                                                         <DefaultDivider class="divider_light"/>
                                                     </v-col>
                                                 </v-row>
-                                                <v-row justify="space-around" align="start" align-content="center">
+                                                <v-row justify="space-around" align="start" align-content="center" v-if="type_checklist === 'libre'">
                                                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                                                         <v-expand-transition>
                                                             <v-row v-show="sections.showAdvancedOptions">
@@ -118,11 +118,12 @@
                                                 <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                                                     <span class="text_default lbl_tit">Relaciona el checklist a los usuarios según criterio o doc. de identidad.</span>
                                                 </v-col>
-                                                <v-col cols="12">
+                                                <v-col cols="12" class="pb-0 pt-0">
                                                     <SegmentFormModal
                                                         :options="modalFormSegmentationOptions"
+                                                        :list_segments="list_segments"
                                                         width="55vw"
-                                                        model_type="App\Models\Course"
+                                                        model_type="App\Models\Checklist"
                                                         :model_id="null"
                                                         :ref="modalFormSegmentationOptions.ref"
                                                         @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
@@ -140,12 +141,12 @@
                                                 </v-col>
                                             </v-row>
                                             <v-row>
-                                                <v-col cols="12" md="12" lg="12">
+                                                <v-col cols="12" md="12" lg="12" class="pb-0 pt-2">
                                                     <span class="title_sub">Selección de cursos</span>
                                                 </v-col>
                                             </v-row>
                                             <v-row class="pb-0">
-                                                <v-col cols="8" md="8" lg="8">
+                                                <v-col cols="8" md="8" lg="8" class="pb-0 pt-2">
                                                     <v-text-field
                                                         outlined
                                                         dense
@@ -158,12 +159,12 @@
                                                         autocomplete="off"
                                                     ></v-text-field>
                                                 </v-col>
-                                                <v-col cols="4" md="4" lg="4" class="bx_options_select">
+                                                <v-col cols="4" md="4" lg="4" class="bx_options_select pb-0 pt-2">
                                                     <span class="text_default">{{checklist.courses.length || 0}} seleccionados | Todos</span>
                                                 </v-col>
                                             </v-row>
                                             <v-row class="pb-0">
-                                                <v-col cols="12" md="12" lg="12">
+                                                <v-col cols="12" md="12" lg="12" class="pb-0 pt-2">
                                                     <div class="box_resultados">
                                                         <div class="bx_message" v-if="results_search.length == 0">
                                                             <span class="text_default">Resultados de búsqueda</span>
@@ -182,10 +183,8 @@
                                                     </div>
                                                 </v-col>
                                             </v-row>
-
-                                            <v-divider/>
                                             <v-row class="pb-0">
-                                                <v-col cols="12" md="12" lg="12">
+                                                <v-col cols="12" md="12" lg="12" class="pb-0 pt-2">
                                                     <div class="box_seleccionados">
                                                         <div class="bx_message" v-if="checklist.courses.length == 0">
                                                             <span class="text_default">Seleccionados</span>
@@ -315,7 +314,7 @@
                 <DefaultModalActionButton
                     @cancel="prevStep"
                     @confirm="nextStep"
-                    cancelLabel="Retroceder"
+                    :cancelLabel="cancelLabel"
                     confirmLabel="Continuar"
                     />
             </v-card-actions>
@@ -359,6 +358,8 @@ export default {
     data() {
         return {
             stepper_box: 1,
+            cancelLabel: "Cancelar",
+            list_segments:[],
             sections: {
                 showAdvancedOptions: false
             },
@@ -480,27 +481,32 @@ export default {
     methods: {
         nextStep(){
             let vue = this;
-            console.log(vue.stepper_box);
+            vue.cancelLabel = "Cancelar";
             if(vue.stepper_box == 1){
+                vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 2;
             }
             else if(vue.stepper_box == 2){
+                vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 3;
             }
             else if(vue.stepper_box == 3){
-                // vue.stepper_box = 2;
+                vue.cancelLabel = "Retroceder";
+                vue.confirm();
             }
         },
         prevStep(){
             let vue = this;
-            console.log(vue.stepper_box);
             if(vue.stepper_box == 1){
+                vue.closeModal();
                 // vue.stepper_box = 2;
             }
             else if(vue.stepper_box == 2){
+                vue.cancelLabel = "Cancelar";
                 vue.stepper_box = 1;
             }
             else if(vue.stepper_box == 3){
+                vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 2;
             }
         },
@@ -531,21 +537,22 @@ export default {
         confirm() {
             let vue = this;
             this.showLoader()
+            vue.checklist.list_segments = {
+                'segments' : vue.modalFormSegmentationOptions.list_segments,
+                'model_type': vue.modalFormSegmentationOptions.model_type,
+                'model_id': null,
+                'code': null
+            };
+            vue.checklist.list_segments_document = {
+                'segment_by_document' : vue.modalFormSegmentationOptions.list_segments_document,
+                'model_type': vue.modalFormSegmentationOptions.model_type,
+                'model_id': null,
+                'code': null
+            };
+            vue.checklist.type_segment = vue.modalFormSegmentationOptions.type_segment
+            vue.checklist.type_checklist = vue.type_checklist
 
-            const validateForm = vue.$refs.formChecklistCreateEdit.validate();
-            const allIsValid = vue.moreValidaciones()
-
-            if (!validateForm) {
-                vue.showValidateActividades();
-            }
-
-
-            if (validateForm && !allIsValid) {
-                vue.expand_cursos = true;
-                vue.actividades_expanded = [];
-                vue.search_text = null;
-                vue.$emit("onConfirm");
-            }
+            vue.$emit("onConfirm");
 
             this.hideLoader()
         },

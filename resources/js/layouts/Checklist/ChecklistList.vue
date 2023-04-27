@@ -32,7 +32,8 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="abrirModalCreateEditChecklist($event)"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar Checklist')"
+                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar un <b>checklist</b>')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
 
@@ -47,7 +48,7 @@
         <ModalCreateChecklist
             ref="ModalCreateChecklist"
             v-model="modal.crear_editar_checklist"
-            :width="'65%'"
+            :width="'870px'"
             @onClose="closeModalCreateEditChecklist"
             @onConfirm="saveChecklist"
             :checklist="dataModalChecklist"
@@ -58,6 +59,13 @@
             :ref="modalDeleteOptions.ref"
             @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
             @onCancel="closeFormModal(modalDeleteOptions)"
+        />
+
+        <DefaultStatusModal
+            :options="modalStatusOptions"
+            :ref="modalStatusOptions.ref"
+            @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+            @onCancel="closeFormModal(modalStatusOptions)"
         />
 
     </section>
@@ -71,13 +79,15 @@ import ModalAsignarChecklistCurso from "../../components/Entrenamiento/Checklist
 
 import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import DefaultStatusModal from "../Default/DefaultStatusModal";
 
 export default {
     components: {
         ModalCreateChecklist,
         ModalAsignarChecklistCurso,
         StepperSubidaMasiva,
-        DefaultDeleteModal
+        DefaultDeleteModal,
+        DefaultStatusModal
     },
     mounted() {
         let vue = this;
@@ -98,13 +108,21 @@ export default {
                         type: 'action',
                         method_name: 'edit'
                     },
+                ],
+                more_actions: [
+                    {
+                        text: "Activo",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
+                    },
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
                         type: 'action',
                         method_name: 'delete'
                     },
-                ],
+                ]
             },
 
             filters: {
@@ -123,15 +141,83 @@ export default {
                 open: false,
                 base_endpoint: '/entrenamiento/checklists',
                 endpoint: '',
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar un checklist! ',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios ahora podrán acceder al tema.',
+                            'Podrás ver el tema como opción para descargar reportes.',
+                            'Si es el único tema, se activará también el curso.'
+                        ],
+                    }
+                },
+                width: '408px'
             },
             dataModalChecklist: {},
             dataModalVerItems: {},
             checklists: [],
             txt_filter_checklist: "",
             file: null,
+
+            modalStatusOptions: {
+                ref: 'ChecklistUpdateStatusModal',
+                open: false,
+                base_endpoint: '/entrenamiento/checklists',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                endpoint: '',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un checklist!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios ahora podrán acceder al tema.',
+                            'Podrás ver el tema como opción para descargar reportes.',
+                            'Si es el único tema, se activará también el curso.',
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un checklist!',
+                        details: [
+                            'Los usuarios verán los cambios en su progreso en unos minutos.',
+                            'Los usuarios ahora podrán acceder al tema.',
+                            'Podrás ver el tema como opción para descargar reportes.',
+                            'Si es el único tema, se activará también el curso.',
+                        ]
+                    }
+                },
+                width: '408px'
+            },
         }
     },
     methods: {
+        updateChecklistStatus(checklist) {
+            let vue = this
+            vue.update_model = checklist
+            vue.checklistUpdateStatusModal.open = true
+            vue.checklistUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
+        },
+
+        async confirmUpdateStatus(validateForm = true) {
+            let vue = this
+            vue.checklistUpdateStatusModal.open = false
+            vue.showLoader()
+
+            if (validateForm)
+                vue.courseValidationModalUpdateStatus.action = null;
+
+
+            if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
+                vue.hideLoader();
+                vue.courseValidationModalUpdateStatus.open = false;
+                return;
+            }
+
+
+            let url = `/escuelas/${vue.update_model.first_school_id.id}/cursos/${vue.update_model.id}/status`;
+            const bodyData = {validateForm}
+
+        },
         async closeModalSubidaMasiva() {
             let vue = this;
             vue.modal.subida_masiva = false;
@@ -162,11 +248,9 @@ export default {
         },
         saveChecklist() {
             let vue = this;
-            // console.log(vue.dataModalChecklist);
             this.showLoader()
             vue.$http.post(`/entrenamiento/checklists/save_checklist`, vue.dataModalChecklist)
                 .then((res) => {
-                    // console.log(res);
                     vue.queryStatus("checklist", "crear_checklist");
                     vue.closeModalCreateEditChecklist();
                     vue.refreshDefaultTable(vue.dataTable, vue.filters);

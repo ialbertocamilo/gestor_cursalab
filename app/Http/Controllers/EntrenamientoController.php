@@ -19,6 +19,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AsignarEntrenadorImport;
 use App\Imports\ChecklistImport;
 use App\Models\Course;
+use App\Models\Segment;
 use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\Workspace;
@@ -230,6 +231,21 @@ class EntrenamientoController extends Controller
         return $this->success($data);
     }
 
+
+    /**
+     * Process request to toggle value of active status (1 or 0)
+     *
+     * @param CheckList $checklist
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(CheckList $checklist, Request $request)
+    {
+        $checklist->update(['active' => !$checklist->active]);
+
+        return $this->success(['msg' => 'Estado actualizado correctamente.']);
+    }
+
     public function deleteChecklist($checklist_id){
         $message = 'Eliminado exitosamente.';
         $type_message = 'success';
@@ -245,10 +261,10 @@ class EntrenamientoController extends Controller
             'type'=>$type_message,
             'data'=>[
                 'msg' => $message]
-            ], 
+            ],
         200);
     }
-    
+
     public function listarChecklist(Request $request)
     {
         $data = $request->all();
@@ -261,6 +277,7 @@ class EntrenamientoController extends Controller
     {
         $workspace = get_current_workspace();
         $data = $request->all();
+        //checklist
         $checklist = CheckList::updateOrCreate(
             ['id' => $data['id']],
             [
@@ -271,6 +288,7 @@ class EntrenamientoController extends Controller
             ]
         );
 
+        //actividades
         foreach ($data['checklist_actividades'] as $key => $checklist_actividad) {
             $type = Taxonomy::where('group', 'checklist')
                 ->where('type', 'type')
@@ -287,8 +305,33 @@ class EntrenamientoController extends Controller
                 ]
             );
         }
-        $cursos = collect($data['courses']);
-        $checklist->courses()->sync($cursos->pluck('id'));
+
+        if($data['type_checklist'] == 'libre')
+        {
+            // Segmentación directa
+            if($data['type_segment'] == 'direct-segmentation')
+            {
+                $data['list_segments']['model_id'] = $checklist->id;
+                $list_segments = (object) $data['list_segments'];
+
+                (new Segment)->storeDirectSegmentation($list_segments);
+            }
+            // Segmentación por documento
+            else if($data['type_segment'] == 'segmentation-by-document')
+            {
+                $data['list_segments_document']['model_id'] = $checklist->id;
+                $list_segments = $data['list_segments_document'];
+
+                (new Segment)->storeSegmentationByDocument($list_segments);
+            }
+        }
+        else if($data['type_checklist'] == 'curso')
+        {
+            // Curso
+            $cursos = collect($data['courses']);
+            $checklist->courses()->sync($cursos->pluck('id'));
+        }
+
 
         return $this->success($checklist);
     }

@@ -54,12 +54,12 @@ export default {
 </script>
 
 <style>
-.v-dialog.v-dialog--active button.default-modal-action-button {
+/* .v-dialog.v-dialog--active button.default-modal-action-button {
     background-color: #5458ea !important;
     border-color: #5458ea !important;
-}
+} */
 
-.v-dialog.v-dialog--active button.default-modal-action-button span {
+/* .v-dialog.v-dialog--active button.default-modal-action-button span {
     color: white !important;
-}
+} */
 </style>
