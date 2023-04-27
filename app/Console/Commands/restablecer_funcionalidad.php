@@ -31,6 +31,7 @@ use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
+use App\Models\PushNotification;
 use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
