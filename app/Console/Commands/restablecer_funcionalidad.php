@@ -83,7 +83,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreCriterionDocument();
         // $this->restoreRequirements();
         // $this->restoreSummayUser();
-        $this->restoreSummaryCourse();
+        // $this->restoreSummaryCourse();
         // $this->restore_summary_course();
         // $this->restores_poll_answers();
         // $this->restore_surname();
@@ -104,10 +104,28 @@ class restablecer_funcionalidad extends Command
         // $this->restoreStatusSummaryTopics();
         // $this->setSummarys();
         // $this->restoSummaryCourseSinceSummaryTopic();
+        $this->restoreJsonNotification();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
     }
-
+    public function restoreJsonNotification(){
+        $notificaciones = PushNotification::all();
+        $_bar = $this->output->createProgressBar($notificaciones->count());
+        $_bar->start();
+        foreach ($notificaciones as $not) {
+            $detalles_json = collect(json_decode($not->detalles_json));
+            foreach ($detalles_json as $detalle) {
+//                info($detalle->usuarios);
+                if ($detalle->estado_envio == 0) {
+                    $detalle->estado_envio = 1;
+                }
+            }
+            $not->detalles_json = json_encode($detalles_json);
+            $not->save();
+            $_bar->advance();
+        }
+        $_bar->finish();
+    }
     public function restoSummaryCourseSinceSummaryTopic(){
         SummaryTopic::select('user_id','topic_id')
         ->where('last_time_evaluated_at','>=','2023-04-15 00:00:00')
