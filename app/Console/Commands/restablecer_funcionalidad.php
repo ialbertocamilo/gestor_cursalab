@@ -887,6 +887,7 @@ class restablecer_funcionalidad extends Command
             $_bar = $this->output->createProgressBar($courses->count());
             $_bar->start();
             foreach ($courses as $course) {
+                SummaryCourse::getCurrentRowOrCreate($course, $user);
                 SummaryCourse::updateUserData($course, $user, false,false);
                 $_bar->advance();
             }
