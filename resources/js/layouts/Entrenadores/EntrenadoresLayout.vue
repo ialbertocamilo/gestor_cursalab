@@ -72,14 +72,14 @@ export default {
                 endpoint: '/entrenadores/search',
                 ref: 'EntrenadorTable',
                 headers: [
-                    {text: "DNI", value: "dni", align: 'start', sortable: false},
+                    {text: "Doc. Identidad", value: "dni", align: 'start', sortable: false},
                     {text: "Entrenador", value: "name", align: 'start'},
-                    {text: "Cant. Alumnos (Activos)", value: "count_active_students", align: 'center'},
+                    {text: "Cantidad de Alumnos", value: "count_active_students", align: 'center'},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
-                        text: "Alumnos",
+                        text: "Detalle",
                         icon: 'mdi mdi-eye',
                         type: 'action',
                         method_name: 'alumnos'
