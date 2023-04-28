@@ -112,6 +112,14 @@ class RestChecklistController extends Controller
         foreach ($alumnos_id as $alumno_id) {
             foreach ($actividades as $key => $actividad) {
                 $checklistRpta = ChecklistRpta::checklist($checklist_id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
+                if(is_null($checklistRpta)){
+                    $checklistRpta = ChecklistRpta::create([
+                        'checklist_id' => $checklist_id,
+                        'student_id' => $alumno_id,
+                        'coach_id' => $entrenador_id,
+                        'percent' => 0
+                    ]);
+                }
                 $checklistRptaItem = ChecklistRptaItem::where('checklist_answer_id', $checklistRpta->id)->where('checklist_item_id', $actividad['id'])->first();
                 if (!$checklistRptaItem) {
                     $checklistRptaItem = ChecklistRptaItem::create([
