@@ -17,6 +17,11 @@ class Topic extends BaseModel
     //        'assessable' => 'string'
     //    ];
 
+    public $defaultRelationships = [
+        'type_evaluation_id' => 'evaluation_type',
+        'course_id' => 'course'
+    ];
+
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;

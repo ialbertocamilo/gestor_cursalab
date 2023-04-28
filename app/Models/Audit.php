@@ -70,10 +70,12 @@ class Audit extends MongoLedger
     public function getModifiedFieldsFiltered(): array
     {
         if ($this->isBasicEvent()) {
-            return array_diff($this->modified, $this->excluded_fields);
-        }
+            // parse to array
+            $modified = is_string($this->modified) ? 
+                        json_decode($this->modified) : $this->modified;
 
-        // info($this->pivot);
+            return array_diff($modified, $this->excluded_fields);
+        }
 
         return $this->pivot['properties'] ?? [];
     }
@@ -103,23 +105,28 @@ class Audit extends MongoLedger
             try {
                 // obtener modelo
                 $model = $this->extract(false);
+                // info(['model_ext' => $model]);
                 // traer relaciones
                 $model->loadDefaultRelationships();
 
                 $relationships = $model->defaultRelationships;
                 // info('getModelProceessed relationships');
-                // info($relationships);
+                // info(['relationships' => $relationships]);
 
                 // asignar valores al id (ejm status_id recibe data de status)
                 $data = $this->prepareData($model);
 
+                // info(['data' => $data]);
+
                 // remover relaciones (ejm status) => array except relations
                 $total = Arr::except($data, $relationships ?? []);
+                // info(['relationships' => $relationships, 'total' => $total]);
 
                 // separar solo modificados => array only modified
                 $modifiedFields = $this->getModifiedFieldsFiltered();
 
                 $modified = Arr::only($total, $modifiedFields);
+
             } catch (\Exception $e) {
                 info($e);
             }
@@ -164,6 +171,19 @@ class Audit extends MongoLedger
         return _ucwords(equivalent_value($attributes, $key, $key));
     }
 
+    public function getAvailableString($item)
+    {
+        $available = true;
+
+        foreach ($item as $key => $value) {
+            if(!is_string($value)) {
+                $available = false;
+                break;
+            } 
+        }
+        return $available;
+    }
+
     public function getValueName(mixed $item, $key, $array, $relationships)
     {
         $relationships_ids = array_keys($relationships ?? []);
@@ -174,9 +194,19 @@ class Audit extends MongoLedger
         }
 
         // if ( is_bool($item) )
-        if (in_array($key, ['active'])) {
+        if (in_array($key, ['active', 'active_results', 'assessable', 'evaluation_verified', 'enable_2fa', 'required'])) {
             return $item ? 'Sí' : 'No';
         }
+
+        // === para arrays strings ===
+        if (is_array($item) && $this->getAvailableString($item)) {
+            $output_li = "";
+            foreach ($item as $key => $value) $output_li .= "<li> $key - $value </li>";
+            return " <ul class='pl-0 mb-0' style='list-style: none;'>
+                        $output_li
+                     </ul>";
+        }
+        // === para arrays strings ===
 
         if (is_array($item)) {
             return $item['title'] ??

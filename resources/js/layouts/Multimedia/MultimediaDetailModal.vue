@@ -41,12 +41,34 @@
                             <v-col cols="8" v-text="resource.title"/>
                             <v-col cols="4" class="multimedia-label" v-text="'Tipo:'"/>
                             <v-col cols="8" v-text="resource.type"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Peso'"/>
+                            <v-col cols="4" class="multimedia-label" v-text="'Peso:'"/>
                             <v-col cols="8" v-text="resource.formattedSize"/>
                             <v-col cols="4" class="multimedia-label" v-text="'Fecha de creación:'"/>
                             <v-col cols="8" v-text="resource.created"/>
                         </v-row>
                     </v-col>
+
+                    <v-col cols="12">
+                        <v-row>
+                            <v-col cols="4" class="multimedia-label" v-text="'Cursos:'"/>
+                            <v-col cols="8">
+                                <ul class="pl-0 mb-0" style="list-style: none;">
+                                    <li v-for="course of resource.courses"
+                                        v-text="course.name"></li>
+                                </ul>
+                                <div v-show="resource.courses.length == 0">Sin cursos asociados</div>
+                            </v-col>
+                            <v-col cols="4" class="multimedia-label" v-text="'Temas:'"/>
+                            <v-col cols="8">
+                                <ul class="pl-0 mb-0" style="list-style: none;">
+                                    <li v-for="topic of resource.topics"
+                                        v-text="topic.name"></li>
+                                </ul>
+                                <div v-show="resource.topics.length == 0">Sin temas asociados</div>
+                            </v-col>
+                        </v-row>    
+                    </v-col>
+
                     <v-col cols="6" v-if="false">
                         <DefaultModalSection
                             title="Ubicación asignada"
@@ -109,13 +131,18 @@ export default {
                 title: null,
                 type: null,
             },
-            resource: {},
+            resource: {
+                courses: [],
+                topics: []
+            },
         }
     },
     methods: {
         closeModal() {
-            let vue = this
-            vue.$emit('onCancel')
+            let vue = this;
+            vue.resource.courses = [];
+            vue.resource.topics = [];
+            vue.$emit('onCancel');
         },
         confirmModal() {
             let vue = this

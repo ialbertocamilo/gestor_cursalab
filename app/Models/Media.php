@@ -11,6 +11,8 @@ use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 use Aws\S3\S3Client;
 use ZipArchive;
 
+use App\Models\Course;
+use App\Models\Topic;
 
 class Media extends BaseModel
 {
@@ -28,6 +30,16 @@ class Media extends BaseModel
     protected $fillable = [
         'title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id'
     ];
+
+    public static function courses_by_file($file) 
+    {
+        return Course::where('imagen', $file)->get();
+    }
+
+    public static function topics_by_file($file) 
+    {
+        return Topic::where('imagen', $file)->get();
+    }
 
     /*
 

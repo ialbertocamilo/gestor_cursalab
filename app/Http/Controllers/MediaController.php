@@ -51,7 +51,7 @@ class MediaController extends Controller
         $type = $multimedia->getMediaType($multimedia->ext);
         $type = $type . ' (' . strtoupper($multimedia->ext) . ')';
 
-
+        $multimedia_file = $multimedia->file;
         $multimedia->file = $multimedia->ext === 'scorm'
             ? $multimedia->file
             : FileService::generateUrl($multimedia->file);
@@ -59,6 +59,10 @@ class MediaController extends Controller
         $multimedia->type = $type;
         $multimedia->created = $multimedia->created_at->format('d/m/Y');
         $multimedia->formattedSize = FileService::formatSize($multimedia->size);
+     
+        $multimedia['courses'] = Media::courses_by_file($multimedia_file);
+        $multimedia['topics'] = Media::topics_by_file($multimedia_file);
+
         return $this->success([
             'multimedia' => $multimedia
         ]);

@@ -51,7 +51,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
     use HasApiTokens, HasFactory, Notifiable, HasRolesAndAbilities, HasPushSubscriptions;
 
-    use \Altek\Accountant\Recordable, \Altek\Eventually\Eventually;
+    use \Altek\Accountant\Recordable;
+    use \Altek\Eventually\Eventually;
 
     use CustomCRUD, CustomAudit, CustomMedia;
 
@@ -65,7 +66,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     use Impersonate;
 
-  use HybridRelations;
+    use HybridRelations;
+
     use Cachable {
         Cachable::newEloquentBuilder insteadof HybridRelations;
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
@@ -99,6 +101,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public $defaultRelationships = [
         'type_id' => 'type',
+        'subworkspace_id' => 'subworkspace'
         // 'job_position_id' => 'job_position', 'area_id' =>  'area', 'gender_id' => 'gender',
         // 'document_type_id' => 'document_type', 'country_id' => 'country', 'district_id' =>  'district'
     ];
@@ -109,7 +112,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'deleted_at',
         'pivot'
     ];
-
 
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -536,6 +538,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->save();
 
+            foreach ($user->criterion_values as $criterion) {
+                info($criterion);
+            }
+
+            info([ 'is_recordable' => $this->isRecordingEnabled(),
+                   'is_event_record: syncing' => $this->isEventRecordable('syncing'),
+                   'is_event_record: synced'  => $this->isEventRecordable('synced'),
+                   'is_event_record: updatingExistingPivot' => $this->isEventRecordable('updatingExistingPivot'),
+                   'is_event_record: existingPivotUpdated' => $this->isEventRecordable('existingPivotUpdated') ]);
+
             if ($user && !$from_massive) {
                 SummaryUser::updateUserData($user, false);
             }
@@ -548,6 +560,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
         }
+
+        info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
 
     public function syncDocumentCriterionValue($old_document, $new_document)
