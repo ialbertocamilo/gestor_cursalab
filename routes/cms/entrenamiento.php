@@ -43,6 +43,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::post('/delete_actividad_by_id', 'eliminarActividadByID');
 		Route::post('/buscar_curso', 'buscarCurso');
 		Route::delete('/{id}/destroy', 'deleteChecklist');
+        Route::put('/{checklist}/status', 'status');
 	});
 
 });
