@@ -59,6 +59,8 @@ if (isset($fullScreen)) {
 
     <div class="d-flex align-items-stretch">
 
+        @unless(isset($fullScreen) && $fullScreen)
+
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
                 {{-- <v-app> --}}
@@ -66,6 +68,8 @@ if (isset($fullScreen)) {
                 {{-- </v-app> --}}
             </div>
         </div>
+
+        @endunless
 
         <div class="content-inner-small pb-0">
             <p class="">

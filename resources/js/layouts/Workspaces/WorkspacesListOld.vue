@@ -351,6 +351,7 @@ export default {
          */
         loadData() {
 
+            console.log('loadData OLD')
             let vue = this;
 
             let url = `/workspaces/search`

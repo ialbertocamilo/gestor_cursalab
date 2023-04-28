@@ -176,3 +176,10 @@ Override Vue Toastification plugin styles
         top: -3px !important;
     }
 }
+
+.workspace-badge .v-badge__badge {
+    font-size: 10px !important;
+    font-weight: 400 !important;
+    height: auto !important;
+    padding: 4px 6px !important;
+}

@@ -127,10 +127,12 @@ class Workspace extends BaseModel
 
         $query = self::generateUserWorkspacesQuery($userId);
 
+        $query->withCount(['schools', 'courses', 'subworkspaces']);
+
         if ($request->id) {
-            $query::where('id', $request->id)
-                ->withCount(['schools', 'courses']);
+            $query::where('id', $request->id);
         }
+        
 
         if ($request->q) {
             $query->where('name', 'like', "%$request->q%");

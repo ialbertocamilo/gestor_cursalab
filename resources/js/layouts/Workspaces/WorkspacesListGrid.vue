@@ -8,7 +8,7 @@
                 />
             </v-col>
         </v-row>
-        <v-row justify="space-around" class="mt-1">
+        <!-- <v-row justify="space-around" class="mt-1">
             <v-col cols="12" class="d-flex justify-content-end py-0 px-8">
                 <div class="lista_media" style="width: 100%">
                     <div class="row">
@@ -28,11 +28,70 @@
                                     />
                                 </div>
                                 <span class="med-box-title">{{ item.title }}</span><br>
-                                <span class="med-box-tag">{{ infoMedia(item).tipo || '-' }}</span>
+                                <span class="med-box-tag">{{ infoMedia(item).tipo }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
+            </v-col>
+        </v-row> -->
+
+        <v-row class="justify-content-center">
+            <v-col cols="10" class="workspaces-wrapper">
+                <v-row class="mb-5">
+                    <v-col v-for="workspace in workspaces"
+                           :key="workspace.id"
+                           cols="3" class="workspace">
+
+                        <div class="row">
+                            <div class="logo-wrapper col-12 pt-3 pb-3">
+
+                                <!-- Logo -->
+
+                                <img v-bind:src="workspace.logo"
+                                     class="logo"
+                                     alt="">
+
+                                <!-- Edit button -->
+
+                                <div @click="editWorkspace(workspace.id)"
+                                     v-if="isAdminInWorkspace(workspace.id)"
+                                     class="edit-button">
+                                    <v-icon color="white" size="16px">
+                                        mdi-square-edit-outline
+                                    </v-icon>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center bg-white">
+                                <span>{{ workspace.name }}</span>
+                            </div>
+                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
+                                <v-icon class="icon" size="30px">mdi-sitemap</v-icon>
+                                <div class="text-left ml-2">
+                                    <span class="number">
+                                        {{ workspace.modules_count }}
+                                    </span><br>
+                                    <span class="label">módulos</span>
+                                </div>
+                            </div>
+                            <div class="col-6 stats pt-3 d-flex justify-content-center align-items-center">
+                                <v-icon class="icon" size="30px">mdi-account-group</v-icon>
+                                <div class="text-left ml-2">
+                                    <span class="number">
+                                        {{ workspace.users_count }}
+                                    </span><br>
+                                    <span class="label">usuarios</span>
+                                </div>
+                            </div>
+                            <div class="col-12 pt-3 pb-3 button-wrapper d-flex justify-content-center">
+                                <button @click="setActiveWorkspace(workspace.id, true)"
+                                        class="btn">
+                                    Ingresar
+                                </button>
+                            </div>
+                        </div>
+                    </v-col>
+                </v-row>
             </v-col>
         </v-row>
     </section>

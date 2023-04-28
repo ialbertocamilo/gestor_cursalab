@@ -616,6 +616,8 @@ export default {
          * Load data from server
          */
         loadData() {
+
+            console.log('AAA')
             let vue = this;
 
             // Load workspaces
