@@ -76,7 +76,10 @@ class RestChecklistController extends Controller
 
         return response()->json([
             'error' => false,
-            'msg' => 'Actividad actualizada.'
+            'msg' => [
+                'titulo' => '',
+                'texto' => ''
+            ]
             /*'checklist_rpta_item' => $checklistRptaItem*/
         ], 200);
     }
