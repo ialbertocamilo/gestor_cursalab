@@ -35,7 +35,7 @@
     <!-- Favicon-->
     <link rel="shortcut icon" href="{{ asset('img/favicon.png')}}">
 
-      {{-- <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script> --}}
+      <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
     <!-- Tweaks for older IEs--><!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>

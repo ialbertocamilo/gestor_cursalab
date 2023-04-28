@@ -32,7 +32,7 @@ class UserResource extends JsonResource
                 'name' => $this->country->name ?? 'No definido',
                 'code' => $this->country->code ?? '',
             ],
-            // 'is_super_user'=>auth()->user()->isAn('super-user'),
+            // 'is_super_user'=> auth()->user()->isAn('super-user'),
             'is_super_user'=> true,
 
             'active' => $this->active,
