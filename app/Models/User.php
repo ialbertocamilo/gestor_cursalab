@@ -185,7 +185,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereNotNull('attempts')
             ->where('attempts', '<>', 0);
     }
-
     public function relationships()
     {
         return $this->hasMany(UserRelationship::class, 'user_id');
@@ -686,7 +685,56 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //            ? array_unique(array_column($all_courses, 'id'))
 //            : collect($all_courses)->unique()->values();
 //    }
+    public function getSegmentedByModelType(
+        $model,
+        $select=false,
+        $unsetRelation=true,
+    ){
+        $user = $this;
+        $user->loadMissing([
+            'criterion_values:id,value_text,criterion_id',
+            'subworkspace:id,parent_id',
+            'subworkspace.parent:id',
+        ]);
+        $workspace = $user->subworkspace->parent;
+        $values_model = $model::when($select, function ($q) use($select) {
+            $q->select($select)->addSelect('workspace_id');
+        })->with(['segments' => function ($q) {
+            $q
+                ->where('active', ACTIVE)
+                ->select('id', 'model_id')
+                ->with('values', function ($q) {
+                    $q
+                        ->with('criterion_value', function ($q) {
+                            $q
+                                ->where('active', ACTIVE)
+                                ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                ->with('criterion', function ($q) {
+                                    $q->select('id', 'name', 'code');
+                                });
+                        })
+                        ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
+                });
+        }])->where('workspace_id', $workspace->id)
+        ->whereRelation('segments', 'active', ACTIVE)
+        ->where('active', ACTIVE)->get();
+        $match_segment = [];
+        $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
 
+        foreach ($values_model as $value) {
+            foreach ($value->segments as $segment) {
+                $course_segment_criteria = $segment->values->groupBy('criterion_id');
+                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+                if ($valid_segment) :
+                    $match_segment[] = $unsetRelation ? $value->unsetRelation('segments') :  $value;
+                endif;
+            }
+        }
+        unset($user->criterion_values);
+        unset($user->subworkspace);
+        unset($user->subworkspace_id);
+        return $match_segment;
+    }
     public function getCurrentCourses(
         $with_programs = true,
         $with_direct_segmentation = true,

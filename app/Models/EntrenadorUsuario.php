@@ -182,9 +182,12 @@ class EntrenadorUsuario extends Model
         // TODO: Lista total de alumnos
         $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
 
-        $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+        $queryDataAlumnos = User::with([
+            'subworkspace:id,parent_id',
+            'subworkspace.parent:id',
+        ])->leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace');
+            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as modulo');
         // $queryDataAlumnos = User::with([
         //     'matricula_presente.carrera' => function ($q) {
         //         $q->select('id', 'nombre');
@@ -217,6 +220,9 @@ class EntrenadorUsuario extends Model
 
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
             // $value->makeHidden('matricula_presente');
+            $Checklist = $value->getSegmentedByModelType(Checklist::class);
+            $completed = ChecklistRpta::where('student_id',$value->id)->whereIn('checklist_id',array_column($Checklist,'id'))->count();
+            $value->percent_advance = (count($Checklist)>0) ? (float)number_format((( $completed / count($Checklist)) * 100), 2) : 0;
             $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             // $value->carrera = $value->matricula_presente->carrera->nombre;
             $value->carrera = '';

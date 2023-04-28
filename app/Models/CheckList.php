@@ -37,7 +37,10 @@ class CheckList extends BaseModel
     {
         return $this->belongsToMany(Course::class, 'checklist_relationships', 'checklist_id', 'course_id');
     }
-
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
+    }
     /*======================================================= SCOPES ==================================================================== */
 
     public function scopeActive($q, $estado)
