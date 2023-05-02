@@ -129,14 +129,17 @@ class Workspace extends BaseModel
 
         $query->withCount(['schools', 'courses', 'subworkspaces']);
 
-        if ($request->id) {
+        if ($request->id)
             $query::where('id', $request->id);
-        }
-        
 
-        if ($request->q) {
+        if ($request->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
+        if ($request->q)
             $query->where('name', 'like', "%$request->q%");
-        }
 
         $field = $request->sortBy ?? 'workspaces.id';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';

@@ -104,7 +104,7 @@ export default {
             setTimeout(() => {
                 // $('#pageloader').css('display', 'none')
                 $('#pageloader').fadeOut()
-            }, 800)
+            }, 250)
         },
         showAlert(msg, type = 'success', title = '') {
             let vue = this
