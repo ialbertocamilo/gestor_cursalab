@@ -48,7 +48,7 @@ class ChecklistRpta extends Model
 
     public static function actualizarChecklistRpta(ChecklistRpta $checklistRpta): void
     {
-        -$cumple = 0;
+        $cumple = 0;
         $checklistValidos = 0;
         $actividades = CheckListItem::where('checklist_id', $checklistRpta->checklist_id)->active(1)->get();
 
