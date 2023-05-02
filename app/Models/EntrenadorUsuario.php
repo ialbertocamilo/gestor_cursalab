@@ -220,7 +220,7 @@ class EntrenadorUsuario extends Model
 
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
             // $value->makeHidden('matricula_presente');
-            $Checklist = $value->getSegmentedByModelType(Checklist::class);
+            $Checklist = $value->getSegmentedByModelType(CheckList::class);
             $completed = ChecklistRpta::where('student_id',$value->id)->whereIn('checklist_id',array_column($Checklist,'id'))->count();
             $value->percent_advance = (count($Checklist)>0) ? (float)number_format((( $completed / count($Checklist)) * 100), 2) : 0;
             $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
