@@ -137,6 +137,7 @@
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
                 @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
+                @impersonate_user="openFormModal(modalImpersonateUserOptions, $event, 'user', `Usar usuario ${$event.nombre} - ${$event.document} en aplicación` )"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Usuario - ${$event.name}`)"
             />
             <UsuarioFormModal
@@ -165,6 +166,13 @@
                 :options="modalResetPasswordOptions"
                 @onConfirm="closeFormModal(modalResetPasswordOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalResetPasswordOptions)"
+            />
+            <UsuarioImpersonateModal
+                width="45vw"
+                :ref="modalImpersonateUserOptions.ref"
+                :options="modalImpersonateUserOptions"
+                @onConfirm="closeFormModal(modalImpersonateUserOptions)"
+                @onCancel="closeFormModal(modalImpersonateUserOptions)"
             />
             <UsuarioCursosModal
                 width="55vw"
@@ -197,11 +205,12 @@ import UsuarioStatusModal from "./UsuarioStatusModal";
 import UsuarioCursosModal from "./UsuarioCursosModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
 import UsuarioResetPasswordModal from "./UsuarioResetPasswordModal";
+import UsuarioImpersonateModal from "./UsuarioImpersonateModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal, LogsModal},
+    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal, LogsModal, UsuarioImpersonateModal},
     props: {
         workspace_id: {
             type: Number|String,
@@ -255,6 +264,7 @@ export default {
                         type: "action",
                         method_name: "edit"
                     },
+                    
                     {
                         text: "Logs",
                         icon: "mdi mdi-database",
@@ -283,6 +293,13 @@ export default {
                         type: 'action',
                         method_name: 'reset_password'
                     },
+                    {
+                        text: "Usar usuario en aplicación",
+                        icon: 'fa fa-user',
+                        type: 'action',
+                        method_name: 'impersonate_user'
+                    },
+
                 ]
             },
             selects: {
@@ -342,6 +359,13 @@ export default {
                 ref: 'UsuarioResetPasswordModal',
                 open: false,
                 base_endpoint: '/usuarios',
+                // hideConfirmBtn: true,
+            },
+            modalImpersonateUserOptions: {
+                ref: 'UsuarioImpersonateModal',
+                open: false,
+                base_endpoint: '/usuarios',
+                confirmLabel: 'Usar usuario',
                 // cancelLabel: 'Cerrar',
                 // hideConfirmBtn: true,
             },
