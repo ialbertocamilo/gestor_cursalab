@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\CheckList;
+use Illuminate\Http\Request;
 use App\Models\ChecklistRpta;
 use App\Models\ChecklistRptaItem;
 use App\Models\EntrenadorUsuario;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\SummaryUserChecklist;
 use Illuminate\Support\Facades\Auth;
 
 class RestChecklistController extends Controller
@@ -110,15 +111,17 @@ class RestChecklistController extends Controller
                         : EntrenadorUsuario::where('user_id', $alumnos_id[0])->where('active', 1)->first()?->trainer_id;
                             
         if($alumnos_todos){
-            $alumnos_id =  EntrenadorUsuario::where('trainer_id',$entrenador_id)->where('active', 1)->pluck('user_id');
+            $alumnos =  EntrenadorUsuario::with('user')->where('trainer_id',$entrenador_id)->where('active', 1)->select('user_id')->get();
+        }else{
+            $alumnos = EntrenadorUsuario::with('user')->whereIn('user_id',$alumnos_id)->select('user_id')->groupBy('user_id')->get();
         }
-        foreach ($alumnos_id as $alumno_id) {
+        foreach ($alumnos as $alumno) {
             foreach ($actividades as $key => $actividad) {
-                $checklistRpta = ChecklistRpta::checklist($checklist_id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
+                $checklistRpta = ChecklistRpta::checklist($checklist_id)->alumno($alumno->user_id)->entrenador($entrenador_id)->first();
                 if(is_null($checklistRpta)){
                     $checklistRpta = ChecklistRpta::create([
                         'checklist_id' => $checklist_id,
-                        'student_id' => $alumno_id,
+                        'student_id' => $alumno->user_id,
                         'coach_id' => $entrenador_id,
                         'percent' => 0
                     ]);
@@ -135,6 +138,7 @@ class RestChecklistController extends Controller
                 $checklistRptaItem->save();
                 ChecklistRpta::actualizarChecklistRpta($checklistRpta);
             }
+            SummaryUserChecklist::updateUserData($alumno->user);
         }
         //Personalizar respuestas.
         return response()->json([

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SummaryUserChecklist extends Model
+class SummaryUserChecklist extends Summary
 {
     use HasFactory;
 
@@ -16,7 +16,7 @@ class SummaryUserChecklist extends Model
     {
         $user = $user ?? auth()->user();
         
-        $row_user = self::getCurrentRow(null, $user);
+        $row_user = self::getCurrentRowOrCreate(null, $user);
 
         if (!$row_user) return true;
 
