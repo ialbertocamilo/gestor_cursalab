@@ -56,6 +56,18 @@
                     elevation="0"
                     small
                     color="primary"
+                    :fab="true"
+                    title="Crear workspace"
+                    @click="createWorkspace"
+                    class="mr-2"
+                    >
+                    <v-icon v-text="'mdi-plus'"/>
+                </v-btn>
+
+                <v-btn
+                    elevation="0"
+                    small
+                    color="primary"
                     title="Cambiar vista"
                     :fab="true"
                     @click="view = !view">
@@ -295,6 +307,16 @@ export default {
                         .getElementById('header-template').innerHTML;
         }
         ,
+        createWorkspace() {
+
+            this.openFormModal(
+                this.workspaceFormModalOptions,
+                null,
+                'create',
+                'Crear workspace'
+            );
+            // this.setActiveWorkspace(workspaceId, false);
+        },
         /**
          * Open form to edit workspace, and update the session workspace
          *

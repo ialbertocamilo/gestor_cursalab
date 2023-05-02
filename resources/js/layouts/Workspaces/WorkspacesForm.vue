@@ -288,14 +288,14 @@ export default {
          */
         loadData(workspace) {
 
-            if (!workspace) return;
+            // if (!workspace) return;
 
             let vue = this;
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
 
-            let url = `/workspaces/${workspace.workspaceId}/edit`;
+            let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
 
             this.$http
                 .get(url)
@@ -321,7 +321,6 @@ export default {
                     });
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
-
                 })
         }
         ,

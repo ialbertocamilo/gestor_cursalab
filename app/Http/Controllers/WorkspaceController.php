@@ -67,6 +67,25 @@ class WorkspaceController extends Controller
         return $this->success($workspaces);
     }
 
+    public function create(): JsonResponse
+    {
+        // Load criteria
+
+        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+
+        foreach ($workspace['criteria'] as $wk_crit) {
+            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
+            $in_segment_list = $in_segment->pluck('id')->all();
+            $wk_crit->its_used = true;
+        }
+
+        $workspace['criteria_workspace'] = null;
+        $workspace['limit_allowed_users'] = null;
+        $workspace['is_superuser'] = auth()->user()->isA('super-user');
+
+        return $this->success($workspace);
+    }
+
     /**
      * Process request to load record data
      *
@@ -89,9 +108,7 @@ class WorkspaceController extends Controller
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
-
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
-
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
         return $this->success($workspace);
