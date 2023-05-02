@@ -106,7 +106,7 @@ class RestChecklistController extends Controller
 
         
         $entrenador_id = ($tipo =='entrenador_alumno') 
-                        ? auth()->user()->id 
+                        ? Auth::user()->id 
                         : EntrenadorUsuario::where('user_id', $alumnos_id[0])->where('active', 1)->first()?->trainer_id;
                             
         if($alumnos_todos){
