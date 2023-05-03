@@ -85,7 +85,7 @@ class Audit extends MongoLedger
 
     public function isBasicEvent()
     {
-        return in_array($this->event, ['created', 'updated', 'deleted']);
+        return in_array($this->event, ['created', 'updated', 'deleted', 'impersonated', 'downloaded']);
     }
 
     public function getDataProcessed(): array
