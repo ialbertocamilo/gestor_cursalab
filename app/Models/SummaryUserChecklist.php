@@ -20,8 +20,9 @@ class SummaryUserChecklist extends Summary
 
         if (!$row_user) return true;
 
-        $checklist_assigned = $user->getSegmentedByModelType(Checklist::class);
-        $completed = ChecklistRpta::where('student_id',$user->id)->whereIn('checklist_id',array_column($checklist_assigned,'id'))->count();
+        $checklist_assigned = $user->getSegmentedByModelType(CheckList::class);
+        
+        $completed = ChecklistRpta::where('student_id',$user->id)->whereIn('checklist_id',array_column($checklist_assigned,'id'))->where('percent',100)->count();
         $assigned = count($checklist_assigned);
         $advanced_percentage = self::getGeneralPercentage($assigned, $completed);
         $data = compact('assigned', 'completed', 'advanced_percentage');

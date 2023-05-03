@@ -32,7 +32,7 @@ class EntrenadorUsuario extends Model
 
     public function scopeAlumno($q, $alumno_id)
     {
-        return $q->where('user_id', $alumno_id);
+        return is_array($alumno_id) ? $q->whereIn('user_id', $alumno_id) : $q->where('user_id', $alumno_id);
     }
 
     /*==============================================================================================================================*/
@@ -182,25 +182,25 @@ class EntrenadorUsuario extends Model
         // TODO: Lista total de alumnos
         $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
 
-        $queryDataAlumnos = User::with([
-            'subworkspace:id,parent_id',
-            'subworkspace.parent:id',
-        ])->leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+        $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
+            ->when($filtro_estado, function($q) use ($filtro_estado){
+               return   $filtro_estado == 'completo'
+                        ? $q->where('suc.advanced_percentage',100) 
+                        : $q->where(function ($q){
+                            $q->where('suc.advanced_percentage',0);
+                            $q->orWhereNull('suc.advanced_percentage');
+                        });
+            })
+            ->when($filtro_usuario, function($q) use ($filtro_usuario){
+                $q->where(function ($query) use ($filtro_usuario) {
+                    $query->where('users.name', 'like', "%$filtro_usuario%");
+                    $query->orWhere('users.document', 'like', "%$filtro_usuario%");
+                });
+            })
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as modulo');
-        // $queryDataAlumnos = User::with([
-        //     'matricula_presente.carrera' => function ($q) {
-        //         $q->select('id', 'nombre');
-        //     }
-        // ])->whereIn('id', $alumnos_ids->pluck('user_id')->all())
-        //     ->select('id', 'name', 'document', 'subworkspace_id');
-
-        if (!empty($filtro_usuario)) {
-            $queryDataAlumnos->where(function ($query) use ($filtro_usuario) {
-                $query->where('users.name', 'like', "%$filtro_usuario%");
-                $query->orWhere('users.document', 'like', "%$filtro_usuario%");
-            });
-        }
+            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage');
+        
         if ($page) {
             $perPage = 50;
             $pagination = $queryDataAlumnos
@@ -219,12 +219,7 @@ class EntrenadorUsuario extends Model
         }
 
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
-            // $value->makeHidden('matricula_presente');
-            $Checklist = $value->getSegmentedByModelType(CheckList::class);
-            $completed = ChecklistRpta::where('student_id',$value->id)->whereIn('checklist_id',array_column($Checklist,'id'))->count();
-            $value->percent_advance = (count($Checklist)>0) ? (float)number_format((( $completed / count($Checklist)) * 100), 2) : 0;
             $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
-            // $value->carrera = $value->matricula_presente->carrera->nombre;
             $value->carrera = '';
         });
         $response['alumnos'] = $dataAlumnos;

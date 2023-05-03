@@ -197,40 +197,62 @@ class CheckList extends BaseModel
         return $response;
     }
 
-    protected function getChecklistsByTrainer($trainer_id): array
+    protected function getChecklistsByTrainer($data): array
     {
-        $checklists = CheckList::where('workspace_id',25)->where('active',1)->paginate(request('paginate', 5));
-        $list_checklist = collect();
+        $filtro_estado = $data['filtro']['estado'];
+        $workspace_id = $data['trainer']->subworkspace->parent->id;
+        $page = $data['page'];
+        $perPage = 10;
 
-        if(count($checklists) > 0) {
-            $i = 0;
-            foreach ($checklists as $check) {
-                $list_checklist->push((object)array(
-                    'id' => $check->id,
-                    'title'  => $check->title,
-                    'description'  => $check->description,
-                    'percentage'  => 16 * (rand(1,5)),
-                    'status'  => $i % 2 == 0 ? 'realizado': 'pendiente',
-                    'courses' => collect()
-                ));
-                $i++;
-            }
-        }
+        $checklists = self::leftJoin('summary_checklists as sc', 'sc.checklist_id', '=', 'checklists.id')
+        ->select('checklists.id','checklists.title','checklists.description','sc.advanced_percentage')->where('workspace_id', $workspace_id)
+        ->where('active', ACTIVE)
+        ->when($filtro_estado, function($q) use ($filtro_estado){
+            return   $filtro_estado == 'completo'
+                     ? $q->where('sc.advanced_percentage',100) 
+                     : $q->where(function ($q){
+                         $q->where('sc.advanced_percentage',0);
+                         $q->orWhereNull('sc.advanced_percentage');
+                     });
+         })->paginate($perPage, ['*'], 'page', $page);
 
-        $response['data'] = $list_checklist;
-        $response['lastPage'] = $checklists->lastPage();
+        // $list_checklist = collect();
 
-        $response['current_page'] = $checklists->currentPage();
-        $response['first_page_url'] = $checklists->url(1);
-        $response['from'] = $checklists->firstItem();
-        $response['last_page'] = $checklists->lastPage();
-        $response['last_page_url'] = $checklists->url($checklists->lastPage());
-        $response['next_page_url'] = $checklists->nextPageUrl();
-        $response['path'] = $checklists->getOptions()['path'];
-        $response['per_page'] = $checklists->perPage();
-        $response['prev_page_url'] = $checklists->previousPageUrl();
-        $response['to'] = $checklists->lastItem();
-        $response['total'] = $checklists->total();
+        // if(count($checklists) > 0) {
+        //     $i = 0;
+        //     foreach ($checklists as $check) {
+        //         $list_checklist->push((object)array(
+        //             'id' => $check->id,
+        //             'title'  => $check->title,
+        //             'description'  => $check->description,
+        //             'percentage'  => 16 * (rand(1,5)),
+        //             'status'  => $i % 2 == 0 ? 'realizado': 'pendiente',
+        //             'courses' => collect()
+        //         ));
+        //         $i++;
+        //     }
+        // }
+        $response['pagination'] = [
+            'total' => $checklists->total(),
+            'pages' => $checklists->lastPage(),
+            'perPage' => $checklists->perPage(),
+            'page' => $page
+        ];
+        $response['checklists'] = collect($checklists->items());
+        // $response['data'] = $checklists;
+        // $response['lastPage'] = $checklists->lastPage();
+
+        // $response['current_page'] = $checklists->currentPage();
+        // $response['first_page_url'] = $checklists->url(1);
+        // $response['from'] = $checklists->firstItem();
+        // $response['last_page'] = $checklists->lastPage();
+        // $response['last_page_url'] = $checklists->url($checklists->lastPage());
+        // $response['next_page_url'] = $checklists->nextPageUrl();
+        // $response['path'] = $checklists->getOptions()['path'];
+        // $response['per_page'] = $checklists->perPage();
+        // $response['prev_page_url'] = $checklists->previousPageUrl();
+        // $response['to'] = $checklists->lastItem();
+        // $response['total'] = $checklists->total();
 
         return $response;
     }
@@ -271,6 +293,34 @@ class CheckList extends BaseModel
         return $response;
     }
 
+    public static function getChecklistsWorkspace($checklist_id,$workspace_id=null,$with_segments=false,$select = ''){
+        $query = self::when($select, function ($q) use($select) {
+            $q->select($select)->addSelect('workspace_id');
+        })->when($with_segments,function($q2){
+            $q2->with(['segments' => function ($q) {
+                $q
+                    ->where('active', ACTIVE)
+                    ->select('id', 'model_id')
+                    ->with('values', function ($q) {
+                        $q
+                            ->with('criterion_value', function ($q) {
+                                $q
+                                    ->where('active', ACTIVE)
+                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                    ->with('criterion', function ($q) {
+                                        $q->select('id', 'name', 'code');
+                                    });
+                            })
+                            ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
+                    });
+            }]);
+        })->when($workspace_id,function($q) use($workspace_id){
+            $q->where('workspace_id', $workspace_id);
+        })
+        // ->whereRelation('segments', 'active', ACTIVE)
+        ->where('active', ACTIVE);
+        return $checklist_id ? $query->where('id', $checklist_id)->first() : $query->get();
+    }
     public function getProgresoActividadesFeedback(ChecklistRpta $checklistRpta, $actividades)
     {
 
