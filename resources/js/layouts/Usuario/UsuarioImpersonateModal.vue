@@ -21,11 +21,12 @@
                           color="primary"
                           class="pb-0"
                         >
-                            <small><strong>IMPORTANTE</strong></small>
+                            <small><strong>CONSIDERACIONES IMPORTANTES</strong></small>
 
                             <ul class="mt-3">
                                 <li><small>Se permitirá el acceso única y exclusivamente a la sesión del usuario con el fin de supervisar el correcto funcionamiento de éste.</small></li>
                                 <li><small>Toda acción está siendo registrada para los reportes correspondientes.</small></li>
+                                <li><small>Si tiene una sesión abierta en su navegador, esta se dará por finalizada.</small></li>
                                 <li><small>Finalice la sesión al terminar su uso.</small></li>
                                 <!-- <li><small>Recuerde que si el usuario cuenta con un correo, el proceso de restauración de contraseña puede realizarse desde la web/aplicación por parte del mismo usuario.</small></li> -->
                             </ul>
@@ -61,34 +62,27 @@ export default {
         },
         confirmModal() {
 
-            // console.log(action)
-
             let vue = this
 
             this.showLoader()
 
             let base = `${vue.options.base_endpoint}`
-            let url =`${base}/${vue.resource.id}/reset-password`;
+            let url =`${base}/${vue.resource.id}/get-signature`;
 
-
-            // let formData = vue.getMultipartFormData('POST', vue.resource, fields);
 
             vue.$http.post(url, null)
-            // vue.$http.post(url, {'modulos_carreras' : vue.resource.modulos_carreras, '_method' : method})
                 .then(({data}) => {
-                    vue.showAlert(data.data.msg)
+                        
+                        let config = data.data.config
 
-                        // if (action == 'reset_total') {
-                        //     this.hideLoader()
-                        // } else {
-                        //     this.loadData(vue.resource)
-                            // vue.closeModal()
-                        this.hideLoader()
-                        // }
-                        // if (action === 'reset_x_tema')
-                        //     vue.queryStatus("usuarios", "reinicia_tema");
+                        let win = window.open(config.url, '_blank');
+                        win.focus();
+                        // vue.showAlert(data.data.msg)
 
                         vue.$emit('onConfirm')
+                        
+                        this.hideLoader()
+
                     })
                     .catch((error) => {
                         vue.hideLoader()

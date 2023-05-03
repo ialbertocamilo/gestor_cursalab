@@ -46,6 +46,11 @@ use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Crypt;
+
+use Altek\Accountant\Facades\Accountant;
+
 // use App\Perfil;
 
 class UsuarioController extends Controller
@@ -899,5 +904,34 @@ class UsuarioController extends Controller
         $user->update($data);
 
         return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
+    } 
+
+    public function getSignature(User $user, Request $request)
+    {
+        $enabled = config('app.impersonation.enabled');
+
+        if (!$enabled) return $this->error('Service not available.', 422, [['Servicio no disponible.']]);
+
+        $user_id = Crypt::encryptString($user->id);
+
+        $signed_url = URL::temporarySignedRoute(
+            'login.external', now()->addSeconds(45), ['token' => $user_id]
+        );
+
+        $parts = parse_url($signed_url);
+        parse_str($parts['query'], $query);
+
+        $signature = $query['signature'] ?? null;
+        $expires = $query['expires'] ?? null;
+
+        $web_url = config('app.web_url');
+
+        $url = $web_url . "/auth/user/external?token={$user_id}&expires={$expires}&signature={$signature}";
+
+        Accountant::record($user, 'impersonated');
+
+        $data = compact('url', 'signature', 'expires', 'user_id', 'signed_url');
+
+        return $this->success(['msg' => 'Autenticando...', 'config' => $data]);
     }
 }

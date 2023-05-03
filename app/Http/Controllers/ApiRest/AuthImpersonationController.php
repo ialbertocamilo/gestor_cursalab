@@ -17,6 +17,9 @@ use Illuminate\Support\Str;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Hash;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
+
 class AuthImpersonationController extends Controller
 {
     public function getData()
@@ -156,6 +159,38 @@ class AuthImpersonationController extends Controller
         $month = strtolower($months[$current_month]);
 
         return "{$current_day}{$month}{$current_year}";
+    }
+
+    public function external($token, Request $request)
+    {
+        $data = [];
+
+        try {
+
+            $enabled = config('app.impersonation.enabled');
+
+            if (!$enabled) return $this->error('Service not available.', http_code: 503);
+
+            $user_id = Crypt::decryptString($request->token);
+
+            $user = User::find($user_id);
+
+            if ($user) {
+
+                $data = $this->respondWithDataAndToken($user);
+
+                $data['config_data']['impersonation'] = [
+                    'show_bar' => true,
+                    // 'user' => null,
+                ];
+            }
+
+        } catch (\Exception $e) {
+
+            return $this->error('Error found.', http_code: 503);
+        }
+
+        return response()->json($data);
     }
 
 }

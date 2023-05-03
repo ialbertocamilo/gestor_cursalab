@@ -137,7 +137,7 @@
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
                 @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
-                @impersonate_user="openFormModal(modalImpersonateUserOptions, $event, 'user', `Usar usuario ${$event.nombre} - ${$event.document} en aplicación` )"
+                @impersonate_user="openFormModal(modalImpersonateUserOptions, $event, 'user', `Acceder como ${$event.nombre} - ${$event.document}` )"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Usuario - ${$event.name}`)"
             />
             <UsuarioFormModal
@@ -294,7 +294,7 @@ export default {
                         method_name: 'reset_password'
                     },
                     {
-                        text: "Usar usuario en aplicación",
+                        text: "Acceder como usuario",
                         icon: 'fa fa-user',
                         type: 'action',
                         method_name: 'impersonate_user'
@@ -365,7 +365,7 @@ export default {
                 ref: 'UsuarioImpersonateModal',
                 open: false,
                 base_endpoint: '/usuarios',
-                confirmLabel: 'Usar usuario',
+                confirmLabel: 'Acceder como usuario',
                 // cancelLabel: 'Cerrar',
                 // hideConfirmBtn: true,
             },
