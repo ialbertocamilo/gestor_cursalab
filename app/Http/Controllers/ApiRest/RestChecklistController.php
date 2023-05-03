@@ -49,11 +49,16 @@ class RestChecklistController extends Controller
         return response()->json($response, 200);
     }
 
-    public function getStudentsByChecklist(CheckList $checklist)
+    public function getStudentsByChecklist(Request $request)
     {
         $trainer = Auth::user();
         // $response = CheckList::getStudentsByChecklist($checklist->id,$trainer->id);
-        $response = CheckList::getStudentsByChecklist($checklist->id, 60704);
+        $data = [
+            'trainer' => $trainer,
+            'checklist_id' => $request->checklist_id,
+            'page' => $request->page ?? null
+        ];
+        $response = CheckList::getStudentsByChecklist($data);
 
         return response()->json($response, 200);
     }
@@ -123,7 +128,7 @@ class RestChecklistController extends Controller
             $alumnos = $query_entrenador_usuario->alumno($alumnos_id)->groupBy('user_id')->get();
         }
         $checklistRptas = ChecklistRpta::checklist($checklist_id)->alumno($alumnos->pluck('user_id')->toArray())->entrenador($entrenador_id)->get();
-        $checklist = Checklist::getChecklistsWorkspace(checklist_id:$checklist_id);
+       
         foreach ($alumnos as $alumno) {
             $checklistRpta = $checklistRptas->where('student_id',$alumno->user_id)->first();
             if(is_null($checklistRpta)){
@@ -149,7 +154,7 @@ class RestChecklistController extends Controller
             ChecklistRpta::actualizarChecklistRpta($checklistRpta);
             SummaryUserChecklist::updateUserData($alumno->user);
         }
-        SummaryChecklist::updateData($checklist);
+        // SummaryChecklist::updateData($checklist);
         //Personalizar respuestas.
         return response()->json([
             'error' => false,

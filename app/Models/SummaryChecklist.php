@@ -25,10 +25,6 @@ class SummaryChecklist extends Model
         $completed = ChecklistRpta::where('checklist_id',$checklist_id)->whereIn('student_id',$users_assigned)->where('percent',100)->count();
         $assigned = count($users_assigned);
         $advanced_percentage = self::getGeneralPercentage($assigned, $completed);
-        info($assigned);
-        info($completed);
-        info($advanced_percentage);
-
         $data = compact('assigned', 'completed', 'advanced_percentage');
         $row_user->update($data);
 

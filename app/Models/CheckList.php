@@ -199,21 +199,19 @@ class CheckList extends BaseModel
 
     protected function getChecklistsByTrainer($data): array
     {
-        $filtro_estado = $data['filtro']['estado'];
+          //añadir cursos: en caso sea tipo curso,añadir tipos
+
+        $filtro_nombre = $data['filtro']['nombre'];
         $workspace_id = $data['trainer']->subworkspace->parent->id;
         $page = $data['page'];
         $perPage = 10;
 
-        $checklists = self::leftJoin('summary_checklists as sc', 'sc.checklist_id', '=', 'checklists.id')
-        ->select('checklists.id','checklists.title','checklists.description','sc.advanced_percentage')->where('workspace_id', $workspace_id)
+        // leftJoin('summary_checklists as sc', 'sc.checklist_id', '=', 'checklists.id')
+        $checklists = self::select('checklists.id','checklists.title','checklists.description')->where('workspace_id', $workspace_id)
         ->where('active', ACTIVE)
-        ->when($filtro_estado, function($q) use ($filtro_estado){
-            return   $filtro_estado == 'completo'
-                     ? $q->where('sc.advanced_percentage',100) 
-                     : $q->where(function ($q){
-                         $q->where('sc.advanced_percentage',0);
-                         $q->orWhereNull('sc.advanced_percentage');
-                     });
+        ->when($filtro_nombre, function($q) use ($filtro_nombre){
+            return  $q->where('title','like','%'.$filtro_nombre.'%');
+                    
          })->paginate($perPage, ['*'], 'page', $page);
 
         // $list_checklist = collect();
@@ -257,38 +255,49 @@ class CheckList extends BaseModel
         return $response;
     }
 
-    protected function getStudentsByChecklist($checklist_id, $trainer_id): array
+    protected function getStudentsByChecklist($data): array
     {
-        $alumnos_ids = EntrenadorUsuario::entrenador($trainer_id)->where('active', 1)->limit(20)->get();
+        $trainer = $data['trainer'];
+        $checklist_id = $data['checklist_id'];
+        $page = $data['page'];
+        $perPage = 10;
+        //añadir porcentaje.
 
+        $alumnos_ids = EntrenadorUsuario::entrenador($trainer->id)->where('active', 1)->select('user_id')->get()->pluck('user_id')->all();
         $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-            ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
-            ->paginate(request('paginate', 5));
+            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
+            ->whereIn('users.id',$alumnos_ids)
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
+            ->paginate($perPage, ['*'], 'page', $page);
 
         if(count($list_students) > 0) {
-            $i = 0;
             foreach ($list_students as $check) {
-                $check->percentage = 16 * (rand(1,5));
                 $check->makeHidden(['abilities', 'roles', 'age', 'fullname']);
-                $i++;
             }
         }
+        $checklist = Checklist::getChecklistsWorkspace(checklist_id:$checklist_id);
+        $course = new Course();
+        $users_assigned = $course->usersSegmented($checklist->segments, $type = 'users_id');
+        $users_assigned_checklist_trainer = array_intersect($alumnos_ids);
+        $completed = ChecklistRpta::where('checklist_id',$checklist_id)->whereIn('student_id',$users_assigned_checklist_trainer)->where('percent',100)->count();
+        $assigned = count($users_assigned_checklist_trainer);
+        $percent = ($assigned > 0) ? (($completed / $assigned) * 100) : 0;
+        $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
 
-        $response['data'] = $list_students->items();
-        $response['lastPage'] = $list_students->lastPage();
-
-        $response['current_page'] = $list_students->currentPage();
-        $response['first_page_url'] = $list_students->url(1);
-        $response['from'] = $list_students->firstItem();
-        $response['last_page'] = $list_students->lastPage();
-        $response['last_page_url'] = $list_students->url($list_students->lastPage());
-        $response['next_page_url'] = $list_students->nextPageUrl();
-        $response['path'] = $list_students->getOptions()['path'];
-        $response['per_page'] = $list_students->perPage();
-        $response['prev_page_url'] = $list_students->previousPageUrl();
-        $response['to'] = $list_students->lastItem();
-        $response['total'] = $list_students->total();
+        $response['pagination'] = [
+            'total' => $list_students->total(),
+            'pages' => $list_students->lastPage(),
+            'perPage' => $list_students->perPage(),
+            'page' => $page
+        ];
+        $response['alumnos'] = collect($list_students->items());
+        $response['checklist'] = [
+            'id'=>$checklist->id,
+            'description'=>$checklist->description,
+            'assigned'=>$assigned,
+            'completed'=>$completed,
+            'percent' => $percent
+        ];
 
         return $response;
     }
