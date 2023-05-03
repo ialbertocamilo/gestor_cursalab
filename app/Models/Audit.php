@@ -243,9 +243,10 @@ class Audit extends MongoLedger
             ($this->recordable->fullname ??
                 ($this->recordable->name ??
                     ($this->recordable->titulo ??
-                        ($this->recordable->nombre ??
-                            '#ID ' .
-                                ($this->recordable->id ?? 'No definido')))));
+                        ($this->recordable->pregunta ??
+                            ($this->recordable->nombre ??
+                                '#ID ' .
+                                    ($this->recordable->id ?? 'No definido'))))));
     }
 
     public function getModifiedLabels($modified)

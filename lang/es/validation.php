@@ -440,6 +440,8 @@ return [
         'fields' => 'filtros',
         'file' => 'archivo',
 
+        // App\Models\Videoteca
+        'workspace_id' => 'Módulo',
 
     ],
 
