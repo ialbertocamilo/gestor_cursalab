@@ -44,6 +44,12 @@ class CheckList extends BaseModel
     {
         return $this->morphMany(Segment::class, 'model');
     }
+
+    public function type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
     /*======================================================= SCOPES ==================================================================== */
 
     public function scopeActive($q, $estado)
@@ -244,7 +250,16 @@ class CheckList extends BaseModel
         $perPage = 10;
 
         // leftJoin('summary_checklists as sc', 'sc.checklist_id', '=', 'checklists.id')
-        $checklists = self::select('checklists.id','checklists.title','checklists.description')->where('workspace_id', $workspace_id)
+        $codes_type_checklists = Taxonomy::select('id','code')
+            ->where('group', 'checklist')
+            ->where('type', 'type_checklist')
+            ->where('active', 1)
+            ->get();
+
+        $checklists = self::select('checklists.id','checklists.title','checklists.description','type_id')->where('workspace_id', $workspace_id)
+        ->with(['courses' => function($q) {
+            $q->select('courses.id', 'courses.name');
+        }])
         ->where('active', ACTIVE)
         ->when($filtro_nombre, function($q) use ($filtro_nombre){
             return  $q->where('title','like','%'.$filtro_nombre.'%');
@@ -254,17 +269,10 @@ class CheckList extends BaseModel
         // $list_checklist = collect();
 
         // if(count($checklists) > 0) {
-        //     $i = 0;
         //     foreach ($checklists as $check) {
-        //         $list_checklist->push((object)array(
-        //             'id' => $check->id,
-        //             'title'  => $check->title,
-        //             'description'  => $check->description,
-        //             'percentage'  => 16 * (rand(1,5)),
-        //             'status'  => $i % 2 == 0 ? 'realizado': 'pendiente',
-        //             'courses' => collect()
-        //         ));
-        //         $i++;
+        //         // $type = $codes_type_checklists->where('id',$check->type_id)->first();
+        //         // $check->type = $type?->code;
+        //         unset($check->type_id);
         //     }
         // }
         $response['pagination'] = [
