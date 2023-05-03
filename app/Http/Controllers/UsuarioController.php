@@ -913,10 +913,12 @@ class UsuarioController extends Controller
 
         if (!$enabled) return $this->error('Service not available.', 422, [['Servicio no disponible.']]);
 
-        $user_id = Crypt::encryptString($user->id);
+        $token = $user->id . '-' . auth()->user()->id;
+
+        $token = Crypt::encryptString($token);
 
         $signed_url = URL::temporarySignedRoute(
-            'login.external', now()->addSeconds($duration), ['token' => $user_id]
+            'login.external', now()->addSeconds($duration), ['token' => $token]
         );
 
         $parts = parse_url($signed_url);
@@ -927,11 +929,11 @@ class UsuarioController extends Controller
 
         $web_url = config('app.web_url');
 
-        $url = $web_url . "auth/login/external?token={$user_id}&expires={$expires}&signature={$signature}";
+        $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}";
 
         Accountant::record($user, 'impersonated');
 
-        $data = compact('url', 'signature', 'expires', 'user_id', 'signed_url');
+        $data = compact('url', 'signature', 'expires', 'token', 'signed_url');
 
         return $this->success(['msg' => 'Autenticando...', 'config' => $data]);
     }
