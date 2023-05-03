@@ -9,4 +9,5 @@ Route::controller(RestChecklistController::class)->group(function () {
     Route::post('/marcar_actividad', 'marcarActividad');
     Route::post('/trainer/checklists', 'getChecklistsByTrainer');
     Route::post('/checklist/students', 'getStudentsByChecklist');
+    Route::get('/checklist/{checklist_id}', 'getChecklistInfo');
 });

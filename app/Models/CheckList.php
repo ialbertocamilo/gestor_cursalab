@@ -197,6 +197,35 @@ class CheckList extends BaseModel
         return $response;
     }
 
+    protected function getChecklistInfo($checklist_id,$trainer){
+        $alumnos_ids = EntrenadorUsuario::entrenador($trainer->id)->where('active', 1)->select('user_id')->get()->pluck('user_id')->all();
+        $checklist = Checklist::getChecklistsWorkspace(checklist_id:$checklist_id);
+        $course = new Course();
+        $users_assigned = $course->usersSegmented($checklist->segments, $type = 'users_id');
+        $users_assigned_checklist_trainer = array_intersect($alumnos_ids);
+        $completed = ChecklistRpta::where('checklist_id',$checklist_id)->whereIn('student_id',$users_assigned_checklist_trainer)->where('percent',100)->count();
+        $assigned = count($users_assigned_checklist_trainer);
+        $percent = ($assigned > 0) ? (($completed / $assigned) * 100) : 0;
+        $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
+        
+        $tax_trainer_user = Taxonomy::where('group', 'checklist')
+            ->where('type', 'type')
+            ->where('code', 'trainer_user')
+            ->first();
+
+        $actividades = CheckListItem::where('checklist_id', $checklist->id)->where('type_id',$tax_trainer_user->id)->active(1)->get();
+
+        $response['checklist'] = [
+            'id'=>$checklist->id,
+            'description'=>$checklist->description,
+            'assigned'=>$assigned,
+            'completed'=>$completed,
+            'percent' => $percent,
+            'actividades' => $actividades
+        ];
+        return $response;
+    }
+
     protected function getChecklistsByTrainer($data): array
     {
           //añadir cursos: en caso sea tipo curso,añadir tipos
@@ -275,14 +304,7 @@ class CheckList extends BaseModel
                 $check->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             }
         }
-        $checklist = Checklist::getChecklistsWorkspace(checklist_id:$checklist_id);
-        $course = new Course();
-        $users_assigned = $course->usersSegmented($checklist->segments, $type = 'users_id');
-        $users_assigned_checklist_trainer = array_intersect($alumnos_ids);
-        $completed = ChecklistRpta::where('checklist_id',$checklist_id)->whereIn('student_id',$users_assigned_checklist_trainer)->where('percent',100)->count();
-        $assigned = count($users_assigned_checklist_trainer);
-        $percent = ($assigned > 0) ? (($completed / $assigned) * 100) : 0;
-        $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
+        
 
         $response['pagination'] = [
             'total' => $list_students->total(),
@@ -291,13 +313,7 @@ class CheckList extends BaseModel
             'page' => $page
         ];
         $response['alumnos'] = collect($list_students->items());
-        $response['checklist'] = [
-            'id'=>$checklist->id,
-            'description'=>$checklist->description,
-            'assigned'=>$assigned,
-            'completed'=>$completed,
-            'percent' => $percent
-        ];
+        
 
         return $response;
     }
