@@ -168,6 +168,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasOne(SummaryUser::class);
     }
 
+    public function summary_checklist()
+    {
+        return $this->belongsTo(SummaryUserChecklist::class,'user_id');
+    }
+    
     public function summary_courses()
     {
         return $this->hasMany(SummaryCourse::class);

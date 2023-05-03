@@ -205,80 +205,155 @@ class CheckList extends BaseModel
         return $response;
     }
 
-    protected function getChecklistsByTrainer($trainer_id): array
+    protected function getChecklistInfo($checklist_id,$trainer){
+        $alumnos_ids = EntrenadorUsuario::entrenador($trainer->id)->where('active', 1)->select('user_id')->get()->pluck('user_id')->all();
+        $checklist = Checklist::getChecklistsWorkspace(checklist_id:$checklist_id);
+        $course = new Course();
+        $users_assigned = $course->usersSegmented($checklist->segments, $type = 'users_id');
+        $users_assigned_checklist_trainer = array_intersect($alumnos_ids);
+        $completed = ChecklistRpta::where('checklist_id',$checklist_id)->whereIn('student_id',$users_assigned_checklist_trainer)->where('percent',100)->count();
+        $assigned = count($users_assigned_checklist_trainer);
+        $percent = ($assigned > 0) ? (($completed / $assigned) * 100) : 0;
+        $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
+        
+        $tax_trainer_user = Taxonomy::where('group', 'checklist')
+            ->where('type', 'type')
+            ->where('code', 'trainer_user')
+            ->first();
+
+        $actividades = CheckListItem::where('checklist_id', $checklist->id)->where('type_id',$tax_trainer_user->id)->active(1)->get();
+
+        $response['checklist'] = [
+            'id'=>$checklist->id,
+            'description'=>$checklist->description,
+            'assigned'=>$assigned,
+            'completed'=>$completed,
+            'percent' => $percent,
+            'actividades' => $actividades
+        ];
+        return $response;
+    }
+
+    protected function getChecklistsByTrainer($data): array
     {
-        $checklists = CheckList::where('workspace_id',25)->where('active',1)->paginate(request('paginate', 5));
-        $list_checklist = collect();
+          //añadir cursos: en caso sea tipo curso,añadir tipos
 
-        if(count($checklists) > 0) {
-            $i = 0;
-            foreach ($checklists as $check) {
-                $list_checklist->push((object)array(
-                    'id' => $check->id,
-                    'title'  => $check->title,
-                    'description'  => $check->description,
-                    'percentage'  => 16 * (rand(1,5)),
-                    'status'  => $i % 2 == 0 ? 'realizado': 'pendiente',
-                    'courses' => collect()
-                ));
-                $i++;
-            }
-        }
+        $filtro_nombre = $data['filtro']['nombre'];
+        $workspace_id = $data['trainer']->subworkspace->parent->id;
+        $page = $data['page'];
+        $perPage = 10;
 
-        $response['data'] = $list_checklist;
-        $response['lastPage'] = $checklists->lastPage();
+        // leftJoin('summary_checklists as sc', 'sc.checklist_id', '=', 'checklists.id')
+        $checklists = self::select('checklists.id','checklists.title','checklists.description')->where('workspace_id', $workspace_id)
+        ->where('active', ACTIVE)
+        ->when($filtro_nombre, function($q) use ($filtro_nombre){
+            return  $q->where('title','like','%'.$filtro_nombre.'%');
+                    
+         })->paginate($perPage, ['*'], 'page', $page);
 
-        $response['current_page'] = $checklists->currentPage();
-        $response['first_page_url'] = $checklists->url(1);
-        $response['from'] = $checklists->firstItem();
-        $response['last_page'] = $checklists->lastPage();
-        $response['last_page_url'] = $checklists->url($checklists->lastPage());
-        $response['next_page_url'] = $checklists->nextPageUrl();
-        $response['path'] = $checklists->getOptions()['path'];
-        $response['per_page'] = $checklists->perPage();
-        $response['prev_page_url'] = $checklists->previousPageUrl();
-        $response['to'] = $checklists->lastItem();
-        $response['total'] = $checklists->total();
+        // $list_checklist = collect();
+
+        // if(count($checklists) > 0) {
+        //     $i = 0;
+        //     foreach ($checklists as $check) {
+        //         $list_checklist->push((object)array(
+        //             'id' => $check->id,
+        //             'title'  => $check->title,
+        //             'description'  => $check->description,
+        //             'percentage'  => 16 * (rand(1,5)),
+        //             'status'  => $i % 2 == 0 ? 'realizado': 'pendiente',
+        //             'courses' => collect()
+        //         ));
+        //         $i++;
+        //     }
+        // }
+        $response['pagination'] = [
+            'total' => $checklists->total(),
+            'pages' => $checklists->lastPage(),
+            'perPage' => $checklists->perPage(),
+            'page' => $page
+        ];
+        $response['checklists'] = collect($checklists->items());
+        // $response['data'] = $checklists;
+        // $response['lastPage'] = $checklists->lastPage();
+
+        // $response['current_page'] = $checklists->currentPage();
+        // $response['first_page_url'] = $checklists->url(1);
+        // $response['from'] = $checklists->firstItem();
+        // $response['last_page'] = $checklists->lastPage();
+        // $response['last_page_url'] = $checklists->url($checklists->lastPage());
+        // $response['next_page_url'] = $checklists->nextPageUrl();
+        // $response['path'] = $checklists->getOptions()['path'];
+        // $response['per_page'] = $checklists->perPage();
+        // $response['prev_page_url'] = $checklists->previousPageUrl();
+        // $response['to'] = $checklists->lastItem();
+        // $response['total'] = $checklists->total();
 
         return $response;
     }
 
-    protected function getStudentsByChecklist($checklist_id, $trainer_id): array
+    protected function getStudentsByChecklist($data): array
     {
-        $alumnos_ids = EntrenadorUsuario::entrenador($trainer_id)->where('active', 1)->limit(20)->get();
+        $trainer = $data['trainer'];
+        $checklist_id = $data['checklist_id'];
+        $page = $data['page'];
+        $perPage = 10;
+        //añadir porcentaje.
 
+        $alumnos_ids = EntrenadorUsuario::entrenador($trainer->id)->where('active', 1)->select('user_id')->get()->pluck('user_id')->all();
         $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-            ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
-            ->paginate(request('paginate', 5));
+            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
+            ->whereIn('users.id',$alumnos_ids)
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
+            ->paginate($perPage, ['*'], 'page', $page);
 
         if(count($list_students) > 0) {
-            $i = 0;
             foreach ($list_students as $check) {
-                $check->percentage = 16 * (rand(1,5));
                 $check->makeHidden(['abilities', 'roles', 'age', 'fullname']);
-                $i++;
             }
         }
+        
 
-        $response['data'] = $list_students->items();
-        $response['lastPage'] = $list_students->lastPage();
-
-        $response['current_page'] = $list_students->currentPage();
-        $response['first_page_url'] = $list_students->url(1);
-        $response['from'] = $list_students->firstItem();
-        $response['last_page'] = $list_students->lastPage();
-        $response['last_page_url'] = $list_students->url($list_students->lastPage());
-        $response['next_page_url'] = $list_students->nextPageUrl();
-        $response['path'] = $list_students->getOptions()['path'];
-        $response['per_page'] = $list_students->perPage();
-        $response['prev_page_url'] = $list_students->previousPageUrl();
-        $response['to'] = $list_students->lastItem();
-        $response['total'] = $list_students->total();
+        $response['pagination'] = [
+            'total' => $list_students->total(),
+            'pages' => $list_students->lastPage(),
+            'perPage' => $list_students->perPage(),
+            'page' => $page
+        ];
+        $response['alumnos'] = collect($list_students->items());
+        
 
         return $response;
     }
 
+    public static function getChecklistsWorkspace($checklist_id,$workspace_id=null,$with_segments=false,$select = ''){
+        $query = self::when($select, function ($q) use($select) {
+            $q->select($select)->addSelect('workspace_id');
+        })->when($with_segments,function($q2){
+            $q2->with(['segments' => function ($q) {
+                $q
+                    ->where('active', ACTIVE)
+                    ->select('id', 'model_id')
+                    ->with('values', function ($q) {
+                        $q
+                            ->with('criterion_value', function ($q) {
+                                $q
+                                    ->where('active', ACTIVE)
+                                    ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                    ->with('criterion', function ($q) {
+                                        $q->select('id', 'name', 'code');
+                                    });
+                            })
+                            ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
+                    });
+            }]);
+        })->when($workspace_id,function($q) use($workspace_id){
+            $q->where('workspace_id', $workspace_id);
+        })
+        // ->whereRelation('segments', 'active', ACTIVE)
+        ->where('active', ACTIVE);
+        return $checklist_id ? $query->where('id', $checklist_id)->first() : $query->get();
+    }
     public function getProgresoActividadesFeedback(ChecklistRpta $checklistRpta, $actividades)
     {
 

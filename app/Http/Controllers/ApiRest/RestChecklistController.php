@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\CheckList;
+use Illuminate\Http\Request;
 use App\Models\ChecklistRpta;
+use App\Models\SummaryChecklist;
 use App\Models\ChecklistRptaItem;
 use App\Models\EntrenadorUsuario;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\SummaryUserChecklist;
 use Illuminate\Support\Facades\Auth;
 
 class RestChecklistController extends Controller
@@ -33,20 +35,34 @@ class RestChecklistController extends Controller
 
         return response()->json($response, 200);
     }
-
-    public function getChecklistsByTrainer()
+    public function getChecklistInfo($checklist_id){
+        $user = Auth::user();
+        $response = CheckList::getChecklistInfo($checklist_id,$user);
+        return response()->json($response, 200);
+    }
+    public function getChecklistsByTrainer(Request $request)
     {
         $trainer = Auth::user();
-        $response = CheckList::getChecklistsByTrainer($trainer->id);
+        $data = [
+            'trainer' => $trainer,
+            'filtro' => $request->filtro,
+            'page' => $request->page ?? null
+        ];
+        $response = CheckList::getChecklistsByTrainer($data);
 
         return response()->json($response, 200);
     }
 
-    public function getStudentsByChecklist(CheckList $checklist)
+    public function getStudentsByChecklist(Request $request)
     {
         $trainer = Auth::user();
         // $response = CheckList::getStudentsByChecklist($checklist->id,$trainer->id);
-        $response = CheckList::getStudentsByChecklist($checklist->id, 60704);
+        $data = [
+            'trainer' => $trainer,
+            'checklist_id' => $request->checklist_id,
+            'page' => $request->page ?? null
+        ];
+        $response = CheckList::getStudentsByChecklist($data);
 
         return response()->json($response, 200);
     }
@@ -76,7 +92,10 @@ class RestChecklistController extends Controller
 
         return response()->json([
             'error' => false,
-            'msg' => 'Actividad actualizada.'
+            'msg' => [
+                'titulo' => '',
+                'texto' => ''
+            ]
             /*'checklist_rpta_item' => $checklistRptaItem*/
         ], 200);
     }
@@ -103,23 +122,28 @@ class RestChecklistController extends Controller
 
         
         $entrenador_id = ($tipo =='entrenador_alumno') 
-                        ? auth()->user()->id 
+                        ? Auth::user()->id 
                         : EntrenadorUsuario::where('user_id', $alumnos_id[0])->where('active', 1)->first()?->trainer_id;
-                            
+
+        $query_entrenador_usuario =  EntrenadorUsuario::select('user_id')->with(['user:id,subworkspace_id','user.subworkspace:id,parent_id','user.subworkspace.parent:id']);   
         if($alumnos_todos){
-            $alumnos_id =  EntrenadorUsuario::where('trainer_id',$entrenador_id)->where('active', 1)->pluck('user_id');
+            $alumnos = $query_entrenador_usuario->where('trainer_id',$entrenador_id)->where('active', 1)->get();
+        }else{
+            $alumnos = $query_entrenador_usuario->alumno($alumnos_id)->groupBy('user_id')->get();
         }
-        foreach ($alumnos_id as $alumno_id) {
+        $checklistRptas = ChecklistRpta::checklist($checklist_id)->alumno($alumnos->pluck('user_id')->toArray())->entrenador($entrenador_id)->get();
+       
+        foreach ($alumnos as $alumno) {
+            $checklistRpta = $checklistRptas->where('student_id',$alumno->user_id)->first();
+            if(is_null($checklistRpta)){
+                $checklistRpta = ChecklistRpta::create([
+                    'checklist_id' => $checklist_id,
+                    'student_id' => $alumno->user_id,
+                    'coach_id' => $entrenador_id,
+                    'percent' => 0
+                ]);
+            }
             foreach ($actividades as $key => $actividad) {
-                $checklistRpta = ChecklistRpta::checklist($checklist_id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
-                if(is_null($checklistRpta)){
-                    $checklistRpta = ChecklistRpta::create([
-                        'checklist_id' => $checklist_id,
-                        'student_id' => $alumno_id,
-                        'coach_id' => $entrenador_id,
-                        'percent' => 0
-                    ]);
-                }
                 $checklistRptaItem = ChecklistRptaItem::where('checklist_answer_id', $checklistRpta->id)->where('checklist_item_id', $actividad['id'])->first();
                 if (!$checklistRptaItem) {
                     $checklistRptaItem = ChecklistRptaItem::create([
@@ -130,9 +154,11 @@ class RestChecklistController extends Controller
                 }
                 $checklistRptaItem->qualification = $actividad['estado'];
                 $checklistRptaItem->save();
-                ChecklistRpta::actualizarChecklistRpta($checklistRpta);
             }
+            ChecklistRpta::actualizarChecklistRpta($checklistRpta);
+            SummaryUserChecklist::updateUserData($alumno->user);
         }
+        // SummaryChecklist::updateData($checklist);
         //Personalizar respuestas.
         return response()->json([
             'error' => false,
