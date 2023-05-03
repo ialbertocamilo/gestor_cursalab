@@ -145,19 +145,19 @@ class CheckList extends BaseModel
 
         $cursos = Course::with('checklists', 'schools')->whereIn('id', $cursos_ids)->get();
         $checklists = collect();
+        $tax_trainer_user = Taxonomy::where('group', 'checklist')
+        ->where('type', 'type')
+        ->where('code', 'trainer_user')
+        ->first();
+        $tax_user_trainer = Taxonomy::where('group', 'checklist')
+            ->where('type', 'type')
+            ->where('code', 'user_trainer')
+            ->first();
         foreach ($cursos as $curso) {
             $curso->categoria = $curso->schools->first()->only('id', 'name');
             if ($curso->checklists->count() > 0) {
                 foreach ($curso->checklists as $checklist) {
                     if ($checklist->active) {
-                        $tax_trainer_user = Taxonomy::where('group', 'checklist')
-                            ->where('type', 'type')
-                            ->where('code', 'trainer_user')
-                            ->first();
-                        $tax_user_trainer = Taxonomy::where('group', 'checklist')
-                            ->where('type', 'type')
-                            ->where('code', 'user_trainer')
-                            ->first();
                         $actividades_activas = $checklist->actividades->where('active', 1)->where('type_id', $tax_trainer_user->id)->sortBy('position');
                         $actividades_activasFeedback = $checklist->actividades->where('active', 1)->where('type_id', $tax_user_trainer->id)->sortBy('position');
                         if (!$checklists->where('id', $checklist->id)->first() && $actividades_activas->count() > 0 && $checklist->active) {
