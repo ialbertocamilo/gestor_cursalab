@@ -268,13 +268,16 @@ class CheckList extends BaseModel
 
         // $list_checklist = collect();
 
-        // if(count($checklists) > 0) {
-        //     foreach ($checklists as $check) {
-        //         // $type = $codes_type_checklists->where('id',$check->type_id)->first();
-        //         // $check->type = $type?->code;
-        //         unset($check->type_id);
-        //     }
-        // }
+        if(count($checklists) > 0) {
+            foreach ($checklists as $check) {
+                $type = $codes_type_checklists->where('id',$check->type_id)->first();
+                $check->type = $type?->code;
+                if($type?->code != 'curso'){
+                    $check->courses=[];
+                }
+                unset($check->type_id);
+            }
+        }
         $response['pagination'] = [
             'total' => $checklists->total(),
             'pages' => $checklists->lastPage(),
