@@ -479,6 +479,12 @@ export default {
         // this.addActividad()
     },
     methods: {
+        rep(){
+            let vue = this
+            vue.checklist.list_segments = vue.checklist.segments
+            vue.modalFormSegmentationOptions.list_segments = vue.checklist.segments
+            vue.modalFormSegmentationOptions.isEdit = true
+        },
         nextStep(){
             let vue = this;
             vue.cancelLabel = "Cancelar";
@@ -531,6 +537,7 @@ export default {
             console.log('resetValidation')
             vue.search_text = null
             vue.results_search = []
+            vue.stepper_box = 1
             if (vue.$refs.formChecklistCreateEdit)
                 vue.$refs.formChecklistCreateEdit.resetValidation()
         },

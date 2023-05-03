@@ -277,6 +277,17 @@ class EntrenamientoController extends Controller
     {
         $workspace = get_current_workspace();
         $data = $request->all();
+
+        if(isset($data['duplicado']) && $data['duplicado'])
+            $data['id'] = null;
+
+        $type_checklist = Taxonomy::where('group', 'checklist')
+                        ->where('type', 'type_checklist')
+                        ->where('code', $data['type_checklist'])
+                        ->first();
+        $starts_at = (isset($data['starts_at']) && $data['starts_at']) ? $data['starts_at'] : null;
+        $finishes_at = (isset($data['finishes_at']) && $data['finishes_at']) ? $data['finishes_at'] : null;
+
         //checklist
         $checklist = CheckList::updateOrCreate(
             ['id' => $data['id']],
@@ -284,7 +295,10 @@ class EntrenamientoController extends Controller
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'active' => $data['active'],
-                'workspace_id' => $workspace->id
+                'workspace_id' => $workspace->id,
+                'type_id' => !is_null($type_checklist) ? $type_checklist->id : null,
+                'starts_at' => $starts_at,
+                'finishes_at' => $finishes_at
             ]
         );
 
@@ -333,7 +347,7 @@ class EntrenamientoController extends Controller
         }
 
 
-        return $this->success($checklist);
+        return $this->success(['msg' => 'Checklist creado. Se ha creado el checklist '.$checklist->title, 'checklist'=>$checklist]);
     }
 
     public function guardarActividadByID(Request $request)

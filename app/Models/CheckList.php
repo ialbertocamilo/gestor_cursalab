@@ -12,7 +12,10 @@ class CheckList extends BaseModel
         'title',
         'description',
         'active',
-        'workspace_id'
+        'workspace_id',
+        'type_id',
+        'starts_at',
+        'finishes_at',
     ];
 
     protected $casts = [
@@ -66,8 +69,8 @@ class CheckList extends BaseModel
             }
         ])->where('workspace_id', $workspace->id);
 
-        $field = request()->sortBy ?? 'created_at';
-        $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
+        $field = 'created_at';
+        $sort = 'DESC';
 
         $queryChecklist->orderBy($field, $sort);
 
@@ -95,6 +98,11 @@ class CheckList extends BaseModel
                 $curso->escuela = $school;
                 $curso->nombre = $workspace . ' - ' . $school . ' - ' . $curso->name;
             }
+
+            $criteria = Segment::getCriteriaByWorkspace(get_current_workspace());
+            $segments = Segment::getSegmentsByModel($criteria, CheckList::class, $checklist->id);
+
+            $checklist->segments = $segments;
 
             $checklist->active = $checklist->active;
         }

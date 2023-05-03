@@ -245,7 +245,14 @@ export default {
                 const vue = this;
                 console.log(11111);
                 console.log(vue.segments);
-                vue.$props.options.list_segments = vue.segments;
+                console.log(vue.$props.options);
+                if(vue.$props.options.isEdit){
+                    vue.segments = vue.$props.options.list_segments
+                }
+                else{
+                    vue.$props.options.list_segments = vue.segments;
+                }
+
                 vue.$props.options.list_segments_document = vue.segment_by_document;
                 console.log(vue.tabs);
                 vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
@@ -254,7 +261,7 @@ export default {
         },
         tabs(){
                 const vue = this;
-                console.log(vue.tabs);
+                console.log(vue.segments);
                 vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
         }
     },

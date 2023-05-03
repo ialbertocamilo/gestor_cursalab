@@ -1,6 +1,6 @@
 <template>
     <v-row justify="space-around">
-        <v-col cols="10">
+        <v-col cols="12">
             <v-row>
                 <v-col cols="5" class="d-flex justify-content-center flex-row bx_search_by_document">
                     <DefaultInput
@@ -12,35 +12,39 @@
                         class="col-11"
                     />
                 </v-col>
-                <v-col cols="7" class="d-flex justify-content-center align-items-center">
-                    <div class="d-flex justify-content-center align-items-center mx-2 est_link">
-                        <v-file-input
-                            show-size
-                            label="Suba el archivo"
-                            v-model="file"
-                            color="#796aee"
-                            hide-details="auto"
-                            dense
-                            outlined
-                            hide-input
-                            prepend-icon="mdi-file-upload"
-                            @change="uploadExcel"
-                            class="upload-file-segment flex-initial"
-                        >
-                            <template v-slot:append-outer>
-                            </template>
-                        </v-file-input>
-                        <span class="text_default">Subir archivo</span>
+                <v-col cols="7" class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="d-flex justify-content-center align-items-center mx-2 est_link">
+                            <v-file-input
+                                show-size
+                                label="Suba el archivo"
+                                v-model="file"
+                                color="#796aee"
+                                hide-details="auto"
+                                dense
+                                outlined
+                                hide-input
+                                prepend-icon="mdi-file-upload"
+                                @change="uploadExcel"
+                                class="upload-file-segment flex-initial"
+                            >
+                                <template v-slot:append-outer>
+                                </template>
+                            </v-file-input>
+                            <span class="text_default">Subir archivo</span>
+                        </div>
+                        <div class="d-flex justify-content-center align-items-center mx-2 est_link">
+                            <a class="justify-end"
+                            href="/templates/Plantilla-Segmentacion.xlsx">
+                            <v-icon small>mdi-file-download</v-icon>
+                            <span class="text_default">Plantilla</span>
+                            </a>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-center align-items-center mx-2 est_link">
-                        <a class="justify-end"
-                        href="/templates/Plantilla-Segmentacion.xlsx">
-                        <v-icon small>mdi-file-download</v-icon>
-                        <span class="text_default">Plantilla</span>
-                        </a>
-                    </div>
-                    <div class="d-flex justify-content-center align-items-center mx-2">
-                        <span class="text_default">{{ arrayCriteriaSelected.length || 0 }} seleccionados | Todos</span>
+                    <div>
+                        <div class="d-flex justify-content-center align-items-center mx-2">
+                            <span class="text_default">{{ arrayCriteriaSelected.length || 0 }} seleccionados | Todos</span>
+                        </div>
                     </div>
                 </v-col>
             </v-row>
