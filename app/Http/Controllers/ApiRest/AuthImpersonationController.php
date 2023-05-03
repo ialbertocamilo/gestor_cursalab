@@ -163,34 +163,41 @@ class AuthImpersonationController extends Controller
 
     public function external($token, Request $request)
     {
-        $data = [];
-
         try {
 
             $enabled = config('app.impersonation.enabled');
 
             if (!$enabled) return $this->error('Service not available.', http_code: 503);
 
-            $user_id = Crypt::decryptString($request->token);
+            $token = Crypt::decryptString($request->token);
+
+            $ids = explode('-', $token);
+
+            $user_id = $ids[0] ?? null;
+            $gestor_id = $ids[1] ?? null;
 
             $user = User::find($user_id);
+            $gestor = User::find($gestor_id);
 
-            if ($user) {
+            if ($user && $gestor) {
 
                 $data = $this->respondWithDataAndToken($user);
 
                 $data['config_data']['impersonation'] = [
                     'show_bar' => true,
-                    // 'user' => null,
+                    'show_title' => 'Acceso como ' . $user->fullname,
+                    'user' => $gestor->fullname,
                 ];
+                
+                return response()->json($data);
             }
+
+            return $this->error('Wrong token.', http_code: 503);
 
         } catch (\Exception $e) {
 
             return $this->error('Error found.', http_code: 503);
         }
-
-        return response()->json($data);
     }
 
 }
