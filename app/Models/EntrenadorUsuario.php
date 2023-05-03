@@ -181,7 +181,8 @@ class EntrenadorUsuario extends Model
         }
         // TODO: Lista total de alumnos
         $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
-
+        $users_assigned = count($alumnos_ids);
+        
         $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
             ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
             ->when($filtro_estado, function($q) use ($filtro_estado){
@@ -210,7 +211,8 @@ class EntrenadorUsuario extends Model
                 'total' => $pagination->total(),
                 'pages' => $pagination->lastPage(),
                 'perPage' => $pagination->perPage(),
-                'page' => $page
+                'page' => $page,
+                'users_assigned'=> $users_assigned
             ];
 
             $dataAlumnos = collect($pagination->items());

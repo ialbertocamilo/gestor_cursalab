@@ -221,7 +221,7 @@ class CheckList extends BaseModel
             ->where('code', 'trainer_user')
             ->first();
 
-        $actividades = CheckListItem::where('checklist_id', $checklist->id)->where('type_id',$tax_trainer_user->id)->active(1)->get();
+        $actividades = CheckListItem::select('id','checklist_id','activity')->where('checklist_id', $checklist->id)->where('type_id',$tax_trainer_user->id)->active(1)->orderBy('position','ASC')->get();
 
         $response['checklist'] = [
             'id'=>$checklist->id,
