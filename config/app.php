@@ -46,6 +46,7 @@ return [
 
     'impersonation' => [
         'enabled' => env('APP_IMPERSONATION_ENABLED', false),
+        'link_duration' => env('APP_IMPERSONATION_LINK_DURATION_SECONDS', 45),
         'code' => env('APP_IMPERSONATION_CODE'),
         'fields' => [
             ['name' => 'username', 'label' => 'Usuario' , 'hidden' => false, 'required' => true],

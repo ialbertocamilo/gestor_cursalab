@@ -909,13 +909,14 @@ class UsuarioController extends Controller
     public function getSignature(User $user, Request $request)
     {
         $enabled = config('app.impersonation.enabled');
+        $duration = config('app.impersonation.link_duration');
 
         if (!$enabled) return $this->error('Service not available.', 422, [['Servicio no disponible.']]);
 
         $user_id = Crypt::encryptString($user->id);
 
         $signed_url = URL::temporarySignedRoute(
-            'login.external', now()->addSeconds(45), ['token' => $user_id]
+            'login.external', now()->addSeconds($duration), ['token' => $user_id]
         );
 
         $parts = parse_url($signed_url);
@@ -926,7 +927,7 @@ class UsuarioController extends Controller
 
         $web_url = config('app.web_url');
 
-        $url = $web_url . "/auth/user/external?token={$user_id}&expires={$expires}&signature={$signature}";
+        $url = $web_url . "auth/login/external?token={$user_id}&expires={$expires}&signature={$signature}";
 
         Accountant::record($user, 'impersonated');
 
