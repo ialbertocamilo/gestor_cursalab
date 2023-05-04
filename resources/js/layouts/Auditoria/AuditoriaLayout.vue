@@ -133,7 +133,7 @@ export default {
                     {
                         text: "Usuario",
                         value: "user",
-                        align: "center",
+                        align: "start",
                         sortable: false
                     },
                     {
