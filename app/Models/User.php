@@ -736,8 +736,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
         }
         unset($user->criterion_values);
-        unset($user->subworkspace);
-        unset($user->subworkspace_id);
+        // unset($user->subworkspace);
+        // unset($user->subworkspace_id);
         return $match_segment;
     }
     public function getCurrentCourses(
