@@ -106,7 +106,7 @@ class restablecer_funcionalidad extends Command
         // $this->restoreStatusSummaryTopics();
         // $this->setSummarys();
         // $this->setSchoolOrden();
-        $this->setCourseOrden();
+        // $this->setCourseOrden();
         // $this->restoSummaryCourseSinceSummaryTopic();
         // $this->restoreJsonNotification();
         $this->info("\n Fin: " . now());
@@ -153,7 +153,7 @@ class restablecer_funcionalidad extends Command
                         ->join('school_subworkspace as ss','ss.school_id','schools.id')
                         ->where('ss.subworkspace_id',$subworkspace->id)
                         // ->ordenBy('schools.name')
-                        ->get()->sortBy('name');
+                        ->get()->sortBy('schools.created_at');
             $position = 1;
             foreach ($schools as $school) {
                 // info($position);
@@ -165,7 +165,7 @@ class restablecer_funcionalidad extends Command
         }
     }
     public function setCourseOrden(){
-        $schools = School::where('id',1)->get();
+        $schools = School::all();
         foreach ($schools as $school) {
             $courses = $school->courses->sortBy('position');
             $position = 1;
