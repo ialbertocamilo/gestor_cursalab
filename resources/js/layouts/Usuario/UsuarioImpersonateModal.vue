@@ -7,18 +7,19 @@
     >
         <template v-slot:content>
 
-            <v-row justify="space-around" class="mt-8 mx-1">
-                <v-col cols="12">
+            <v-row justify="space-around" class="--mt-8 --mx-1">
+                <v-col cols="12" class="mb-0">
 
                     <DefaultErrors :errors="errors"/>
 
                     <template >
 
+                          <!-- border="top" -->
+                          <!-- colored-border -->
+                          <!-- color="primary" -->
                         <v-alert
-                          colored-border
                           flat
-                          color="primary"
-                          class="pb-0 px-0"
+                          class="pb-0 mx-0 mb-0"
                         >
                             <small><strong>CONSIDERACIONES IMPORTANTES</strong></small>
 
