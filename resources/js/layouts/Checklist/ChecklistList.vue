@@ -31,7 +31,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="abrirModalCreateEditChecklist($event)"
+                @edit="abrirModalCreateEditChecklist($event, true)"
                 @duplicate="duplicateChecklist($event)"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar un <b>checklist</b>')"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"
@@ -246,13 +246,14 @@ export default {
                 entrenador: ''
             }
         },
-        async abrirModalCreateEditChecklist(checklist) {
+        async abrirModalCreateEditChecklist(checklist, edit = false) {
             let vue = this;
             vue.dataModalChecklist = checklist;
             await vue.$refs.ModalCreateChecklist.resetValidation()
 
             vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
-            vue.$refs.ModalCreateChecklist.rep()
+            if (edit)
+                vue.$refs.ModalCreateChecklist.rep()
 
             vue.modal.crear_editar_checklist = true;
         },

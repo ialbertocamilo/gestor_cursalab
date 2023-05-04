@@ -346,8 +346,12 @@ class EntrenamientoController extends Controller
             $checklist->courses()->sync($cursos->pluck('id'));
         }
 
-
-        return $this->success(['msg' => 'Checklist creado. Se ha creado el checklist '.$checklist->title, 'checklist'=>$checklist]);
+        if($data['id']){
+            $msg = 'Checklist actualizado. Se ha actualizado el checklist '.$checklist->title;
+        }else{
+            $msg = 'Checklist creado. Se ha creado el checklist '.$checklist->title;
+        }
+        return $this->success(['msg' => $msg, 'checklist'=>$checklist]);
     }
 
     public function guardarActividadByID(Request $request)

@@ -43,7 +43,7 @@
                     </div>
                     <div>
                         <div class="d-flex justify-content-center align-items-center mx-2">
-                            <span class="text_default">{{ arrayCriteriaSelected.length || 0 }} seleccionados | Todos</span>
+                            <span class="text_default">{{ arrayCriteriaSelected.length || 0 }} seleccionados</span>
                         </div>
                     </div>
                 </v-col>

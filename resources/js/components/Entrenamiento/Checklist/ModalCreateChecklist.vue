@@ -145,7 +145,7 @@
                                                     <span class="title_sub">Selección de cursos</span>
                                                 </v-col>
                                             </v-row>
-                                            <v-row class="pb-0">
+                                            <v-row class="d-flex justify-content-between pb-0">
                                                 <v-col cols="8" md="8" lg="8" class="pb-0 pt-2">
                                                     <v-text-field
                                                         outlined
@@ -159,8 +159,8 @@
                                                         autocomplete="off"
                                                     ></v-text-field>
                                                 </v-col>
-                                                <v-col cols="4" md="4" lg="4" class="bx_options_select pb-0 pt-2">
-                                                    <span class="text_default">{{checklist.courses.length || 0}} seleccionados | Todos</span>
+                                                <v-col cols="4" md="4" lg="4" class="d-flex justify-content-end bx_options_select pb-0 pt-2">
+                                                    <span class="text_default">{{checklist.courses.length || 0}} seleccionados</span>
                                                 </v-col>
                                             </v-row>
                                             <v-row class="pb-0">
