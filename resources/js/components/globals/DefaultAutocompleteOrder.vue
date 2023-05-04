@@ -62,7 +62,11 @@
 
 
             <template v-slot:selection="{ item, index }" v-if="multiple">
-                <v-chip small class="flex justify-content-between mt-1" v-if="index < countShowValues">
+                <v-chip
+                    small
+                    class="flex justify-content-between mt-1"
+                    :class="[hideCodes.includes(item.code) ? 'hidden-chip' : '', readyOnlyCodes.includes(item.code) ? 'readonly-chip' : '']"
+                    v-if="index < countShowValues">
                     <span> {{ String(item[itemText]) }}
                         <v-btn
                             v-if="!readyOnlyCodes.includes(item.code)"
@@ -71,6 +75,10 @@
                             @click="removeItem(item.id)">
                             <v-icon color="white">mdi-minus-circle</v-icon>
                         </v-btn>
+
+                        <v-icon
+                            v-if="readyOnlyCodes.includes(item.code)"
+                            size="14" color="white">mdi-lock</v-icon>
                     </span>
                 </v-chip>
                 <span
@@ -105,6 +113,10 @@
 export default {
     props: {
         readyOnlyCodes: {
+            type: Array,
+            default: function() { return [] }
+        },
+        hideCodes: {
             type: Array,
             default: function() { return [] }
         },
@@ -455,6 +467,36 @@ export default {
     .v-scroll-auto-complete::-webkit-scrollbar-thumb {
         background: #afafaf;
         border-radius: 3rem;
+    }
+
+    .readonly-chip,
+    .readonly-chip:hover  {
+        background: white !important;
+        border: 2px solid #d7d6d8 !important;
+
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
+        height: 26px !important;
+        border-radius: 13px !important;
+    }
+
+    .readonly-chip span {
+        color: #dbdadb;
+        font-size: 14px;
+    }
+
+    .readonly-chip .v-icon {
+        background: #d7d6d8;
+        border-radius: 50%;
+        margin-right: -10px;
+        margin-top: -2px;
+        height: 20px;
+        width: 20px;
+        padding-right: 1px;
+    }
+
+    .hidden-chip {
+        display: none !important;
     }
 
     .readonly-list-item {

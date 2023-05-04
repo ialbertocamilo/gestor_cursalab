@@ -92,14 +92,6 @@
                 @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
-		@logs="
-                    openFormModal(
-                        modalLogsOptions,
-                        $event,
-                        'logs',
-                        `Logs del Curso - ${$event.name}`
-                    )
-                "
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -139,15 +131,14 @@
             <DialogConfirm
                 :ref="courseUpdateStatusModal.ref"
                 v-model="courseUpdateStatusModal.open"
-                :options="courseUpdateStatusModal"
-                width="408px"
+                width="450px"
                 title="Cambiar de estado al curso"
                 subtitle="¿Está seguro de cambiar de estado al curso?"
                 @onConfirm="confirmUpdateStatus"
                 @onCancel="courseUpdateStatusModal.open = false"
             />
             <CourseValidationsUpdateStatus
-                width="408px"
+                width="50vw"
                 :ref="courseValidationModalUpdateStatus.ref"
                 :options="courseValidationModalUpdateStatus"
                 @onCancel="closeFormModal(courseValidationModalUpdateStatus);  closeFormModal(deleteConfirmationDialog)"
@@ -155,7 +146,7 @@
                 :resource="{}"
             />
 
-            <SegmentFormModal
+            <SegmentCoursesFormModal
                 :options="modalFormSegmentationOptions"
                 width="55vw"
                 model_type="App\Models\Course"
@@ -172,14 +163,7 @@
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
                 @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
-            <LogsModal
-                :options="modalLogsOptions"
-                width="55vw"
-                :model_id="null"
-                model_type="App\Models\Course"
-                :ref="modalLogsOptions.ref"
-                @onCancel="closeSimpleModal(modalLogsOptions)"
-            />
+
         </v-card>
     </section>
 </template>
@@ -189,9 +173,8 @@ import CursosEncuestaModal from "./CursosEncuestaModal";
 import MoverCursoModal from "./MoverCursoModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
-import SegmentFormModal from "../Blocks/SegmentFormModal";
+import SegmentCoursesFormModal from "../Blocks/SegmentCoursesFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
-import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
@@ -200,9 +183,8 @@ export default {
         DialogConfirm,
         'CourseValidationsDelete': CursoValidacionesModal,
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
-        SegmentFormModal,
-        CompatibilityFormModal,
-        LogsModal
+        SegmentCoursesFormModal,
+        CompatibilityFormModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -246,14 +228,6 @@ export default {
                         type: 'action',
                         method_name: 'redirect_to_course_form_page'
                     },
-                    {
-                        text: "Logs",
-                        icon: "mdi mdi-database",
-                        type: "action",
-                        show_condition: "is_super_user",
-                        method_name: "logs"
-                    }
-
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',
@@ -319,19 +293,12 @@ export default {
                 base_endpoint: `/cursos`,
             },
             modalFormSegmentationOptions: {
-                ref: 'SegmentFormModal',
+                ref: 'SegmentCoursesFormModal',
                 open: false,
                 persistent: true,
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
-                resource: 'segmentación'
-            },
-            modalLogsOptions: {
-                ref: "LogsModal",
-                open: false,
-                showCloseIcon: true,
-                persistent: true,
-                base_endpoint: "/search"
+                resource: 'segmentación',
             },
 
             modalFormCompatibilityOptions: {
@@ -360,42 +327,11 @@ export default {
                 title: 'Actualizar Curso',
                 contentText: '¿Desea actualizar este registro?',
                 open: false,
-                endpoint: '',
-                title_modal: 'Cambio de estado de un <b>curso</b>',
-                type_modal: 'status',
-                status_item_modal: null,
-                content_modal: {
-                    inactive: {
-                        title: '¡Estás por desactivar un curso!',
-                        details: [
-                            'Los usuarios verán los cambios en su progreso en unos minutos.',
-                            'Los usuarios no podrán acceder al curso.',
-                            'El diploma del curso no aparecerá para descargar desde el app.',
-                            'No podrás ver el curso como opción para la descarga de reportes.',
-                            'El detalle del curso activos/inactivos aparecerá en “Notas de usuario”.'
-                        ],
-                    },
-                    active: {
-                        title: '¡Estás por activar un curso!',
-                        details: [
-                            'Los usuarios verán los cambios en su progreso en unos minutos.',
-                            'Los usuarios ahora podrán acceder al curso.',
-                            'El diploma del curso ahora aparecerá para descargar desde el app.',
-                            'Podrás ver el curso como opción para descargar reportes.'
-                        ]
-                    }
-                },
+                endpoint: ''
             },
             courseValidationModalUpdateStatus: {
                 ref: 'CourseListValidationModalUpdateStatus',
                 open: false,
-                title_modal: 'El curso es prerrequisito',
-                type_modal:'requirement',
-                content_modal: {
-                    requirement: {
-                        title: '¡El curso que deseas desactivar es un prerrequisito! '
-                    },
-                }
             },
 
             courseValidationModalDefault: {
@@ -436,6 +372,7 @@ export default {
             vue.filters.q = param_q;
 
         vue.getSelects();
+
     },
     methods: {
         getSchoolsAndRefreshTable(){
@@ -464,6 +401,8 @@ export default {
         getSelects() {
             let vue = this
             const url = `${vue.base_endpoint}/schools/get-data`
+
+
 
             vue.$http.get(url)
                 .then(({data}) => {
@@ -523,7 +462,6 @@ export default {
             let vue = this
             vue.update_model = course
             vue.courseUpdateStatusModal.open = true
-            vue.courseUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
         },
         async confirmUpdateStatus(validateForm = true) {
             let vue = this
@@ -533,11 +471,13 @@ export default {
             if (validateForm)
                 vue.courseValidationModalUpdateStatus.action = null;
 
+
             if (vue.courseValidationModalUpdateStatus.action === 'validations-after-update') {
                 vue.hideLoader();
                 vue.courseValidationModalUpdateStatus.open = false;
                 return;
             }
+
 
             let url = `/escuelas/${vue.update_model.first_school_id.id}/cursos/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
@@ -550,7 +490,6 @@ export default {
                     if (has_info_messages)
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     else {
-                        vue.courseValidationModalUpdateStatus.type_modal = null
                         vue.showAlert(data.data.msg)
                         vue.courseValidationModalUpdateStatus.open = false;
                     }
@@ -558,16 +497,6 @@ export default {
                     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
                 .catch(error => {
-                    if (error && error.errors){
-                        if(error.data.validations.list){
-                            error.data.validations.list.forEach(element => {
-                                if(element.type == "has_active_topics" && error.data.validations.list.length == 1){
-                                    vue.courseValidationModalUpdateStatus.title_modal = 'Cambio de estado de un <b>curso</b>';
-                                    vue.courseValidationModalUpdateStatus.content_modal.requirement.title = '¡Estás por desactivar un curso!';
-                                }
-                            });
-                        }
-                    }
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModalUpdateStatus, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
@@ -587,5 +516,6 @@ export default {
             // win.focus();
         }
     }
+
 }
 </script>

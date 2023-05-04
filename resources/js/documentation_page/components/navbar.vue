@@ -34,14 +34,14 @@
                         <v-list-item-icon >
                             <v-icon class="item_icon">{{item.icon}}</v-icon>
                         </v-list-item-icon>
-                        <v-list-item-title class="grupo_title" v-text="item.title"></v-list-item-title>
+                        <v-list-item-title class="grupo_title">{{ item.title }}</v-list-item-title>
                     </template>
                     <div v-for="(item,index) in item.subItems" :key="index" class="my-1" style="margin-left: 1rem;">
                         <v-list-item  dark dense :to="item.link" >
                             <v-list-item-icon >
                                 <v-icon class="item_icon">{{item.icon}}</v-icon>
                             </v-list-item-icon>
-                                <v-list-item-title class="item_title text-wrap" v-text="item.title"></v-list-item-title>
+                                <v-list-item-title class="item_title text-wrap">{{ item.title }}</v-list-item-title>
                         </v-list-item>
                     </div>
                 </v-list-group>
@@ -103,6 +103,16 @@ export default {
                             icon:'mdi-account-convert',
                             title:'Alta de usuarios',
                             link:'/documentation-api/update-create-users',
+                        },
+                        {
+                            icon:'mdi-account-multiple-plus',
+                            title:'Crear usuarios',
+                            link:'/documentation-api/create-users',
+                        },
+                        {
+                            icon:'mdi-account-edit',
+                            title:'Actualizar usuarios',
+                            link:'/documentation-api/update-users',
                         },
                         {
                             icon:'mdi-account-check',

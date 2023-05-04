@@ -32,6 +32,7 @@ use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
+use App\Models\PushNotification;
 use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +75,7 @@ class restablecer_funcionalidad extends Command
     public function handle()
     {
         $this->info(" Inicio: " . now());
-        info(" Inicio: " . now());
+        // info(" Inicio: " . now());
 
         // $this->restablecer_estado_tema();
         // $this->restablecer_estado_tema_2();
@@ -106,8 +107,43 @@ class restablecer_funcionalidad extends Command
         // $this->setSummarys();
         // $this->setSchoolOrden();
         $this->setCourseOrden();
+        // $this->restoSummaryCourseSinceSummaryTopic();
+        // $this->restoreJsonNotification();
         $this->info("\n Fin: " . now());
-        info(" \n Fin: " . now());
+        // info(" \n Fin: " . now());
+    }
+    public function restoreJsonNotification(){
+        $notificaciones = PushNotification::all();
+        $_bar = $this->output->createProgressBar($notificaciones->count());
+        $_bar->start();
+        foreach ($notificaciones as $not) {
+            $detalles_json = collect(json_decode($not->detalles_json));
+            foreach ($detalles_json as $detalle) {
+//                info($detalle->usuarios);
+                if ($detalle->estado_envio == 0) {
+                    $detalle->estado_envio = 1;
+                }
+            }
+            $not->detalles_json = json_encode($detalles_json);
+            $not->save();
+            $_bar->advance();
+        }
+        $_bar->finish();
+    }
+    public function restoSummaryCourseSinceSummaryTopic(){
+        SummaryTopic::select('user_id','topic_id')
+        ->where('last_time_evaluated_at','>=','2023-04-15 00:00:00')
+        ->where('last_time_evaluated_at','<=','2023-04-15 11:30:00')
+        ->groupBy('user_id')->get()->map(function($summary){
+            $this->info('start');
+            $user = User::find($summary->user_id);
+            $course_id = Topic::where('id',$summary->topic_id)->first()->course_id;
+            $course = Course::find($course_id);
+            SummaryCourse::updateUserData($course, $user, false,false);
+            SummaryUser::updateUserData($user);
+        });
+        cache_clear_model(SummaryUser::class);
+        cache_clear_model(SummaryCourse::class);
     }
 
     public function setSchoolOrden(){
@@ -900,11 +936,12 @@ class restablecer_funcionalidad extends Command
     }
     // 45671352
     public function restoreSummaryCourse(){
-        User::select('id','subworkspace_id')->whereIn('document',['MIFAR0404UV','INKFAR0404UV'])->get()->map(function($user){
+        User::select('id','subworkspace_id')->whereIn('document',[ '41264573', '80331413'])->get()->map(function($user){
             $courses = $user->getCurrentCourses();
             $_bar = $this->output->createProgressBar($courses->count());
             $_bar->start();
             foreach ($courses as $course) {
+                SummaryCourse::getCurrentRowOrCreate($course, $user);
                 SummaryCourse::updateUserData($course, $user, false,false);
                 $_bar->advance();
             }

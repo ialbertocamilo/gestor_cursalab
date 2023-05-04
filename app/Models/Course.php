@@ -1302,7 +1302,8 @@ class Course extends BaseModel
             $modules = DB::select(DB::raw("
                         select w.name module_name,
                                w.criterion_value_id module_id,
-                               s.name school_name
+                               s.name school_name,
+                               s.id school_id
                         from school_subworkspace sw
                             inner join workspaces w on sw.subworkspace_id = w.id
                             inner join schools s on s.id = sw.school_id
