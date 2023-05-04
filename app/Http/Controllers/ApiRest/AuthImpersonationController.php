@@ -185,7 +185,7 @@ class AuthImpersonationController extends Controller
 
                 $data['config_data']['impersonation'] = [
                     'show_bar' => true,
-                    'show_title' => 'Acceso como ' . $user->fullname,
+                    'show_title' => 'Accediste como ' . $user->fullname,
                     'user' => $gestor->fullname,
                 ];
                 
