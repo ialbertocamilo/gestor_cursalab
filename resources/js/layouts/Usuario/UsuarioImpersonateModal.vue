@@ -15,20 +15,18 @@
                     <template >
 
                         <v-alert
-                          border="top"
                           colored-border
-                          elevation="2"
+                          flat
                           color="primary"
-                          class="pb-0"
+                          class="pb-0 px-0"
                         >
                             <small><strong>CONSIDERACIONES IMPORTANTES</strong></small>
 
                             <ul class="mt-3">
-                                <li><small>Se permitirá el acceso única y exclusivamente a la sesión del usuario con el fin de supervisar el correcto funcionamiento de éste.</small></li>
-                                <li><small>Toda acción está siendo registrada para los reportes correspondientes.</small></li>
-                                <li><small>Si tiene una sesión abierta en su navegador, esta se dará por finalizada.</small></li>
+                                <li><small>Se permitirá el acceso a la cuenta del usuario única y exclusivamente con el fin de supervisar el correcto funcionamiento de éste.</small></li>
+                                <!-- <li><small>Toda acción está siendo registrada para los reportes correspondientes.</small></li> -->
+                                <li><small>Si tiene una sesión de usuario abierta en su navegador, ésta se dará por finalizada.</small></li>
                                 <li><small>Finalice la sesión al terminar su uso.</small></li>
-                                <!-- <li><small>Recuerde que si el usuario cuenta con un correo, el proceso de restauración de contraseña puede realizarse desde la web/aplicación por parte del mismo usuario.</small></li> -->
                             </ul>
                         </v-alert>
 
