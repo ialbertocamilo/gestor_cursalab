@@ -33,7 +33,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -42,7 +42,7 @@
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             item-text="name"
                         />
                     </v-col>
@@ -55,7 +55,7 @@
                             :options="modalDateFilter1"
                             v-model="filters.dates"
                             label="Fecha de creación"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -63,8 +63,8 @@
                             learable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
@@ -314,6 +314,28 @@ export default {
             // let vue = this
             // vue.delete_model = school
             // vue.modalDeleteOptions.open = true
+        },
+        changeHeaders(){
+            let vue = this;
+            const indexOrden = vue.dataTable.headers.findIndex(h => h.text == 'Orden');
+            console.log('indexOrden',indexOrden);
+            if(vue.filters.modules.length ==1 && !vue.filters.q && !vue.filters.active &&  !vue.filters.dates){
+                console.log('entra if');
+                vue.$nextTick(() => {
+                    if(indexOrden == -1){
+                        vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'SchoolSubworkspace', sortable: false}, 1);
+                        console.log('entra set');
+                    }
+                });
+            }else{
+                console.log('entra else');
+                if(indexOrden != -1){
+                    vue.$nextTick(() => {
+                        vue.dataTable.headers.splice(indexOrden, 1);
+                        console.log('entra delete');
+                    })
+                }
+            }
         },
         selectDefaultModule(modules) {
             let vue = this

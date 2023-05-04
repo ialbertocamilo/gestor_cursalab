@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\ApiResponse;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
+use Illuminate\Database\Eloquent\Model;
 
 class SortingModel extends Model
 {
@@ -155,19 +155,19 @@ class SortingModel extends Model
 
     protected function setChangeOrder($request)
     {
-        try {
-
-            DB::beginTransaction();
-
+        // try {
+            $models_with_position_pivot = ['SchoolSubworkspace','CourseSchool'];
             $model = "App" . '\\' . "Models" . '\\' . $request->model;
             $model = app($model);
 
-            $resource = $model::find($request->id);
-
             $field = $request->field ?? 'position';
             $action = $request->action;
-
-
+            if(in_array($request->model,$models_with_position_pivot)){
+                $this->updatePositionInPivotTable($model,$request,$field,$action);
+                return $this->success(['msg' => 'Orden actualizado correctamente.']);
+            }
+            
+            $resource = $model::find($request->id);
             // if ($resource->$field === 1)
             // {
             //     if ($action == 'down')
@@ -183,7 +183,7 @@ class SortingModel extends Model
             } else {
                 $next_resource = $model::where('position', $new_orden)->first();
             }
-
+            DB::beginTransaction();
             if ($next_resource) {
                 $next_resource->position = $resource->position;
                 $next_resource->save();
@@ -193,13 +193,122 @@ class SortingModel extends Model
             $resource->save();
 
             DB::commit();
-        } catch (\Exception $e) {
-            // info($e->getMessage());
-            DB::rollBack();
 
-            return $this->error('Error al actualizar', 422);
-        }
+        // } catch (\Exception $e) {
+        //     // info($e->getMessage());
+        //     DB::rollBack();
+
+        //     return $this->error('Error al actualizar', 422);
+        // }
 
         return $this->success(['msg' => 'Orden actualizado correctamente.']);
+    }
+
+    public function updatePositionInPivotTable($model, $request, $field, $action){
+        $resource = null;
+        $modelKey = '';
+        $pivotField = '';
+        $class_model = get_class($model);
+        switch ($class_model) {
+            case SchoolSubworkspace::class:
+                $resource = $model::where('subworkspace_id', $request->pivot_id_selected)
+                                ->where('school_id', $request->id)
+                                ->first();
+                $modelKey = 'subworkspace_id';
+                $pivotField = 'school_id';
+                break;
+            case CourseSchool::class:
+                $resource = $model::where('school_id', $request->pivot_id_selected)
+                                ->where('course_id', $request->id)
+                                ->first();
+                $modelKey = 'school_id';
+                $pivotField = 'course_id';
+                break;
+            default:
+                return;
+        }
+        $new_position = $action == 'up' ? $resource->position + 1 : $resource->position - 1;
+        DB::transaction(function () use ($model, $resource, $new_position, $modelKey, $pivotField) {
+            // Actualizar el siguiente recurso
+            $model::where('position', $new_position)
+                ->where($modelKey, $resource->{$modelKey})
+                ->update(['position' => $resource->position]);
+
+            // Actualizar el recurso actual
+            $model::where($modelKey, $resource->{$modelKey})
+                ->where($pivotField, $resource->{$pivotField})
+                ->update(['position' => $new_position]);
+        });
+        if ($class_model === SchoolSubworkspace::class) {
+            cache_clear_model(School::class);
+        } else if ($class_model === CourseSchool::class) {
+            cache_clear_model(Course::class);
+        }
+    }
+    public static function setLastPositionInPivotTable($pivotModel,$model,$data,$fields_to_search){
+        //example data structure ['subworkspace_id'=>$subworkspace->id,'school_id' => $school->id]
+        $last_postion =  $pivotModel::where(function($q) use ($fields_to_search){
+                            foreach ($fields_to_search as $key => $value) {
+                                $q->where($key,$value);
+                            }
+                        })->orderBy('position','desc')
+                        ->first()?->position;
+        //insert
+        $data['position'] = $last_postion+1 ?? 1;
+        $pivotModel::create($data);
+        cache_clear_model($model);
+    }
+    public static function deletePositionInPivotTable($pivotModel,$model,$fields_to_search){
+        $pivotModel::where(function($q) use ($fields_to_search){
+            foreach ($fields_to_search as $key => $value) {
+                $q->where($key,$value);
+            }
+        })->delete();
+        cache_clear_model($model);
+    }
+    public static function reorderItemsInPivotTable($class_model,$pivot_id_selected,$position){
+        //event create
+        // info($class_model);
+        // switch ($class_model) {
+        //     case 'SchoolSubworkspace':
+                // $resource = $class_model::where('subworkspace_id', $pivot_id_selected)
+                //             ->where('position', '>=', $position)
+                //             ->where('position', '<', function($query) use ($position){
+                //                 $query->selectRaw('MIN(position)+1')
+                //                     ->from('school_subworkspace')
+                //                     ->where('position', '>=', $position);
+                //             })
+                //             ->orderby('position','desc')->first();
+                $subworkspace = $class_model
+                ::selectRaw('@group := IF(@prev_position + 1 = position, @group, @group + 1) AS pos_group, @prev_position := position as position')
+                ->crossJoin(DB::raw('(SELECT @prev_position := NULL, @group := 0) AS vars'))
+                ->where('position', '>=', $position)
+                ->where('subworkspace_id', $pivot_id_selected)
+                ->orderBy('position', 'ASC')
+                ->get();
+
+            $groups = $subworkspace->groupBy('pos_group')->map(function ($group) {
+                return [ 'start_position' => $group->min('position'), 'end_position' => $group->max('position'),    ];
+            })->values();
+
+            $result = DB::table(DB::raw('(' . $groups->toSql() . ') as groups'))
+                ->mergeBindings($groups)
+                ->select('start_position', 'end_position')
+                ->groupBy('pos_group')
+                ->limit(1);
+            dd($result);
+                $modelKey = 'subworkspace_id';
+                $pivotField = 'school_id';
+        //         break;
+        //     case CourseSchool::class:
+        //         $resource = $model::where('school_id', $request->pivot_id_selected)
+        //                         ->where('course_id', $request->id)
+        //                         ->first();
+        //         $modelKey = 'school_id';
+        //         $pivotField = 'course_id';
+        //         break;
+        //     default:
+        //         return;
+        // }
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\School;
 use App\Models\Ticket;
 use App\Models\Visita;
 use App\Models\Summary;
@@ -104,8 +105,10 @@ class restablecer_funcionalidad extends Command
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
         // $this->setSummarys();
+        // $this->setSchoolOrden();
+        // $this->setCourseOrden();
         // $this->restoSummaryCourseSinceSummaryTopic();
-        $this->restoreJsonNotification();
+        // $this->restoreJsonNotification();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
     }
@@ -141,6 +144,38 @@ class restablecer_funcionalidad extends Command
         });
         cache_clear_model(SummaryUser::class);
         cache_clear_model(SummaryCourse::class);
+    }
+
+    public function setSchoolOrden(){
+        $subworkspaces = Workspace::select('id')->whereNotNull('parent_id')->get();
+        foreach ($subworkspaces as $key => $subworkspace) {
+            $schools = School::disableCache()
+                        ->join('school_subworkspace as ss','ss.school_id','schools.id')
+                        ->where('ss.subworkspace_id',$subworkspace->id)
+                        // ->ordenBy('schools.name')
+                        ->get()->sortBy('schools.created_at');
+            $position = 1;
+            foreach ($schools as $school) {
+                // info($position);
+                Db::table('school_subworkspace')->where('subworkspace_id',$subworkspace->id)->where('school_id',$school->id)->update([
+                    'position'=>$position
+                ]);
+                $position = $position + 1;
+            }
+        }
+    }
+    public function setCourseOrden(){
+        $schools = School::all();
+        foreach ($schools as $school) {
+            $courses = $school->courses->sortBy('position');
+            $position = 1;
+            foreach ($courses as $course) {
+                Db::table('course_school')->where('school_id',$school->id)->where('course_id',$course->id)->update([
+                    'position'=>$position
+                ]);
+                $position = $position + 1;
+            }
+        }
     }
     public function setSummarys(){
         $users = User::whereIn('document',[''])->select('id')->get();

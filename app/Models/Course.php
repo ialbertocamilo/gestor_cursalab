@@ -10,7 +10,7 @@ class Course extends BaseModel
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
         'assessable', 'freely_eligible', 'type_id',
-        'position', 'scheduled_restarts', 'active',
+        'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date'
     ];
@@ -150,6 +150,8 @@ class Course extends BaseModel
         if ($request->school_id) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->where('school_id', $request->school_id);
+            })->when($request->canChangePosition ?? null, function ($q) use ($request) {
+                $q->join('course_school as cs','cs.course_id','courses.id')->where('cs.school_id',$request->school_id);
             });
         }
 
@@ -158,6 +160,8 @@ class Course extends BaseModel
         if ($request->schools) {
             $q->whereHas('schools', function ($t) use ($request) {
                 $t->whereIn('school_id', $request->schools);
+            })->when($request->canChangePosition ?? null, function ($q) use ($request) {
+                $q->join('course_school as cs','cs.course_id','courses.id')->whereIn('cs.school_id', $request->schools);
             });
         }
 
@@ -200,13 +204,16 @@ class Course extends BaseModel
         // } else {
         //     $q->orderBy('created_at', 'DESC');
         // }
-
-        $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
-
-        $field = $field ?? 'position';
-        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
-        $q->orderBy($field, $sort);
+        if(!$request->canChangePosition){
+            // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
+    
+            $field = $field ?? 'created_at';
+            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+    
+            $q->orderBy($field, $sort);
+        }else{
+            $q->addSelect('cs.position as course_position')->orderBy('course_position', 'ASC')->groupBy('courses.id');
+        }
 
         return $q->paginate($request->paginate);
     }
@@ -235,7 +242,14 @@ class Course extends BaseModel
 
                 $course = self::create($data);
                 $course->workspaces()->sync([$workspace->id]);
-
+                foreach ($data['escuelas'] as  $escuela) {
+                    SortingModel::setLastPositionInPivotTable(CourseSchool::class,Course::class,[
+                        'school_id' => $escuela,
+                        'course_id'=>$course->id,
+                    ],[
+                        'school_id'=>$escuela,
+                    ]);
+                }
             endif;
 
             if ($data['requisito_id']) :
@@ -445,7 +459,6 @@ class Course extends BaseModel
     {
         // $workspace_id = auth()->user()->subworkspace->parent_id;
         $workspace_id = $user->subworkspace->parent_id;
-
         $schools = $user_courses->groupBy('schools.*.id');
         $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
             $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
@@ -460,10 +473,20 @@ class Course extends BaseModel
             ->get();
 
         $data = [];
-
+        $positions_schools = SchoolSubworkspace::select('school_id','position')
+                                ->where('subworkspace_id',$user->subworkspace_id)
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->get();
+       
+        $positions_courses = CourseSchool::select('school_id','course_id','position')
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->whereIn('course_id',$user_courses->pluck('id'))
+                                ->get();
+                                
         foreach ($schools as $school_id => $courses) {
 
             $school = $courses->first()->schools->where('id', $school_id)->first();
+            $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
             $school_courses = [];
             $school_completed = 0;
             $school_assigned = 0;
@@ -474,6 +497,7 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
+                $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
 
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
@@ -602,6 +626,7 @@ class Course extends BaseModel
                         'id' => $course->id,
                         'nombre' => $course_name,
                         'descripcion' => $course->description,
+                        'orden' => $course_position,
                         'imagen' => $course->imagen,
                         'requisito_id' => NULL,
                         'c_evaluable' => 0,
@@ -628,6 +653,7 @@ class Course extends BaseModel
                         'id' => $course->id,
                         'nombre' => $course_name,
                         'descripcion' => $course->description,
+                        'orden' => $course_position,
                         'imagen' => $course->imagen,
                         'c_evaluable' => $course->assessable,
                         'disponible' => $course_status['available'],
@@ -662,7 +688,8 @@ class Course extends BaseModel
             if ($workspace_id === 25) {
                 $school_name = removeUCModuleNameFromCourseName($school_name);
             }
-
+            $columns = array_column($school_courses, 'orden');
+            array_multisort($columns, SORT_ASC, $school_courses);
             $data[] = [
                 'categoria_id' => $school->id,
 //                'categoria' => $school->name,
@@ -673,7 +700,7 @@ class Course extends BaseModel
                 'estado' => $school_status,
                 'ultimo_curso' => $last_course_reviewed,
                 'ultimos_cursos' => $last_school_courses,
-                'orden' => $school->position,
+                'orden' => $school_position,
                 "cursos" => $school_courses,
             ];
         }
