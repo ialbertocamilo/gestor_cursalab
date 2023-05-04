@@ -10,7 +10,7 @@ class Course extends BaseModel
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
         'assessable', 'freely_eligible', 'type_id',
-        'position', 'scheduled_restarts', 'active',
+        'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date'
     ];
@@ -205,9 +205,9 @@ class Course extends BaseModel
         //     $q->orderBy('created_at', 'DESC');
         // }
         if(!$request->canChangePosition){
-            $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
+            // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
     
-            $field = $field ?? 'position';
+            $field = $field ?? 'created_at';
             $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
     
             $q->orderBy($field, $sort);
