@@ -30,7 +30,7 @@
                         <img class="avatar" src="{{ asset('img/avatar-default.png') }}" />
                     </div>
                 </button>
-                <div class="dropdown-menu dropdown-header-menu shadow-md">
+                <div class="dropdown-menu dropdown-header-menu shadow-md header-menu-session">
                     <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/workspaces/criterios">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-clipboard-list"></span>

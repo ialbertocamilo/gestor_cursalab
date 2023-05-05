@@ -183,3 +183,9 @@ Override Vue Toastification plugin styles
     height: auto !important;
     padding: 3px 6px !important;
 }
+
+.header-menu-session{
+    .dropdown-icon-width{
+        margin-top: -5px;
+    }
+}
