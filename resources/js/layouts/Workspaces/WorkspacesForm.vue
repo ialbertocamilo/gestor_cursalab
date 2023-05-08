@@ -69,6 +69,66 @@
                 </v-row>
 
                 <v-row>
+                    <v-col cols="12">
+                        <DefaultModalSection title="Diplomas">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputLogoMarcaAgua"
+                                            v-model="resource.logo_marca_agua"
+                                            label="Imagen (500x350px)"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource, 'logo_marca_agua')"
+                                        />
+                                    </v-col>
+                                    <v-col cols="6" class="d-flex">
+                                        <span class="mt-4 mr-2">¿Activar marca de agua en diploma?</span>
+                                        <div>
+                                            <DefaultToggle 
+                                                class="mt-0" 
+                                                v-model="resource.marca_agua_estado" 
+                                                no-label
+                                                />
+                                        </div>
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
+                <v-row>
+                    <v-col cols="12">
+                        <DefaultModalSection title="Notificaciones Push">
+                                <template v-slot:content>
+                                    <v-row>
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                class="mb-4" 
+                                                label="Empezar envio luego de: (en minutos)"
+                                                type="number" 
+                                                v-model="resource.notificaciones_push_envio_inicio" />
+                                            <DefaultInput 
+                                                label="Número de usuarios por envio" 
+                                                type="number" 
+                                                v-model="resource.notificaciones_push_envio_intervalo" 
+                                            />
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <DefaultInput 
+                                                label="Frecuencia de envio por bloques (en minutos)"
+                                                type="number" 
+                                                v-model="resource.notificaciones_push_chunk" 
+                                                />
+                                        </v-col>
+                                    </v-row>
+                                </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
+                <v-row>
                     <v-col>
                         <v-subheader class="mt-4 px-0">
                             <strong>Criterios</strong>
@@ -139,9 +199,11 @@
 
 
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria'
+    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
+    'logo_marca_agua', 'marca_agua_estado', 
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk'
 ];
-const file_fields = ['logo', 'logo_negativo'];
+const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
     'Los criterios son atributos de los usuarios, que se utilizan para segmentar (asignar) el contenido (cursos).',
     'Los "criterios por defecto" son datos que se usan de forma obligatoria para todos workspaces.',
@@ -182,11 +244,10 @@ export default {
                 logo: '',
                 logo_negativo: '',
                 selected_criteria: {}
-            }
-
-            ,
+            },
             limit_allowed_users: null,
-            resource: {}
+            resource: {
+            }
             ,
             defaultCriteria: []
             ,
@@ -215,6 +276,7 @@ export default {
             let vue = this
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
+            vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
         }
         ,
         closeModal() {
@@ -296,10 +358,16 @@ export default {
             })
 
             let url = `/workspaces/${workspace.workspaceId}/edit`;
+            // console.log('showloader');
+
+            // === no muestra por la funcion openFormModal en mixin.js
+            // setTimeout(() => console.log('stay hereeeeeeeeee'), 100);
+            // === mostrar loader
 
             this.$http
                 .get(url)
                 .then(({data}) => {
+                    vue.hideLoader();
 
                     vue.is_superuser = data.data.is_superuser || false;
 

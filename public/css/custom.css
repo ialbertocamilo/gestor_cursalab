@@ -1163,6 +1163,11 @@ span.lbl_txt_val {
 	opacity: .6;
 }
 
+.text-primary-sub{
+  color :#5458ea !important
+}
+
+
 /*solo soporta hasta tres por layout*/
 /*one*/
 .form-control.is-valid.one + .one.toggle-eye,
@@ -1200,3 +1205,7 @@ span.lbl_txt_val {
 /*three*/
 /*solo soporta hasta tres por layout*/
 
+input[type="color"] {
+	height: 2rem !important;
+	padding: 0 !important;
+}

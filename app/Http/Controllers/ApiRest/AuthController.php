@@ -7,7 +7,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
                         PasswordResetAppRequest };
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{ Usuario, User };
+use App\Models\{ Usuario, User, Ambiente };
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -583,4 +583,19 @@ class AuthController extends Controller
         return $this->error('invalid-token', 503, $status);
     }
     // === RESET ===
+
+
+
+    // === AMBIENTE ===
+    public function configuracion_ambiente() 
+    {
+        $ambiente = Ambiente::first();
+        
+        if($ambiente) {
+            $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
+            return response()->json($ambiente);
+        }
+        return response()->json([]);
+    }
+    // === AMBIENTE ===
 }

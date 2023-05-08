@@ -53,6 +53,9 @@ Route::post('/reset', [AuthController::class, 'reset_password']);
 Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
 Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
 
+// === endpoint para configuracion de ambiente ===
+Route::get('/config_ambiente', [AuthController::class, 'configuracion_ambiente']);
+
 Route::group(['prefix' => 'auth', 'middleware' => 'throttle:800'], function () {
     Route::post('/login', [AuthController::class, 'login']);
 });

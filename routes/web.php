@@ -131,6 +131,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('programas')->middleware('checkrol:admin')->group(base_path('routes/cms/blocks.php'));
 //    Route::prefix('media')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/media.php'));
 
+    Route::prefix('ambiente')->middleware('checkrol:admin,super-user')->group(base_path('routes/cms/ambiente.php'));
 
     Route::prefix('workspaces')->middleware('checkrol:admin')->group(base_path('routes/cms/workspaces.php'));
     Route::prefix('/')->middleware(['checkrol:admin,reports,only-reports'])->group(base_path('routes/cms/reportes.php'));

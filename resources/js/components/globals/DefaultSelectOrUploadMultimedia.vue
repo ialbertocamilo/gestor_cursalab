@@ -51,7 +51,7 @@
                    @click="openSelectPreviewMultimediaModal"
             >
                 <v-icon class="mx-2" style="font-size: 0.95em;">fas fa-photo-video</v-icon>
-                Seleccionar multimedia
+                {{ labelButton }}
             </v-btn>
         </transition>
 
@@ -78,6 +78,11 @@ export default {
         label: {
             type: String,
             required: true
+        },
+        labelButton:{
+            type: String,
+            required: false,
+            default:'Seleccionar multimedia'
         },
         description: {
             type: String,

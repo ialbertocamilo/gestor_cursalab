@@ -22,7 +22,13 @@ class Workspace extends BaseModel
         'reinicios_programado',
         'contact_support',
         'limit_allowed_users',
-        'users_with_empty_criteria'
+        'users_with_empty_criteria',
+
+        'logo_marca_agua',
+        'marca_agua_estado',
+        'notificaciones_push_chunk',
+        'notificaciones_push_envio_inicio',
+        'notificaciones_push_envio_intervalo'
     ];
 
     public function sluggable(): array

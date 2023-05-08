@@ -349,7 +349,7 @@ export default {
             vue.$nextTick(() => {
                 vue.$refs[dialog.ref].loadSelects();
             });
-
+            // console.log('here at openFormModal');
             if (action != 'status' && action != 'delete')
                 vue.hideLoader()
         },

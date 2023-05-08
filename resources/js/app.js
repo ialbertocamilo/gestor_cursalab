@@ -140,6 +140,7 @@ Vue.component("criterion-layout-wk", require("./layouts/Criteria/CriterionListPa
 Vue.component("criterion-value-layout", require("./layouts/Criteria/CriterionValues/CriterionValueListPage"));
 Vue.component("encuesta-layout", require("./layouts/Encuestas/EncuestaListPage"));
 Vue.component("incidencia-layout", require("./layouts/Incidencias/IncidenciaListPage"));
+Vue.component("ambiente-layout", require("./layouts/Ambiente/AmbientePage"));
 Vue.component(
     "encuesta-pregunta-layout",
     require("./layouts/Encuestas/Preguntas/PreguntaListPage")
