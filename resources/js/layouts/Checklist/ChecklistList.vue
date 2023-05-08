@@ -277,9 +277,9 @@ export default {
                 });
         },
         duplicateChecklist(checklist) {
-            let new_checklist = checklist
+            let new_checklist = {...checklist}
 
-            new_checklist.title_duplicado = '(Duplicado) - '+new_checklist.title
+            new_checklist.title = new_checklist.title  + ' - copia'
             new_checklist.duplicado = true
 
             this.abrirModalCreateEditChecklist(new_checklist)

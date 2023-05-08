@@ -310,7 +310,7 @@
 
             </v-card-text>
 
-            <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)">
+            <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" class="actions_btn_modal">
                 <DefaultModalActionButton
                     @cancel="prevStep"
                     @confirm="nextStep"
@@ -985,5 +985,8 @@ span.v-stepper__step__step:after {
 }
 .bx_steps .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
     margin-top: 10px !important;
+}
+.v-card__actions.actions_btn_modal button.default-modal-action-button.btn_back.v-btn.v-btn--flat span.v-btn__content {
+    color: #5458ea;
 }
 </style>
