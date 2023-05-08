@@ -151,13 +151,16 @@ class UsuarioController extends Controller
 
     public function edit(User $user)
     {
+        $user->load('criterion_values');
+
         $current_workspace_criterion_list = $this->getFormSelects(true);
         $user_criteria = [];
 
         foreach ($current_workspace_criterion_list as $criterion) {
+            
             $value = $user->criterion_values->where('criterion_id', $criterion->id);
-            $user_criterion_value = $criterion->multiple ?
-                $value->pluck('id') : $value?->first()?->id;
+
+            $user_criterion_value = $criterion->multiple ? $value->pluck('id') : $value?->first()?->id;
 
             if ($criterion->field_type?->code == 'date') {
                 $user_criteria[$criterion->code] = $value?->first()?->value_text;
@@ -165,7 +168,6 @@ class UsuarioController extends Controller
                 $user_criteria[$criterion->code] = $user_criterion_value;
             }
         }
-
 
 //        $criterion_grouped = $user->criterion_values()->with('criterion')->get()
 //            ->groupBy('criterion.code')->toArray();
@@ -184,10 +186,11 @@ class UsuarioController extends Controller
 //            }
 //        }
         $user->criterion_list = $user_criteria;
+
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
-            'criteria' => $this->getFormSelects(true)
+            'criteria' => $current_workspace_criterion_list
         ]);
     }
 
@@ -197,11 +200,11 @@ class UsuarioController extends Controller
         $criteria = Criterion::query()
             ->with([
                 'values' => function ($q) use ($current_workspace) {
-                    $q->with('parents:id,criterion_id,value_text')
-                        ->whereHas('workspaces', function ($q2) use ($current_workspace) {
+                    // $q->with('parents:id,criterion_id,value_text')
+                        $q->whereHas('workspaces', function ($q2) use ($current_workspace) {
                             $q2->where('id', $current_workspace->id);
-                        })
-                        ->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
+                        });
+                        $q->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
                             'value_text');
                 },
                 'field_type:id,code'
