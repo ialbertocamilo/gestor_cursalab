@@ -145,6 +145,8 @@ class CheckList extends BaseModel
 
         $cursos = Course::with('checklists', 'schools')->whereIn('id', $cursos_ids)->get();
         $checklists = collect();
+        $checklists_pendientes = collect();
+        $checklists_realizados = collect();
         $tax_trainer_user = Taxonomy::where('group', 'checklist')
         ->where('type', 'type')
         ->where('code', 'trainer_user')
@@ -158,6 +160,7 @@ class CheckList extends BaseModel
             if ($curso->checklists->count() > 0) {
                 foreach ($curso->checklists as $checklist) {
                     if ($checklist->active) {
+                        $type_checklist = Taxonomy::where('id', $checklist->type_id)->first();
                         $actividades_activas = $checklist->actividades->where('active', 1)->where('type_id', $tax_trainer_user->id)->sortBy('position');
                         $actividades_activasFeedback = $checklist->actividades->where('active', 1)->where('type_id', $tax_user_trainer->id)->sortBy('position');
                         if (!$checklists->where('id', $checklist->id)->first() && $actividades_activas->count() > 0 && $checklist->active) {
@@ -183,6 +186,7 @@ class CheckList extends BaseModel
                                 'id' => $checklist->id,
                                 'titulo' => $checklist->title,
                                 'descripcion' => $checklist->description,
+                                'type_checklist' => $type_checklist?->code,
                                 'disponible' => $disponible,
                                 'curso' => $checklist->courses()->with([
                                     'schools' => function ($query) {
@@ -196,7 +200,13 @@ class CheckList extends BaseModel
                                 'actividades_feedback' => $progresoActividadFeedback['actividades_feedback'],
                                 'feedback_disponible' => $progresoActividad['feedback_disponible']
                             ];
-                            if ($tempChecklist['porcentaje'] === 100.00) $checklistCompletados++;
+                            if ($tempChecklist['porcentaje'] === 100.00) {
+                                $checklistCompletados++;
+                                $checklists_realizados->push($tempChecklist);
+                            }
+                            else {
+                                $checklists_pendientes->push($tempChecklist);
+                            }
                             $checklists->push($tempChecklist);
                         }
                     }
@@ -206,7 +216,8 @@ class CheckList extends BaseModel
         $response['checklists_totales'] = $checklists->count();
         $response['checklists_completados'] = $checklistCompletados;
         $response['porcentaje'] = $checklists->count() > 0 ? (float)number_format((($checklistCompletados / $checklists->count()) * 100), 2) : 0;
-        $response['checklists'] = $checklists->sortByDesc('disponible')->values()->all();
+        $response['checklists']['pendientes'] = $checklists_pendientes->sortByDesc('disponible')->values()->all();
+        $response['checklists']['realizados'] = $checklists_realizados->sortByDesc('disponible')->values()->all();
         $response['active'] = !is_null($entrenador);
         return $response;
     }
@@ -221,7 +232,7 @@ class CheckList extends BaseModel
         $assigned = count($users_assigned_checklist_trainer);
         $percent = ($assigned > 0) ? (($completed / $assigned) * 100) : 0;
         $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
-        
+
         $tax_trainer_user = Taxonomy::where('group', 'checklist')
             ->where('type', 'type')
             ->where('code', 'trainer_user')
@@ -263,7 +274,7 @@ class CheckList extends BaseModel
         ->where('active', ACTIVE)
         ->when($filtro_nombre, function($q) use ($filtro_nombre){
             return  $q->where('title','like','%'.$filtro_nombre.'%');
-                    
+
          })->paginate($perPage, ['*'], 'page', $page);
 
         // $list_checklist = collect();
@@ -323,7 +334,7 @@ class CheckList extends BaseModel
                 $check->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             }
         }
-        
+
 
         $response['pagination'] = [
             'total' => $list_students->total(),
@@ -332,7 +343,7 @@ class CheckList extends BaseModel
             'page' => $page
         ];
         $response['alumnos'] = collect($list_students->items());
-        
+
 
         return $response;
     }
