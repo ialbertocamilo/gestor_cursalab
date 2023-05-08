@@ -133,12 +133,12 @@ export default {
                     {
                         text: "Usuario",
                         value: "user",
-                        align: "center",
+                        align: "start",
                         sortable: false
                     },
                     {
                         text: "Acción",
-                        value: "event",
+                        value: "action",
                         align: "center",
                         sortable: false
                     },
@@ -202,10 +202,11 @@ export default {
                     { id: "Usuario_rest", name: "App" }
                 ],
                 events: [
-                    { id: "created", name: "Se creó" },
-                    { id: "updated", name: "Se actualizó" },
-                    { id: "deleted", name: "Se eliminó" },
-                    { id: "downloaded", name: "Se descargó" }
+                    { id: "created", name: "Creación" },
+                    { id: "updated", name: "Actualización" },
+                    { id: "deleted", name: "Eliminación" },
+                    { id: "downloaded", name: "Descarga" },
+                    { id: "impersonated", name: "Personificación" },
                 ],
                 model_type: []
             },
@@ -221,7 +222,8 @@ export default {
             detailsModalOptions: {
                 ref: "AuditoriaDetailsModal",
                 open: false,
-                resource: "Audit"
+                resource: "Audit",
+                showCloseIcon: true
             }
         };
     },

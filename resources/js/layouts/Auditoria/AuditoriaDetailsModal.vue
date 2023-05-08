@@ -1,5 +1,5 @@
 <template>
-    <DefaultDialog :options="options" :width="width" :show-card-actions="false">
+    <DefaultDialog :options="options" :width="width" :show-card-actions="false" @onCancel="closeModal">
         <template v-slot:content>
             <v-tabs fixed-tabs v-model="tabs">
                 <v-tabs-slider></v-tabs-slider>
