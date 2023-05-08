@@ -33,7 +33,7 @@
                             v-model="filters.segmented_module"
                             item-text="name"
                             item-value="id"
-                            @onChange="getSchoolsAndRefreshTable()"
+                            @onChange="getSchoolsAndRefreshTable(),changeHeaders()"
                         />
                     </v-col>
 
@@ -46,7 +46,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                         />
                     </v-col>
 
@@ -56,7 +56,7 @@
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado de curso"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             item-text="name"
                         />
                     </v-col>
@@ -67,7 +67,7 @@
                             v-model="filters.q"
                             label="Buscar por nombre..."
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
@@ -412,7 +412,23 @@ export default {
                     // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
         },
-
+        changeHeaders(){
+            let vue = this;
+            const indexOrden = vue.dataTable.headers.findIndex(h => h.text == 'Orden');
+            if(vue.filters.schools.length==1 && !vue.filters.type && !vue.filters.q && !vue.filters.active &&  !vue.filters.dates){
+                vue.$nextTick(() => {
+                    if(indexOrden == -1){
+                        vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'CourseSchool', sortable: false}, 1);
+                    }
+                });
+            }else{
+                if(indexOrden != -1){
+                    vue.$nextTick(() => {
+                        vue.dataTable.headers.splice(indexOrden, 1);
+                    })
+                }
+            }
+        },
         deleteCurso(course) {
             let vue = this
             vue.delete_model = course

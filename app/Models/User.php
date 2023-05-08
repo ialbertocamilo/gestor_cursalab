@@ -118,6 +118,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'old_passwords' => 'array',
     ];
 
+    protected $recordableEvents = ['impersonated'];
+
     public function getIdentifier()
     {
         return $this->getKey();

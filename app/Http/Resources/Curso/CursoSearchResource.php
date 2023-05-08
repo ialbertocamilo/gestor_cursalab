@@ -33,12 +33,20 @@ class CursoSearchResource extends JsonResource
         $all_modules = $modules->unique();
 
         $modules = array_unique($modules->pluck('name')->toArray());
-
+        $position = null;
+        $pivot_id_selected = null;
+        if($request->canChangePosition){
+            $position = $this->course_position;
+            $pivot_id_selected = $request->school_id  ?? $request->schools[0];
+        }
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'orden' => $this->position,
+            // 'orden' => $this->position,
             // 'position' => $this->position,
+            'pivot_id_selected'=> $pivot_id_selected,
+            'position' => $position,
+            'canChangePosition' => $request->canChangePosition,
             'nombre' => $this->name,
             'schools' => implode(', ', $schools),
             'modules' => implode(', ', $modules),

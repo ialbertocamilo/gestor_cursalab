@@ -11,6 +11,7 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\Prueba;
+use App\Models\School;
 use App\Models\Ticket;
 use App\Models\Visita;
 use App\Models\Summary;
@@ -31,6 +32,7 @@ use App\Models\UsuarioCurso;
 use App\Models\SummaryCourse;
 use App\Models\CriterionValue;
 use Illuminate\Console\Command;
+use App\Models\PushNotification;
 use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
@@ -103,11 +105,31 @@ class restablecer_funcionalidad extends Command
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
         // $this->setSummarys();
-        $this->restoSummaryCourseSinceSummaryTopic();
+        // $this->setSchoolOrden();
+        // $this->setCourseOrden();
+        // $this->restoSummaryCourseSinceSummaryTopic();
+        // $this->restoreJsonNotification();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
     }
-
+    public function restoreJsonNotification(){
+        $notificaciones = PushNotification::all();
+        $_bar = $this->output->createProgressBar($notificaciones->count());
+        $_bar->start();
+        foreach ($notificaciones as $not) {
+            $detalles_json = collect(json_decode($not->detalles_json));
+            foreach ($detalles_json as $detalle) {
+//                info($detalle->usuarios);
+                if ($detalle->estado_envio == 0) {
+                    $detalle->estado_envio = 1;
+                }
+            }
+            $not->detalles_json = json_encode($detalles_json);
+            $not->save();
+            $_bar->advance();
+        }
+        $_bar->finish();
+    }
     public function restoSummaryCourseSinceSummaryTopic(){
         SummaryTopic::select('user_id','topic_id')
         ->where('last_time_evaluated_at','>=','2023-04-15 00:00:00')
@@ -122,6 +144,38 @@ class restablecer_funcionalidad extends Command
         });
         cache_clear_model(SummaryUser::class);
         cache_clear_model(SummaryCourse::class);
+    }
+
+    public function setSchoolOrden(){
+        $subworkspaces = Workspace::select('id')->whereNotNull('parent_id')->get();
+        foreach ($subworkspaces as $key => $subworkspace) {
+            $schools = School::disableCache()
+                        ->join('school_subworkspace as ss','ss.school_id','schools.id')
+                        ->where('ss.subworkspace_id',$subworkspace->id)
+                        // ->ordenBy('schools.name')
+                        ->get()->sortBy('schools.created_at');
+            $position = 1;
+            foreach ($schools as $school) {
+                // info($position);
+                Db::table('school_subworkspace')->where('subworkspace_id',$subworkspace->id)->where('school_id',$school->id)->update([
+                    'position'=>$position
+                ]);
+                $position = $position + 1;
+            }
+        }
+    }
+    public function setCourseOrden(){
+        $schools = School::all();
+        foreach ($schools as $school) {
+            $courses = $school->courses->sortBy('position');
+            $position = 1;
+            foreach ($courses as $course) {
+                Db::table('course_school')->where('school_id',$school->id)->where('course_id',$course->id)->update([
+                    'position'=>$position
+                ]);
+                $position = $position + 1;
+            }
+        }
     }
     public function setSummarys(){
         $users = User::whereIn('document',[''])->select('id')->get();
@@ -882,11 +936,12 @@ class restablecer_funcionalidad extends Command
     }
     // 45671352
     public function restoreSummaryCourse(){
-        User::select('id','subworkspace_id')->whereIn('document',['MIFAR0404UV','INKFAR0404UV'])->get()->map(function($user){
+        User::select('id','subworkspace_id')->whereIn('document',[ '41264573', '80331413'])->get()->map(function($user){
             $courses = $user->getCurrentCourses();
             $_bar = $this->output->createProgressBar($courses->count());
             $_bar->start();
             foreach ($courses as $course) {
+                SummaryCourse::getCurrentRowOrCreate($course, $user);
                 SummaryCourse::updateUserData($course, $user, false,false);
                 $_bar->advance();
             }
