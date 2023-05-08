@@ -182,15 +182,14 @@ class EntrenadorUsuario extends Model
         // TODO: Lista total de alumnos
         $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
         $users_assigned = count($alumnos_ids);
-        
+
         $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
             ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
             ->when($filtro_estado, function($q) use ($filtro_estado){
-               return   $filtro_estado == 'completo'
-                        ? $q->where('suc.advanced_percentage',100) 
+               return   $filtro_estado == 'realizado'
+                        ? $q->where('suc.advanced_percentage',100)
                         : $q->where(function ($q){
-                            $q->where('suc.advanced_percentage',0);
-                            $q->orWhereNull('suc.advanced_percentage');
+                            $q->where('suc.advanced_percentage', '!=', 0);
                         });
             })
             ->when($filtro_usuario, function($q) use ($filtro_usuario){
@@ -200,8 +199,8 @@ class EntrenadorUsuario extends Model
                 });
             })
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage');
-        
+            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage','suc.assigned');
+
         if ($page) {
             $perPage = 50;
             $pagination = $queryDataAlumnos
@@ -223,6 +222,12 @@ class EntrenadorUsuario extends Model
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
             $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             $value->carrera = '';
+            $value->checklists = ChecklistRpta::leftJoin('courses as c','checklist_answers.course_id', '=', 'c.id')
+                                    ->where('checklist_answers.student_id', $value->id)
+                                    ->where('checklist_answers.coach_id', $entrenador['data_usuario']->id)
+                                    ->where('checklist_answers.percent', '<', 100)
+                                    ->select('checklist_answers.checklist_id','checklist_answers.course_id', 'c.name as course_name', 'checklist_answers.percent')
+                                    ->get();
         });
         $response['alumnos'] = $dataAlumnos;
 
