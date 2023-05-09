@@ -479,7 +479,6 @@ class Topic extends BaseModel
             $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
 
             $topics_count = $topics->count();
-            $tiempoInicioTema = microtime(true);
             foreach ($topics as $topic) {
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
@@ -573,9 +572,7 @@ class Topic extends BaseModel
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                 ]);
             }
-            $tiempoFinTema = microtime(true);
-            $tiempoEjecucionTema = $tiempoFinTema - $tiempoInicioTema;
-            info('Tema:'.$tiempoEjecucionTema);
+    
 
             $requirement_list = null;
             $requirement_course = $course->requirements->first();
