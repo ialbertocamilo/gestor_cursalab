@@ -186,11 +186,12 @@ class EntrenamientoController extends Controller
                 ->where('user_id', $alumno->id)
                 ->first();
             if ($registro) {
-                $registro->active = $estado ? 1 : 0;
+                $registro->active = !$registro->active;
                 $registro->save();
                 //TODO:
                 //                if ()
-
+                cache_clear_model(EntrenadorUsuario::class);
+                cache_clear_model(User::class);
                 return response()->json(['error' => false, 'msg' => 'Relación entrenador-alumno actualizada.'], 200);
             }
             return response()->json(['error' => true, 'msg' => 'El entrenador o el alumno no existe.'], 200);
