@@ -24,7 +24,7 @@ class RestTopicController extends Controller
         $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
         $tiempo = microtime(true);
         $tiempoEjecucion = $tiempo - $tiempoInicioApi;
-        info('Time execution:'.$tiempoEjecucion);
+        info('Time execution:'.$tiempoEjecucion.'- Subworkspace_id: '.$user->subworkspace_id.' - '.$user->document);
         return $this->successApp(['data' => $data]);
     }
 
