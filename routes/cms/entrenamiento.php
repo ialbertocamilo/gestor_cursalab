@@ -17,6 +17,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::view('/', 'entrenamiento.entrenadores.index')->name('entrenamiento.entrenadores');
 		// ->middleware('permission:entrenamiento.index');
 		Route::get('/search', 'search');
+		Route::get('/list-students/{entrenador_id}', 'listStudents');
 		Route::post('/listar_entrenadores', 'listarEntrenadores');
 		Route::post('/asignar', 'asignar');
 		Route::post('/asignar_masivo', 'asignarMasivo');

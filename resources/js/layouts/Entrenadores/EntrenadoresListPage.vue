@@ -231,8 +231,15 @@ export default {
             vue.dataModalVerAlumnos = {};
             vue.modal.asignar_ver_alumnos = false;
         },
-        abrirModalVerAlumnos(entrenador) {
+        async abrirModalVerAlumnos(entrenador) {
             let vue = this;
+            vue.showLoader();
+            await axios.get(`/entrenamiento/entrenadores/list-students/${entrenador.id}`).then(({data})=>{
+                entrenador.alumnos = data.data.alumnos;
+                vue.hideLoader();
+            }).catch((error)=>{
+                vue.hideLoader();
+            })
             vue.dataModalVerAlumnos = entrenador;
             vue.modal.asignar_ver_alumnos = true;
         },

@@ -41,9 +41,8 @@ class EntrenadorUsuario extends Model
     {
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
-
 //        $queryEntrenadores = User::whereIs('trainer');
-        $queryEntrenadores = User::whereRelation('subworkspace', 'parent_id', $data['workspace_id'])
+        $queryEntrenadores = User::select('id','name','lastname','surname','fullname','document','subworkspace_id','active')->whereRelation('subworkspace', 'parent_id', $data['workspace_id'])
             ->whereHas('students');
 
         // $queryEntrenadores = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR);
@@ -58,36 +57,35 @@ class EntrenadorUsuario extends Model
 
         $queryEntrenadores->orderBy($field, $sort);
 
-        $entrenadores = $queryEntrenadores->paginate(request('paginate', 15));
+        $entrenadores = $queryEntrenadores->withCount('students as alumnos_count')->paginate(request('paginate', 15));
 
         // info($entrenadores);
-        // dd($entrenadores->pluck('id')->all());
 
-        $entrenador_usuario = EntrenadorUsuario::with('user')->whereIn('trainer_id', $entrenadores->pluck('id')->all())->get();
-        $responseData = [];
-        foreach ($entrenadores->items() as $entrenador) {
-            $alumnosEntrenador = $entrenador_usuario->where('trainer_id', $entrenador->id)->sortByDesc('updated_at');
-            $tempAlumnos = collect();
-            $alumnosEntrenador->each(function ($value, $key) use ($tempAlumnos) {
-                $subw = $value->user->subworkspace()->first();
-                $temp = [
-                    'id' => $value->user->id,
-                    'document' => $value->user->document,
-                    'name' => (!empty($value->user->fullname)) ? $value->user->fullname : $value->user->name,
-                    'botica' => (!is_null($subw)) ? $subw->name : '',
-                    'estado' => $value->active === 1,
-                    'loading' => false
-                ];
-                $tempAlumnos->push($temp);
-            });
-            $entrenador->alumnos = $tempAlumnos;
-            $entrenador->alumnos_count = $entrenador->alumnos->count();
-            $entrenador->asignar_ver_alumnos = false;
-            $entrenador->asignar_alumnos = false;
-            $responseData[] = $entrenador->only('document', 'name', 'alumnos', 'asignar_ver_alumnos', 'botica', 'asignar_alumnos', 'config_id', 'id', 'alumnos_count');
-        }
-
-        $response['data'] = $responseData;
+        // $entrenador_usuario = EntrenadorUsuario::with('user')->whereIn('trainer_id', $entrenadores->pluck('id')->all())->get();
+        // $responseData = [];
+        // foreach ($entrenadores->items() as $entrenador) {
+        //     // $alumnosEntrenador = $entrenador_usuario->where('trainer_id', $entrenador->id)->sortByDesc('updated_at');
+        //     $tempAlumnos = collect();
+        //     // $alumnosEntrenador->each(function ($value, $key) use ($tempAlumnos) {
+        //     //     $subw = $value->user->subworkspace()->first();
+        //     //     $temp = [
+        //     //         'id' => $value->user->id,
+        //     //         'document' => $value->user->document,
+        //     //         'name' => (!empty($value->user->fullname)) ? $value->user->fullname : $value->user->name,
+        //     //         'botica' => (!is_null($subw)) ? $subw->name : '',
+        //     //         'estado' => $value->active === 1,
+        //     //         'loading' => false
+        //     //     ];
+        //     //     $tempAlumnos->push($temp);
+        //     // });
+        //     $entrenador->alumnos = $tempAlumnos;
+        //     $entrenador->alumnos_count = $entrenador->alumnos->count();
+        //     $entrenador->asignar_ver_alumnos = false;
+        //     $entrenador->asignar_alumnos = false;
+        //     $responseData[] = $entrenador->only('document', 'name', 'alumnos', 'asignar_ver_alumnos', 'botica', 'asignar_alumnos', 'config_id', 'id', 'alumnos_count');
+        // }
+        // dd($entrenadores->items());
+        $response['data'] = $entrenadores->items();
         $response['lastPage'] = $entrenadores->lastPage();
 
         $response['current_page'] = $entrenadores->currentPage();
@@ -105,7 +103,35 @@ class EntrenadorUsuario extends Model
 
         return $response;
     }
-
+    public static function listStudents($trainer_id){
+        // $entrenador = EntrenadorUsuario::with(['student'=>function($q){
+        //     $q->select('id','name','lastname','surname','fullname','document','subworkspace_id','active');
+        // },'user.subworkspace'])->where('trainer_id', $trainer_id)->first();
+        $trainer = User::where('id',$trainer_id)->select('id')->with(['students'=>function($q){
+            $q->select('users.id','name','lastname','surname','fullname','document','subworkspace_id','trainer_user.active as estado');
+        }])->first();
+        $workspace = get_current_workspace();
+        $subworkspaces = Workspace::select('id','name')->where('parent_id',$workspace->id)->get();
+        $tempAlumnos = collect();
+        foreach ($trainer->students as $student) {
+            $subw = $subworkspaces->where('id',$student->subworkspace_id)->first();
+            $student->botica = (!is_null($subw)) ? $subw->name : '';
+            $student->loading = false;
+            // $temp = [
+            //     'id' => $student->id,
+            //     'document' => $student->document,
+            //     'name' => (!empty($student->fullname)) ? $student->fullname : $student->name,
+            //     'botica' => (!is_null($subw)) ? $subw->name : '',
+            //     'estado' => $student->active === 1,
+            //     'loading' => false
+            // ];
+            // $tempAlumnos->push($temp);
+        }
+        
+        return [
+            'alumnos'=> $trainer->students
+        ];
+    }
     public function validarUsuario($usuario_dni)
     {
         $response['error'] = false;
