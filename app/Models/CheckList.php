@@ -111,11 +111,12 @@ class CheckList extends BaseModel
             $checklist->segments = $segments;
 
             $checklist->active = $checklist->active;
+            $checklist->is_super_user = auth()->user()->isAn('super-user');
+
         }
 
         $response['data'] = $checklists->items();
         $response['lastPage'] = $checklists->lastPage();
-
         $response['current_page'] = $checklists->currentPage();
         $response['first_page_url'] = $checklists->url(1);
         $response['from'] = $checklists->firstItem();
@@ -206,17 +207,26 @@ class CheckList extends BaseModel
                             }
                             $progresoActividad = $this->getProgresoActividades($checklist, $checklistRpta, $actividades_activas);
                             $progresoActividadFeedback = $this->getProgresoActividadesFeedback($checklistRpta, $actividades_activasFeedback);
+
+                            $lista_cursos = $checklist->courses()->with([
+                                'schools' => function ($query) {
+                                    $query->select('id', 'name');
+                                }
+                            ])->select('id', 'name')->get();
+
+                            foreach($lista_cursos as $lc) {
+                                $lc->makeHidden(['summaries', 'polls', 'requirements', 'pivot']);
+                                $status_c = Course::getCourseStatusByUser($user, $lc);
+                                $lc->status_c = $status_c['status'];
+                            }
+
                             $tempChecklist = [
                                 'id' => $checklist->id,
                                 'titulo' => $checklist->title,
                                 'descripcion' => $checklist->description,
                                 'type_checklist' => $type_checklist?->code,
                                 'disponible' => $disponible,
-                                'curso' => $checklist->courses()->with([
-                                    'schools' => function ($query) {
-                                        $query->select('id', 'name');
-                                    }
-                                ])->select('id', 'name')->get(),
+                                'curso' => $lista_cursos,
                                 'porcentaje' => $progresoActividad['porcentaje'],
                                 'actividades_totales' => $progresoActividad['actividades_totales'],
                                 'actividades_completadas' => $progresoActividad['actividades_completadas'],
