@@ -433,28 +433,29 @@ class Topic extends BaseModel
         $schools = $user_courses->groupBy('schools.*.id');
         $courses = $schools[$school_id] ?? collect();
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
+        $courses_id = $user_courses->pluck('id');
         $positions_courses = CourseSchool::select('school_id','course_id','position')
                     ->where('school_id',$school_id)
-                    ->whereIn('course_id',$user_courses->pluck('id'))
+                    ->whereIn('course_id',$courses_id)
                     ->get();
         // UC
         $school_name = $school?->name;
         if ($workspace_id === 25) {
             $school_name = removeUCModuleNameFromCourseName($school_name);
         }
-
         $sub_workspace = $user->subworkspace;
         $mod_eval = $sub_workspace->mod_evaluaciones;
 
         // $max_attempts = isset($mod_eval['nro_intentos']) ? (int)$mod_eval['nro_intentos'] : 5;
 
-        $schools_courses = [];
+        // $schools_courses = [];
+        $schools_courses = collect();
 
         $topic_status_arr = config('topics.status');
 
-        $courses = $courses->sortBy('position');
+        // $courses = $courses->sortBy('position');
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
-            ->whereIn('course_id', $user_courses->pluck('id'))
+            ->whereIn('course_id', $courses_id)
             ->where('user_id', $user->id)
             ->groupBy('course_id')
             ->get();
@@ -471,23 +472,22 @@ class Topic extends BaseModel
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
 
             $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course);
-            $topics_data = [];
+            // $topics_data = [];
+            $topics_data = collect();
+
 
             $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
 
             $topics_count = $topics->count();
-
             foreach ($topics as $topic) {
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
-
-                $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
-                ->where('topic_id', $topic->id)
-                ->where('user_id', $user->id)
-                ->first();
+                $summary_topic =  $topic->summaries->first();
+                // $summary_topic = $summary_topics_by_user->where('topic_id', $topic->id)
+                // // ->where('user_id', $user->id)
+                // ->first();
 
                 $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
-
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
                     $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
@@ -506,6 +506,7 @@ class Topic extends BaseModel
                         }
                     }
                 }
+
                 $media_embed = array();
                 $media_not_embed = array();
                 foreach ($media_topics as $med) {
@@ -526,7 +527,7 @@ class Topic extends BaseModel
                 // if (true) {
                 if ($course->compatible) {
 
-                    $topics_data[] = [
+                    $topics_data->push([
                         'id' => $topic->id,
                         'nombre' => $topic->name,
                         'requisito_id' => NULL,
@@ -544,14 +545,14 @@ class Topic extends BaseModel
                         'estado_tema' => 'aprobado',
                         'estado_tema_str' => 'Convalidado',
                         'compatible' => true,
-                    ];
+                    ]);
 
                     continue;
                 }
 
                 $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
 
-                $topics_data[] = [
+                $topics_data->push([
                     'id' => $topic->id,
                     'nombre' => $topic->name,
                     'requisito_id' => $topic_status['topic_requirement'],
@@ -569,8 +570,9 @@ class Topic extends BaseModel
                     'estado_tema' => $topic_status['status'],
                     //                    'estado_tema_str' => $topic_status['status'],
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
-                ];
+                ]);
             }
+    
 
             $requirement_list = null;
             $requirement_course = $course->requirements->first();
@@ -583,7 +585,7 @@ class Topic extends BaseModel
 
                     $req_course = $requirement_course->model_course;
 
-                    $req_course->load([
+                    $req_course->loadMissing([
                         'summaries' => function ($q) use ($user) {
                             $q
                                 ->with('status:id,name,code')
@@ -610,7 +612,7 @@ class Topic extends BaseModel
 
                                     $req_course_req = $requirement_course_req->model_course;
 
-                                    $req_course_req->load([
+                                    $req_course_req->loadMissing([
                                         'summaries' => function ($q) use ($user) {
                                             $q
                                                 ->with('status:id,name,code')
@@ -668,7 +670,7 @@ class Topic extends BaseModel
 
                                         $req_course_req = $requirement_course_req->model_course;
 
-                                        $req_course_req->load([
+                                        $req_course_req->loadMissing([
                                             'summaries' => function ($q) use ($user) {
                                                 $q
                                                     ->with('status:id,name,code')
@@ -717,7 +719,7 @@ class Topic extends BaseModel
             // if (true) {
             if ($course->compatible) {
 
-                $schools_courses[] = [
+                $schools_courses->push([
                     'id' => $course->id,
                     'orden' => $course_position,
                     'nombre' => $course_name,
@@ -743,12 +745,12 @@ class Topic extends BaseModel
                         'id' => $course->compatible->course->id ?? 'X',
                         'name' => $course->compatible->course->name ?? 'TEST DEFAULT COMPATIBLE',
                     ],
-                ];
+                ]);
 
                 continue;
             }
 
-            $schools_courses[] = [
+            $schools_courses->push([
                 'id' => $course->id,
                 'orden' => $course_position,
 //                'nombre' => $course->name,
@@ -771,8 +773,9 @@ class Topic extends BaseModel
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
                 'mod_evaluaciones' => $course->mod_evaluaciones
-            ];
+            ]);
         }
+        $schools_courses = $schools_courses->toArray();
         $columns = array_column($schools_courses, 'orden');
         array_multisort($columns, SORT_ASC, $schools_courses);
         return [
