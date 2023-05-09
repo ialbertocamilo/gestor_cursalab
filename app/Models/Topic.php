@@ -831,9 +831,12 @@ class Topic extends BaseModel
         $topic_req_name = null;
         if($topic_requirement?->requirement_id){
             $topic_req = Topic::where('id', $topic_requirement?->requirement_id)->first();
+            // dd($topic_req,$topic->requirements->first());
             $topic_req_name = $topic_req?->name;
-            $topic_req_status = self::getTopicProgressByUser($user,$topic_req);
-            $available_topic_req = !($topic_req_status['status'] == 'bloqueado');
+            // $topic_req_status = self::getTopicProgressByUser($user,$topic_req);
+            $topic_req_status = $topic_requirement->summaries?->status->code ?? 'por-iniciar';
+            // $available_topic_req = !($topic_req_status['status'] == 'bloqueado');
+            $available_topic_req = !($topic_req_status == 'bloqueado');
         }
 
         return [
