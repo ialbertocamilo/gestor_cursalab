@@ -14,6 +14,17 @@ class AmbienteRequest extends FormRequest
     public function rules()
     {
         return [
+            //gestor
+            'color_primario' => 'nullable', 
+            'color_secundario' => 'nullable',
+            'titulo' => 'nullable', 
+            'titulo_login' => 'nullable',
+            'fondo' => 'nullable', 
+            'logo' => 'nullable', 
+            'icono' => 'nullable', 
+            'logo_empresa' => 'nullable',
+
+            //app
             'titulo_login_app' => 'required|min:5|max:255',
             'subtitulo_login_app' => 'required|min:5|max:255',
 
@@ -31,6 +42,9 @@ class AmbienteRequest extends FormRequest
             'completed_courses_logo' => 'nullable',
             'enrolled_courses_logo' => 'nullable',
             'diplomas_logo' => 'nullable',
+
+            'logo_male' => 'nullable',
+            'logo_female' => 'nullable',
         ];
     }
     public function validationData(): array

@@ -1209,3 +1209,16 @@ input[type="color"] {
 	height: 2rem !important;
 	padding: 0 !important;
 }
+
+.tab-primary{
+    border: 1px solid #5458ea;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    background-color: #ffffff !important;
+    color: #5458ea !important;
+}
+
+.tab-primary.v-tab--active{
+    color: #ffffff !important;
+    background-color: #5458ea !important;
+}

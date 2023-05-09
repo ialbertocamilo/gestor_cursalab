@@ -15,12 +15,21 @@ class AmbienteController extends Controller
 
         // info(['data' => $data ]);
 
+        //gestor
+        $data = Media::requestUploadFile($data, 'fondo');
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'icono');
+        $data = Media::requestUploadFile($data, 'logo_empresa');
+
+        //app
         $data = Media::requestUploadFile($data, 'fondo_app');
         $data = Media::requestUploadFile($data, 'logo_app');
         $data = Media::requestUploadFile($data, 'logo_cursalab');
         $data = Media::requestUploadFile($data, 'completed_courses_logo');
         $data = Media::requestUploadFile($data, 'enrolled_courses_logo');
         $data = Media::requestUploadFile($data, 'diplomas_logo');
+        $data = Media::requestUploadFile($data, 'male_logo');
+        $data = Media::requestUploadFile($data, 'female_logo');
 
         if ($count_ambiente) {
             $ambiente = Ambiente::first();

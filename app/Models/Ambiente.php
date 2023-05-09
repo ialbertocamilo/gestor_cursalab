@@ -9,10 +9,15 @@ class Ambiente extends Model
 {
     protected $table = 'config_general';
     protected $fillable = [
+        //gestor
+        'color_primario', 'color_secundario',
+        'titulo', 'titulo_login',
+        'fondo', 'logo', 'icono', 'logo_empresa',
+        //app
         'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position', 
         'color_primario_app', 'color_secundario_app', 'fondo_app', 'logo_app',
         'logo_cursalab_position','show_blog_btn','logo_cursalab',
-        'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo'
+        'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo','male_logo', 'female_logo',
     ];
 
     protected $hidden = [
