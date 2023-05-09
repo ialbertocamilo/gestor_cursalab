@@ -213,9 +213,11 @@ class CheckList extends BaseModel
                 }
             }
         }
-        $response['checklists_totales'] = $checklists->count();
-        $response['checklists_completados'] = $checklistCompletados;
-        $response['porcentaje'] = $checklists->count() > 0 ? (float)number_format((($checklistCompletados / $checklists->count()) * 100), 2) : 0;
+        $suc = SummaryUserChecklist::where('user_id',$alumno_id)->first();
+
+        $response['checklists_totales'] = $suc?->assigned ?? 0;
+        $response['checklists_completados'] = $suc?->completed ?? 0;
+        $response['porcentaje'] = $suc?->advanced_percentage ?? 0;
         $response['checklists']['pendientes'] = $checklists_pendientes->sortByDesc('disponible')->values()->all();
         $response['checklists']['realizados'] = $checklists_realizados->sortByDesc('disponible')->values()->all();
         $response['active'] = !is_null($entrenador);
