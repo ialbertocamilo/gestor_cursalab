@@ -170,8 +170,8 @@
                                                 <v-btn 
                                                     small 
                                                     color="primary" 
-                                                    :text="!(resource.form_login_position == 'left')" 
-                                                    @click="resource.form_login_position = 'left'">
+                                                    :text="!(resource.form_login_position == 'start')" 
+                                                    @click="resource.form_login_position = 'start'">
                                                         <v-icon>
                                                             mdi-format-align-left
                                                         </v-icon>
@@ -180,8 +180,8 @@
                                                     <v-btn 
                                                         small 
                                                         color="primary" 
-                                                        :text="!(resource.form_login_position == 'middle')" 
-                                                        @click="resource.form_login_position = 'middle'">
+                                                        :text="!(resource.form_login_position == 'center')" 
+                                                        @click="resource.form_login_position = 'center'">
                                                         <v-icon>
                                                             mdi-format-align-center
                                                         </v-icon> 
@@ -190,8 +190,8 @@
                                                     <v-btn 
                                                         small 
                                                         color="primary" 
-                                                        :text="!(resource.form_login_position == 'right')" 
-                                                        @click="resource.form_login_position = 'right'">
+                                                        :text="!(resource.form_login_position == 'end')" 
+                                                        @click="resource.form_login_position = 'end'">
                                                         <v-icon>
                                                             mdi-format-align-right
                                                         </v-icon>
@@ -299,8 +299,8 @@
                                             <v-btn 
                                                 small 
                                                 color="primary" 
-                                                :text="!(resource.logo_cursalab_position == 'left')" 
-                                                @click="resource.logo_cursalab_position = 'left'">
+                                                :text="!(resource.logo_cursalab_position == 'start')" 
+                                                @click="resource.logo_cursalab_position = 'start'">
                                                 <v-icon>
                                                     mdi-format-align-left
                                                 </v-icon>
@@ -309,8 +309,8 @@
                                             <v-btn 
                                                 small 
                                                 color="primary"
-                                                :text="!(resource.logo_cursalab_position == 'middle')" 
-                                                @click="resource.logo_cursalab_position = 'middle'">
+                                                :text="!(resource.logo_cursalab_position == 'center')" 
+                                                @click="resource.logo_cursalab_position = 'center'">
                                                 <v-icon>
                                                     mdi-format-align-center
                                                 </v-icon> 
@@ -319,8 +319,8 @@
                                             <v-btn 
                                                 small 
                                                 color="primary" 
-                                                :text="!(resource.logo_cursalab_position == 'right')" 
-                                                @click="resource.logo_cursalab_position = 'right'">
+                                                :text="!(resource.logo_cursalab_position == 'end')" 
+                                                @click="resource.logo_cursalab_position = 'end'">
                                                 <v-icon>
                                                     mdi-format-align-right
                                                 </v-icon>
@@ -472,13 +472,11 @@ const file_fields = [
                 vue.showLoader();
                 vue.$http.get(base_url)
                          .then(({data}) => {
-                            vue.hideLoader();
-
                             if (data.data) {
                                 vue.is_superuser = data.data.is_superuser || false;
                                 vue.resource = Object.assign({}, data.data);
                             }
-                            // console.log('data loadData', data);
+                            vue.hideLoader();
                          }, (err) => console.error(err));
             },
             storeForm() {
@@ -498,12 +496,10 @@ const file_fields = [
 
                     vue.$http.post(base_url, formData)
                         .then(({data}) => {
-
-                            // console.log('data storeForm', data);
                             this.hideLoader();
-                            vue.resetForm();
                             vue.showAlert(data.data.msg);
                             this.hideLoader();
+                            vue.loadData();
 
                         }).catch((error) => {
 
