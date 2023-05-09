@@ -25,7 +25,15 @@ class RestTopicController extends Controller
 
         return $this->successApp(['data' => $data]);
     }
+    public function topicsv2(Course $course, Request $request)
+    {
+        $user = Auth::user();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
 
+        $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
+
+        return $this->successApp(['data' => $data]);
+    }
     public function reviewTopic(Topic $topic, $user = null)
     {
         if ($topic->course->hasBeenValidated())
