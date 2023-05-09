@@ -745,7 +745,7 @@ class Course extends BaseModel
 
                 $req_course = $requirement_course->model_course;
 
-                $req_course->load([
+                $req_course->loadMissing([
                     'summaries' => function ($q) use ($user) {
                         $q
                             ->with('status:id,name,code')
