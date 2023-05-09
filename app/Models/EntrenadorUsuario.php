@@ -189,7 +189,8 @@ class EntrenadorUsuario extends Model
                return   $filtro_estado == 'realizado'
                         ? $q->where('suc.advanced_percentage',100)
                         : $q->where(function ($q){
-                            $q->where('suc.advanced_percentage', '!=', 0);
+                            $q->where('suc.advanced_percentage', '!=', 100);
+                            $q->orWhereNull('suc.advanced_percentage');
                         });
             })
             ->when($filtro_usuario, function($q) use ($filtro_usuario){
@@ -222,6 +223,8 @@ class EntrenadorUsuario extends Model
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
             $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             $value->carrera = '';
+            $value->advanced_percentage = $value->advanced_percentage ?? 0;
+            $value->assigned = $value->assigned ?? 0;
             // $value->checklists = ChecklistRpta::leftJoin('courses as c','checklist_answers.course_id', '=', 'c.id')
             //                         ->where('checklist_answers.student_id', $value->id)
             //                         ->where('checklist_answers.coach_id', $entrenador['data_usuario']->id)
