@@ -222,14 +222,15 @@ class EntrenadorUsuario extends Model
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
             $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             $value->carrera = '';
-            $value->checklists = ChecklistRpta::leftJoin('courses as c','checklist_answers.course_id', '=', 'c.id')
-                                    ->where('checklist_answers.student_id', $value->id)
-                                    ->where('checklist_answers.coach_id', $entrenador['data_usuario']->id)
-                                    ->where('checklist_answers.percent', '<', 100)
-                                    ->select('checklist_answers.checklist_id','checklist_answers.course_id', 'c.name as course_name', 'checklist_answers.percent')
-                                    ->get();
+            // $value->checklists = ChecklistRpta::leftJoin('courses as c','checklist_answers.course_id', '=', 'c.id')
+            //                         ->where('checklist_answers.student_id', $value->id)
+            //                         ->where('checklist_answers.coach_id', $entrenador['data_usuario']->id)
+            //                         ->where('checklist_answers.percent', '<', 100)
+            //                         ->select('checklist_answers.checklist_id','checklist_answers.course_id', 'c.name as course_name', 'checklist_answers.percent')
+            //                         ->get();
         });
         $response['alumnos'] = $dataAlumnos;
+        $response['total_alumnos'] = count($dataAlumnos);
 
         // TODO: Últimos 10 alumnos vistos
         // $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id')->all())->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
