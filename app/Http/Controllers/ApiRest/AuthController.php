@@ -587,12 +587,35 @@ class AuthController extends Controller
 
 
     // === AMBIENTE ===
+    public function getMediaUrl($media) {
+        if ($media) {
+           return get_media_url($media);
+        }
+        return $media;
+    }
+
     public function configuracion_ambiente() 
     {
         $ambiente = Ambiente::first();
         
         if($ambiente) {
             $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
+            
+            // gestor
+            $ambiente->fondo = $this->getMediaUrl($ambiente->fondo);
+            $ambiente->logo  = $this->getMediaUrl($ambiente->logo);
+            $ambiente->icono = $this->getMediaUrl($ambiente->icono);
+            $ambiente->logo_empresa = $this->getMediaUrl($ambiente->logo_empresa);
+            // app
+            $ambiente->fondo_app = $this->getMediaUrl($ambiente->fondo_app);
+            $ambiente->logo_app  = $this->getMediaUrl($ambiente->logo_app);
+            $ambiente->logo_cursalab = $this->getMediaUrl($ambiente->logo_cursalab);
+            $ambiente->completed_courses_logo = $this->getMediaUrl($ambiente->completed_courses_logo);
+            $ambiente->enrolled_courses_logo  = $this->getMediaUrl($ambiente->enrolled_courses_logo);
+            $ambiente->diplomas_logo = $this->getMediaUrl($ambiente->diplomas_logo);
+            $ambiente->male_logo   = $this->getMediaUrl($ambiente->male_logo);
+            $ambiente->female_logo = $this->getMediaUrl($ambiente->female_logo);
+
             return response()->json($ambiente);
         }
         return response()->json([]);
