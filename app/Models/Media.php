@@ -168,7 +168,7 @@ class Media extends BaseModel
     {
         $zip = new ZipArchive();
         $res = $zip->open($file, ZipArchive::CREATE);
-            
+
         if ($res === TRUE) {
 
             $zip->extractTo(public_path($temp_path));
@@ -189,8 +189,9 @@ class Media extends BaseModel
             'secret' => $config['secret'],
             'version' => 'latest',
             'region' => $config['region'],
+            'endpoint'    => 'https://sfo2.digitaloceanspaces.com',
             'options' => [
-                'CacheControl' => 'max-age=25920000, no-transform, public', 
+                'CacheControl' => 'max-age=25920000, no-transform, public',
             ]
         ]);
 
