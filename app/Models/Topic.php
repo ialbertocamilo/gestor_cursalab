@@ -459,6 +459,7 @@ class Topic extends BaseModel
             ->where('user_id', $user->id)
             ->groupBy('course_id')
             ->get();
+        
         foreach ($courses as $course) {
             $course_position = $positions_courses->where('course_id',$course->id)->first()?->position;
             // $compatible = $course->getCourseCompatibilityByUser($user);
