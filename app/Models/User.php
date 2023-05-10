@@ -703,6 +703,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $withRelations = 'default',
         $only_ids = false,
         $response_type = 'courses-separated',
+        $byCoursesId = []
     )
     {
         $user = $this;
@@ -722,7 +723,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $compatibles_courses = $all_courses['compatibles'] ?? [];
 
         $query = $this->getUserCourseSegmentationQuery($withRelations);
-
+        if(count($byCoursesId)>0){
+            $query->whereIn('id', $byCoursesId);
+        }
         $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
 
 

@@ -28,10 +28,8 @@ class RestTopicController extends Controller
     public function topicsv2(Course $course, Request $request)
     {
         $user = Auth::user();
-        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
-
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',byCoursesId:[$course?->id]);
         $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
-
         return $this->successApp(['data' => $data]);
     }
     public function reviewTopic(Topic $topic, $user = null)

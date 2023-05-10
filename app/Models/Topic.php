@@ -423,7 +423,6 @@ class Topic extends BaseModel
         ];
     }
 
-
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         if ($user_courses->count() === 0) return [];
@@ -782,7 +781,6 @@ class Topic extends BaseModel
             'cursos' => $schools_courses
         ];
     }
-
     public function getTopicStatusByUser(Topic $topic, User $user, $max_attempts)
     {
         $grade = 0;
