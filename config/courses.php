@@ -141,11 +141,11 @@ return [
 
                         });
                 },
-                'summaries' => function ($q) use ($user_id) {
-                    $q
-                        ->with('status:id,name,code')
-                        ->where('user_id', $user_id);
-                },
+                // 'summaries' => function ($q) use ($user_id) {
+                //     $q
+                //         ->with('status:id,name,code')
+                //         ->where('user_id', $user_id);
+                // },
                 'polls',
                 'schools' => function ($q) {
                     $q
