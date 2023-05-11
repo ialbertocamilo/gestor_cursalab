@@ -27,14 +27,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
 
                         });
@@ -54,14 +54,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
 
                         });
@@ -74,14 +74,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'criterion_id', 'starts_at', 'finishes_at', 'criterion_value_id');
 
                         });
@@ -129,14 +129,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'criterion_id', 'starts_at', 'finishes_at', 'criterion_value_id');
 
                         });
@@ -174,6 +174,8 @@ return [
                 },
                 'requirements' => [
                     'model_course' => [
+                        'topics',
+                        'schools',
 //                        'compatibilities_a:id',
 //                        'compatibilities_b:id',
                         'summaries' => function ($q) use ($user_id) {

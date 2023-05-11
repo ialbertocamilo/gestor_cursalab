@@ -18,11 +18,13 @@ class RestTopicController extends Controller
 {
     public function topics(Course $course, Request $request)
     {
+        $tiempoInicioApi = microtime(true);
         $user = Auth::user();
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
-        dd($courses);
         $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
-
+        $tiempo = microtime(true);
+        $tiempoEjecucion = $tiempo - $tiempoInicioApi;
+        info('Time execution:'.$tiempoEjecucion.'- Subworkspace_id: '.$user->subworkspace_id.' - '.$user->document);
         return $this->successApp(['data' => $data]);
     }
 

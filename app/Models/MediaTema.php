@@ -19,4 +19,9 @@ class MediaTema extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
+
+    public function topic()
+    {
+        return $this->belongsTo(Topic::class, 'topic_id');
+    }
 }
