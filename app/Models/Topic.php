@@ -459,7 +459,17 @@ class Topic extends BaseModel
             ->where('user_id', $user->id)
             ->groupBy('course_id')
             ->get();
-        
+        $summary_courses_compatibles = SummaryCourse::with('course:id,name')
+            ->whereRelation('course', 'active', ACTIVE)
+            ->where('user_id', $user->id)
+            // ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
+            ->orderBy('grade_average', 'DESC')
+            ->whereRelation('status', 'code', 'aprobado')
+            ->get();
+        $statuses_courses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
+        $statuses_topic = Taxonomy::where('group', 'topic')->where('type', 'user-status')
+            ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+            ->pluck('id')->toArray();
         foreach ($courses as $course) {
             $course_position = $positions_courses->where('course_id',$course->id)->first()?->position;
             // $compatible = $course->getCourseCompatibilityByUser($user);
@@ -471,8 +481,8 @@ class Topic extends BaseModel
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
-
-            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course);
+            $medias = $course->topics->pluck('medias');
+            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course,$summary_courses_compatibles,$medias,$statuses_courses);
             // $topics_data = [];
             $topics_data = collect();
 
@@ -551,7 +561,7 @@ class Topic extends BaseModel
                     continue;
                 }
 
-                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
+                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
 
                 $topics_data->push([
                     'id' => $topic->id,
@@ -596,7 +606,7 @@ class Topic extends BaseModel
                         'compatibilities_b:id',
                     ]);
 
-                    $compatible_course_req = $req_course->getCourseCompatibilityByUser($user);
+                    $compatible_course_req = $req_course->getCourseCompatibilityByUser($user,$summary_courses_compatibles);
 
                     if (!$compatible_course_req):
                         if($requirement_course?->requirement_id){
@@ -623,7 +633,7 @@ class Topic extends BaseModel
                                         'compatibilities_b:id',
                                     ]);
 
-                                    $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+                                    $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user,$summary_courses_compatibles);
 
                                     if (!$compatible_course_req_req):
                                         $available_course_req = false;
@@ -681,7 +691,7 @@ class Topic extends BaseModel
                                             'compatibilities_b:id',
                                         ]);
 
-                                        $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+                                        $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user,$summary_courses_compatibles);
 
                                         if (!$compatible_course_req_req):
                                             $available_course_req = false;
@@ -787,7 +797,7 @@ class Topic extends BaseModel
         ];
     }
 
-    public function getTopicStatusByUser(Topic $topic, User $user, $max_attempts)
+    public function getTopicStatusByUser(Topic $topic, User $user, $max_attempts,$statuses)
     {
         $grade = 0;
         $available_topic = false;
@@ -799,9 +809,9 @@ class Topic extends BaseModel
         // $topic_status = 'por-iniciar';
         $topic_status = $summary_topic->status->code ?? 'por-iniciar';
 
-        $statuses = Taxonomy::where('group', 'topic')->where('type', 'user-status')
-            ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
-            ->pluck('id')->toArray();
+        // $statuses = Taxonomy::where('group', 'topic')->where('type', 'user-status')
+        //     ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+        //     ->pluck('id')->toArray();
 
         if ($topic->assessable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
