@@ -111,11 +111,12 @@ class CheckList extends BaseModel
             $checklist->segments = $segments;
 
             $checklist->active = $checklist->active;
+            $checklist->is_super_user = auth()->user()->isAn('super-user');
+
         }
 
         $response['data'] = $checklists->items();
         $response['lastPage'] = $checklists->lastPage();
-
         $response['current_page'] = $checklists->currentPage();
         $response['first_page_url'] = $checklists->url(1);
         $response['from'] = $checklists->firstItem();
@@ -143,7 +144,30 @@ class CheckList extends BaseModel
         $cursos_x_user = $user->getCurrentCourses();
         $cursos_ids = $cursos_x_user->pluck('id')->toArray();
 
-        $cursos = Course::with('checklists', 'schools')->whereIn('id', $cursos_ids)->get();
+        $lista_cursos = collect();
+        $new_lista_cursos = collect();
+
+        // $cursos = Course::with('checklists', 'schools')->whereIn('id', $cursos_ids)->get();
+        $checklist_course_assigned = Checklist::whereHas('courses',function($q) use ($cursos_ids){
+            $q->whereIn('id',$cursos_ids);
+        })->where('active',1)->select('id')->get();
+
+        $checklist_libre_assigned = array_column($user->getSegmentedByModelType(CheckList::class),'id');
+
+        foreach($checklist_course_assigned as $cca) {
+            $lista_cursos->push($cca->courses->pluck('id')->toArray());
+        }
+        foreach($checklist_libre_assigned as $cla) {
+            $cla = CheckList::with('courses')->where('id', $cla)->first();
+            $lista_cursos->push($cla->courses->pluck('id')->toArray());
+        }
+        foreach($lista_cursos as $lisc){
+            foreach($lisc as $lis) {
+                $new_lista_cursos->push($lis);
+            }
+        }
+        $cursos = $new_lista_cursos->unique();
+
         $checklists = collect();
         $checklists_pendientes = collect();
         $checklists_realizados = collect();
@@ -156,6 +180,7 @@ class CheckList extends BaseModel
             ->where('code', 'user_trainer')
             ->first();
         foreach ($cursos as $curso) {
+            $curso = Course::with('checklists', 'schools')->where('id', $curso)->first();
             $curso->categoria = $curso->schools->first()->only('id', 'name');
             if ($curso->checklists->count() > 0) {
                 foreach ($curso->checklists as $checklist) {
@@ -182,17 +207,26 @@ class CheckList extends BaseModel
                             }
                             $progresoActividad = $this->getProgresoActividades($checklist, $checklistRpta, $actividades_activas);
                             $progresoActividadFeedback = $this->getProgresoActividadesFeedback($checklistRpta, $actividades_activasFeedback);
+
+                            $lista_cursos = $checklist->courses()->with([
+                                'schools' => function ($query) {
+                                    $query->select('id', 'name');
+                                }
+                            ])->select('id', 'name')->get();
+
+                            foreach($lista_cursos as $lc) {
+                                $lc->makeHidden(['summaries', 'polls', 'requirements', 'pivot']);
+                                $status_c = Course::getCourseStatusByUser($user, $lc);
+                                $lc->status_c = $status_c['status'];
+                            }
+
                             $tempChecklist = [
                                 'id' => $checklist->id,
                                 'titulo' => $checklist->title,
                                 'descripcion' => $checklist->description,
                                 'type_checklist' => $type_checklist?->code,
                                 'disponible' => $disponible,
-                                'curso' => $checklist->courses()->with([
-                                    'schools' => function ($query) {
-                                        $query->select('id', 'name');
-                                    }
-                                ])->select('id', 'name')->get(),
+                                'curso' => $lista_cursos,
                                 'porcentaje' => $progresoActividad['porcentaje'],
                                 'actividades_totales' => $progresoActividad['actividades_totales'],
                                 'actividades_completadas' => $progresoActividad['actividades_completadas'],
@@ -213,11 +247,12 @@ class CheckList extends BaseModel
                 }
             }
         }
+
         $suc = SummaryUserChecklist::where('user_id',$alumno_id)->first();
 
-        $response['checklists_totales'] = $suc?->assigned ?? 0;
+        $response['checklists_totales'] = count($checklists) ?? 0;
         $response['checklists_completados'] = $suc?->completed ?? 0;
-        $response['porcentaje'] = $suc?->advanced_percentage ?? 0;
+        $response['porcentaje'] =  SummaryUserChecklist::getGeneralPercentage(count($checklists), $suc?->completed ?? 0);
         $response['checklists']['pendientes'] = $checklists_pendientes->sortByDesc('disponible')->values()->all();
         $response['checklists']['realizados'] = $checklists_realizados->sortByDesc('disponible')->values()->all();
         $response['active'] = !is_null($entrenador);
