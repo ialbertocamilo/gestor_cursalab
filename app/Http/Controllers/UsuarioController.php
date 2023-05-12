@@ -562,7 +562,17 @@ class UsuarioController extends Controller
     public function getCoursesByUser(User $user)
     {
         info('getCoursesByUser INICIO');
-        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
+
+
+        if ($user->hasDataUpToDate()) {
+
+            $courses = $user->getCurrentCoursesLite('course-view-app-user');
+
+        } else {
+
+            $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
+        }
+
         // info($courses);
         info('getCoursesByUser FIN');
 //        $courses = Course::whereIn('id', $courses)->get();

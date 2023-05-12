@@ -177,6 +177,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasOne(SummaryUser::class);
     }
 
+    public function course_data()
+    {
+        return $this->hasOne(UserCourseData::class);
+    }    
+
     public function summary_courses()
     {
         return $this->hasMany(SummaryCourse::class);
@@ -740,8 +745,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
 
-        // info($all_courses['current_courses']);
-        // info($all_courses['compatibles']);
+        // info($all_courses['current_courses_x']);
+        // info($all_courses['compatibles_x']);
+
+        $user->course_data()->updateOrCreate([
+            'courses' => $all_courses['current_courses_x'],
+            'compatibles' => $all_courses['compatibles_x'],
+        ]);
 
         $query = $this->getUserCourseSegmentationQuery($withRelations);
         
@@ -787,133 +797,133 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return Course::with($relations);
     }
 
-    public function setProgramCourses($user, &$all_courses)
-    {
-        $user_criterion_values_id = $user->criterion_values->pluck('id');
-        $current_active_programs = Block::with([
-            'segments.values.criterion_value',
-            'block_children.child' => [
-                'segments.values.criterion_value',
-                'courses' => [
-                    'segments.values.criterion_value',
-                    'requirements',
-                    'schools',
-                    'topics' => [
-                        'evaluation_type',
-                        'requirements',
-                        'medias.type'
-                    ],
-                    'polls.questions',
-                    'topics.evaluation_type'
-                ],
-            ]
-        ])
-            ->where('parent', 1)
-            ->where('active', ACTIVE)
-            ->get();
+    // public function setProgramCourses($user, &$all_courses)
+    // {
+    //     $user_criterion_values_id = $user->criterion_values->pluck('id');
+    //     $current_active_programs = Block::with([
+    //         'segments.values.criterion_value',
+    //         'block_children.child' => [
+    //             'segments.values.criterion_value',
+    //             'courses' => [
+    //                 'segments.values.criterion_value',
+    //                 'requirements',
+    //                 'schools',
+    //                 'topics' => [
+    //                     'evaluation_type',
+    //                     'requirements',
+    //                     'medias.type'
+    //                 ],
+    //                 'polls.questions',
+    //                 'topics.evaluation_type'
+    //             ],
+    //         ]
+    //     ])
+    //         ->where('parent', 1)
+    //         ->where('active', ACTIVE)
+    //         ->get();
 
-        foreach ($current_active_programs as $program) {
+    //     foreach ($current_active_programs as $program) {
 
-            $program_segment_valid = false;
+    //         $program_segment_valid = false;
 
-            if ($program->segments->count() === 0) :
+    //         if ($program->segments->count() === 0) :
 
-                $program_segment_valid = true;
+    //             $program_segment_valid = true;
 
-            else :
+    //         else :
 
-                foreach ($program->segments as $segment) {
+    //             foreach ($program->segments as $segment) {
 
-                    $program_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
-                    $program_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $program_segment_criterion_values_id);
+    //                 $program_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
+    //                 $program_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $program_segment_criterion_values_id);
 
-                    if ($program_segment_valid) break;
-                }
+    //                 if ($program_segment_valid) break;
+    //             }
 
-            endif;
+    //         endif;
 
-            if ($program_segment_valid) :
+    //         if ($program_segment_valid) :
 
-                $blocks = collect();
+    //             $blocks = collect();
 
-                foreach ($program->block_children as $block_child) {
+    //             foreach ($program->block_children as $block_child) {
 
-                    $block_segment_valid = false;
+    //                 $block_segment_valid = false;
 
-                    if ($block_child->child->segments->count() === 0) :
+    //                 if ($block_child->child->segments->count() === 0) :
 
-                        $block_segment_valid = true;
+    //                     $block_segment_valid = true;
 
-                    else :
+    //                 else :
 
-                        foreach ($block_child->child->segments as $segment) {
+    //                     foreach ($block_child->child->segments as $segment) {
 
-                            $block_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
-                            $block_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $block_segment_criterion_values_id);
+    //                         $block_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
+    //                         $block_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $block_segment_criterion_values_id);
 
-                            if ($block_segment_valid) break;
-                        }
+    //                         if ($block_segment_valid) break;
+    //                     }
 
-                    endif;
+    //                 endif;
 
-                    if ($block_segment_valid) :
+    //                 if ($block_segment_valid) :
 
-                        $courses = collect();
+    //                     $courses = collect();
 
-                        foreach ($block_child->child->courses as $course) {
+    //                     foreach ($block_child->child->courses as $course) {
 
-                            if ($course->segments->count() === 0) :
+    //                         if ($course->segments->count() === 0) :
 
-                                $courses->push([
-                                    'id' => $course->id,
-                                    'name' => $course->name,
-                                    'position' => $course->position,
-                                    'schools' => $course->schools->toArray()
-                                ]);
+    //                             $courses->push([
+    //                                 'id' => $course->id,
+    //                                 'name' => $course->name,
+    //                                 'position' => $course->position,
+    //                                 'schools' => $course->schools->toArray()
+    //                             ]);
 
-                                $all_courses[] = $course;
+    //                             $all_courses[] = $course;
 
-                            else :
+    //                         else :
 
-                                foreach ($course->segments as $segment) {
+    //                             foreach ($course->segments as $segment) {
 
-                                    $course_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
-                                    $course_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $course_segment_criterion_values_id);
+    //                                 $course_segment_criterion_values_id = $segment->values->pluck('criterion_value_id');
+    //                                 $course_segment_valid = $this->validateSegmentByUser($user_criterion_values_id, $course_segment_criterion_values_id);
 
-                                    if ($course_segment_valid) :
+    //                                 if ($course_segment_valid) :
 
-                                        $courses->push([
-                                            'id' => $course->id,
-                                            'name' => $course->name,
-                                            'position' => $course->position,
-                                            'schools' => $course->schools->toArray()
-                                        ]);
+    //                                     $courses->push([
+    //                                         'id' => $course->id,
+    //                                         'name' => $course->name,
+    //                                         'position' => $course->position,
+    //                                         'schools' => $course->schools->toArray()
+    //                                     ]);
 
-                                        $all_courses[] = $course;
-                                        break;
+    //                                     $all_courses[] = $course;
+    //                                     break;
 
-                                    endif;
-                                }
+    //                                 endif;
+    //                             }
 
-                            endif;
-                        }
+    //                         endif;
+    //                     }
 
-                        //                        $blocks->push([
-                        //                            'id' => $block_child->child->id,
-                        //                            'name' => $block_child->child->name,
-                        //                            'courses_count' => $courses->count(),
-                        //                            'courses' => $courses->sortBy('position')->values()->all()
-                        //                        ]);
-                    endif;
-                }
-                //                $programs->push([
-                //                    'id' => $program->id,
-                //                    'name' => $program->name,
-                //                    'blocks' => $blocks,
-                //                ]);
-            endif;
-        }
-    }
+    //                     //                        $blocks->push([
+    //                     //                            'id' => $block_child->child->id,
+    //                     //                            'name' => $block_child->child->name,
+    //                     //                            'courses_count' => $courses->count(),
+    //                     //                            'courses' => $courses->sortBy('position')->values()->all()
+    //                     //                        ]);
+    //                 endif;
+    //             }
+    //             //                $programs->push([
+    //             //                    'id' => $program->id,
+    //             //                    'name' => $program->name,
+    //             //                    'blocks' => $blocks,
+    //             //                ]);
+    //         endif;
+    //     }
+    // }
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $response_type)
     {
@@ -994,12 +1004,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                             if ($compatible):
 
                                 $all_courses['compatibles'][$course->id] = $compatible;
+                                $all_courses['compatibles_x'][$course->id] = [ 
+                                    'summary_course_id' => $compatible->id ,
+                                    'course_id' => $compatible->course_id ,
+                                ];
 
                             endif;
 
                         endif;
 
                         $all_courses['current_courses'][] = $course;
+                        $all_courses['current_courses_x'][] = $course->id;
 
                         break;
                     }
@@ -1607,5 +1622,25 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // }
 
         return $user;
+    }
+
+    public function hasDataUpToDate()
+    {
+        $course_data = $this->course_data;
+
+        if ($course_data) {
+
+            if ($course_data->updated_at > $this->required_update_at) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getCurrentCoursesLite($query_key)
+    {
+        // TO do: return courses with same data as getCurrentCourses
     }
 }
