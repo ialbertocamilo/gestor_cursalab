@@ -422,17 +422,7 @@ class Topic extends BaseModel
             'type' => 'validations-after-update'
         ];
     }
-    protected function listCoursesBySchool($user_courses){
-        $format_courses = $user_courses->map(function($course){
-            return [
-                'course_id'=>$course->id,
-                'name' => $course->name
-            ];
-        });
-        return [
-            'courses' => $format_courses
-        ];
-    }
+    
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         if ($user_courses->count() === 0) return [];
@@ -461,7 +451,6 @@ class Topic extends BaseModel
         $schools_courses = collect();
 
         $topic_status_arr = config('topics.status');
-
         // $courses = $courses->sortBy('position');
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
             ->whereIn('course_id', $courses_id)
@@ -490,15 +479,16 @@ class Topic extends BaseModel
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
-            $medias = $course->topics->pluck('medias');
-            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course,$summary_courses_compatibles,$medias,$statuses_courses);
+            $media_temas = $course->topics->pluck('medias');
+            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course,$summary_courses_compatibles,$media_temas,$statuses_courses);
             // $topics_data = [];
             $topics_data = collect();
 
 
             $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
 
-            $topics_count = $topics->count();
+            $topics_count = count($topics);
+            $summary_topics_user = $course->topics->pluck('summaries') ?? [];
             foreach ($topics as $topic) {
 
                 $media_topics = $topic->medias->sortBy('position')->values()->all();
@@ -668,7 +658,8 @@ class Topic extends BaseModel
                                 'name' => $course_name_req,
                                 'school_id' => $req_school?->id,
                                 'disponible' => $available_course_req,
-                                'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                                // 'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null,
+                                'ultimo_tema_visto' => ($req) ? Course::ultimoTemaVisto($req, $user, $media_temas, $summary_topics_user) : null
                             ];
                         }
                     endif;
@@ -726,7 +717,8 @@ class Topic extends BaseModel
                                     'name' => $course_name_req,
                                     'school_id' => $req_school?->id,
                                     'disponible' => $available_course_req,
-                                    'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                                    // 'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                                    'ultimo_tema_visto' => ($req) ?  Course::ultimoTemaVisto($req, $user, $media_temas, $summary_topics_user) : null
                                 ];
                             }
                         }

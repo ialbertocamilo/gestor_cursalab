@@ -39,7 +39,7 @@ class RestTopicController extends Controller
     {
         $user = Auth::user();
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',bySchoolsId:[$school_id]);
-        $data = Topic::listCoursesBySchool($courses);
+        $data = Course::getDataToCoursesViewAppByUser($user, $courses);
         return $this->successApp(['data' => $data]);
     }
 
