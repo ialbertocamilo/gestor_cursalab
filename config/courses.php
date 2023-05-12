@@ -102,13 +102,17 @@ return [
                         'evaluation_type:id,code',
                         'requirements.summaries_topics' => function ($q) use ($user_id) {
                             $q
-                                // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
                         },
                         'summaries' => function ($q) use ($user_id) {
                             $q
-                                // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
                         }
@@ -160,13 +164,18 @@ return [
                             'evaluation_type:id,code',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                   ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             },
+                            'requirements.model_topic:id,name',
                             'summaries' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             }
@@ -220,13 +229,17 @@ return [
                             'evaluation_type:id,code',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             },
                             'summaries' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             }
