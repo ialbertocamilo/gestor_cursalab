@@ -119,7 +119,7 @@ class RestChecklistController extends Controller
         $alumnos_id = $request->alumnos_id;
         $alumnos_todos = $request->alumnos_todos;
         $tipo = $request->tipo;
-
+        $message = [];
         
         $entrenador_id = ($tipo =='entrenador_alumno') 
                         ? Auth::user()->id 
@@ -132,7 +132,7 @@ class RestChecklistController extends Controller
             $alumnos = $query_entrenador_usuario->alumno($alumnos_id)->groupBy('user_id')->get();
         }
         $checklistRptas = ChecklistRpta::checklist($checklist_id)->alumno($alumnos->pluck('user_id')->toArray())->entrenador($entrenador_id)->get();
-       
+        $checklist = Checklist::select('id','title')->with('actividades','actividades.type:id,code')->where('id',$checklist_id)->first();
         foreach ($alumnos as $alumno) {
             $checklistRpta = $checklistRptas->where('student_id',$alumno->user_id)->first();
             if(is_null($checklistRpta)){
@@ -158,11 +158,33 @@ class RestChecklistController extends Controller
             ChecklistRpta::actualizarChecklistRpta($checklistRpta);
             SummaryUserChecklist::updateUserData($alumno->user);
         }
+
         // SummaryChecklist::updateData($checklist);
         //Personalizar respuestas.
+        if($tipo == 'alumno_entrenador'){
+            $message = [
+                'title'=> 'Se ha realizado la evaluación',
+                'body'=>'Se ha realizado la evaluación del checklist: <b>'.$checklist->title.'</b>'            
+            ];
+        }else{
+            $actividades = collect($actividades);
+            $actividades_cumple = $actividades->where('estado','No cumple')->count();
+            $actividades_no_cumple = $actividades->where('estado','Cumple')->count();
+            if( $actividades_cumple + $actividades_no_cumple  == $checklist->actividades->where('type.code','trainer_user')->where('active',1)->count()){
+                $message = [
+                    "titulo" => "Checklist finalizado",
+                    "mensaje" => 'Se han calificado todas las actividades del checklist: <b>'.$checklist->title.'</b>'            
+                ];
+            }else{
+                $message = [
+                    "titulo" => "Cambios guardados",
+                    "mensaje" => 'Se han guardado las calificaciones del checklist: <b>'.$checklist->title.'</b>'            
+                ];
+            }
+        }
         return response()->json([
             'error' => false,
-            'msg' => 'Actividad actualizada.'
+            'message' => $message
             /*'checklist_rpta_item' => $checklistRptaItem*/
         ], 200);
     }
