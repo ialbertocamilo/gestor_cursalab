@@ -27,6 +27,22 @@ class RestTopicController extends Controller
         info('Time execution:'.$tiempoEjecucion.'- Subworkspace_id: '.$user->subworkspace_id.' - '.$user->document);
         return $this->successApp(['data' => $data]);
     }
+    public function topicsv2(Course $course, Request $request)
+    {
+        $user = Auth::user();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',byCoursesId:[$course?->id]);
+        $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
+        return $this->successApp(['data' => $data]);
+    }
+
+    public function listCoursesBySchool($school_id)
+    {
+        $user = Auth::user();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',bySchoolsId:[$school_id]);
+        $data = Topic::listCoursesBySchool($courses);
+        return $this->successApp(['data' => $data]);
+    }
+
 
     public function reviewTopic(Topic $topic, $user = null)
     {

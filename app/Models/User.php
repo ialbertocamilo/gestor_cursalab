@@ -713,6 +713,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $withRelations = 'default',
         $only_ids = false,
         $response_type = 'courses-separated',
+        $byCoursesId = [],
+        $bySchoolsId = [],
     )
     {
         $user = $this;
@@ -741,6 +743,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         
         info('getCurrentCourses D');
 
+        if(count($bySchoolsId)>0){
+            $byCoursesId = CourseSchool::whereIn('school_id',$bySchoolsId)->select('course_id')->pluck('course_id');
+            // $query->whereRelation('schools', 'school_id', 'in',$bySchoolsId);
+            // dd($query->first());
+        }
+        if(count($byCoursesId)>0){
+            $query->whereIn('id', $byCoursesId);
+        }
         $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
 
 
