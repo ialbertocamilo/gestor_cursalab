@@ -422,7 +422,17 @@ class Topic extends BaseModel
             'type' => 'validations-after-update'
         ];
     }
-
+    protected function listCoursesBySchool($user_courses){
+        $format_courses = $user_courses->map(function($course){
+            return [
+                'course_id'=>$course->id,
+                'name' => $course->name
+            ];
+        });
+        return [
+            'courses' => $format_courses
+        ];
+    }
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         if ($user_courses->count() === 0) return [];

@@ -20,6 +20,28 @@ return [
     'user-courses-query' => function ($relation, $user_id) {
 
         return match ($relation) {
+            'only-segments'=>[
+                'segments' => function ($q) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->select('id', 'model_id')
+                        ->with('values', function ($q) {
+                            $q
+                                ->with('criterion_value', function ($q) {
+                                    $q
+                                        ->where('active', ACTIVE)
+                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                        ->with('criterion', function ($q) {
+                                            $q->select('id', 'name', 'code');
+                                        });
+                                })
+                                ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
+
+                        });
+                },
+                'compatibilities_a:id',
+                'compatibilities_b:id',
+            ],
             'soft' => [
                 'segments' => function ($q) {
                     $q
