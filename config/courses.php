@@ -183,6 +183,8 @@ return [
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
                         },
+                        'compatibilities_a:id',
+                        'compatibilities_b:id',
                     ],
                     'summaries_course' => function ($q) use ($user_id) {
                         $q

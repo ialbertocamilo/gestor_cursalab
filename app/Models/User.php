@@ -736,8 +736,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         
         info('getCurrentCourses C');
 
+
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
+
+        // info($all_courses['current_courses']);
+        // info($all_courses['compatibles']);
 
         $query = $this->getUserCourseSegmentationQuery($withRelations);
         
@@ -954,9 +958,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('status', 'code', 'aprobado')
             ->get();
 
+
+
         info('SCWDS 5');
 
         foreach ($course_segmentations as $course) {
+
+            // $segment_ids = $course->segments->pluck('id');
+            
+            // $segment_values = SegmentValue::whereIn('segment_id', $segment_ids)->get();
 
             foreach ($course->segments as $segment) {
 //                dd($segment->values->first());
@@ -966,7 +976,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //                if (!$valid_rule) continue;
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
+                // $course_segment_criteria = $segment_values->where('segment_id', $segment->id)->groupBy('criterion_id');
 
+                // $valid_segment = false;
                 $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
                 //                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
