@@ -755,6 +755,8 @@ class Course extends BaseModel
 
         $requirement_course = $course->requirements->first();
 
+        $summary_topics_user = $course->topics->pluck('summaries');
+
         $media_temas = $medias;
 
         if ($requirement_course) {
@@ -767,16 +769,16 @@ class Course extends BaseModel
 
                 $req_course = $requirement_course->model_course;
 
-                $req_course->loadMissing([
-                    'summaries' => function ($q) use ($user) {
-                        $q
-                            ->with('status:id,name,code')
-                            ->where('user_id', $user->id);
-                    },
-                    'compatibilities_a:id',
-                    'compatibilities_b:id',
-                    'requirements'
-                ]);
+                // $req_course->loadMissing([
+                //     'summaries' => function ($q) use ($user) {
+                //         $q
+                //             ->with('status:id,name,code')
+                //             ->where('user_id', $user->id);
+                //     },
+                //     'compatibilities_a:id',
+                //     'compatibilities_b:id',
+                //     'requirements'
+                // ]);
 
                 $compatible_course_req = $req_course->getCourseCompatibilityByUser($user, $summary_courses_compatibles);
                 // $compatible_course_req = $requirement_course->model_course->getCourseCompatibilityByUser($user);
@@ -836,7 +838,7 @@ class Course extends BaseModel
                             'name' => $course_name_req,
                             'school_id' => $req_school?->id,
                             'disponible' => $available_course_req,
-                            'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user, $media_temas) : null
+                            'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user, $media_temas, $summary_topics_user) : null
                         ];
                     }
                 endif;
@@ -900,7 +902,7 @@ class Course extends BaseModel
                                 'name' => $course_name_req,
                                 'school_id' => $req_school?->id,
                                 'disponible' => $available_course_req,
-                                'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user, $media_temas) : null
+                                'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user, $media_temas, $summary_topics_user) : null
                             ];
                         }
                     }
@@ -1349,12 +1351,13 @@ class Course extends BaseModel
         return $modules;
     }
 
-    protected function ultimoTemaVisto(Course $curso, User $user, $media_temas): array
+    protected function ultimoTemaVisto(Course $curso, User $user, $media_temas, $summary_topics_user): array
     {
         $topics_user = $curso->topics->pluck('id')->toArray();
 
         $topics = $curso->topics->sortBy('position')->where('active', ACTIVE);
-        $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id)->get();
+        $summary_topics = $summary_topics_user->whereIn('topic_id', $topics_user);
+        // $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id)->get();
 
         $last_topic = null;
         if ($summary_topics->count() > 0) {
