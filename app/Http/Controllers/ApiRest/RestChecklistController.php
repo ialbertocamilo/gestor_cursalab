@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Models\User;
+use App\Models\Taxonomy;
 use App\Models\CheckList;
 use Illuminate\Http\Request;
 use App\Models\ChecklistRpta;
@@ -114,8 +115,9 @@ class RestChecklistController extends Controller
         //     'alumnos_todos'=>true,
         //      'tipo' => 'entrenador_alumno ' o 'alumno_entrenador'
         // ]
-        $actividades = $request->actividades;
         $checklist_id = $request->checklist_id;
+        $checklist = Checklist::select('id','title','type_id')->with('type:id,code','actividades','actividades.type:id,code')->where('id',$checklist_id)->first();
+        $actividades = $request->actividades;
         $alumnos_id = $request->alumnos_id;
         $alumnos_todos = $request->alumnos_todos;
         $tipo = $request->tipo;
@@ -127,12 +129,27 @@ class RestChecklistController extends Controller
 
         $query_entrenador_usuario =  EntrenadorUsuario::select('user_id')->with(['user:id,subworkspace_id','user.subworkspace:id,parent_id','user.subworkspace.parent:id']);   
         if($alumnos_todos){
-            $alumnos = $query_entrenador_usuario->where('trainer_id',$entrenador_id)->where('active', 1)->get();
+            if($checklist->type->code == 'curso'){
+                $courses_id = $checklist->courses()->get()->pluck('id');
+                if(count($courses_id)){
+                    $status_id_completed = Taxonomy::where('group', 'course')->where('type','user-status')->where('code','aprobado')->first()?->id;
+                    $alumnos = $query_entrenador_usuario->where('trainer_id',$entrenador_id)->where('active', 1)
+                    ->whereHas('user.summary_courses',function($q)use ($courses_id,$status_id_completed) {
+                        foreach ($courses_id as $key => $course_id) {
+                            $q->where('course_id',$course_id);
+                        }
+                        $q->where('status_id',$status_id_completed);
+                    })->get();
+                }else{
+                    $alumnos = [];
+                }
+            }else{
+                $alumnos = $query_entrenador_usuario->where('trainer_id',$entrenador_id)->where('active', 1)->get();
+            }
         }else{
             $alumnos = $query_entrenador_usuario->alumno($alumnos_id)->groupBy('user_id')->get();
         }
         $checklistRptas = ChecklistRpta::checklist($checklist_id)->alumno($alumnos->pluck('user_id')->toArray())->entrenador($entrenador_id)->get();
-        $checklist = Checklist::select('id','title')->with('actividades','actividades.type:id,code')->where('id',$checklist_id)->first();
         foreach ($alumnos as $alumno) {
             $checklistRpta = $checklistRptas->where('student_id',$alumno->user_id)->first();
             if(is_null($checklistRpta)){
