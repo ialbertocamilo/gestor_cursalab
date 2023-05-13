@@ -741,8 +741,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
 
             $user->course_data()->updateOrCreate([
-                'courses' => $all_courses['current_courses_x'] ?? [],
-                'compatibles' => $all_courses['compatibles_x'] ?? [],
+                'courses' => $all_courses['current_courses_ids'] ?? [],
+                'compatibles' => $all_courses['compatibles_ids'] ?? [],
             ]);
         }
 
@@ -756,7 +756,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         
         info('getCurrentCourses C');
 
-
         $query = $this->getUserCourseSegmentationQuery($withRelations);
         
         info('getCurrentCourses D');
@@ -766,11 +765,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             // $query->whereRelation('schools', 'school_id', 'in',$bySchoolsId);
             // dd($query->first());
         }
+
         if(count($byCoursesId)>0){
             $query->whereIn('id', $byCoursesId);
         }
-        $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
 
+        $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
 
         if ($only_ids)
             return array_unique(array_column($current_courses, 'id'));
@@ -784,7 +784,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             if ($compatible_course) {
 
                 $course->compatible = $compatible_course;
-
             }
         }
         
@@ -880,7 +879,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                             if ($compatible):
 
                                 $all_courses['compatibles'][$course->id] = $compatible;
-                                $all_courses['compatibles_x'][$course->id] = [ 
+                                $all_courses['compatibles_ids'][$course->id] = [ 
                                     'summary_course_id' => $compatible->id ,
                                     'course_id' => $compatible->course_id ,
                                 ];
@@ -890,7 +889,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                         endif;
 
                         $all_courses['current_courses'][] = $course;
-                        $all_courses['current_courses_x'][] = $course->id;
+                        $all_courses['current_courses_ids'][] = $course->id;
 
                         break;
                     }
@@ -1446,10 +1445,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     ->whereIn('id', $course_ids)
                     ->get();
 
-        $compatible_summary_courses = SummaryCourse::with('course:id,name')
-            ->whereIn('id', $compatible_ids)
-            ->orderBy('grade_average', 'DESC')
-            ->get();
+        if ($compatible_ids) {
+
+            $compatible_summary_courses = SummaryCourse::with('course:id,name')
+                ->whereIn('id', $compatible_ids)
+                ->orderBy('grade_average', 'DESC')
+                ->get();
+        }
+
 
         $all_courses = [];
 
@@ -1457,20 +1460,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $all_courses['current_courses'][] = $course;
 
-            $compatible = $compatible_summary_courses->where('course_id', $course->id)->first();
+            if ($compatible_ids) {
 
-            if ($compatible) {
+                $compatible = $compatible_summary_courses->where('course_id', $course->id)->first();
 
-                $compatible->course->compatible_of = $course;
-                $compatible_course = $compatible;
+                if ($compatible) {
 
-                $all_courses['compatibles'][$course->id] = $compatible_course;
+                    $compatible->course->compatible_of = $course;
+                    $compatible_course = $compatible;
+
+                    $all_courses['compatibles'][$course->id] = $compatible_course;
+                }
             }
-        }
 
-        // foreach ($variable as $key => $value) {
-        //     // code...
-        // }
+        }
 
         return $all_courses;
     }
