@@ -464,9 +464,15 @@ class Topic extends BaseModel
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->get();
-        $statuses_courses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
-        $statuses_topic = Taxonomy::where('group', 'topic')->where('type', 'user-status')
-            ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+        $user_status = Taxonomy::where('type', 'user-status')->get();
+        // $statuses_courses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
+        $statuses_courses = $user_status->where('group', 'course')->where('type', 'user-status');
+        // $statuses_topic = Taxonomy::where('group', 'topic')->where('type', 'user-status')
+        //     ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+        //     ->pluck('id')->toArray();
+
+        $statuses_topic = $user_status->where('group', 'topic')->where('type', 'user-status')
+        ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
             ->pluck('id')->toArray();
         $medias = MediaTema::whereHas('topic', function($q) use ($courses) {
                 $q->whereIn('course_id', $courses->pluck('id')->toArray());
@@ -614,9 +620,9 @@ class Topic extends BaseModel
 
                     if (!$compatible_course_req):
                         if($requirement_course?->requirement_id){
-                            $req = Course::where('id',$requirement_course?->requirement_id)->first();
-
-                            $requirement_course_req = $req->requirements->first();
+                            $req = $req_course;
+                            // $req = Course::where('id',$requirement_course?->requirement_id)->first();
+    
                             $available_course_req = true;
 
                             // if ($requirement_course_req) {

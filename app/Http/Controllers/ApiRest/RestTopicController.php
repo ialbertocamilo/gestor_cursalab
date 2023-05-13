@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RestTopicController extends Controller
 {
-    public function topics(Course $course, Request $request)
+    public function topics($course_id, Request $request)
     {
         $tiempoInicioApi = microtime(true);
         $user = Auth::user();
