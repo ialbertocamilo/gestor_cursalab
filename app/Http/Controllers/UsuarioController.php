@@ -563,15 +563,7 @@ class UsuarioController extends Controller
     {
         info('getCoursesByUser INICIO');
 
-
-        if ($user->hasDataUpToDate()) {
-
-            $courses = $user->getCurrentCoursesLite('course-view-app-user');
-
-        } else {
-
-            $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
-        }
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
 
         // info($courses);
         info('getCoursesByUser FIN');
