@@ -17,7 +17,15 @@ class UserCourseData extends Model
 
     protected $table = 'course_user_data';
 
-    protected $fillable = ['user_id', 'courses', 'compatibles'];
+    protected $fillable = ['user_id', 'courses', 'compatibles', 'current_courses_updated_at'];
+
+    protected $casts = [
+        'current_courses_updated_at' => 'datetime',
+    ];
+
+    // protected $primaryKey = "_id";
+
+    // public $incrementing = false;
 
 
     // protected $with = ['children', 'parent'];
@@ -29,6 +37,11 @@ class UserCourseData extends Model
     {
         return $this->morphTo();
     }
+
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class);
+    // }
 
     // public function model()
     // {

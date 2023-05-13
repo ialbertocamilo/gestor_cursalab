@@ -694,23 +694,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // return $query->paginate($request->rowsPerPage);
     }
 
-//    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true, $withRelations = 'default', $only_ids = false)
-//    {
-//        $user = $this;
-//        $user->load('criterion_values:id,value_text,criterion_id');
-////        $programs = collect();
-//        $all_courses = [];
-//
-////        if ($with_programs) $this->setProgramCourses($user, $all_courses);
-//
-//        // TODO: Agregar segmentacion directa
-//        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $withRelations);
-//
-//        return $only_ids
-//            ? array_unique(array_column($all_courses, 'id'))
-//            : collect($all_courses)->unique()->values();
-//    }
-
     public function getCurrentCourses(
         $with_programs = true,
         $with_direct_segmentation = true,
@@ -724,11 +707,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         
-        info('getCurrentCourses A');
-
         if ($user->hasDataUpToDate()) {
 
-            $all_courses = $user->getCoursesDirectly($withRelations);
+            $all_courses = $user->getCoursesDirectly();
 
         } else {
 
@@ -740,30 +721,23 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $response_type);
             }
 
-            $user->course_data()->updateOrCreate([
+            $user->course_data()->updateOrCreate(['user_id' => $user->id], [
                 'courses' => $all_courses['current_courses_ids'] ?? [],
                 'compatibles' => $all_courses['compatibles_ids'] ?? [],
+                'current_courses_updated_at' => now(),
             ]);
         }
 
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
         
-        info('getCurrentCourses B');
-
         if ($response_type === 'courses-unified')
             return $all_courses;
         
-        info('getCurrentCourses C');
-
         $query = $this->getUserCourseSegmentationQuery($withRelations);
         
-        info('getCurrentCourses D');
-
         if(count($bySchoolsId)>0){
             $byCoursesId = CourseSchool::whereIn('school_id',$bySchoolsId)->select('course_id')->pluck('course_id');
-            // $query->whereRelation('schools', 'school_id', 'in',$bySchoolsId);
-            // dd($query->first());
         }
 
         if(count($byCoursesId)>0){
@@ -775,8 +749,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($only_ids)
             return array_unique(array_column($current_courses, 'id'));
 
-        info('getCurrentCourses E');
-
         foreach ($courses as $course) {
 
             $compatible_course = $compatibles_courses[$course->id] ?? false;
@@ -787,8 +759,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
         }
         
-        info('getCurrentCourses F');
-
         return $courses;
     }
 
@@ -802,15 +772,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $response_type)
     {
-        info('SCWDS 1');
-//        $all_courses['compatibles'] = [];
         $user->loadMissing('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
 
         $query = $this->getUserCourseSegmentationQuery('soft');
-
-        info('SCWDS 2');
 
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
@@ -822,8 +788,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('active', ACTIVE)
             ->get();
 
-        info('SCWDS 3');
-
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
 //        $user->active_cycle = $user->getActiveCycle();
 
@@ -833,8 +797,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //                ->where('value_text', 'Ciclo 0')->first()
 //        ];
 
-        info('SCWDS 4');
-
         $summary_courses_compatibles = SummaryCourse::with('course:id,name')
             ->whereRelation('course', 'active', ACTIVE)
             ->where('user_id', $user->id)
@@ -843,35 +805,29 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelation('status', 'code', 'aprobado')
             ->get();
 
-
-
-        info('SCWDS 5');
-
         foreach ($course_segmentations as $course) {
 
             // $segment_ids = $course->segments->pluck('id');
-            
             // $segment_values = SegmentValue::whereIn('segment_id', $segment_ids)->get();
 
             foreach ($course->segments as $segment) {
-//                dd($segment->values->first());
 
-//                $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
-//
-//                if (!$valid_rule) continue;
+            // $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
+            // if (!$valid_rule) continue;
 
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
                 // $course_segment_criteria = $segment_values->where('segment_id', $segment->id)->groupBy('criterion_id');
 
-                // $valid_segment = false;
+                // info($course_segment_criteria);
+
                 $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
-                //                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria, $workspace_criteria);
 
                 if ($valid_segment) :
 
                     // COMPATIBLE VALIDATION
 
                     if ($response_type === 'courses-separated') {
+
                         if ($user->subworkspace->parent_id === 25):
 
                             $compatible = $course->getCourseCompatibilityByUser($user, $summary_courses_compatibles);
@@ -880,8 +836,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                                 $all_courses['compatibles'][$course->id] = $compatible;
                                 $all_courses['compatibles_ids'][$course->id] = [ 
-                                    'summary_course_id' => $compatible->id ,
-                                    'course_id' => $compatible->course_id ,
+                                    'summary_course_id' => $compatible->id,
+                                    'course_id' => $compatible->course_id,
                                 ];
 
                             endif;
@@ -915,9 +871,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
         }
 
-
         unset($user->active_cycle);
-	    info('SCWDS 6');
     }
 
     public function validateUCCyclesRule(Segment $segment, $user, $UC_rules_data): bool
@@ -1421,11 +1375,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function hasDataUpToDate()
     {
+        // return false;
+        
         $course_data = $this->course_data;
 
         if ($course_data) {
 
-            if ($course_data->updated_at > $this->required_update_at) {
+            if ($course_data->current_courses_updated_at > $this->required_update_at) {
 
                 return true;
             }
@@ -1434,7 +1390,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return false;
     }
 
-    public function getCoursesDirectly($query_key): array
+    public function getCoursesDirectly(): array
     {
         $course_ids = $this->course_data['courses'];
         $compatibles = $this->course_data['compatibles'];
@@ -1452,7 +1408,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 ->orderBy('grade_average', 'DESC')
                 ->get();
         }
-
 
         $all_courses = [];
 
