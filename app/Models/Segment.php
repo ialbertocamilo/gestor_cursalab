@@ -407,7 +407,6 @@ Segment extends BaseModel
         if ($criterion_id == 48) {
 
             // $temp_segment_values = $segment_values->keyBy('criterion_value_id');
-
             // $row = $temp_segment_values->get($user_criterion_value_id_by_criterion[0]);
 
             $row = $segment_values->pluck('criterion_value_id')->where('criterion_value_id', $user_criterion_value_id_by_criterion[0])->first();
