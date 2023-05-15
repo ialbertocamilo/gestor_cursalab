@@ -70,7 +70,7 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                    <v-col cols="11" class="d-flex justify-content-center">
+                    <v-col cols="11" class="d-flex justify-content-center" style="height: 364px;">
                         <!-- hide-delimiter-background -->
                         <v-carousel
                             height="100%"
@@ -85,7 +85,7 @@
                                 v-for="(row, i) in segments"
                                 :key="i"
                             >
-                                <v-sheet class="group-sheet" height="100%">
+                                <v-sheet class="group-sheet" height="100%" style="overflow-y: auto;">
                                     <!-- <div class="text-h6 text-center"  v-if="!limitOne">
                                         {{ tabs_title }} {{ i + 1 }} /
                                         {{ segments.length }}

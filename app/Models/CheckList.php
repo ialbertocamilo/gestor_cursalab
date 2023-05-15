@@ -112,7 +112,8 @@ class CheckList extends BaseModel
 
             $checklist->active = $checklist->active;
             $checklist->is_super_user = auth()->user()->isAn('super-user');
-
+            $type_checklist = Taxonomy::where('id', $checklist->type_id)->first();
+            $checklist->type_checklist = $type_checklist?->code;
         }
 
         $response['data'] = $checklists->items();

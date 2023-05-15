@@ -1,6 +1,6 @@
 <template>
     <v-row justify="space-around">
-        <v-col cols="12">
+        <v-col cols="12" style="height: 400px;">
             <v-row>
                 <v-col cols="5" class="d-flex justify-content-center flex-row bx_search_by_document">
                     <DefaultInput
