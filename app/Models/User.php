@@ -707,11 +707,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         
-        if ($user->hasDataUpToDate()) {
+        // if ($user->hasDataUpToDate()) {
 
-            $all_courses = $user->getCoursesDirectly();
+        //     $all_courses = $user->getCoursesDirectly();
 
-        } else {
+        // } else {
 
             $user->load('criterion_values:id,value_text,criterion_id');
 
@@ -726,7 +726,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 'compatibles' => $all_courses['compatibles_ids'] ?? [],
                 'current_courses_updated_at' => now(),
             ]);
-        }
+        // }
 
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];

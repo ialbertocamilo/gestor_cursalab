@@ -513,6 +513,12 @@ class Course extends BaseModel
                          ->get();
 
             $courses = $courses->sortBy('position');
+            $cycles = null;
+            if($workspace_id === 25){
+                $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
+                ->where('value_text', '<>', 'Ciclo 0')
+                ->orderBy('position')->get();
+            }
 
             foreach ($courses as $course) {
                 $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
@@ -557,7 +563,7 @@ class Course extends BaseModel
                 $tags = [];
                 if ($workspace_id === 25) {
                     $course_name = removeUCModuleNameFromCourseName($course_name);
-                    $tags = $this->getCourseTagsToUCByUser($course, $user);
+                    $tags = $this->getCourseTagsToUCByUser($course, $user,$cycles);
                 }
 
                 $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
@@ -1170,7 +1176,7 @@ class Course extends BaseModel
         return $a;
     }
 
-    public function getCourseTagsToUCByUser($course, $user)
+    public function getCourseTagsToUCByUser($course, $user,$cycles)
     {
         $tags = [];
 
@@ -1206,11 +1212,12 @@ class Course extends BaseModel
 
             $ciclo = null;
             if ($temp_segment)
-                $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
-                    ->whereRelation('criterion', 'code', 'cycle')
-                    ->where('value_text', '<>', 'Ciclo 0')
-                    ->orderBy('position')
-                    ->first();
+                $ciclo = $cycles->whereIn('id', $temp_segment->values->pluck('criterion_value_id'))->first();
+                // $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
+                //     ->whereRelation('criterion', 'code', 'cycle')
+                //     ->where('value_text', '<>', 'Ciclo 0')
+                //     ->orderBy('position')
+                //     ->first();
 
             if ($ciclo)
                 $tags = [$ciclo->value_text];
