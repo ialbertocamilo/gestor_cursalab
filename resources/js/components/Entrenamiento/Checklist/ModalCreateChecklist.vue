@@ -484,6 +484,8 @@ export default {
             vue.checklist.list_segments = vue.checklist.segments
             vue.modalFormSegmentationOptions.list_segments = vue.checklist.segments
             vue.modalFormSegmentationOptions.isEdit = true
+            vue.resource.type_checklist = vue.checklist.type_checklist;
+            vue.type_checklist = vue.checklist.type_checklist;
         },
         nextStep(){
             let vue = this;
@@ -789,6 +791,7 @@ export default {
 }
 .v-stepper__header.stepper_dots {
     justify-content: center;
+    height: initial;
 }
 .v-stepper__header.stepper_dots .v-divider {
     margin: 0;
@@ -800,7 +803,7 @@ export default {
     max-width: 30px;
 }
 .v-stepper__header.stepper_dots .v-stepper__step {
-    padding: 24px 0;
+    padding: 10px 0;
     margin: 0;
 }
 .v-stepper__header.stepper_dots .v-stepper__step span.v-stepper__step__step {
