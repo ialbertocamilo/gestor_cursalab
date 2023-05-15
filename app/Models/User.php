@@ -712,7 +712,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $all_courses = $user->getCoursesDirectly();
         } else {
 
-            $user->load('criterion_values:id,value_text,criterion_id');
+            $user->load(['criterion_values:id,value_text,criterion_id','criterion_values.criterion:id,code']);
 
             $all_courses = [];
 
