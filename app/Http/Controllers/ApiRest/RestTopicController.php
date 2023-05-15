@@ -42,6 +42,13 @@ class RestTopicController extends Controller
         $data = Course::getDataToCoursesViewAppByUser($user, $courses);
         return $this->successApp(['data' => $data]);
     }
+    public function listCoursesBySchoolV2($school_id)
+    {
+        $user = Auth::user();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',bySchoolsId:[$school_id]);
+        $data = Course::getDataToCoursesViewAppByUserV2($user, $courses);
+        return $this->successApp($data);
+    }
 
 
     public function reviewTopic(Topic $topic, $user = null)

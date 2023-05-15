@@ -7,6 +7,7 @@ Route::controller(RestTopicController::class)->group(function() {
     Route::get('/{course}', 'topics');
 
     Route::get('/{school_id}/list-courses', 'listCoursesBySchool');
+    Route::get('/{school_id}/list-courses2', 'listCoursesBySchoolV2');
     Route::prefix('v2')->group(function () {
         Route::get('/{course}', 'topicsv2');
     });

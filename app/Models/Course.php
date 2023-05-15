@@ -206,10 +206,10 @@ class Course extends BaseModel
         // }
         if(!$request->canChangePosition){
             // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
-    
+
             $field = $field ?? 'created_at';
             $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-    
+
             $q->orderBy($field, $sort);
         }else{
             $q->addSelect('cs.position as course_position')->orderBy('course_position', 'ASC')->groupBy('courses.id');
@@ -477,7 +477,7 @@ class Course extends BaseModel
                                 ->where('subworkspace_id',$user->subworkspace_id)
                                 ->whereIn('school_id',array_keys($schools->all()))
                                 ->get();
-       
+
         $positions_courses = CourseSchool::select('school_id','course_id','position')
                                 ->whereIn('school_id',array_keys($schools->all()))
                                 ->whereIn('course_id',$user_courses->pluck('id'))
@@ -495,7 +495,7 @@ class Course extends BaseModel
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
 
-                                
+
         foreach ($schools as $school_id => $courses) {
 
             $school = $courses->first()->schools->where('id', $school_id)->first();
@@ -727,6 +727,145 @@ class Course extends BaseModel
                 'estado' => $school_status,
                 'ultimo_curso' => $last_course_reviewed,
                 'ultimos_cursos' => $last_school_courses,
+                'orden' => $school_position,
+                "cursos" => $school_courses,
+            ];
+        }
+
+        $columns = array_column($data, 'orden');
+        array_multisort($columns, SORT_ASC, $data);
+
+        return $data;
+    }
+    protected function getDataToCoursesViewAppByUserV2($user, $user_courses): array
+    {
+        $workspace_id = $user->subworkspace->parent_id;
+        $schools = $user_courses->groupBy('schools.*.id');
+        $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
+            $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
+        })->with('status:id,code')
+            ->where('user_id', $user->id)
+            ->get();
+
+        $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
+            ->whereIn('course_id', $user_courses->pluck('id'))
+            ->where('user_id', $user->id)
+            ->groupBy('course_id')
+            ->get();
+
+        $data = [];
+        $positions_schools = SchoolSubworkspace::select('school_id','position')
+                                ->where('subworkspace_id',$user->subworkspace_id)
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->get();
+
+        $positions_courses = CourseSchool::select('school_id','course_id','position')
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->whereIn('course_id',$user_courses->pluck('id'))
+                                ->get();
+
+        $summary_courses_compatibles = SummaryCourse::with('course:id,name')
+            ->whereRelation('course', 'active', ACTIVE)
+            ->where('user_id', $user->id)
+            ->orderBy('grade_average', 'DESC')
+            ->whereRelation('status', 'code', 'aprobado')
+            ->get();
+
+        $user->loadMissing('criterion_values.criterion.field_type');
+
+        $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
+
+
+        foreach ($schools as $school_id => $courses) {
+
+            $school = $courses->first()->schools->where('id', $school_id)->first();
+            $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
+            $school_courses = [];
+            $school_completed = 0;
+            $school_assigned = 0;
+            $school_percentage = 0;
+
+            $medias = MediaTema::whereHas('topic', function($q) use ($courses) {
+                                $q->whereIn('course_id', $courses->pluck('id')->toArray());
+                            })
+                         ->get();
+
+            $courses = $courses->sortBy('position');
+            $cycles = null;
+            if($workspace_id === 25){
+                $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
+                ->where('value_text', '<>', 'Ciclo 0')
+                ->orderBy('position')->get();
+            }
+
+            foreach ($courses as $course) {
+                $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
+
+                $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
+                $school_assigned++;
+                $last_topic = null;
+                $course_status = self::getCourseStatusByUser($user, $course, $summary_courses_compatibles, $medias, $statuses);
+                if ($course_status['status'] == 'completado') $school_completed++;
+
+
+                // UC rule
+                $course_name = $course->name;
+                $tags = [];
+                if ($workspace_id === 25) {
+                    $course_name = removeUCModuleNameFromCourseName($course_name);
+                    $tags = $this->getCourseTagsToUCByUser($course, $user,$cycles);
+                }
+
+                if ($course->compatible) {
+
+                    $school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'status' => 'aprobado',
+                        'requirements' => null,
+                        'encuesta' => false,
+                        'encuesta_habilitada' => false,
+                        'encuesta_resuelta' => false,
+                        'encuesta_id' => null,
+                    ];
+                }
+                else
+                {
+                    $school_courses[] = [
+                        'id' => $course->id,
+                        'nombre' => $course_name,
+                        'status' => $course_status['status'],
+                        'requirements' => $course_status['requirements'],
+                        'encuesta' => $course_status['available_poll'],
+                        'encuesta_habilitada' => $course_status['enabled_poll'],
+                        'encuesta_resuelta' => $course_status['solved_poll'],
+                        'encuesta_id' => $course_status['poll_id'],
+                    ];
+                }
+            }
+
+            if ($school_completed > 0) :
+                $school_status = $school_completed >= $school_assigned ? 'Aprobado' : 'Desarrollo';
+                $school_percentage = ($school_completed / $school_assigned) * 100;
+            else :
+                $school_status = 'Pendiente';
+            endif;
+            $school_percentage = round($school_percentage);
+
+            // UC
+            $school_name = $school->name;
+            if ($workspace_id === 25) {
+                $school_name = removeUCModuleNameFromCourseName($school_name);
+            }
+            $columns = array_column($school_courses, 'orden');
+            // array_multisort($columns, SORT_ASC, $school_courses);
+            $data[] = [
+                'categoria_id' => $school->id,
+                'categoria' => $school_name,
+                'completados' => $school_completed,
+                'asignados' => $school_assigned,
+                'porcentaje' => $school_percentage,
+                'estado' => $school_status,
                 'orden' => $school_position,
                 "cursos" => $school_courses,
             ];
@@ -1449,7 +1588,7 @@ class Course extends BaseModel
     public function getScheduleRestartMinutes()
     {
         $config = $this->scheduled_restarts;
-        
+
         $tiempo_en_minutos = $this->parseConfigInMinutes($config);
         if ($config AND $config['activado'] AND $tiempo_en_minutos > 0) {
 
@@ -1471,13 +1610,13 @@ class Course extends BaseModel
     }
 
     public function parseConfigInMinutes($config){
-        $reinicio_dias = isset($config['reinicio_dias']) && $config['reinicio_dias'] != null  
+        $reinicio_dias = isset($config['reinicio_dias']) && $config['reinicio_dias'] != null
         ? $config['reinicio_dias']*1440  : 0 ;
 
-        $reinicio_horas = isset($config['reinicio_horas']) && $config['reinicio_horas'] != null  
+        $reinicio_horas = isset($config['reinicio_horas']) && $config['reinicio_horas'] != null
                 ? $config['reinicio_horas']*60  : 0 ;
 
-        $reinicio_minutos = isset($config['reinicio_minutos']) && $config['reinicio_minutos'] != null  
+        $reinicio_minutos = isset($config['reinicio_minutos']) && $config['reinicio_minutos'] != null
                 ? $config['reinicio_minutos']  : 0 ;
 
         return $reinicio_dias + $reinicio_horas + $reinicio_minutos;
@@ -1485,7 +1624,7 @@ class Course extends BaseModel
     public function getAttemptsLimit()
     {
         if (!$this->mod_evaluaciones) return null;
-        
+
         return isset($this->mod_evaluaciones['nro_intentos']) ? $this->mod_evaluaciones['nro_intentos'] : null;
     }
 }
