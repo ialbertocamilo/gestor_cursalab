@@ -192,7 +192,8 @@ class RestUserProgressController extends Controller
             $course_name = $course->name;
             $tags = [];
             if ($workspace_id === 25) {
-                $tags = $course->getCourseTagsToUCByUser($course, $user,$cycles);
+                // $tags = $course->getCourseTagsToUCByUser($course, $user,$cycles);
+                $tags = $course->tags;
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
 

@@ -707,11 +707,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         
-        if ($user->hasDataUpToDate()) {
+        // if ($user->hasDataUpToDate()) {
 
-            $all_courses = $user->getCoursesDirectly();
+        //     $all_courses = $user->getCoursesDirectly();
 
-        } else {
+        // } else {
 
             $user->load('criterion_values:id,value_text,criterion_id');
 
@@ -724,12 +724,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $user->course_data()->updateOrCreate(['user_id' => $user->id], [
                 'courses' => $all_courses['current_courses_ids'] ?? [],
                 'compatibles' => $all_courses['compatibles_ids'] ?? [],
+                'course_id_tags' => $all_courses['course_id_tags'] ?? [],
                 'current_courses_updated_at' => now(),
             ]);
-        }
+        // }
 
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
+        $course_id_tags = collect($all_courses['course_id_tags']) ?? collect();
         
         if ($response_type === 'courses-unified')
             return $all_courses;
@@ -748,13 +750,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if ($only_ids)
             return array_unique(array_column($current_courses, 'id'));
-
+        $isUserUcfp = $user->subworkspace->parent_id === 25;
         foreach ($courses as $course) {
-
             $compatible_course = $compatibles_courses[$course->id] ?? false;
-
+            $course->tags = ($isUserUcfp) ? $course_id_tags->where('course_id',$course->id)->first()['tags'] : [];
             if ($compatible_course) {
-
                 $course->compatible = $compatible_course;
             }
         }
@@ -804,12 +804,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->get();
-
+        $cycles = null;
+        if($user->subworkspace->parent_id === 25){
+            $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
+            ->where('value_text', '<>', 'Ciclo 0')
+            ->orderBy('position')->get();
+        }
         foreach ($course_segmentations as $course) {
 
             // $segment_ids = $course->segments->pluck('id');
             // $segment_values = SegmentValue::whereIn('segment_id', $segment_ids)->get();
-
+            
             foreach ($course->segments as $segment) {
 
             // $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
@@ -823,7 +828,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
 
                 if ($valid_segment) :
-
+                    $tags = [];
+                    if($user->subworkspace->parent_id === 25){
+                        $tags = $course->getCourseTagsToUCByUser($course, $user,$segment,$cycles);
+                    }
                     // COMPATIBLE VALIDATION
 
                     if ($response_type === 'courses-separated') {
@@ -846,7 +854,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                         $all_courses['current_courses'][] = $course;
                         $all_courses['current_courses_ids'][] = $course->id;
-
+                        $all_courses['course_id_tags'][] = [
+                            'course_id'=>$course->id,
+                            'tags' => $tags
+                        ];
                         break;
                     }
 

@@ -563,7 +563,8 @@ class Course extends BaseModel
                 $tags = [];
                 if ($workspace_id === 25) {
                     $course_name = removeUCModuleNameFromCourseName($course_name);
-                    $tags = $this->getCourseTagsToUCByUser($course, $user,$cycles);
+                    $tags = $course->tags;
+                    // $tags = $this->getCourseTagsToUCByUser($course, $user,$cycles);
                 }
 
                 $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
@@ -1176,7 +1177,7 @@ class Course extends BaseModel
         return $a;
     }
 
-    public function getCourseTagsToUCByUser($course, $user,$cycles)
+    public function getCourseTagsToUCByUser($course, $user,$valid_segment,$cycles)
     {
         $tags = [];
 
@@ -1190,29 +1191,29 @@ class Course extends BaseModel
 
         } else {
 
-            $temp_segment = null;
-            $user_criteria = $user->criterion_values->groupBy('criterion_id');
-            // $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+            // $temp_segment = null;
+            // $user_criteria = $user->criterion_values->groupBy('criterion_id');
+            // // $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
 
-            foreach ($course->segments as $segment) {
+            // foreach ($course->segments as $segment) {
 
-                $course_segment_criteria = $segment->values->groupBy('criterion_id');
+            //     $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
-                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+            //     $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
 
-                if ($valid_segment) :
-                    $temp_segment = $segment;
-                    break;
-                endif;
+            //     if ($valid_segment) :
+            //         $temp_segment = $segment;
+            //         break;
+            //     endif;
 
-            }
+            // }
 
 //            $ciclos_values = $temp_segment->values()->whereRelation('criterion', 'code', 'cycle')->pluck('criterion_value_id');
 //            $ciclos = CriterionValue::whereIn('id', $ciclos_values)->where('value_text', '<>', 'Ciclo 0')->get();
 
             $ciclo = null;
-            if ($temp_segment)
-                $ciclo = $cycles->whereIn('id', $temp_segment->values->pluck('criterion_value_id'))->first();
+            if ($valid_segment)
+                $ciclo = $cycles->whereIn('id', $valid_segment->values->pluck('criterion_value_id'))->first();
                 // $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
                 //     ->whereRelation('criterion', 'code', 'cycle')
                 //     ->where('value_text', '<>', 'Ciclo 0')
