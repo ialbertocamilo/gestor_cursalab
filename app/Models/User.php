@@ -707,11 +707,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         
-        // if ($user->hasDataUpToDate()) {
+        if ($user->hasDataUpToDate()) {
 
-        //     $all_courses = $user->getCoursesDirectly();
-
-        // } else {
+            $all_courses = $user->getCoursesDirectly();
+        } else {
 
             $user->load('criterion_values:id,value_text,criterion_id');
 
@@ -727,7 +726,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 'course_id_tags' => $all_courses['course_id_tags'] ?? [],
                 'current_courses_updated_at' => now(),
             ]);
-        // }
+        }
 
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
@@ -1405,7 +1404,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $course_ids = $this->course_data['courses'];
         $compatibles = $this->course_data['compatibles'];
-
         $compatible_ids = array_column($compatibles, 'summary_course_id');
 
         $courses = $this->getUserCourseSegmentationQuery('soft')
@@ -1421,7 +1419,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
 
         $all_courses = [];
-
+        $all_courses['course_id_tags'] = $this->course_data['course_id_tags'];
         foreach ($courses as $key => $course) {
 
             $all_courses['current_courses'][] = $course;
