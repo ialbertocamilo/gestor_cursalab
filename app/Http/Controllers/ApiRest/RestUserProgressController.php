@@ -9,6 +9,7 @@ use App\Models\Taxonomy;
 use App\Models\CourseSchool;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
+use App\Models\CriterionValue;
 use App\Models\SchoolSubworkspace;
 use App\Http\Controllers\Controller;
 
