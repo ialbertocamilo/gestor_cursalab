@@ -167,7 +167,7 @@ class RestTopicController extends Controller
             $summary_course = SummaryCourse::updateUserData($topic->course, $user);
             SummaryUser::updateUserData($user);
         }else{
-            $summary_course = SummaryCourse::select('id','status_id')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
+            $summary_course = SummaryCourse::select('id','status_id','advanced_percentage')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
         }
         $topic_status =  $statuses->where('id',$summary_topic->status_id)->first();
         $course_status = $statuses->where('id',$summary_course?->status_id)->first();
@@ -191,6 +191,7 @@ class RestTopicController extends Controller
                 'status' => $course_status?->code,
                 'habilitar_requisitos' => $avaible_requirements_course,
                 'requirements' => ($avaible_requirements_course) ? $topic->course->requirements->pluck('id') : [],
+                'encuesta_habilitada' => $summary_course->advanced_percentage == 100 && $topic->course->polls->first()
                 // 'requirements' => $topic->course->requirements()->pluck('id')
             ]
         ],'Contenido revisado correctamente.');
