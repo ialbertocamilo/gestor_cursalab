@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Support\ExternalDatabase;
+use App\Imports\MassiveUploadTopicGrades;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
 class restablecer_funcionalidad extends Command
@@ -104,7 +105,7 @@ class restablecer_funcionalidad extends Command
         // $this->generateStatusTopics();
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
-        // $this->setSummarys();
+        $this->setSummarysFromTopicGrades();
         // $this->setSchoolOrden();
         // $this->setCourseOrden();
         // $this->restoSummaryCourseSinceSummaryTopic();
@@ -177,28 +178,49 @@ class restablecer_funcionalidad extends Command
             }
         }
     }
-    public function setSummarys(){
-        $users = User::whereIn('document',[''])->select('id')->get();
+    public function setSummarysFromTopicGrades(){
+        $users = User::whereIn('document',['03052023'])->get();
+        $massive = new MassiveUploadTopicGrades([
+            'evaluation_type'=>'',
+            'course'=>'',
+            'topics'=>'',
+            'number_socket'=>'',
+        ]);
+        $massive->topic_states = Taxonomy::getData('topic', 'user-status')->get();
+        $massive->source = Taxonomy::getFirstData('summary', 'source', 'massive-upload-grades');
+
         foreach ($users as $user) {
             $courses = $user->getCurrentCourses();
             $_bar = $this->output->createProgressBar($courses->count());
             $_bar->start();
             foreach ($courses as $course) {
-                $topics = Topic::with('evaluation_type')
-                ->where('course_id',$course)->where('active',1)->select('id','type_evaluation_id')
+                $course_settings =Course::getModEval($course);
+                $topics = Topic::disableCache()->with('course')->where('course_id', $course->id)              
+                ->where(function ($q) {
+                    $q->where('assessable', INACTIVE); // NO evaluables
+                    $q->orWhere(function ($q2) { // Evaluables calificados
+                        $q2->where('assessable', ACTIVE)
+                            ->whereRelation('evaluation_type', 'code', 'qualified');
+                    });
+                })
                 ->get();
-
+                $user_progress_media = array();
+                $data = ['03052023',20,'','','','',null];
+                $massive->uploadTopicGrades($course_settings, $user, $topics, $data);
                 foreach ($topics as $topic) {
-                    $summary = SummaryTopic::whereIn('topic_id',$topics->pluck('id'))
-                    ->whereRelationIn('status', 'code', ['aprobado'])
-                    ->first();
-                    // if($topic->evaluation_type->code=='aprobado'){
-                    //     $summary_create = 
-                    // }else{
-                    //     $summary_create->status_id = 4576;
-                    // }
-                    $summary_create = SummaryTopic::storeData($topic, $user);
+                    $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
+                    foreach ($medias as  $media) {
+                        array_push($user_progress_media, (object) array(
+                            'media_topic_id' => $media->id,
+                            'status' => 'revisado',
+                            'last_media_duration' => null
+                        ));
+                    }
+                    SummaryTopic::where('user_id',$user->id)->where('topic_id',$topic->id)->update([
+                        'media_progress' => json_encode($user_progress_media)
+                    ]);
                 }
+                SummaryCourse::getCurrentRowOrCreate($course, $user);
                 SummaryCourse::updateUserData($course, $user, false,false);
                 $_bar->advance();
             }
