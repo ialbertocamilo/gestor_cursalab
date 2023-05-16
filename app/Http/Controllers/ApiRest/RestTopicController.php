@@ -177,14 +177,13 @@ class RestTopicController extends Controller
             $avaible_requirements_topic =  $topic_status->code == 'revisado';
             $avaible_requirements_course = $course_status->code == 'aprobado';
         }
-        // dd($topic->requirements()->first());
         return $this->success([
             'tema'=>[
                 'id'=> $topic->id,
                 'estado_tema' => $topic_status?->code,
                 'estado_tema_str' => $topic_status?->name,
                 'habilitar_requisitos' => $avaible_requirements_topic,
-                'requirements' => ($avaible_requirements) ? $topic->requirements->pluck('id') : []
+                'requirements' => ($avaible_requirements_topic) ? $topic->requirements->pluck('id') : []
                 // 'requirements' => $topic->requirements()->pluck('id')
             ],
             'course'=>[
