@@ -80,19 +80,19 @@ class RestTopicController extends Controller
 
     public function reviewTopicMedia( Request $request, Topic $topic, MediaTema $media, $user = null)
     {
-        if ($topic->course->hasBeenValidated())
-            return ['error' => 0, 'data' => null];
+        // if ($topic->course->hasBeenValidated())
+        //     return ['error' => 0, 'data' => null];
 
         $user = auth()->user() ?? $user;
 
         $topic->load('course');
 
-        $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+        $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration','status_id')
             ->where('topic_id', $topic->id)
             ->where('user_id', $user->id)
             ->first();
-
         if (!$summary_topic) return $this->error("No se pudo revisar el contenido.", 422);
+        $statuses = Taxonomy::select('id','name','code','group')->where('type', 'user-status')->get();
 
         $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
 
@@ -158,19 +158,43 @@ class RestTopicController extends Controller
                     $pending = true;
             }
         }
+        $summary_course = null;
         if(!$pending && !$topic->type_evaluation_id){
-
             $reviewed_topic_taxonomy = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
             $summary_topic->status_id = $reviewed_topic_taxonomy?->id;
             $summary_topic->last_time_evaluated_at = now();
             $summary_topic->save();
-
-            SummaryCourse::updateUserData($topic->course, $user);
+            $summary_course = SummaryCourse::updateUserData($topic->course, $user);
             SummaryUser::updateUserData($user);
-
+        }else{
+            $summary_course = SummaryCourse::select('id','status_id')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
         }
-
-        return $this->success(['msg' => "Contenido revisado correctamente."]);
+        $topic_status =  $statuses->where('id',$summary_topic->status_id)->first();
+        $course_status = $statuses->where('id',$summary_course?->status_id)->first();
+        $avaible_requirements_topic = false; //code aprobado o realizado
+        $avaible_requirements_course = false;
+        if($topic->type_evaluation_id){
+            $avaible_requirements_topic =  $topic_status->code == 'revisado';
+            $avaible_requirements_course = $course_status->code == 'aprobado';
+        }
+        // dd($topic->requirements()->first());
+        return $this->success([
+            'tema'=>[
+                'id'=> $topic->id,
+                'estado_tema' => $topic_status?->code,
+                'estado_tema_str' => $topic_status?->name,
+                'habilitar_requisitos' => $avaible_requirements_topic,
+                'requirements' => ($avaible_requirements) ? $topic->requirements->pluck('id') : []
+                // 'requirements' => $topic->requirements()->pluck('id')
+            ],
+            'course'=>[
+                'id'=> $topic->course_id,
+                'status' => $course_status?->code,
+                'habilitar_requisitos' => $avaible_requirements_course,
+                'requirements' => ($avaible_requirements_course) ? $topic->course->requirements->pluck('id') : [],
+                // 'requirements' => $topic->course->requirements()->pluck('id')
+            ]
+        ],'Contenido revisado correctamente.');
     }
 
     public function reviewTopicMediaDuration( Request $request, Topic $topic, MediaTema $media, $user = null)
