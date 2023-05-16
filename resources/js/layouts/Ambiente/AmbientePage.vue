@@ -23,7 +23,13 @@
                          <v-form ref="gestorForm">
                             
                             <v-row class="mt-4">
-
+                                <v-col cols="12">
+                                    <DefaultInput 
+                                        v-model="resource.link_genially"
+                                        clearable 
+                                        label="Link Genially" 
+                                    />
+                                </v-col>
                                 <v-col cols="6">
                                     <DefaultInput 
                                         v-model="resource.color_primario"
@@ -393,7 +399,7 @@
 <script>
 const fields = [
     // gestor
-    'color_primario', 'color_secundario',
+    'link_genially', 'color_primario', 'color_secundario',
     'titulo', 'titulo_login',
     'fondo', 'logo', 'icono', 'logo_empresa',
     //app

@@ -10,6 +10,7 @@ class Ambiente extends Model
     protected $table = 'config_general';
     protected $fillable = [
         //gestor
+        'link_genially',
         'color_primario', 'color_secundario',
         'titulo', 'titulo_login',
         'fondo', 'logo', 'icono', 'logo_empresa',

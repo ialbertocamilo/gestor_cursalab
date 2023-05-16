@@ -24,6 +24,6 @@ class RecordingListener
      */
     public function handle(Recording $event)
     {
-        info(['Ledger-recording', $event]);
+        // info(['Ledger-recording', $event]);
     }
 }

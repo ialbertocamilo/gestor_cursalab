@@ -360,6 +360,8 @@ class LoginController extends Controller
         // return $this->guard()->attempt(
         //     $this->credentials($request), $request->boolean('remember')
         // );
+        info($request->all());
+        
         return (Auth::attempt(['email_gestor' => $request->email, 'password' => $request->password, 'active' => 1]));
     }
 

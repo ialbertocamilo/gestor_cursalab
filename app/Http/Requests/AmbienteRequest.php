@@ -15,6 +15,7 @@ class AmbienteRequest extends FormRequest
     {
         return [
             //gestor
+            'link_genially' => 'nullable',
             'color_primario' => 'nullable', 
             'color_secundario' => 'nullable',
             'titulo' => 'nullable', 
