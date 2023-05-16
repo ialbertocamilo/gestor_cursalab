@@ -80,8 +80,8 @@ class RestTopicController extends Controller
 
     public function reviewTopicMedia( Request $request, Topic $topic, MediaTema $media, $user = null)
     {
-        // if ($topic->course->hasBeenValidated())
-        //     return ['error' => 0, 'data' => null];
+        if ($topic->course->hasBeenValidated())
+            return ['error' => 0, 'data' => null];
 
         $user = auth()->user() ?? $user;
 
