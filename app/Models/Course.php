@@ -1372,7 +1372,6 @@ class Course extends BaseModel
         //     ->orderBy('grade_average', 'DESC')
         //     ->whereRelation('status', 'code', 'aprobado')
         //     ->first();
-
         $compatible_summary_course = $summary_courses_compatibles
             ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
             ->sortByDesc('grade_average')
@@ -1417,8 +1416,14 @@ class Course extends BaseModel
             'compatibilities_a:id',
             'compatibilities_b:id',
         ]);
-
-        $compatible = $this->getCourseCompatibilityByUser($user);
+        $summary_courses_compatibles = SummaryCourse::with('course:id,name')
+        ->whereRelation('course', 'active', ACTIVE)
+        ->where('user_id', $user->id)
+        // ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
+        ->orderBy('grade_average', 'DESC')
+        ->whereRelation('status', 'code', 'aprobado')
+        ->get();
+        $compatible = $this->getCourseCompatibilityByUser($user,$summary_courses_compatibles);
 
         return $compatible ? true : false;
     }
