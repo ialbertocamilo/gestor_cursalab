@@ -102,7 +102,7 @@ return [
                         'evaluation_type:id,code',
                         'requirements.summaries_topics' => function ($q) use ($user_id) {
                             $q
-                                ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
                                     'passed', 'last_time_evaluated_at',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
@@ -110,7 +110,7 @@ return [
                         },
                         'summaries' => function ($q) use ($user_id) {
                             $q
-                                ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
                                     'passed', 'last_time_evaluated_at',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
@@ -164,7 +164,7 @@ return [
                             'evaluation_type:id,code',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
-                                   ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                   ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
                                     'passed', 'last_time_evaluated_at',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
@@ -173,7 +173,7 @@ return [
                             'requirements.model_topic:id,name',
                             'summaries' => function ($q) use ($user_id) {
                                 $q
-                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
                                     'passed', 'last_time_evaluated_at',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
@@ -229,7 +229,7 @@ return [
                             'evaluation_type:id,code',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
-                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
                                     'passed', 'last_time_evaluated_at',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
@@ -237,7 +237,7 @@ return [
                             },
                             'summaries' => function ($q) use ($user_id) {
                                 $q
-                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade',
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
                                     'passed', 'last_time_evaluated_at',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
