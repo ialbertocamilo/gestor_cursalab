@@ -191,9 +191,11 @@ class CheckList extends BaseModel
                 $disponible = true;
                 if($type_checklist?->code == 'curso'){
                     $courses_id = $checklist->courses->pluck('id');
-                    $disponible = count($courses_id) ==  $summaries_course_checklist->where('status_id',$aprobado->id)->filter(function($q) use ($courses_id) {
-                        return in_array($q->course_id, $courses_id);
-                    })->count();
+                    if(count($courses_id)>0){
+                        $disponible = count($courses_id) ==  $summaries_course_checklist->where('status_id',$aprobado->id)->filter(function($q) use ($courses_id) {
+                            return in_array($q->course_id, $courses_id);
+                        })->count();
+                    }
                 }
                 $lista_cursos = $checklist->courses->map(function($course) use ($user,$summaries_course_checklist,$statuses_course){
                     $status = 'Pendiente';
