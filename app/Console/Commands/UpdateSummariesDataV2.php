@@ -2,21 +2,20 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
+use App\Models\Course;
+use App\Models\SummaryUser;
+use App\Models\SummaryCourse;
 use Illuminate\Console\Command;
 
-use App\Models\SummaryCourse;
-use App\Models\SummaryUser;
-use App\Models\Course;
-use App\Models\User;
-
-class UpdateSummariesData extends Command
+class UpdateSummariesDataV2 extends Command
 {
-    /**
+/**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'summary:update-data';
+    protected $signature = 'summary:update-data-v2';
 
     /**
      * The console command description.
@@ -56,54 +55,39 @@ class UpdateSummariesData extends Command
         ]);
 
         $bar = $this->output->createProgressBar($users->count());
-//        $this->info("INICIO : " . now());
-//        $this->line("");
         $bar->start();
-        info('Init command v1');
+        $chunkUserUpdate = [];
+        $chunkSummaryCourseUpdate = [];
+        $chunkSummaryUserUpdate = [];
+        info('Init command v2');
         foreach ($users as $key => $user) {
 
             $user = User::disableCache()->find($user->id);
-
             if ($user->summary_course_update) {
-
                 $course_ids = explode(',', $user->summary_course_data);
-
                 $courses = Course::disableCache()->whereIn('id', $course_ids)->get();
-
-//                $now = now();
-//                $this->newLine();
-//                $implode = implode(',', $courses->pluck('id')->toArray());
-//                $this->line("[{$now}] Updating courses => {$implode}");
                 foreach ($courses as $course) {
-//                    $now = now();
-//                    $this->line("[{$now}] Updating course => $course->name");
-                    // SummaryCourse::getCurrentRowOrCreate($course, $user);
-                    SummaryCourse::updateUserData($course, $user, false,false);
+                    $chunkSummaryCourseUpdate[] = SummaryCourse::updateUserData($course, $user, false,false,notSaveData:true);
                 }
             }
-
             if ($user->summary_user_update) {
-//                $now = now();
-//                $this->line("[{$now}] [getCurrentRowOrCreate] Updating summary user => $user->document");
                 SummaryUser::getCurrentRowOrCreate($user, $user);
-
-//                $now = now();
-//                $this->line("[{$now}] [updateUserData] Updating summary user => $user->id - $user->document");
-                SummaryUser::updateUserData($user);
-
+                $chunkSummaryUserUpdate[] = SummaryUser::updateUserData($user,notSaveData:true);
             }
-
-            $user->update([
-                'summary_user_update' => NULL,
-                'summary_course_update' => NULL,
-                'summary_course_data' => NULL,
-                'is_updating' => 0,
-                // 'required_update_at' => NULL,
-                'last_summary_updated_at' => now(),
-            ]);
+            $chunkUserUpdate[] = [
+                    'id' => $user->id,
+                    'summary_user_update' => NULL,
+                    'summary_course_update' => NULL,
+                    'summary_course_data' => NULL,
+                    'is_updating' => 0,
+                    'last_summary_updated_at' => now(),
+            ];
             $bar->advance();
         }
-        info('Finish command v1');
+        batch()->update(new SummaryCourse, $chunkSummaryCourseUpdate, 'id');
+        batch()->update(new SummaryUser, $chunkSummaryUserUpdate, 'id');
+        batch()->update(new User, $chunkUserUpdate, 'id');
+        info('Finish command v2');
         $bar->finish();
 //        $this->newLine(2);
 //        $this->info("FIN : " . now());
