@@ -152,7 +152,8 @@ class CheckList extends BaseModel
                         mergeChecklist:true,
                     );
         $checklists_taxonomies = Taxonomy::select('id','name','code','type')->where('group','checklist')->get();
-        $aprobado = Taxonomy::select('id','name','code')->where('group','course')->where('type','user-status')->where('code','aprobado')->first();
+        $statuses_course = Taxonomy::select('id','name','code')->where('group','course')->where('type','user-status')->get();
+        $aprobado = $statuses_course->where('code','aprobado')->first();
         $tax_trainer_user = $checklists_taxonomies->where('type','type')->where('code','trainer_user')->first();
         $tax_user_trainer = $checklists_taxonomies->where('type','type')->where('code','user_trainer')->first();
 
@@ -160,7 +161,7 @@ class CheckList extends BaseModel
             ->whereIn('course_id',$checklists_assigned->pluck('courses.*.id')->flatten())
             ->select('id','course_id','status_id')
             ->get();
-      
+        $checklist_rptas_user = ChecklistRpta::select('coach_id','student_id','checklist_id','flag_congrats','percent')->alumno($alumno_id)->entrenador($entrenador_id)->get();
         foreach ($checklists_assigned as $checklist) {
             $type_checklist = $checklists_taxonomies->where('type','type_checklist')->where('id', $checklist->type_id)->first();
             $actividades_activas = $checklist->actividades->where('active', 1)->where('type_id', $tax_trainer_user->id)->sortBy('position');
@@ -168,7 +169,7 @@ class CheckList extends BaseModel
             if ($actividades_activas->count() > 0 && $checklist->active) {
                 // $r_x_c = $summaries_course_checklist->where('course_id', $checklist->id)->first();
                 // $disponible = $r_x_c && $r_x_c->status_id === $aprobado->id;
-                $checklistRpta = ChecklistRpta::checklist($checklist->id)->alumno($alumno_id)->entrenador($entrenador_id)->first();
+                $checklistRpta = $checklist_rptas_user->where('checklist_id',$checklist->id)->first();
                 if (!$checklistRpta) {
                     $checklistRpta = ChecklistRpta::create([
                         'checklist_id' => $checklist->id,
@@ -194,11 +195,17 @@ class CheckList extends BaseModel
                         return in_array($q->course_id, $courses_id);
                     })->count();
                 }
-                $lista_cursos = $checklist->courses->map(function($course) use ($user){
+                $lista_cursos = $checklist->courses->map(function($course) use ($user,$summaries_course_checklist,$statuses_course){
+                    $status = 'Pendiente';
+                    $summary_course = $summaries_course_checklist->where('course_id',$course->id)->first();
+                    if($summary_course){
+                        $status = $statuses_course->where('id',$summary_course->status_id)?->name;
+                    }
                     return [
                         'id' =>$course->id,
                         'name' => $course->name,
-                        'status' => Course::getCourseStatusByUser($user, $course)['status'],
+                        'status' => $status,
+                        // 'status' => Course::getCourseStatusByUser($user, $course)['status'],
                         'schools' => $course->schools->map(fn($school)=> ['id'=>$school->id,'name'=>$school->name])
                     ];
                 });
