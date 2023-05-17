@@ -12,6 +12,7 @@ class ChecklistRpta extends Model
         'student_id',
         'checklist_id',
         // 'calificacion',
+        'flag_congrats',
         'percent',
         'course_id',
         'school_id'
