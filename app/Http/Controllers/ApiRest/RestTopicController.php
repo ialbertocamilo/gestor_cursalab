@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
-use App\Models\Course;
 use App\Models\Media;
-use App\Models\MediaTema;
-use App\Models\SummaryCourse;
-use App\Models\SummaryTopic;
-use App\Models\SummaryUser;
-use App\Models\Taxonomy;
 use App\Models\Topic;
+use App\Models\Course;
+use App\Models\Taxonomy;
+use App\Models\MediaTema;
+use App\Models\Requirement;
+use App\Models\SummaryUser;
+use App\Models\SummaryTopic;
 use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class RestTopicController extends Controller
@@ -173,24 +174,28 @@ class RestTopicController extends Controller
         $course_status = $statuses->where('id',$summary_course?->status_id)->first();
         $avaible_requirements_topic = false; //code aprobado o realizado
         $avaible_requirements_course = false;
-        if($topic->type_evaluation_id){
+        if(!$topic->type_evaluation_id){
             $avaible_requirements_topic =  $topic_status->code == 'revisado';
-            $avaible_requirements_course = $course_status->code == 'aprobado';
         }
+        $avaible_requirements_course = $course_status->code == 'aprobado';
         return $this->success([
             'tema'=>[
                 'id'=> $topic->id,
                 'estado_tema' => $topic_status?->code,
                 'estado_tema_str' => $topic_status?->name,
                 'habilitar_requisitos' => $avaible_requirements_topic,
-                'requirements' => ($avaible_requirements_topic) ? $topic->requirements->pluck('id') : []
+                'requirements' => ($avaible_requirements_topic) 
+                    ?   Requirement::where('model_type','App\\Models\\Topic')->where('requirement_id',$topic->id)->select('model_id')->pluck('model_id')
+                    :   []
                 // 'requirements' => $topic->requirements()->pluck('id')
             ],
             'course'=>[
                 'id'=> $topic->course_id,
                 'status' => $course_status?->code,
                 'habilitar_requisitos' => $avaible_requirements_course,
-                'requirements' => ($avaible_requirements_course) ? $topic->course->requirements->pluck('id') : [],
+                'requirements' => ($avaible_requirements_course) 
+                    ? Requirement::where('model_type','App\\Models\\Course')->where('requirement_id',$topic->course_id)->select('model_id')->pluck('model_id') 
+                    : [],
                 'encuesta_habilitada' => $summary_course->advanced_percentage == 100 && $topic->course->polls->first()
                 // 'requirements' => $topic->course->requirements()->pluck('id')
             ]
