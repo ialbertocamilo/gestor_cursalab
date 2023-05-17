@@ -1426,8 +1426,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             if ($compatible_ids) {
 
-                $compatible = $compatible_summary_courses->where('course_id', $course->id)->first();
-
+                // $compatible = $compatible_summary_courses->where('course_id', $course->id)->first();
+                $compatible_course_row = $compatibles[$course->id]['summary_course_id'] ?? NULL;
+                $compatible = $compatible_summary_courses->where('id', $compatible_course_row)->first();
+                
                 if ($compatible) {
 
                     $compatible->course->compatible_of = $course;
