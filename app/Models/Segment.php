@@ -409,7 +409,7 @@ Segment extends BaseModel
             // $temp_segment_values = $segment_values->keyBy('criterion_value_id');
             // $row = $temp_segment_values->get($user_criterion_value_id_by_criterion[0]);
 
-            $row = $segment_values->pluck('criterion_value_id')->where('criterion_value_id', $user_criterion_value_id_by_criterion[0])->first();
+            $row = $segment_values->where('criterion_value_id', $user_criterion_value_id_by_criterion[0])->first();
             // $rows = $segment_values->pluck('criterion_value_id')->toArray();
 
             // return in_array($user_criterion_value_id_by_criterion[0], $rows) ? true : false;
