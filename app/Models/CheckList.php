@@ -188,6 +188,12 @@ class CheckList extends BaseModel
                 //     }
                 // ])->select('id', 'name')->get();
                 $disponible = true;
+                if($type_checklist?->code == 'curso'){
+                    $courses_id = $checklist->courses->pluck('id');
+                    $disponible = count($courses_id) ==  $summaries_course_checklist->where('status_id',$aprobado->id)->filter(function($q) use ($courses_id) {
+                        return in_array($q->course_id, $courses_id);
+                    })->count();
+                }
                 $lista_cursos = $checklist->courses->map(function($course) use ($user){
                     return [
                         'id' =>$course->id,
@@ -196,6 +202,7 @@ class CheckList extends BaseModel
                         'schools' => $course->schools->map(fn($school)=> ['id'=>$school->id,'name'=>$school->name])
                     ];
                 });
+                
                 // foreach($lista_cursos as $lc) {
                 //     // $lc->makeHidden(['summaries', 'polls', 'requirements', 'pivot']);
                 //     $status_c = Course::getCourseStatusByUser($user, $lc);
@@ -217,7 +224,7 @@ class CheckList extends BaseModel
                     'mostrar_modal' => false
                 ];
                 if ($tempChecklist['porcentaje'] === 100.00) {
-                    $tempChecklist['mostrar_modal'] = $tempChecklist['actividades_completadas'] == $tempChecklist['actividades']->where('estado','Cumple')->count();
+                    $tempChecklist['mostrar_modal'] = $tempChecklist['actividades_completadas'] == count($tempChecklist['actividades']->where('estado','Cumple'));
                     $checklistCompletados++;
                     $checklists_realizados->push($tempChecklist);
                 }
