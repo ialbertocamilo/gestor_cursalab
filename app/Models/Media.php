@@ -121,8 +121,8 @@ class Media extends BaseModel
 
             if ($extracted) {
 
-                $new_folder = 'scorm/' . $name;
-
+                // $new_folder = 'scorm/' . $name;
+                $new_folder = $name;
                 Media::uploadUnzippedFolderToBucket($temp_path, $new_folder);
 
                 $name = $new_folder . '/' . $name_scorm['nombre'];
