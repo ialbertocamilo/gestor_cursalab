@@ -566,26 +566,17 @@ class CheckList extends BaseModel
                     $checklistRptaItem->checklist_item_id =  $actividad->id;
                     $checklistRptaItem->qualification =   'Pendiente';
                     $checklistRptaItem->save();
-                    $checkList->rpta_items->push($checklistRptaItem);
+                    $checklistRpta->rpta_items->push($checklistRptaItem);
                 }
-                // $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
-                if ($checklistRptaItem) {
-                    $actividad->estado = $checklistRptaItem->qualification;
-                    if (in_array($actividad->estado, ['Cumple', 'No cumple'])) $completadas++;
-                } else {
-                    $actividad->estado = 'Pendiente';
-                }
-                $type_name = !is_null($actividad->type_id) ? $checklists_taxonomies->where('id', $actividad->type_id)->first() : null;
-                $type_name = !is_null($type_name) ? $type_name->code : '';
-                $actividad->tipo = $type_name;
+                $actividad->estado = $checklistRptaItem->qualification;
+                if (in_array($actividad->estado, ['Cumple', 'No cumple'])) $completadas++;
+                $actividad->tipo =  $checklists_taxonomies->where('id', $actividad->type_id)->first()?->code ?? '';
             }
             // ChecklistRpta::actualizarChecklistRptaV2($checklistRpta,$actividades,$checklists_taxonomies);
             $porcentaje = ($actividades->count() > 0) ? (($completadas / $actividades->count()) * 100) : 0;
-            // $porcentaje = $completadas / count($actividades);
             $porcentaje = round(($porcentaje > 100) ? 100 : $porcentaje); // maximo porcentaje = 100
             $checklistRpta->percent = $porcentaje;
             $checklistRpta->update();
-
         } else {
             // $actividadProgreso = ChecklistRptaItem::with('rpta_items')->where('checklist_answer_id', $checklistRpta->id)->get();
             $actividadProgreso = $checklistRpta->rpta_items;
@@ -605,7 +596,7 @@ class CheckList extends BaseModel
         return [
             'actividades_completadas' => $completadas,
             'actividades_totales' => $actividades->count(),
-            'porcentaje' => (float)number_format($porcentaje * 100, 2),
+            'porcentaje' => $porcentaje,
             'actividades' => $actividades->values()->all(),
             'feedback_disponible' => $feedback_disponible
         ];
