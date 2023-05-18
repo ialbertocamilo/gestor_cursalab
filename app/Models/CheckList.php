@@ -161,7 +161,7 @@ class CheckList extends BaseModel
             ->whereIn('course_id',$checklists_assigned->pluck('courses.*.id')->flatten())
             ->select('id','course_id','status_id')
             ->get();
-        $checklist_rptas_user = ChecklistRpta::select('coach_id','student_id','checklist_id','flag_congrats','percent')->alumno($alumno_id)->entrenador($entrenador_id)->get();
+        $checklist_rptas_user = ChecklistRpta::select('id','coach_id','student_id','checklist_id','flag_congrats','percent')->with('rpta_items:id,checklist_answer_id,checklist_item_id,qualification')->alumno($alumno_id)->entrenador($entrenador_id)->get();
         foreach ($checklists_assigned as $checklist) {
             $type_checklist = $checklists_taxonomies->where('type','type_checklist')->where('id', $checklist->type_id)->first();
             $actividades_activas = $checklist->actividades->where('active', 1)->where('type_id', $tax_trainer_user->id)->sortBy('position');
@@ -180,8 +180,8 @@ class CheckList extends BaseModel
                         'percent' => 0
                     ]);
                 }
-                $progresoActividad = $this->getProgresoActividades($checklist, $checklistRpta, $actividades_activas);
-                $progresoActividadFeedback = $this->getProgresoActividadesFeedback($checklistRpta, $actividades_activasFeedback);
+                $progresoActividad = $this->getProgresoActividades($checklist, $checklistRpta, $actividades_activas,$checklists_taxonomies);
+                $progresoActividadFeedback = $this->getProgresoActividadesFeedback($checklistRpta, $actividades_activasFeedback,$checklists_taxonomies);
 
                 // $lista_cursos = $checklist->courses->with([
                 //     'schools' => function ($query) {
@@ -534,18 +534,18 @@ class CheckList extends BaseModel
         ->where('active', ACTIVE);
         return $checklist_id ? $query->where('id', $checklist_id)->first() : $query->get();
     }
-    public function getProgresoActividadesFeedback(ChecklistRpta $checklistRpta, $actividades)
+    public function getProgresoActividadesFeedback(ChecklistRpta $checklistRpta, $actividades,$checklists_taxonomies)
     {
 
         foreach ($actividades as $actividad) {
-            $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
+            $actividadProgreso = $checklistRpta->rpta_items->where('checklist_item_id', $actividad->id)->first();
             $actividad->disponible = !is_null($actividadProgreso);
             if (!is_null($actividadProgreso)) {
                 $actividad->estado = $actividadProgreso->qualification;
             } else {
                 $actividad->estado = 'Pendiente';
             }
-            $type_name = !is_null($actividad->type_id) ? Taxonomy::where('id', $actividad->type_id)->first() : null;
+            $type_name = !is_null($actividad->type_id) ? $checklists_taxonomies->where('id', $actividad->type_id)->first() : null;
             $type_name = !is_null($type_name) ? $type_name->code : '';
             $actividad->tipo = $type_name;
         }
@@ -554,34 +554,41 @@ class CheckList extends BaseModel
         ];
     }
 
-    public function getProgresoActividades(Checklist $checkList, ChecklistRpta $checklistRpta, $actividades)
+    public function getProgresoActividades(Checklist $checkList, ChecklistRpta $checklistRpta, $actividades,$checklists_taxonomies)
     {
         $completadas = 0;
         if ($checklistRpta->porcentaje !== 100) {
             foreach ($actividades as $actividad) {
-                $checklistRptaItem = ChecklistRptaItem::where('checklist_answer_id', $checklistRpta->id)->where('checklist_item_id', $actividad->id)->first();
+                $checklistRptaItem = $checklistRpta->rpta_items->where('checklist_item_id', $actividad->id)->first();
                 if (!$checklistRptaItem) {
-                    $checklistRptaItem = ChecklistRptaItem::create([
-                        'checklist_answer_id' => $checklistRpta->id,
-                        'checklist_item_id' => $actividad->id,
-                        'qualification' => 'Pendiente'
-                    ]);
-                    ChecklistRpta::actualizarChecklistRpta($checklistRpta);
+                    $checklistRptaItem = new ChecklistRptaItem();
+                    $checklistRptaItem->checklist_answer_id =  $checklistRpta->id;
+                    $checklistRptaItem->checklist_item_id =  $actividad->id;
+                    $checklistRptaItem->qualification =   'Pendiente';
+                    $checklistRptaItem->save();
+                    $checkList->rpta_items->push($checklistRptaItem);
                 }
-                $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
-                if ($actividadProgreso) {
-                    $actividad->estado = $actividadProgreso->qualification;
+                // $actividadProgreso = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
+                if ($checklistRptaItem) {
+                    $actividad->estado = $checklistRptaItem->qualification;
                     if (in_array($actividad->estado, ['Cumple', 'No cumple'])) $completadas++;
                 } else {
                     $actividad->estado = 'Pendiente';
                 }
-                $type_name = !is_null($actividad->type_id) ? Taxonomy::where('id', $actividad->type_id)->first() : null;
+                $type_name = !is_null($actividad->type_id) ? $checklists_taxonomies->where('id', $actividad->type_id)->first() : null;
                 $type_name = !is_null($type_name) ? $type_name->code : '';
                 $actividad->tipo = $type_name;
             }
-            $porcentaje = $completadas / count($actividades);
+            // ChecklistRpta::actualizarChecklistRptaV2($checklistRpta,$actividades,$checklists_taxonomies);
+            $porcentaje = ($actividades->count() > 0) ? (($completadas / $actividades->count()) * 100) : 0;
+            // $porcentaje = $completadas / count($actividades);
+            $porcentaje = round(($porcentaje > 100) ? 100 : $porcentaje); // maximo porcentaje = 100
+            $checklistRpta->percent = $porcentaje;
+            $checklistRpta->update();
+
         } else {
-            $actividadProgreso = ChecklistRptaItem::with('rpta_items')->where('checklist_answer_id', $checklistRpta->id)->get();
+            // $actividadProgreso = ChecklistRptaItem::with('rpta_items')->where('checklist_answer_id', $checklistRpta->id)->get();
+            $actividadProgreso = $checklistRpta->rpta_items;
             $actividades = collect();
             foreach ($actividadProgreso->rpta_items as $rpta) {
                 $actividades->push([

@@ -71,4 +71,22 @@ class ChecklistRpta extends Model
         $checklistRpta->percent = $percent;
         $checklistRpta->update();
     }
+    public static function actualizarChecklistRptaV2(ChecklistRpta $checklistRpta,$checklistItems,$checklists_taxonomies): void
+    {
+        $cumple = 0;
+        $checklistValidos = 0;
+        $actividades = $checklistItems->where('active',1);
+        $tax_trainer_user = $checklists_taxonomies->where('type','type')->where('code','trainer_user')->first();
+        foreach ($actividades as $actividad) {
+            if ($actividad->type_id == $tax_trainer_user->id) {
+                $checklistValidos++;
+                $rpta_item = $checklistRpta->rpta_items->where('checklist_item_id', $actividad->id)->first();
+                if ($rpta_item && ($rpta_item->qualification === 'Cumple' || $rpta_item->qualification === 'No cumple'))  $cumple++;
+            }
+        }
+        $percent = ($checklistValidos > 0) ? (($cumple / $checklistValidos) * 100) : 0;
+        $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
+        $checklistRpta->percent = $percent;
+        $checklistRpta->update();
+    }
 }
