@@ -202,7 +202,7 @@ export default {
          async download(url, name, id) {
             let saveAuditUrl = `/reports/save/${id}`;
 
-            this.$root.downloadReport(url, name);
+            this.$root.downloadReport(url, name + '.xlsx');
             try {
                 let response = await axios({
                     url: saveAuditUrl,
