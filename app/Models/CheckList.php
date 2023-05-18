@@ -146,8 +146,6 @@ class CheckList extends BaseModel
                         withChecklistFreeRelations:['actividades:id,checklist_id,type_id,activity,position,active'],
                         withChecklistCourseRelations:[
                             'actividades:id,checklist_id,type_id,activity,position,active',
-                            'courses:id,name',
-                            'courses.schools:id,name'
                         ],
                         mergeChecklist:true,
                     );

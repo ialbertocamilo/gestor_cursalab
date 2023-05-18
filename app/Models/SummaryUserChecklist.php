@@ -37,11 +37,16 @@ class SummaryUserChecklist extends Summary
         
         $cursos_x_user = $user->getCurrentCourses();
         $cursos_ids = $cursos_x_user->pluck('id')->toArray();
-        
+        $defaultChecklistCourseRelation = [
+            'courses'=>function($q) use ($cursos_ids){
+                $q->select('id,name')->whereIn('id',$cursos_ids);
+            },
+            'courses.schools:id,name'
+        ];
         $checklist_course_assigned = Checklist::whereHas('courses',function($q) use ($cursos_ids){
             $q->whereIn('id',$cursos_ids);
         })->when(count($withChecklistCourseRelations)>0 , function($q) use ($withChecklistCourseRelations){
-            $q->with($withChecklistCourseRelations);
+            $q->with(array_merge($withChecklistCourseRelations,$defaultChecklistCourseRelation));
         })->where('active',1)->select($select_checklist)->get();
         if($mergeChecklist){
             return $checklist_course_assigned->merge($checklist_libre_assigned);
