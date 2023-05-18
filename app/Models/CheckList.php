@@ -174,8 +174,8 @@ class CheckList extends BaseModel
                     $checklistRpta = ChecklistRpta::create([
                         'checklist_id' => $checklist->id,
                         'student_id' => $alumno_id,
-                        'course_id' => $curso->id, //deprecated
-                        'school_id' => $curso->categoria['id'], //deprecated
+                        // 'course_id' => $curso->id, //deprecated
+                        // 'school_id' => $curso->categoria['id'], //deprecated
                         'coach_id' => $entrenador_id,
                         'percent' => 0
                     ]);
