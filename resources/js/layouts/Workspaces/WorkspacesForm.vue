@@ -107,7 +107,7 @@
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
                             :label="generateCriterionTitle(criterion)"
-                            :disabled="true"
+                            :disabled="false"
                         >
                             <!-- :disabled="criterion.code === 'module'" -->
                         </v-checkbox>

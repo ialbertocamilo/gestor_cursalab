@@ -99,11 +99,13 @@ class WorkspaceController extends Controller
         $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
 
         foreach ($workspace['criteria'] as $wk_crit) {
-            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
-            $in_segment_list = $in_segment->pluck('id')->all();
-            $wk_crit->its_used = false;
-            if (count($in_segment_list))
-                $wk_crit->its_used = true;
+            $in_segments = SegmentValue::where('criterion_id', $wk_crit->id)->count();
+            // $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
+            // $in_segment_list = $in_segment->pluck('id')->all();
+             $wk_crit->its_used = $in_segments > 0 ? true : false;
+            // $wk_crit->its_used = false;
+            // if (count($in_segment_list))
+                // $wk_crit->its_used = true;
         }
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
