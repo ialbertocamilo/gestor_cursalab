@@ -119,7 +119,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'old_passwords' => 'array',
     ];
 
-    protected $recordableEvents = ['impersonated'];
+    protected $recordableEvents = ['created', 'updated', 'restored', 'deleted', 'forceDeleted',
+        'synced', 'existingPivotUpdated', 'attached', 'detached', 'impersonated'];
 
     public function getIdentifier()
     {
