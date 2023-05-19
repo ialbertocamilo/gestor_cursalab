@@ -9,6 +9,7 @@ use App\Models\Taxonomy;
 use App\Models\CourseSchool;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
+use App\Models\CriterionValue;
 use App\Models\SchoolSubworkspace;
 use App\Http\Controllers\Controller;
 
@@ -179,14 +180,20 @@ class RestUserProgressController extends Controller
         $course_status_arr = config('courses.status');
         $topic_status_arr = config('topics.status');
         $school_courses = collect();
-
+        $cycles = null;
+        if($workspace_id === 25){
+            $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
+            ->where('value_text', '<>', 'Ciclo 0')
+            ->orderBy('position')->get();
+        }
         foreach ($courses as $course) {
             $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
 
             $course_name = $course->name;
             $tags = [];
             if ($workspace_id === 25) {
-                $tags = $course->getCourseTagsToUCByUser($course, $user);
+                // $tags = $course->getCourseTagsToUCByUser($course, $user,$cycles);
+                $tags = $course->tags;
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
 

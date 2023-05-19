@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
-use App\Models\Course;
 use App\Models\Media;
-use App\Models\MediaTema;
-use App\Models\SummaryCourse;
-use App\Models\SummaryTopic;
-use App\Models\SummaryUser;
-use App\Models\Taxonomy;
 use App\Models\Topic;
+use App\Models\Course;
+use App\Models\Taxonomy;
+use App\Models\MediaTema;
+use App\Models\Requirement;
+use App\Models\SummaryUser;
+use App\Models\SummaryTopic;
 use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class RestTopicController extends Controller
 {
-    public function topics(Course $course, Request $request)
+    public function topics($course_id, Request $request)
     {
         $tiempoInicioApi = microtime(true);
         $user = Auth::user();
@@ -27,6 +28,29 @@ class RestTopicController extends Controller
         info('Time execution:'.$tiempoEjecucion.'- Subworkspace_id: '.$user->subworkspace_id.' - '.$user->document);
         return $this->successApp(['data' => $data]);
     }
+    public function topicsv2(Course $course, Request $request)
+    {
+        $user = Auth::user();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',byCoursesId:[$course?->id]);
+        $data = Topic::getDataToTopicsViewAppByUser($user, $courses, $request->school_id);
+        return $this->successApp(['data' => $data]);
+    }
+
+    public function listCoursesBySchool($school_id)
+    {
+        $user = Auth::user();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',bySchoolsId:[$school_id]);
+        $data = Course::getDataToCoursesViewAppByUser($user, $courses);
+        return $this->successApp(['data' => $data]);
+    }
+    public function listCoursesBySchoolV2($school_id)
+    {
+        $user = Auth::user();
+        $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',bySchoolsId:[$school_id]);
+        $data = Course::getDataToCoursesViewAppByUserV2($user, $courses);
+        return $this->successAppV2($data);
+    }
+
 
     public function reviewTopic(Topic $topic, $user = null)
     {
@@ -64,12 +88,12 @@ class RestTopicController extends Controller
 
         $topic->load('course');
 
-        $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+        $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration','status_id')
             ->where('topic_id', $topic->id)
             ->where('user_id', $user->id)
             ->first();
-
         if (!$summary_topic) return $this->error("No se pudo revisar el contenido.", 422);
+        $statuses = Taxonomy::select('id','name','code','group')->where('type', 'user-status')->get();
 
         $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
 
@@ -135,19 +159,47 @@ class RestTopicController extends Controller
                     $pending = true;
             }
         }
+        $summary_course = null;
         if(!$pending && !$topic->type_evaluation_id){
-
             $reviewed_topic_taxonomy = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
             $summary_topic->status_id = $reviewed_topic_taxonomy?->id;
             $summary_topic->last_time_evaluated_at = now();
             $summary_topic->save();
-
-            SummaryCourse::updateUserData($topic->course, $user);
+            $summary_course = SummaryCourse::updateUserData($topic->course, $user);
             SummaryUser::updateUserData($user);
-
+        }else{
+            $summary_course = SummaryCourse::select('id','status_id','advanced_percentage')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
         }
-
-        return $this->success(['msg' => "Contenido revisado correctamente."]);
+        $topic_status =  $statuses->where('id',$summary_topic->status_id)->first();
+        $course_status = $statuses->where('id',$summary_course?->status_id)->first();
+        $avaible_requirements_topic = false; //code aprobado o realizado
+        $avaible_requirements_course = false;
+        if(!$topic->type_evaluation_id){
+            $avaible_requirements_topic =  $topic_status->code == 'revisado';
+        }
+        $avaible_requirements_course = $course_status->code == 'aprobado';
+        return $this->success([
+            'tema'=>[
+                'id'=> $topic->id,
+                'estado_tema' => $topic_status?->code,
+                'estado_tema_str' => $topic_status?->name,
+                'habilitar_requisitos' => $avaible_requirements_topic,
+                'requirements' => ($avaible_requirements_topic) 
+                    ?   Requirement::where('model_type','App\\Models\\Topic')->where('requirement_id',$topic->id)->select('model_id')->pluck('model_id')
+                    :   []
+                // 'requirements' => $topic->requirements()->pluck('id')
+            ],
+            'course'=>[
+                'id'=> $topic->course_id,
+                'status' => $course_status?->code,
+                'habilitar_requisitos' => $avaible_requirements_course,
+                'requirements' => ($avaible_requirements_course) 
+                    ? Requirement::where('model_type','App\\Models\\Course')->where('requirement_id',$topic->course_id)->select('model_id')->pluck('model_id') 
+                    : [],
+                'encuesta_habilitada' => $summary_course->advanced_percentage == 100 && $topic->course->polls->first()
+                // 'requirements' => $topic->course->requirements()->pluck('id')
+            ]
+        ],'Contenido revisado correctamente.');
     }
 
     public function reviewTopicMediaDuration( Request $request, Topic $topic, MediaTema $media, $user = null)

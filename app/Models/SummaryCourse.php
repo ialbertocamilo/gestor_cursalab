@@ -172,7 +172,7 @@ class SummaryCourse extends Summary
     }
 
 
-    protected function updateUserData($course, $user = null, $update_attempts = true,$update_certification_data=true)
+    protected function updateUserData($course, $user = null, $update_attempts = true,$update_certification_data=true,$notSaveData=false)
     {
         $user = $user ?? auth()->user();
         $row_course = SummaryCourse::getCurrentRow($course, $user);
@@ -276,7 +276,10 @@ class SummaryCourse extends Summary
         if ($update_attempts)
             $course_data['last_time_evaluated_at'] = now();
             $course_data['attempts'] = $row_course->attempts + 1;
-
+        if($notSaveData){
+            $course_data['id'] = $row_course->id;
+            return $course_data;
+        }
 //        info($row_course->status_id);
         $row_course->update($course_data);
 //        info($row_course->status_id);

@@ -402,7 +402,23 @@ Segment extends BaseModel
 
     private function validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion)
     {
-        return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+        $criterion_id = $segment_values->first()->criterion_id;
+
+        if ($criterion_id == 48) {
+
+            // $temp_segment_values = $segment_values->keyBy('criterion_value_id');
+            // $row = $temp_segment_values->get($user_criterion_value_id_by_criterion[0]);
+
+            $row = $segment_values->where('criterion_value_id', $user_criterion_value_id_by_criterion[0])->first();
+            // $rows = $segment_values->pluck('criterion_value_id')->toArray();
+
+            // return in_array($user_criterion_value_id_by_criterion[0], $rows) ? true : false;
+            return $row ? true : false;
+
+        } else {
+
+            return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+        }
     }
 
     private function validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion)

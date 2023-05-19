@@ -28,6 +28,10 @@ trait ApiResponse
     {
         return response()->json($data, $code);
     }
+    public function successAppV2($data, int $code = ResponseAlias::HTTP_OK): JsonResponse
+    {
+        return response()->json(['data' => (object)reset($data)], $code, [], JSON_NUMERIC_CHECK);
+    }
 
     public function errorApp($data, $code = 500)
     {

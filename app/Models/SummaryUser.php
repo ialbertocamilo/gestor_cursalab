@@ -24,7 +24,7 @@ class SummaryUser extends Summary
         return $this->belongsTo(Taxonomy::class, 'status_id');
     }
 
-    protected function updateUserData($user = null, $comes_from_evaluation = true)
+    protected function updateUserData($user = null, $comes_from_evaluation = true,$notSaveData = false)
     {
         $user = $user ?? auth()->user();
         
@@ -48,6 +48,10 @@ class SummaryUser extends Summary
         if ($comes_from_evaluation)
             $data['last_time_evaluated_at'] = now();
 
+        if($notSaveData){
+            $data['id'] = $row_user->id;
+            return $data;
+        }
         $row_user->update($data);
 
         return $row_user;

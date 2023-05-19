@@ -27,7 +27,10 @@ class Requirement extends BaseModel
     {
         return $this->hasOne(Course::class, 'id', 'requirement_id');
     }
-
+    public function model_topic()
+    {
+        return $this->hasOne(Topic::class, 'id', 'requirement_id');
+    }
     public function requirement()
     {
         return $this->morphTo();
