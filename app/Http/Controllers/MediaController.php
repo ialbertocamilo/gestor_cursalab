@@ -51,12 +51,9 @@ class MediaController extends Controller
         $type = $multimedia->getMediaType($multimedia->ext);
         $type = $type . ' (' . strtoupper($multimedia->ext) . ')';
 
-
-        if ($multimedia->ext === 'scorm') {
-            $multimedia->file = generateSignedUrl('scorm/' . $multimedia->title);
-        } else {
-            $multimedia->file = FileService::generateUrl($multimedia->file);
-        }
+ $multimedia->file = $multimedia->ext === 'scorm'
+            ? $multimedia->file
+            : FileService::generateUrl($multimedia->file);
 
         $multimedia->preview = $multimedia->getPreview();
         $multimedia->type = $type;

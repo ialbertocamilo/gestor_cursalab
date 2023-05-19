@@ -21,8 +21,7 @@ class VademecumResource extends JsonResource
             $hasScormRoute =
                 ($this->media_type === 'scorm'  || $this->media_type == null) &&
                 $this->media->file != null;
-            $file = generateSignedUrl('scorm/' . $this->media->title);
-
+            $file = $this->media->file;
         } else {
             $hasScormRoute = false;
             $file = null;
