@@ -694,17 +694,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $model,
         $select=false,
         $unsetRelation=true,
+        $withModelRelations=[]
     ){
         $user = $this;
-        $user->loadMissing([
+        $with_default = [
             'criterion_values:id,value_text,criterion_id',
             'subworkspace:id,parent_id',
             'subworkspace.parent:id',
-        ]);
+        ];
+        
+        $user->loadMissing($with_default);
         $workspace = $user->subworkspace->parent;
-        $values_model = $model::when($select, function ($q) use($select) {
-            $q->select($select)->addSelect('workspace_id');
-        })->with(['segments' => function ($q) {
+        $default_model_relations = ['segments' => function ($q) {
             $q
                 ->where('active', ACTIVE)
                 ->select('id', 'model_id')
@@ -720,7 +721,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                         })
                         ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
                 });
-        }])->where('workspace_id', $workspace->id)
+        }];
+        $values_model = $model::when($select, function ($q) use($select) {
+            $q->select($select)->addSelect('workspace_id');
+        })->with(array_merge($default_model_relations,$withModelRelations))->where('workspace_id', $workspace->id)
         ->whereRelation('segments', 'active', ACTIVE)
         ->where('active', ACTIVE)->get();
         $match_segment = [];
