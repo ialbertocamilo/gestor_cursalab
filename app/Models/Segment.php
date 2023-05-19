@@ -103,6 +103,8 @@ Segment extends BaseModel
                     'segmentation-by-document' => $this->setDataSegmentationByDocument($segment),
                     default => [],
                 };
+                $segment->direct_segmentation = $this->setDataDirectSegmentation($criteria, $segment);
+                $segment->segmentation_by_document = $this->setDataSegmentationByDocument($segment);
             }
         } else {
 
@@ -465,7 +467,7 @@ Segment extends BaseModel
         $segments = Segment::loadSupervisorSegmentCriterionValues($supervisorId);
 
         if (count($segments) === 0) return [];
-        //Function to get 
+        //Function to get
         $course = new Course();
         return $course->usersSegmented($segments,'users_id');
         // Generate conditions

@@ -1,41 +1,5 @@
 <template>
     <div>
-        <div class="row justify-center">
-
-            <div v-if="isCourseSegmentation() && modulesSchools.length"
-                    class="col-10">
-                <!--
-                                        <v-expansion-panels>
-                                        <v-expansion-panel
-                                        title="Item"
-                                        text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                                        ></v-expansion-panel>
-                                    </v-expansion-panels> -->
-
-                <v-expansion-panels class="school-breadcrumb">
-                    <v-expansion-panel>
-                        <v-expansion-panel-header>
-                            Escuelas asignadas
-                        </v-expansion-panel-header>
-                        <v-expansion-panel-content>
-                            <DefaultSimpleBreadcrumbs
-                                v-for="moduleSchool of modulesSchools"
-                                :key="moduleSchool.subworkspace_id"
-                                :breadcrumbs="[
-                            {title: moduleSchool.module_name, disabled: true},
-                            {title: moduleSchool.school_name, disabled: true},
-                        ]"/>
-                        </v-expansion-panel-content>
-                    </v-expansion-panel>
-                </v-expansion-panels>
-
-            </div>
-
-        </div>
-
-        <!--
-        Tabs
-        ======================================== -->
 
         <v-tabs
             v-model="tabs"
@@ -243,18 +207,29 @@ export default {
     watch: {
         segments(){
                 const vue = this;
-                console.log(11111);
-                console.log(vue.segments);
-                console.log(vue.$props.options);
                 if(vue.$props.options.isEdit){
-                    vue.segments = vue.$props.options.list_segments
+                    if(vue.$props.options.type_checklist == 'libre'){
+                        vue.segments = vue.$props.options.list_segments
+                        if(Array.isArray(vue.$props.options.list_segments)){
+                            vue.$props.options.list_segments.forEach(element => {
+                                console.log(element);
+                                console.log(element.type_code);
+                                if(element.type_code == 'segmentation-by-document') {
+                                    console.log(element.criteria_selected);
+                                    console.log(vue.segment_by_document);
+                                    vue.segment_by_document.criteria_selected = element.criteria_selected;
+                                }else {
+                                    console.log(element);
+                                }
+                            });
+                        }
+                    }
+                    if(vue.$props.options.type_segment == 'segmentation-by-document') {
+                        vue.tabs = 1;
+                    }
                 }
-                else{
-                    vue.$props.options.list_segments = vue.segments;
-                }
-
+                vue.$props.options.list_segments = vue.segments;
                 vue.$props.options.list_segments_document = vue.segment_by_document;
-                console.log(vue.tabs);
                 vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
 
                 vue.$props.options.model_type= vue.model_type;
@@ -262,7 +237,7 @@ export default {
         tabs(){
                 const vue = this;
                 console.log(vue.segments);
-                vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
+                // vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
         }
     },
     methods: {
@@ -270,7 +245,6 @@ export default {
             let vue = this;
             // vue.options.open = false
             vue.resetSelects();
-            vue.resetValidation();
 
             // alert modal info
             vue.modalInfoOptions.hideConfirmBtn = false;
