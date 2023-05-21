@@ -7,6 +7,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
+
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 use Aws\S3\S3Client;
 use ZipArchive;
@@ -129,6 +131,10 @@ class Media extends BaseModel
                 $path = get_media_url($name, 'cdn_scorm');
                 $ext = 'scorm';
 
+                // Delete temporal folder
+                File::deleteDirectory(public_path($temp_path));
+
+
                 $uploaded = true;
             }
         }
@@ -168,7 +174,7 @@ class Media extends BaseModel
     {
         $zip = new ZipArchive();
         $res = $zip->open($file, ZipArchive::CREATE);
-            
+
         if ($res === TRUE) {
 
             $zip->extractTo(public_path($temp_path));
@@ -189,18 +195,26 @@ class Media extends BaseModel
             'secret' => $config['secret'],
             'version' => 'latest',
             'region' => $config['region'],
+            'endpoint'    => 'https://sfo2.digitaloceanspaces.com',
             'options' => [
-                'CacheControl' => 'max-age=25920000, no-transform, public', 
+                'CacheControl' => 'max-age=25920000, no-transform, public',
             ]
         ]);
 
         $bucket = $config['scorm']['bucket'];
         $keyPrefix = $config['scorm']['root'] . '/' . $new_folder . '/';
-        $options = array(
+        $options =  array(
             'concurrency' => 20,
-        );
+            'debug'       => true,
+            'before' => function (\Aws\Command $command) {
+            $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
+                ? 'public-read'
+                : 'private';
+        });
 
         $client->uploadDirectory($temp_path, $bucket, $keyPrefix, $options);
+
+
     }
 
     public static function verify_scorm($file,$name){
