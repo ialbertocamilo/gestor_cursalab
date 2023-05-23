@@ -513,10 +513,10 @@ class CheckList extends BaseModel
             //     $usersSegmented = array_merge($usersSegmented,$course_users);
             // }
         }else{
-            $alumnos_ids =$trainer->students()->select('users.id')->where('users.active',1)->pluck('user_id');;
-            $checklist = CheckList::select('id','type_id')->with('segments')->where('id',$checklist_id)->first();
+            $alumnos_ids =$trainer->students()->select('users.id')->where('users.active',1)->pluck('id')->toArray();
+            $checklist_segments = $checklist->segments()->get();
             $course = new Course();
-            $checklist_users = $course->usersSegmented($checklist->segments, $type = 'users_id');
+            $checklist_users = $course->usersSegmented($checklist_segments, $type = 'users_id');
             $alumnos_ids = array_intersect($alumnos_ids,$checklist_users);
         }
         $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
@@ -527,9 +527,6 @@ class CheckList extends BaseModel
 
         if(count($list_students) > 0) {
             foreach ($list_students as $student) {
-                if(!$check->summary_user_checklist){
-                    $check->advanced_percentage= '0';
-                }
                 $student->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             }
         }
