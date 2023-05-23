@@ -125,7 +125,7 @@
                                                         width="55vw"
                                                         model_type="App\Models\Checklist"
                                                         :model_id="null"
-                                                        :ref="modalFormSegmentationOptions.ref"
+                                                        ref="modalFormSegmentationOptions"
                                                         @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
                                                         @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
                                                     />
@@ -484,6 +484,7 @@ export default {
             vue.checklist.list_segments = vue.checklist.segments
             vue.modalFormSegmentationOptions.list_segments = vue.checklist.segments
             vue.modalFormSegmentationOptions.isEdit = true
+            vue.modalFormSegmentationOptions.type_checklist = vue.checklist.type_checklist;
             vue.resource.type_checklist = vue.checklist.type_checklist;
             vue.type_checklist = vue.checklist.type_checklist;
         },
@@ -540,8 +541,13 @@ export default {
             vue.search_text = null
             vue.results_search = []
             vue.stepper_box = 1
-            if (vue.$refs.formChecklistCreateEdit)
-                vue.$refs.formChecklistCreateEdit.resetValidation()
+
+            if (vue.$refs.modalFormSegmentationOptions)
+                vue.$refs.modalFormSegmentationOptions.closeModal()
+            vue.modalFormSegmentationOptions.list_segments = null
+            vue.modalFormSegmentationOptions.list_segments_document = null
+            vue.modalFormSegmentationOptions.isEdit = null
+            vue.modalFormSegmentationOptions.type_checklist = null
         },
         confirm() {
             let vue = this;

@@ -19,10 +19,10 @@
             </v-card>
         </v-dialog>
 
-        <v-row v-for="(criteria, index) in segment.criteria_selected" :key="index">
-            <v-col cols="12" md="12" lg="12" v-if="segment.criteria_selected[index] == null">
+        <v-row v-for="(criteria, index) in segment.direct_segmentation" :key="index">
+            <v-col cols="12" md="12" lg="12" v-if="segment.direct_segmentation[index] == null">
                 <DefaultAutocomplete
-                    v-model="segment.criteria_selected[index]"
+                    v-model="segment.direct_segmentation[index]"
                     :ready-only-codes="selectedCriteriaIncludesModule() ? ['module'] : []"
                     :items="new_criteria"
                     label="Selecciona criterios"
@@ -30,13 +30,12 @@
                     item-value="id"
                     dense
                     returnObject
-                    @onChange="print(segment.criteria_selected[index])"
                 />
             </v-col>
 
             <v-col cols="12" md="12" lg="12" v-else>
                 <segment-values
-                    :criterion="segment.criteria_selected[index]"
+                    :criterion="segment.direct_segmentation[index]"
                     @addDateRange="addDateRange($event)"
                 />
             </v-col>
@@ -88,26 +87,21 @@ export default {
     },
     mounted() {
         let vue = this;
-        console.log(vue.segment.criteria_selected);
         vue.segment.loading = true;
         setTimeout(() => {
             vue.segment.loading = false;
         }, 1200);
-        this.prueba();
+        // this.prueba();
 
         vue.loadData();
     },
     methods: {
-        print(ggg){
-            console.log(ggg);
-            console.log(ggg.length);
-        },
         prueba() {
-            this.segment.criteria_selected.push(null);
+            this.segment.direct_segmentation.push(null);
         },
         addDateRange(data) {
             let vue = this;
-            let criterion = vue.segment.criteria_selected;
+            let criterion = vue.segment.direct_segmentation;
 
             if (criterion){
                 const hasValuesSelected = criterion.hasOwnProperty('values_selected');
@@ -148,7 +142,7 @@ export default {
             vue.dialog_eliminar = false;
         },
         selectedCriteriaIncludesModule() {
-            let result = this.segment.criteria_selected.code === 'module'
+            let result = this.segment.direct_segmentation.code === 'module'
             return !!result
         }
     }
