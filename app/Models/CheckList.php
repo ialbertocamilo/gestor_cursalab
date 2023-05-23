@@ -482,9 +482,15 @@ class CheckList extends BaseModel
         $checklist = CheckList::select('id','type_id')->with('type:id,code')->where('id',$checklist_id)->first();
         if($checklist->type->code == 'curso'){
             $courses = $checklist->courses()->select('courses.id')->with('segments')->get('id');
+            $status_id_completed = Taxonomy::where('group', 'course')->where('type','user-status')->where('code','aprobado')->first()?->id;
             $alumnos = $trainer->students()->with([
                 'criterion_values:id,value_text,criterion_id','criterion_values.criterion.field_type'
-            ])->select('users.id')->where('users.active',1)->get();
+            ])->whereHas('summary_courses',function($q)use ($courses,$status_id_completed) {
+                foreach ($courses as $course) {
+                    $q->where('course_id',$course->id);
+                }
+                $q->where('status_id',$status_id_completed);
+            })->select('users.id')->where('users.active',1)->get();
             $alumnos_ids = [];
             foreach ($alumnos as $alumno) {
                 $hasAllCourses = true;
@@ -497,7 +503,6 @@ class CheckList extends BaseModel
                     $alumnos_ids[] = $alumno->id;
                 } 
             }
-            $alumnos_ids[] = $alumno->id;
             // $alumnos_ids = User::whereIn('id',$final_list)->where('active', 1)
             //         ->select('id')
             //         ->whereHas('summary_courses',function($q)use ($courses_id,$status_id_completed) {
@@ -513,7 +518,7 @@ class CheckList extends BaseModel
             //     $usersSegmented = array_merge($usersSegmented,$course_users);
             // }
         }else{
-            $alumnos_ids =$trainer->students()->select('users.id')->where('users.active',1)->pluck('id')->toArray();
+            $alumnos_ids = $trainer->students()->select('users.id')->where('users.active',1)->pluck('id')->toArray();
             $checklist_segments = $checklist->segments()->get();
             $course = new Course();
             $checklist_users = $course->usersSegmented($checklist_segments, $type = 'users_id');
