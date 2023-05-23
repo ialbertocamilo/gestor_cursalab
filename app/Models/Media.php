@@ -205,7 +205,6 @@ class Media extends BaseModel
         $keyPrefix = $config['scorm']['root'] . '/' . $new_folder . '/';
         $options =  array(
             'concurrency' => 20,
-            'debug'       => true,
             'before' => function (\Aws\Command $command) {
             $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
                 ? 'public-read'
