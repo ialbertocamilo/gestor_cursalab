@@ -479,8 +479,22 @@ class CheckList extends BaseModel
         $page = $data['page'];
         $perPage = 10;
         //añadir porcentaje.
-
+        $checklist = CheckList::select('id','type_id')->with('type:id,code')->where('id',$checklist_id)->first();
         $alumnos_ids = EntrenadorUsuario::entrenador($trainer->id)->where('active', 1)->select('user_id')->get()->pluck('user_id')->all();
+        if($checklist->type->code == 'curso'){
+            $checklist = CheckList::select('id','type_id')->with(['courses:id,name','courses.segments'])->where('id',$checklist_id)->first();
+            $usersSegmented = [];
+            foreach ($checklist->courses as $course) {
+                $course_users = $course->usersSegmented($course->segments, $type = 'users_id');
+                $usersSegmented = array_merge($usersSegmented,$course_users);
+            }
+            $alumnos_ids = array_intersect($alumnos_ids,$usersSegmented);
+        }else{
+            $checklist = CheckList::select('id','type_id')->with('segments')->where('id',$checklist_id)->first();
+            $course = new Course();
+            $checklist_users = $course->usersSegmented($checklist->segments, $type = 'users_id');
+            $alumnos_ids = array_intersect($alumnos_ids,$checklist_users);
+        }
         $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
             ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
             ->whereIn('users.id',$alumnos_ids)
