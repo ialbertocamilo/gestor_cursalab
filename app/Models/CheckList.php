@@ -110,6 +110,18 @@ class CheckList extends BaseModel
 
             $checklist->segments = $segments;
 
+            $segmentation_by_document_list = [];
+            $segmentation_by_document = $segments->map(function ($item) {
+                return ['segmentation_by_document'=> $item->segmentation_by_document];
+            });
+
+            foreach ($segmentation_by_document as $seg) {
+                foreach ($seg['segmentation_by_document'] as $value) {
+                    array_push($segmentation_by_document_list, $value);
+                }
+            }
+            $checklist->segmentation_by_document = ['segmentation_by_document'=> $segmentation_by_document_list];
+
             $checklist->active = $checklist->active;
             $checklist->is_super_user = auth()->user()->isAn('super-user');
             $type_checklist = Taxonomy::where('id', $checklist->type_id)->first();
@@ -194,7 +206,7 @@ class CheckList extends BaseModel
                         $disponible = count($courses_id) ==  $summaries_course_checklist->where('status_id',$aprobado->id)->filter(function($q) use ($courses_id) {
                             return in_array($q->course_id, $courses_id);
                         })->count();
-                    
+
                     }
                 }
                 $lista_cursos = $checklist->courses->map(function($course) use ($user,$summaries_course_checklist,$statuses_course){
@@ -211,7 +223,7 @@ class CheckList extends BaseModel
                         'schools' => $course->schools->map(fn($school)=> ['id'=>$school->id,'name'=>$school->name])
                     ];
                 });
-                
+
                 // foreach($lista_cursos as $lc) {
                 //     // $lc->makeHidden(['summaries', 'polls', 'requirements', 'pivot']);
                 //     $status_c = Course::getCourseStatusByUser($user, $lc);
@@ -261,7 +273,7 @@ class CheckList extends BaseModel
         $checklistCompletados = 0;
 
         $user = User::where('id', $alumno_id)->first();
-       
+
         $cursos_x_user = $user->getCurrentCourses();
         $cursos_ids = $cursos_x_user->pluck('id')->toArray();
 

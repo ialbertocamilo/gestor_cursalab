@@ -544,4 +544,53 @@ Segment extends BaseModel
 
         return $totals;
     }
+
+    public function storeSegmentationByDocumentForm($data)
+    {
+        $segmentation_by_document = Taxonomy::getFirstData('segment', 'type', 'segmentation-by-document');
+        $code_segmentation = Taxonomy::getFirstData('segment', 'code', $data['code']);
+
+        if (count($data['segment_by_document']['segmentation_by_document']) === 0) {
+            $segment = self::where('active', ACTIVE)
+                ->where('model_id', $data['model_id'])
+                ->where('model_type', $data['model_type'])
+                ->where('type_id', $segmentation_by_document->id)
+                ->first();
+
+            if ($segment) {
+                $segment->values()->delete();
+                $segment->delete();
+            }
+            return;
+        }
+
+
+        $segment = self::firstOrCreate(
+            [
+                'model_id' => $data['model_id'],
+                'model_type' => $data['model_type'],
+                'type_id' => $segmentation_by_document->id,
+                'code_id' => $code_segmentation?->id,
+            ],
+            ['name' => "Segmentación por documento", 'active' => ACTIVE]
+        );
+
+        $segment->values()->delete();
+
+        $document_criterion = Criterion::where('code', 'document')->first();
+
+        $values = [];
+
+        foreach ($data['segment_by_document']['segmentation_by_document'] ?? [] as $value) {
+
+            $values[] = [
+                'id' => $value['segment_value_id'] ?? null,
+                'criterion_value_id' => $value['criterion_value_id'],
+                'criterion_id' => $document_criterion->id,
+                'type_id' => NULL,
+            ];
+        }
+
+        $segment->values()->sync($values);
+    }
 }

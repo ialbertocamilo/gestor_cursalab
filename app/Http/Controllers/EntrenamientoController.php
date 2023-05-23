@@ -314,7 +314,7 @@ class EntrenamientoController extends Controller
                 ->where('code', $checklist_actividad['type_name'])
                 ->first();
             CheckListItem::updateOrCreate(
-                ['id' => $checklist_actividad['id']],
+                ['id' => is_null($data['id']) ? null : $checklist_actividad['id']],
                 [
                     'activity' => $checklist_actividad['activity'],
                     'type_id' => !is_null($type) ? $type->id : null,
@@ -328,20 +328,28 @@ class EntrenamientoController extends Controller
         if($data['type_checklist'] == 'libre')
         {
             // Segmentación directa
-            if($data['type_segment'] == 'direct-segmentation')
+            if(isset($data['list_segments']['segments']) && count($data['list_segments']['segments']) > 0)
             {
                 $data['list_segments']['model_id'] = $checklist->id;
+
+                $list_segments_temp = [];
+                foreach($data['list_segments']['segments'] as $seg) {
+                    if($seg['type_code'] === 'direct-segmentation')
+                        array_push($list_segments_temp, $seg);
+                }
+                $data['list_segments']['segments'] = $list_segments_temp;
+
                 $list_segments = (object) $data['list_segments'];
 
                 (new Segment)->storeDirectSegmentation($list_segments);
             }
             // Segmentación por documento
-            else if($data['type_segment'] == 'segmentation-by-document')
+            if(isset($data['list_segments_document']['segment_by_document']) && isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']))
             {
                 $data['list_segments_document']['model_id'] = $checklist->id;
                 $list_segments = $data['list_segments_document'];
 
-                (new Segment)->storeSegmentationByDocument($list_segments);
+                (new Segment)->storeSegmentationByDocumentForm($list_segments);
             }
         }
         else if($data['type_checklist'] == 'curso')

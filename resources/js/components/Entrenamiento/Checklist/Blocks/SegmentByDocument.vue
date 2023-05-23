@@ -156,20 +156,23 @@ export default {
     computed: {
         arrayCriteriaSelected() {
             const vue = this;
-            const UserSelecteds = vue.segment.criteria_selected;
-            let usersearch = vue.usersearch || '';
-                usersearch = usersearch.trim();
+            if(vue.segment !== undefined && vue.segment !== null) {
+                const UserSelecteds = vue.segment.segmentation_by_document;
+                let usersearch = vue.usersearch || '';
+                    usersearch = usersearch.trim();
 
-            //check if empty
-            if(!usersearch.length) return UserSelecteds;
-                usersearch = usersearch.toLowerCase();
+                //check if empty
+                if(!usersearch.length) return UserSelecteds;
+                    usersearch = usersearch.toLowerCase();
 
-            return UserSelecteds.filter( ({ document: doc, fullname: full }) => {
-                const searchDoc =  (doc.toLowerCase()).includes(usersearch);
-                const searchFull =  (full.toLowerCase()).includes(usersearch);
+                return UserSelecteds.filter( ({ document: doc, fullname: full }) => {
+                    const searchDoc =  (doc.toLowerCase()).includes(usersearch);
+                    const searchFull =  (full.toLowerCase()).includes(usersearch);
 
-                return (searchDoc || searchFull);
-            });
+                    return (searchDoc || searchFull);
+                });
+            }
+            return [];
         }
     },
     watch: {
@@ -215,9 +218,12 @@ export default {
             currentdoc = currentdoc.trim();
 
             const vue = this;
-            const UserDocuments = vue.segment.criteria_selected.map( ({document: doc}) => doc );
-            return { docState : UserDocuments.includes(currentdoc),
-                     docData: UserDocuments };
+            if(vue.segment !== undefined && vue.segment !== null) {
+                const UserDocuments = vue.segment.segmentation_by_document.map( ({document: doc}) => doc );
+                return { docState : UserDocuments.includes(currentdoc),
+                        docData: UserDocuments };
+            }
+            return [];
         },
         addUser(user) {
             let vue = this;
@@ -256,7 +262,7 @@ export default {
                 .then(({data}) => {
                     // vue.filter_result = data.data;
                     data.data.forEach((user) => {
-                        const exist = vue.segment.criteria_selected.filter(el => el.document == user.document);
+                        const exist = vue.segment.segmentation_by_document.filter(el => el.document == user.document);
 
                         if (exist.length === 0){
                             vue.$emit("addUser", user);

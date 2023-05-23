@@ -95,6 +95,15 @@ export default {
 
         vue.loadData();
     },
+    watch: {
+        segment: {
+            handler(n, o) {
+                console.log(this.segment);
+                this.segment.criteria_selected = this.segment.direct_segmentation
+            },
+            deep: true
+        }
+    },
     methods: {
         prueba() {
             this.segment.direct_segmentation.push(null);

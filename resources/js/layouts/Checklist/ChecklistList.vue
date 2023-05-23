@@ -195,7 +195,11 @@ export default {
                 description: '',
                 active: true,
                 checklist_actividades: [],
-                courses: []
+                courses: [],
+                segments: [],
+                segmentation_by_document: {
+                    segmentation_by_document:[]
+                }
             }
         }
     },

@@ -55,7 +55,7 @@
                                                         <DefaultAutocomplete
                                                             dense
                                                             label="Tipo de checklist"
-                                                            v-model="resource.type_checklist"
+                                                            v-model="checklist.type_checklist"
                                                             :items="selects.type_checklist"
                                                             item-text="name"
                                                             item-value="id"
@@ -66,7 +66,7 @@
                                                         <DefaultToggle v-model="checklist.active"/>
                                                     </v-col>
                                                 </v-row>
-                                                <v-row justify="space-around" align="start" align-content="center" v-if="type_checklist === 'libre'">
+                                                <v-row justify="space-around" align="start" align-content="center" v-if="checklist.type_checklist === 'libre'">
                                                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                                                         @click="sections.showAdvancedOptions = !sections.showAdvancedOptions"
                                                         style="cursor: pointer">
@@ -77,7 +77,7 @@
                                                         <DefaultDivider class="divider_light"/>
                                                     </v-col>
                                                 </v-row>
-                                                <v-row justify="space-around" align="start" align-content="center" v-if="type_checklist === 'libre'">
+                                                <v-row justify="space-around" align="start" align-content="center" v-if="checklist.type_checklist === 'libre'">
                                                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                                                         <v-expand-transition>
                                                             <v-row v-show="sections.showAdvancedOptions">
@@ -112,8 +112,8 @@
                         <v-stepper-content step="2" class="p-0">
                                 <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step2">
                                     <v-card-text>
-                                        <!-- checklist libre (segmenteacion) -->
-                                        <div v-if="type_checklist === 'libre'">
+                                        <!-- checklist libre (segmentacion) -->
+                                        <div v-if="checklist.type_checklist === 'libre'">
                                             <v-row>
                                                 <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                                                     <span class="text_default lbl_tit">Relaciona el checklist a los usuarios según criterio o doc. de identidad.</span>
@@ -121,7 +121,8 @@
                                                 <v-col cols="12" class="pb-0 pt-0">
                                                     <SegmentFormModal
                                                         :options="modalFormSegmentationOptions"
-                                                        :list_segments="list_segments"
+                                                        :list_segments="checklist.segments"
+                                                        :list_segments_document="checklist.segmentation_by_document"
                                                         width="55vw"
                                                         model_type="App\Models\Checklist"
                                                         :model_id="null"
@@ -132,9 +133,9 @@
                                                 </v-col>
                                             </v-row>
                                         </div>
-                                        <!-- checklist libre (segmenteacion) -->
+                                        <!-- checklist libre (segmentacion) -->
                                         <!-- checklist curso -->
-                                        <div v-else>
+                                        <div v-else-if="checklist.type_checklist === 'curso'">
                                             <v-row>
                                                 <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                                                     <span class="text_default lbl_tit">Relaciona el checklist a los usuarios según el o los cursos.</span>
@@ -481,12 +482,6 @@ export default {
     methods: {
         rep(){
             let vue = this
-            vue.checklist.list_segments = vue.checklist.segments
-            vue.modalFormSegmentationOptions.list_segments = vue.checklist.segments
-            vue.modalFormSegmentationOptions.isEdit = true
-            vue.modalFormSegmentationOptions.type_checklist = vue.checklist.type_checklist;
-            vue.resource.type_checklist = vue.checklist.type_checklist;
-            vue.type_checklist = vue.checklist.type_checklist;
         },
         nextStep(){
             let vue = this;
@@ -544,32 +539,22 @@ export default {
 
             if (vue.$refs.modalFormSegmentationOptions)
                 vue.$refs.modalFormSegmentationOptions.closeModal()
-            vue.modalFormSegmentationOptions.list_segments = null
-            vue.modalFormSegmentationOptions.list_segments_document = null
-            vue.modalFormSegmentationOptions.isEdit = null
-            vue.modalFormSegmentationOptions.type_checklist = null
         },
         confirm() {
             let vue = this;
-            this.showLoader()
             vue.checklist.list_segments = {
-                'segments' : vue.modalFormSegmentationOptions.list_segments,
-                'model_type': vue.modalFormSegmentationOptions.model_type,
+                'segments' : vue.checklist.segments,
+                'model_type': "App\\Models\\Checklist",
                 'model_id': null,
-                'code': null
+                'code': "direct-segmentation"
             };
             vue.checklist.list_segments_document = {
-                'segment_by_document' : vue.modalFormSegmentationOptions.list_segments_document,
-                'model_type': vue.modalFormSegmentationOptions.model_type,
+                'segment_by_document' : vue.checklist.segmentation_by_document,
+                'model_type': "App\\Models\\Checklist",
                 'model_id': null,
-                'code': null
+                'code': "segmentation-by-document"
             };
-            vue.checklist.type_segment = vue.modalFormSegmentationOptions.type_segment
-            vue.checklist.type_checklist = vue.type_checklist
-
             vue.$emit("onConfirm");
-
-            this.hideLoader()
         },
         showValidateActividades() {
             let vue = this

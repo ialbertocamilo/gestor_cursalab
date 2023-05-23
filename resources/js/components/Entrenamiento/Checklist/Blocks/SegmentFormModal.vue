@@ -46,7 +46,7 @@
                             :continuous="false"
                         >
                             <v-carousel-item
-                                v-for="(row, i) in segments"
+                                v-for="(row, i) in list_segments"
                                 :key="i"
                             >
                                 <v-sheet class="group-sheet" height="100%" style="overflow-y: auto;">
@@ -59,7 +59,7 @@
 
                                     <Segment
                                         :is-course-segmentation="isCourseSegmentation()"
-                                        :segments="segments"
+                                        :segments="list_segments"
                                         :segment="row"
                                         :criteria="criteria"
                                         :course-modules="courseModules"
@@ -84,7 +84,7 @@
 
                 <SegmentByDocument
                     ref="SegmentByDocument"
-                    :segment="segment_by_document"
+                    :segment="list_segments_document"
 
                     :current-clean="segment_by_document_clean"
                     @addUser="addUser"
@@ -155,7 +155,8 @@ export default {
             type: String,
             default: null
         },
-        list_segments: Array
+        list_segments: Array,
+        list_segments_document: Object
     },
     data() {
         return {
@@ -202,49 +203,23 @@ export default {
     },
     mounted() {
         let vue = this;
-        this.addSegmentation('direct-segmentation');
     },
     watch: {
         segments(){
                 const vue = this;
-                if(vue.$props.options.isEdit){
-                    if(vue.$props.options.type_checklist == 'libre'){
-                        vue.segments = vue.$props.options.list_segments
-                        if(Array.isArray(vue.$props.options.list_segments)){
-                            vue.$props.options.list_segments.forEach(element => {
-                                console.log(element);
-                                console.log(element.type_code);
-                                if(element.type_code == 'segmentation-by-document') {
-                                    console.log(element.criteria_selected);
-                                    console.log(vue.segment_by_document);
-                                    vue.segment_by_document.criteria_selected = element.criteria_selected;
-                                }else {
-                                    console.log(element);
-                                }
-                            });
-                        }
-                    }
-                    if(vue.$props.options.type_segment == 'segmentation-by-document') {
-                        vue.tabs = 1;
-                    }
-                }
-                vue.$props.options.list_segments = vue.segments;
-                vue.$props.options.list_segments_document = vue.segment_by_document;
-                vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
-
                 vue.$props.options.model_type= vue.model_type;
         },
         tabs(){
                 const vue = this;
-                console.log(vue.segments);
-                // vue.$props.options.type_segment = (vue.tabs == 1) ? 'segmentation-by-document' : 'direct-segmentation';
         }
     },
     methods: {
+        openModaltwo() {
+            let vue = this;
+        },
         closeModal() {
             let vue = this;
-            // vue.options.open = false
-            vue.resetSelects();
+                vue.segments = [];
 
             // alert modal info
             vue.modalInfoOptions.hideConfirmBtn = false;
@@ -265,14 +240,15 @@ export default {
             return {
                 id: `new-segment-${Date.now()}`,
                 type_code,
-                criteria_selected: []
+                criteria_selected: [],
+                direct_segmentation: []
             };
         },
         async addSegmentation(type_code) {
             let vue = this;
-            vue.segments.push(this.getNewSegment(type_code));
+            vue.list_segments.push(this.getNewSegment(type_code));
 
-            vue.steps = vue.segments.length - 1;
+            vue.steps = vue.list_segments.length - 1;
         },
         borrarBloque(segment) {
             let vue = this;
@@ -581,12 +557,14 @@ console.log(vue.segments.length);
         },
         addUser(user) {
             let vue = this;
-
-            const already_added = vue.segment_by_document.criteria_selected.filter(el => el.document == user.document).length > 0;
+            if(vue.list_segments_document === undefined || vue.list_segments_document === null) {
+                vue.list_segments_document = {'segmentation_by_document': []};
+            }
+            const already_added = vue.list_segments_document.segmentation_by_document.filter(el => el.document == user.document).length > 0;
 
             if (!already_added) {
 
-                vue.segment_by_document.criteria_selected.push(user)
+                vue.list_segments_document.segmentation_by_document.push(user)
 
                 vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user, 'remove');
             }
@@ -594,11 +572,11 @@ console.log(vue.segments.length);
         deleteUser(user) {
             let vue = this;
 
-            const index = vue.segment_by_document.criteria_selected.findIndex(el => el.document == user.document);
+            const index = vue.list_segments_document.segmentation_by_document.findIndex(el => el.document == user.document);
 
             if (index !== -1) {
 
-                vue.segment_by_document.criteria_selected.splice(index, 1);
+                vue.list_segments_document.segmentation_by_document.splice(index, 1);
 
                 // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
             }
