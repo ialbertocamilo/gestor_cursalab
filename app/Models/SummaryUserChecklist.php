@@ -20,7 +20,7 @@ class SummaryUserChecklist extends Summary
         $checklist_user = self::getChecklistByUser($user,'id');
         $checklist_assigned = array_unique(
                 array_merge(
-                    $checklist_user['checklist_libre_assigned']->pluck('id')->toArray(),
+                    array_column($checklist_user['checklist_libre_assigned'],'id'),
                     $checklist_user['checklist_course_assigned']->pluck('id')->toArray()
                 )
             );
@@ -32,7 +32,7 @@ class SummaryUserChecklist extends Summary
         $row_user->update($data);
         return $row_user;
     }
-    public static function getChecklistByUser(User $user,$select_checklist,$withChecklistFreeRelations=[],$withChecklistCourseRelations,$mergeChecklist=false){
+    public static function getChecklistByUser(User $user,$select_checklist,$withChecklistFreeRelations=[],$withChecklistCourseRelations=[],$mergeChecklist=false){
         $checklist_libre_assigned = $user->getSegmentedByModelType(CheckList::class,withModelRelations:$withChecklistFreeRelations);
         
         $cursos_x_user = $user->getCurrentCourses();
