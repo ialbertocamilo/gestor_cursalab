@@ -744,6 +744,19 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // unset($user->subworkspace_id);
         return $match_segment;
     }
+    public function userHasCourse($course){
+        $user = $this;
+        $user->loadMissing(['criterion_values:id,value_text,criterion_id','criterion_values.criterion.field_type']);
+        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+        foreach ($course->segments as $segment) {
+            $course_segment_criteria = $segment->values->groupBy('criterion_id');
+            $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+            if ($valid_segment) :
+                return true;
+            endif;
+        }
+        return false;
+    }
     public function getCurrentCourses(
         $with_programs = true,
         $with_direct_segmentation = true,

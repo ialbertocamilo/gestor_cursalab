@@ -480,24 +480,40 @@ class CheckList extends BaseModel
         $perPage = 10;
         //añadir porcentaje.
         $checklist = CheckList::select('id','type_id')->with('type:id,code')->where('id',$checklist_id)->first();
-        $alumnos_ids = EntrenadorUsuario::entrenador($trainer->id)->where('active', 1)->select('user_id')->get()->pluck('user_id')->all();
         if($checklist->type->code == 'curso'){
-            $courses_id = $checklist->courses()->select('id')->pluck('id');
-            $status_id_completed = Taxonomy::where('group', 'course')->where('type','user-status')->where('code','aprobado')->first()?->id;
-            $alumnos_ids = User::whereIn('id',$alumnos_ids)->where('active', 1)
-                    ->select('id')
-                    ->whereHas('summary_courses',function($q)use ($courses_id,$status_id_completed) {
-                        foreach ($courses_id as $key => $course_id) {
-                            $q->where('course_id',$course_id);
-                        }
-                        $q->where('status_id',$status_id_completed);
-                    })->pluck('id');
+            $courses = $checklist->courses()->select('courses.id')->with('segments')->get('id');
+            $alumnos = $trainer->students()->with([
+                'criterion_values:id,value_text,criterion_id','criterion_values.criterion.field_type'
+            ])->select('users.id')->where('users.active',1)->get();
+            $alumnos_ids = [];
+            foreach ($alumnos as $alumno) {
+                $hasAllCourses = true;
+                foreach ($courses as $course) {
+                    if(!$alumno->userHasCourse($course)){
+                        $hasAllCourses = false;
+                    }
+                }
+                if($hasAllCourses){
+                    $alumnos_ids[] = $alumno->id;
+                } 
+            }
+            $alumnos_ids[] = $alumno->id;
+            // $alumnos_ids = User::whereIn('id',$final_list)->where('active', 1)
+            //         ->select('id')
+            //         ->whereHas('summary_courses',function($q)use ($courses_id,$status_id_completed) {
+            //             foreach ($courses_id as $key => $course_id) {
+            //                 $q->where('course_id',$course_id);
+            //             }
+            //             $q->where('status_id',$status_id_completed);
+            //         })->pluck('id');
+            // $status_id_completed = Taxonomy::where('group', 'course')->where('type','user-status')->where('code','aprobado')->first()?->id;
             // $usersSegmented = [];
             // foreach ($checklist->courses as $course) {
             //     $course_users = $course->usersSegmented($course->segments, $type = 'users_id');
             //     $usersSegmented = array_merge($usersSegmented,$course_users);
             // }
         }else{
+            $alumnos_ids =$trainer->students()->select('users.id')->where('users.active',1)->pluck('user_id');;
             $checklist = CheckList::select('id','type_id')->with('segments')->where('id',$checklist_id)->first();
             $course = new Course();
             $checklist_users = $course->usersSegmented($checklist->segments, $type = 'users_id');
@@ -510,8 +526,11 @@ class CheckList extends BaseModel
             ->paginate($perPage, ['*'], 'page', $page);
 
         if(count($list_students) > 0) {
-            foreach ($list_students as $check) {
-                $check->makeHidden(['abilities', 'roles', 'age', 'fullname']);
+            foreach ($list_students as $student) {
+                if(!$check->summary_user_checklist){
+                    $check->advanced_percentage= '0';
+                }
+                $student->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             }
         }
 
