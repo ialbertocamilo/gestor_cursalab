@@ -482,13 +482,21 @@ class CheckList extends BaseModel
         $checklist = CheckList::select('id','type_id')->with('type:id,code')->where('id',$checklist_id)->first();
         $alumnos_ids = EntrenadorUsuario::entrenador($trainer->id)->where('active', 1)->select('user_id')->get()->pluck('user_id')->all();
         if($checklist->type->code == 'curso'){
-            $checklist = CheckList::select('id','type_id')->with(['courses:id,name','courses.segments'])->where('id',$checklist_id)->first();
-            $usersSegmented = [];
-            foreach ($checklist->courses as $course) {
-                $course_users = $course->usersSegmented($course->segments, $type = 'users_id');
-                $usersSegmented = array_merge($usersSegmented,$course_users);
-            }
-            $alumnos_ids = array_intersect($alumnos_ids,$usersSegmented);
+            $courses_id = $checklist->courses()->select('id')->pluck('id');
+            $status_id_completed = Taxonomy::where('group', 'course')->where('type','user-status')->where('code','aprobado')->first()?->id;
+            $alumnos_ids = User::whereIn('id',$alumnos_ids)->where('active', 1)
+                    ->select('id')
+                    ->whereHas('summary_courses',function($q)use ($courses_id,$status_id_completed) {
+                        foreach ($courses_id as $key => $course_id) {
+                            $q->where('course_id',$course_id);
+                        }
+                        $q->where('status_id',$status_id_completed);
+                    })->pluck('id');
+            // $usersSegmented = [];
+            // foreach ($checklist->courses as $course) {
+            //     $course_users = $course->usersSegmented($course->segments, $type = 'users_id');
+            //     $usersSegmented = array_merge($usersSegmented,$course_users);
+            // }
         }else{
             $checklist = CheckList::select('id','type_id')->with('segments')->where('id',$checklist_id)->first();
             $course = new Course();
