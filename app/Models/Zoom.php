@@ -31,11 +31,20 @@ class Zoom extends Model
             $token = $zoom_acc->generateJWT();
 
             $client = new Client();
+   $response = $client->request('POST', 'https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' . env('ZOOM_ACCOUNT_ID'), [
+                'auth' => [
+                    env('ZOOM_CLIENT_ID'),
+                    env('ZOOM_CLIENT_SECRET')
+                ]
+            ]);
 
+            $data = json_decode($response->getBody(), true);
+
+            $accessToken = $data['access_token'];
             $params = [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $token,
+                    'Authorization' => 'Bearer ' . $accessToken,
                 ],
             ];
 
