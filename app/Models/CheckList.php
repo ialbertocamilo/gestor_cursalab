@@ -483,18 +483,18 @@ class CheckList extends BaseModel
         if($checklist->type->code == 'curso'){
             $courses = $checklist->courses()->select('courses.id')->with('segments')->get('id');
             $status_id_completed = Taxonomy::where('group', 'course')->where('type','user-status')->where('code','aprobado')->first()?->id;
-            $list_students = $trainer->students()->leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
-            ->whereIn('users.id',$alumnos_ids)
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
-            ->with([
-                'criterion_values:id,value_text,criterion_id','criterion_values.criterion.field_type'
-            ])->whereHas('summary_courses',function($q)use ($courses,$status_id_completed) {
+            $alumnos_ids = $trainer->students()
+            // ->with([
+            //     'criterion_values:id,value_text,criterion_id','criterion_values.criterion.field_type'
+            // ])
+            ->whereHas('summary_courses',function($q)use ($courses,$status_id_completed) {
                 foreach ($courses as $course) {
                     $q->where('course_id',$course->id);
                 }
                 $q->where('status_id',$status_id_completed);
-            })->where('users.active',1)->paginate($perPage, ['*'], 'page', $page);
+            })
+            ->select('users.id')->where('users.active',1)->get()->pluck('id');
+            // dd($alumnos_ids);
             // $alumnos_ids = [];
             // foreach ($alumnos as $alumno) {
             //     $hasAllCourses = true;
@@ -527,15 +527,18 @@ class CheckList extends BaseModel
             $course = new Course();
             $checklist_users = $course->usersSegmented($checklist_segments, $type = 'users_id');
             $alumnos_ids = array_intersect($alumnos_ids,$checklist_users);
-            $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-                ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
-                ->whereIn('users.id',$alumnos_ids)
-                ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
-                ->paginate($perPage, ['*'], 'page', $page);
         }
+        $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
+            ->whereIn('users.id',$alumnos_ids)
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
+            ->paginate($perPage, ['*'], 'page', $page);
 
         if(count($list_students) > 0) {
             foreach ($list_students as $student) {
+                if(!$student->advanced_percentage){
+                    $student->advanced_percentage = 0;
+                }
                 $student->makeHidden(['abilities', 'roles', 'age', 'fullname']);
             }
         }
