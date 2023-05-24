@@ -2,14 +2,14 @@
     <v-row justify="space-around">
         <v-col cols="12" style="height: 400px;">
             <v-row>
-                <v-col cols="5" class="d-flex justify-content-center flex-row bx_search_by_document">
+                <v-col cols="5" class="d-flex flex-row bx_search_by_document">
                     <DefaultInput
                         clearable dense
                         v-model="search"
                         placeholder="Búsqueda"
                         append-icon="mdi-magnify"
                         :loading="autocomplete_loading"
-                        class="col-11"
+                        class="col-12"
                     />
                 </v-col>
                 <v-col cols="7" class="d-flex justify-content-between align-items-center">
@@ -24,20 +24,24 @@
                                 dense
                                 outlined
                                 hide-input
-                                prepend-icon="mdi-file-upload"
                                 @change="uploadExcel"
-                                class="upload-file-segment flex-initial"
+                                class="upload-file-segment flex-initial hide_icon"
+                                ref="input_file_upload"
+                                id="input_file_upload"
+                                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                             >
                                 <template v-slot:append-outer>
                                 </template>
                             </v-file-input>
-                            <span class="text_default">Subir archivo</span>
+                            <div @click="$refs.input_file_upload.$refs.input.click()" style="cursor: pointer;">
+                                <img src="/img/checklist/upload.svg" class="mrb_3">
+                                <span class="text_default">Subir archivo</span>
+                            </div>
                         </div>
                         <div class="d-flex justify-content-center align-items-center mx-2 est_link">
-                            <a class="justify-end"
-                            href="/templates/Plantilla-Segmentacion.xlsx">
-                            <v-icon small>mdi-file-download</v-icon>
-                            <span class="text_default">Plantilla</span>
+                            <a class="justify-end" href="/templates/Plantilla-Segmentacion.xlsx">
+                                <img src="/img/checklist/download.svg" class="mrb_3">
+                                <span class="text_default">Plantilla</span>
                             </a>
                         </div>
                     </div>
@@ -344,5 +348,20 @@ button.v-icon.v-icon--link {
 }
 .bx_search_by_document .v-input__append-inner button.v-btn {
     padding: 0 !important;
+}
+.bx_search_by_document .v-input__slot fieldset {
+    border-radius: 8px;
+}
+.est_link a {
+    text-decoration: none !important;
+    display: flex;
+    align-items: flex-end;
+}
+.mrb_3 {
+    margin-bottom: 3px;
+    margin-right: 3px;
+}
+.hide_icon .v-input__prepend-outer {
+    display: none;
 }
 </style>
