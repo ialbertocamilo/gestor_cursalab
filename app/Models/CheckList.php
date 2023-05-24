@@ -483,26 +483,30 @@ class CheckList extends BaseModel
         if($checklist->type->code == 'curso'){
             $courses = $checklist->courses()->select('courses.id')->with('segments')->get('id');
             $status_id_completed = Taxonomy::where('group', 'course')->where('type','user-status')->where('code','aprobado')->first()?->id;
-            $alumnos = $trainer->students()->with([
+            $list_students = $trainer->students()->leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
+            ->whereIn('users.id',$alumnos_ids)
+            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
+            ->with([
                 'criterion_values:id,value_text,criterion_id','criterion_values.criterion.field_type'
             ])->whereHas('summary_courses',function($q)use ($courses,$status_id_completed) {
                 foreach ($courses as $course) {
                     $q->where('course_id',$course->id);
                 }
                 $q->where('status_id',$status_id_completed);
-            })->select('users.id')->where('users.active',1)->get();
-            $alumnos_ids = [];
-            foreach ($alumnos as $alumno) {
-                $hasAllCourses = true;
-                foreach ($courses as $course) {
-                    if(!$alumno->userHasCourse($course)){
-                        $hasAllCourses = false;
-                    }
-                }
-                if($hasAllCourses){
-                    $alumnos_ids[] = $alumno->id;
-                } 
-            }
+            })->where('users.active',1)->paginate($perPage, ['*'], 'page', $page);
+            // $alumnos_ids = [];
+            // foreach ($alumnos as $alumno) {
+            //     $hasAllCourses = true;
+            //     foreach ($courses as $course) {
+            //         if(!$alumno->userHasCourse($course)){
+            //             $hasAllCourses = false;
+            //         }
+            //     }
+            //     if($hasAllCourses){
+            //         $alumnos_ids[] = $alumno->id;
+            //     } 
+            // }
             // $alumnos_ids = User::whereIn('id',$final_list)->where('active', 1)
             //         ->select('id')
             //         ->whereHas('summary_courses',function($q)use ($courses_id,$status_id_completed) {
@@ -523,12 +527,12 @@ class CheckList extends BaseModel
             $course = new Course();
             $checklist_users = $course->usersSegmented($checklist_segments, $type = 'users_id');
             $alumnos_ids = array_intersect($alumnos_ids,$checklist_users);
+            $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+                ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
+                ->whereIn('users.id',$alumnos_ids)
+                ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
+                ->paginate($perPage, ['*'], 'page', $page);
         }
-        $list_students = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
-            ->whereIn('users.id',$alumnos_ids)
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage')
-            ->paginate($perPage, ['*'], 'page', $page);
 
         if(count($list_students) > 0) {
             foreach ($list_students as $student) {
