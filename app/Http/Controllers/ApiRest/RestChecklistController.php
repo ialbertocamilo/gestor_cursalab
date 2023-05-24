@@ -57,7 +57,7 @@ class RestChecklistController extends Controller
     public function getStudentsByChecklist(Request $request)
     {
         $trainer = Auth::user();
-        $trainer = User::where('document',31313131)->first();
+        // $trainer = User::where('document',31313131)->first();
         // $response = CheckList::getStudentsByChecklist($checklist->id,$trainer->id);
         $data = [
             'trainer' => $trainer,
