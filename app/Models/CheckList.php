@@ -110,6 +110,18 @@ class CheckList extends BaseModel
 
             $checklist->segments = $segments;
 
+            $segmentation_by_document_list = [];
+            $segmentation_by_document = $segments->map(function ($item) {
+                return ['segmentation_by_document'=> $item->segmentation_by_document];
+            });
+
+            foreach ($segmentation_by_document as $seg) {
+                foreach ($seg['segmentation_by_document'] as $value) {
+                    array_push($segmentation_by_document_list, $value);
+                }
+            }
+            $checklist->segmentation_by_document = ['segmentation_by_document'=> $segmentation_by_document_list];
+
             $checklist->active = $checklist->active;
             $checklist->is_super_user = auth()->user()->isAn('super-user');
             $type_checklist = Taxonomy::where('id', $checklist->type_id)->first();
