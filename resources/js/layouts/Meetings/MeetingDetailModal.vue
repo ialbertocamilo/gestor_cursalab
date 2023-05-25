@@ -1211,6 +1211,7 @@ export default {
         },
         downloadReport() {
             let vue = this
+            vue.queryStatus("reportes", "descargar_reporte_meetings");
             let url = `${vue.options.base_endpoint}/${vue.resource.id}/export-report`
             window.open(url, '_blank');
         },

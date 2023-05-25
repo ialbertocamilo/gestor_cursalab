@@ -34,6 +34,8 @@ class EncuestaResource extends JsonResource
             'created_at' => $this->created_at->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at->format('d/m/Y g:i a'),
 
+            'is_super_user'=>auth()->user()->isAn('super-user')
+
             // 'escuelas_count' => $this->categorias_count,
             // 'usuarios_count' => thousandsFormat($this->usuarios_count),
 

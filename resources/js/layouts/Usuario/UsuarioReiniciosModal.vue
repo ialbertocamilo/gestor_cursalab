@@ -51,10 +51,23 @@
                                   border="right"
                                     colored-border
                                 >
-                                    <small><strong>Para temas desaprobados</strong></small>
-                                    <br>
-                                    <small>Se reiniciará el tema seleccionado.</small>
-
+                                <div class="d-flex justify-space-between">
+                                    <div>
+                                        <small><strong>Para temas desaprobados</strong></small>
+                                        <br>
+                                        <small>Se reiniciará el tema seleccionado.</small>
+                                    </div>
+                                    <div class="d-flex justify-space-between align-center">
+                                        <div class="mx-2 d-flex flex-column align-center" style="color: #5458ea;">
+                                            <span class="font-weight-bold" style="font-size: 1.7rem;" v-text="selects.temas.length"></span>
+                                            <span class="text-subtitle-1">temas</span>
+                                        </div>
+                                        <v-divider :thickness="3" inset class="border-opacity-100 m-0" color="info" vertical></v-divider>
+                                        <div class="mx-2 text-subtitle-1" style="color: #5458ea;">
+                                            Disponibles a reinicio
+                                        </div>
+                                    </div>
+                                </div>
                                 </v-alert>
                                    <v-form ref="temasForm">
 
@@ -274,16 +287,16 @@ export default {
             vue.resetFormValidation('temasForm')
         }
         ,
-        loadData(resource) {
-
+        async loadData(resource) {
             let vue = this
+            vue.showLoader()
             let url = `${vue.options.base_endpoint}/${resource.id}/reset`
-
-            vue.$http.get(url).then(({data}) => {
+            await vue.$http.get(url).then(({data}) => {
                 vue.selects.temas = data.data.topics
                 vue.selects.cursos = data.data.courses
                 vue.resource = data.data.user
                 vue.resetValidation()
+                vue.hideLoader()
             });
         },
         loadSelects() {
@@ -298,5 +311,9 @@ export default {
         min-height: 150px; max-height: 450px;
         overflow-x: auto;
         overflow-y: auto;
+    }
+    .v-divider--vertical.v-divider--inset{
+        max-height:calc(100% - 7px) !important;   
+        border: 1.5px solid #3490dc !important;
     }
 </style>

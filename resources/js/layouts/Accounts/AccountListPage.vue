@@ -1,7 +1,5 @@
 <template>
-
     <div>
-
         <header class="page-header">
             <div class="breadcrumb-holder container-fluid">
                 <v-card-title>
@@ -26,7 +24,6 @@
         </header>
 
         <section class="client section-list">
-
             <v-card class="card" elevation="0">
                 <v-card-text>
                     <v-row class="justify-content-start">
@@ -56,11 +53,47 @@
                     :data-table="dataTable"
                     :filters="filters"
                     @edit="openFormModal(modalOptions, $event)"
-                    @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                    @token="openFormModal(modalTokenOptions, $event, 'token', 'Actualizar tokens')"
-                    @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar cuenta')"
+                    @status="
+                        openFormModal(
+                            modalStatusOptions,
+                            $event,
+                            'status',
+                            'Actualizar estado'
+                        )
+                    "
+                    @token="
+                        openFormModal(
+                            modalTokenOptions,
+                            $event,
+                            'token',
+                            'Actualizar tokens'
+                        )
+                    "
+                    @delete="
+                        openFormModal(
+                            modalDeleteOptions,
+                            $event,
+                            'delete',
+                            'Eliminar cuenta'
+                        )
+                    "
+                    @logs="
+                        openFormModal(
+                            modalLogsOptions,
+                            $event,
+                            'logs',
+                            `Logs del Evento - ${$event.name}`
+                        )
+                    "
                 />
-
+                <LogsModal
+                    :options="modalLogsOptions"
+                    width="55vw"
+                    :model_id="null"
+                    model_type="App\Models\Account"
+                    :ref="modalLogsOptions.ref"
+                    @onCancel="closeSimpleModal(modalLogsOptions)"
+                />
                 <AccountFormModal
                     width="50vw"
                     :ref="modalOptions.ref"
@@ -95,15 +128,10 @@
                     :ref="modalInfoOptions.ref"
                     @onCancel="closeFormModal(modalInfoOptions)"
                 />
-
             </v-card>
-
         </section>
-
     </div>
-
 </template>
-
 
 <script>
 import AccountFormModal from "./AccountFormModal";
@@ -111,9 +139,17 @@ import AccountTokenModal from "./AccountTokenModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import MeetingInfoModal from "../Meetings/MeetingInfoModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {AccountFormModal, AccountTokenModal, DefaultStatusModal, DefaultDeleteModal, MeetingInfoModal},
+    components: {
+        AccountFormModal,
+        AccountTokenModal,
+        DefaultStatusModal,
+        DefaultDeleteModal,
+        MeetingInfoModal,
+        LogsModal
+    },
     data() {
         return {
             dataTable: {
@@ -154,6 +190,13 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -184,7 +227,14 @@ export default {
                 base_endpoint: '/aulas-virtuales/cuentas',
                 resource: 'cuenta',
                 hideConfirmBtn: true,
-                cancelLabel: 'Cerrar',
+                cancelLabel: "Cerrar"
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: "/search",
+                persistent: true
             },
             modalStatusOptions: {
                 ref: 'AccountStatusModal',
@@ -233,6 +283,5 @@ export default {
             // TODO: Call store or update USER
         },
     }
-
 }
 </script>

@@ -33,7 +33,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -42,7 +42,7 @@
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             item-text="name"
                         />
                     </v-col>
@@ -55,7 +55,7 @@
                             :options="modalDateFilter1"
                             v-model="filters.dates"
                             label="Fecha de creación"
-                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                         />
                     </v-col>
                     <v-col cols="3">
@@ -63,8 +63,8 @@
                             learable dense
                             v-model="filters.q"
                             label="Buscar por nombre..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1),changeHeaders()"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
@@ -77,8 +77,30 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar escuela')"
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs de la escuela - ${$event.name}`
+                    )
+                "
+                @status="
+                    openFormModal(
+                        modalStatusOptions,
+                        $event,
+                        'status',
+                        'Actualizar estado'
+                    )
+                "
+                @delete="
+                    openFormModal(
+                        modalDeleteOptions,
+                        $event,
+                        'delete',
+                        'Eliminar escuela'
+                    )
+                "
                 @duplicate="openDuplicarModal($event)"
             />
                 <!-- @delete="deleteEscuela($event)" -->
@@ -118,11 +140,17 @@
                 @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\School"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
-
 
 <script>
 import EscuelaFormModal from "./EscuelaFormModal";
@@ -131,10 +159,19 @@ import EscuelaValidacionesModal from "./EscuelaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DuplicarCursos from './DuplicarCursos';
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    props: ['workspace_id', 'workspace_name'],
-    components: {EscuelaFormModal, EscuelaValidacionesModal, DialogConfirm, DefaultStatusModal, DuplicarCursos, DefaultDeleteModal},
+    props: ["workspace_id", "workspace_name"],
+    components: {
+        EscuelaFormModal,
+        EscuelaValidacionesModal,
+        DialogConfirm,
+        DefaultStatusModal,
+        DuplicarCursos,
+        DefaultDeleteModal,
+        LogsModal
+    },
     data() {
         let vue = this
 
@@ -181,6 +218,15 @@ export default {
                         show_condition: 'has_no_courses',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+
+                        method_name: "logs"
+                    }
+
                     // {
                     //     text: "Actualizar Estado",
                     //     icon: 'fa fa-circle',
@@ -188,6 +234,13 @@ export default {
                     //     method_name: 'status'
                     // },
                 ],
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
             modalDeleteOptions: {
                 ref: 'EscuelaDeleteModal',
@@ -262,6 +315,28 @@ export default {
             // vue.delete_model = school
             // vue.modalDeleteOptions.open = true
         },
+        changeHeaders(){
+            let vue = this;
+            const indexOrden = vue.dataTable.headers.findIndex(h => h.text == 'Orden');
+            console.log('indexOrden',indexOrden);
+            if(vue.filters.modules.length ==1 && !vue.filters.q && !vue.filters.active &&  !vue.filters.dates){
+                console.log('entra if');
+                vue.$nextTick(() => {
+                    if(indexOrden == -1){
+                        vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'SchoolSubworkspace', sortable: false}, 1);
+                        console.log('entra set');
+                    }
+                });
+            }else{
+                console.log('entra else');
+                if(indexOrden != -1){
+                    vue.$nextTick(() => {
+                        vue.dataTable.headers.splice(indexOrden, 1);
+                        console.log('entra delete');
+                    })
+                }
+            }
+        },
         selectDefaultModule(modules) {
             let vue = this
 
@@ -325,6 +400,5 @@ export default {
             vue.modalCursosDuplicar.categoria_id = 0;
         }
     }
-
 }
 </script>

@@ -26,7 +26,8 @@ jQuery(function ($) {
         let current = new Date();
         let new_sent = (nps_sent != null) ? (parseInt(nps_sent)+86400000) < current.getTime() : false;
 
-        if(mostrar_nps != null && mostrar_nps && (nps_sent == null || new_sent)){
+        let data_nps = localStorage.getItem('data_nps');
+        if(mostrar_nps != null && mostrar_nps && (nps_sent == null || new_sent) && data_nps != null){
             setTimeout(() => {
                 box_valoracion.classList.remove('hide')
             }, 2500);
@@ -36,7 +37,12 @@ jQuery(function ($) {
 
 
 function close_box_val() {
-    sendSaveComment();
+    let data_nps = localStorage.getItem('data_nps');
+    if(data_nps != null) {
+        sendSaveComment();
+    } else {
+        localStorage.removeItem('mostrar_nps');
+    }
     setTimeout(() => {
         box_valoracion.classList.add('hide');
     }, 300);
@@ -45,12 +51,19 @@ function close_box_val() {
 function showStars(){
     box_val_stars.classList.remove('hide');
     let data_nps = localStorage.getItem('data_nps');
-    local_data_nps = JSON.parse(data_nps);
-    local_data_nps.encuesta.secciones.forEach(element => {
-        if(element.seccion == 1)
-            box_val_stars_question.innerHTML = element.pregunta
-    });
-    sendSaveComment();
+    if(data_nps != null) {
+        local_data_nps = JSON.parse(data_nps);
+        local_data_nps.encuesta.secciones.forEach(element => {
+            if(element.seccion == 1)
+                box_val_stars_question.innerHTML = element.pregunta
+        });
+        sendSaveComment();
+    } else {
+        localStorage.removeItem('mostrar_nps');
+        setTimeout(() => {
+            box_valoracion.classList.add('hide');
+        }, 300);
+    }
 }
 
 function showIcons( star ){

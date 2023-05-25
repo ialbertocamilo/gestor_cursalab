@@ -6,7 +6,7 @@
         <template v-slot:item="{ item }">
             <div class="d-flex flex-column">
                 <a class="default-breadcrumb-title"
-                   href="#"
+                   :href="item.url ? item.url : '#'"
                    v-text="item.title"
                    @click="navigate(item)"
                 />

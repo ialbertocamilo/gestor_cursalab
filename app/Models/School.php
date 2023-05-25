@@ -9,7 +9,7 @@ class School extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma',
-        'position', 'scheduled_restarts', 'active'
+         'scheduled_restarts', 'active'
     ];
 
     public function setActiveAttribute($value)
@@ -43,8 +43,17 @@ class School extends BaseModel
         $modules_id = $request->modules ?? $workspace->subworkspaces->pluck('id')->toArray();
 
         $escuelas = School::
+        // addSelect('DISTINCT(ss.school_id)')
             // whereRelation('workspaces', 'workspace_id', $workspace->id)
-            whereHas('subworkspaces', function ($j) use ($modules_id) {
+            
+            // ->whereIn('ss.subworkspace_id',$modules_id)
+            // with(['subworkspaces',function($q){
+            //     $q->select('subworkspace_id','school_id','orden');
+            // }])
+            when($request->canChangePosition ?? null, function ($q) use ($modules_id) {
+                $q->join('school_subworkspace as ss','ss.school_id','schools.id')->where('ss.subworkspace_id',$modules_id[0]);
+            })
+            ->whereHas('subworkspaces', function ($j) use ($modules_id) {
                 $j->whereIn('subworkspace_id', $modules_id);
             })
             ->withCount(['courses']);
@@ -69,24 +78,24 @@ class School extends BaseModel
             if (isset($request->dates[1]))
                 $escuelas->whereDate('created_at', '<=', $request->dates[1]);
         }
-
-        if (!is_null($request->sortBy)) {
-            $field = $request->sortBy ?? 'created_at';
-            $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
-            $escuelas->orderBy($field, $sort);
-        } else {
-            $escuelas->orderBy('created_at', 'DESC');
+        if(!$request->canChangePosition){
+            if (!is_null($request->sortBy)) {
+                $field = $request->sortBy ?? 'created_at';
+                $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+                $escuelas->orderBy($field, $sort);
+            } else {
+                $escuelas->orderBy('created_at', 'DESC');
+            }
+        }else{
+            $escuelas->addSelect('ss.position as school_position')->orderBy('school_position', 'ASC')->groupBy('schools.id');
         }
 
 
         // $field = $request->sortBy == 'orden' ? 'position' : $request->sortBy;
-
         // $field = $field ?? 'position';
         // $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
-
+        // dd($escuelas->paginate($request->paginate)->pluck('id'));
         // $escuelas->orderBy($field, $sort);
-
         return $escuelas->paginate($request->paginate);
     }
 
@@ -100,6 +109,14 @@ class School extends BaseModel
                 $school->update($data);
             else :
                 $school = self::create($data);
+                foreach ($data['subworkspaces'] as  $subworkspace) {
+                    SortingModel::setLastPositionInPivotTable(SchoolSubworkspace::class,School::class,[
+                        'subworkspace_id'=>$subworkspace,
+                        'school_id' => $school->id
+                    ],[
+                        'subworkspace_id'=>$subworkspace,
+                    ]);
+                }
             endif;
             
             $school->subworkspaces()->sync($data['subworkspaces'] ?? []);

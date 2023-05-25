@@ -46,6 +46,7 @@ return [
 
     'impersonation' => [
         'enabled' => env('APP_IMPERSONATION_ENABLED', false),
+        'link_duration' => env('APP_IMPERSONATION_LINK_DURATION_SECONDS', 45),
         'code' => env('APP_IMPERSONATION_CODE'),
         'fields' => [
             ['name' => 'username', 'label' => 'Usuario' , 'hidden' => false, 'required' => true],
@@ -97,6 +98,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'web_url' => env('APP_WEB_URL', 'http://localhost'),
 
     'asset_url' => env('ASSET_URL'),
 
@@ -240,7 +242,7 @@ return [
         App\Providers\ValidationServiceProvider::class,
         Lab404\Impersonate\ImpersonateServiceProvider::class,
 
-        // Jenssegers\Mongodb\MongodbServiceProvider::class,
+        Jenssegers\Mongodb\MongodbServiceProvider::class,
         // App\Providers\TenancyServiceProvider::class,
 
     ],

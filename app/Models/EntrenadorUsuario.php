@@ -6,16 +6,30 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Bouncer;
 
-class EntrenadorUsuario extends Model
+use App\Traits\CustomAudit;
+use Altek\Accountant\Contracts\Recordable;
+class EntrenadorUsuario extends Model implements Recordable
 {
+    use \Altek\Accountant\Recordable, \Altek\Eventually\Eventually, CustomAudit;
+
     protected $table = 'trainer_user';
 
     protected $fillable = ['trainer_id', 'user_id', 'active'];
+
+    public $defaultRelationships = [
+        'user_id' => 'user',
+        'trainer_id' => 'trainer',
+    ];
+
     public $timestamps = false;
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    public function trainer()
+    {
+        return $this->belongsTo(User::class, 'trainer_id');
     }
 
     // public function entrenador()
@@ -46,11 +60,12 @@ class EntrenadorUsuario extends Model
             ->whereHas('students');
 
         // $queryEntrenadores = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR);
-        if (!empty($filtro) || $filtro == null)
+        if (!empty($filtro) || $filtro == null) {
             $queryEntrenadores->where(function ($query) use ($filtro) {
                 $query->where('name', 'like', "%$filtro%");
                 $query->orWhere('document', 'like', "%$filtro%");
             });
+        }
 
         $field = request('sortBy') ?? 'created_at';
         $sort = request('sortDesc') == 'true' ? 'DESC' : 'ASC';
@@ -100,7 +115,6 @@ class EntrenadorUsuario extends Model
         $response['to'] = $entrenadores->lastItem();
         $response['total'] = $entrenadores->total();
 
-
         return $response;
     }
     public static function listStudents($trainer_id){
@@ -127,7 +141,7 @@ class EntrenadorUsuario extends Model
             // ];
             // $tempAlumnos->push($temp);
         }
-        
+
         return [
             'alumnos'=> $trainer->students
         ];
@@ -160,15 +174,17 @@ class EntrenadorUsuario extends Model
         if ($entrenador['error']) return $entrenador;
 
 
+
         $alumnos_ids = EntrenadorUsuario::where('trainer_id', $entrenador['data_usuario']->id)->get();
         $queryDataAlumnos = User::whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
             ->select('users.id', 'users.name', 'users.lastname', 'users.surname', 'users.document', 'users.subworkspace_id', DB::raw("CONCAT(users.document, ' - ', users.name) as text"));
 
-        if (!empty($filtro))
+        if (!empty($filtro)) {
             $queryDataAlumnos->where(function ($query) use ($filtro) {
                 $query->where('users.name', 'like', "%$filtro%");
                 $query->orWhere('users.document', 'like', "%$filtro%");
             });
+        }
 
         $dataAlumnos = $queryDataAlumnos->get();
         if ($dataAlumnos->count() == 0) {
@@ -277,7 +293,6 @@ class EntrenadorUsuario extends Model
             ->where('user_id', $user_id)
             ->first();
         if (is_null($registro) || !$registro) {
-
             $data['trainer_id'] = $trainer_id;
             $data['user_id'] = $user_id;
             EntrenadorUsuario::create($data);

@@ -3,7 +3,6 @@
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Database Connection Name
@@ -34,7 +33,6 @@ return [
     */
 
     'connections' => [
-
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DATABASE_URL'),
@@ -199,10 +197,11 @@ return [
             // 'password' => env('DB_MONGO_PASSWORD'),
             'options' => [
 //                'replicaSet' => 'rs0',
-                'database' => 'admin' // sets the authentication database required by mongo 3
+                'database' => 'admin', // sets the authentication database required by mongo 3
+                'tls' => env('DB_MONGO_OPT_TLS', false),
+                'tlsCAFile' => env('DB_MONGO_OPT_TLS_CA', ''),
             ],
         ],
-
     ],
 
     /*
@@ -230,7 +229,6 @@ return [
     */
 
     'redis' => [
-
         'client' => env('REDIS_CLIENT', 'predis'),
 
         'options' => [
@@ -256,7 +254,5 @@ return [
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
-
     ],
-
 ];

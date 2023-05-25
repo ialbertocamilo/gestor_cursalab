@@ -18,7 +18,7 @@
                         <img src="/img/upload_error.png">
                     </div>
                     <div class="text_error_upload">El archivo no se ha podido cargar correctamente.</div>
-                    <span class="label_error_upload" v-if="error_size">El archivo supera el peso maximo<br>permitido. (máximo 200 Mb)</span>
+                    <span class="label_error_upload" v-if="error_size">El archivo supera el peso maximo<br>permitido. (máximo 300 Mb)</span>
                     <span class="label_error_upload" v-else>El archivo no es del formato permitido</span>
                 </div>
                 <div class="init_upload" v-else>
@@ -113,7 +113,7 @@ export default {
             let validExt = (this.typesAllowed[0] != '') ? this.validatedFileExtension(file, this.typesAllowed) : true;
             let vue = this;
 
-            if(file.size > 0 && (file.size/1024/1024) > 200) {
+            if(file.size > 0 && (file.size/1024/1024) > 302) {
                 vue.error_upload = true;
                 vue.error_size = true;
                 this.$refs.myVueDropzone.removeAllFiles()

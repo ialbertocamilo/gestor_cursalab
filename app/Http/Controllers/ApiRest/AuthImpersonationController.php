@@ -17,6 +17,9 @@ use Illuminate\Support\Str;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Hash;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
+
 class AuthImpersonationController extends Controller
 {
     public function getData()
@@ -156,6 +159,45 @@ class AuthImpersonationController extends Controller
         $month = strtolower($months[$current_month]);
 
         return "{$current_day}{$month}{$current_year}";
+    }
+
+    public function external($token, Request $request)
+    {
+        try {
+
+            $enabled = config('app.impersonation.enabled');
+
+            if (!$enabled) return $this->error('Service not available.', http_code: 503);
+
+            $token = Crypt::decryptString($request->token);
+
+            $ids = explode('-', $token);
+
+            $user_id = $ids[0] ?? null;
+            $gestor_id = $ids[1] ?? null;
+
+            $user = User::find($user_id);
+            $gestor = User::find($gestor_id);
+
+            if ($user && $gestor) {
+
+                $data = $this->respondWithDataAndToken($user);
+
+                $data['config_data']['impersonation'] = [
+                    'show_bar' => true,
+                    'show_title' => 'Accediste como ' . $user->fullname,
+                    'user' => $gestor->fullname,
+                ];
+                
+                return response()->json($data);
+            }
+
+            return $this->error('Wrong token.', http_code: 503);
+
+        } catch (\Exception $e) {
+
+            return $this->error('Error found.', http_code: 503);
+        }
     }
 
 }

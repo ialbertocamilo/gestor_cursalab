@@ -62,8 +62,8 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
 
             foreach ($this->codes as $position => $code) {
                 if (isset($row[$code]) and !is_null($row[$code])) {
-                    $row[$code] = $row[$code] === true ? 'Verdadero' : $row[$code];
-                    $row[$code] = $row[$code] === false ? 'Falso' : $row[$code];
+                    $row[$code] = $row[$code] === true || $row[$code] == 'TRUE' ? 'Verdadero' : $row[$code];
+                    $row[$code] = $row[$code] === false || $row[$code] == 'FALSE' ? 'Falso' : $row[$code];
                     $correcta = $n_rpta_ok == $position;
                     $respuestas[$position] = $row[$code];
                 }

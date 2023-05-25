@@ -83,7 +83,7 @@
                         </v-col>
                         <v-col cols="3" class="sep-left">
                             <v-row>
-                                <v-col cols="12">
+                                <!-- <v-col cols="12">
                                     <DefaultInput
                                         dense
                                         type="number"
@@ -91,7 +91,7 @@
                                         placeholder="Orden"
                                         v-model="resource.position"
                                     />
-                                </v-col>
+                                </v-col> -->
                                 <v-col cols="12">
                                     <DefaultAutocomplete
                                         dense

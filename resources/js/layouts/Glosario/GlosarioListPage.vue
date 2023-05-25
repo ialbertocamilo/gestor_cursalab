@@ -50,13 +50,36 @@
                 </v-row>
             </v-card-text>
 
-            <DefaultTable :ref="dataTable.ref"
-                          :data-table="dataTable"
-                          :filters="filters"
-                          @reset="reset"
-                          @edit="openFormModal(modalOptions, $event)"
-                          @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                          @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar registro')"
+            <DefaultTable
+                :ref="dataTable.ref"
+                :data-table="dataTable"
+                :filters="filters"
+                @reset="reset"
+                @edit="openFormModal(modalOptions, $event)"
+                @status="
+                    openFormModal(
+                        modalStatusOptions,
+                        $event,
+                        'status',
+                        'Actualizar estado'
+                    )
+                "
+                @delete="
+                    openFormModal(
+                        modalDeleteOptions,
+                        $event,
+                        'delete',
+                        'Eliminar registro'
+                    )
+                "
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs de Glosario - ${$event.name}`
+                    )
+                "
             />
 
             <GlosarioFormModal width="50vw"
@@ -91,11 +114,17 @@
                                 @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Glossary"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
-
 
 <script>
 import GlosarioFormModal from "./GlosarioFormModal";
@@ -103,17 +132,17 @@ import GlosarioImportFormModal from "./GlosarioImportFormModal";
 import CareerCategoryFormModal from "./CareerCategoryFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-
     components: {
         GlosarioFormModal,
         GlosarioImportFormModal,
         CareerCategoryFormModal,
         DefaultStatusModal,
+        LogsModal,
         DefaultDeleteModal
-    }
-    ,
+    },
     data() {
         return {
             dataTable: {
@@ -147,6 +176,13 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -186,12 +222,19 @@ export default {
                 resource: 'Importar',
                 confirmLabel: 'Importar',
             },
-             modalCareerCategoryOptions: {
-                ref: 'CareerCategoryFormModal',
+            modalLogsOptions: {
+                ref: "LogsModal",
                 open: false,
-                base_endpoint: '/glosario',
-                resource: 'Carreras - Categorías',
-                confirmLabel: 'Actualizar',
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
+            modalCareerCategoryOptions: {
+                ref: "CareerCategoryFormModal",
+                open: false,
+                base_endpoint: "/glosario",
+                resource: "Carreras - Categorías",
+                confirmLabel: "Actualizar"
             },
             modalStatusOptions: {
                 ref: 'GlosarioStatusModal',
@@ -237,6 +280,5 @@ export default {
             // TODO: Call store or update USER
         },
     }
-
 }
 </script>

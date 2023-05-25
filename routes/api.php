@@ -55,6 +55,8 @@ Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
 
 Route::group(['prefix' => 'auth', 'middleware' => 'throttle:800'], function () {
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login/external/{token}', [AuthImpersonationController::class, 'external'])
+        ->name('login.external')->middleware('signed');
 });
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {

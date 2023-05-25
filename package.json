@@ -19,7 +19,8 @@
         "popper.js": "^1.12",
         "postcss": "^8.1.14",
         "pusher-js": "^7.4.0",
-        "vue": "^2.5.7",
+        "vue": "2.6.14",
+        "vue-template-compiler": "2.6.14",
         "vuex": "^3.6.2",
         "webpack-bundle-analyzer": "^4.6.1"
     },

@@ -37,39 +37,54 @@ class AuditCustom extends Model
 
     public function getRecordableName()
     {
-        return $this->auditable->etapa ?? $this->auditable->nombre ?? $this->auditable->titulo ?? '#ID ' . ($this->auditable->id ?? 'Undefined');
+        return $this->auditable->etapa ??
+            ($this->auditable->nombre ??
+                ($this->auditable->titulo ??
+                    '#ID ' . ($this->auditable->id ?? 'Undefined')));
     }
-
 
     protected function prepareSearchQuery($request)
     {
-        $q = self::with('user', 'user_rest', 'section', 'auditable')
-            ->where(function ($q) {
-                $q->where('tags', 'like', '%modelo_independiente%')
+        $q = self::with('user', 'user_rest', 'section', 'auditable')->where(
+            function ($q) {
+                $q
+                    ->where('tags', 'like', '%modelo_independiente%')
                     ->orWhere('tags', null);
-            });
-            // ->orderBy('created_at', 'DESC');
+            }
+        );
+        // ->orderBy('created_at', 'DESC');
 
-        if ($request->events)
+        if ($request->events) {
             $q->whereIn('event', $request->events);
+        }
 
-        if ($request->resources)
+        if ($request->resources) {
             $q->whereIn('auditable_type', $request->resources);
+        }
 
         if ($request->search_in) {
             $search_in = $request->search_in;
             $q->where('user_type', '=', "App\\$search_in");
             $relation = $search_in === 'User' ? 'user' : 'user_rest';
-            $field_name = $search_in === 'User' ?
-                "users.name like ? or users.email like ?"
-                : "usuarios.nombre like ? or usuarios.dni like ?";
+            $field_name =
+                $search_in === 'User'
+                    ? 'users.name like ? or users.email like ?'
+                    : 'usuarios.nombre like ? or usuarios.dni like ?';
             if ($request->us_search) {
-                $q->whereHas($relation, function ($query) use ($field_name, $request) {
-                    $query->where(function ($query2) use ($field_name, $request) {
-                        $query2->whereRaw($field_name, ["%$request->us_search%", "%$request->us_search%"]);
+                $q->whereHas($relation, function ($query) use (
+                    $field_name,
+                    $request
+                ) {
+                    $query->where(function ($query2) use (
+                        $field_name,
+                        $request
+                    ) {
+                        $query2->whereRaw($field_name, [
+                            "%$request->us_search%",
+                            "%$request->us_search%",
+                        ]);
                     });
-                }
-                );
+                });
             }
         }
 
@@ -82,8 +97,7 @@ class AuditCustom extends Model
 
         $sort = 'DESC';
 
-        if ($request->sortDesc)
-        {
+        if ($request->sortDesc) {
             $sort = $request->sortDesc == 'true' ? 'ASC' : 'DESC';
         }
 

@@ -1,3 +1,4 @@
+
 <template>
     <section class="section-list">
         <DefaultFilter
@@ -138,7 +139,22 @@
                     :is="view"
                     :data="data"
                     :loading="loading"
-                    @detalles="openFormModal(modalOptions, $event, 'detalles', 'Detalle de multimedia')"
+                    @detalles="
+                        openFormModal(
+                            modalOptions,
+                            $event,
+                            'detalles',
+                            'Detalle de multimedia'
+                        )
+                    "
+                    @logs="
+                        openFormModal(
+                            modalLogsOptions,
+                            $event,
+                            'logs',
+                            `Logs de Multimedia - ${$event.title}`
+                        )
+                    "
                     @download="download"
                 />
             </transition>
@@ -172,20 +188,29 @@
             @onCancel="closeFormModal(modalUpdateMultimedia)"
             @onConfirm="getData"
         />
+        <LogsModal
+            :options="modalLogsOptions"
+            width="55vw"
+            :model_id="null"
+            model_type="App\Models\Media"
+            :ref="modalLogsOptions.ref"
+            @onCancel="closeSimpleModal(modalLogsOptions)"
+        />
     </section>
 </template>
-
 
 <script>
 import MultimediaGrid from "./MultimediaGrid";
 import MultimediaListView from "./MultimediaListView";
 import MultimediaDetailModal from "./MultimediaDetailModal";
 import MultimediaUpdateModal from "./MultimediaUpdateModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
         MultimediaUpdateModal,
         MultimediaDetailModal,
+        LogsModal,
         'grid': {
             props: ['data', 'loading'],
             components: {MultimediaGrid},
@@ -215,6 +240,7 @@ export default {
                     :data='data' :loading='loading'
                     @detalles='detalles'
                     @download='download'
+                    @logs = 'logs'
                 />`,
             methods: {
                 detalles(rowData) {
@@ -222,8 +248,12 @@ export default {
                     vue.$emit("detalles", rowData)
                 },
                 download(rowData) {
-                    let vue = this
-                    vue.$emit("download", rowData)
+                    let vue = this;
+                    vue.$emit("download", rowData);
+                },
+                logs(rowData) {
+                    let vue = this;
+                    vue.$emit("logs", rowData);
                 }
             },
             data() {
@@ -250,9 +280,16 @@ export default {
                                 type: 'action',
                                 method_name: 'detalles'
                             },
-                        ],
-                    },
-                }
+                            {
+                                text: "Logs",
+                                icon: "mdi mdi-database",
+                                type: "action",
+                                show_condition: "is_super_user",
+                                method_name: "logs"
+                            }
+                        ]
+                    }
+                };
             }
         }
     },
@@ -309,13 +346,20 @@ export default {
                     {nombre: 'Fecha de creación', id: 'created_at'},
                 ]
             },
-            modalDateFilter1: {
+            modalLogsOptions: {
+                ref: "LogsModal",
                 open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
+            },
+            modalDateFilter1: {
+                open: false
             },
             modalDateFilter2: {
-                open: false,
-            },
-        }
+                open: false
+            }
+        };
     },
     mounted() {
         let vue = this

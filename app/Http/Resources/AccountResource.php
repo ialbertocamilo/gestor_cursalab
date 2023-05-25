@@ -22,6 +22,7 @@ class AccountResource extends JsonResource
             'type' => $this->type->name ?? 'No definido',
             'email' => $this->email,
             'active' => $this->active ? true : false,
+            'is_super_user' => auth()->user()->isAn('super-user'),
 
             // 'orden' => $this->orden,
 

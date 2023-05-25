@@ -4,6 +4,7 @@ use App\Models\Workspace;
 use App\Services\FileService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Aws\S3\S3Client;
 
 const INACTIVE = false;
 const ACTIVE = true;
@@ -12,10 +13,46 @@ const DAY_MINUTES = 1440;
 const WEEK_MINUTES = 10080;
 const MONTH_MINUTES = 43200;
 
+const EV_QUALIFIED = 4578;
+
+const COURSE_STATUS_APROBADO = 4568;
+const COURSE_STATUS_DESARROLLO = 4569;
+const COURSE_STATUS_DESAPROBADO = 4570;
+const COURSE_STATUS_ENC_PENDIENTE = 4571;
+
 const CACHE_MINUTES_DASHBOARD_GRAPHICS = 30;
 const CACHE_MINUTES_DASHBOARD_DATA = 60;
 
 const SECRET_PASS = '';
+
+function generateSignedUrl(string $key, string $expires = '+360 minutes'): string
+{
+    $config = config('filesystems.disks.s3');
+
+    $s3Client = new S3Client([
+        'version' => 'latest',
+        'region' => $config['region'],
+        'credentials' => [
+            'key' => $config['key'],
+            'secret' => $config['secret'],
+        ],
+        'endpoint'    => 'https://sfo2.digitaloceanspaces.com',
+        'options' => [
+            'CacheControl' => 'max-age=25920000, no-transform, public',
+        ]
+    ]);
+
+    $bucket = $config['scorm']['bucket'];
+
+    $cmd = $s3Client->getCommand('GetObject', [
+        'Bucket' => $bucket,
+        'Key' => $key,
+    ]);
+
+    $request = $s3Client->createPresignedRequest($cmd, $expires);
+
+    return (string) $request->getUri();
+}
 
 function cleanExtraSpaces($str)
 {
@@ -242,9 +279,9 @@ function cache_clear_model($model)
     \Artisan::call('modelCache:clear', array('--model' => $model));
 }
 
-function get_media_url($path = '')
+function get_media_url($path = '', $cdn = 'cdn')
 {
-    return FileService::generateUrl($path);
+    return FileService::generateUrl($path, $cdn);
 }
 
 function excelDateToDate($fecha)

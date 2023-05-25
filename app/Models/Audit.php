@@ -2,49 +2,62 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Altek\Accountant\Models\Ledger;
+// use Illuminate\Database\Eloquent\Model;
+// use Altek\Accountant\Models\Ledger;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 use Carbon\Carbon;
 
-class Audit extends Ledger
+class Audit extends MongoLedger
 {
-    // use Ledger;
+    protected $connection = 'mongodb';
 
-    // protected $rememberFor = WEEK_MINUTES;
-    // protected $table = 'ledgers';
+    /*   class Audit extends Ledger
+    use Ledger;
 
-    // protected $fillable = ['title', 'body', 'slug', 'category_id', 'position', 'section_id', 'user_id', 'active', 'code', 'app_id'];
-    // protected $fillable = [];
-    // protected $guarded = [];
+    protected $connection = 'mongodb';
+    protected $rememberFor = WEEK_MINUTES;
+    protected $table = 'ledgers';
 
-    // protected $hidden=[
-    //   'pivot'
-    // ];
+    protected $fillable = ['title', 'body', 'slug', 'category_id', 'position', 'section_id', 'user_id', 'active', 'code', 'app_id'];
+    protected $fillable = [];
+    protected $guarded = [];
+
+    protected $hidden=[
+      'pivot'
+    ]; */
 
     // protected $with = ['children', 'parent'];
     protected $excluded_fields = ['created_at', 'updated_at', 'id', 'password'];
 
-    // relatiionships
+    // relationships
+
+    public function user(): ?MorphTo
+    {
+        return $this->morphTo();
+    }
 
     public function model()
     {
-       return $this->belongsTo(Taxonomy::class, 'recordable_type', 'path')
-                    ->where('group', 'system')->where('type', 'model');
+        return $this->belongsTo(Taxonomy::class, 'recordable_type', 'path')
+            ->where('group', 'system')
+            ->where('type', 'model');
     }
 
     public function action_name()
     {
-       return $this->belongsTo(Taxonomy::class, 'event', 'code')
-                    ->where('group', 'system')->where('type', 'action');
+        return $this->belongsTo(Taxonomy::class, 'event', 'code')
+            ->where('group', 'system')
+            ->where('type', 'action');
     }
 
     public function event_name()
     {
-       return $this->belongsTo(Taxonomy::class, 'event', 'code')
-                    ->where('group', 'system')->where('type', 'event');
+        return $this->belongsTo(Taxonomy::class, 'event', 'code')
+            ->where('group', 'system')
+            ->where('type', 'event');
     }
 
     // methods
@@ -56,8 +69,9 @@ class Audit extends Ledger
 
     public function getModifiedFieldsFiltered(): array
     {
-        if ($this->isBasicEvent() )
+        if ($this->isBasicEvent()) {
             return array_diff($this->modified, $this->excluded_fields);
+        }
 
         // info($this->pivot);
 
@@ -66,12 +80,12 @@ class Audit extends Ledger
 
     public function getDataFiltered(): array
     {
-        return Arr::except($this->getData(), $this->excluded_fields);
+        return Arr::except($this->getData(true), $this->excluded_fields);
     }
 
     public function isBasicEvent()
     {
-        return in_array($this->event, ['created', 'updated', 'deleted']);
+        return in_array($this->event, ['created', 'updated', 'deleted', 'impersonated', 'downloaded']);
     }
 
     public function getDataProcessed(): array
@@ -85,13 +99,10 @@ class Audit extends Ledger
     {
         $total = $modified = [];
 
-        if ( $this->isBasicEvent() ) {
-
+        if ($this->isBasicEvent()) {
             try {
-                
                 // obtener modelo
                 $model = $this->extract(false);
-
                 // traer relaciones
                 $model->loadDefaultRelationships();
 
@@ -109,7 +120,6 @@ class Audit extends Ledger
                 $modifiedFields = $this->getModifiedFieldsFiltered();
 
                 $modified = Arr::only($total, $modifiedFields);
-
             } catch (\Exception $e) {
                 info($e);
             }
@@ -117,7 +127,6 @@ class Audit extends Ledger
 
         return compact('total', 'modified');
     }
-
 
     public function prepareData($model): array
     {
@@ -127,16 +136,20 @@ class Audit extends Ledger
         $array = $model->toArray();
 
         $relationships = $model->defaultRelationships;
-            // info('prepareData relationships');
-            // info($relationships);
+        // info('prepareData relationships');
+        // info($relationships);
 
-        foreach ($array as $key => $item)
-        {
+        foreach ($array as $key => $item) {
             // info($key);
             $data[$key] = [
                 'key' => $key,
                 'label' => $this->getLabelName($key),
-                'value' => $this->getValueName($item, $key, $array, $relationships),
+                'value' => $this->getValueName(
+                    $item,
+                    $key,
+                    $array,
+                    $relationships
+                ),
                 // 'modified' => null,
             ];
         }
@@ -155,22 +168,22 @@ class Audit extends Ledger
     {
         $relationships_ids = array_keys($relationships ?? []);
 
-        if ( in_array($key, $relationships_ids) )
-        {
+        if (in_array($key, $relationships_ids)) {
             $relation = $relationships[$key];
             $item = $array[$relation];
         }
 
         // if ( is_bool($item) )
-        if ( in_array($key, ['active']) )
+        if (in_array($key, ['active'])) {
             return $item ? 'Sí' : 'No';
+        }
 
+        if (is_array($item)) {
+            return $item['title'] ??
+                ($item['alias'] ?? ($item['name'] ?? 'ND'));
+        }
 
-        if ( is_array($item) )
-            return $item['title'] ?? $item['alias'] ?? $item['name'] ?? 'ND';
-
-        if ( is_date($item) )
-        {
+        if (is_date($item) && !is_numeric($item)) {
             $item = Carbon::parse($item)->setTimezone('America/Lima');
 
             return $item->format('d/m/Y g:i a');
@@ -183,23 +196,33 @@ class Audit extends Ledger
     {
         $name = $this->model->name ?? 'No definido';
 
-        if ( ! $this->isBasicEvent() AND $name )
-            $name = $name . ' / ' . $this->getLabelName($this->pivot['relation'] ?? 'Relación' );
+        if (!$this->isBasicEvent() and $name) {
+            $name =
+                $name .
+                ' / ' .
+                $this->getLabelName($this->pivot['relation'] ?? 'Relación');
+        }
 
         return $name;
     }
 
+    // Registros Nombre
     public function getRecordableName()
     {
-        return $this->recordable->title ?? $this->recordable->fullname ?? $this->recordable->name ?? '#ID ' . ($this->recordable->id ?? 'No definido');
+        return $this->recordable->title ??
+            ($this->recordable->fullname ??
+                ($this->recordable->name ??
+                    ($this->recordable->titulo ??
+                        ($this->recordable->nombre ??
+                            '#ID ' .
+                                ($this->recordable->id ?? 'No definido')))));
     }
 
     public function getModifiedLabels($modified)
     {
         $data = [];
 
-        foreach ($modified as $key => $field)
-        {
+        foreach ($modified as $key => $field) {
             $data[] = strtolower($field['label']);
         }
 
@@ -219,42 +242,60 @@ class Audit extends Ledger
         // Dates filter
 
         if ($request->date_range) {
-
             if (isset($request->date_range[1])) {
-                $starDate = $request->date_range[0] . ' 00:00';
-                $endDate = $request->date_range[1] . ' 23:59';
-                $query->whereBetween('created_at', [$starDate, $endDate]);
+                $startDate = new Carbon($request->date_range[0]);
+                $endDate = new Carbon($request->date_range[1]);
+                $query->whereBetween('created_at', [
+                    $startDate,
+                    $endDate->addDay(1),
+                ]);
             } else {
-                $query->whereDate('created_at', '=', $request->date_range[0]);
+                $startDate = new Carbon($request->date_range[0]);
+                $endDate = new Carbon($request->date_range[0]);
+                $query->whereBetween('created_at', [
+                    $startDate,
+                    $endDate->addDay(1),
+                ]);
             }
         }
 
         // Search field filter
 
         if ($request->us_search) {
-
             // Get users ids which names matches search
             // get_current_workspace()->id
-            $usersIds = User::where('users.name', 'like', "%$request->us_search%")
-                            ->pluck('id');
+            $usersIds = User::where(
+                'users.name',
+                'like',
+                "%$request->us_search%"
+            )->pluck('id');
             $query->whereIn('user_id', $usersIds->toArray());
         }
 
         // Models filter
 
-        if ($request->models) {
-
-            $query->where('recordable_type', $request->models);
+        if ($request->model_type) {
+            $query->where('recordable_type', $request->model_type);
         }
 
-        $field = $request->sortBy ?? 'id';
-        $sort = $request->sortDesc == 'true' ? 'ASC' : 'DESC';
+        if ($request->model_id) {
+            $model_id = intval($request->model_id);
+            $query->where('recordable_id', $model_id);
+        }
 
-        $query->orderBy($field, $sort)
-              ->orderBy('id', $sort);
+        // Sort by date
+        $field = $request->sortBy ?? 'created_at';
 
-        return $query->paginate($request->rowsPerPage);
+        $sort = $request->sortBy ? 'asc' : 'desc';
+        $sort2 = $request->sortDesc ? 'desc' : 'asc';
 
+        if ($request->sortBy && $request->sortDesc) {
+            $query->orderBy($field, $sort2);
+        } else {
+            $query->orderBy($field, $sort);
+        }
+
+        // Paginate
+        return $query->paginate($request->paginate);
     }
-
 }

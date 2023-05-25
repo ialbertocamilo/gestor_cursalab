@@ -27,14 +27,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
 
                         });
@@ -54,14 +54,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
 
                         });
@@ -74,14 +74,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'criterion_id', 'starts_at', 'finishes_at', 'criterion_value_id');
 
                         });
@@ -102,13 +102,17 @@ return [
                         'evaluation_type:id,code',
                         'requirements.summaries_topics' => function ($q) use ($user_id) {
                             $q
-                                // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
                         },
                         'summaries' => function ($q) use ($user_id) {
                             $q
-                                // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
                         }
@@ -129,14 +133,14 @@ return [
                         ->select('id', 'model_id')
                         ->with('values', function ($q) {
                             $q
-                                ->with('criterion_value', function ($q) {
-                                    $q
-                                        ->where('active', ACTIVE)
-                                        ->select('id', 'value_text', 'value_date', 'value_boolean')
-                                        ->with('criterion', function ($q) {
-                                            $q->select('id', 'name', 'code');
-                                        });
-                                })
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
                                 ->select('id', 'segment_id', 'criterion_id', 'starts_at', 'finishes_at', 'criterion_value_id');
 
                         });
@@ -160,13 +164,18 @@ return [
                             'evaluation_type:id,code',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                   ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             },
+                            'requirements.model_topic:id,name',
                             'summaries' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             }
@@ -174,6 +183,8 @@ return [
                 },
                 'requirements' => [
                     'model_course' => [
+                        'topics',
+                        'schools',
 //                        'compatibilities_a:id',
 //                        'compatibilities_b:id',
                         'summaries' => function ($q) use ($user_id) {
@@ -181,6 +192,8 @@ return [
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
                         },
+                        'compatibilities_a:id',
+                        'compatibilities_b:id',
                     ],
                     'summaries_course' => function ($q) use ($user_id) {
                         $q
@@ -216,13 +229,17 @@ return [
                             'evaluation_type:id,code',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             },
                             'summaries' => function ($q) use ($user_id) {
                                 $q
-                                    // ->select('id', 'user_id', 'topic_id', 'status_id', 'attempts', 'grade', 'passed')
+                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
+                                    'passed', 'last_time_evaluated_at',
+                                    'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
                             }

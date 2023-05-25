@@ -5,10 +5,10 @@
     $roles = $user->getRoles();
     $subworkspace = get_current_workspace();
     $accounts_count = \App\Models\Account::where('active', ACTIVE)
-        ->where('workspace_id', $subworkspace->parent_id ?? null)
+        ->where('workspace_id', $subworkspace->id ?? null)
         ->count();
-
     $show_meeting_section = $accounts_count > 0 ? "admin" : "admin_DISABLE";
+    // dd($roles,$show_meeting_section);
     $workspace = get_current_workspace();
 @endphp
 
@@ -219,7 +219,7 @@ if (isset($fullScreen)) {
         const USER_WORKSPACE_SLUG = "{{ $workspace?->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v1=' . date('Y-W')) }}"></script>
+    <script src="{{ asset('js/app.js?v2=' . date('Y-W')) }}"></script>
     <script src="{{ asset('js/custom.js?v=2' . date('Y-W-m')) }}"></script>
     <script>
         $(document).ready(function () {

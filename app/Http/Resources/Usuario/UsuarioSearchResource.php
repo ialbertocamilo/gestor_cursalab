@@ -24,12 +24,15 @@ class UsuarioSearchResource extends JsonResource
             'document' => $this->document ?? 'Sin documento',
             'module' => $this->resource->subworkspace->name ?? 'No module',
             'active' => !!$this->active,
-            'failed_topics_count' => $this->failed_topics_count,
+            // 'failed_topics_count' => $this->failed_topics_count,
+            'failed_topics_count' => '',
+            // 'pruebas_desaprobadas' => $this->failed_topics_count ? true : false,
+            'show_badge' => $this->failed_topics_count ? true : false,
             'pruebas_desaprobadas' => $this->failed_topics_count ? true : false,
             // 'pruebas_desaprobadas' => ($request->superuser AND $this->failed_topics_count) ? true : false,
            // 'pruebas_desaprobadas' => true,
             'reporte_route' => route('exportar.node', ['dni' => $this->document]),
-
+            'is_super_user'=>auth()->user()->isAn('super-user'),
 
             'career' => $this->criterion_values->where('criterion_id', 41)->first()->value_text ?? '----',
             'cycle' => $this->criterion_values->where('criterion_id', 40)->sortBy('position')->last()->value_text ?? '---',

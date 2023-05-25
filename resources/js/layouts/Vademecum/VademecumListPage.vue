@@ -58,6 +58,14 @@
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar registro')"
+		@logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Curso - ${$event.name}`
+                    )
+                "
             />
 
             <VademecumFormModal
@@ -81,23 +89,31 @@
                 @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
-
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Vademecum"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
-
 
 <script>
 import VademecumFormModal from "./VademecumFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-
     components: {
-        VademecumFormModal, DefaultStatusModal, DefaultDeleteModal
-    }
-    ,
+        VademecumFormModal,
+        DefaultStatusModal,
+        DefaultDeleteModal,
+        LogsModal
+    },
     data() {
         return {
             dataTable: {
@@ -134,9 +150,16 @@ export default {
                     },
                     {
                         text: "Eliminar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
+                        icon: "far fa-trash-alt",
+                        type: "action",
+                        method_name: "delete"
+                    },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
                     }
                 ],
                 more_actions: [
@@ -156,6 +179,13 @@ export default {
                 q: '',
                 module_id: null,
                 category_id: null,
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
             modalOptions: {
                 ref: 'VademecumFormModal',
@@ -206,6 +236,5 @@ export default {
             // TODO: Call store or update USER
         },
     }
-
 }
 </script>

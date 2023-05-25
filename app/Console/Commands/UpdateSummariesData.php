@@ -59,6 +59,7 @@ class UpdateSummariesData extends Command
 //        $this->info("INICIO : " . now());
 //        $this->line("");
         $bar->start();
+        info('Init command v1');
         foreach ($users as $key => $user) {
 
             $user = User::disableCache()->find($user->id);
@@ -102,6 +103,7 @@ class UpdateSummariesData extends Command
             ]);
             $bar->advance();
         }
+        info('Finish command v1');
         $bar->finish();
 //        $this->newLine(2);
 //        $this->info("FIN : " . now());
