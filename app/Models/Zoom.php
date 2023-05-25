@@ -28,23 +28,14 @@ class Zoom extends Model
             $this->logActivity($zoom_acc, $path, $method);
 
             $url = "$this->base_url$path";
-            $token = $zoom_acc->generateJWT();
+            $token = $zoom_acc->getZoomAccessToken($zoom_acc->client_id, $zoom_acc->client_secret, $zoom_acc->account_id);
 
             $client = new Client();
-   $response = $client->request('POST', 'https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' . env('ZOOM_ACCOUNT_ID'), [
-                'auth' => [
-                    env('ZOOM_CLIENT_ID'),
-                    env('ZOOM_CLIENT_SECRET')
-                ]
-            ]);
 
-            $data = json_decode($response->getBody(), true);
-
-            $accessToken = $data['access_token'];
             $params = [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Authorization' => 'Bearer ' . $token,
                 ],
             ];
 
