@@ -89,6 +89,8 @@
                     :current-clean="segment_by_document_clean"
                     @addUser="addUser"
                     @deleteUser="deleteUser"
+                    @addUserAll="addUserAll"
+                    @deleteUserAll="deleteUserAll"
                 />
 
             </v-tab-item>
@@ -554,6 +556,24 @@ console.log(vue.segments.length);
         },
         loadSelects() {
             let vue = this;
+        },
+        addUserAll(user) {
+            let vue = this;
+            if(vue.list_segments_document === undefined || vue.list_segments_document === null) {
+                vue.list_segments_document = {'segmentation_by_document': []};
+            }
+            const already_added = vue.list_segments_document.segmentation_by_document.filter(el => el.document == user.document).length > 0;
+
+            if (!already_added) {
+                vue.list_segments_document.segmentation_by_document.push(user)
+            }
+        },
+        deleteUserAll() {
+            let vue = this;
+            if(vue.list_segments_document === undefined || vue.list_segments_document === null) {
+                vue.list_segments_document = {'segmentation_by_document': []};
+            }
+            vue.list_segments_document.segmentation_by_document = [];
         },
         addUser(user) {
             let vue = this;

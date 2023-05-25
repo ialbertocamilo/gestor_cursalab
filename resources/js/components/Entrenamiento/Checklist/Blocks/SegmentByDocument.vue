@@ -231,15 +231,18 @@ export default {
         selectAll() {
             let vue = this
             if(vue.filter_result.length > 0) {
-                vue.filter_result.forEach(element => {
-                    this.addUser(element)
+                vue.filter_result.forEach((element, index) => {
+                    this.addUserAll(element)
                 });
+                if(vue.arrayCriteriaSelected.length >= vue.filter_result.length)
+                    vue.filter_result = []
             }
             else {
                 if(vue.arrayCriteriaSelected.length > 0) {
-                    vue.arrayCriteriaSelected.forEach(element => {
-                        this.deleteUser(element)
+                    vue.arrayCriteriaSelected.forEach((element, index) => {
+                        vue.filter_result.push(element)
                     });
+                    this.deleteUserAll()
                 }
             }
         },
@@ -254,6 +257,14 @@ export default {
             }
             return [];
         },
+        addUserAll(user) {
+            let vue = this;
+            vue.$emit("addUserAll", user);
+        },
+        deleteUserAll() {
+            let vue = this;
+            vue.$emit("deleteUserAll");
+        },
         addUser(user) {
             let vue = this;
 
@@ -261,8 +272,8 @@ export default {
         },
         deleteUser(user) {
             let vue = this;
-
             vue.$emit("deleteUser", user);
+            vue.filter_result.push(user)
         },
         addOrRemoveFromFilterResult(user, action = 'add') {
             let vue = this;
