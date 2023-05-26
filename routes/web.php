@@ -16,6 +16,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 
 Route::redirect('/', 'login', 301);
+//temporary route
+Route::view('email_info','emails.email_information_apis');
+Route::view('email_limite','emails.email_limite_usuarios');
 
 // login routes
 Route::get('login', [LoginController::class, 'showLoginFormInit'])->name('login');
