@@ -171,7 +171,7 @@ class CheckList extends BaseModel
             ->whereIn('course_id',$checklists_assigned->pluck('courses.*.id')->flatten())
             ->select('id','course_id','status_id')
             ->get();
-        $checklist_rptas_user = ChecklistRpta::select('id','coach_id','student_id','checklist_id','flag_congrats','percent')->with('rpta_items:id,checklist_answer_id,checklist_item_id,qualification')->alumno($alumno_id)->entrenador($entrenador_id)->get();
+        $checklist_rptas_user = ChecklistRpta::select('id','feedback_entrador','coach_id','student_id','checklist_id','flag_congrats','percent')->with('rpta_items:id,checklist_answer_id,checklist_item_id,qualification')->alumno($alumno_id)->entrenador($entrenador_id)->get();
         foreach ($checklists_assigned as $checklist) {
             $type_checklist = $checklists_taxonomies->where('type','type_checklist')->where('id', $checklist->type_id)->first();
             $actividades_activas = $checklist->actividades->where('active', 1)->where('type_id', $tax_trainer_user->id)->sortBy('position');
@@ -242,6 +242,7 @@ class CheckList extends BaseModel
                     'actividades' => collect($progresoActividad['actividades']),
                     'actividades_feedback' => $progresoActividadFeedback['actividades_feedback'],
                     'feedback_disponible' => $progresoActividad['feedback_disponible'],
+                    'feedback_entrador'=> $checklistRpta?->feedback_entrador,
                     'mostrar_modal' => false
                 ];
                 if ($tempChecklist['porcentaje'] === 100.00) {

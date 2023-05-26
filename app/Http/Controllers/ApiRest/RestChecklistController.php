@@ -122,6 +122,7 @@ class RestChecklistController extends Controller
         $alumnos_id = $request->alumnos_id;
         $alumnos_todos = $request->alumnos_todos;
         $tipo = $request->tipo;
+        $feedback_entrador = $request->feedback_entrador ?? null;
         $message = [];
         
         $entrenador_id = ($tipo =='entrenador_alumno') 
@@ -172,6 +173,10 @@ class RestChecklistController extends Controller
                 }
                 $checklistRptaItem->qualification = $actividad['estado'];
                 $checklistRptaItem->save();
+            }
+            if(($tipo =='alumno_entrenador') ){
+                $checklistRpta->feedback_entrador = boolval($feedback_entrador == 'si');
+                $checklistRpta->save();
             }
             ChecklistRpta::actualizarChecklistRpta($checklistRpta);
             SummaryUserChecklist::updateUserData($alumno->user);
