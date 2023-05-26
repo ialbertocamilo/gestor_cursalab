@@ -609,6 +609,20 @@ class Media extends BaseModel
         return $response;
     }
 
+    protected function generateNameFile($name, $ext) {
+        
+        $name = Str::of($name)->limit(200);
+        $str_random = Str::random(15);
+        $workspace_id = session('workspace')['id'] ?? NULL;
+
+        // workspace creation reference
+        $workspace_code = 'wrkspc-' . ($workspace_id ?? 'x');
+        $name = $workspace_code . '-' . $name . '-' . date('YmdHis') . '-' . $str_random;
+        $fileName = $name . '.' . $ext;
+
+        return $fileName;
+    }
+
     // public function getViewDetail($preview)
     // {
     //     $media = $this;

@@ -36,6 +36,7 @@ use App\Http\Controllers\MigrarAvanceController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\ConvalidacionesController;
 use App\Http\Controllers\MigracionController;
+use App\Http\Controllers\DiplomaController;
 
 // Route::get('dashboard_pbi', function () {
 //     return view('powerbi.index');
@@ -702,4 +703,10 @@ Route::prefix('/migrar_avance')->controller(MigrarAvanceController::class)->grou
     Route::get('/list_temas/{curso_id}', 'listTemas');
     Route::get('/get_duplicates_data/{tipo}/{id}/{categoria_id}', 'getDuplicatesData');
     Route::post('/migrar_temas', 'migrarTemas');
+});
+
+// DIPLOMAS
+Route::prefix('/diploma')->controller(DiplomaController::class)->group(function () {
+    Route::view('/create', 'diploma.create_edit')->name('diploma.create');
+    Route::view('/edit/{diploma}', 'diploma.create_edit')->name('diploma.edit');
 });

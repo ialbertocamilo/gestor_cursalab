@@ -1,6 +1,7 @@
 <template>
     <v-btn
         class="mx-1"
+        :disabled="disabled"
         :class="{}"
         elevation="0"
         :ripple="false"
@@ -29,6 +30,10 @@ export default {
         },
         template: {
             type: String
+        },
+        disabled: {
+            type: Boolean,
+            default: false
         }
     },
     methods: {

@@ -320,7 +320,38 @@ export default {
                     // },
                 ]
             },
+            {
+                title: "DIPLOMAS",
+                icon: "fas fa-medal",
+                active: false,
+                items: [
+                    {
+                        title: "Listar",
+                        icon: "fas fa-list",
+                        path: "/diplomas",
+                        subpaths: ["diplomas"],
+                        selected: false,
+                        permission: "diplomas",
+                        role: [
+                            "super-user",
+                            "admin",
+                        ]
+                    },
 
+                    {
+                        title: "Crear",
+                        icon: "fas fa-plus",
+                        path: "/diploma/create",
+                        subpaths: ["diploma/create"],
+                        selected: false,
+                        permission: "diploma_create",
+                        role: [
+                            "super-user",
+                            "admin",
+                        ]
+                    }
+                ]
+            },
             {
                 title: "GESTIONA TU CONTENIDO",
                 icon: "fas fa-pen-square",

@@ -1345,7 +1345,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         if ($keyenv == 'GESTOR') {
-            return $user->where('email', $value)->first();
+            return $user->where('email_gestor', $value)->first();
         }
 
         return $user->where('document', $value)
