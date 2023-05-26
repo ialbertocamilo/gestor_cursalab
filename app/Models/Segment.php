@@ -98,13 +98,17 @@ Segment extends BaseModel
             foreach ($segments as $segment) {
 
                 $segment->type_code = $segment->type?->code;
+
+                $direct_segmentation = $this->setDataDirectSegmentation($criteria, $segment);
+                $segmentation_by_document = ($segment->type_code == 'segmentation-by-document') ? $this->setDataSegmentationByDocument($segment) : [];
+
                 $segment->criteria_selected = match ($segment->type?->code) {
-                    'direct-segmentation' => $this->setDataDirectSegmentation($criteria, $segment),
-                    'segmentation-by-document' => $this->setDataSegmentationByDocument($segment),
+                    'direct-segmentation' => $direct_segmentation,
+                    'segmentation-by-document' => $segmentation_by_document,
                     default => [],
                 };
-                $segment->direct_segmentation = $this->setDataDirectSegmentation($criteria, $segment);
-                $segment->segmentation_by_document = $this->setDataSegmentationByDocument($segment);
+                $segment->direct_segmentation = $direct_segmentation;
+                $segment->segmentation_by_document = $segmentation_by_document;
             }
         } else {
 

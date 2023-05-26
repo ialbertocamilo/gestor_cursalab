@@ -36,7 +36,7 @@
             <v-col cols="12" md="12" lg="12" v-else>
                 <segment-values
                     :criterion="segment.direct_segmentation[index]"
-                    @addDateRange="addDateRange($event)"
+                    @addDateRange="addDateRange($event, index)"
                 />
             </v-col>
         </v-row>
@@ -108,9 +108,9 @@ export default {
         prueba() {
             this.segment.direct_segmentation.push(null);
         },
-        addDateRange(data) {
+        addDateRange(data, index) {
             let vue = this;
-            let criterion = vue.segment.direct_segmentation;
+            let criterion = vue.segment.direct_segmentation[index];
 
             if (criterion){
                 const hasValuesSelected = criterion.hasOwnProperty('values_selected');
