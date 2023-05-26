@@ -118,7 +118,7 @@ class Certificate extends Model
     protected function uploadMediaBase64($name, $path, $base64)
     {
         $exploded = explode(',', $base64, 2);
-        $s3 = Storage::disk('s3')->put($path, base64_decode($exploded[1]));
+        $s3 = Storage::disk('s3')->put($path, base64_decode($exploded[1]), 'public');
         $size = Storage::disk('s3')->size($path);
 
         try {
