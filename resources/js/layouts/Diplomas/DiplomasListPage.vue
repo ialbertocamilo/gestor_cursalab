@@ -6,7 +6,7 @@
                 <v-spacer/>
                 <DefaultModalButton
                     :label="'Diploma'"
-                    @click="openCRUDPage(`/diplomas/create`)"/>
+                    @click="openCRUDPage(`/diploma/create`)"/>
             </v-card-title>
         </v-card>
 
