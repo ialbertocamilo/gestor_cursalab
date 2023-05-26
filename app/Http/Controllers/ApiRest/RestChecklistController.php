@@ -175,7 +175,7 @@ class RestChecklistController extends Controller
                 $checklistRptaItem->save();
             }
             if(($tipo =='alumno_entrenador') ){
-                $checklistRpta->feedback_entrador = boolval($feedback_entrador == 'si');
+                $checklistRpta->feedback_entrador = $feedback_entrador == 'si';
                 $checklistRpta->save();
             }
             ChecklistRpta::actualizarChecklistRpta($checklistRpta);
