@@ -6,6 +6,13 @@ Route::controller(RestTopicController::class)->group(function() {
 
     Route::get('/{course}', 'topics');
 
+    Route::get('/{school_id}/list-courses', 'listCoursesBySchoolV2');
+    // Route::get('/{school_id}/list-courses2', 'listCoursesBySchoolV2');
+    Route::prefix('v2')->group(function () {
+        Route::get('/{course}', 'topicsv2');
+    });
+
+
     Route::get('/topics/update-plays/{topic}', 'updateTopicPlays');
     Route::get('/topics/update-resets-count/{topic}', 'updateActivity');
 

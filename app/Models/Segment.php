@@ -98,13 +98,17 @@ Segment extends BaseModel
             foreach ($segments as $segment) {
 
                 $segment->type_code = $segment->type?->code;
+
+                $direct_segmentation = $this->setDataDirectSegmentation($criteria, $segment);
+                $segmentation_by_document = ($segment->type_code == 'segmentation-by-document') ? $this->setDataSegmentationByDocument($segment) : [];
+
                 $segment->criteria_selected = match ($segment->type?->code) {
-                    'direct-segmentation' => $this->setDataDirectSegmentation($criteria, $segment),
-                    'segmentation-by-document' => $this->setDataSegmentationByDocument($segment),
+                    'direct-segmentation' => $direct_segmentation,
+                    'segmentation-by-document' => $segmentation_by_document,
                     default => [],
                 };
-                $segment->direct_segmentation = $this->setDataDirectSegmentation($criteria, $segment);
-                $segment->segmentation_by_document = $this->setDataSegmentationByDocument($segment);
+                $segment->direct_segmentation = $direct_segmentation;
+                $segment->segmentation_by_document = $segmentation_by_document;
             }
         } else {
 
@@ -403,7 +407,23 @@ Segment extends BaseModel
 
     private function validateDefaultTypeCriteria($segment_values, $user_criterion_value_id_by_criterion)
     {
-        return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+        $criterion_id = $segment_values->first()->criterion_id;
+
+        if ($criterion_id == 48) {
+
+            // $temp_segment_values = $segment_values->keyBy('criterion_value_id');
+            // $row = $temp_segment_values->get($user_criterion_value_id_by_criterion[0]);
+
+            $row = $segment_values->where('criterion_value_id', $user_criterion_value_id_by_criterion[0])->first();
+            // $rows = $segment_values->pluck('criterion_value_id')->toArray();
+
+            // return in_array($user_criterion_value_id_by_criterion[0], $rows) ? true : false;
+            return $row ? true : false;
+
+        } else {
+
+            return $segment_values->whereIn('criterion_value_id', $user_criterion_value_id_by_criterion)->count() > 0;
+        }
     }
 
     private function validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion)

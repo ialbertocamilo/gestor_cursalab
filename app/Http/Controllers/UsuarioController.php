@@ -46,6 +46,11 @@ use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Crypt;
+
+use Altek\Accountant\Facades\Accountant;
+
 // use App\Perfil;
 
 class UsuarioController extends Controller
@@ -146,13 +151,16 @@ class UsuarioController extends Controller
 
     public function edit(User $user)
     {
+        $user->load('criterion_values');
+
         $current_workspace_criterion_list = $this->getFormSelects(true);
         $user_criteria = [];
 
         foreach ($current_workspace_criterion_list as $criterion) {
+            
             $value = $user->criterion_values->where('criterion_id', $criterion->id);
-            $user_criterion_value = $criterion->multiple ?
-                $value->pluck('id') : $value?->first()?->id;
+
+            $user_criterion_value = $criterion->multiple ? $value->pluck('id') : $value?->first()?->id;
 
             if ($criterion->field_type?->code == 'date') {
                 $user_criteria[$criterion->code] = $value?->first()?->value_text;
@@ -160,7 +168,6 @@ class UsuarioController extends Controller
                 $user_criteria[$criterion->code] = $user_criterion_value;
             }
         }
-
 
 //        $criterion_grouped = $user->criterion_values()->with('criterion')->get()
 //            ->groupBy('criterion.code')->toArray();
@@ -179,10 +186,11 @@ class UsuarioController extends Controller
 //            }
 //        }
         $user->criterion_list = $user_criteria;
+
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
-            'criteria' => $this->getFormSelects(true)
+            'criteria' => $current_workspace_criterion_list
         ]);
     }
 
@@ -192,11 +200,11 @@ class UsuarioController extends Controller
         $criteria = Criterion::query()
             ->with([
                 'values' => function ($q) use ($current_workspace) {
-                    $q->with('parents:id,criterion_id,value_text')
-                        ->whereHas('workspaces', function ($q2) use ($current_workspace) {
+                    // $q->with('parents:id,criterion_id,value_text')
+                        $q->whereHas('workspaces', function ($q2) use ($current_workspace) {
                             $q2->where('id', $current_workspace->id);
-                        })
-                        ->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
+                        });
+                        $q->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
                             'value_text');
                 },
                 'field_type:id,code'
@@ -268,16 +276,23 @@ class UsuarioController extends Controller
 
         // $subworkspace = Workspace::find($user->subworkspace_id);
         // $mod_eval = $subworkspace->mod_evaluaciones;
-
+        $courses_id = $user->getCurrentCourses(only_ids:true);
         $topics = SummaryTopic::query()
             ->join('topics', 'topics.id', '=', 'summary_topics.topic_id')
-            ->where('summary_topics.passed', 0)
+            ->join('courses','courses.id','topics.course_id')
+            // ->where('summary_topics.passed', 0)
             // ->where('summary_topics.attempts', '>=', $mod_eval['nro_intentos'] ?? 3)
-            ->where('summary_topics.attempts', '<>', 0)
-            ->whereNotNull('summary_topics.attempts')
             ->where('summary_topics.user_id', $user->id)
+            ->whereIn('topics.course_id',$courses_id)
+            ->whereNotNull('summary_topics.attempts')
+            ->where('summary_topics.attempts', '>=', DB::raw('CONVERT(courses.mod_evaluaciones->"$.nro_intentos",UNSIGNED)'))
+            ->whereRelationIn('status', 'code', ['desaprobado', 'por-iniciar'])
             ->select('topics.id', 'topics.name')
             ->get();
+            // ->filter(function ($summary) {
+            //     $course = Course::select('mod_evaluaciones')->where('id',$summary->course_id);
+
+            // });
 
         $courses = [];
 
@@ -546,14 +561,19 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
+        info('getCoursesByUser INICIO');
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
-//        $courses = Course::whereIn('id', $courses)->get();
+        info('getCoursesByUser FIN');
+
+        info('getDataToCoursesViewAppByUser INICIO');
+        $schools = Course::getDataToCoursesViewAppByUser($user, $courses);
+        info('getDataToCoursesViewAppByUser FIN');
 
         return $this->success([
             'user' => [
                 'id' => $user->id,
                 'fullname' => $user->fullname,
-                'schools' => Course::getDataToCoursesViewAppByUser($user, $courses)
+                'schools' => $schools
             ]
         ]);
     }
@@ -599,22 +619,16 @@ class UsuarioController extends Controller
     public function reinicios_data()
     {
         // Get workspace saved in session
-
-        $session = session()->all();
-        $workspace = $session['workspace'];
-
+        $workspace = get_current_workspace();
         // Load modules
-
         $modules = Workspace::where('parent_id', $workspace->id)
             ->select('id', 'name')
             ->get();
-
+        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
         // Load workspace's schools
-
-        $schools = School::whereHas('workspaces', function ($q) use ($workspace) {
-            $q->where('workspace_id', $workspace->id);
+        $schools = School::whereHas('subworkspaces', function ($j) use ($modules_id) {
+            $j->whereIn('subworkspace_id', $modules_id);
         })->get();
-
         return response()->json(compact('schools', 'modules'), 200);
     }
 
@@ -898,5 +912,37 @@ class UsuarioController extends Controller
         $user->update($data);
 
         return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
+    } 
+
+    public function getSignature(User $user, Request $request)
+    {
+        $enabled = config('app.impersonation.enabled');
+        $duration = config('app.impersonation.link_duration');
+
+        if (!$enabled) return $this->error('Service not available.', 422, [['Servicio no disponible.']]);
+
+        $token = $user->id . '-' . auth()->user()->id;
+
+        $token = Crypt::encryptString($token);
+
+        $signed_url = URL::temporarySignedRoute(
+            'login.external', now()->addSeconds($duration), ['token' => $token]
+        );
+
+        $parts = parse_url($signed_url);
+        parse_str($parts['query'], $query);
+
+        $signature = $query['signature'] ?? null;
+        $expires = $query['expires'] ?? null;
+
+        $web_url = config('app.web_url');
+
+        $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}";
+
+        Accountant::record($user, 'impersonated');
+
+        $data = compact('url', 'signature', 'expires', 'token', 'signed_url');
+
+        return $this->success(['msg' => 'Autenticando...', 'config' => $data]);
     }
 }

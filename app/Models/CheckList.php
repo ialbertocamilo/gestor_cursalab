@@ -518,7 +518,7 @@ class CheckList extends BaseModel
             //     }
             //     if($hasAllCourses){
             //         $alumnos_ids[] = $alumno->id;
-            //     } 
+            //     }
             // }
             // $alumnos_ids = User::whereIn('id',$final_list)->where('active', 1)
             //         ->select('id')

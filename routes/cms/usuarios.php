@@ -22,6 +22,7 @@ Route::controller(UsuarioController::class)->group(function () {
 //    Route::get('/{user}/show', 'show');
 
     Route::put('/{user}/status', 'updateStatus');
+    Route::post('/{user}/get-signature', 'getSignature');
 
 	Route::get('{user}/reset', 'reset')->name('usuarios.reset');
 	Route::post('{user}/reset_x_tema', 'reset_x_tema')->name('usuarios.reset_x_tema');

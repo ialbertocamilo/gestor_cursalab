@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources\Escuela;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Services\FileService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class EscuelaSearchResource extends JsonResource
 {
@@ -18,7 +19,12 @@ class EscuelaSearchResource extends JsonResource
         $modalidades = config('constantes.modalidad');
 
         $modules = $this->subworkspaces->pluck('name')->toArray();
-
+        // info($this->orden);
+        $position = null;
+        if($request->canChangePosition){
+            // $position = DB::table('school_subworkspace')->select('position')->where('subworkspace_id',$request->modules[0])->where('school_id',$this->id)->first()?->position;
+            $position = $this->school_position;
+        }
         return [
             'id' => $this->id,
             'nombre' => $this->name,
@@ -26,9 +32,11 @@ class EscuelaSearchResource extends JsonResource
             'image' => FileService::generateUrl($this->imagen),
             'images' => $this->getModulesImages(),
             'modules' => implode(', ', $modules),
+            'pivot_id_selected'=> $request->canChangePosition ? $request->modules[0] : null,
             'active' => $this->active,
-            'orden' => $this->position,
-            'position' => $this->position,
+            // 'orden' => $position,
+            'canChangePosition' => $request->canChangePosition,
+            'position' => $position,
 
             'modalidad' => $modalidades[$this->modalidad] ?? '',
 
@@ -40,6 +48,9 @@ class EscuelaSearchResource extends JsonResource
             'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : '-',
 
             'cursos_route' => route('cursos.list', [$this->id]),
+            'is_super_user'=>auth()->user()->isAn('super-user')
+
+
         ];
     }
 

@@ -61,7 +61,7 @@ class enviar_notificaciones extends Command
                         if ($envio) {
 //                            $this->info(" Se envió bloque: " . now());
 //                            info(" Se envió bloque: " . now());
-//                            $detalle->estado_envio = 1;
+                           $detalle->estado_envio = 1;
                         } else {
                             $nueva_fecha = Carbon::createFromFormat('Y-m-d H:i', $last_detalle);
                             $detalle->hora_envio = $nueva_fecha->addMinutes(15)->format('Y-m-d H:i');

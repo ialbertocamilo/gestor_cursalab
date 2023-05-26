@@ -14,6 +14,9 @@ import WorkspacePage from '../pages/WorkspacePage.vue'
 import CoursePage from '../pages/CoursePage.vue'
 import UsersPage from '../pages/UsersPage.vue'
 import CourseDetailPage from '../pages/CourseDetailPage.vue'
+import UserUpdatePage from '../pages/UserUpdatePage.vue'
+import UserCreatePage from '../pages/UserCreatePage.vue'
+
 
 Vue.use(VueRouter);
 const routes = [
@@ -46,6 +49,16 @@ const routes = [
         path: "/documentation-api/update-create-users",
 		name: "UserPage",
 		component:UserPage,
+    },
+	{
+        path: "/documentation-api/create-users",
+		name: "UserCreatePage",
+		component:UserCreatePage,
+    },
+	{
+        path: "/documentation-api/update-users",
+		name: "UserUpdatePage",
+		component:UserUpdatePage,
     },
 	{
         path: "/documentation-api/workspace",

@@ -21,7 +21,28 @@
 
         <v-col cols="12" md="12" lg="12">
             <span class="mb-3">Selecciona criterios:</span>
+            <!-- Hide modules -->
             <DefaultAutocompleteOrder
+                v-if="hideModule"
+                return-object
+                dense
+                label="Criterios"
+                v-model="segment.criteria_selected"
+                :items="new_criteria"
+                multiple
+                item-text="name"
+                :hide-codes="selectedCriteriaIncludesModule() ? ['module'] : []"
+                :ready-only-codes="selectedCriteriaIncludesModule() ? ['module'] : []"
+                item-id="id"
+                :count-show-values="4"
+                :showSelectAll="false"
+                :loading-state="true"
+                :clearable-state="true"
+            />
+
+            <!-- Show modules -->
+            <DefaultAutocompleteOrder
+                v-if="!hideModule"
                 return-object
                 dense
                 label="Criterios"
@@ -85,7 +106,8 @@ export default {
         "criteria",
         "courseModules",
         'isCourseSegmentation',
-        "options"
+        "options",
+        'hideModule'
     ],
     data() {
         return {

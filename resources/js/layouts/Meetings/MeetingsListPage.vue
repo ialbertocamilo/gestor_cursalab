@@ -1,8 +1,9 @@
 <template>
-
     <div>
         <header class="page-header mt-5 py-0 mx-8">
-            <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
+            <div
+                class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0"
+            >
                 <v-card-title>
                     Aulas Virtuales
                     <v-spacer/>
@@ -37,10 +38,6 @@
                     @onConfirm="closeSimpleModal(modalFormSegmentationOptions)"
                   />
 
-
-
-
-
                     <MeetingDirectionsModal
                         :options="modalDirectionsOptions"
                         :ref="modalDirectionsOptions.ref"
@@ -59,9 +56,7 @@
         <section class="client section-list">
             <div class="container-fluid">
                 <div class="row">
-
                     <div class="col-sm-12">
-
                         <v-card class="card" elevation="0">
                             <v-card-text>
                                 <v-row class="justify-content-start">
@@ -78,14 +73,21 @@
                                       </v-col> -->
                                     <v-col cols="3">
                                         <DefaultSelect
-                                            clearable multiple
+                                            clearable
+                                            multiple
                                             label="Estado"
                                             dense
                                             v-model="filters.statuses"
                                             :items="selects.statuses"
                                             item-text="name"
                                             :show-select-all="false"
-                                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                                            @onChange="
+                                                refreshDefaultTable(
+                                                    dataTable,
+                                                    filters,
+                                                    1
+                                                )
+                                            "
                                         />
                                     </v-col>
                                     <v-col cols="3">
@@ -93,11 +95,19 @@
                                             clearable
                                             dense
                                             range
-                                            :referenceComponent="'modalDateFilter1'"
+                                            :referenceComponent="
+                                                'modalDateFilter1'
+                                            "
                                             :options="modalDateFilter1"
                                             v-model="filters.dates"
                                             label="Fecha"
-                                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                                            @onChange="
+                                                refreshDefaultTable(
+                                                    dataTable,
+                                                    filters,
+                                                    1
+                                                )
+                                            "
                                         />
                                     </v-col>
                                     <v-col cols="3">
@@ -111,7 +121,6 @@
                                             append-icon="mdi-magnify"
                                         />
                                     </v-col>
-
                                 </v-row>
                                 <v-row class="justify-content-start tableMeeting">
                                     <v-col cols="12">
@@ -120,34 +129,104 @@
                                             :data-table="dataTable"
                                             :filters="filters"
                                             :default-sort-desc="true"
-                                            @edit="openFormModal(modalFormOptions, $event)"
-                                            @detail="openFormModal(modalDetailOptions, $event, 'detail', `Detalle de reunión: ${$event.name}`)"
-                                            @finish="openFormModal(modalFinishOptions, $event, 'finalizar', `Finalizar reunión: ${$event.name}`)"
+                                            @edit="
+                                                openFormModal(
+                                                    modalFormOptions,
+                                                    $event
+                                                )
+                                            "
+                                            @detail="
+                                                openFormModal(
+                                                    modalDetailOptions,
+                                                    $event,
+                                                    'detail',
+                                                    `Detalle de reunión: ${$event.name}`
+                                                )
+                                            "
+                                            @finish="
+                                                openFormModal(
+                                                    modalFinishOptions,
+                                                    $event,
+                                                    'finalizar',
+                                                    `Finalizar reunión: ${$event.name}`
+                                                )
+                                            "
+                                            @logs="
+                                                openFormModal(
+                                                    modalLogsOptions,
+                                                    $event,
+                                                    'logs',
+                                                    `Logs de la Reunión - ${$event.name}`
+                                                )
+                                            "
                                         />
 
                                         <MeetingDetailModal
                                             :options="modalDetailOptions"
                                             width="60vw"
                                             :ref="modalDetailOptions.ref"
-                                            @onDuplicate="openFormDuplicateModal"
-                                            @onCancel="closeSimpleModal(modalDetailOptions)"
-                                            @onConfirm="closeFormModal(modalDetailOptions, dataTable, filters)"
+                                            @onDuplicate="
+                                                openFormDuplicateModal
+                                            "
+                                            @onCancel="
+                                                closeSimpleModal(
+                                                    modalDetailOptions
+                                                )
+                                            "
+                                            @onConfirm="
+                                                closeFormModal(
+                                                    modalDetailOptions,
+                                                    dataTable,
+                                                    filters
+                                                )
+                                            "
                                         />
 
                                         <MeetingFinishModal
                                             :options="modalFinishOptions"
                                             width="60vw"
                                             :ref="modalFinishOptions.ref"
-                                            @onCancel="closeSimpleModal(modalFinishOptions)"
-                                            @onConfirm="closeFormModal(modalFinishOptions, dataTable, filters)"
+                                            @onCancel="
+                                                closeSimpleModal(
+                                                    modalFinishOptions
+                                                )
+                                            "
+                                            @onConfirm="
+                                                closeFormModal(
+                                                    modalFinishOptions,
+                                                    dataTable,
+                                                    filters
+                                                )
+                                            "
                                         />
 
                                         <MeetingFormModal
                                             :options="modalFormOptions"
                                             width="50vw"
                                             :ref="modalFormOptions.ref"
-                                            @onCancel="closeSimpleModal(modalFormOptions)"
-                                            @onConfirm="closeFormModal(modalFormOptions, dataTable, filters)"
+                                            @onCancel="
+                                                closeSimpleModal(
+                                                    modalFormOptions
+                                                )
+                                            "
+                                            @onConfirm="
+                                                closeFormModal(
+                                                    modalFormOptions,
+                                                    dataTable,
+                                                    filters
+                                                )
+                                            "
+                                        /><LogsModal
+                                            :options="modalLogsOptions"
+                                            width="55vw"
+                                            :model_id="null"
+                                            model_type="App\Models\Meeting"
+                                            :ref="modalLogsOptions.ref"
+                                            @onCancel="
+                                                closeSimpleModal(
+                                                    modalLogsOptions
+                                                )
+                                            "
                                         />
 
                                         <!--   <MeetingFormModal
@@ -164,40 +243,46 @@
                     </div>
                 </div>
             </div>
-
         </section>
     </div>
-
 </template>
 
 <script>
-import SegmentFormModal from './../Blocks/SegmentFormModal';
+import SegmentFormModal from "./../Blocks/SegmentFormModal";
 import MeetingFinishModal from "./MeetingFinishModal";
 import MeetingDirectionsModal from "./MeetingDirectionsModal";
 import MeetingDetailModal from "./MeetingDetailModal";
 import MeetingFormModal from "./MeetingFormModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {MeetingDetailModal, MeetingFormModal, MeetingFinishModal, MeetingDirectionsModal, SegmentFormModal},
+    components: {
+        MeetingDetailModal,
+        MeetingFormModal,
+        MeetingFinishModal,
+        MeetingDirectionsModal,
+        LogsModal,
+        SegmentFormModal
+    },
     // props: ['usuario_id', 'workspace_id', 'superuser'],
     props: {
         usuario_id: {
-            type: Number|String,
+            type: Number | String,
             required: true
         },
         workspace_id: {
-            type: Number|String,
+            type: Number | String,
             required: true
         },
         superuser: {
             type: Boolean,
             required: true
-        },
+        }
     },
     data: () => ({
         dataTable: {
-            endpoint: '/aulas-virtuales/search',
-            ref: 'MeetingTable',
+            endpoint: "/aulas-virtuales/search",
+            ref: "MeetingTable",
             headers: [
                 // {text: "ID", value: "id", align: 'center', sortable: false},
                 // {text: "Tipo", value: "type", sortable: false},
@@ -216,25 +301,32 @@ export default {
             actions: [
                 {
                     text: "Editar",
-                    icon: 'mdi mdi-pencil',
-                    type: 'action',
-                    method_name: 'edit',
-                    show_condition: 'editable'
+                    icon: "mdi mdi-pencil",
+                    type: "action",
+                    method_name: "edit",
+                    show_condition: "editable"
                 },
                 {
                     text: "Finalizar",
-                    icon: 'fas fa-check',
-                    type: 'action',
-                    method_name: 'finish',
-                    show_condition: 'is_live'
+                    icon: "fas fa-check",
+                    type: "action",
+                    method_name: "finish",
+                    show_condition: "is_live"
                 },
                 {
                     text: "Detalle",
-                    icon: 'mdi mdi-eye',
-                    type: 'action',
-                    method_name: 'detail'
+                    icon: "mdi mdi-eye",
+                    type: "action",
+                    method_name: "detail"
                 },
-            ],
+                {
+                    text: "Logs",
+                    icon: "mdi mdi-database",
+                    type: "action",
+                    show_condition: "is_super_user",
+                    method_name: "logs"
+                }
+            ]
             // more_actions: [
             //     {
             //         text: "Cancelar",
@@ -264,38 +356,45 @@ export default {
             statuses: []
         },
         modalDirectionsOptions: {
-            ref: 'MeetingDirectionsModal',
+            ref: "MeetingDirectionsModal",
             open: false,
-            base_endpoint: '/aulas-virtuales',
-            resource: 'cuenta',
+            base_endpoint: "/aulas-virtuales",
+            resource: "cuenta",
             hideConfirmBtn: true,
-            cancelLabel: 'Cerrar',
+            cancelLabel: "Cerrar"
         },
         modalDateOptions: {
-            ref: 'DateRangeFilter',
-            open: false,
+            ref: "DateRangeFilter",
+            open: false
         },
         modalDetailOptions: {
-            ref: 'MeetingDetailModal',
+            ref: "MeetingDetailModal",
             open: false,
-            base_endpoint: '/aulas-virtuales',
-            confirmLabel: 'Cerrar',
+            base_endpoint: "/aulas-virtuales",
+            confirmLabel: "Cerrar",
             hideCancelBtn: true
         },
-        modalFormOptions: {
-            ref: 'MeetingFormlModal',
+        modalLogsOptions: {
+            ref: "LogsModal",
             open: false,
-            base_endpoint: '/aulas-virtuales',
-            confirmLabel: 'Guardar',
-            resource: 'reunión',
+            showCloseIcon: true,
+            persistent: true,
+            base_endpoint: "/search"
         },
-        modalFormSegmentationOptions:{
-            ref: 'SegmentFormModal',
+        modalFormOptions: {
+            ref: "MeetingFormlModal",
+            open: false,
+            base_endpoint: "/aulas-virtuales",
+            confirmLabel: "Guardar",
+            resource: "reunión"
+        },
+        modalFormSegmentationOptions: {
+            ref: "SegmentFormModal",
             open: false,
             persistent: true,
-            base_endpoint: '/segments',
-            confirmLabel: 'Guardar',
-            resource: 'segmentación',
+            base_endpoint: "/segments",
+            confirmLabel: "Guardar",
+            resource: "segmentación"
         },
         // modalFormDuplicateOptions: {
         //     ref: 'MeetingFormlModal',
@@ -306,38 +405,42 @@ export default {
         //     action: 'duplicate',
         // },
         modalDateFilter1: {
-            open: false,
+            open: false
         },
         modalFinishOptions: {
-            ref: 'MeetingFinishModal',
+            ref: "MeetingFinishModal",
             open: false,
-            base_endpoint: '/aulas-virtuales',
-            cancelLabel: 'Cerrar',
+            base_endpoint: "/aulas-virtuales",
+            cancelLabel: "Cerrar"
             // hideConfirmBtn: true,
-        },
+        }
     }),
     mounted() {
-        let vue = this
+        let vue = this;
         vue.getSelects();
         // if (vue.usuario_id)
         //     vue.modalFormOptions.usuario_id = vue.usuario_id
     },
     methods: {
         getSelects() {
-            let vue = this
-            const url = `/aulas-virtuales/get-list-selects`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.types = data.data.types
-                    vue.selects.statuses = data.data.statuses
-                })
+            let vue = this;
+            const url = `/aulas-virtuales/get-list-selects`;
+            vue.$http.get(url).then(({ data }) => {
+                vue.selects.types = data.data.types;
+                vue.selects.statuses = data.data.statuses;
+            });
         },
 
         openFormDuplicateModal(resource) {
-            let vue = this
+            let vue = this;
             vue.modalDetailOptions.open = false;
-            vue.openFormModal(vue.modalFormOptions, resource, 'duplicate', 'Crear reunión');
-        },
+            vue.openFormModal(
+                vue.modalFormOptions,
+                resource,
+                "duplicate",
+                "Crear reunión"
+            );
+        }
         //      async activity() {
         //          console.log('entra');
         // let vue = this;
@@ -362,7 +465,7 @@ export default {
         // 	});
         //      },
     }
-}
+};
 </script>
 <style lang="scss">
 .tableMeeting table tbody td {

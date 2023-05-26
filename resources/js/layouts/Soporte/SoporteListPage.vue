@@ -73,7 +73,15 @@
                 :filters="filters"
                 @edit="openFormModal(modalOptions, $event, null, `Editar Ticket - #${$event.id}`)"
                 @show="openFormModal(modalShowOptions, $event, null, `Detalle de Ticket - #${$event.id}`)"
+                @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs de Ticket - ${$event.detail}`)"
             />
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Post"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"/>
 
             <SoporteFormModal
                 width="35vw"
@@ -90,32 +98,29 @@
                 @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
                 @onCancel="closeFormModal(modalShowOptions)"
             />
-
         </v-card>
     </section>
 </template>
 
-
 <script>
 import SoporteFormModal from "./SoporteFormModal";
 import SoporteShowModal from "./SoporteShowModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
         SoporteFormModal,
-        SoporteShowModal
-    }
-    ,
+        SoporteShowModal,
+        LogsModal
+    },
     data() {
         return {
             dateFilterStart: {
-                open: false,
-            }
-            ,
+                open: false
+            },
             dateFilterEnd: {
-                open: false,
-            }
-            ,
+                open: false
+            },
             dataTable: {
                 endpoint: '/soporte/search',
                 ref: 'SoporteTable',
@@ -142,6 +147,13 @@ export default {
                         type: 'action',
                         method_name: 'show'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',
@@ -185,14 +197,21 @@ export default {
                 cancelLabel: "Cerrar",
                 showCloseIcon: true
             },
-            modalDeleteOptions: {
-                ref: 'SoporteDeleteModal',
+            modalLogsOptions: {
+                ref: "LogsModal",
                 open: false,
-                base_endpoint: '/soporte',
-                contentText: '¿Desea eliminar este registro?',
-                endpoint: '',
+                showCloseIcon: true,
+                base_endpoint: "/search",
+                persistent: true
             },
-        }
+            modalDeleteOptions: {
+                ref: "SoporteDeleteModal",
+                open: false,
+                base_endpoint: "/soporte",
+                contentText: "¿Desea eliminar este registro?",
+                endpoint: ""
+            }
+        };
     },
     mounted() {
         let vue = this
@@ -223,6 +242,5 @@ export default {
             // TODO: Call store or update USER
         },
     }
-
 }
 </script>

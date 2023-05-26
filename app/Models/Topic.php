@@ -422,8 +422,7 @@ class Topic extends BaseModel
             'type' => 'validations-after-update'
         ];
     }
-
-
+    
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         if ($user_courses->count() === 0) return [];
@@ -433,30 +432,54 @@ class Topic extends BaseModel
         $schools = $user_courses->groupBy('schools.*.id');
         $courses = $schools[$school_id] ?? collect();
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
-
+        $courses_id = $user_courses->pluck('id');
+        $positions_courses = CourseSchool::select('school_id','course_id','position')
+                    ->where('school_id',$school_id)
+                    ->whereIn('course_id',$courses_id)
+                    ->get();
         // UC
         $school_name = $school?->name;
         if ($workspace_id === 25) {
             $school_name = removeUCModuleNameFromCourseName($school_name);
         }
-
         $sub_workspace = $user->subworkspace;
         $mod_eval = $sub_workspace->mod_evaluaciones;
 
         // $max_attempts = isset($mod_eval['nro_intentos']) ? (int)$mod_eval['nro_intentos'] : 5;
 
-        $schools_courses = [];
+        // $schools_courses = [];
+        $schools_courses = collect();
 
         $topic_status_arr = config('topics.status');
-
-        $courses = $courses->sortBy('position');
+        // $courses = $courses->sortBy('position');
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
-            ->whereIn('course_id', $user_courses->pluck('id'))
+            ->whereIn('course_id', $courses_id)
             ->where('user_id', $user->id)
             ->groupBy('course_id')
             ->get();
-        foreach ($courses as $course) {
+        $summary_courses_compatibles = SummaryCourse::with('course:id,name')
+            ->whereRelation('course', 'active', ACTIVE)
+            ->where('user_id', $user->id)
+            // ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
+            ->orderBy('grade_average', 'DESC')
+            ->whereRelation('status', 'code', 'aprobado')
+            ->get();
+        $user_status = Taxonomy::where('type', 'user-status')->get();
+        // $statuses_courses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
+        $statuses_courses = $user_status->where('group', 'course')->where('type', 'user-status');
+        // $statuses_topic = Taxonomy::where('group', 'topic')->where('type', 'user-status')
+        //     ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+        //     ->pluck('id')->toArray();
 
+        $statuses_topic = $user_status->where('group', 'topic')->where('type', 'user-status')
+        ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+            ->pluck('id')->toArray();
+        $medias = MediaTema::whereHas('topic', function($q) use ($courses) {
+                $q->whereIn('course_id', $courses->pluck('id')->toArray());
+            })
+         ->get();
+        foreach ($courses as $course) {
+            $course_position = $positions_courses->where('course_id',$course->id)->first()?->position;
             // $compatible = $course->getCourseCompatibilityByUser($user);
 
             // UC rule
@@ -466,25 +489,26 @@ class Topic extends BaseModel
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
+            $media_temas = $medias->whereIn('topic_id',$course->topics->pluck('id')) ?? [];
+            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course,$summary_courses_compatibles,$media_temas,$statuses_courses);
+            // $topics_data = [];
+            $topics_data = collect();
 
-            $course_status = $course->compatible ? [] : Course::getCourseStatusByUser($user, $course);
-            $topics_data = [];
 
             $topics = $course->topics->where('active', ACTIVE)->sortBy('position');
 
-            $topics_count = $topics->count();
-
+            $topics_count = count($topics);
+            $summary_topics_user = $course->topics->pluck('summaries') ?? [];
             foreach ($topics as $topic) {
 
-                $media_topics = $topic->medias->sortBy('position')->values()->all();
-
-                $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
-                ->where('topic_id', $topic->id)
-                ->where('user_id', $user->id)
-                ->first();
+                // $media_topics = $topic->medias->sortBy('position')->values()->all();
+                $media_topics = $media_temas->where('topic_id',$topic->id)->sortBy('position')->values()->all();
+                $summary_topic =  $topic->summaries->first();
+                // $summary_topic = $summary_topics_by_user->where('topic_id', $topic->id)
+                // // ->where('user_id', $user->id)
+                // ->first();
 
                 $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
-
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
                     $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
@@ -503,6 +527,7 @@ class Topic extends BaseModel
                         }
                     }
                 }
+
                 $media_embed = array();
                 $media_not_embed = array();
                 foreach ($media_topics as $med) {
@@ -523,7 +548,7 @@ class Topic extends BaseModel
                 // if (true) {
                 if ($course->compatible) {
 
-                    $topics_data[] = [
+                    $topics_data->push([
                         'id' => $topic->id,
                         'nombre' => $topic->name,
                         'requisito_id' => NULL,
@@ -541,14 +566,14 @@ class Topic extends BaseModel
                         'estado_tema' => 'aprobado',
                         'estado_tema_str' => 'Convalidado',
                         'compatible' => true,
-                    ];
+                    ]);
 
                     continue;
                 }
 
-                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts);
+                $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
 
-                $topics_data[] = [
+                $topics_data->push([
                     'id' => $topic->id,
                     'nombre' => $topic->name,
                     'requisito_id' => $topic_status['topic_requirement'],
@@ -566,8 +591,9 @@ class Topic extends BaseModel
                     'estado_tema' => $topic_status['status'],
                     //                    'estado_tema_str' => $topic_status['status'],
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
-                ];
+                ]);
             }
+    
 
             $requirement_list = null;
             $requirement_course = $course->requirements->first();
@@ -580,7 +606,7 @@ class Topic extends BaseModel
 
                     $req_course = $requirement_course->model_course;
 
-                    $req_course->load([
+                    $req_course->loadMissing([
                         'summaries' => function ($q) use ($user) {
                             $q
                                 ->with('status:id,name,code')
@@ -590,48 +616,48 @@ class Topic extends BaseModel
                         'compatibilities_b:id',
                     ]);
 
-                    $compatible_course_req = $req_course->getCourseCompatibilityByUser($user);
+                    $compatible_course_req = $req_course->getCourseCompatibilityByUser($user,$summary_courses_compatibles);
 
                     if (!$compatible_course_req):
                         if($requirement_course?->requirement_id){
-                            $req = Course::where('id',$requirement_course?->requirement_id)->first();
-
-                            $requirement_course_req = $req->requirements->first();
+                            $req = $req_course;
+                            // $req = Course::where('id',$requirement_course?->requirement_id)->first();
+    
                             $available_course_req = true;
 
-                            if ($requirement_course_req) {
+                            // if ($requirement_course_req) {
 
-                                $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
+                            //     $summary_requirement_course_req = $requirement_course_req->summaries_course->where('user_id',$user->id)->first();
 
-                                if (!$summary_requirement_course_req) {
+                            //     if (!$summary_requirement_course_req) {
 
-                                    $req_course_req = $requirement_course_req->model_course;
+                            //         $req_course_req = $requirement_course_req->model_course;
 
-                                    $req_course_req->load([
-                                        'summaries' => function ($q) use ($user) {
-                                            $q
-                                                ->with('status:id,name,code')
-                                                ->where('user_id', $user->id);
-                                        },
-                                        'compatibilities_a:id',
-                                        'compatibilities_b:id',
-                                    ]);
+                            //         $req_course_req->loadMissing([
+                            //             'summaries' => function ($q) use ($user) {
+                            //                 $q
+                            //                     ->with('status:id,name,code')
+                            //                     ->where('user_id', $user->id);
+                            //             },
+                            //             'compatibilities_a:id',
+                            //             'compatibilities_b:id',
+                            //         ]);
 
-                                    $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+                            //         $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user,$summary_courses_compatibles);
 
-                                    if (!$compatible_course_req_req):
-                                        $available_course_req = false;
-                                    endif;
-                                }else{
-                                    try {
-                                        if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
-                                            $available_course_req = false;
-                                        }
-                                    } catch (\Throwable $th) {
-                                        //throw $th;
-                                    }
-                                }
-                            }
+                            //         if (!$compatible_course_req_req):
+                            //             $available_course_req = false;
+                            //         endif;
+                            //     }else{
+                            //         try {
+                                        // if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
+                                        //     $available_course_req = false;
+                                        // }
+                            //         } catch (\Throwable $th) {
+                            //             //throw $th;
+                            //         }
+                            //     }
+                            // }
 
                             $req_school = $req->schools->first();
                             $course_name_req = $req->name;
@@ -643,7 +669,8 @@ class Topic extends BaseModel
                                 'name' => $course_name_req,
                                 'school_id' => $req_school?->id,
                                 'disponible' => $available_course_req,
-                                'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                                // 'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null,
+                                'ultimo_tema_visto' => ($req) ? Course::ultimoTemaVisto($req, $user, $media_temas, $summary_topics_user) : null
                             ];
                         }
                     endif;
@@ -665,7 +692,7 @@ class Topic extends BaseModel
 
                                         $req_course_req = $requirement_course_req->model_course;
 
-                                        $req_course_req->load([
+                                        $req_course_req->loadMissing([
                                             'summaries' => function ($q) use ($user) {
                                                 $q
                                                     ->with('status:id,name,code')
@@ -675,7 +702,7 @@ class Topic extends BaseModel
                                             'compatibilities_b:id',
                                         ]);
 
-                                        $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user);
+                                        $compatible_course_req_req = $req_course_req->getCourseCompatibilityByUser($user,$summary_courses_compatibles);
 
                                         if (!$compatible_course_req_req):
                                             $available_course_req = false;
@@ -701,7 +728,8 @@ class Topic extends BaseModel
                                     'name' => $course_name_req,
                                     'school_id' => $req_school?->id,
                                     'disponible' => $available_course_req,
-                                    'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                                    // 'ultimo_tema_visto' => ($req) ? self::ultimoTemaVisto($req, $user) : null
+                                    'ultimo_tema_visto' => ($req) ?  Course::ultimoTemaVisto($req, $user, $media_temas, $summary_topics_user) : null
                                 ];
                             }
                         }
@@ -714,8 +742,9 @@ class Topic extends BaseModel
             // if (true) {
             if ($course->compatible) {
 
-                $schools_courses[] = [
+                $schools_courses->push([
                     'id' => $course->id,
+                    'orden' => $course_position,
                     'nombre' => $course_name,
                     'descripcion' => $course->description,
                     'imagen' => $course->imagen,
@@ -739,13 +768,14 @@ class Topic extends BaseModel
                         'id' => $course->compatible->course->id ?? 'X',
                         'name' => $course->compatible->course->name ?? 'TEST DEFAULT COMPATIBLE',
                     ],
-                ];
+                ]);
 
                 continue;
             }
 
-            $schools_courses[] = [
+            $schools_courses->push([
                 'id' => $course->id,
+                'orden' => $course_position,
 //                'nombre' => $course->name,
                 'nombre' => $course_name,
                 'descripcion' => $course->description,
@@ -766,9 +796,11 @@ class Topic extends BaseModel
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
                 'mod_evaluaciones' => $course->mod_evaluaciones
-            ];
+            ]);
         }
-
+        $schools_courses = $schools_courses->toArray();
+        $columns = array_column($schools_courses, 'orden');
+        array_multisort($columns, SORT_ASC, $schools_courses);
         return [
             'id' => $school?->id,
 //            'nombre' => $school?->name,
@@ -777,7 +809,7 @@ class Topic extends BaseModel
         ];
     }
 
-    public function getTopicStatusByUser(Topic $topic, User $user, $max_attempts)
+    public function getTopicStatusByUser(Topic $topic, User $user, $max_attempts,$statuses)
     {
         $grade = 0;
         $available_topic = false;
@@ -789,9 +821,9 @@ class Topic extends BaseModel
         // $topic_status = 'por-iniciar';
         $topic_status = $summary_topic->status->code ?? 'por-iniciar';
 
-        $statuses = Taxonomy::where('group', 'topic')->where('type', 'user-status')
-            ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
-            ->pluck('id')->toArray();
+        // $statuses = Taxonomy::where('group', 'topic')->where('type', 'user-status')
+        //     ->whereIn('code', ['aprobado', 'realizado', 'revisado'])
+        //     ->pluck('id')->toArray();
 
         if ($topic->assessable && $topic->evaluation_type->code === 'qualified') {
             if ($summary_topic) {
@@ -809,11 +841,11 @@ class Topic extends BaseModel
         if (!$topic_requirement) {
             $available_topic = true;
         } else {
-            $summary_requirement_topic = SummaryTopic::with('status:id,name,code')
-                ->where('user_id', $user->id)
-                ->where('topic_id', $topic_requirement->requirement_id)
-                ->first();
-
+            // $summary_requirement_topic = SummaryTopic::with('status:id,name,code')
+            //     ->where('user_id', $user->id)
+            //     ->where('topic_id', $topic_requirement->requirement_id)
+            //     ->first();
+            $summary_requirement_topic = $topic_requirement->summaries_topics->first();
 //            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
             $activity_requirement = in_array($summary_requirement_topic?->status_id, $statuses);
             $test_requirement = $summary_requirement_topic?->result == 1;
@@ -824,10 +856,13 @@ class Topic extends BaseModel
 
         $topic_req_name = null;
         if($topic_requirement?->requirement_id){
-            $topic_req = Topic::where('id', $topic_requirement?->requirement_id)->first();
-            $topic_req_name = $topic_req?->name;
-            $topic_req_status = self::getTopicProgressByUser($user,$topic_req);
-            $available_topic_req = !($topic_req_status['status'] == 'bloqueado');
+            // $topic_req = Topic::where('id', $topic_requirement?->requirement_id)->first();
+            // dd($topic_req,$topic->requirements->first());
+            $topic_req_name = $topic_requirement?->model_topic?->name;
+            // $topic_req_status = self::getTopicProgressByUser($user,$topic_req);
+            $topic_req_status = $topic_requirement->summaries?->status->code ?? 'por-iniciar';
+            // $available_topic_req = !($topic_req_status['status'] == 'bloqueado');
+            $available_topic_req = !($topic_req_status == 'bloqueado');
         }
 
         return [
@@ -969,7 +1004,7 @@ class Topic extends BaseModel
         $topics_user = $curso->topics->pluck('id')->toArray();
 
         $topics = $curso->topics->sortBy('position')->where('active', ACTIVE);
-        $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id);
+        $summary_topics = SummaryTopic::whereIn('topic_id',$topics_user)->where('user_id',$user->id)->get();
 
         $last_topic = null;
         if ($summary_topics->count() > 0) {

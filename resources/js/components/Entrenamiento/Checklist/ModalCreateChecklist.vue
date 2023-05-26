@@ -88,6 +88,7 @@
                                                                         :options="modalDateStart"
                                                                         v-model="resource.modalDateStart"
                                                                         label="Inicio de checklist"
+                                                                        class="bx_calendar_top"
                                                                     />
                                                                 </v-col>
                                                                 <v-col cols="12">
@@ -97,6 +98,7 @@
                                                                         :options="modalDateEnd"
                                                                         v-model="resource.modalDateEnd"
                                                                         label="Fin de checklist"
+                                                                        class="bx_calendar_top"
                                                                     />
                                                                 </v-col>
                                                             </v-row>
@@ -982,5 +984,12 @@ span.v-stepper__step__step:after {
 }
 .v-card__actions.actions_btn_modal button.default-modal-action-button.btn_back.v-btn.v-btn--flat span.v-btn__content {
     color: #5458ea;
+}
+.v-menu.bx_calendar_top .v-menu__content {
+    bottom: 0px;
+    top: initial !important;
+    right: calc(100% - 10px);
+    left: initial !important;
+    transform-origin: right bottom !important;
 }
 </style>

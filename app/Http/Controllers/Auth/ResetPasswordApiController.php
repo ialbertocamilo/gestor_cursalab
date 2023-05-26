@@ -127,6 +127,7 @@ class ResetPasswordApiController extends Controller
 
                 $user->old_passwords = $old_passwords;
                 $user->password = $password;
+                $user->last_pass_updated_at = now();
                 $user->setRememberToken(Str::random(60));
                 $user->save();
             }

@@ -58,19 +58,27 @@ return [
             'options' => [
                 'CacheControl' => 'max-age=25920000, no-transform, public', 
                 // 'ContentEncoding' => 'gzip'
-            ]
+            ],
+            'scorm' => [
+                'bucket' => env('AWS_BUCKET_SCORM'),
+                'root' => env('AWS_CURSALAB_CLIENT_NAME_FOLDER_SCORM'),
+            ],
         ],
 
         'cdn' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            // 'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
-            // 'root' => storage_path('app/public'),
             'url' => env('BUCKET_BASE_URL') . '/' . env('AWS_CURSALAB_CLIENT_NAME_FOLDER'),
-            // 'visibility' => 'public',
-            // 'throw' => false,
+        ],
+
+        'cdn_scorm' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'visibility' => 'public',
+            'throw' => false,
+            'url' => env('BUCKET_BASE_URL_SCORM') . '/' . env('AWS_CURSALAB_CLIENT_NAME_FOLDER_SCORM'),
         ],
 
     ],

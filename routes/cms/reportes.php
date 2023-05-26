@@ -9,6 +9,7 @@ Route::get('reportes/{layout}', [ExportarController::class, 'indexReport'])->nam
 
 Route::get('/reports/queue', [ReportsController::class, 'loadReportsQueue']);
 Route::get('/reports/types', [ReportsController::class, 'loadRepotsTypes']);
+Route::get('/reports/save/{id}', [ReportsController::class, 'saveAudits']);
 
 Route::prefix('exportar')->controller(ExportarController::class)->group(function () {
 
@@ -62,4 +63,3 @@ Route::prefix('exportar')->group(function () {
 	Route::get('/curricula_excel', [CurriculasGruposController::class, 'exportarCurriculasExcel']);
 
 });
-

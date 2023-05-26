@@ -14,7 +14,6 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
-
                     <v-col cols="3">
                         <DefaultInput clearable dense
                                       v-model="filters.q"
@@ -33,7 +32,15 @@
                           @edit="openFormModal(modalOptions, $event)"
                           @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                           @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar anuncio')"
-            />
+			  @logs="
+				    openFormModal(
+				        modalLogsOptions,
+				        $event,
+				        'logs',
+				        `Logs de Preguntas - ${$event.title}`
+				    )
+				"
+		/>
 
             <PreguntaFrecuenteFormModal width="45vw"
                               :ref="modalOptions.ref"
@@ -53,23 +60,29 @@
                                 @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
+	    <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Post"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
 
         </v-card>
     </section>
 </template>
 
-
 <script>
 import PreguntaFrecuenteFormModal from "./PreguntaFrecuenteFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-
     components: {
-        PreguntaFrecuenteFormModal, DefaultStatusModal, DefaultDeleteModal
-    }
-    ,
+        PreguntaFrecuenteFormModal, DefaultStatusModal, DefaultDeleteModal, LogsModal
+    },
     data() {
         return {
             dataTable: {
@@ -101,6 +114,13 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                 ],
                 more_actions: [
                     // {
@@ -132,14 +152,21 @@ export default {
                 contentText: '¿Desea cambiar de estado a este registro?',
                 endpoint: '',
             },
-            modalDeleteOptions: {
-                ref: 'PreguntaFrecuenteDeleteModal',
+            modalLogsOptions: {
+                ref: "LogsModal",
                 open: false,
-                base_endpoint: '/preguntas-frecuentes',
-                contentText: '¿Desea eliminar este registro?',
-                endpoint: '',
+                showCloseIcon: true,
+                base_endpoint: "/search",
+                persistent: true
             },
-        }
+            modalDeleteOptions: {
+                ref: "PreguntaFrecuenteDeleteModal",
+                open: false,
+                base_endpoint: "/preguntas-frecuentes",
+                contentText: "¿Desea eliminar este registro?",
+                endpoint: ""
+            }
+        };
     },
     mounted() {
         let vue = this
@@ -161,6 +188,5 @@ export default {
             // TODO: Call store or update USER
         },
     }
-
 }
 </script>

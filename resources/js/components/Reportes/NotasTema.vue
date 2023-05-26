@@ -426,11 +426,9 @@ export default {
                     }
                 })
                 const vue = this
-                if(response.statusText == "OK"){
-                    setTimeout(() => {
-                        vue.queryStatus("reportes", "descargar_reporte_temas");
-                    }, 500);
-                }
+                setTimeout(() => {
+                    vue.queryStatus("reportes", "descargar_reporte_temas");
+                }, 500);
 
             } catch (ex) {
                 console.log(ex.message)

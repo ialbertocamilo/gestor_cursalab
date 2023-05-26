@@ -45,9 +45,18 @@
                             </a>
                         </div>
                     </div>
-                    <div>
+                    <div class="d-flex">
                         <div class="d-flex justify-content-center align-items-center mx-2">
                             <span class="text_default">{{ arrayCriteriaSelected.length || 0 }} seleccionados</span>
+                        </div>
+                        <div class="bx_select_all">
+                            <label class="text_default" for="checkbox">
+                                Todos
+                                <div class="round">
+                                    <input type="checkbox" id="checkbox" @change="selectAll" v-model="select_all" />
+                                    <span class="checkmark"></span>
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </v-col>
@@ -155,6 +164,7 @@ export default {
                     }
                 },
             },
+            select_all: false
         };
     },
     computed: {
@@ -218,6 +228,24 @@ export default {
         },
     },
     methods: {
+        selectAll() {
+            let vue = this
+            if(vue.filter_result.length > 0) {
+                vue.filter_result.forEach((element, index) => {
+                    this.addUserAll(element)
+                });
+                if(vue.arrayCriteriaSelected.length >= vue.filter_result.length)
+                    vue.filter_result = []
+            }
+            else {
+                if(vue.arrayCriteriaSelected.length > 0) {
+                    vue.arrayCriteriaSelected.forEach((element, index) => {
+                        vue.filter_result.push(element)
+                    });
+                    this.deleteUserAll()
+                }
+            }
+        },
         checkIfExistUser(currentdoc) {
             currentdoc = currentdoc.trim();
 
@@ -229,6 +257,14 @@ export default {
             }
             return [];
         },
+        addUserAll(user) {
+            let vue = this;
+            vue.$emit("addUserAll", user);
+        },
+        deleteUserAll() {
+            let vue = this;
+            vue.$emit("deleteUserAll");
+        },
         addUser(user) {
             let vue = this;
 
@@ -236,8 +272,8 @@ export default {
         },
         deleteUser(user) {
             let vue = this;
-
             vue.$emit("deleteUser", user);
+            vue.filter_result.push(user)
         },
         addOrRemoveFromFilterResult(user, action = 'add') {
             let vue = this;
@@ -363,5 +399,69 @@ button.v-icon.v-icon--link {
 }
 .hide_icon .v-input__prepend-outer {
     display: none;
+}
+// check todos
+.bx_select_all {
+    display: flex;
+    border-left: 1px solid #434D56;
+    padding-left: 6px;
+}
+.bx_select_all label {
+    display: flex;
+    margin: 0;
+}
+.bx_select_all .round {
+    position: relative;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    margin-left: 5px;
+}
+
+.bx_select_all .round input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.bx_select_all .round .checkmark {
+    height: 14px;
+    width: 14px;
+    border-radius: 15px;
+    border: 1px solid #434D56;
+}
+
+.bx_select_all .round:hover input ~ .checkmark {
+  background-color: #5458ea;
+}
+
+.bx_select_all .round input:checked ~ .checkmark {
+  background-color: #5458ea;
+}
+
+.bx_select_all .round .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.bx_select_all .round input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.bx_select_all .round .checkmark:after {
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    transform: translate(-50%,-50%);
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
 }
 </style>

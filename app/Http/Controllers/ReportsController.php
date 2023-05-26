@@ -9,11 +9,12 @@ use App\Models\Taxonomy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+
+use Altek\Accountant\Facades\Accountant;
 use Illuminate\Support\Facades\Auth;
 
 class ReportsController extends Controller
 {
-
     /**
      * Load workspace's reports queue from the last month
      *
@@ -23,7 +24,6 @@ class ReportsController extends Controller
     public function loadReportsQueue(Request $request): JsonResponse
     {
         // Checks whether current user is a super user
-
         Auth::checK();
         $isSuperUser = AssignedRole::hasRole(Auth::user()->id, Role::SUPER_USER);
 
@@ -74,8 +74,17 @@ class ReportsController extends Controller
      */
     public function loadRepotsTypes(): JsonResponse
     {
-        return $this->success(Taxonomy::getDataByGroupAndType(
-            'reports', 'report'
-        ));
+        return $this->success(
+            Taxonomy::getDataByGroupAndType('reports', 'report')
+        );
+    }
+
+    public function saveAudits(Request $request, GeneratedReport $report)
+    {
+        $report = $report::search($request->id);
+
+        Accountant::record($report, 'downloaded');
+
+        return $this->success($report);
     }
 }
