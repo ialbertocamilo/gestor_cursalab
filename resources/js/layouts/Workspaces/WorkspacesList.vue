@@ -60,6 +60,7 @@
                     title="Crear workspace"
                     @click="createWorkspace"
                     class="mr-2"
+                    v-if="false"
                     >
                     <v-icon v-text="'mdi-plus'"/>
                 </v-btn>
@@ -140,7 +141,7 @@
                                 <button
                                     type="button" class="btn btn-md"
                                     @click="editWorkspace(workspace.id)"
-                                    v-show="!view"
+                                    v-show="!view && workspace.is_super_user"
                                 >
                                     <span class="v-badge">
                                         <v-icon class="icon" color="primary">mdi-pencil</v-icon>
@@ -156,7 +157,7 @@
                                         'logs',
                                         `Logs del módulo - ${workspace.name}`
                                     )"
-                                    v-show="!view"
+                                    v-show="!view && workspace.is_super_user"
                                 >
                                     <span class="v-badge">
                                         <v-icon class="icon" color="primary">mdi-database</v-icon>
@@ -221,7 +222,15 @@ import WorkspacesForm from "./WorkspacesForm";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
-    props: [ 'header' ],
+    props: [ 'header'],
+    // props: {
+    //     'header',
+    //     is_superuser: {
+    //         type: Boolean,
+    //         required: true,
+    //         default: false
+    //     },
+    // },
     components: {
         WorkspacesForm, LogsModal
         

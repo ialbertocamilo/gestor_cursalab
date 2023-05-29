@@ -31,6 +31,9 @@
                     </div>
                 </button>
                 <div class="dropdown-menu dropdown-header-menu shadow-md header-menu-session">
+
+                    @if(auth()->user()->isAn('super-user'))
+
                     <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/workspaces/criterios">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-clipboard-list"></span>
@@ -57,6 +60,8 @@
                     </a>
                     
                     <hr>
+
+                    @endif
 
                     <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/reset_password">
                         <div class="dropdown-icon-width">
