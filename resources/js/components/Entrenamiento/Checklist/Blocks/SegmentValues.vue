@@ -57,7 +57,7 @@
 
         </v-row>
 
-        <v-row style="padding: 10px 0px 10px 0px !important" v-else>
+        <v-row v-else>
 
             <v-col cols="12" md="12" lg="12" class="p-0 px-3 vertical-align">
 

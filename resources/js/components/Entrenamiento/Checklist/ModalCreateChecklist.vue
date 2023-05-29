@@ -131,6 +131,7 @@
                                                         ref="modalFormSegmentationOptions"
                                                         @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
                                                         @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+                                                        @disabledBtnModal="disabledBtnModal"
                                                     />
                                                 </v-col>
                                             </v-row>
@@ -314,11 +315,12 @@
             </v-card-text>
 
             <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" class="actions_btn_modal">
-                <DefaultModalActionButton
+                <ButtonsModal
                     @cancel="prevStep"
                     @confirm="nextStep"
                     :cancelLabel="cancelLabel"
                     confirmLabel="Continuar"
+                    :disabled_next="disabled_btn_next"
                     />
             </v-card-actions>
         </v-card>
@@ -339,12 +341,14 @@
 <script>
 import draggable from 'vuedraggable'
 import SegmentFormModal from "./Blocks/SegmentFormModal";
+import ButtonsModal from './Blocks/ButtonsModal.vue';
 
 export default {
     components: {
-        draggable,
-        SegmentFormModal
-    },
+    draggable,
+    SegmentFormModal,
+    ButtonsModal
+},
     props: {
         value: Boolean,
         width: String,
@@ -360,6 +364,10 @@ export default {
     },
     data() {
         return {
+            disabled_btn_next: true,
+            stepper_box_btn1: true,
+            stepper_box_btn2: true,
+            stepper_box_btn3: false,
             stepper_box: 1,
             cancelLabel: "Cancelar",
             list_segments:[],
@@ -481,13 +489,65 @@ export default {
     async mounted() {
         // this.addActividad()
     },
+    watch: {
+        checklist: {
+            handler(n, o) {
+                let vue = this;
+
+                if(vue.stepper_box == 1) {
+                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.checklist.type_checklist) && vue.validateRequired(vue.checklist.title) && vue.validateRequired(vue.checklist.description));
+                    vue.disabled_btn_next = vue.stepper_box_btn1;
+                }
+                else if(vue.stepper_box == 2){
+                     vue.disabled_btn_next = vue.stepper_box_btn2;
+                }
+                else if(vue.stepper_box == 3){
+                     vue.disabled_btn_next = vue.stepper_box_btn3;
+                }
+            },
+            deep: true
+        },
+        stepper_box: {
+            handler(n, o) {
+                let vue = this;
+
+                if(vue.stepper_box == 1) {
+                    if(vue.validateRequired(vue.checklist.type_checklist) && vue.validateRequired(vue.checklist.title) && vue.validateRequired(vue.checklist.description)) {
+                        vue.stepper_box_btn1 = false;
+                    }
+                    vue.disabled_btn_next = vue.stepper_box_btn1;
+                }
+                else if(vue.stepper_box == 2){
+                     vue.disabled_btn_next = vue.stepper_box_btn2;
+                }
+                else if(vue.stepper_box == 3){
+                     vue.disabled_btn_next = vue.stepper_box_btn3;
+                }
+            },
+            deep: true
+        }
+    },
     methods: {
         rep(){
             let vue = this
         },
+        validateRequired(input) {
+            return input != undefined && input != null && input != "";
+        },
         nextStep(){
             let vue = this;
             vue.cancelLabel = "Cancelar";
+
+            if(vue.checklist.segments != null && vue.checklist.segments.length > 0) {}
+            else {
+                vue.checklist.segments = [{
+                    id: `new-segment-${Date.now()}`,
+                    type_code: 'direct-segmentation',
+                    criteria_selected: [],
+                    direct_segmentation: [null]
+                }];
+            }
+
             if(vue.stepper_box == 1){
                 vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 2;
@@ -514,6 +574,26 @@ export default {
             else if(vue.stepper_box == 3){
                 vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 2;
+            }
+        },
+        disabledBtnModal() {
+            let vue = this;
+            vue.stepper_box_btn2 = false;
+
+            if(vue.checklist.segments != null && vue.checklist.segments.length > 0) {
+
+                let direct_segmentation = vue.checklist.segments[0].direct_segmentation;
+
+                if (direct_segmentation != null && direct_segmentation.length > 0)  {
+                    if( direct_segmentation[0] == null ) {}
+                    else {
+                        direct_segmentation.forEach(element => {
+                            if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
+                                vue.stepper_box_btn2 = true;
+                            }
+                        });
+                    }
+                }
             }
         },
         setActividadesHasErrorProp() {
@@ -991,5 +1071,9 @@ span.v-stepper__step__step:after {
     right: calc(100% - 10px);
     left: initial !important;
     transform-origin: right bottom !important;
+}
+.bx_seg .v-select__slot .v-input__append-inner,
+.bx_steps .bx_seg .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
+    margin-top: 6px !important;
 }
 </style>
