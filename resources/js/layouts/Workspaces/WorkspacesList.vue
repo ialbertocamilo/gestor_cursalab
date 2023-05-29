@@ -60,7 +60,7 @@
                     title="Crear workspace"
                     @click="createWorkspace"
                     class="mr-2"
-                    v-if="false"
+                    v-if="is_superuser"
                     >
                     <v-icon v-text="'mdi-plus'"/>
                 </v-btn>
@@ -110,7 +110,7 @@
                                     title="Ir a módulos"
                                     @click="setActiveWorkspace(workspace.id, '/modulos')"
                                 >
-                                    <v-badge class="" :content="workspace.modules_count">
+                                    <v-badge class="" :content="'' + workspace.modules_count">
                                         <v-icon class="icon" color="primary">mdi-sitemap</v-icon>
                                         <br> <span class="table-default-icon-title" v-text="'Módulos'"/>
                                     </v-badge>
@@ -121,7 +121,7 @@
                                     title="Ir a usuarios"
                                     @click="setActiveWorkspace(workspace.id, '/usuarios')"
                                 >
-                                    <v-badge :content="workspace.users_count">
+                                    <v-badge :content="'' + workspace.users_count">
                                         <v-icon class="icon" color="primary">mdi-account-group</v-icon>
                                         <br> <span class="table-default-icon-title" v-text="'Usuarios'"/>
                                     </v-badge>
@@ -132,7 +132,7 @@
                                     title="Ir a cursos"
                                     @click="setActiveWorkspace(workspace.id, '/cursos')"
                                 >
-                                    <v-badge :content="workspace.courses_count">
+                                    <v-badge :content="'' + workspace.courses_count">
                                         <v-icon class="icon" color="primary">mdi-notebook</v-icon>
                                         <br> <span class="table-default-icon-title" v-text="'Cursos'"/>
                                     </v-badge>
@@ -222,15 +222,14 @@ import WorkspacesForm from "./WorkspacesForm";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
-    props: [ 'header'],
-    // props: {
-    //     'header',
-    //     is_superuser: {
-    //         type: Boolean,
-    //         required: true,
-    //         default: false
-    //     },
-    // },
+    // props: [ 'header'],
+    props: {
+        is_superuser: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+    },
     components: {
         WorkspacesForm, LogsModal
         

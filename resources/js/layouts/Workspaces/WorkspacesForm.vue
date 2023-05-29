@@ -331,10 +331,14 @@ export default {
 
             let exists = false;
 
-            criteria_workspace.forEach(v => {
-                if (v.id === criterionId)
-                    exists = true;
-            });
+            if (criteria_workspace) {
+                
+                criteria_workspace.forEach(v => {
+                    if (v.id === criterionId)
+                        exists = true;
+                });
+            }
+
 
             return exists;
         }

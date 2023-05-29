@@ -86,6 +86,52 @@ class WorkspaceController extends Controller
         return $this->success($workspace);
     }
 
+    public function store(WorkspaceRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        // Upload files
+
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'logo_negativo');
+
+        // Set constraint: limit allowed users
+
+        if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
+
+            $constraint_user['type'] = $data['limit_allowed_users_type'];
+            $constraint_user['quantity'] = intval($data['limit_allowed_users_limit']);
+
+            $data['limit_allowed_users'] = $constraint_user;
+        else:
+            $data['limit_allowed_users'] = null;
+        endif;
+
+        // Update record in database
+
+        $workspace = Workspace::create($data);
+
+        // Save workspace's criteria
+
+        $criteriaSelected = json_decode($data['selected_criteria'], true);
+
+        $criteria = [];
+
+        $module_criterion = Criterion::where('code', 'module')->first();
+
+        foreach ($criteriaSelected as $criterion_id => $is_selected) {
+            if ($is_selected) $criteria[] = $criterion_id;
+        }
+
+        $criteria[] = $module_criterion->id;
+
+        $workspace->criterionWorkspace()->sync($criteria);
+
+        \Artisan::call('modelCache:clear', array('--model' => "App\Models\Criterion"));
+
+        return $this->success(['msg' => 'Workspace creado correctamente.']);
+    }
+
     /**
      * Process request to load record data
      *
