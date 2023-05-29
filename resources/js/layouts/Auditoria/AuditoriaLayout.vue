@@ -89,6 +89,7 @@
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
+                :filters="filters"
                 @showdetails="
                     openFormModal(
                         detailsModalOptions,

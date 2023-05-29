@@ -723,6 +723,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->course_data()->updateOrCreate(['user_id' => $user->id], [
                 'courses' => $all_courses['current_courses_ids'] ?? [],
+                'schools' => $all_courses['current_schools_ids'] ?? [],
                 'compatibles' => $all_courses['compatibles_ids'] ?? [],
                 'course_id_tags' => $all_courses['course_id_tags'] ?? [],
                 'current_courses_updated_at' => now(),
@@ -858,6 +859,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                             'course_id'=>$course->id,
                             'tags' => $tags
                         ];
+
+                        foreach ($course->schools as $key => $school) {
+                            $all_courses['current_schools_ids'][$school->id][] = $course->id;
+                        }
+
                         break;
                     }
 
