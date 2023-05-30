@@ -431,12 +431,12 @@ class Topic extends BaseModel
 
         $schools = $user_courses->groupBy('schools.*.id');
         $courses = $schools[$school_id] ?? collect();
-        if(count($courses)==0){
-            //Solucion temporal: Si la escuela enviada por api no se encuetra dentro del curso, seleccionar la primera escuela
-            //El bug de busqueda de cursos en escuela por el lado de aplicación.
-            $school_id = $user_courses->first()->schools?->first()?->id;
-            $courses = $schools[$school_id] ?? collect();
-        }
+        // if(count($courses)==0){
+        //     //Solucion temporal: Si la escuela enviada por api no se encuetra dentro del curso, seleccionar la primera escuela
+        //     //El bug de busqueda de cursos en escuela por el lado de aplicación.
+        //     $school_id = $user_courses->first()->schools?->first()?->id;
+        //     $courses = $schools[$school_id] ?? collect();
+        // }
         $school = $courses->first()?->schools?->where('id', $school_id)->first();
         $courses_id = $user_courses->pluck('id');
         $positions_courses = CourseSchool::select('school_id','course_id','position')
