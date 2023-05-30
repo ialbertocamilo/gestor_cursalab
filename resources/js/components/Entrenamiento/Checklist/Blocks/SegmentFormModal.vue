@@ -20,43 +20,8 @@
 
             <v-tab-item>
 
-                <v-row justify="space-around" v-if="!limitOne">
-                    <v-col cols="10" class="d-flex justify-content-end pb-0 pt-0">
-                        <v-btn
-                            variant="plain"
-                            class="btn_secondary"
-                            @click="addSegmentation('direct-segmentation')"
-                        >
-                            Agregar otra segmentación
-                            <v-icon class="" v-text="'mdi-plus'"/>
-                        </v-btn>
-                    </v-col>
-                </v-row>
-
                 <v-row justify="space-around">
-                    <v-col cols="11" class="d-flex justify-content-center" style="height: 364px;">
-                        <!-- hide-delimiter-background -->
-                        <v-carousel
-                            height="100%"
-                            show-arrows-on-hover
-                            light
-                            v-model="steps"
-                            hide-delimiters
-                            class="---mb-6 bx_segment"
-                            :continuous="false"
-                        >
-                            <v-carousel-item
-                                v-for="(row, i) in list_segments"
-                                :key="i"
-                            >
-                                <v-sheet class="group-sheet" height="100%" style="overflow-y: auto;">
-                                    <!-- <div class="text-h6 text-center"  v-if="!limitOne">
-                                        {{ tabs_title }} {{ i + 1 }} /
-                                        {{ segments.length }}
-                                    </div>
-
-                                    <v-divider class="mx-12"/> -->
-
+                    <v-col cols="12" class="d-flex justify-content-center" style="height: 364px;" v-for="(row, i) in list_segments" :key="i">
                                     <Segment
                                         :is-course-segmentation="isCourseSegmentation()"
                                         :segments="list_segments"
@@ -66,15 +31,9 @@
                                         class="mx-5"
                                         :options="options"
                                         @borrar_segment="borrarBloque"
+                                        @disabledBtnModal="disabledBtnModal"
                                     />
 
-                                    <!-- <v-divider class="mx-12"/>
-
-                                    <p class="text-center">Usuarios alcanzados: <strong>{{ total[i] || 0 }}</strong></p> -->
-
-                                </v-sheet>
-                            </v-carousel-item>
-                        </v-carousel>
                     </v-col>
                 </v-row>
 
@@ -603,7 +562,11 @@ console.log(vue.segments.length);
         },
         isCourseSegmentation() {
             return this.model_type === 'App\\Models\\Course'
-        }
+        },
+        disabledBtnModal() {
+            let vue = this;
+            vue.$emit("disabledBtnModal");
+        },
     }
 };
 </script>
