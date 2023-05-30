@@ -955,7 +955,7 @@ export default {
                         vue.showAlert('Hubo un problema al actualizar diploma.', 'error');
                     } else {
                         vue.showAlert('El diploma fue actualizada correctamente.');
-                        setTimeout(() => vue.leavePage(), 800);
+                        setTimeout(() => vue.leavePage(), 1500);
                     }
                 });
 
@@ -972,7 +972,7 @@ export default {
                         vue.showAlert('Hubo un problema al guardar diploma.', 'error');
                     } else {
                         vue.showAlert('El diploma fue guardada correctamente.');
-                        setTimeout(() => vue.leavePage(), 800);
+                        setTimeout(() => vue.leavePage(), 1500);
                     }
                 });
             }
@@ -1126,7 +1126,6 @@ export default {
 }
 
 .canvas-style {
-    border: 1rem solid #ffffff;
     border-radius: 0.5rem;
     width: 100%;
     height: 100%;

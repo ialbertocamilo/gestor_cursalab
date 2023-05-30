@@ -43,7 +43,7 @@ export default {
         return {
             resource: {},
             rules: {
-              	diploma: this.getRules(['required', 'max:100', 'text']),
+              	diploma: this.getRules(['required', 'max:100']),
             },
         }
     },

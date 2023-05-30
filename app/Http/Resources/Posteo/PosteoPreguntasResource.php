@@ -21,8 +21,8 @@ class PosteoPreguntasResource extends JsonResource
             'tipo_pregunta' => $this->type->name,
             'required' => $this->required ? 'Sí' : 'No',
             'score' => $this->score ?? '-',
-            // 'is_super_user'=>auth()->user()->isAn('super-user')
-            'is_super_user'=> true
+            'is_super_user'=>auth()->user()->isAn('super-user')
+            // 'is_super_user'=> true
         ];
     }
 }
