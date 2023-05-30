@@ -176,7 +176,7 @@
                                                         <ul v-else>
                                                             <li v-for="(curso, index) in results_search" :key="curso.id" class="d-flex align-center justify-content-between">
                                                                 <span class="text_default">{{ curso.escuela }} - {{ curso.curso }}</span>
-                                                                <v-btn small icon :ripple="false" @click="seleccionarCurso(curso, index)">
+                                                                <v-btn small icon :ripple="false" @click="seleccionarCurso(curso, index)" :disabled="disabled_add_courses">
                                                                     <v-icon class="icon_size" small color="black"
                                                                             style="font-size: 1.25rem !important;">
                                                                         mdi-plus-circle
@@ -397,6 +397,7 @@ export default {
             file: null,
             search_text: null,
             results_search: [],
+            disabled_add_courses: false,
             isLoading: false,
             messageActividadesEmpty: false,
             formRules: {
@@ -499,7 +500,8 @@ export default {
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
-                     vue.disabled_btn_next = vue.stepper_box_btn2;
+                    vue.disabledBtnModal()
+                    vue.disabled_btn_next = vue.stepper_box_btn2;
                 }
                 else if(vue.stepper_box == 3){
                      vue.disabled_btn_next = vue.stepper_box_btn3;
@@ -518,7 +520,8 @@ export default {
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
-                     vue.disabled_btn_next = vue.stepper_box_btn2;
+                    vue.disabledBtnModal()
+                    vue.disabled_btn_next = vue.stepper_box_btn2;
                 }
                 else if(vue.stepper_box == 3){
                      vue.disabled_btn_next = vue.stepper_box_btn3;
@@ -551,6 +554,14 @@ export default {
             if(vue.stepper_box == 1){
                 vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 2;
+
+                if(vue.checklist.type_checklist == "libre") {
+                    vue.checklist.courses = [];
+                }
+                if(vue.checklist.type_checklist == "curso") {
+                    vue.checklist.segments[0].direct_segmentation = [null];
+                    vue.checklist.segmentation_by_document.segmentation_by_document = [];
+                }
             }
             else if(vue.stepper_box == 2){
                 vue.cancelLabel = "Retroceder";
@@ -580,18 +591,26 @@ export default {
             let vue = this;
             vue.stepper_box_btn2 = false;
 
-            if(vue.checklist.segments != null && vue.checklist.segments.length > 0) {
+            let direct_segmentation = (vue.checklist.segments != null && vue.checklist.segments.length > 0) ? vue.checklist.segments[0].direct_segmentation : [];
 
-                let direct_segmentation = vue.checklist.segments[0].direct_segmentation;
+            if(vue.checklist.courses.length == 0 && (direct_segmentation.length > 0 && direct_segmentation[0] == null)) {
+                vue.stepper_box_btn2 = true;
+            } else {
 
-                if (direct_segmentation != null && direct_segmentation.length > 0)  {
-                    if( direct_segmentation[0] == null ) {}
-                    else {
-                        direct_segmentation.forEach(element => {
-                            if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
-                                vue.stepper_box_btn2 = true;
-                            }
-                        });
+                if (vue.checklist.type_checklist == 'curso') {
+                    if (vue.checklist.courses.length == 0) {
+                        vue.stepper_box_btn2 = true
+                    }
+                } else {
+                    if (direct_segmentation.length > 0)  {
+                        if( direct_segmentation[0] == null ) {}
+                        else {
+                            direct_segmentation.forEach(element => {
+                                if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
+                                    vue.stepper_box_btn2 = true;
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -746,12 +765,22 @@ export default {
             let vue = this;
             vue.results_search.push(curso)
             vue.checklist.courses.splice(index, 1)
+            if(vue.checklist.courses.length >= 2) {
+                vue.disabled_add_courses = true;
+            } else {
+                vue.disabled_add_courses = false;
+            }
 
         },
         seleccionarCurso(curso, index) {
             let vue = this;
             vue.checklist.courses.push(curso)
             vue.results_search.splice(index, 1)
+            if(vue.checklist.courses.length >= 2) {
+                vue.disabled_add_courses = true;
+            } else {
+                vue.disabled_add_courses = false;
+            }
         },
         getNewSegment(type_code) {
             return {

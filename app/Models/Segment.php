@@ -99,7 +99,7 @@ Segment extends BaseModel
 
                 $segment->type_code = $segment->type?->code;
 
-                $direct_segmentation = $this->setDataDirectSegmentation($criteria, $segment);
+                $direct_segmentation = ($segment->type_code == 'direct-segmentation') ? $this->setDataDirectSegmentation($criteria, $segment) : [];
                 $segmentation_by_document = ($segment->type_code == 'segmentation-by-document') ? $this->setDataSegmentationByDocument($segment) : [];
 
                 $segment->criteria_selected = match ($segment->type?->code) {

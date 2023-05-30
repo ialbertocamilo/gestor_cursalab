@@ -20,8 +20,8 @@
 
             <v-tab-item>
 
-                <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-center" style="height: 364px;" v-for="(row, i) in list_segments" :key="i">
+                <v-row justify="space-around" v-for="(row, i) in list_segments" :key="i">
+                    <v-col cols="12" class="d-flex justify-content-center" style="height: 364px;" v-if="row.type_code == 'direct-segmentation'">
                                     <Segment
                                         :is-course-segmentation="isCourseSegmentation()"
                                         :segments="list_segments"
