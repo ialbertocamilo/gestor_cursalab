@@ -64,6 +64,12 @@
             <div class="box_workspaces">
                 @foreach ($workspaces as $wk)
                     <div class="row mb-3">
+                        <label class="form-control-label">
+                            {{ Form::checkbox('workspaces_email[' . $wk->slug . '][]', $wk->id, null, ['class' => 'display-none', 'id' => 'workspaces_email[' . $wk->slug . '][]' ]) }}
+                            <input type="hidden" id="email_{{ $wk->id }}"
+                                   name="emailtowk[{{ $wk->id }}][]" value=""
+                                   ref="email_{{ $wk->id }}">
+                        </label>
                         <div class="col-md-12">
                             <div class="row">
                                 <div class="col-md-3">
@@ -95,7 +101,7 @@
 
                                 {{--                                <pre>{{$existe}}</pre>--}}
                                 @if ($existe)
-                                    <div class="col-md-6" id="div-select-{{$wk->id}}">
+                                    <div class="col-md-9" id="div-select-{{$wk->id}}">
 
                                         @foreach ($workspaces_roles as $wksk => $wksv)
                                             @if ($wksk == $wk->slug)
@@ -113,16 +119,23 @@
                                                 @endphp
                                                 <workspace-rol :workspaces="{{ $workspaces }}"
                                                                :roles="{{ $roles }}" :toworkspace="'{{ $wk->id }}'"
-                                                               :roleselects="{{ $selected }}"/>
+                                                               :roleselects="{{ $selected }}"
+                                                               :emails_information="{{$emails_information}}"
+                                                               :emails_information_selected="{{$emails_information_selected}}"
+
+                                                />
                                             @endif
                                         @endforeach
                                     </div>
 
                                 @else
-                                    <div class="col-md-6" id="div-select-{{$wk->id}}">
+                                    <div class="col-md-9" id="div-select-{{$wk->id}}">
 
                                         <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
-                                                       :toworkspace="'{{ $wk->id }}'"/>
+                                                       :toworkspace="'{{ $wk->id }}'" 
+                                                       :emails_information="{{$emails_information}}"
+                                                       :emails_information_selected="{{$emails_information_selected}}"               
+                                        />
                                     </div>
                                 @endif
                             </div>
@@ -145,9 +158,17 @@
                                                ref="roles_{{ $wk->id }}">
                                     </label>
                                 </div>
-                                <div class="col-md-6" id="div-select-{{$wk->id}}">
+                                <label class="form-control-label">
+                                    {{ Form::checkbox('workspaces_email[' . $wk->slug . '][]', $wk->id, null, ['class' => 'display-none', 'id' => 'workspaces_email[' . $wk->slug . '][]' ]) }}
+                                    <input type="hidden" id="email_{{ $wk->id }}"
+                                           name="emailtowk[{{ $wk->id }}][]" value=""
+                                           ref="email_{{ $wk->id }}">
+                                </label>
+                                <div class="col-md-9" id="div-select-{{$wk->id}}">
                                     <workspace-rol :workspaces="{{ $workspaces }}" :roles="{{ $roles }}"
-                                                   :toworkspace="'{{ $wk->id }}'"/>
+                                                   :toworkspace="'{{ $wk->id }}'"
+                                                   :emails_information="{{$emails_information}}"
+                                    />
                                 </div>
                             </div>
                         </div>

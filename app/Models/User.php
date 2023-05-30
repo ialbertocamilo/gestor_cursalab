@@ -166,7 +166,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $this->hasMany(CriterionValueUser::class);
     }
-
+    public function emails_user()
+    {
+        return $this->hasMany(EmailUser::class);
+    }
     public function subworkspace()
     {
         return $this->belongsTo(Workspace::class, 'subworkspace_id');

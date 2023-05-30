@@ -15,7 +15,7 @@
                           height:5px; 
                           border-radius:4px; 
                           background: #FFCD0C;"></div>
-              Reporte de actualización en datos
+              Reporte de actualización <br>en datos
               <div style="margin-left: 8%;
                           width: 9px; 
                           height: 9px; 
