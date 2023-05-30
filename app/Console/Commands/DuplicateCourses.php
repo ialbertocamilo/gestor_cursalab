@@ -123,7 +123,6 @@ class DuplicateCourses extends Command
     public function loadCourses($workspaceId) {
 
         return DB::select(DB::raw("select
-            sw.workspace_id,
             s.id school_id,
             c.id course_id,
             c.name course_name
