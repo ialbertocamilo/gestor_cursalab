@@ -26,7 +26,6 @@
                                                 <DefaultInput clearable
                                                             v-model="checklist.title"
                                                             label="Título"
-                                                            :rules="formRules.titulo_descripcion"
                                                 />
                                             </v-col>
                                         </v-row>
@@ -39,7 +38,6 @@
                                                     hide-details="auto"
                                                     label="Descripción"
                                                     v-model="checklist.description"
-                                                    :rules="formRules.titulo_descripcion"
                                                     class="txt_desc"
                                                 ></v-textarea>
                                             </v-col>
@@ -264,7 +262,6 @@
                                                                                 auto-grow
                                                                                 hide-details="auto"
                                                                                 v-model="actividad.activity"
-                                                                                :rules="formRules.actividad"
                                                                             ></v-textarea>
                                                                         </v-col>
                                                                         <v-col cols="12" md="3" lg="3" class="d-flex align-center no-white-space">
@@ -592,8 +589,9 @@ export default {
             vue.stepper_box_btn2 = false;
 
             let direct_segmentation = (vue.checklist.segments != null && vue.checklist.segments.length > 0) ? vue.checklist.segments[0].direct_segmentation : [];
+            let segmentation_by_document = vue.checklist.segmentation_by_document != null && vue.checklist.segmentation_by_document.segmentation_by_document.length > 0;
 
-            if(vue.checklist.courses.length == 0 && (direct_segmentation.length > 0 && direct_segmentation[0] == null)) {
+            if(vue.checklist.courses.length == 0 && (direct_segmentation.length > 0 && direct_segmentation[0] == null) && !segmentation_by_document) {
                 vue.stepper_box_btn2 = true;
             } else {
 

@@ -320,6 +320,18 @@ export default {
                 checklist_actividades: [],
                 courses: []
             };
+            vue.objectModal = {
+                id: 0,
+                title: '',
+                description: '',
+                active: true,
+                checklist_actividades: [],
+                courses: [],
+                segments: [],
+                segmentation_by_document: {
+                    segmentation_by_document:[]
+                }
+            };
             vue.modal.crear_editar_checklist = false;
         },
         closeModalAsignarChecklistCurso() {
