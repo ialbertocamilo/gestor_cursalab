@@ -16,7 +16,14 @@ class EmailUser extends Model
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
-
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class, 'workspace_id');
+    }
     public static function storeUpdate($data,$user){
         $user->emails_user()->delete();
         $users_email_to_create = [];

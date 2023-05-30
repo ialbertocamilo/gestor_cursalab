@@ -17,7 +17,14 @@ use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 
 Route::redirect('/', 'login', 301);
 //temporary route
-Route::view('email_info','emails.email_information_apis');
+Route::get('email_info',function(){
+    $mail_data=[
+        'init_date'=> date('d/m/Y', strtotime('-1 day')). ' 6:00 am',
+        'final_date'=> date('d/m/Y').' 5:30 am',
+        'route' => env('REPORTS_BASE_URL').'/reports/1683154596242.xlsx'
+    ];
+    return view('emails.email_information_apis',['data'=>$mail_data]);
+});
 Route::view('email_limite','emails.email_limite_usuarios');
 
 // login routes

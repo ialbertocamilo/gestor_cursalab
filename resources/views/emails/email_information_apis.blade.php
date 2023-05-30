@@ -31,7 +31,7 @@
                 <div style="width:25px; height:5px; margin-left:-4rem; border-radius:4px; background: #FFCD0C;"></div>
                 
                 <p style="color:#120C29; text-align:center; font-size: 1.5rem; margin-bottom:3px;margin-top:3px; font-weight:bold;">
-                       <a href="#">Descargar reporte</a>
+                    <a target="_blank" href="{{$data['route']}}">Descargar reporte</a>  
                 </p>
                 
                 <div style="margin-left:auto;margin-right: -3rem;width: 9px; height: 9px; border-radius: 9px; background: #CC96FC;"></div> 
@@ -42,7 +42,7 @@
     <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                Los datos mostrados fueron recopilados del 16/05/23 a las 6 hrs hasta el 17/05/23 a las 6 hrs.
+                Los datos mostrados fueron recopilados del {{ $data['init_date'] }} hasta el {{ $data['final_date'] }}.
             </p>
         </td>
     </tr>
