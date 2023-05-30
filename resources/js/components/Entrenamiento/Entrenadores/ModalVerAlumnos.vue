@@ -31,8 +31,8 @@
                     >
                         <v-btn
                             color="primary"
-                            :outlined="entrenador.asignar_alumnos"
-                            @click="entrenador.asignar_alumnos = !entrenador.asignar_alumnos"
+                            :outlined="asignar_alumnos"
+                            @click="asignar_alumnos = !asignar_alumnos"
                         >
                             Agregar alumnos
                         </v-btn
@@ -41,7 +41,7 @@
                 </v-row>
                 <v-expand-transition>
                     <v-row
-                        v-show="entrenador.asignar_alumnos"
+                        v-show="asignar_alumnos"
                         class="mb-4"
                     >
                         <v-col cols="12" md="12" lg="12" class="py-0 my-0">
@@ -192,7 +192,8 @@ export default {
             timeout: null,
             search_text: null,
             dialog_delete: false,
-            data_eliminar: null
+            data_eliminar: null,
+            asignar_alumnos: false
         };
     },
     computed: {
@@ -361,6 +362,7 @@ export default {
 
                     vue.data_eliminar = false
                     vue.dialog_delete = false;
+                    vue.txt_filter_alumnos();
                 })
                 .catch(err => {
                     console.log(err)

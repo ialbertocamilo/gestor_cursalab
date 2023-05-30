@@ -225,6 +225,7 @@ class EntrenamientoController extends Controller
         $alumno = $request->alumno;
 
         EntrenadorUsuario::where('trainer_id', $entrenador['id'])->where('user_id', $alumno['id'])->delete();
+        cache_clear_model(User::class);
         return response()->json(['error' => false, 'msg' => 'Relación Entrenador-Alumno eliminada.'], 200);
     }
 

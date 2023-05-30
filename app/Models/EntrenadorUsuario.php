@@ -121,13 +121,15 @@ class EntrenadorUsuario extends Model implements Recordable
         // $entrenador = EntrenadorUsuario::with(['student'=>function($q){
         //     $q->select('id','name','lastname','surname','fullname','document','subworkspace_id','active');
         // },'user.subworkspace'])->where('trainer_id', $trainer_id)->first();
-        $trainer = User::where('id',$trainer_id)->select('id')->with(['students'=>function($q){
-            $q->select('users.id','name','lastname','surname','fullname','document','subworkspace_id','trainer_user.active as estado');
-        }])->first();
+        $students = EntrenadorUsuario::join('users','trainer_user.user_id','=','users.id')
+                    ->where('trainer_user.trainer_id', $trainer_id)
+                    ->select('users.id','name','lastname','surname','fullname','document','subworkspace_id','trainer_user.active as estado')
+                    ->get();
+
         $workspace = get_current_workspace();
         $subworkspaces = Workspace::select('id','name')->where('parent_id',$workspace->id)->get();
         $tempAlumnos = collect();
-        foreach ($trainer->students as $student) {
+        foreach ($students as $student) {
             $subw = $subworkspaces->where('id',$student->subworkspace_id)->first();
             $student->botica = (!is_null($subw)) ? $subw->name : '';
             $student->loading = false;
@@ -143,7 +145,7 @@ class EntrenadorUsuario extends Model implements Recordable
         }
 
         return [
-            'alumnos'=> $trainer->students
+            'alumnos'=> $students
         ];
     }
     public function validarUsuario($usuario_dni)
