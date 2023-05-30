@@ -31,15 +31,22 @@
                         />
                     </v-col>
                 </v-row>
-                <mUsuarios :number_socket="number_socket" :key="1" :url_template="url_template" v-show="process_id==1" @emitir-alert="show_alert_msg"
+                <mUsuarios :number_socket="number_socket" :key="1" :url_template="url_template" 
+                           :process="list_massive_processes[1]"
+                           v-show="process_id==1" 
+                           @emitir-alert="show_alert_msg"
                            @download-excel-observations="downloadExcelObservations"
                            @show-modal-limit-allowed-users="openModalLimitAllowedUsers($event)"/>
 
-                <ActivarUsuarios :number_socket="number_socket" :key="2" :url_template="url_template" v-show="process_id==2"
+                <ActivarUsuarios :number_socket="number_socket" :key="2" :url_template="url_template" 
+                                 :process="list_massive_processes[2]"
+                                 v-show="process_id==2"
                                  @emitir-alert="show_alert_msg"
                                  @show-modal-limit-allowed-users="openModalLimitAllowedUsers($event)"/>
 
-                <InactivarUsuarios :number_socket="number_socket" :key="3" :url_template="url_template" v-show="process_id==3"
+                <InactivarUsuarios :number_socket="number_socket" :key="3" :url_template="url_template" 
+                                   :process="list_massive_processes[3]"
+                                   v-show="process_id==3"
                                    @emitir-alert="show_alert_msg"/>
 
                 <DefaultDialog

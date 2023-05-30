@@ -41,12 +41,21 @@
                             <v-col cols="8" v-text="resource.title"/>
                             <v-col cols="4" class="multimedia-label" v-text="'Tipo:'"/>
                             <v-col cols="8" v-text="resource.type"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Peso'"/>
+                            <v-col cols="4" class="multimedia-label" v-text="'Peso:'"/>
                             <v-col cols="8" v-text="resource.formattedSize"/>
                             <v-col cols="4" class="multimedia-label" v-text="'Fecha de creación:'"/>
                             <v-col cols="8" v-text="resource.created"/>
                         </v-row>
                     </v-col>
+
+                    <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
+                    <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
+                    <MultimediaSectionsInfo :resource="resource.sections.schools" label="Escuelas" />
+                    <MultimediaSectionsInfo :resource="resource.sections.announcements" label="Anuncios" />
+                    <MultimediaSectionsInfo :resource="resource.sections.videotecas" label="Videotecas" />
+                    <MultimediaSectionsInfo :resource="resource.sections.vademecums" label="Protocolos y documentos" />
+                    <MultimediaSectionsInfo :resource="resource.sections.modules" label="Módulos" />
+
                     <v-col cols="6" v-if="false">
                         <DefaultModalSection
                             title="Ubicación asignada"
@@ -69,9 +78,10 @@
 </template>
 <script>
 import DialogConfirm from "../../components/basicos/DialogConfirm";
+import MultimediaSectionsInfo from "./MultimediaSectionsInfo";
 
 export default {
-    components: {DialogConfirm},
+    components: { DialogConfirm, MultimediaSectionsInfo },
     props: {
         options: {
             type: Object,
@@ -104,18 +114,27 @@ export default {
             resourceDefault: {
                 created_at: null,
                 ext: null,
-                file: null,
+                file_url: null,
                 id: null,
                 title: null,
                 type: null,
             },
-            resource: {},
+            resource: {
+                sections: {
+                    course: [],
+                    topics: [],
+                    schools: [],
+                    announcements: [],
+                    videotecas: [],
+                    vademecums: []
+                }
+            },
         }
     },
     methods: {
         closeModal() {
-            let vue = this
-            vue.$emit('onCancel')
+            let vue = this;
+            vue.$emit('onCancel');
         },
         confirmModal() {
             let vue = this
@@ -164,7 +183,7 @@ export default {
         },
         openMultimedia() {
             let vue = this
-            this.openInNewTab(vue.resource.file)
+            this.openInNewTab(vue.resource.file_url)
         },
         downloadMultimedia() {
             let vue = this

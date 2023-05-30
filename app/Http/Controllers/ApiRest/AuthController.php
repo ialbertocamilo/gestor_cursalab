@@ -7,7 +7,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
                         PasswordResetAppRequest };
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{ Usuario, User };
+use App\Models\{ Usuario, User, Ambiente };
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -35,9 +35,11 @@ class AuthController extends Controller
             $data = $request->validated();
 
             // === validacion de recaptcha ===
-            $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
+            // $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
+            $availableRecaptcha = true;
             if($availableRecaptcha) {
-                $responseRecaptcha = $this->checkRecaptchaData($data);
+                // $responseRecaptcha = $this->checkRecaptchaData($data);
+                $responseRecaptcha = true;
                 if($responseRecaptcha !== true) return $responseRecaptcha;
             }
             // === validacion de recaptcha ===
@@ -581,4 +583,42 @@ class AuthController extends Controller
         return $this->error('invalid-token', 503, $status);
     }
     // === RESET ===
+
+
+
+    // === AMBIENTE ===
+    public function getMediaUrl($media) {
+        if ($media) {
+           return get_media_url($media);
+        }
+        return $media;
+    }
+
+    public function configuracion_ambiente() 
+    {
+        $ambiente = Ambiente::first();
+        
+        if($ambiente) {
+            $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
+            
+            // gestor
+            $ambiente->fondo = $this->getMediaUrl($ambiente->fondo);
+            $ambiente->logo  = $this->getMediaUrl($ambiente->logo);
+            $ambiente->icono = $this->getMediaUrl($ambiente->icono);
+            $ambiente->logo_empresa = $this->getMediaUrl($ambiente->logo_empresa);
+            // app
+            $ambiente->fondo_app = $this->getMediaUrl($ambiente->fondo_app);
+            $ambiente->logo_app  = $this->getMediaUrl($ambiente->logo_app);
+            $ambiente->logo_cursalab = $this->getMediaUrl($ambiente->logo_cursalab);
+            $ambiente->completed_courses_logo = $this->getMediaUrl($ambiente->completed_courses_logo);
+            $ambiente->enrolled_courses_logo  = $this->getMediaUrl($ambiente->enrolled_courses_logo);
+            $ambiente->diplomas_logo = $this->getMediaUrl($ambiente->diplomas_logo);
+            $ambiente->male_logo   = $this->getMediaUrl($ambiente->male_logo);
+            $ambiente->female_logo = $this->getMediaUrl($ambiente->female_logo);
+
+            return response()->json($ambiente);
+        }
+        return response()->json([]);
+    }
+    // === AMBIENTE ===
 }

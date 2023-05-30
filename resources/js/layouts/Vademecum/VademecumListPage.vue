@@ -55,6 +55,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
+                :avoid_first_data_load="dataTable.avoid_first_data_load"
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar registro')"
@@ -117,6 +118,7 @@ export default {
     data() {
         return {
             dataTable: {
+                avoid_first_data_load: false,
                 endpoint: '/vademecum/search',
                 ref: 'VademecumTable',
                 headers: [
@@ -214,8 +216,29 @@ export default {
     mounted() {
         let vue = this
         vue.getSelects();
-    }
-    ,
+
+        // === check localstorage vademecum ===
+        if(vue.dataTable.avoid_first_data_load) {
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+            const { storage: vademecumStorage } = vue.getStorageUrl('vademecum');
+            vue.openFormModal(vue.modalOptions, { id: vademecumStorage.id });
+        }
+        // === check localstorage vademecum ===
+    },
+    created() {
+        let vue = this;
+
+        // === check localstorage vademecum ===
+        const { status, storage: vademecumStorage } = vue.getStorageUrl('vademecum');
+        if(status) {
+            vue.filters.q = vademecumStorage.q;
+            vue.filters.module_id = vademecumStorage.module_id[0]; // considerar que puede ser multimple
+            vue.filters.category_id = vademecumStorage.category_id;
+
+            vue.dataTable.avoid_first_data_load = true;
+        }
+        // === check localstorage vademecum ===
+    },
     methods: {
         getSelects() {
             let vue = this

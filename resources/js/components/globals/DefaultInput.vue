@@ -194,7 +194,7 @@ export default {
 
             vue.iconSeePass = !vue.iconSeePass;
             vue.localType = !vue.iconSeePass ? 'text' : 'password';
-        }
+        },
     }
 }
 </script>

@@ -333,3 +333,14 @@ function stringConcatEqualNum(array $data, int $num)
 
     return implode('|', $piecesPart);
 }
+
+function get_data_bykeys($data, $keys = [])
+{
+    $new_data = [];
+    foreach ($data as $key => $value) {
+        if(in_array($key, $keys)) $new_data[$key] = $value; 
+    }
+
+    return $new_data;
+}
+

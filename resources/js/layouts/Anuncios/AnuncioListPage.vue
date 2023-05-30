@@ -50,6 +50,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
+                :avoid_first_data_load="dataTable.avoid_first_data_load"
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>anuncio</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminación de un <b>anuncio</b>')"
@@ -112,6 +113,7 @@ export default {
     data() {
         return {
             dataTable: {
+                avoid_first_data_load: false,
                 endpoint: '/anuncios/search',
                 ref: 'AnuncioTable',
                 headers: [
@@ -229,6 +231,27 @@ export default {
     mounted() {
         let vue = this
         vue.getSelects();
+        // === check localstorage anuncio ===
+        if(vue.dataTable.avoid_first_data_load) {
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+            const { storage: vademecumStorage } = vue.getStorageUrl('anuncio');
+            vue.openFormModal(vue.modalOptions, { id: vademecumStorage.id });
+        }
+        // === check localstorage anuncio ===
+    },
+    created() {
+        let vue = this;
+
+        // === check localstorage anuncio ===
+        const { status, storage: anuncioStorage } = vue.getStorageUrl('anuncio');
+        if(status) {
+            vue.filters.q = anuncioStorage.q;
+            vue.filters.module = anuncioStorage.module[0]; // considerar que puede ser multimple
+            vue.filters.active = anuncioStorage.active;
+
+            vue.dataTable.avoid_first_data_load = true;
+        }
+        // === check localstorage anuncio ===
     },
     methods: {
         getSelects() {

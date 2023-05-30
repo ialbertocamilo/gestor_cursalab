@@ -157,7 +157,9 @@ class WorkspaceController extends Controller
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
+
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
+        // $workspace['is_superuser'] = true;
 
         return $this->success($workspace);
     }
@@ -174,9 +176,11 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
+        info(['data' => $request->all() ]);
 
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
+        $data = Media::requestUploadFile($data, 'logo_marca_agua');
 
         // Set constraint: limit allowed users
 

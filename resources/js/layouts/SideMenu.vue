@@ -320,7 +320,42 @@ export default {
                     // },
                 ]
             },
+            {
+                title: "DIPLOMAS",
+                icon: "fas fa-medal",
+                active: false,
+                items: [
+                    {
+                        title: "Listar",
+                        icon: "fas fa-list",
+                        path: "/diplomas",
+                        subpaths: ["diplomas"],
+                        selected: false,
+                        permission: "diplomas",
+                        role: [
+                            "super-user",
+                            "admin",
+                            "content-manager",
+                            "trainer"
+                        ]
+                    },
 
+                    {
+                        title: "Crear",
+                        icon: "fas fa-plus",
+                        path: "/diploma/create",
+                        subpaths: ["diploma/create"],
+                        selected: false,
+                        permission: "diploma_create",
+                        role: [
+                            "super-user",
+                            "admin",
+                            "content-manager",
+                            "trainer"
+                        ]
+                    }
+                ]
+            },
             {
                 title: "GESTIONA TU CONTENIDO",
                 icon: "fas fa-pen-square",
@@ -553,6 +588,21 @@ export default {
                         path:"/soporte",
                         subpaths:["soporte"],
                         selected:false,
+                        role: ["super-user", "admin"]
+                    },
+                ]
+            },
+            {
+                title: "CONFIGURACIÓN",
+                icon: "fas fa-wrench",
+                active: false,
+                items: [
+                    {
+                        title: "Ambiente",
+                        icon: "fas fa-cog",
+                        path: "/ambiente",
+                        subpaths: ["ambiente"],
+                        selected: false,
                         role: ["super-user", "admin"]
                     },
                 ]

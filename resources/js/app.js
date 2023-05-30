@@ -117,6 +117,10 @@ Vue.component("usuario-ayuda", require("./layouts/UsuarioAyuda.vue"));
 Vue.component("soporte-layout", require("./layouts/Soporte/SoporteListPage.vue"));
 Vue.component("soporte-ayuda-layout", require("./layouts/Soporte/Ayudas/AyudaListPage.vue"));
 
+// diplomas
+Vue.component("diploma-layout", require("./layouts/Diplomas/DiplomasListPage"));
+Vue.component("diploma-form-page", require("./layouts/Diplomas/DiplomaFormPage"));
+
 // Gestor views
 Vue.component("blocks-layout", require("./layouts/Blocks/BlockListPage"));
 Vue.component("blocks-form-data-layout", require("./layouts/Blocks/BlockFormDataPage"));
@@ -140,6 +144,7 @@ Vue.component("criterion-layout-wk", require("./layouts/Criteria/CriterionListPa
 Vue.component("criterion-value-layout", require("./layouts/Criteria/CriterionValues/CriterionValueListPage"));
 Vue.component("encuesta-layout", require("./layouts/Encuestas/EncuestaListPage"));
 Vue.component("incidencia-layout", require("./layouts/Incidencias/IncidenciaListPage"));
+Vue.component("ambiente-layout", require("./layouts/Ambiente/AmbientePage"));
 Vue.component(
     "encuesta-pregunta-layout",
     require("./layouts/Encuestas/Preguntas/PreguntaListPage")

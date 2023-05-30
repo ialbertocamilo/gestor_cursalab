@@ -349,7 +349,7 @@ export default {
             vue.$nextTick(() => {
                 vue.$refs[dialog.ref].loadSelects();
             });
-
+            // console.log('here at openFormModal');
             if (action != 'status' && action != 'delete')
                 vue.hideLoader()
         },
@@ -731,5 +731,21 @@ export default {
             }
             return res;
         },
+        getStorageUrl(key, mainKey = 'media_data') {
+
+            const currentUrl = window.location.search;
+            const currentParams = new URLSearchParams(currentUrl);
+            const existKey = currentParams.has(mainKey); 
+
+            let storage = localStorage.getItem(key);
+            let status = false;
+
+            if(storage && existKey) {
+                storage = JSON.parse(storage);
+                status = true;
+            }
+
+            return { storage, status };
+        }
     },
 };
