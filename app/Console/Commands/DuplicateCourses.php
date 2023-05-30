@@ -132,9 +132,10 @@ class DuplicateCourses extends Command
             courses c
             join course_school cs on c.id = cs.course_id
             join schools s on s.id = cs.school_id
-            join school_workspace sw on sw.school_id = s.id
 
-        where c.name in (
+        where
+            subworkspace_id  in (SELECT id from workspaces where parent_id = :workspaceId)
+            and c.name in (
                 'PIC: Prevención y Sanción del Hostigamiento Sexual Laboral',
                 'PIC: Conética',
                 'PIC: Sesgos Inconscientes',
@@ -142,9 +143,11 @@ class DuplicateCourses extends Command
                 'PIC: Primeros auxilios',
                 'PIC: Programa IRIS',
                 'PIC: Seguridad de la Información 2022'
-            ) and sw.workspace_id = :workspaceId
+            )
         "), ['workspaceId' => $workspaceId]);
     }
+
+
 
     /**
      * Courses validation
