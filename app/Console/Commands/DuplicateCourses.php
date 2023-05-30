@@ -133,16 +133,18 @@ class DuplicateCourses extends Command
             join schools s on s.id = cs.school_id
 
         where
-            s.id in (SELECT school_id from school_subworkspace ss where subworkspace_id  in (SELECT id from workspaces where parent_id = :workspaceId)
+            s.id in (
+                SELECT school_id from school_subworkspace ss where subworkspace_id  in (SELECT id from workspaces where parent_id = :workspaceId)
                                                                     )
             and c.name in (
-                'PIC: Prevención y Sanción del Hostigamiento Sexual Laboral',
-                'PIC: Conética',
-                'PIC: Sesgos Inconscientes',
-                'PIC: Evacuación y prevención de incendios',
-                'PIC: Primeros auxilios',
-                'PIC: Programa IRIS',
-                'PIC: Seguridad de la Información 2022'
+                'PIC: Prevención y Sanción del Hostigamiento Sexual Laboral'
+                -- ,
+                -- 'PIC: Conética',
+                -- 'PIC: Sesgos Inconscientes',
+                -- 'PIC: Evacuación y prevención de incendios',
+                -- 'PIC: Primeros auxilios',
+                -- 'PIC: Programa IRIS',
+                -- 'PIC: Seguridad de la Información 2022'
             )
         "), ['workspaceId' => $workspaceId]);
     }
