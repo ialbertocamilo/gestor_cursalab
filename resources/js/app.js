@@ -117,9 +117,10 @@ Vue.component("usuario-ayuda", require("./layouts/UsuarioAyuda.vue"));
 Vue.component("soporte-layout", require("./layouts/Soporte/SoporteListPage.vue"));
 Vue.component("soporte-ayuda-layout", require("./layouts/Soporte/Ayudas/AyudaListPage.vue"));
 
-// diplomas
+/* === diplomas ===*/
 Vue.component("diploma-layout", require("./layouts/Diplomas/DiplomasListPage"));
 Vue.component("diploma-form-page", require("./layouts/Diplomas/DiplomaFormPage"));
+/* === diplomas ===*/
 
 // Gestor views
 Vue.component("blocks-layout", require("./layouts/Blocks/BlockListPage"));
@@ -204,6 +205,12 @@ Vue.component("meetings-layout", require("./layouts/Meetings/MeetingsListPage.vu
 Vue.component("accounts-layout", require("./layouts/Accounts/AccountListPage.vue"));
 
 Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
+
+/*=== votaciones ===*/
+Vue.component("votacion-layout", require("./layouts/Votaciones/VotacionesListPage.vue"));
+Vue.component("votacion-form-page", require("./layouts/Votaciones/VotacionesFormPage.vue"));
+/*=== votaciones ===*/
+
 
 const app = new Vue({
     vuetify,
