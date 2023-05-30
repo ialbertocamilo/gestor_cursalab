@@ -335,6 +335,8 @@ export default {
                         role: [
                             "super-user",
                             "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     },
 
@@ -348,6 +350,8 @@ export default {
                         role: [
                             "super-user",
                             "admin",
+                            "content-manager",
+                            "trainer"
                         ]
                     }
                 ]

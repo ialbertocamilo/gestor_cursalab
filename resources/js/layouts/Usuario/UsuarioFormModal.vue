@@ -428,7 +428,7 @@ export default {
                 vue.parseCriterionValues()
 
                 // === validar cambio de criterios
-                if (vue.confirmModalInfo) {
+                if (vue.confirmModalInfo && edit) {
                     const checkCriterios = vue.checkChangesAtCriterios(data.criterion_list_final); // criterios
                     const checkData = vue.checkChangesAtUserData(data, [{key:'document', label:'Identificador'}]); // documento - dni
 

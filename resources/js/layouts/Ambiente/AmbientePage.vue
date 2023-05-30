@@ -491,9 +491,11 @@ const file_fields = [
                 vue.errors = [];
                 this.showLoader();
 
-                const isValid = vue.validateForm('applicationForm');
+                const isValid_app = vue.validateForm('applicationForm');
+                const isValid_gestor = vue.validateForm('gestorForm');
                 let base_url = `${vue.base_endpoint}/store`;
-                if (isValid) {
+                
+                if (isValid_app || isValid_gestor) {
 
                     // Prepare data
                     let formData = vue.getMultipartFormData(
