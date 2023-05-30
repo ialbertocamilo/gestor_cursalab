@@ -26,7 +26,7 @@ export default {
                                 if(typeof(Storage) !== 'undefined'){
                                     localStorage.removeItem('mostrar_nps');
                                 }
-                            }, 3500);
+                            }, 1500);
                             return;
                         }
                     });
