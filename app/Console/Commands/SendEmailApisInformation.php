@@ -37,23 +37,23 @@ class SendEmailApisInformation extends Command
 
     private function sendEmail(){
         $type_id = Taxonomy::where('group','email')->where('type','user')->where('code','info_apis')->first()?->id;
-        // $users_to_send_email = EmailUser::with(['user:id,email_gestor','workspace:id,name'])->wherehas('user',function($q){
-        //     $q->where('active',ACTIVE);
-        // })->where('type_id',$type_id)->get();
+        $users_to_send_email = EmailUser::with(['user:id,email_gestor','workspace:id,name'])->wherehas('user',function($q){
+            $q->where('active',ACTIVE);
+        })->where('type_id',$type_id)->get();
         // $reports = GeneratedReport::query()
         // ->where('workspace_id', $workspaceId)
         // ->where('created_at', '>=', Carbon::today()->toDateTimeString())
         // ->get('created_at', 'desc');
-        // foreach ($users_to_send_email as $users_to_send) {
-        //     $mail_data=[
-        //         'subject'=>'Reporte de APIS',
-        //         'init_date'=> date('d/m/Y', strtotime('-1 day')). ' 6:00 am',
-        //         'final_date'=> date('d/m/Y').' 5:30 am',
-        //         'route' => env('REPORTS_BASE_URL').'/reports/1683154596242.xlsx'
-        //     ];
-        //     Mail::to($users_to_send->user->email_gestor)
-        //     ->send(new EmailTemplate('emails.email_information_apis', $mail_data));
-        // }
+        foreach ($users_to_send_email as $users_to_send) {
+            $mail_data=[
+                'subject'=>'Reporte de APIS',
+                'init_date'=> date('d/m/Y', strtotime('-1 day')). ' 6:00 am',
+                'final_date'=> date('d/m/Y').' 5:30 am',
+                'route' => env('REPORTS_BASE_URL').'/reports/1683154596242.xlsx'
+            ];
+            Mail::to($users_to_send->user->email_gestor)
+            ->send(new EmailTemplate('emails.email_information_apis', $mail_data));
+        }
         $workspaces = Workspace::with('emails.user:id,email_gestor')->wherehas('emails.user',function($q){
             $q->where('active',ACTIVE);
         })->select('id','name')->get();
