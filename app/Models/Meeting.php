@@ -297,7 +297,8 @@ class Meeting extends BaseModel
         $field = $request->sortBy ?? 'starts_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $query->orderBy($field, $sort)->orderBy('name', $sort)->orderBy('id', $sort);
+        $query->orderBy($field, $sort);
+        // ->orderBy('name', $sort)->orderBy('id', $sort);
 
         if ($method == 'paginate')
             return $query->paginate($request->paginate);
