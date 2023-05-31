@@ -2,12 +2,10 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Checklists
+                <span class="fw-bold font-nunito">Checklists</span>
                 <v-spacer/>
                 <DefaultActivityButton :label="'Subida masiva'" @click="modal.subida_masiva= true"/>
-                <DefaultModalButton :label="'Checklist'" @click="
-                                abrirModalCreateEditChecklist(objectModal)
-                            "/>
+                <DefaultModalButton :label="'Checklist'" @click="abrirModalCreateEditChecklist(objectModal)" class="font-nunito"/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">

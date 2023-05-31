@@ -289,7 +289,7 @@ class EntrenadorUsuario extends Model implements Recordable
             $alumno_doc = User::select('document')->where('id', $user_id)->where('active', 1)->first();
             $alumno_doc = $alumno_doc?->document ?? $user_id;
             $response['error'] = true;
-            $response['msg'] = 'El alumno que se quiere asignar con Doc. de Identidad ('.$alumno_doc.'), es un entrenador.';
+            $response['msg'] = 'El usuario con Doc. de Identidad ('.$alumno_doc.'), es un entrenador.';
             return $response;
         }
 
