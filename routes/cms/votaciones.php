@@ -8,6 +8,8 @@ Route::controller(CampaignController::class)->group(function () {
 	Route::view('/', 'votaciones.list')->name('votaciones.list');
 	Route::get('/search', 'search')->name('votacion.search');
 
+	Route::get('/form-selects', 'getFormSelects')->name('votacion.form-selects');
+
 /*	// ==== CAMPAÑAS ====
 	Route::get('/index', [AnnouncementsController::class, 'index']);
 	Route::get('/indexid/{id}', [AnnouncementsController::class, 'indexId']);

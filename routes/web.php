@@ -147,5 +147,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::prefix('diplomas')->middleware('checkrol:admin')->group(base_path('routes/cms/diplomas.php'));
     
+    // === votaciones === 
     Route::prefix('votaciones')->middleware('checkrol:admin')->group(base_path('routes/cms/votaciones.php'));
+    // === votaciones === 
 });
