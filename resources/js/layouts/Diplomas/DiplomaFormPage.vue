@@ -21,7 +21,7 @@
                     </v-btn>
                 </p>
             </div>
-            <v-container class="grey lighten-5 mb-0 d-flex justify-content-center">
+            <div class="mx-3 grey lighten-5 mb-0 d-flex justify-content-center">
                 <v-row class="mt-0 container-box">
 
                     <div id="overlay-div" class="overlay-div mx-4 mt-3" v-show="overlay"> 
@@ -173,7 +173,7 @@
                     </v-card>
                 </v-dialog>
 
-            </v-container>
+            </div>
 
             <div class="d-flex justify-center position-relative menu-save">
                 <panelEditor 
@@ -1073,13 +1073,12 @@ export default {
     display: flex;
     width: 100%;
     height: 66vh;
-    background-color: #dfdfdf;
-    border: 1rem solid #ffffff;
+    background-color: #ffffff;
     border-radius: .5rem;
 }
 
 .overlay-div:hover{
-    background-color: #efefef;
+    background-color: #ffffff;
 }
 
 .overlay-div:hover .overlay-icon{
