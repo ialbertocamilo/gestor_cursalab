@@ -105,6 +105,10 @@ class AuthImpersonationController extends Controller
         $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name')->where('id', $workspace->parent_id)->first() : null;
         if ($workspace_data) {
             $workspace_data->logo = get_media_url($workspace_data->logo);
+
+            if ($workspace_data->id > 33) {
+                $workspace_data->slug = 'farmacias-peruanas';
+            }
         }
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
