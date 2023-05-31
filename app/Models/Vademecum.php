@@ -132,8 +132,9 @@ class Vademecum extends Model
             $relationships = [
                 'modules' => function ($q) use ($request) {
                     if ($request->module_id) {
-                        $workspace = Workspace::find($request->module_id);
-                        $q->where('module_id', $workspace->criterion_value_id);
+                        // $workspace = Workspace::find($request->module_id);
+                        $q->where('module_id', $request->module_id);
+                        // $q->where('module_id', $workspace->criterion_value_id);
                     }
                  },
                 'subcategory',

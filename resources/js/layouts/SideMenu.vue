@@ -235,7 +235,7 @@ export default {
                         path: "/users",
                         subpaths: ["users"],
                         selected: false,
-                        role: ["super-user", "config"]
+                        role: ["super-user"]
                     },
                     {
                         title: "Criterios",
@@ -549,7 +549,7 @@ export default {
                         subpaths: ["documentation-api"],
                         selected: false,
                         permission: "documentation_api",
-                        role: ["super-user", "admin"]
+                        role: ["super-user"]
                     }
                 ]
             },
@@ -603,7 +603,7 @@ export default {
                         path: "/ambiente",
                         subpaths: ["ambiente"],
                         selected: false,
-                        role: ["super-user", "admin"]
+                        role: ["super-user"]
                     },
                 ]
             }

@@ -207,7 +207,7 @@ class EntrenadorUsuario extends Model implements Recordable
         // ])->whereIn('id', $alumnos_ids->pluck('user_id')->all())
         //     ->select('id', 'name', 'document', 'subworkspace_id');
 
-        if (!empty($filtro)) {
+        if (!empty($filtro) && !is_array($filtro)) {
             $queryDataAlumnos->where(function ($query) use ($filtro) {
                 $query->where('users.name', 'like', "%$filtro%");
                 $query->orWhere('users.document', 'like', "%$filtro%");
