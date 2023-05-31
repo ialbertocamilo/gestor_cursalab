@@ -4,7 +4,7 @@
             <v-card-title>
                 <span class="fw-bold font-nunito">Checklists</span>
                 <v-spacer/>
-                <DefaultActivityButton :label="'Subida masiva'" @click="modal.subida_masiva= true"/>
+                <DefaultActivityButton :label="'Subida masiva'" @click="optionsModalSubidaMasivaChecklist.open = true"/>
                 <DefaultModalButton :label="'Checklist'" @click="abrirModalCreateEditChecklist(objectModal)" class="font-nunito"/>
             </v-card-title>
         </v-card>
@@ -36,11 +36,15 @@
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
         </v-card>
-        <StepperSubidaMasiva
-            urlPlantilla="/templates/Plantilla_Checklist.xlsx"
-            urlSubida="/entrenamiento/checklists/import"
-            v-model="modal.subida_masiva"
-            @onClose="closeModalSubidaMasiva"
+        <ModalSubidaMasivaChecklist
+            template_url="/templates/Plantilla_Checklist.xlsx"
+            v-model="modal.asignar_ver_alumnos"
+            :width="'40%'"
+            :options="optionsModalSubidaMasivaChecklist"
+            @onCancel="optionsModalSubidaMasivaChecklist.open=false"
+            @onConfirm = "optionsModalSubidaMasivaChecklist.open=false"
+            @showSnackbar="mostrarSnackBar($event)"
+            @refreshTable="refreshDefaultTable(dataTable, filters, 1)"
         />
 
         <ModalCreateChecklist
@@ -78,10 +82,10 @@
 
 <script>
 
+import ModalSubidaMasivaChecklist from "../../components/Entrenamiento/Checklist/ModalSubidaMasivaChecklist.vue";
 import ModalCreateChecklist from "../../components/Entrenamiento/Checklist/ModalCreateChecklist.vue";
 import ModalAsignarChecklistCurso from "../../components/Entrenamiento/Checklist/ModalAsignarChecklistCurso.vue";
 
-import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import LogsModal from "../../components/globals/Logs";
@@ -90,10 +94,10 @@ export default {
     components: {
         ModalCreateChecklist,
         ModalAsignarChecklistCurso,
-        StepperSubidaMasiva,
         DefaultDeleteModal,
         DefaultStatusModal,
-        LogsModal
+        LogsModal,
+        ModalSubidaMasivaChecklist
     },
     mounted() {
         let vue = this;
@@ -219,7 +223,11 @@ export default {
                 segmentation_by_document: {
                     segmentation_by_document:[]
                 }
-            }
+            },
+            optionsModalSubidaMasivaChecklist:{
+                open: false,
+                title: 'Subir checklist'
+            },
         }
     },
     methods: {
