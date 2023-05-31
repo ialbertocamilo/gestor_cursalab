@@ -140,16 +140,20 @@ class EntrenamientoController extends Controller
     public function asignar(Request $request)
     {
         $data = $request->all();
+        $errors = [];
         foreach ($data['alumnos'] as $key => $alumno) {
             $temp = [
                 'trainer_id' => $data['entrenador_id'],
                 'user_id' => $alumno['id'],
                 'active' => 1
             ];
-            EntrenadorUsuario::asignar($temp);
+            $asignar_msg = EntrenadorUsuario::asignar($temp);
+            if($asignar_msg['error'])
+                array_push($errors, $asignar_msg['msg']);
         }
         $alumnos = EntrenadorUsuario::getUsuariosByEntrenador($data);
         $apiResponse['alumnos'] = $alumnos['data'];
+        $apiResponse['errors'] = $errors;
 
         return response()->json($apiResponse, 200);
     }

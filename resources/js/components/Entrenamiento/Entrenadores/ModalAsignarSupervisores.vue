@@ -7,7 +7,7 @@
         <template v-slot:content>
             <v-card-text>
                 <div class="text-center">
-                    <span class="font-weight-black">Descarga</span> la plantilla para rellenarla con la data que deseas subir a la plataforma 
+                    <span class="font-weight-black">Descarga</span> la plantilla para rellenarla con la data que deseas subir a la plataforma
                 </div>
                 <div class="text-center my-4">
                     <DefaultButton
@@ -24,6 +24,7 @@
                     <vuedropzone
                         :ref="myVueDropzone"
                         @emitir-archivo="changeFile"
+                        @emitir-archivo-completo="changeFileComplete"
                         @emitir-alerta="enviar_alerta"
                         @emitir-download-file="descargarErrores()"
                         :error_file="dropzone_file.error_file"
@@ -40,6 +41,7 @@
     </DefaultDialog>
 </template>
 <script>
+import XLSX from "xlsx";
 import vuedropzone from "../../SubidaMasiva/dropzone.vue";
 export default {
     components:{vuedropzone},
@@ -61,12 +63,14 @@ export default {
                 file:null,
                 error_file:false,
                 success_file:false
-            }
+            },
+            errores: []
         }
     },
     methods: {
         closeModal() {
             let vue = this
+            vue.nuevo_archivo()
             vue.$emit('onCancel')
         },
         resetValidation() {
@@ -74,6 +78,9 @@ export default {
             vue.$refs.cuentaZoomForm.resetValidation()
         },
         changeFile(res) {
+            this.dropzone_file.file = res;
+        },
+        changeFileComplete(res) {
             this.dropzone_file.file = res;
         },
         enviar_alerta(info) {
@@ -86,28 +93,39 @@ export default {
             this.dropzone_file.file = null;
             this.dropzone_file.error_file = false;
             this.dropzone_file.success_file = false;
+            vue.dropzone_file.hasObservation = false;
+            vue.options.confirmLabel = "Confirmar"
+            vue.errores = []
         },
         async confirmModal() {
             let vue = this
-            vue.showLoader()
-            vue.progress_upload = 'cargando'
-            let data = new FormData();
-            data.append("archivo", vue.dropzone_file.file);
-            await axios
-                .post('/entrenamiento/entrenadores/asignar_masivo', data)
-                .then((res) => {
-                    vue.dropzone_file.success_file = true;
-                    if (res.data.info.data_no_procesada.length > 0) {
-                        vue.dropzone_file.hasObservation = true;
-                    }
-                    vue.archivo = null;
-                    vue.hideLoader()
-                    // vue.$emit('onConfirm')
-                })
-                .catch((err) => {
-                    vue.hideLoader();
-                    console.log(err);
-                });
+            if(vue.errores.length > 0)
+                vue.nuevo_archivo()
+
+            if(vue.dropzone_file.file != null) {
+                vue.showLoader()
+                vue.progress_upload = 'cargando'
+                let data = new FormData();
+                data.append("archivo", vue.dropzone_file.file);
+                await axios
+                    .post('/entrenamiento/entrenadores/asignar_masivo', data)
+                    .then((res) => {
+                        vue.dropzone_file.success_file = true;
+                        if (res.data.info.data_no_procesada.length > 0) {
+                            vue.dropzone_file.hasObservation = true;
+                            vue.errores = res.data.info.data_no_procesada
+                            vue.options.confirmLabel = "Subir otro archivo"
+                        }
+                        vue.options.confirmLabel = "Subir otro archivo"
+                        vue.archivo = null;
+                        vue.hideLoader()
+                        // vue.$emit('onConfirm')
+                    })
+                    .catch((err) => {
+                        vue.hideLoader();
+                        console.log(err);
+                    });
+            }
         },
         resetSelects() {
             // Selects independientes
@@ -130,7 +148,24 @@ export default {
                 vue.errores,
                 "Data no procesada"
             );
-        }
+        },
+        descargarExcelDatosNoProcesados(headers, values, array, filename) {
+            let data = XLSX.utils.json_to_sheet(array, {
+                header: values
+            });
+            //Llenar cabeceras
+            headers.forEach((element, index) => {
+                const indice = `${this.abc[index]}1`;
+                data[`${indice}`].v = element;
+            });
+            // Parsear la columna de dni 'A' a String 's'
+            for (const indice in data) {
+                if (indice.includes('A')) data[indice].t = 's'
+            }
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, data, filename);
+            XLSX.writeFile(workbook, `${filename}.xlsx`);
+        },
     }
 }
 </script>

@@ -58,7 +58,7 @@ class AsignarEntrenadorImport implements ToCollection
                 continue;
             }
 
-            $is_student = EntrenadorUsuario::alumno($entrenador_dni)->first();
+            $is_student = EntrenadorUsuario::alumno($entrenador->id)->first();
             if (!is_null($is_student)) {
                 $temp = [
                     'dni' => (string)$entrenador_dni,
