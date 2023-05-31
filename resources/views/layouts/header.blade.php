@@ -28,10 +28,10 @@
     <!-- Google fonts  -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
     <!-- theme stylesheet-->
-    <link rel="stylesheet" href="{{ asset('css/style.default.css?v=' . date('Y-W') ) }}" id="theme-stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/style.default.css?v=' . date('Y-W-d') ) }}" id="theme-stylesheet">
     <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="{{ asset('css/custom.css?v=2'.date('Y-W-m')) }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css?v='.date('Y-W-m-d')) }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css?v=2'.date('Y-W-m-d')) }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css?v='.date('Y-W-m-d-H')) }}">
     <!-- Favicon-->
     <link rel="shortcut icon" href="{{ asset('img/favicon.png')}}">
 

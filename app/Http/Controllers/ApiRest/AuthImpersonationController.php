@@ -102,9 +102,13 @@ class AuthImpersonationController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
         if ($workspace_data) {
             $workspace_data->logo = get_media_url($workspace_data->logo);
+
+            if ($workspace_data->id > 33) {
+                $workspace_data->slug = 'farmacias-peruanas';
+            }
         }
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
