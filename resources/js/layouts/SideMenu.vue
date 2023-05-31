@@ -334,9 +334,9 @@ export default {
                         permission: "diplomas",
                         role: [
                             "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
+                            // "admin",
+                            // "content-manager",
+                            // "trainer"
                         ]
                     },
 
@@ -349,9 +349,9 @@ export default {
                         permission: "diploma_create",
                         role: [
                             "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
+                            // "admin",
+                            // "content-manager",
+                            // "trainer"
                         ]
                     }
                 ]
