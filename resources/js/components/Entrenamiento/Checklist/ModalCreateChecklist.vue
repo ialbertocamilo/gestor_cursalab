@@ -246,8 +246,7 @@
                                                             @end="drag=false" class="custom-draggable" ghost-class="ghost">
                                                         <transition-group type="transition" name="flip-list" tag="div">
                                                             <div v-for="(actividad, i) in checklist.checklist_actividades"
-                                                                :key="actividad.id"
-                                                                :class="{'default-actividad-error': actividad.hasErrors}">
+                                                                :key="actividad.id">
                                                                 <div class="item-draggable activities">
                                                                     <v-row>
                                                                         <v-col cols="1" class="d-flex align-center justify-content-center ">
@@ -262,6 +261,7 @@
                                                                                 auto-grow
                                                                                 hide-details="auto"
                                                                                 v-model="actividad.activity"
+                                                                                :class="{'border-error': actividad.hasErrors}"
                                                                             ></v-textarea>
                                                                         </v-col>
                                                                         <v-col cols="12" md="3" lg="3" class="d-flex align-center no-white-space">
@@ -409,7 +409,7 @@ export default {
             modalAlert: {
                 ref: 'modalAlert',
                 title: 'Alerta',
-                contentText: 'Este checklist debe de tener por lo menos una (1) actividad "Califica a: Alumno"',
+                contentText: 'Este checklist debe de tener por lo menos una (1) actividad "Se califica al alumno"',
                 open: false,
                 endpoint: '',
                 confirmLabel:"Entendido",
@@ -501,7 +501,9 @@ export default {
                     vue.disabled_btn_next = vue.stepper_box_btn2;
                 }
                 else if(vue.stepper_box == 3){
-                     vue.disabled_btn_next = vue.stepper_box_btn3;
+                    let errors = vue.showValidateActividades()
+                    vue.stepper_box_btn3 = vue.checklist.checklist_actividades.length == 0 || errors > 0
+                    vue.disabled_btn_next = vue.stepper_box_btn3;
                 }
             },
             deep: true
@@ -521,7 +523,9 @@ export default {
                     vue.disabled_btn_next = vue.stepper_box_btn2;
                 }
                 else if(vue.stepper_box == 3){
-                     vue.disabled_btn_next = vue.stepper_box_btn3;
+                    let errors = vue.showValidateActividades()
+                    vue.stepper_box_btn3 = vue.checklist.checklist_actividades.length == 0 || errors > 0
+                    vue.disabled_btn_next = vue.stepper_box_btn3;
                 }
             },
             deep: true
@@ -653,24 +657,27 @@ export default {
                 'model_id': null,
                 'code': "segmentation-by-document"
             };
-            vue.$emit("onConfirm");
+            const allIsValid = vue.moreValidaciones()
+
+            if (allIsValid == 0)
+                vue.$emit("onConfirm");
         },
         showValidateActividades() {
             let vue = this
-            vue.checklist.checklist_actividades.forEach((el, index) => {
-                el.hasErrors = !el.actividad || el.actividad === ''
-            })
+            let errors = 0;
+
+            if( vue.checklist.checklist_actividades.length > 0 ) {
+                vue.checklist.checklist_actividades.forEach((el, index) => {
+                    el.hasErrors = !el.activity || el.activity === ''
+                    if(el.hasErrors) errors++;
+                })
+            }
+            return errors;
         },
         moreValidaciones() {
             let vue = this
             let errors = 0
 
-            // validar al menos una actividad
-            if (vue.checklist.checklist_actividades.length === 0) {
-                let msg = 'Debe registrar al menos una actividad'
-                // vue.showAlert(msg, 'warning')
-                errors++
-            }
             let hasActividadEntrenadorUsuario = false;
             vue.checklist.checklist_actividades.map(actividad=>{
                if( actividad.type_name=='trainer_user') hasActividadEntrenadorUsuario=true;
@@ -1008,6 +1015,10 @@ button.btn_secondary span.v-btn__content i{
     border: 1px solid #D9D9D9;
     padding: 10px 0;
 }
+.box_resultados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before,
+.box_seleccionados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before {
+    opacity: 0;
+}
 .bx_message {
     display: flex;
     justify-content: center;
@@ -1102,5 +1113,8 @@ span.v-stepper__step__step:after {
 .bx_seg .v-select__slot .v-input__append-inner,
 .bx_steps .bx_seg .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
     margin-top: 6px !important;
+}
+.border-error .v-input__slot fieldset {
+    border-color: #FF5252 !important;
 }
 </style>
