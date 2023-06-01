@@ -28,7 +28,7 @@ class Zoom extends Model
             $this->logActivity($zoom_acc, $path, $method);
 
             $url = "$this->base_url$path";
-            $token = $zoom_acc->generateJWT();
+            $token = $zoom_acc->getZoomAccessToken($zoom_acc->client_id, $zoom_acc->client_secret, $zoom_acc->account_id);
 
             $client = new Client();
 
