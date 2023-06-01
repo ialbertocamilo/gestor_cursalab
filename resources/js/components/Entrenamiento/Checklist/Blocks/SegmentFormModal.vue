@@ -36,7 +36,13 @@
 
                     </v-col>
                 </v-row>
-
+                <div v-if="list_segments!= null
+                && list_segments[0] != null
+                && list_segments[0].direct_segmentation.length > 0
+                && list_segments[0].direct_segmentation[0] != null
+                && list_segments[0].direct_segmentation.length < 3" style="text-align: center;">
+                    <div class="msg_label">Debes seleccionar al menos 3 criterios para continuar.</div>
+                </div>
             </v-tab-item>
 
             <v-tab-item>
@@ -606,5 +612,16 @@ console.log(vue.segments.length);
 .bx_segment .v-window__prev button.v-btn span.v-ripple__container,
 .bx_segment .v-window__next button.v-btn span.v-ripple__container {
     opacity: 0;
+}
+.msg_label {
+    font-family: "Nunito", sans-serif;
+    font-size: 12px;
+    text-align: center;
+    border: 1px solid #5458ea;
+    display: inline-block;
+    padding: 0 10px;
+    border-radius: 5px;
+    color: #5458ea;
+    margin: 0 auto;
 }
 </style>
