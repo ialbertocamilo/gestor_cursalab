@@ -159,6 +159,7 @@
                                                         clearable
                                                         append-icon="mdi-magnify"
                                                         autocomplete="off"
+                                                        :loading="isLoading"
                                                     ></v-text-field>
                                                 </v-col>
                                                 <v-col cols="4" md="4" lg="4" class="d-flex justify-content-end bx_options_select pb-0 pt-2">
@@ -169,7 +170,7 @@
                                                 <v-col cols="12" md="12" lg="12" class="pb-0 pt-2">
                                                     <div class="box_resultados">
                                                         <div class="bx_message" v-if="results_search.length == 0">
-                                                            <span class="text_default">Resultados de búsqueda</span>
+                                                            <span class="text_default">{{ isLoading ? 'Espere...' : 'Resultados de búsqueda'}}</span>
                                                         </div>
                                                         <ul v-else>
                                                             <li v-for="(curso, index) in results_search" :key="curso.id" class="d-flex align-center justify-content-between">

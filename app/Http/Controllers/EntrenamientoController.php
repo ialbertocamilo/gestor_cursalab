@@ -242,6 +242,16 @@ class EntrenamientoController extends Controller
         return $this->success($data);
     }
 
+    public function searchChecklistByID(Request $request)
+    {
+        $data = $request->all();
+        $id = $data['id'] ?? null;
+
+        $data = CheckList::getChecklistById($id);
+
+        return $this->success($data);
+    }
+
 
     /**
      * Process request to toggle value of active status (1 or 0)

@@ -37,6 +37,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::view('/', 'entrenamiento.checklist.index')->name('entrenamiento.checklist');
 		// ->middleware('permission:entrenamiento.index');
 		Route::get('/search', 'searchChecklist');
+		Route::post('/search_checklist', 'searchChecklistByID');
 		Route::post('/listar_checklist', 'listarChecklist');
 		Route::post('/import', 'importChecklist');
 		Route::post('/save_checklist', 'guardarChecklist');

@@ -278,7 +278,35 @@ export default {
         },
         async abrirModalCreateEditChecklist(checklist, edit = false) {
             let vue = this;
-            vue.dataModalChecklist = checklist;
+
+            if(edit && checklist.id != null && checklist.id != 0) {
+                this.showLoader()
+                vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: checklist.id})
+                    .then((res) => {
+                        let res_checklist = res.data.data.checklist;
+                        if (res_checklist != null) {
+
+                            vue.dataModalChecklist = res_checklist;
+
+                        }else{
+                            vue.$notification.warning(`No se pudo obtener datos del checklist`, {
+                                timer: 6,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+                            vue.closeModalCreateEditChecklist();
+                            vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                        }
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            } else {
+                vue.dataModalChecklist = checklist;
+            }
+
             await vue.$refs.ModalCreateChecklist.resetValidation()
 
             vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
@@ -306,13 +334,39 @@ export default {
                     this.hideLoader()
                 });
         },
-        duplicateChecklist(checklist) {
+        async duplicateChecklist(checklist) {
+
+            let vue = this;
             let new_checklist = {...checklist}
 
-            new_checklist.title = new_checklist.title  + ' - copia'
-            new_checklist.duplicado = true
+            this.showLoader()
+            vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: new_checklist.id})
+                .then((res) => {
+                    let res_checklist = res.data.data.checklist;
+                    if (res_checklist != null) {
 
-            this.abrirModalCreateEditChecklist(new_checklist)
+                        new_checklist = res_checklist;
+
+                        new_checklist.title = new_checklist.title  + ' - copia'
+                        new_checklist.duplicado = true
+
+                        vue.abrirModalCreateEditChecklist(new_checklist)
+
+                    }else{
+                        vue.$notification.warning(`No se pudo obtener datos del checklist`, {
+                            timer: 6,
+                            showLeftIcn: false,
+                            showCloseIcn: true
+                        });
+                        vue.closeModalCreateEditChecklist();
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                    }
+                    this.hideLoader()
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.hideLoader()
+                });
         },
         async closeModalCreateEditChecklist() {
             let vue = this;
