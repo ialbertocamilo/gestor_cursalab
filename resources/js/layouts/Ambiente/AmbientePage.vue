@@ -305,30 +305,40 @@
                                             <v-btn 
                                                 small 
                                                 color="primary" 
-                                                :text="!(resource.logo_cursalab_position == 'start')" 
-                                                @click="resource.logo_cursalab_position = 'start'">
+                                                :text="!(resource.logo_cursalab_position == 'top-left')" 
+                                                @click="resource.logo_cursalab_position = 'top-left'">
                                                 <v-icon>
-                                                    mdi-format-align-left
+                                                    mdi-arrow-top-left-bold-box-outline
                                                 </v-icon>
                                             </v-btn>
                                             
                                             <v-btn 
                                                 small 
                                                 color="primary"
-                                                :text="!(resource.logo_cursalab_position == 'center')" 
-                                                @click="resource.logo_cursalab_position = 'center'">
+                                                :text="!(resource.logo_cursalab_position == 'top-right')" 
+                                                @click="resource.logo_cursalab_position = 'top-right'">
                                                 <v-icon>
-                                                    mdi-format-align-center
+                                                    mdi-arrow-top-right-bold-box-outline
                                                 </v-icon> 
                                             </v-btn>
 
                                             <v-btn 
                                                 small 
                                                 color="primary" 
-                                                :text="!(resource.logo_cursalab_position == 'end')" 
-                                                @click="resource.logo_cursalab_position = 'end'">
+                                                :text="!(resource.logo_cursalab_position == 'bottom-left')" 
+                                                @click="resource.logo_cursalab_position = 'bottom-left'">
                                                 <v-icon>
-                                                    mdi-format-align-right
+                                                    mdi-arrow-bottom-left-bold-box-outline
+                                                </v-icon>
+                                            </v-btn>
+
+                                            <v-btn 
+                                                small 
+                                                color="primary" 
+                                                :text="!(resource.logo_cursalab_position == 'bottom-right')" 
+                                                @click="resource.logo_cursalab_position = 'bottom-right'">
+                                                <v-icon>
+                                                    mdi-arrow-bottom-right-bold-box-outline
                                                 </v-icon>
                                             </v-btn>
                                         </div>

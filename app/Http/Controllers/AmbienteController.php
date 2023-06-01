@@ -48,7 +48,7 @@ class AmbienteController extends Controller
      
         if($ambiente) {
             $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
-            $ambiente['is_superuser'] = true;
+            $ambiente['is_superuser'] = auth()->user()->isAn('super-user');
            
             return $this->success($ambiente);
         }
