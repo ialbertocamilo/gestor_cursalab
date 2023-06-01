@@ -33,6 +33,7 @@ class AmbienteRequest extends FormRequest
             'form_login_position' => 'nullable',
             'color_primario_app' => 'nullable',
             'color_secundario_app' => 'nullable',
+            'color_terciario_app' => 'nullable',
             
             'fondo_app' => 'nullable',
             'logo_app' => 'nullable',

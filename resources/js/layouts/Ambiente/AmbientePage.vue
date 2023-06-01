@@ -216,7 +216,7 @@
                                 </v-col>
                                 <v-col cols="6" class="pt-0">
                                     <v-row>
-                                        <v-col cols="6">
+                                        <v-col cols="4">
                                             <DefaultInput 
                                                 v-model="resource.color_primario_app"
                                                 type="color" 
@@ -224,12 +224,20 @@
                                                 label="Color primario" 
                                             />
                                         </v-col>
-                                        <v-col cols="6">
+                                        <v-col cols="4">
                                             <DefaultInput 
                                                 v-model="resource.color_secundario_app"
                                                 type="color" 
                                                 clearable 
                                                 label="Color secundario" 
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInput 
+                                                v-model="resource.color_terciario_app"
+                                                type="color" 
+                                                clearable 
+                                                label="Color terciario" 
                                             />
                                         </v-col>
                                     </v-row>
@@ -414,7 +422,7 @@ const fields = [
     'fondo', 'logo', 'icono', 'logo_empresa',
     //app
     'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position', 
-    'color_primario_app', 'color_secundario_app', 'fondo_app', 'logo_app',
+    'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'logo_app',
     'male_logo', 'female_logo',
     'logo_cursalab_position','show_blog_btn','logo_cursalab',
     'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo'
