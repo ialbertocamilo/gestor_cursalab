@@ -15,6 +15,7 @@ use App\Models\SegmentValue;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
+use App\Models\Ambiente;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -64,7 +65,10 @@ class WorkspaceController extends Controller
         $workspaces = Workspace::search($request);
         WorkspaceResource::collection($workspaces);
 
-        return $this->success($workspaces);
+        $config = Ambiente::first();
+        $config->logo = get_media_url($config->logo);
+
+        return $this->success(compact('workspaces', 'config'));
     }
 
     public function create(): JsonResponse

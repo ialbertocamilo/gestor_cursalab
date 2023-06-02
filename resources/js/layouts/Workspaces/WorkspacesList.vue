@@ -5,16 +5,14 @@
             <div class="col-6">
                 <v-row class="--justify-content-center --pt-3 --pb-3" align="center">
                     <div class="col-3">
-                        <img src="/img/we-connect-logo.png"
+                        <img :src="config.logo"
                              class="logo"
-                            alt="We connect">
+                            alt="Logo">
                     </div>
                     <div class="col-6">
                         <h1>Mis workspaces</h1>
-                        <h3>Bienvenido(a) a WeConnect 2.0</h3>
-                        <small>
-                            Ingresa a un workspace para administrar  su contenido
-                        </small>
+                        <h3>Bienvenido(a) a {{ config.titulo }}</h3>
+                        <small>Ingresa a un workspace para administrar su contenido</small>
                     </div>
                 </v-row>
             </div>
@@ -235,6 +233,10 @@ export default {
         
     },
     data: () => ({
+        config: {
+            logo: null,
+            title: null,
+        },
         headerTemplate : '',
         // superUserRoleId : 1,
         // configRoleId: 2,
@@ -372,17 +374,18 @@ export default {
             this.$http
                 .get(url)
                 .then(({data}) => {
-                    vue.workspaces = data.data.data;
+                    vue.workspaces = data.data.workspaces.data;
+                    vue.config = data.data.config;
 
                     // vue.data = data.data.data
                     // console.log(vue.data)
-                    if (vue.pagination.actual_page > data.data.total_pages)
-                        vue.pagination.actual_page = data.data.total_pages
+                    if (vue.pagination.actual_page > data.data.workspaces.total_pages)
+                        vue.pagination.actual_page = data.data.workspaces.total_pages
 
-                    vue.pagination.total_pages = data.data.last_page;
-                    vue.pagination.fromRow = data.data.from || 0;
-                    vue.pagination.toRow = data.data.to || 0;
-                    vue.pagination.total_rows = data.data.total;
+                    vue.pagination.total_pages = data.data.workspaces.last_page;
+                    vue.pagination.fromRow = data.data.workspaces.from || 0;
+                    vue.pagination.toRow = data.data.workspaces.to || 0;
+                    vue.pagination.total_rows = data.data.workspaces.total;
                     vue.loading = false
 
                     vue.hideLoader()
