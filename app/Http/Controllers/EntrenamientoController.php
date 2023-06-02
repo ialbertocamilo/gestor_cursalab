@@ -154,6 +154,7 @@ class EntrenamientoController extends Controller
         $alumnos = EntrenadorUsuario::getUsuariosByEntrenador($data);
         $apiResponse['alumnos'] = $alumnos['data'];
         $apiResponse['errors'] = $errors;
+        cache_clear_model(EntrenadorUsuario::class);
         cache_clear_model(User::class);
 
         return response()->json($apiResponse, 200);
@@ -230,6 +231,7 @@ class EntrenamientoController extends Controller
         $alumno = $request->alumno;
 
         EntrenadorUsuario::where('trainer_id', $entrenador['id'])->where('user_id', $alumno['id'])->delete();
+        cache_clear_model(EntrenadorUsuario::class);
         cache_clear_model(User::class);
         return response()->json(['error' => false, 'msg' => 'Se eliminó al alumno ('.$alumno['document'].') para el entrenador ('.$entrenador['document'].')'], 200);
     }

@@ -116,9 +116,20 @@ export default {
                             vue.errores = res.data.info.data_no_procesada
                             vue.options.confirmLabel = "Subir otro archivo"
                         }
+                        else {
+                            if(res.data.error == false) {
+                                vue.$notification.success(`Se subió correctamente el archivo.`, {
+                                    timer: 6,
+                                    showLeftIcn: false,
+                                    showCloseIcn: true
+                                });
+                                vue.closeModal();
+                            }
+                        }
                         vue.options.confirmLabel = "Subir otro archivo"
                         vue.archivo = null;
                         vue.hideLoader()
+                        vue.$emit('refreshTable')
                         // vue.$emit('onConfirm')
                     })
                     .catch((err) => {
