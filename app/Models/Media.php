@@ -570,7 +570,7 @@ class Media extends BaseModel
         $preview = '';
 
         if (in_array(strtolower($ext), $valid_ext1)) {
-            $preview = $this->file;
+            $preview = FileService::generateUrl($this->file);
         } else if (in_array(strtolower($ext), $valid_ext2)) {
             $preview = FileService::generateUrl(self::DEFAULT_VIDEO_IMG);
         } else if (in_array(strtolower($ext), $valid_ext3)) {

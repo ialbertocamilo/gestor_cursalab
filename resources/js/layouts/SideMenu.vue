@@ -667,14 +667,13 @@ export default {
          */
         loadData() {
 
-            console.log('AAA')
             let vue = this;
 
             // Load workspaces
 
             let url = `/workspaces/search`;
             this.$http.get(url).then(({ data }) => {
-                vue.workspaces = data.data.data;
+                vue.workspaces = data.data.workspaces.data;
             });
         },
 
