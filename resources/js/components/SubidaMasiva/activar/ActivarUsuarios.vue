@@ -8,7 +8,7 @@
             <v-card-text class="instructivo">
                 <ul>
                     <li class="mt-2">
-                        La cantidad máxima de filas por excel es de <b>2500</b>.
+                        La cantidad máxima de filas por excel es de <b>500</b>.
                     </li>
                     <li class="mt-2">
                         Columnas del excel: <b>Doc. de identidad</b>.
