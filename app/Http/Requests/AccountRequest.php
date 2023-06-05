@@ -29,8 +29,12 @@ class AccountRequest extends FormRequest
             'username' => 'nullable|min:3|max:255',
             'identifier' => 'nullable|min:3|max:255',
 
-            'key' => 'required|min:3|max:255',
-            'secret' => 'required|min:3|max:255',
+            // 'key' => 'required|min:3|max:255',
+            // 'secret' => 'required|min:3|max:255',
+
+            'client_id'=>'required|min:3|max:255',
+            'client_secret'=>'required|min:3|max:255',
+            'account_id'=>'required|min:3|max:255',
 
             'service_id' => 'required',
             'plan_id' => 'required',
@@ -43,6 +47,7 @@ class AccountRequest extends FormRequest
             'token' => 'nullable',
             'refresh_token' => 'nullable',
             'workspace_id' => 'nullable',
+
 
         ];
 
