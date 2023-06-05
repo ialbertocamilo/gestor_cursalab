@@ -61,7 +61,7 @@ class SendEmailApisInformation extends Command
                     'download_url' => env('REPORTS_BASE_URL').'/'.$report?->download_url,
                 ];
             }else{
-                $workspaces_to_send_info = $users_to_send->emails_user->filter(function($email_user) use ($reports){
+                $workspaces_to_send_info = $users_to_send->emails_user->where('type_id',$type_id)->filter(function($email_user) use ($reports){
                     $report = $reports->where('name','workspace_report')->where('workspace_id',$email_user->workspace_id)->first();
                     return $report;
                 })->map(function($email_user) use ($reports){
