@@ -29,10 +29,16 @@
             <div style="margin: 10px 95px;background-color:#FFFFFF;padding: 20px 0px;border-radius: 1rem;">
             
                 <div style="width:25px; height:5px; margin-left:-4rem; border-radius:4px; background: #FFCD0C;"></div>
-                
-                <p style="color:#120C29; text-align:center; font-size: 1.5rem; margin-bottom:3px;margin-top:3px; font-weight:bold;">
+                @foreach ($data['workspaces'] as $workspace)
+                    <p style="color:#120C29; text-align:center; font-size: 1.5rem; margin-bottom:18px;margin-top:3px; font-weight:bold;">
+                        <a target="_blank" href="{{$workspace['download_url']}}">
+                            {{$workspace['workspace_name']}}
+                        </a>  
+                    </p>
+                @endforeach
+                {{-- <p style="color:#120C29; text-align:center; font-size: 1.5rem; margin-bottom:3px;margin-top:3px; font-weight:bold;">
                     <a target="_blank" href="{{$data['route']}}">Descargar reporte</a>  
-                </p>
+                </p> --}}
                 
                 <div style="margin-left:auto;margin-right: -3rem;width: 9px; height: 9px; border-radius: 9px; background: #CC96FC;"></div> 
 

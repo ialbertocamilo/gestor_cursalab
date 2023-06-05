@@ -21,7 +21,16 @@ Route::get('email_info',function(){
     $mail_data=[
         'init_date'=> date('d/m/Y', strtotime('-1 day')). ' 6:00 am',
         'final_date'=> date('d/m/Y').' 5:30 am',
-        'route' => env('REPORTS_BASE_URL').'/reports/1683154596242.xlsx'
+        'workspaces'=>[
+            [
+              "workspace_name" => "Intercorp Retail",
+              "download_url" => "http://localhost:3000/reports/general_api_report_2023-06-05.xlsx"
+            ],
+            [
+              "workspace_name" => "Financiera Oh",
+              "download_url" => "http://localhost:3000/reports/Financiera-Oh_2023-06-05.xlsx"
+            ]
+        ]
     ];
     return view('emails.email_information_apis',['data'=>$mail_data]);
 });

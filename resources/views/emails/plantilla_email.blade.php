@@ -130,7 +130,7 @@
                         <tr>
                             <td align="center" colspan="12"  style="font-family: 'Poppins', sans-serif;">
                                 <p style="color:#5D5FEF;font-size: 13px;font-weight: bold;">© Cursalab
-                                    {{ date('Y') }} | Lima, Perú</p>
+                                    {{ date('Y') }} | Worldwide</p>
                             </td>
                         </tr>
                     </table>
