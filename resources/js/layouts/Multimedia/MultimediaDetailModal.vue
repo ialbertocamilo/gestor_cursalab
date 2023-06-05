@@ -48,13 +48,17 @@
                         </v-row>
                     </v-col>
 
-                    <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
-                    <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
-                    <MultimediaSectionsInfo :resource="resource.sections.schools" label="Escuelas" />
-                    <MultimediaSectionsInfo :resource="resource.sections.announcements" label="Anuncios" />
-                    <MultimediaSectionsInfo :resource="resource.sections.videotecas" label="Videotecas" />
-                    <MultimediaSectionsInfo :resource="resource.sections.vademecums" label="Protocolos y documentos" />
-                    <MultimediaSectionsInfo :resource="resource.sections.modules" label="Módulos" />
+                    <div v-if="resource.sections">
+
+                        <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
+                        <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
+                        <MultimediaSectionsInfo :resource="resource.sections.schools" label="Escuelas" />
+                        <MultimediaSectionsInfo :resource="resource.sections.announcements" label="Anuncios" />
+                        <MultimediaSectionsInfo :resource="resource.sections.videotecas" label="Videotecas" />
+                        <MultimediaSectionsInfo :resource="resource.sections.vademecums" label="Protocolos y documentos" />
+                        <MultimediaSectionsInfo :resource="resource.sections.modules" label="Módulos" />
+
+                    </div>  
 
                     <v-col cols="6" v-if="false">
                         <DefaultModalSection
