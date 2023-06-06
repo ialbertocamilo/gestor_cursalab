@@ -199,7 +199,7 @@ class AuthController extends Controller
         if ($workspace_data) {
             $workspace_data->logo = get_media_url($workspace_data->logo);
 
-            if ($workspace_data->id > 33) {
+            if ($workspace_data->id >= 33) {
                 $workspace_data->slug = 'farmacias-peruanas';
             }
         }
@@ -213,13 +213,22 @@ class AuthController extends Controller
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }
 
+        $criterios = [];
+
+        foreach ($user->criterion_values as $value) {
+            $criterios[] = [
+                'valor' => $value->value_text,
+                'tipo' => $value->criterion->name ?? null,
+            ];
+        }
+
         $user_data = [
             "id" => $user->id,
             "dni" => $user->document,
             "nombre" => $user->name ?? '',
             "apellido" => $user->lastname ?? '',
             "full_name" => $user->fullname,
-            'criteria' => $user->criterion_values,
+            // 'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
@@ -229,6 +238,7 @@ class AuthController extends Controller
             'android' => $user->android,
             'ios' => $user->ios,
             'huawei' => $user->huawei,
+            'criterios' => $criterios,
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo
