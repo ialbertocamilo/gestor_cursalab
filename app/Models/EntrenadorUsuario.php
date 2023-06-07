@@ -46,7 +46,7 @@ class EntrenadorUsuario extends Model implements Recordable
 
     public function scopeAlumno($q, $alumno_id)
     {
-        return $q->where('user_id', $alumno_id);
+        return is_array($alumno_id) ? $q->whereIn('user_id', $alumno_id) : $q->where('user_id', $alumno_id);
     }
 
     /*==============================================================================================================================*/
@@ -55,9 +55,8 @@ class EntrenadorUsuario extends Model implements Recordable
     {
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
-
 //        $queryEntrenadores = User::whereIs('trainer');
-        $queryEntrenadores = User::whereRelation('subworkspace', 'parent_id', $data['workspace_id'])
+        $queryEntrenadores = User::select('id','name','lastname','surname','fullname','document','subworkspace_id','active')->whereRelation('subworkspace', 'parent_id', $data['workspace_id'])
             ->whereHas('students');
 
         // $queryEntrenadores = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR);
@@ -73,37 +72,35 @@ class EntrenadorUsuario extends Model implements Recordable
 
         $queryEntrenadores->orderBy($field, $sort);
 
-        $entrenadores = $queryEntrenadores->paginate(request('paginate', 15));
+        $entrenadores = $queryEntrenadores->withCount('students as alumnos_count')->paginate(request('paginate', 15));
 
         // info($entrenadores);
-        // dd($entrenadores->pluck('id')->all());
 
-        $entrenador_usuario = EntrenadorUsuario::with('user')->whereIn('trainer_id', $entrenadores->pluck('id')->all())->get();
-        $responseData = [];
-        foreach ($entrenadores->items() as $entrenador) {
-            $alumnosEntrenador = $entrenador_usuario->where('trainer_id', $entrenador->id)->sortByDesc('updated_at');
-            $tempAlumnos = collect();
-            $alumnosEntrenador->each(function ($value, $key) use ($tempAlumnos) {
-                $subw = $value->user->subworkspace()->first();
-                $temp = [
-                    'id' => $value->user->id,
-                    'document' => $value->user->document,
-                    'name' => (!empty($value->user->fullname)) ? $value->user->fullname : $value->user->name,
-                    'botica' => (!is_null($subw)) ? $subw->name : '',
-                    'estado' => $value->active === 1,
-                    'loading' => false
-                ];
-                $tempAlumnos->push($temp);
-            });
-            $entrenador->alumnos = $tempAlumnos;
-            $entrenador->alumnos_count = $entrenador->alumnos->count();
-            $entrenador->asignar_ver_alumnos = false;
-            $entrenador->asignar_alumnos = false;
-	    $entrenador->is_super_user = auth()->user()->isAn('super-user');
-	    $responseData[] = $entrenador->only('document', 'name', 'alumnos', 'asignar_ver_alumnos', 'botica', 'asignar_alumnos', 'config_id', 'id', 'alumnos_count', 'is_super_user');
-        }
-
-        $response['data'] = $responseData;
+        // $entrenador_usuario = EntrenadorUsuario::with('user')->whereIn('trainer_id', $entrenadores->pluck('id')->all())->get();
+        // $responseData = [];
+        // foreach ($entrenadores->items() as $entrenador) {
+        //     // $alumnosEntrenador = $entrenador_usuario->where('trainer_id', $entrenador->id)->sortByDesc('updated_at');
+        //     $tempAlumnos = collect();
+        //     // $alumnosEntrenador->each(function ($value, $key) use ($tempAlumnos) {
+        //     //     $subw = $value->user->subworkspace()->first();
+        //     //     $temp = [
+        //     //         'id' => $value->user->id,
+        //     //         'document' => $value->user->document,
+        //     //         'name' => (!empty($value->user->fullname)) ? $value->user->fullname : $value->user->name,
+        //     //         'botica' => (!is_null($subw)) ? $subw->name : '',
+        //     //         'estado' => $value->active === 1,
+        //     //         'loading' => false
+        //     //     ];
+        //     //     $tempAlumnos->push($temp);
+        //     // });
+        //     $entrenador->alumnos = $tempAlumnos;
+        //     $entrenador->alumnos_count = $entrenador->alumnos->count();
+        //     $entrenador->asignar_ver_alumnos = false;
+        //     $entrenador->asignar_alumnos = false;
+        //     $responseData[] = $entrenador->only('document', 'name', 'alumnos', 'asignar_ver_alumnos', 'botica', 'asignar_alumnos', 'config_id', 'id', 'alumnos_count');
+        // }
+        // dd($entrenadores->items());
+        $response['data'] = $entrenadores->items();
         $response['lastPage'] = $entrenadores->lastPage();
 
         $response['current_page'] = $entrenadores->currentPage();
@@ -120,7 +117,37 @@ class EntrenadorUsuario extends Model implements Recordable
 
         return $response;
     }
+    public static function listStudents($trainer_id){
+        // $entrenador = EntrenadorUsuario::with(['student'=>function($q){
+        //     $q->select('id','name','lastname','surname','fullname','document','subworkspace_id','active');
+        // },'user.subworkspace'])->where('trainer_id', $trainer_id)->first();
+        $students = EntrenadorUsuario::join('users','trainer_user.user_id','=','users.id')
+                    ->where('trainer_user.trainer_id', $trainer_id)
+                    ->select('users.id','name','lastname','surname','fullname','document','subworkspace_id','trainer_user.active as estado')
+                    ->get();
 
+        $workspace = get_current_workspace();
+        $subworkspaces = Workspace::select('id','name')->where('parent_id',$workspace->id)->get();
+        $tempAlumnos = collect();
+        foreach ($students as $student) {
+            $subw = $subworkspaces->where('id',$student->subworkspace_id)->first();
+            $student->botica = (!is_null($subw)) ? $subw->name : '';
+            $student->loading = false;
+            // $temp = [
+            //     'id' => $student->id,
+            //     'document' => $student->document,
+            //     'name' => (!empty($student->fullname)) ? $student->fullname : $student->name,
+            //     'botica' => (!is_null($subw)) ? $subw->name : '',
+            //     'estado' => $student->active === 1,
+            //     'loading' => false
+            // ];
+            // $tempAlumnos->push($temp);
+        }
+
+        return [
+            'alumnos'=> $students
+        ];
+    }
     public function validarUsuario($usuario_dni)
     {
         $response['error'] = false;
@@ -184,7 +211,9 @@ class EntrenadorUsuario extends Model implements Recordable
     protected function alumnosApi($data)
     {
         $entrenador_dni = $data['entrenador_dni'];
-        $filtro = $data['filtro'];
+        $filtro_usuario = $data['filtro']['usuario'];
+        $filtro_estado = $data['filtro']['estado'];
+
         $page = $data['page'];
 
         $response['error'] = false;
@@ -196,23 +225,27 @@ class EntrenadorUsuario extends Model implements Recordable
         }
         // TODO: Lista total de alumnos
         $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
+        $users_assigned = count($alumnos_ids);
 
         $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
+            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'users.id')
+            ->when($filtro_estado, function($q) use ($filtro_estado){
+               return   $filtro_estado == 'realizado'
+                        ? $q->where('suc.advanced_percentage',100)
+                        : $q->where(function ($q){
+                            $q->where('suc.advanced_percentage', '!=', 100);
+                            $q->orWhereNull('suc.advanced_percentage');
+                        });
+            })
+            ->when($filtro_usuario, function($q) use ($filtro_usuario){
+                $q->where(function ($query) use ($filtro_usuario) {
+                    $query->where('users.name', 'like', "%$filtro_usuario%");
+                    $query->orWhere('users.document', 'like', "%$filtro_usuario%");
+                });
+            })
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace');
-        // $queryDataAlumnos = User::with([
-        //     'matricula_presente.carrera' => function ($q) {
-        //         $q->select('id', 'nombre');
-        //     }
-        // ])->whereIn('id', $alumnos_ids->pluck('user_id')->all())
-        //     ->select('id', 'name', 'document', 'subworkspace_id');
+            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage','suc.assigned');
 
-        if (!empty($filtro) && !is_array($filtro)) {
-            $queryDataAlumnos->where(function ($query) use ($filtro) {
-                $query->where('users.name', 'like', "%$filtro%");
-                $query->orWhere('users.document', 'like', "%$filtro%");
-            });
-        }
         if ($page) {
             $perPage = 50;
             $pagination = $queryDataAlumnos
@@ -222,7 +255,8 @@ class EntrenadorUsuario extends Model implements Recordable
                 'total' => $pagination->total(),
                 'pages' => $pagination->lastPage(),
                 'perPage' => $pagination->perPage(),
-                'page' => $page
+                'page' => $page,
+                'users_assigned'=> $users_assigned
             ];
 
             $dataAlumnos = collect($pagination->items());
@@ -231,37 +265,13 @@ class EntrenadorUsuario extends Model implements Recordable
         }
 
         $dataAlumnos->each(function ($value, $key) use ($alumnos_ids, $entrenador) {
-            // $value->makeHidden('matricula_presente');
             $value->makeHidden(['abilities', 'roles', 'age', 'fullname']);
-            // $value->carrera = $value->matricula_presente->carrera->nombre;
             $value->carrera = '';
+            $value->advanced_percentage = $value->advanced_percentage ?? 0;
+            $value->assigned = $value->assigned ?? 0;
         });
         $response['alumnos'] = $dataAlumnos;
-
-        // TODO: Últimos 10 alumnos vistos
-        $ultimos_alumnos_ids = ChecklistRpta::limit(10)->whereIn('student_id', $alumnos_ids->pluck('user_id')->all())->orderBy('updated_at', 'DESC')->groupBy('student_id')->get();
-        $ultimos_alumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
-            ->whereIn('users.id', $ultimos_alumnos_ids->pluck('student_id')->all())
-            ->select('users.id', 'users.name', 'users.fullname as full_name', 'users.document', 'w.name as subworkspace')
-            ->get();
-        // $ultimos_alumnos = Usuario::with([
-        //     'matricula_presente.carrera' => function ($q) {
-        //         $q->select('id', 'nombre');
-        //     }
-        // ])->where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ALUMNO)
-        //     ->whereIn('id', $ultimos_alumnos_ids->pluck('alumno_id')->all())
-        //     ->select('id', 'nombre', 'dni', 'botica', 'sexo')
-        //     ->get();
-
-        $ultimos_alumnos->each(function ($value, $key) use ($alumnos_ids, $ultimos_alumnos_ids, $entrenador) {
-            // $value->makeHidden('matricula_presente');
-            // $value->carrera = $value->matricula_presente->carrera->nombre;
-            $value->carrera = '';
-            $temp2 = $ultimos_alumnos_ids->where('student_id', $value->id)->where('coach_id', $entrenador['data_usuario']->id)->sortByDesc('updated_at')->first();
-            $value->ultima_actividad = '';
-            if ($temp2) $value->ultima_actividad = $temp2->updated_at->format('Y-m-d H:i:s');
-        });
-        $response['ultimos_alumnos'] = $ultimos_alumnos;
+        $response['total_alumnos'] = count($dataAlumnos);
 
         return $response;
     }
@@ -276,8 +286,17 @@ class EntrenadorUsuario extends Model implements Recordable
 
         $alumno = EntrenadorUsuario::where('trainer_id', $user_id)->first();
         if (!is_null($alumno)) {
+            $alumno_doc = User::select('document')->where('id', $user_id)->where('active', 1)->first();
+            $alumno_doc = $alumno_doc?->document ?? $user_id;
             $response['error'] = true;
-            $response['msg'] = 'El alumno que se quiere asignar, es un entrenador.';
+            $response['msg'] = 'El usuario con Doc. de Identidad ('.$alumno_doc.'), es un entrenador.';
+            return $response;
+        }
+
+        $is_trainer = EntrenadorUsuario::where('user_id', $trainer_id)->first();
+        if (!is_null($is_trainer)) {
+            $response['error'] = true;
+            $response['msg'] = 'El entrenador que se quiere asignar, es un alumno.';
             return $response;
         }
 
