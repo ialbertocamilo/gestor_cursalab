@@ -513,12 +513,12 @@ class Course extends BaseModel
                          ->get();
 
             $courses = $courses->sortBy('position');
-            $cycles = null;
-            if($workspace_id === 25){
-                $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
-                ->where('value_text', '<>', 'Ciclo 0')
-                ->orderBy('position')->get();
-            }
+            // $cycles = null;
+            // if($workspace_id === 25){
+            //     $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
+            //     ->where('value_text', '<>', 'Ciclo 0')
+            //     ->orderBy('position')->get();
+            // }
 
             foreach ($courses as $course) {
                 $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;

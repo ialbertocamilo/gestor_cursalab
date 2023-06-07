@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\WebexService;
 use App\Services\ZoomService;
 use Firebase\JWT\JWT;
+use GuzzleHttp\Client;
 
 class Account extends BaseModel
 {
@@ -12,7 +13,7 @@ class Account extends BaseModel
         'workspace_id',
         'name', 'description', 'email', 'username', 'password', 'identifier', 'active',
         'key', 'secret', 'token', 'refresh_token', 'sdk_token', 'zak_token',
-        'service_id', 'plan_id', 'type_id', 'max_assistants', 'old_id'
+        'service_id', 'plan_id', 'type_id','account_id','client_id','client_secret', 'max_assistants', 'old_id'
     ];
 
     public function service()
@@ -35,6 +36,9 @@ class Account extends BaseModel
         return $this->hasMany(Meeting::class);
     }
 
+
+
+
     public function generateJWT()
     {
         $payload = [
@@ -45,7 +49,7 @@ class Account extends BaseModel
         ];
 
         $temp = JWT::encode($payload, $this->secret, 'HS256');
-//        $this->refresh_token = $temp;
+        //        $this->refresh_token = $temp;
 
         $this->update(['refresh_token' => $temp]);
 
@@ -61,6 +65,25 @@ class Account extends BaseModel
 
         return ['sdk_token' => $this->sdk_token, 'zak_token' => $this->zak_token];
     }
+
+    public function getZoomAccessToken($clientID, $clientSecret, $accountID) {
+        $client = new Client();
+
+        $response = $client->request('POST', 'https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' . $accountID, [
+            'auth' => [
+                $clientID,
+                $clientSecret
+            ]
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+
+        $accessToken = $data['access_token'];
+
+        return $accessToken;
+    }
+
+
 
     protected function search($request)
     {

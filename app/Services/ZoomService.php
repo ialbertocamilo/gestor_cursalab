@@ -23,8 +23,8 @@ class ZoomService extends MeetingService
             $this->logActivity($account, $path, $method);
 
             $url = "$this->base_url$path";
-            $token = $account->generateJWT();
-            // info($token);
+            $token = $account->getZoomAccessToken($account->client_id, $account->client_secret, $account->account_id);
+            info($token);
 
             $client = new Client();
 
@@ -77,7 +77,7 @@ class ZoomService extends MeetingService
     {
         $config = config('zoom.requests.meeting.create');
         $method = ($meeting and $meeting->identifier) ? 'patch' : 'post';
-        $url = ($meeting and $meeting->identifier) ? "/users/{$account->identifier}/meetings/$meeting->identifier" : "/users/{$account->identifier}/meetings";
+        $url = ($meeting and $meeting->identifier) ? "/users/{$account->email}/meetings/$meeting->identifier" : "/users/{$account->email}/meetings";
         $startTimestamp = strtotime($data['starts_at'] ?? $meeting->starts_at);
 
         $data_zoom = array_replace_recursive($config, [
