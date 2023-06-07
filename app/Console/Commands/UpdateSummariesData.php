@@ -49,7 +49,7 @@ class UpdateSummariesData extends Command
                     ->orWhereNotNull('summary_course_update');
             })
             ->whereNotNull('subworkspace_id')
-            ->limit(1000)
+            ->limit(2500)
             ->get();
 
         User::whereIn('id', $users->pluck('id'))->update([
