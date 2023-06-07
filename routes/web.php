@@ -40,6 +40,7 @@ Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('pas
 
 
 Route::get('home', [DashboardController::class, 'index'])->name('home');
+Route::get('welcome', [DashboardController::class, 'index'])->name('home');
 
 // DESCARGAS
 Route::get('dnx/{id}', [GestorController::class, 'descargaArchivo']);
@@ -69,7 +70,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::get('/impersonate/leave', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
     Route::get('/impersonate/take/{value}', [ImpersonateController::class, 'take'])->name('impersonate')->middleware('checkrol:super-user');
 
-    Route::view('welcome', 'welcome');
+    // Route::view('welcome', 'welcome');
 
     Route::get('/workspaces/search', [WorkspaceController::class, 'search']);
     Route::put('/usuarios/session/workspace/{workspace}', [UsuarioController::class, 'updateWorkspaceInSession']);
