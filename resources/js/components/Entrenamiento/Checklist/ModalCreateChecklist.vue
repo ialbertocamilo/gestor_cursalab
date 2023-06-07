@@ -26,7 +26,6 @@
                                                 <DefaultInput clearable
                                                             v-model="checklist.title"
                                                             label="Título"
-                                                            :rules="formRules.titulo_descripcion"
                                                 />
                                             </v-col>
                                         </v-row>
@@ -39,7 +38,6 @@
                                                     hide-details="auto"
                                                     label="Descripción"
                                                     v-model="checklist.description"
-                                                    :rules="formRules.titulo_descripcion"
                                                     class="txt_desc"
                                                 ></v-textarea>
                                             </v-col>
@@ -161,6 +159,7 @@
                                                         clearable
                                                         append-icon="mdi-magnify"
                                                         autocomplete="off"
+                                                        :loading="isLoading"
                                                     ></v-text-field>
                                                 </v-col>
                                                 <v-col cols="4" md="4" lg="4" class="d-flex justify-content-end bx_options_select pb-0 pt-2">
@@ -171,12 +170,12 @@
                                                 <v-col cols="12" md="12" lg="12" class="pb-0 pt-2">
                                                     <div class="box_resultados">
                                                         <div class="bx_message" v-if="results_search.length == 0">
-                                                            <span class="text_default">Resultados de búsqueda</span>
+                                                            <span class="text_default">{{ isLoading ? 'Espere...' : 'Resultados de búsqueda'}}</span>
                                                         </div>
                                                         <ul v-else>
                                                             <li v-for="(curso, index) in results_search" :key="curso.id" class="d-flex align-center justify-content-between">
                                                                 <span class="text_default">{{ curso.escuela }} - {{ curso.curso }}</span>
-                                                                <v-btn small icon :ripple="false" @click="seleccionarCurso(curso, index)">
+                                                                <v-btn small icon :ripple="false" @click="seleccionarCurso(curso, index)" :disabled="disabled_add_courses">
                                                                     <v-icon class="icon_size" small color="black"
                                                                             style="font-size: 1.25rem !important;">
                                                                         mdi-plus-circle
@@ -248,8 +247,7 @@
                                                             @end="drag=false" class="custom-draggable" ghost-class="ghost">
                                                         <transition-group type="transition" name="flip-list" tag="div">
                                                             <div v-for="(actividad, i) in checklist.checklist_actividades"
-                                                                :key="actividad.id"
-                                                                :class="{'default-actividad-error': actividad.hasErrors}">
+                                                                :key="actividad.id">
                                                                 <div class="item-draggable activities">
                                                                     <v-row>
                                                                         <v-col cols="1" class="d-flex align-center justify-content-center ">
@@ -264,7 +262,7 @@
                                                                                 auto-grow
                                                                                 hide-details="auto"
                                                                                 v-model="actividad.activity"
-                                                                                :rules="formRules.actividad"
+                                                                                :class="{'border-error': actividad.hasErrors}"
                                                                             ></v-textarea>
                                                                         </v-col>
                                                                         <v-col cols="12" md="3" lg="3" class="d-flex align-center no-white-space">
@@ -397,6 +395,7 @@ export default {
             file: null,
             search_text: null,
             results_search: [],
+            disabled_add_courses: false,
             isLoading: false,
             messageActividadesEmpty: false,
             formRules: {
@@ -411,7 +410,7 @@ export default {
             modalAlert: {
                 ref: 'modalAlert',
                 title: 'Alerta',
-                contentText: 'Este checklist debe de tener por lo menos una (1) actividad "Califica a: Alumno"',
+                contentText: 'Este checklist debe de tener por lo menos una (1) actividad "Se califica al alumno"',
                 open: false,
                 endpoint: '',
                 confirmLabel:"Entendido",
@@ -499,10 +498,13 @@ export default {
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
-                     vue.disabled_btn_next = vue.stepper_box_btn2;
+                    vue.disabledBtnModal()
+                    vue.disabled_btn_next = vue.stepper_box_btn2;
                 }
                 else if(vue.stepper_box == 3){
-                     vue.disabled_btn_next = vue.stepper_box_btn3;
+                    let errors = vue.showValidateActividades()
+                    vue.stepper_box_btn3 = vue.checklist.checklist_actividades.length == 0 || errors > 0
+                    vue.disabled_btn_next = vue.stepper_box_btn3;
                 }
             },
             deep: true
@@ -518,10 +520,13 @@ export default {
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
-                     vue.disabled_btn_next = vue.stepper_box_btn2;
+                    vue.disabledBtnModal()
+                    vue.disabled_btn_next = vue.stepper_box_btn2;
                 }
                 else if(vue.stepper_box == 3){
-                     vue.disabled_btn_next = vue.stepper_box_btn3;
+                    let errors = vue.showValidateActividades()
+                    vue.stepper_box_btn3 = vue.checklist.checklist_actividades.length == 0 || errors > 0
+                    vue.disabled_btn_next = vue.stepper_box_btn3;
                 }
             },
             deep: true
@@ -551,6 +556,14 @@ export default {
             if(vue.stepper_box == 1){
                 vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 2;
+
+                if(vue.checklist.type_checklist == "libre") {
+                    vue.checklist.courses = [];
+                }
+                if(vue.checklist.type_checklist == "curso") {
+                    vue.checklist.segments[0].direct_segmentation = [null];
+                    vue.checklist.segmentation_by_document.segmentation_by_document = [];
+                }
             }
             else if(vue.stepper_box == 2){
                 vue.cancelLabel = "Retroceder";
@@ -580,18 +593,27 @@ export default {
             let vue = this;
             vue.stepper_box_btn2 = false;
 
-            if(vue.checklist.segments != null && vue.checklist.segments.length > 0) {
+            let direct_segmentation = (vue.checklist.segments != null && vue.checklist.segments.length > 0) ? vue.checklist.segments[0].direct_segmentation : [];
+            let segmentation_by_document = vue.checklist.segmentation_by_document != null && vue.checklist.segmentation_by_document.segmentation_by_document.length > 0;
 
-                let direct_segmentation = vue.checklist.segments[0].direct_segmentation;
+            if(vue.checklist.courses.length == 0 && (direct_segmentation.length > 0 && direct_segmentation[0] == null) && !segmentation_by_document) {
+                vue.stepper_box_btn2 = true;
+            } else {
 
-                if (direct_segmentation != null && direct_segmentation.length > 0)  {
-                    if( direct_segmentation[0] == null ) {}
-                    else {
-                        direct_segmentation.forEach(element => {
-                            if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
-                                vue.stepper_box_btn2 = true;
-                            }
-                        });
+                if (vue.checklist.type_checklist == 'curso') {
+                    if (vue.checklist.courses.length == 0) {
+                        vue.stepper_box_btn2 = true
+                    }
+                } else {
+                    if (direct_segmentation.length > 0)  {
+                        if( direct_segmentation[0] == null ) {}
+                        else {
+                            direct_segmentation.forEach(element => {
+                                if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
+                                    vue.stepper_box_btn2 = true;
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -636,24 +658,27 @@ export default {
                 'model_id': null,
                 'code': "segmentation-by-document"
             };
-            vue.$emit("onConfirm");
+            const allIsValid = vue.moreValidaciones()
+
+            if (allIsValid == 0)
+                vue.$emit("onConfirm");
         },
         showValidateActividades() {
             let vue = this
-            vue.checklist.checklist_actividades.forEach((el, index) => {
-                el.hasErrors = !el.actividad || el.actividad === ''
-            })
+            let errors = 0;
+
+            if( vue.checklist.checklist_actividades.length > 0 ) {
+                vue.checklist.checklist_actividades.forEach((el, index) => {
+                    el.hasErrors = !el.activity || el.activity === ''
+                    if(el.hasErrors) errors++;
+                })
+            }
+            return errors;
         },
         moreValidaciones() {
             let vue = this
             let errors = 0
 
-            // validar al menos una actividad
-            if (vue.checklist.checklist_actividades.length === 0) {
-                let msg = 'Debe registrar al menos una actividad'
-                // vue.showAlert(msg, 'warning')
-                errors++
-            }
             let hasActividadEntrenadorUsuario = false;
             vue.checklist.checklist_actividades.map(actividad=>{
                if( actividad.type_name=='trainer_user') hasActividadEntrenadorUsuario=true;
@@ -746,12 +771,22 @@ export default {
             let vue = this;
             vue.results_search.push(curso)
             vue.checklist.courses.splice(index, 1)
+            if(vue.checklist.courses.length >= 2) {
+                vue.disabled_add_courses = true;
+            } else {
+                vue.disabled_add_courses = false;
+            }
 
         },
         seleccionarCurso(curso, index) {
             let vue = this;
             vue.checklist.courses.push(curso)
             vue.results_search.splice(index, 1)
+            if(vue.checklist.courses.length >= 2) {
+                vue.disabled_add_courses = true;
+            } else {
+                vue.disabled_add_courses = false;
+            }
         },
         getNewSegment(type_code) {
             return {
@@ -981,6 +1016,10 @@ button.btn_secondary span.v-btn__content i{
     border: 1px solid #D9D9D9;
     padding: 10px 0;
 }
+.box_resultados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before,
+.box_seleccionados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before {
+    opacity: 0;
+}
 .bx_message {
     display: flex;
     justify-content: center;
@@ -1075,5 +1114,8 @@ span.v-stepper__step__step:after {
 .bx_seg .v-select__slot .v-input__append-inner,
 .bx_steps .bx_seg .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
     margin-top: 6px !important;
+}
+.border-error .v-input__slot fieldset {
+    border-color: #FF5252 !important;
 }
 </style>

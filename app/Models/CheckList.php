@@ -66,14 +66,7 @@ class CheckList extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $queryChecklist = CheckList::with([
-            'checklist_actividades' => function ($q) {
-                $q->orderBy('active', 'desc')->orderBy('position');
-            },
-            'courses' => function ($q) {
-                $q->select('courses.id', 'courses.name');
-            }
-        ])->where('workspace_id', $workspace->id);
+        $queryChecklist = CheckList::where('workspace_id', $workspace->id);
 
         $field = 'created_at';
         $sort = 'DESC';
@@ -88,7 +81,42 @@ class CheckList extends BaseModel
         }
         $checklists = $queryChecklist->paginate(request('paginate', 15));
 
-        foreach ($checklists->items() as $checklist) {
+        $response['data'] = $checklists->items();
+        $response['lastPage'] = $checklists->lastPage();
+        $response['current_page'] = $checklists->currentPage();
+        $response['first_page_url'] = $checklists->url(1);
+        $response['from'] = $checklists->firstItem();
+        $response['last_page'] = $checklists->lastPage();
+        $response['last_page_url'] = $checklists->url($checklists->lastPage());
+        $response['next_page_url'] = $checklists->nextPageUrl();
+        $response['path'] = $checklists->getOptions()['path'];
+        $response['per_page'] = $checklists->perPage();
+        $response['prev_page_url'] = $checklists->previousPageUrl();
+        $response['to'] = $checklists->lastItem();
+        $response['total'] = $checklists->total();
+
+        return $response;
+    }
+
+    protected function getChecklistById($checklist_id)
+    {
+        $response['checklist'] = null;
+
+        $workspace = get_current_workspace();
+
+        $checklist = CheckList::with([
+            'checklist_actividades' => function ($q) {
+                $q->orderBy('active', 'desc')->orderBy('position');
+            },
+            'courses' => function ($q) {
+                $q->select('courses.id', 'courses.name');
+            }
+        ])
+        ->where('workspace_id', $workspace->id)
+        ->where('id', $checklist_id)
+        ->first();
+
+        if(!is_null($checklist)) {
             foreach ($checklist->checklist_actividades as $act) {
                 $type_id = $act->type_id ?? null;
                 $type_name = !is_null($type_id) ? Taxonomy::where('id', $type_id)->first() : null;
@@ -128,19 +156,7 @@ class CheckList extends BaseModel
             $checklist->type_checklist = $type_checklist?->code;
         }
 
-        $response['data'] = $checklists->items();
-        $response['lastPage'] = $checklists->lastPage();
-        $response['current_page'] = $checklists->currentPage();
-        $response['first_page_url'] = $checklists->url(1);
-        $response['from'] = $checklists->firstItem();
-        $response['last_page'] = $checklists->lastPage();
-        $response['last_page_url'] = $checklists->url($checklists->lastPage());
-        $response['next_page_url'] = $checklists->nextPageUrl();
-        $response['path'] = $checklists->getOptions()['path'];
-        $response['per_page'] = $checklists->perPage();
-        $response['prev_page_url'] = $checklists->previousPageUrl();
-        $response['to'] = $checklists->lastItem();
-        $response['total'] = $checklists->total();
+        $response['checklist'] = $checklist;
 
         return $response;
     }

@@ -49,12 +49,12 @@
                         <div class="d-flex justify-content-center align-items-center mx-2">
                             <span class="text_default">{{ arrayCriteriaSelected.length || 0 }} seleccionados</span>
                         </div>
-                        <div class="bx_select_all">
+                        <div class="bx_select_all" :class="{ disabled: filter_result.length == 0 && arrayCriteriaSelected.length == 0 }">
                             <label class="text_default" for="checkbox">
                                 Todos
                                 <div class="round">
-                                    <input type="checkbox" id="checkbox" @change="selectAll" v-model="select_all" />
-                                    <span class="checkmark"></span>
+                                    <input type="checkbox" id="checkbox" @change="selectAll" v-model="select_all" :disabled="filter_result.length == 0 && arrayCriteriaSelected.length == 0" />
+                                    <span class="checkmark" :class="{ selected: filter_result.length == 0 && arrayCriteriaSelected.length > 0 }"></span>
                                 </div>
                             </label>
                         </div>
@@ -409,6 +409,7 @@ button.v-icon.v-icon--link {
 .bx_select_all label {
     display: flex;
     margin: 0;
+    cursor: pointer;
 }
 .bx_select_all .round {
     position: relative;
@@ -435,26 +436,32 @@ button.v-icon.v-icon--link {
     border-radius: 15px;
     border: 1px solid #434D56;
 }
+.bx_select_all .round .checkmark.selected {
+    border: 1px solid #5458ea;
+    background-color: #5458ea;
+}
 
-.bx_select_all .round:hover input ~ .checkmark {
+.bx_select_all .round:hover input ~ .checkmark
+{
   background-color: #5458ea;
 }
 
-.bx_select_all .round input:checked ~ .checkmark {
-  background-color: #5458ea;
+.bx_select_all.disabled label {
+    color: #bfbfbf;
+}
+
+.bx_select_all.disabled .round .checkmark {
+    border: 1px solid #bfbfbf;
+}
+
+.bx_select_all.disabled .round:hover input ~ .checkmark
+{
+    background-color: #fff;
 }
 
 .bx_select_all .round .checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
-}
-
-.bx_select_all .round input:checked ~ .checkmark:after {
-  display: block;
-}
-
-.bx_select_all .round .checkmark:after {
+    content: "";
+    display: none;
     left: 50%;
     top: 50%;
     width: 7px;
@@ -463,5 +470,10 @@ button.v-icon.v-icon--link {
     position: absolute;
     background: #fff;
     border-radius: 50%;
+}
+
+.bx_select_all .round:hover .checkmark.selected:after,
+.bx_select_all .round .checkmark.selected:after {
+  display: block;
 }
 </style>

@@ -99,7 +99,7 @@ export default {
         },
         async confirmModal() {
             let vue = this
-            if(vue.errores.length > 0)
+            if(vue.errores.length > 0 || vue.options.confirmLabel == 'Subir otro archivo')
                 vue.nuevo_archivo()
 
             if(vue.dropzone_file.file != null) {
@@ -108,7 +108,7 @@ export default {
                 let data = new FormData();
                 data.append("archivo", vue.dropzone_file.file);
                 await axios
-                    .post('/entrenamiento/entrenadores/asignar_masivo', data)
+                    .post('/entrenamiento/checklists/import', data)
                     .then((res) => {
                         vue.dropzone_file.success_file = true;
                         if (res.data.info.data_no_procesada.length > 0) {
@@ -116,21 +116,10 @@ export default {
                             vue.errores = res.data.info.data_no_procesada
                             vue.options.confirmLabel = "Subir otro archivo"
                         }
-                        else {
-                            if(res.data.error == false) {
-                                vue.$notification.success(`Se subió correctamente el archivo.`, {
-                                    timer: 6,
-                                    showLeftIcn: false,
-                                    showCloseIcn: true
-                                });
-                                vue.closeModal();
-                            }
-                        }
                         vue.options.confirmLabel = "Subir otro archivo"
                         vue.archivo = null;
                         vue.hideLoader()
                         vue.$emit('refreshTable')
-                        // vue.$emit('onConfirm')
                     })
                     .catch((err) => {
                         vue.hideLoader();

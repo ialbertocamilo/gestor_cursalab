@@ -140,16 +140,22 @@ class EntrenamientoController extends Controller
     public function asignar(Request $request)
     {
         $data = $request->all();
+        $errors = [];
         foreach ($data['alumnos'] as $key => $alumno) {
             $temp = [
                 'trainer_id' => $data['entrenador_id'],
                 'user_id' => $alumno['id'],
                 'active' => 1
             ];
-            EntrenadorUsuario::asignar($temp);
+            $asignar_msg = EntrenadorUsuario::asignar($temp);
+            if($asignar_msg['error'])
+                array_push($errors, $asignar_msg['msg']);
         }
         $alumnos = EntrenadorUsuario::getUsuariosByEntrenador($data);
         $apiResponse['alumnos'] = $alumnos['data'];
+        $apiResponse['errors'] = $errors;
+        cache_clear_model(EntrenadorUsuario::class);
+        cache_clear_model(User::class);
 
         return response()->json($apiResponse, 200);
     }
@@ -225,13 +231,25 @@ class EntrenamientoController extends Controller
         $alumno = $request->alumno;
 
         EntrenadorUsuario::where('trainer_id', $entrenador['id'])->where('user_id', $alumno['id'])->delete();
-        return response()->json(['error' => false, 'msg' => 'Relación Entrenador-Alumno eliminada.'], 200);
+        cache_clear_model(EntrenadorUsuario::class);
+        cache_clear_model(User::class);
+        return response()->json(['error' => false, 'msg' => 'Se eliminó al alumno ('.$alumno['document'].') para el entrenador ('.$entrenador['document'].')'], 200);
     }
 
     // CHECKLIST
     public function searchChecklist(Request $request)
     {
         $data = CheckList::gridCheckList($request->all());
+
+        return $this->success($data);
+    }
+
+    public function searchChecklistByID(Request $request)
+    {
+        $data = $request->all();
+        $id = $data['id'] ?? null;
+
+        $data = CheckList::getChecklistById($id);
 
         return $this->success($data);
     }

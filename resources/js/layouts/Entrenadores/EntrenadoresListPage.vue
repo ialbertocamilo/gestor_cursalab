@@ -21,10 +21,10 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Entrenadores
+                <span class="fw-bold font-nunito">Entrenadores</span>
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'"/> -->
-                <DefaultModalButton :label="'Asignar alumnos'" @click="optionsModalAsignarSupervisores.open = true"/>
+                <DefaultModalButton :label="'Asignar Entrenadores y Alumnos'" @click="optionsModalAsignarSupervisores.open = true" :icon="false" class="font-nunito"/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -39,11 +39,6 @@
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                         />
-                    </v-col>
-                    <v-col cols="4">
-                        <!-- <DefaultButton label="Filtros"
-                                       icon="mdi-filter"
-                                       @click="open_advanced_filter = !open_advanced_filter"/> -->
                     </v-col>
                     <v-col cols="4">
                         <DefaultInput
@@ -77,6 +72,11 @@
 <!--                                </v-tooltip>-->
 <!--                            </template>-->
 <!--                        </v-text-field>-->
+                    </v-col>
+                    <v-col cols="4">
+                        <!-- <DefaultButton label="Filtros"
+                                       icon="mdi-filter"
+                                       @click="open_advanced_filter = !open_advanced_filter"/> -->
                     </v-col>
                 </v-row>
             </v-card-text>

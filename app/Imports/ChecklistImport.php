@@ -18,6 +18,7 @@ class ChecklistImport implements ToCollection
 
     public function collection(Collection $collection)
     {
+        $workspace = get_current_workspace();
         $data_ok = collect();
         $data_no_procesada = collect();
 
@@ -25,6 +26,11 @@ class ChecklistImport implements ToCollection
         $collection = $collection->reject(function ($value, $key) {
             return $key == 0;
         });
+
+        $type_checklist = Taxonomy::where('group', 'checklist')
+                        ->where('type', 'type_checklist')
+                        ->where('code', 'curso')
+                        ->first();
 
         // Recorrer cada fila y crear el checklist
         foreach ($collection as $value) {
@@ -36,7 +42,13 @@ class ChecklistImport implements ToCollection
                 if ($index >= 3) $tempActividades->push($actividad);
             }
             // Crear CHECKLIST
-            $checklist = CheckList::create(['title' => $titulo, 'description' => $descripcion, 'active' => 1]);
+            $checklist = CheckList::create([
+                'title' => $titulo,
+                'description' => $descripcion,
+                'active' => 1,
+                'workspace_id' => $workspace->id,
+                'type_id' => !is_null($type_checklist) ? $type_checklist->id : null,
+            ]);
             foreach ($tempActividades->all() as $index => $actividad) {
                 if (!is_null($actividad) && !empty($actividad)) {
                     $type = Taxonomy::where('group', 'checklist')

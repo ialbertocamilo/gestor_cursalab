@@ -5,6 +5,7 @@
                     :options="dropzoneOptions"
                     :useCustomSlot="true"
                     v-on:vdropzone-success="uploadSuccess"
+                    v-on:vdropzone-complete="uploadComplete"
                     v-on:vdropzone-error="uploadError"
                     v-on:vdropzone-removed-file="fileRemoved"
         >
@@ -34,7 +35,7 @@
                 <div v-if="hasObservation" class="mx-8 mt-4">
                     <div class="text-subtitle-2" style="color:red;">Sin embargo el archivo tuvo observaciones que no se pudieron cargar.</div><br>
                     <div class="mt-4 text-subtitle-2">
-                        Descargar <span style="color:red;font-weight: bolder;" @click="downloadObservationsFile()">el archivo</span> con observaciones.
+                        Descargar <span style="color:red;font-weight: bolder; cursor: pointer;" @click="downloadObservationsFile()">el archivo</span> con observaciones.
                     </div>
                 </div>
                 <br>
@@ -113,6 +114,13 @@
             success_file: function(newVal, oldVal) {
                 this.$refs.myVueDropzone.removeAllFiles()
                 this.archivo = null;
+            },
+            hasObservation: function(newVal, oldVal) {
+                if(this.hasObservation)
+                    this.$refs.myVueDropzone.disable()
+                else
+                    this.$refs.myVueDropzone.enable()
+                this.archivo = null;
             }
         },
         methods: {
@@ -122,6 +130,9 @@
             },
             uploadSuccess(file, response) {
                 this.$emit("emitir-archivo", file);
+            },
+            uploadComplete(file, response) {
+                this.$emit("emitir-archivo-completo", file);
             },
             uploadError(file, message) {
                 // this.$emit("emitir-alerta", 'Ocurrió un error');

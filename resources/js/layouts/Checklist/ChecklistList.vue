@@ -2,12 +2,10 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Checklists
+                <span class="fw-bold font-nunito">Checklists</span>
                 <v-spacer/>
-                <DefaultActivityButton :label="'Subida masiva'" @click="modal.subida_masiva= true"/>
-                <DefaultModalButton :label="'Checklist'" @click="
-                                abrirModalCreateEditChecklist(objectModal)
-                            "/>
+                <DefaultActivityButton :label="'Subida masiva'" @click="optionsModalSubidaMasivaChecklist.open = true"/>
+                <DefaultModalButton :label="'Checklist'" @click="abrirModalCreateEditChecklist(objectModal)" class="font-nunito"/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -38,11 +36,15 @@
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
         </v-card>
-        <StepperSubidaMasiva
-            urlPlantilla="/templates/Plantilla_Checklist.xlsx"
-            urlSubida="/entrenamiento/checklists/import"
-            v-model="modal.subida_masiva"
-            @onClose="closeModalSubidaMasiva"
+        <ModalSubidaMasivaChecklist
+            template_url="/templates/Plantilla_Checklist.xlsx"
+            v-model="modal.asignar_ver_alumnos"
+            :width="'40%'"
+            :options="optionsModalSubidaMasivaChecklist"
+            @onCancel="optionsModalSubidaMasivaChecklist.open=false"
+            @onConfirm = "optionsModalSubidaMasivaChecklist.open=false"
+            @showSnackbar="mostrarSnackBar($event)"
+            @refreshTable="refreshDefaultTable(dataTable, filters, 1)"
         />
 
         <ModalCreateChecklist
@@ -80,10 +82,10 @@
 
 <script>
 
+import ModalSubidaMasivaChecklist from "../../components/Entrenamiento/Checklist/ModalSubidaMasivaChecklist.vue";
 import ModalCreateChecklist from "../../components/Entrenamiento/Checklist/ModalCreateChecklist.vue";
 import ModalAsignarChecklistCurso from "../../components/Entrenamiento/Checklist/ModalAsignarChecklistCurso.vue";
 
-import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import LogsModal from "../../components/globals/Logs";
@@ -92,10 +94,10 @@ export default {
     components: {
         ModalCreateChecklist,
         ModalAsignarChecklistCurso,
-        StepperSubidaMasiva,
         DefaultDeleteModal,
         DefaultStatusModal,
-        LogsModal
+        LogsModal,
+        ModalSubidaMasivaChecklist
     },
     mounted() {
         let vue = this;
@@ -221,7 +223,11 @@ export default {
                 segmentation_by_document: {
                     segmentation_by_document:[]
                 }
-            }
+            },
+            optionsModalSubidaMasivaChecklist:{
+                open: false,
+                title: 'Subir checklist'
+            },
         }
     },
     methods: {
@@ -272,7 +278,35 @@ export default {
         },
         async abrirModalCreateEditChecklist(checklist, edit = false) {
             let vue = this;
-            vue.dataModalChecklist = checklist;
+
+            if(edit && checklist.id != null && checklist.id != 0) {
+                this.showLoader()
+                vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: checklist.id})
+                    .then((res) => {
+                        let res_checklist = res.data.data.checklist;
+                        if (res_checklist != null) {
+
+                            vue.dataModalChecklist = res_checklist;
+
+                        }else{
+                            vue.$notification.warning(`No se pudo obtener datos del checklist`, {
+                                timer: 6,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+                            vue.closeModalCreateEditChecklist();
+                            vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                        }
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            } else {
+                vue.dataModalChecklist = checklist;
+            }
+
             await vue.$refs.ModalCreateChecklist.resetValidation()
 
             vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
@@ -300,13 +334,39 @@ export default {
                     this.hideLoader()
                 });
         },
-        duplicateChecklist(checklist) {
+        async duplicateChecklist(checklist) {
+
+            let vue = this;
             let new_checklist = {...checklist}
 
-            new_checklist.title = new_checklist.title  + ' - copia'
-            new_checklist.duplicado = true
+            this.showLoader()
+            vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: new_checklist.id})
+                .then((res) => {
+                    let res_checklist = res.data.data.checklist;
+                    if (res_checklist != null) {
 
-            this.abrirModalCreateEditChecklist(new_checklist)
+                        new_checklist = res_checklist;
+
+                        new_checklist.title = new_checklist.title  + ' - copia'
+                        new_checklist.duplicado = true
+
+                        vue.abrirModalCreateEditChecklist(new_checklist)
+
+                    }else{
+                        vue.$notification.warning(`No se pudo obtener datos del checklist`, {
+                            timer: 6,
+                            showLeftIcn: false,
+                            showCloseIcn: true
+                        });
+                        vue.closeModalCreateEditChecklist();
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                    }
+                    this.hideLoader()
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.hideLoader()
+                });
         },
         async closeModalCreateEditChecklist() {
             let vue = this;
@@ -319,6 +379,18 @@ export default {
                 active: true,
                 checklist_actividades: [],
                 courses: []
+            };
+            vue.objectModal = {
+                id: 0,
+                title: '',
+                description: '',
+                active: true,
+                checklist_actividades: [],
+                courses: [],
+                segments: [],
+                segmentation_by_document: {
+                    segmentation_by_document:[]
+                }
             };
             vue.modal.crear_editar_checklist = false;
         },
