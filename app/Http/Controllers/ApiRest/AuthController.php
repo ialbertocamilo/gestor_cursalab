@@ -258,7 +258,7 @@ class AuthController extends Controller
         return [
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
-            //            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            // 'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
         ];
