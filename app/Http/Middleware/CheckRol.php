@@ -26,7 +26,7 @@ class CheckRol
         // === check workpsace only to 25 - Farmacias Peruanas ===
         $workspace_id = session('workspace')['id'];
         if($workspace_id !== 25 and $request->is('glosario'))
-            Redirect::to('welcome')->send();
+            Redirect::to('home')->send();
         // === check workpsace only to 25 - Farmacias Peruanas ===
 
         if (!$user->isAn('super-user')) {
@@ -41,7 +41,7 @@ class CheckRol
                     return abort(403);
                 }
 
-                Redirect::to('welcome')->send();
+                Redirect::to('home')->send();
             }
         }
         return $next($request);

@@ -86,7 +86,7 @@
                            >
 
                         <div class="row">
-                            <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/welcome')" title="Ir al workspace" 
+                            <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace" 
                             :style="{'height': `${view ? '105px' : 'auto'}`}"
                             >
 
@@ -414,7 +414,7 @@ export default {
          * @param workspaceId
          * @param redirect
          */
-        setActiveWorkspace(workspaceId, redirect = '/welcome') {
+        setActiveWorkspace(workspaceId, redirect = '/home') {
 
             let vue = this;
 
