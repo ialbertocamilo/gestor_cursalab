@@ -199,8 +199,8 @@ class AuthController extends Controller
         if ($workspace_data) {
             $workspace_data->logo = get_media_url($workspace_data->logo);
 
-            if ($workspace_data->id >= 33) {
-                $workspace_data->slug = 'farmacias-peruanas';
+            if ($workspace_data->slug == 'farmacias-peruanas') {
+                $workspace_data->logo = get_media_url($user->subworkspace->logo);
             }
         }
         if ($user->subworkspace->logo) {
