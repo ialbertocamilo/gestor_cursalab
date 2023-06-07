@@ -47,6 +47,7 @@ class UpdateSummariesDataV2 extends Command
                 $q->whereNotNull('summary_user_update')
                     ->orWhereNotNull('summary_course_update');
             })
+            ->whereNotNull('subworkspace_id')
             ->limit(1000)
             ->get();
 
