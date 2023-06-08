@@ -9,7 +9,7 @@
         >
             <template v-slot:content>
                 <v-row>
-                    <v-col cols="12">
+                    <v-col cols="12" class="py-0">
                         <v-img
                             :src="resource.preview"
                             :lazy-src="`https://picsum.photos/10/6?image=200`"
@@ -20,7 +20,7 @@
                         <p class="text-center my-3">
                             {{ resource.title }}
                         </p>
-                        <p class="text-center">
+                        <p class="text-center mb-3">
                             <strong>[ {{ resource.type }} ]</strong>
                             <strong>[ {{ resource.formattedSize }} ]</strong>
                             <strong>[ {{ resource.created }} ]</strong>
@@ -28,7 +28,9 @@
                     </v-col>
                 </v-row>
 
-                <v-row v-if="resource.sections" :style="{ 'border-top': '1px solid rgba(0,0,0,.12)' }">
+                <v-row v-if="resource.sections">
+
+                    <hr>
 
                     <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
                     <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
