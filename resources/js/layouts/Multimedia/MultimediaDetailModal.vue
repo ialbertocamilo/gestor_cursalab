@@ -8,46 +8,53 @@
         >
             <template v-slot:content>
                 <v-row>
-                    <v-col cols="8">
+                    <v-col cols="12">
                         <v-img
                             :src="resource.preview"
                             :lazy-src="`https://picsum.photos/10/6?image=200`"
-                            aspect-ratio="1.7"
-                            contain/>
+                            aspect-ratio="2"
+                            contain
+                        />
+
+                            <p class="text-center my-3">
+                                {{ resource.title }}
+                            </p>
+                            <p class="text-center">
+                                <strong>[{{ resource.type }}] [{{ resource.formattedSize }}] [{{ resource.created }}]</strong>
+                            </p>
                     </v-col>
-                    <v-col cols="4" class="d-flex flex-column align-center" style="justify-content: space-evenly">
-                        <div class="d-flex justify-content-center flex-column align-center">
-                            <span class="multimedia-label mb-1">
-                                Abrir en otra pestaña
-                            </span>
-                            <DefaultButton
-                                append-icon="mdi-open-in-new"
-                                label="Abrir"
-                                @click="openMultimedia"
-                            />
-                        </div>
+                </v-row>
+
+                <v-row>
+
+                    <v-col cols="12" class="d-flex align-center" style="justify-content: center">
+
+                        <DefaultButton
+                            append-icon="mdi-open-in-new"
+                            label="Abrir multimedia"
+                            @click="openMultimedia"
+                        />
+
                         <DefaultButton
                             v-if="resource.ext !== 'scorm'"
                             append-icon="mdi-download"
                             label="Descargar"
                             @click="downloadMultimedia"
                         />
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12">
-                        <v-row>
-                            <v-col cols="4" class="multimedia-label" v-text="'Nombre de archivo:'"/>
-                            <v-col cols="8" v-text="resource.title"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Tipo:'"/>
-                            <v-col cols="8" v-text="resource.type"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Peso:'"/>
-                            <v-col cols="8" v-text="resource.formattedSize"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Fecha de creación:'"/>
-                            <v-col cols="8" v-text="resource.created"/>
-                        </v-row>
+
+                        <DefaultButton
+                            v-if="resource.ext !== 'scorm'"
+                            append-icon="mdi-trash-can"
+                            label="Eliminar"
+                            color="default"
+                            @click="modalDeleteOptions.open = true"
+                        />
+
                     </v-col>
 
+                </v-row>
+
+                <v-row>
                     <div v-if="resource.sections">
 
                         <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
@@ -60,11 +67,11 @@
 
                     </div>  
 
-                    <v-col cols="6" v-if="false">
+                    <!-- <v-col cols="6" v-if="false">
                         <DefaultModalSection
                             title="Ubicación asignada"
                         />
-                    </v-col>
+                    </v-col> -->
                 </v-row>
             </template>
         </DefaultDialog>

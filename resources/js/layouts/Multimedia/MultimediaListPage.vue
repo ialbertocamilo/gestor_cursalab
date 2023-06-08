@@ -315,9 +315,10 @@ export default {
                 open: false,
                 base_endpoint: '/multimedia',
                 cancelLabel: 'Cerrar',
-                confirmLabel: 'Eliminar',
+                // confirmLabel: 'Eliminar',
                 resource: 'Multimedia',
                 showCloseIcon: true,
+                hideConfirmBtn: true,
             },
             modalUpdateMultimedia: {
                 ref: 'MultimediaUpdateModal',
