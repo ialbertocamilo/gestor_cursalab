@@ -178,10 +178,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasOne(SummaryUser::class);
     }
 
+    public function summary_checklist()
+    {
+        return $this->belongsTo(SummaryUserChecklist::class,'user_id');
+    }
+
     public function course_data()
     {
         return $this->hasOne(UserCourseData::class);
-    }    
+    }
 
     public function summary_courses()
     {
@@ -201,7 +206,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereRelationIn('status', 'code', ['desaprobado', 'por-iniciar'])
             ->where('attempts', '<>', 0);
     }
-
     public function relationships()
     {
         return $this->hasMany(UserRelationship::class, 'user_id');
@@ -345,7 +349,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         if ($soft) {
-            
+
             $user_cycles = $user->criterion_values
             ->where('criterion.code', 'cycle')
             ->sortBy('position');
@@ -455,7 +459,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
 
             $data['old_passwords'] = $old_passwords;
-        } 
+        }
     }
 
     protected function storeRequest($data, $user = null, $update_password = true, $from_massive = false)
@@ -473,7 +477,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 }
 
                 $this->setPasswordData($data, $update_password, $user);
-  
+
                 $user->update($data);
 
                 if ($user->wasChanged('document') && ($data['document'] ?? false)):
@@ -486,7 +490,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     }
                 endif;
             else :
-       
+
                 $this->setPasswordData($data, $update_password, $user);
 
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
@@ -695,6 +699,89 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // return $query->paginate($request->rowsPerPage);
     }
 
+//    public function getCurrentCourses($with_programs = true, $with_direct_segmentation = true, $withFreeCourses = true, $withRelations = 'default', $only_ids = false)
+//    {
+//        $user = $this;
+//        $user->load('criterion_values:id,value_text,criterion_id');
+////        $programs = collect();
+//        $all_courses = [];
+//
+////        if ($with_programs) $this->setProgramCourses($user, $all_courses);
+//
+//        // TODO: Agregar segmentacion directa
+//        if ($with_direct_segmentation) $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $withRelations);
+//
+//        return $only_ids
+//            ? array_unique(array_column($all_courses, 'id'))
+//            : collect($all_courses)->unique()->values();
+//    }
+    public function getSegmentedByModelType(
+        $model,
+        $select=false,
+        $unsetRelation=true,
+        $withModelRelations=[]
+    ){
+        $user = $this;
+        $with_default = [
+            'criterion_values:id,value_text,criterion_id',
+            'subworkspace:id,parent_id',
+            'subworkspace.parent:id',
+        ];
+
+        $user->loadMissing($with_default);
+        $workspace = $user->subworkspace->parent;
+        $default_model_relations = ['segments' => function ($q) {
+            $q
+                ->where('active', ACTIVE)
+                ->select('id', 'model_id')
+                ->with('values', function ($q) {
+                    $q
+                        ->with('criterion_value', function ($q) {
+                            $q
+                                ->where('active', ACTIVE)
+                                ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                ->with('criterion', function ($q) {
+                                    $q->select('id', 'name', 'code');
+                                });
+                        })
+                        ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
+                });
+        }];
+        $values_model = $model::when($select, function ($q) use($select) {
+            $q->select($select)->addSelect('workspace_id');
+        })->with(array_merge($default_model_relations,$withModelRelations))->where('workspace_id', $workspace->id)
+        ->whereRelation('segments', 'active', ACTIVE)
+        ->where('active', ACTIVE)->get();
+        $match_segment = [];
+        $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
+
+        foreach ($values_model as $value) {
+            foreach ($value->segments as $segment) {
+                $course_segment_criteria = $segment->values->groupBy('criterion_id');
+                $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+                if ($valid_segment) :
+                    $match_segment[] = $unsetRelation ? $value->unsetRelation('segments') :  $value;
+                endif;
+            }
+        }
+        unset($user->criterion_values);
+        // unset($user->subworkspace);
+        // unset($user->subworkspace_id);
+        return $match_segment;
+    }
+    public function userHasCourse($course){
+        $user = $this;
+        $user->loadMissing(['criterion_values:id,value_text,criterion_id','criterion_values.criterion.field_type']);
+        $user_criteria = $user->criterion_values->groupBy('criterion_id');
+        foreach ($course->segments as $segment) {
+            $course_segment_criteria = $segment->values->groupBy('criterion_id');
+            $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
+            if ($valid_segment) :
+                return true;
+            endif;
+        }
+        return false;
+    }
     public function getCurrentCourses(
         $with_programs = true,
         $with_direct_segmentation = true,
@@ -707,7 +794,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     )
     {
         $user = $this;
-        
+
         if ($user->hasDataUpToDate()) {
 
             $all_courses = $user->getCoursesDirectly();
@@ -723,6 +810,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->course_data()->updateOrCreate(['user_id' => $user->id], [
                 'courses' => $all_courses['current_courses_ids'] ?? [],
+                'schools' => $all_courses['current_schools_ids'] ?? [],
                 'compatibles' => $all_courses['compatibles_ids'] ?? [],
                 'course_id_tags' => $all_courses['course_id_tags'] ?? [],
                 'current_courses_updated_at' => now(),
@@ -732,12 +820,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
         $course_id_tags = collect($all_courses['course_id_tags']) ?? collect();
-        
+
         if ($response_type === 'courses-unified')
             return $all_courses;
-        
+
         $query = $this->getUserCourseSegmentationQuery($withRelations);
-        
+
         if(count($bySchoolsId)>0){
             $byCoursesId = CourseSchool::whereIn('school_id',$bySchoolsId)->select('course_id')->pluck('course_id');
         }
@@ -758,7 +846,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $course->compatible = $compatible_course;
             }
         }
-        
+
         return $courses;
     }
 
@@ -811,10 +899,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->orderBy('position')->get();
         }
         foreach ($course_segmentations as $course) {
-
             // $segment_ids = $course->segments->pluck('id');
             // $segment_values = SegmentValue::whereIn('segment_id', $segment_ids)->get();
-            
+
             foreach ($course->segments as $segment) {
 
             // $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
@@ -843,7 +930,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                             if ($compatible):
 
                                 $all_courses['compatibles'][$course->id] = $compatible;
-                                $all_courses['compatibles_ids'][$course->id] = [ 
+                                $all_courses['compatibles_ids'][$course->id] = [
                                     'summary_course_id' => $compatible->id,
                                     'course_id' => $compatible->course_id,
                                 ];
@@ -858,6 +945,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                             'course_id'=>$course->id,
                             'tags' => $tags
                         ];
+
+                        foreach ($course->schools as $key => $school) {
+                            $all_courses['current_schools_ids'][$school->id][] = $course->id;
+                        }
+
                         break;
                     }
 
@@ -1387,7 +1479,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function hasDataUpToDate()
     {
         // return false;
-        
+
         $course_data = $this->course_data;
 
         if ($course_data) {
@@ -1430,7 +1522,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 // $compatible = $compatible_summary_courses->where('course_id', $course->id)->first();
                 $compatible_course_row = $compatibles[$course->id]['summary_course_id'] ?? NULL;
                 $compatible = $compatible_summary_courses->where('id', $compatible_course_row)->first();
-                
+
                 if ($compatible) {
 
                     $compatible->course->compatible_of = $course;

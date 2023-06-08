@@ -247,11 +247,9 @@ export default {
                     end: FechaFiltro.end
                 })
                 const vue = this
-                if(response.statusText == "OK"){
-                    setTimeout(() => {
-                        vue.queryStatus("reportes", "descargar_reporte_checklist_general");
-                    }, 500);
-                }
+                setTimeout(() => {
+                    vue.queryStatus("reportes", "descargar_reporte_checklist_general");
+                }, 500);
 
             } catch (ex) {
                 console.log(ex.message)

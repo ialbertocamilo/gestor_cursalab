@@ -17,6 +17,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::view('/', 'entrenamiento.entrenadores.index')->name('entrenamiento.entrenadores');
 		// ->middleware('permission:entrenamiento.index');
 		Route::get('/search', 'search');
+		Route::get('/list-students/{entrenador_id}', 'listStudents');
 		Route::post('/listar_entrenadores', 'listarEntrenadores');
 		Route::post('/asignar', 'asignar');
 		Route::post('/asignar_masivo', 'asignarMasivo');
@@ -36,6 +37,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::view('/', 'entrenamiento.checklist.index')->name('entrenamiento.checklist');
 		// ->middleware('permission:entrenamiento.index');
 		Route::get('/search', 'searchChecklist');
+		Route::post('/search_checklist', 'searchChecklistByID');
 		Route::post('/listar_checklist', 'listarChecklist');
 		Route::post('/import', 'importChecklist');
 		Route::post('/save_checklist', 'guardarChecklist');
@@ -43,6 +45,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::post('/delete_actividad_by_id', 'eliminarActividadByID');
 		Route::post('/buscar_curso', 'buscarCurso');
 		Route::delete('/{id}/destroy', 'deleteChecklist');
+        Route::put('/{checklist}/status', 'status');
 	});
 
 });

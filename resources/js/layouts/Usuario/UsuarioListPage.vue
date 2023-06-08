@@ -297,7 +297,7 @@ export default {
                         text: "Acceder como usuario",
                         icon: 'fa fa-user',
                         type: 'action',
-                        show_condition: "is_super_user",
+                        // show_condition: "is_super_user",
                         method_name: 'impersonate_user'
                     },
 

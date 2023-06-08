@@ -269,11 +269,9 @@ export default {
                         courses: vue.course
                     }
                 })
-                if(response.statusText == "OK"){
-                    setTimeout(() => {
-                        vue.queryStatus("reportes", "descargar_reporte_visitas");
-                    }, 500);
-                }
+                setTimeout(() => {
+                    vue.queryStatus("reportes", "descargar_reporte_visitas");
+                }, 500);
 
             } catch (ex) {
                 console.log(ex.message)

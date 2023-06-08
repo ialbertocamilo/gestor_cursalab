@@ -19,6 +19,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AsignarEntrenadorImport;
 use App\Imports\ChecklistImport;
 use App\Models\Course;
+use App\Models\Segment;
 use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\Workspace;
@@ -122,7 +123,11 @@ class EntrenamientoController extends Controller
 
         return $this->success($data);
     }
-
+    public function listStudents($trainer_id)
+    {
+        $data = EntrenadorUsuario::listStudents($trainer_id);
+        return $this->success($data);
+    }
     //ENTRENADORES
     public function listarEntrenadores(Request $request)
     {
@@ -135,16 +140,22 @@ class EntrenamientoController extends Controller
     public function asignar(Request $request)
     {
         $data = $request->all();
+        $errors = [];
         foreach ($data['alumnos'] as $key => $alumno) {
             $temp = [
                 'trainer_id' => $data['entrenador_id'],
                 'user_id' => $alumno['id'],
                 'active' => 1
             ];
-            EntrenadorUsuario::asignar($temp);
+            $asignar_msg = EntrenadorUsuario::asignar($temp);
+            if($asignar_msg['error'])
+                array_push($errors, $asignar_msg['msg']);
         }
         $alumnos = EntrenadorUsuario::getUsuariosByEntrenador($data);
         $apiResponse['alumnos'] = $alumnos['data'];
+        $apiResponse['errors'] = $errors;
+        cache_clear_model(EntrenadorUsuario::class);
+        cache_clear_model(User::class);
 
         return response()->json($apiResponse, 200);
     }
@@ -181,11 +192,12 @@ class EntrenamientoController extends Controller
                 ->where('user_id', $alumno->id)
                 ->first();
             if ($registro) {
-                $registro->active = $estado ? 1 : 0;
+                $registro->active = !$registro->active;
                 $registro->save();
                 //TODO:
                 //                if ()
-
+                cache_clear_model(EntrenadorUsuario::class);
+                cache_clear_model(User::class);
                 return response()->json(['error' => false, 'msg' => 'Relación entrenador-alumno actualizada.'], 200);
             }
             return response()->json(['error' => true, 'msg' => 'El entrenador o el alumno no existe.'], 200);
@@ -219,7 +231,9 @@ class EntrenamientoController extends Controller
         $alumno = $request->alumno;
 
         EntrenadorUsuario::where('trainer_id', $entrenador['id'])->where('user_id', $alumno['id'])->delete();
-        return response()->json(['error' => false, 'msg' => 'Relación Entrenador-Alumno eliminada.'], 200);
+        cache_clear_model(EntrenadorUsuario::class);
+        cache_clear_model(User::class);
+        return response()->json(['error' => false, 'msg' => 'Se eliminó al alumno ('.$alumno['document'].') para el entrenador ('.$entrenador['document'].')'], 200);
     }
 
     // CHECKLIST
@@ -228,6 +242,31 @@ class EntrenamientoController extends Controller
         $data = CheckList::gridCheckList($request->all());
 
         return $this->success($data);
+    }
+
+    public function searchChecklistByID(Request $request)
+    {
+        $data = $request->all();
+        $id = $data['id'] ?? null;
+
+        $data = CheckList::getChecklistById($id);
+
+        return $this->success($data);
+    }
+
+
+    /**
+     * Process request to toggle value of active status (1 or 0)
+     *
+     * @param CheckList $checklist
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(CheckList $checklist, Request $request)
+    {
+        $checklist->update(['active' => !$checklist->active]);
+
+        return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 
     public function deleteChecklist($checklist_id){
@@ -245,10 +284,10 @@ class EntrenamientoController extends Controller
             'type'=>$type_message,
             'data'=>[
                 'msg' => $message]
-            ], 
+            ],
         200);
     }
-    
+
     public function listarChecklist(Request $request)
     {
         $data = $request->all();
@@ -261,23 +300,39 @@ class EntrenamientoController extends Controller
     {
         $workspace = get_current_workspace();
         $data = $request->all();
+
+        if(isset($data['duplicado']) && $data['duplicado'])
+            $data['id'] = null;
+
+        $type_checklist = Taxonomy::where('group', 'checklist')
+                        ->where('type', 'type_checklist')
+                        ->where('code', $data['type_checklist'])
+                        ->first();
+        $starts_at = (isset($data['starts_at']) && $data['starts_at']) ? $data['starts_at'] : null;
+        $finishes_at = (isset($data['finishes_at']) && $data['finishes_at']) ? $data['finishes_at'] : null;
+
+        //checklist
         $checklist = CheckList::updateOrCreate(
             ['id' => $data['id']],
             [
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'active' => $data['active'],
-                'workspace_id' => $workspace->id
+                'workspace_id' => $workspace->id,
+                'type_id' => !is_null($type_checklist) ? $type_checklist->id : null,
+                'starts_at' => $starts_at,
+                'finishes_at' => $finishes_at
             ]
         );
 
+        //actividades
         foreach ($data['checklist_actividades'] as $key => $checklist_actividad) {
             $type = Taxonomy::where('group', 'checklist')
                 ->where('type', 'type')
                 ->where('code', $checklist_actividad['type_name'])
                 ->first();
             CheckListItem::updateOrCreate(
-                ['id' => $checklist_actividad['id']],
+                ['id' => is_null($data['id']) ? null : $checklist_actividad['id']],
                 [
                     'activity' => $checklist_actividad['activity'],
                     'type_id' => !is_null($type) ? $type->id : null,
@@ -287,10 +342,47 @@ class EntrenamientoController extends Controller
                 ]
             );
         }
-        $cursos = collect($data['courses']);
-        $checklist->courses()->sync($cursos->pluck('id'));
 
-        return $this->success($checklist);
+        if($data['type_checklist'] == 'libre')
+        {
+            // Segmentación directa
+            if(isset($data['list_segments']['segments']) && count($data['list_segments']['segments']) > 0)
+            {
+                $data['list_segments']['model_id'] = $checklist->id;
+
+                $list_segments_temp = [];
+                foreach($data['list_segments']['segments'] as $seg) {
+                    if($seg['type_code'] === 'direct-segmentation')
+                        array_push($list_segments_temp, $seg);
+                }
+                $data['list_segments']['segments'] = $list_segments_temp;
+
+                $list_segments = (object) $data['list_segments'];
+
+                (new Segment)->storeDirectSegmentation($list_segments);
+            }
+            // Segmentación por documento
+            if(isset($data['list_segments_document']['segment_by_document']) && isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']))
+            {
+                $data['list_segments_document']['model_id'] = $checklist->id;
+                $list_segments = $data['list_segments_document'];
+
+                (new Segment)->storeSegmentationByDocumentForm($list_segments);
+            }
+        }
+        else if($data['type_checklist'] == 'curso')
+        {
+            // Curso
+            $cursos = collect($data['courses']);
+            $checklist->courses()->sync($cursos->pluck('id'));
+        }
+
+        if($data['id']){
+            $msg = 'Checklist actualizado. Se ha actualizado el checklist '.$checklist->title;
+        }else{
+            $msg = 'Checklist creado. Se ha creado el checklist '.$checklist->title;
+        }
+        return $this->success(['msg' => $msg, 'checklist'=>$checklist]);
     }
 
     public function guardarActividadByID(Request $request)

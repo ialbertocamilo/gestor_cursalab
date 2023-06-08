@@ -180,11 +180,6 @@ class Meeting extends BaseModel
         if ($meeting->started_at and $meeting->finished_at) {
             $started_at = $meeting->started_at < $meeting->starts_at ?
                 $meeting->starts_at : $meeting->started_at;
-
-//            info($started_at->format('Y-m-d H:i:s'));
-//            info($meeting->finished_at);
-//            info($meeting->finished_at->diffInMinutes($started_at));
-
             return $meeting->finished_at->diffInMinutes($started_at);
         }
         return 0;
@@ -192,13 +187,6 @@ class Meeting extends BaseModel
 
     public function buildPrefix(string $flag = 'M')
     {
-        /*
-        $workSpaceParts = explode(' ', $this->workspace->name);
-        $currentPrefix = '';
-        foreach($workSpaceParts as $value) {
-            $currentPrefix .= str_split($value)[0]; //first letter
-        } */
-
         return $flag.$this->id.'-'.$this->starts_at->format('md');
     }
 
@@ -297,7 +285,8 @@ class Meeting extends BaseModel
         $field = $request->sortBy ?? 'starts_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
-        $query->orderBy($field, $sort)->orderBy('name', $sort)->orderBy('id', $sort);
+        $query->orderBy($field, $sort);
+        // ->orderBy('name', $sort)->orderBy('id', $sort);
 
         if ($method == 'paginate')
             return $query->paginate($request->paginate);

@@ -16,7 +16,7 @@ class UpdateSummariesData extends Command
      *
      * @var string
      */
-    protected $signature = 'summary:update-data';
+    protected $signature = 'summary:update-data {subworkspace_id?}';
 
     /**
      * The console command description.
@@ -42,15 +42,21 @@ class UpdateSummariesData extends Command
      */
     public function handle()
     {
+        $subworkspace_id = $this->argument('subworkspace_id');
+
         $users = User::disableCache()->select('id')
             ->where('is_updating', 0)
             ->where(function ($q) {
                 $q->whereNotNull('summary_user_update')
                     ->orWhereNotNull('summary_course_update');
             })
-            ->limit(1000)
+            ->when($subworkspace_id, function($q) use ($subworkspace_id){
+                $q->where('subworkspace_id', $subworkspace_id);
+            })
+            ->whereNotNull('subworkspace_id')
+            ->limit(2500)
             ->get();
-
+            
         User::whereIn('id', $users->pluck('id'))->update([
             'is_updating' => 1
         ]);

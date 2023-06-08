@@ -21,10 +21,10 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Entrenadores
+                <span class="fw-bold font-nunito">Entrenadores</span>
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'"/> -->
-                <DefaultModalButton :label="'Asignar alumnos'" @click="modal.asignar_usuarios = true"/>
+                <DefaultModalButton :label="'Asignar Entrenadores y Alumnos'" @click="optionsModalAsignarSupervisores.open = true" :icon="false" class="font-nunito"/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -34,16 +34,11 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar entrenadores por nombre o DNI..."
+                            label="Buscar entrenadores"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                         />
-                    </v-col>
-                    <v-col cols="4">
-                        <!-- <DefaultButton label="Filtros"
-                                       icon="mdi-filter"
-                                       @click="open_advanced_filter = !open_advanced_filter"/> -->
                     </v-col>
                     <v-col cols="4">
                         <DefaultInput
@@ -78,6 +73,11 @@
 <!--                            </template>-->
 <!--                        </v-text-field>-->
                     </v-col>
+                    <v-col cols="4">
+                        <!-- <DefaultButton label="Filtros"
+                                       icon="mdi-filter"
+                                       @click="open_advanced_filter = !open_advanced_filter"/> -->
+                    </v-col>
                 </v-row>
             </v-card-text>
 
@@ -99,17 +99,26 @@
             <EntrenadorVerAlumnosModal
                 :ref="modalOptions.ref"
                 :options="modalOptions"
-                width="60vw"
+                width="40vw"
             />
         </v-card>
-        <StepperSubidaMasiva
+        <!-- <StepperSubidaMasiva
             urlPlantilla="/templates/Plantilla-Asignar_Entrenador.xlsx"
             urlSubida="/entrenamiento/entrenadores/asignar_masivo"
             v-model="modal.asignar_usuarios"
             @onClose="closeModalSubidaMasiva"
             typeForm="asigna_alumnos"
+        /> -->
+        <ModalAsignarSupervisores
+            template_url="/templates/Plantilla-Asignar_Entrenador.xlsx"
+            v-model="modal.asignar_ver_alumnos"
+            :width="'40%'"
+            :options="optionsModalAsignarSupervisores"
+            @onCancel="optionsModalAsignarSupervisores.open=false"
+            @onConfirm = "optionsModalAsignarSupervisores.open=false"
+            @showSnackbar="mostrarSnackBar($event)"
+            @refreshTable="refreshDefaultTable(dataTable, filters, 1)"
         />
-
         <ModalVerAlumnos
             v-model="modal.asignar_ver_alumnos"
             :width="'60%'"
@@ -150,18 +159,20 @@
 
 <script>
 import EntrenadorVerAlumnosModal from "./EntrenadorVerAlumnosModal";
-import ModalVerAlumnos from "../../components/Entrenamiento/Entrenadores/ModalVerAlumnos.vue";
+import ModalVerAlumnos from "../../components/Entrenamiento/Entrenadores/ModalVerAlumnos.vue"
+import ModalAsignarSupervisores from "../../components/Entrenamiento/Entrenadores/ModalAsignarSupervisores.vue"
+
 import ModalFiltroUsuario from "../../components/Entrenamiento/Entrenadores/ModalFiltroUsuario";
-import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
+// import StepperSubidaMasiva from "../../components/SubidaMasiva/StepperSubidaMasiva.vue";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
     props: ["roles"],
     components: {
         EntrenadorVerAlumnosModal,
-        StepperSubidaMasiva,
         ModalVerAlumnos,
         ModalFiltroUsuario,
+        ModalAsignarSupervisores,
         LogsModal
     },
     mounted() {
@@ -174,14 +185,14 @@ export default {
                 endpoint: '/entrenamiento/entrenadores/search',
                 ref: 'EntrenadorTable',
                 headers: [
-                    {text: "DNI", value: "document", align: 'start', sortable: false},
+                    {text: "Doc. identidad", value: "document", align: 'start', sortable: false},
                     {text: "Entrenador", value: "name", align: 'start'},
-                    {text: "Cant. Alumnos (Activos)", value: "alumnos_count", align: 'center', sortable: false},
+                    {text: "Cantidad de Alumnos", value: "alumnos_count", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
-                        text: "Alumnos",
+                        text: "Detalles",
                         icon: 'mdi mdi-eye',
                         type: 'action',
                         method_name: 'alumnos'
@@ -231,6 +242,10 @@ export default {
                 open: false,
                 title: ''
             },
+            optionsModalAsignarSupervisores:{
+                open: false,
+                title: 'Asignar entrenadores y alumnos'
+            },
             snackbar: {
                 show: false,
                 text: '',
@@ -251,8 +266,15 @@ export default {
             vue.dataModalVerAlumnos = {};
             vue.modal.asignar_ver_alumnos = false;
         },
-        abrirModalVerAlumnos(entrenador) {
+        async abrirModalVerAlumnos(entrenador) {
             let vue = this;
+            vue.showLoader();
+            await axios.get(`/entrenamiento/entrenadores/list-students/${entrenador.id}`).then(({data})=>{
+                entrenador.alumnos = data.data.alumnos;
+                vue.hideLoader();
+            }).catch((error)=>{
+                vue.hideLoader();
+            })
             vue.dataModalVerAlumnos = entrenador;
             vue.modal.asignar_ver_alumnos = true;
         },
