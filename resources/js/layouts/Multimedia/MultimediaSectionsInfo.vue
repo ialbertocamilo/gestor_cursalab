@@ -1,8 +1,8 @@
 <template>
 	<v-col cols="12" class="py-0" v-show="resource && resource.length > 0">
 		<v-row>
-			<v-col cols="4" class="multimedia-label" v-text="label + ':'"/>
-		    <v-col cols="8">
+			<v-col cols="12" class="multimedia-label" v-text="label"/>
+		    <v-col cols="12">
 		        <ul class="mb-0">
 		            <li v-for="res of resource">
 		                <span v-text="res.name"></span>
@@ -32,9 +32,9 @@
 		                </span>
 		            </li>
 		        </ul>
-		        <div v-show="resource && resource.length === 0">
+		       <!--  <div v-show="resource && resource.length === 0">
 		            Sin <span class="text-lowercase" v-text="label"></span> asociados
-		        </div>
+		        </div> -->
 	    	</v-col>
 		</v-row>
 	</v-col>

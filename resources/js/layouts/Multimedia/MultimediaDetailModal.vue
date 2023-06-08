@@ -5,6 +5,7 @@
             :width="width"
             @onCancel="closeModal"
             @onConfirm="confirmModal"
+            :show-card-actions="false"
         >
             <template v-slot:content>
                 <v-row>
@@ -20,42 +21,14 @@
                                 {{ resource.title }}
                             </p>
                             <p class="text-center">
-                                <strong>[{{ resource.type }}] [{{ resource.formattedSize }}] [{{ resource.created }}]</strong>
+                                <strong>[ {{ resource.type }} ]</strong>
+                                <strong>[ {{ resource.formattedSize }} ]</strong>
+                                <strong>[ {{ resource.created }} ]</strong>
                             </p>
                     </v-col>
                 </v-row>
 
-                <v-row>
-
-                    <v-col cols="12" class="d-flex align-center" style="justify-content: center">
-
-                        <DefaultButton
-                            append-icon="mdi-open-in-new"
-                            label="Abrir multimedia"
-                            @click="openMultimedia"
-                        />
-
-                        <DefaultButton
-                            v-if="resource.ext !== 'scorm'"
-                            append-icon="mdi-download"
-                            label="Descargar"
-                            @click="downloadMultimedia"
-                        />
-
-                        <DefaultButton
-                            v-if="resource.ext !== 'scorm'"
-                            append-icon="mdi-trash-can"
-                            label="Eliminar"
-                            color="default"
-                            @click="modalDeleteOptions.open = true"
-                        />
-
-                    </v-col>
-
-                </v-row>
-
-                <v-row>
-                    <div v-if="resource.sections">
+                <v-row  v-if="resource.sections">
 
                         <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
                         <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
@@ -65,8 +38,6 @@
                         <MultimediaSectionsInfo :resource="resource.sections.vademecums" label="Protocolos y documentos" />
                         <MultimediaSectionsInfo :resource="resource.sections.modules" label="Módulos" />
 
-                    </div>  
-
                     <!-- <v-col cols="6" v-if="false">
                         <DefaultModalSection
                             title="Ubicación asignada"
@@ -74,17 +45,70 @@
                     </v-col> -->
                 </v-row>
             </template>
+
+
+            <template v-slot:card-actions>
+                <v-card-actions :style="{ 'border-top': '1px solid rgba(0,0,0,.12)' }">
+
+                   <v-row justify="center" class="mx-0 support-card-actions">
+                        <v-col cols="12" class="d-flex justify-content-around">
+
+                            <v-btn
+                                class="default-modal-action-button"
+                                text
+                                elevation="0"
+                                :ripple="false"
+                                color="primary"
+                                @click="openMultimedia"
+                            >
+                                <v-icon left color="primary" small>mdi-open-in-new</v-icon>
+                                Abrir multimedia
+                            </v-btn>
+
+                            <v-btn
+                                class="default-modal-action-button"
+                                text
+                                elevation="0"
+                                :ripple="false"
+                                color="primary"
+                                @click="downloadMultimedia"
+                                v-if="resource.ext !== 'scorm'"
+                            >
+                                <v-icon left color="primary" small>mdi-download</v-icon>
+                                Descargar multimedia
+                            </v-btn>
+
+                            <v-btn
+                                class="default-modal-action-button"
+                                text
+                                elevation="0"
+                                :ripple="false"
+                                color="default"
+                                @click="modalDeleteOptions.open = true"
+                                v-if="resource.ext !== 'scorm'"
+                            >
+                                <v-icon left color="primary" small>mdi-trash-can</v-icon>
+                                Eliminar multimedia
+                            </v-btn>
+
+                        </v-col>
+                       
+                    </v-row>
+
+                </v-card-actions>
+           
+                <DialogConfirm
+                    :ref="modalDeleteOptions.ref"
+                    v-model="modalDeleteOptions.open"
+                    :options="modalDeleteOptions"
+                    width="408px"
+                    title="Eliminar Multimedia"
+                    subtitle="¿Está seguro de eliminar el archivo multimedia?"
+                    @onConfirm="confirmDelete"
+                    @onCancel="modalDeleteOptions.open = false"
+                />
+            </template>
         </DefaultDialog>
-        <DialogConfirm
-            :ref="modalDeleteOptions.ref"
-            v-model="modalDeleteOptions.open"
-            :options="modalDeleteOptions"
-            width="408px"
-            title="Eliminar Multimedia"
-            subtitle="¿Está seguro de eliminar el archivo multimedia?"
-            @onConfirm="confirmDelete"
-            @onCancel="modalDeleteOptions.open = false"
-        />
     </div>
 </template>
 <script>
