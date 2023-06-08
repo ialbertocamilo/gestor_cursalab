@@ -30,8 +30,8 @@
     <!-- theme stylesheet-->
     <link rel="stylesheet" href="{{ asset('css/style.default.css?v=1.134' . date('Y-W-d') ) }}" id="theme-stylesheet">
     <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="{{ asset('css/custom.css?v=2.235-'.date('Y-W-m-d')) }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css?v=1.135-'.date('Y-W-m-d-H')) }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css?v=2.236-'.date('Y-W-m-d')) }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css?v=1.136-'.date('Y-W-m-d-H')) }}">
     <!-- Favicon-->
     <link rel="shortcut icon" href="{{ asset('img/favicon.png')}}">
 

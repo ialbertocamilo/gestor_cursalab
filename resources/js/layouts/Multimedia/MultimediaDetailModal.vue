@@ -30,7 +30,9 @@
 
                 <v-row v-if="resource.sections">
 
-                    <hr>
+                    <div class="col col-12">
+                        <hr class="mt-0">
+                    </div>
 
                     <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
                     <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
