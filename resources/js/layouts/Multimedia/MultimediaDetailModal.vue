@@ -58,6 +58,19 @@
                                 text
                                 elevation="0"
                                 :ripple="false"
+                                color="default"
+                                @click="modalDeleteOptions.open = true"
+                                v-if="resource.ext !== 'scorm'"
+                            >
+                                <v-icon left color="default" small>mdi-trash-can</v-icon>
+                                Eliminar multimedia
+                            </v-btn>
+                            
+                            <v-btn
+                                class="default-modal-action-button"
+                                text
+                                elevation="0"
+                                :ripple="false"
                                 color="primary"
                                 @click="openMultimedia"
                             >
@@ -76,19 +89,6 @@
                             >
                                 <v-icon left color="primary" small>mdi-download</v-icon>
                                 Descargar multimedia
-                            </v-btn>
-
-                            <v-btn
-                                class="default-modal-action-button"
-                                text
-                                elevation="0"
-                                :ripple="false"
-                                color="default"
-                                @click="modalDeleteOptions.open = true"
-                                v-if="resource.ext !== 'scorm'"
-                            >
-                                <v-icon left color="default" small>mdi-trash-can</v-icon>
-                                Eliminar multimedia
                             </v-btn>
 
                         </v-col>
