@@ -137,6 +137,59 @@ class Certificate extends Model
 
         return $media;
     }
+
+    protected function getTotalByUser($user = null)
+    {
+        $user = $user ?? auth()->user();
+
+        $user_courses = $user->getCurrentCourses(withRelations: 'soft');
+        $user_courses_id = $user_courses->pluck('id');
+        $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
+        $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);
+
+        $query = SummaryCourse::query()
+            ->where('user_id', $user->id)
+            ->whereIn('course_id', $all_courses_id->toArray())
+            ->whereNotNull('certification_issued_at');
+
+        // if ($request->type == 'accepted')
+        //     $query->whereNotNull('certification_accepted_at');
+
+        // if ($request->type == 'pending')
+        //     $query->whereNull('certification_accepted_at');
+
+        $certificates = $query->get();
+
+        $total = 0;
+
+        // $qs = $request->q ?? NULL;
+
+        foreach ($user_courses as $user_course) {
+
+            // if ($qs AND !stringContains($user_course->name, $qs))
+            //     continue;
+
+            $certificate = $certificates->where('course_id', $user_course->id)->first();
+
+            if ($certificate) {
+
+                $total++;
+
+                continue;
+            }
+
+            if ($user_course->compatible) {
+
+                $compatible_certificate = $certificates->where('course_id', $user_course->compatible->course_id)->first();
+
+                if ($compatible_certificate) {
+                    $total++;
+                }
+            }
+        }
+
+        return $total;
+    }
 }
 
 
