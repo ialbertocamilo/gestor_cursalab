@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApiRest;
 use App\Models\Topic;
 use App\Models\Course;
 use App\Models\School;
+use App\Models\Certificate;
 use App\Models\Taxonomy;
 use App\Models\CourseSchool;
 use Illuminate\Http\Request;
