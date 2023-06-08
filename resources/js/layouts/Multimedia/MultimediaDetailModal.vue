@@ -28,7 +28,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row  v-if="resource.sections">
+                <v-row v-if="resource.sections" :style="{ 'border-top': '1px solid rgba(0,0,0,.12)' }">
 
                     <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
                     <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
@@ -58,14 +58,14 @@
                                 text
                                 elevation="0"
                                 :ripple="false"
-                                color="default"
+                                color="grey"
                                 @click="modalDeleteOptions.open = true"
                                 v-if="resource.ext !== 'scorm'"
                             >
-                                <v-icon left color="default" small>mdi-trash-can</v-icon>
+                                <v-icon left color="grey" small>mdi-trash-can</v-icon>
                                 Eliminar multimedia
                             </v-btn>
-                            
+
                             <v-btn
                                 class="default-modal-action-button"
                                 text

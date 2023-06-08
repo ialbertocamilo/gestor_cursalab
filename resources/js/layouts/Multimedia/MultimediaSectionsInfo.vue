@@ -8,10 +8,13 @@
 		                <span v-text="res.name"></span>
 		                <span v-if="Array.isArray(res.url)">
 		                    <v-btn 
+		                     	class="default-modal-action-button"
 		                        v-for="url of res.url"
 		                        :key="url"
 		                        text
 		                        small
+		                        elevation="0"
+                                :ripple="false"
 		                        color="primary"
 		                        @click="openInOtherTab(url)">
 		                        <v-icon>
@@ -21,8 +24,11 @@
 		                </span>
 		                <span v-else>
 		                    <v-btn 
+		                     	class="default-modal-action-button"
 		                        text
 		                        small
+		                        elevation="0"
+                                :ripple="false"
 		                        color="primary"
 		                        @click="openInOtherTabUrl(res)">
 		                        <v-icon>
