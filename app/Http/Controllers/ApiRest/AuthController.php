@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest, 
+use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
                         PasswordResetAppRequest };
 use App\Models\Error;
 use App\Models\Workspace;
@@ -35,11 +35,11 @@ class AuthController extends Controller
             $data = $request->validated();
 
             // === validacion de recaptcha ===
-            $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
-            if($availableRecaptcha) {
-                $responseRecaptcha = $this->checkRecaptchaData($data);
-                if($responseRecaptcha !== true) return $responseRecaptcha;
-            }
+            // $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
+            // if($availableRecaptcha) {
+            //     $responseRecaptcha = $this->checkRecaptchaData($data);
+            //     if($responseRecaptcha !== true) return $responseRecaptcha;
+            // }
             // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
@@ -61,7 +61,7 @@ class AuthController extends Controller
                 // custom message
                 if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                     return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
-                } 
+                }
                 return $this->error('Intento fallido A.', 400, $responseAttempts);
             }
             // === validacion de intentos ===
@@ -72,7 +72,7 @@ class AuthController extends Controller
                 if (trim($userinput) === $password) {
                     $responseResetPass = [];
                     Auth::user()->resetAttemptsUser(); // resetea intentos
-                
+
                     $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
                     return response()->json($responseResetPass);
                 }
@@ -105,24 +105,24 @@ class AuthController extends Controller
 
                 $user = Auth::user();
                 $user->resetAttemptsUser(); // resetea intentos
-                
+
                 // === validar si debe reestablecer contraseña ===
                 $canResetPassWord = $user->checkIfCanResetPassword('APP');
                 if($canResetPassWord) {
                     return $this->resetPasswordBuildToken($user);
                 }
-                // === validar si debe reestablecer contraseña === 
+                // === validar si debe reestablecer contraseña ===
 
                 $responseUserData = $this->respondWithDataAndToken($data);
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
 
-                return response()->json($responseUserData); 
+                return response()->json($responseUserData);
 
             } else {
                 // === validacion de intentos ===
-                $userInstance->checkTimeToReset(trim($userinput), 'APP'); 
+                $userInstance->checkTimeToReset(trim($userinput), 'APP');
                 $user_attempts = $userInstance->incrementAttempts(trim($userinput), 'APP');
-                
+
                 if($user_attempts) {
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
                     $responseAttempts['credentials1'] = $credentials1;
@@ -130,7 +130,7 @@ class AuthController extends Controller
                     // custom message
                     if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
-                    } 
+                    }
 
                     return $this->error('Intento fallido.', 400, $responseAttempts);
                 }
@@ -322,7 +322,7 @@ class AuthController extends Controller
                     'attempts_fulled'=> $user_attempts->fulled_attempts ];
 
         if($user_time) {
-            $current_time = is_null($user_attempts->attempts_lock_time) ? false 
+            $current_time = is_null($user_attempts->attempts_lock_time) ? false
                           : now()->diff($user_attempts->attempts_lock_time)->format("%I:%S");
 
             return array_merge(['current_time' => $current_time], $errors);
@@ -342,7 +342,7 @@ class AuthController extends Controller
     }
     // === ATTEMPTS ===
 
-    // === RECAPTCHA === 
+    // === RECAPTCHA ===
     public function checkVersionMobileRecaptcha($data)
     {
         $currentOS = $data['os'] ?? '';
@@ -358,14 +358,14 @@ class AuthController extends Controller
             else $availableRecaptcha = false;
         }
 
-        return $availableRecaptcha; 
+        return $availableRecaptcha;
     }
 
     public function checkRecaptchaData($data)
     {
         $g_recaptcha_response = $data['g-recaptcha-response'] ?? '';
         $recaptcha_response = NULL;
-                
+
         if ($g_recaptcha_response) {
             //validar token recaptcha
             $recaptcha_response = $this->validateRecaptcha($g_recaptcha_response);
@@ -374,22 +374,22 @@ class AuthController extends Controller
             }
             //validar el score de recaptcha
             if(!$recaptcha_response['score'] >= 0.5) {
-                return $this->error('error-recaptcha', 500, [ 
+                return $this->error('error-recaptcha', 500, [
                         'score' => $recaptcha_response['score'],
                         'error-codes' => ['score-is-low']
                 ]);
             }
-     
+
             return true;
 
-        } else { 
-            return $this->error('error-recaptcha', 500); 
+        } else {
+            return $this->error('error-recaptcha', 500);
         }
     }
 
-    public function validateRecaptcha($siteToken) 
+    public function validateRecaptcha($siteToken)
     {
-        $secretKey = env('RECAPTCHA_TOKEN'); 
+        $secretKey = env('RECAPTCHA_TOKEN');
         $recaptchaUrl = env('RECAPTCHA_BASE_URL');
 
         // validamos token recaptcha
@@ -447,7 +447,7 @@ class AuthController extends Controller
         $stackAnswers = array_map($callBackCode, $criteriaCodeStack);
         $date = $user->getCriterionValueCode('birthday_date')->value_text;
 
-        return [ 'user' => $stackAnswers, 
+        return [ 'user' => $stackAnswers,
                  'birht_date' => date('d-m-Y', strtotime($date)),
                  'checkCredentials' => $checkCredentials ];
         // dd(['user' => $user, 'checkCredentials' => $checkCredentials]);
@@ -470,11 +470,11 @@ class AuthController extends Controller
 
         if($request->birthday_date) {
             $user_birth_date = $user->getCriterionValueCode('birthday_date');
-            
+
             if(is_null($user_birth_date)){
                 return $this->incrementAttemptsOnly($user);
-                // no tiene fecha de nacimiento 
-                // $response = $this->incrementAttemptsOnly($user, true); 
+                // no tiene fecha de nacimiento
+                // $response = $this->incrementAttemptsOnly($user, true);
                 // $response['birthday_date'] = 'No existe la fecha de nacimiento en este usuario';
                 // return $this->error('Intento fallido', 400, $response);
             }
@@ -492,11 +492,11 @@ class AuthController extends Controller
             if($user_state_gender && $user_state_date) {
                 $user->resetAttemptsUser(); // resetear intentos
                 return $this->resetPasswordBuildToken($user);
-            } 
+            }
             return $this->incrementAttemptsOnly($user);
         }
 
-        return $this->incrementAttemptsOnly($user);  
+        return $this->incrementAttemptsOnly($user);
     }
     // === QUIZZ ===
 
@@ -507,7 +507,7 @@ class AuthController extends Controller
         $token = Password::createToken($user);
 
         $response = [ 'user_data'   => [ 'fullname' => $user->getFullnameAttribute(),
-                                         'identifier' => $user->email ], 
+                                         'identifier' => $user->email ],
                       'user_token'  => $token,
                       'reset_days'  => env('RESET_PASSWORD_DAYS_APP'),
                       'first_reset' => is_null($user->last_pass_updated_at) ];
@@ -526,10 +526,10 @@ class AuthController extends Controller
 
         $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
                                          : $request->only('document', 'password', 'password_confirmation', 'token');
-        
+
         $credentials1 = $credentials2 = ['password' => $request->password];
         $userinput = $request->email ? $credentials['email'] : $credentials['document'];
-        
+
         $credentials1['email'] = $userinput;
         $credentials2['document'] = $userinput;
 
@@ -541,7 +541,7 @@ class AuthController extends Controller
             $instance = new User;
             $instance->setDocumentAsEmail($request->document);
         }
-        // === prov el email a documento === 
+        // === prov el email a documento ===
 
         $status = Password::reset($credentials, function($user, $password) {
 
