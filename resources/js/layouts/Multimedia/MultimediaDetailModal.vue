@@ -87,7 +87,7 @@
                                 @click="modalDeleteOptions.open = true"
                                 v-if="resource.ext !== 'scorm'"
                             >
-                                <v-icon left color="primary" small>mdi-trash-can</v-icon>
+                                <v-icon left color="default" small>mdi-trash-can</v-icon>
                                 Eliminar multimedia
                             </v-btn>
 
