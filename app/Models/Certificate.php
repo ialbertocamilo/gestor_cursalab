@@ -138,11 +138,11 @@ class Certificate extends Model
         return $media;
     }
 
-    protected function getTotalByUser($user = null)
+    protected function getTotalByUser($user = null, $assigned_courses = null)
     {
         $user = $user ?? auth()->user();
 
-        $user_courses = $user->getCurrentCourses(withRelations: 'soft');
+        $user_courses = $assigned_courses ?? $user->getCurrentCourses(withRelations: 'soft');
         $user_courses_id = $user_courses->pluck('id');
         $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
         $all_courses_id = $user_courses_id->merge($user_compatibles_courses_id);

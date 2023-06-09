@@ -5,7 +5,6 @@
             :width="width"
             @onCancel="closeModal"
             @onConfirm="confirmModal"
-            :show-card-actions="false"
         >
             <template v-slot:content>
                 <v-row>
@@ -13,7 +12,7 @@
                         <v-img
                             :src="resource.preview"
                             :lazy-src="`https://picsum.photos/10/6?image=200`"
-                            aspect-ratio="2"
+                            aspect-ratio="3"
                             contain
                         />
 

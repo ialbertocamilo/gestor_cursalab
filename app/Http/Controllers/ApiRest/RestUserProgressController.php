@@ -55,7 +55,7 @@ class RestUserProgressController extends Controller
         $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->where('type.code', '<>', 'free')->count()) * 100) : 0;
         $general_percentage = min($general_percentage, 100);
 
-        $total_certificates = Certificate::getTotalByUser($user);
+        $total_certificates = Certificate::getTotalByUser($user, $assigned_courses);
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses_count,
