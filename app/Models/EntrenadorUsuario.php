@@ -244,7 +244,7 @@ class EntrenadorUsuario extends Model implements Recordable
                 });
             })
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage','suc.assigned');
+            ->select('users.id', 'users.name', 'users.lastname', 'users.surname', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage','suc.assigned');
 
         if ($page) {
             $perPage = 50;
@@ -270,7 +270,6 @@ class EntrenadorUsuario extends Model implements Recordable
             $value->advanced_percentage = $value->advanced_percentage ?? 0;
             $value->assigned = $value->assigned ?? 0;
             $value->name = $value->fullname ?? $value->getFullnameAttribute();
-            $value->tester = $value->getFullnameAttribute();
         });
         $response['alumnos'] = $dataAlumnos;
         $response['total_alumnos'] = count($dataAlumnos);
