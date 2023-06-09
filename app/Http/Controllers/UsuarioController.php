@@ -561,13 +561,13 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
-        info('getCoursesByUser INICIO');
+        // info('getCoursesByUser INICIO');
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
-        info('getCoursesByUser FIN');
+        // info('getCoursesByUser FIN');
 
-        info('getDataToCoursesViewAppByUser INICIO');
+        // info('getDataToCoursesViewAppByUser INICIO');
         $schools = Course::getDataToCoursesViewAppByUser($user, $courses);
-        info('getDataToCoursesViewAppByUser FIN');
+        // info('getDataToCoursesViewAppByUser FIN');
 
         return $this->success([
             'user' => [

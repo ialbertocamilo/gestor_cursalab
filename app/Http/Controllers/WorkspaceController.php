@@ -180,7 +180,7 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
-        info(['data' => $request->all() ]);
+        // info(['data' => $request->all() ]);
 
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');

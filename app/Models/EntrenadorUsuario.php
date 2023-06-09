@@ -269,6 +269,7 @@ class EntrenadorUsuario extends Model implements Recordable
             $value->carrera = '';
             $value->advanced_percentage = $value->advanced_percentage ?? 0;
             $value->assigned = $value->assigned ?? 0;
+            $value->name = $value->fullname ?? $value->getFullnameAttribute();
         });
         $response['alumnos'] = $dataAlumnos;
         $response['total_alumnos'] = count($dataAlumnos);

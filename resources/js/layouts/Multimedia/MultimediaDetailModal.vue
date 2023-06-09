@@ -5,6 +5,7 @@
             :width="width"
             @onCancel="closeModal"
             @onConfirm="confirmModal"
+            :show-card-actions="false"
         >
             <template v-slot:content>
                 <v-row>
@@ -12,9 +13,11 @@
                         <v-img
                             :src="resource.preview"
                             :lazy-src="`https://picsum.photos/10/6?image=200`"
-                            aspect-ratio="3"
+                            max-height="300"
                             contain
+                            class="grey lighten-5"
                         />
+                            <!-- aspect-ratio="4/3" -->
 
                         <p class="text-center my-3">
                             {{ resource.title }}

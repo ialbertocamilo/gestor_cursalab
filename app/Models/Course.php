@@ -1241,13 +1241,13 @@ class Course extends BaseModel
                 foreach ($grouped as $i => $values) {
 
 
-                    info($idx);
+                    // info($idx);
 
                     $q->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
 
                         $ids = $values->pluck('criterion_value_id');
 
-                        info($ids);
+                        // info($ids);
 
                         $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
                             ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);

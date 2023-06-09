@@ -175,7 +175,7 @@
             </section>
         </v-card>
         <MultimediaDetailModal
-            width="60vw"
+            width="45vw"
             :ref="modalOptions.ref"
             :options="modalOptions"
             @onCancel="closeFormModal(modalOptions);"
