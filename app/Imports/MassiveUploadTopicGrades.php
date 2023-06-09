@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Massive;
 use App\Models\Summary;
 use App\Models\Taxonomy;
+use App\Models\MediaTema;
 use App\Models\SummaryUser;
 use App\Models\SummaryTopic;
 use App\Models\SummaryCourse;
@@ -197,7 +198,21 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 $a_topic_was_created = true;
                 $this->storeSummaryTopic($topic, $user, $summary_data);
             }
+            $user_progress_media = array();
+            $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
+            foreach ($medias as  $media) {
+                array_push($user_progress_media, (object) array(
+                    'media_topic_id' => $media->id,
+                    'status' => 'revisado',
+                    'last_media_duration' => null
+                ));
+            }
+            SummaryTopic::where('user_id',$user->id)->where('topic_id',$topic->id)->update([
+                'media_progress' => json_encode($user_progress_media)
+            ]);
         }
+        
+        SummaryCourse::getCurrentRowOrCreate($this->course, $user);
 
         if ($a_topic_was_created) {
             $this->updated_users_id[] = $user->id;
