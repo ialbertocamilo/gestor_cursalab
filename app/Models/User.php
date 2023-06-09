@@ -819,7 +819,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
-        $course_id_tags = collect($all_courses['course_id_tags']) ?? collect();
+        $course_id_tags = isset($all_courses['course_id_tags']) ? collect($all_courses['course_id_tags']) : collect();
 
         if ($response_type === 'courses-unified')
             return $all_courses;
