@@ -200,3 +200,7 @@ Override Vue Toastification plugin styles
 .list-style-none{
     list-style: none !important;
 }
+
+.v-treeview-node__content {
+    margin-top: 6px;
+}
