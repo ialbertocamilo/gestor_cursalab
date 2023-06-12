@@ -14,7 +14,7 @@
                     	</p>
                     </v-col>
                     <v-col cols="12">
-                        <img :src="options.resource.preview" class="img-preview" alt="Previsualización de diploma">
+                        <img :src="options.resource.preview" class="--img-preview w-100" alt="Previsualización de diploma">
                     </v-col>
                     <v-col cols="12">
                     	<DefaultInput 

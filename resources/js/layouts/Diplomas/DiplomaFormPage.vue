@@ -21,7 +21,7 @@
                     </v-btn>
                 </p>
             </div>
-            <div class="mx-3 grey lighten-5 mb-0 d-flex justify-content-center">
+            <div class="mx-8 mb-0 d-flex justify-content-center">
                 <v-row class="mt-0 container-box">
 
                     <div id="overlay-div" class="overlay-div mx-4 mt-3" v-show="overlay"> 
@@ -1072,7 +1072,7 @@ export default {
     position: relative;
     display: flex;
     width: 100%;
-    height: 66vh;
+    height: 56vh;
     background-color: #ffffff;
     border-radius: .5rem;
 }
@@ -1119,7 +1119,7 @@ export default {
 }
 
 .container-box  {
-    height: 75vh;
+    height: 65vh;
     background-color: #D4D4D4;
     border-radius: 0.5rem;
 }
