@@ -252,7 +252,7 @@ export default {
             vue.getCardsInfo()
             vue.getEvaluacionesPorFecha()
             vue.getVisitas()
-            vue.getTopBoticas()
+            // vue.getTopBoticas()
             if (change) vue.queryStatus("dashboard", "uso_filtro");
         },
         getCardsInfo(refresh = false) {
