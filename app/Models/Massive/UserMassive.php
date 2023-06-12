@@ -408,7 +408,11 @@ class UserMassive extends Massive implements ToCollection
             return $date;
         } catch (\Throwable $th) {
             try {
-                return Carbon::parse(strtotime($fecha))->format('Y-m-d');
+                if(strtotime($fecha)){
+                    return Carbon::parse(strtotime($fecha))->format('Y-m-d');
+                }else{
+                    return 'invalid date';
+                }
             } catch (\Throwable $th) {
                 return 'invalid date';
             }
