@@ -30,7 +30,7 @@ class RoleController extends Controller
             $roles = Role::paginate();
         }
         $super_user = auth()->user()->isAn('super-user');
-        return view('roles.index', compact('roles', 'super_user'));
+        return view('roles.list', compact('roles', 'super_user'));
     }
 
     public function create()
@@ -50,7 +50,8 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
         // $permissions = Ability::where('entity_type', '<>', '*')->get();
-        return view('roles.edit', compact('role'));
+        // return compact('role');
+        return $this->success(compact('role'));
     }
 
     public function search(Request $request)

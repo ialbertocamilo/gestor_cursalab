@@ -129,6 +129,7 @@ Vue.component("tag-layout", require("./layouts/Tags/TagListPage"));
 Vue.component("error-layout", require("./layouts/Errores/ErrorListPage"));
 Vue.component("usuario-layout", require("./layouts/Usuario/UsuarioListPage"));
 Vue.component("modulo-layout", require("./layouts/Modulos/ModuloListPage"));
+Vue.component("role-layout", require("./layouts/Roles/RoleListPage"));
 Vue.component("escuela-layout", require("./layouts/Escuelas/EscuelaListPage"));
 Vue.component("escuela-form-page", require("./layouts/Escuelas/EscuelaFormPage"));
 Vue.component("curso-layout", require("./layouts/Cursos/CursosListPage"));
