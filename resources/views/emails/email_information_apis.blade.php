@@ -48,7 +48,9 @@
     <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                Los datos mostrados fueron recopilados del {{ $data['init_date'] }} hasta el {{ $data['final_date'] }}.
+                Los datos mostrados fueron recopilados del {{ $data['init_date'] }} hasta el {{ $data['final_date'] }}. Asimismo, esta información ha generada de manera automática
+                mediante las APIS de integración no incluye los datos modificados de 
+                manera manual.
             </p>
         </td>
     </tr>

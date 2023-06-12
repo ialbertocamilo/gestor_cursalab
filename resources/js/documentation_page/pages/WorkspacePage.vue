@@ -7,7 +7,7 @@
             <p>
                 Los Workspaces son espacios que agrupan Módulos. Ejemplo: Workspace: Intercorp Retail , Módulos dentro del workspace: Agora,InDigital XP,Intercorp Retail 
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>
