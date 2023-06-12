@@ -117,8 +117,8 @@ const SUB_ITEM_GLOSARY =  { title:"Glosario",
 const SUB_ITEM_VADEMECUM = {
                             title:"Protocolos y Documentos",
                             icon:"fas fa-file-invoice",
-                            path:"/vademecum",
-                            subpaths:["vademecum"],
+                            path:"/protocolos-y-documentos",
+                            subpaths:["protocolos-y-documentos"],
                             selected:false,
                             permission:"vademecum",
                             role:["super-user","admin","content-manager","trainer-TEST"]

@@ -91,7 +91,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('encuestas')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/encuestas.php'));
     Route::prefix('multimedia')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/multimedia.php'));
     Route::prefix('glosario')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/glosario.php'));
-    Route::prefix('vademecum')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/vademecum.php'));
+    Route::prefix('protocolos-y-documentos')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/vademecum.php'));
     Route::prefix('videoteca')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/videoteca.php'));
     Route::prefix('tags')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/tags.php'));
 

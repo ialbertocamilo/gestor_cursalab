@@ -4,7 +4,7 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Vademecum / Categorías
+                Protocolos y documentos / Categorías
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'" @click="activity"/> -->
                 <DefaultModalButton :label="'Categoria'" @click="openFormModal(modalOptions)"/>
@@ -60,7 +60,7 @@ export default {
 
         return {
             dataTable: {
-                endpoint: '/vademecum/categorias/search',
+                endpoint: '/protocolos-y-documentos/categorias/search',
                 ref: 'CategoriaTable',
                 headers: [
                     {text: "Nombre", value: "nombre"},
@@ -107,14 +107,14 @@ export default {
             modalOptions: {
                 ref: 'CategoriaFormModal',
                 open: false,
-                base_endpoint: '/vademecum/categorias',
+                base_endpoint: '/protocolos-y-documentos/categorias',
                 resource: 'Categoria',
                 confirmLabel: 'Guardar',
             },
             modalDeleteOptions: {
                 ref: 'CategoriaDeleteModal',
                 open: false,
-                base_endpoint: '/vademecum/categorias',
+                base_endpoint: '/protocolos-y-documentos/categorias',
                 contentText: '¿Desea eliminar este registro?',
                 endpoint: '',
             },
@@ -128,7 +128,7 @@ export default {
     methods: {
         getSelects() {
             let vue = this
-            // const url = '/vademecum/categorias/get-list-selects'
+            // const url = '/protocolos-y-documentos/categorias/get-list-selects'
             // vue.$http.get(url)
             //     .then(({data}) => {
             //         vue.selects.modulos = data.data.modulos
