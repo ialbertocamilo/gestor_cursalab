@@ -1,7 +1,7 @@
 <template>
     <div>
-        <header class="page-header">
-            <div class="breadcrumb-holder container-fluid">
+        <header class="page-header mt-5 py-0 mx-8">
+            <div class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0">
                 <v-card-title>
                     <!--     <ul class="breadcrumb ">
                             <li class="breadcrumb-item"><a href="/aulas-virtuales">Anuncios</a></li>
@@ -23,7 +23,7 @@
             </div>
         </header>
 
-        <section class="client section-list">
+        <section class="client section-list mx-8">
             <v-card class="card" elevation="0">
                 <v-card-text>
                     <v-row class="justify-content-start">
