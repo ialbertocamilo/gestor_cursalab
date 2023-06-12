@@ -1,6 +1,6 @@
 <template>
-    <section className="section-list ">
-        <v-card flat className="elevation-0 mb-4">
+    <section class="section-list ">
+        <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Supervisores
                 <v-spacer/>
@@ -15,9 +15,9 @@
             </v-card-title>
         </v-card>
 
-        <v-card flat className="elevation-0 mb-4">
+        <v-card flat class="elevation-0 mb-4">
             <v-card-text>
-                <v-row>
+                <v-row class="justify-content-start">
                     <v-col cols="4">
                         <DefaultInput
                             clearable dense
