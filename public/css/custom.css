@@ -503,7 +503,7 @@ footer.main-footer {
 }
 .lista_media .img_box {
 	width: 100%;
-	height: 150px;
+	height: 120px;
 /*	border: 1px solid rgba(173, 168, 214, 0.5);*/
 	border: 1px solid rgb(204 203 213 / 50%);
 	display: flex;

@@ -204,3 +204,9 @@ Override Vue Toastification plugin styles
 .v-treeview-node__content {
     margin-top: 6px;
 }
+
+.text-overflow-ellipsis {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

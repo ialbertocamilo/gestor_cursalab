@@ -5,11 +5,20 @@
             :width="width"
             @onCancel="closeModal"
             @onConfirm="confirmModal"
-            :show-card-actions="false"
         >
+            <!-- :show-card-actions="false" -->
             <template v-slot:content>
+                <v-row class="mb-3">
+                    <div class="col col-8 text-left pt-0 text-overflow-ellipsis small" :title="resource.title">
+                        {{ resource.title }}
+                    </div>
+
+                    <div class="col col-2 text-right pt-0 text-overflow-ellipsis small" :title="resource.type">{{ resource.type }}</div>
+                    <div class="col col-2 text-right pt-0 text-overflow-ellipsis small" :title="resource.formattedSize">{{ resource.formattedSize }}</div>
+                </v-row>
                 <v-row>
                     <v-col cols="12" class="py-0">
+                    
                         <v-img
                             :src="resource.preview"
                             :lazy-src="`https://picsum.photos/10/6?image=200`"
@@ -19,15 +28,55 @@
                         />
                             <!-- aspect-ratio="4/3" -->
 
-                        <p class="text-center my-3">
-                            {{ resource.title }}
-                        </p>
                         <p class="text-center mb-3">
-                            <strong>[ {{ resource.type }} ]</strong>
-                            <strong>[ {{ resource.formattedSize }} ]</strong>
-                            <strong>[ {{ resource.created }} ]</strong>
+                            <!-- <strong>[ {{ resource.created }} ]</strong> -->
                         </p>
                     </v-col>
+                </v-row>
+
+                <v-row justify="center" class="mx-0 support-card-actions">
+                    <v-col cols="12" class="d-flex justify-content-center">
+
+
+                        <v-btn
+                            class=""
+                            text
+                            elevation="0"
+                            :ripple="false"
+                            color="primary"
+                            @click="openMultimedia"
+                        >
+                            <v-icon color="primary">mdi-open-in-new</v-icon>
+                            <!-- Abrir multimedia -->
+                        </v-btn>
+
+                        <v-btn
+                            class=""
+                            text
+                            elevation="0"
+                            :ripple="false"
+                            color="primary"
+                            @click="downloadMultimedia"
+                            v-if="resource.ext !== 'scorm'"
+                        >
+                            <v-icon color="primary">mdi-download</v-icon>
+                            <!-- Descargar multimedia -->
+                        </v-btn>
+
+                        <v-btn
+                            class=""
+                            text
+                            elevation="0"
+                            :ripple="false"
+                            color="grey"
+                            @click="modalDeleteOptions.open = true"
+                            v-if="resource.ext !== 'scorm'"
+                        >
+                            <v-icon color="grey">mdi-trash-can</v-icon>
+                            <!-- Eliminar multimedia -->
+                        </v-btn>
+                    </v-col>
+                   
                 </v-row>
 
                 <v-row v-if="resource.sections">
@@ -54,7 +103,7 @@
 
 
             <template v-slot:card-actions>
-                <v-card-actions :style="{ 'border-top': '1px solid rgba(0,0,0,.12)' }">
+               <!--  <v-card-actions :style="{ 'border-top': '1px solid rgba(0,0,0,.12)' }">
 
                    <v-row justify="center" class="mx-0 support-card-actions">
                         <v-col cols="12" class="d-flex justify-content-around">
@@ -101,7 +150,7 @@
                        
                     </v-row>
 
-                </v-card-actions>
+                </v-card-actions> -->
            
                 <DialogConfirm
                     :ref="modalDeleteOptions.ref"

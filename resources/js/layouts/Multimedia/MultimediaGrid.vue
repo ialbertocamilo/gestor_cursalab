@@ -8,9 +8,9 @@
                 />
             </v-col>
         </v-row>
-        <v-row justify="space-around" class="mt-1">
+        <v-row justify="space-around" class="">
             <v-col cols="12" class="d-flex justify-content-end py-0 px-8">
-                <div class="lista_media" style="width: 100%">
+                <div class="lista_media pt-0" style="width: 100%">
                     <div class="row">
                         <div class="col-12 d-flex justify-center" v-if="!loading && data.length === 0">
                             <h4>No se encontraron resultados</h4>
@@ -74,10 +74,15 @@ export default {
 @import "resources/sass/variables";
 
 .med-box-tag {
-    border-radius: 4px;
-    padding: .3rem 2rem !important;
-    background-color: $primary-default-color;
-    font-size: .9rem !important;
+    // border-radius: 4px;
+    // padding: .3rem 2rem !important;
+    // background-color: $primary-default-color;
+    // font-size: .9rem !important;
+    // color: white;
+
+    border-radius: 1em;
+    padding: 0.3rem 1rem !important;
+    background-color: #b0b1c7;
     color: white;
 }
 
