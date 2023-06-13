@@ -200,6 +200,9 @@ Vue.component("accounts-layout", require("./layouts/Accounts/AccountListPage.vue
 
 Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
 
+Vue.component("benefit-layout", require("./layouts/Benefits/BenefitsList.vue"));
+Vue.component("benefit-form-page", require("./layouts/Benefits/BenefitFormPage"));
+
 const app = new Vue({
     vuetify,
     store,

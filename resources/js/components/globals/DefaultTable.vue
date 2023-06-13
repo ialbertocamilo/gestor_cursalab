@@ -555,6 +555,31 @@
             </template>
             <!--   ===================================================  -->
 
+            <!-- BENEFICIOS -->
+            <template v-slot:item.benefit_speaker="{ item, header }">
+                <div class="text-center" v-if="item.benefit_speaker">
+                    {{ item.benefit_speaker }}
+                </div>
+                <div class="text-center" v-else>
+                    <span class="custom_link_add_speaker" @click="addSpeaker(item)">Agregar Speaker</span>
+                </div>
+            </template>
+            <template v-slot:item.benefit_type="{ item, header }">
+                <div class="text-center" v-if="item.benefit_type">
+                    {{ item.benefit_type }}
+                </div>
+                <div class="text-center" v-else>
+                    <span class="custom_benefit_type">Pendiente</span>
+                </div>
+            </template>
+            <template v-slot:item.benefit_stars="{ item, header }">
+                <div class="text-center" v-if="item.benefit_stars">
+                    {{ item.benefit_stars }}
+                </div>
+                <div class="text-center" v-else>
+                    <span class="custom_benefit_stars">Pendiente</span>
+                </div>
+            </template>
 
         </v-data-table>
         <!--   Custom Paginator -->
@@ -872,7 +897,10 @@ export default {
 
             this.hideLoader()
         },
-
+        addSpeaker( item ) {
+            let vue = this
+            vue.$emit('addSpeaker', item)
+        }
     }
 }
 </script>
@@ -884,5 +912,18 @@ thead.v-data-table-header .v-tooltip__content {
 }
 i.v-icon.icon_tooltip {
     color: #000 !important;
+}
+span.custom_link_add_speaker {
+    font-size: 14px;
+    color: #5458EA;
+    font-family: "Nunito", sans-serif;
+    text-decoration: underline;
+    cursor: pointer;
+}
+span.custom_benefit_stars,
+span.custom_benefit_type {
+    color: #C9CED6;
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
 }
 </style>

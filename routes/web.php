@@ -143,4 +143,5 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::prefix('resumen_encuesta')->middleware('checkrol:admin,reports,only-reports')->group(base_path('routes/cms/resumen_encuesta.php'));
 
+    Route::prefix('beneficios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/beneficios.php'));
 });

@@ -21,6 +21,7 @@ class RestBenefitController extends Controller
         $user = Auth::user();
         $data = [
             'filtro' => $request->filtro,
+            'status' => $request->status ?? null,
             'page' => $request->page ?? null
         ];
         $apiResponse = Benefit::getBenefits($data);
