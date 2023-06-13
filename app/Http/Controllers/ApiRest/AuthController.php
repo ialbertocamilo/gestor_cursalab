@@ -64,7 +64,7 @@ class AuthController extends Controller
                 if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                     return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
                 } 
-                return $this->error('Intento fallido A.', 400, $responseAttempts);
+                return $this->error('Intento fallido [L].', 400, $responseAttempts);
             }
             // === validacion de intentos ===
 
@@ -134,7 +134,7 @@ class AuthController extends Controller
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
                     } 
 
-                    return $this->error('Intento fallido.', 400, $responseAttempts);
+                    return $this->error('Intento fallido [L2].', 400, $responseAttempts);
                 }
                 // === validacion de intentos ===
 
@@ -354,7 +354,7 @@ class AuthController extends Controller
             // $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
             $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
             if($returned) return $responseAttempts;
-            return $this->error('Intento fallido.', 400, $responseAttempts);
+            return $this->error('Intento fallido [IAO].', 400, $responseAttempts);
         }
     }
     // === ATTEMPTS ===
@@ -481,7 +481,7 @@ class AuthController extends Controller
         if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
             $user['fulled_attempts'] = true;
             $responseAttempts = $this->sendAttempsAppResponse($user);
-            return $this->error('Intento fallido.', 400, $responseAttempts);
+            return $this->error('Intento fallido [Q].', 400, $responseAttempts);
         }
         // === validacion de intentos ===
 
