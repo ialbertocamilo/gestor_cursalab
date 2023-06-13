@@ -445,7 +445,7 @@ class Topic extends BaseModel
                     ->get();
         // UC
         $school_name = $school?->name;
-        if ($workspace_id === 25) {
+        if ($workspace_id === 25 && $school_name) {
             $school_name = removeUCModuleNameFromCourseName($school_name);
         }
         $sub_workspace = $user->subworkspace;
@@ -490,7 +490,7 @@ class Topic extends BaseModel
 
             // UC rule
             $course_name = $course->name;
-            if ($workspace_id === 25) {
+            if ($workspace_id === 25 && $course_name) {
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
@@ -667,7 +667,7 @@ class Topic extends BaseModel
 
                             $req_school = $req->schools->first();
                             $course_name_req = $req->name;
-                            if ($workspace_id === 25) {
+                            if ($workspace_id === 25 && $course_name_req) {
                                 $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
                             }
                             $requirement_list = [
@@ -726,7 +726,7 @@ class Topic extends BaseModel
 
                                 $req_school = $req->schools->first();
                                 $course_name_req = $req->name;
-                                if ($workspace_id === 25) {
+                                if ($workspace_id === 25 && $course_name_req) {
                                     $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
                                 }
                                 $requirement_list = [
