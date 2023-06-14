@@ -368,7 +368,9 @@ Segment extends BaseModel
                 'type_id' => NULL,
             ];
         }
-
+        $data['segments'] = [$segment];
+        $data = (object) $data; 
+        $this->updateSegmentToLaunchObeserver($data);
         $segment->values()->sync($values);
     }
 
