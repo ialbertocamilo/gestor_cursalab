@@ -230,14 +230,28 @@ export default {
             vue.$http.post(url, formData)
                 .then(({data}) => {
                     // vue.filter_result = data.data;
-                    data.data.forEach((user) => {
+                    const users = (data.data.users) ? data.data.users :  data.data;
+                    if(data.data.users_not_found && data.data.users_not_found.length>0){
+                        let headers = ["Documento"];
+                        let values =["document"];
+                        console.log('not_found',data.data.users_not_found);
+                        vue.descargarExcelFromArray(
+                            headers,
+                            values,
+                            data.data.users_not_found,
+                            "Documentos_no_encontrados_" + Math.floor(Math.random() * 1000),
+                            "Se han encontrado observaciones. Descargar lista de observaciones"
+                        );
+                    }
+                    console.log('users',users.length);
+                    users.forEach((user) => {
                         const exist = vue.segment.criteria_selected.filter(el => el.document == user.document);
 
                         if (exist.length === 0){
                             vue.$emit("addUser", user);
                         }
                     });
-
+                    
                     vue.file = null;
 
                     vue.hideLoader();
