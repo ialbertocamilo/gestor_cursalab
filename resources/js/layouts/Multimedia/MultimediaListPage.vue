@@ -1,4 +1,3 @@
-
 <template>
     <section class="section-list">
         <DefaultFilter
@@ -72,7 +71,7 @@
                             :count-show-values="2"
                         />
                     </v-col>
-                    <v-col cols="3">
+                    <!-- <v-col cols="3">
                         <DefaultInputDate
                             clearable
                             dense
@@ -83,7 +82,7 @@
                             label="Fecha"
                             @onChange="getData"
                         />
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="3">
                         <DefaultInput
                             clearable
@@ -95,34 +94,6 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
-                    <v-col cols="3" class="d-flex justify-content-end">
-                        <DefaultButton
-                            label="Ver Filtros"
-                            icon="mdi-filter"
-                            @click="open_advanced_filter = !open_advanced_filter"/>
-                    </v-col>
-                </v-row>
-                <v-row justify="space-between" class="mx-1" style="background-color: #F9FAFB; border-radius: 6px">
-                    <v-col cols="4">
-                        <v-btn
-                            elevation="0"
-                            small
-                            color="primary"
-                            :fab="view === 'grid'"
-                            :icon="view === 'list'"
-                            @click="view = 'grid'">
-                            <v-icon v-text="'mdi-grid' "/>
-                        </v-btn>
-                        <v-btn
-                            elevation="0"
-                            small
-                            color="primary"
-                            :fab="view === 'list'"
-                            :icon="view === 'grid'"
-                            @click="view = 'list'">
-                            <v-icon v-text="'mdi-format-list-bulleted'"/>
-                        </v-btn>
-                    </v-col>
                     <v-col cols="2">
                         <DefaultSelect
                             label="Ordenar por"
@@ -132,7 +103,25 @@
                             @onChange="getData"
                         />
                     </v-col>
+                    <v-col cols="4" class="d-flex justify-content-end">
+                        <v-btn
+                            elevation="0"
+                            small
+                            text
+                            color="primary"
+                            title="Cambiar vista"
+                            :fab="true"
+                            @click="view == 'grid' ? view = 'list' : view = 'grid'">
+                            <v-icon v-text="view == 'grid' ? 'mdi-grid' : 'mdi-format-list-bulleted' "/>
+                        </v-btn>
+                        <DefaultButton
+                            text
+                            label="Aplicar filtros"
+                            icon="mdi-filter"
+                            @click="open_advanced_filter = !open_advanced_filter"/>
+                    </v-col>
                 </v-row>
+               
             </v-card-text>
             <transition name="fade" mode="out-in">
                 <component
@@ -301,7 +290,7 @@ export default {
             pagination: {
                 total_pages: 1,
                 actual_page: 1,
-                rows_per_page: 12,
+                rows_per_page: 18,
                 fromRow: 1,
                 toRow: 1,
                 total_rows: 0,

@@ -8,19 +8,24 @@
         right
     >
         <v-card flat elevation="0">
-            <v-row>
+            <!-- <v-row>
                 <v-col cols="12" class="d-flex justify-content-end pb-0 pr-7">
+                </v-col>
+            </v-row> -->
+            <v-card-title class="py-0 px-2 filter-title">
+                <v-col cols="6" class="d-flex justify-content-start pb-0">
+                    {{ title }}
+                </v-col>
+
+                <v-col cols="6" class="d-flex justify-content-end pb-0 pr-0">
                     <v-btn
-                        fab dark small
+                        fab dark small text
                         color="primary"
                         elevation="0"
                         @click="closeFilter">
                         <v-icon v-text="'mdi-close'"/>
                     </v-btn>
                 </v-col>
-            </v-row>
-            <v-card-title class="pt-1 filter-title">
-                {{ title }}
             </v-card-title>
             <DefaultDivider/>
             <div class="d-flex flex-column pt-0 px-7">
@@ -28,7 +33,7 @@
                     <slot name="content"/>
                 </v-row>
                 <v-row>
-                    <v-col cols="12" class="d-flex" style="justify-content: end; padding-right: 1.3rem !important;">
+                    <v-col cols="12" class="d-flex" style="justify-content: center;">
                         <DefaultButton
                             text
                             label="Limpiar filtros"
@@ -43,6 +48,10 @@
                 </v-row>
                 <v-row>
                     <slot name="consideraciones"/>
+                </v-row>
+
+                 <v-row justify="space-around">
+                    <img src="/svg/filtros.svg" width="55%" class="mt-7">
                 </v-row>
             </div>
         </v-card>
@@ -62,7 +71,7 @@ export default {
         },
         width: {
             type: Number | String,
-            default: '40%'
+            default: '30%'
         },
         disabledConfirmBtn: {
             type: Boolean,

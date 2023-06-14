@@ -177,8 +177,8 @@ export default {
                     {
                         title: "Aulas Virtuales",
                         icon: "fas fa-chalkboard-teacher",
-                        path: "/aulas-virtuales",
-                        subpaths: ["aulas-virtuales"],
+                        path: "/aulas-virtuales/reuniones",
+                        subpaths: ["aulas-virtuales/reuniones"],
                         selected: false,
                         permission: "meetings",
                         role: ["super-user", this.show_meeting_section]
@@ -187,7 +187,7 @@ export default {
                         title: "Cuentas Zoom",
                         icon: "fas fa-chalkboard-teacher",
                         path: "/aulas-virtuales/cuentas",
-                        subpaths: ["cuentas-zoom"],
+                        subpaths: ["aulas-virtuales/cuentas"],
                         selected: false,
                         permission: "accounts",
                         role: ["super-user"]

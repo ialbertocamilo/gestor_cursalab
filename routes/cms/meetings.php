@@ -10,7 +10,7 @@ Route::get('/get-data', [RestMeetingController::class, 'getData']);
 
 Route::controller(MeetingController::class)->group(function() {
 
-    Route::view('/', 'meetings.list')->name('meetings.list');
+    Route::view('/reuniones', 'meetings.list')->name('meetings.list');
     // ->middleware('permission:meetings.list');
 
     Route::get('/search', 'search');

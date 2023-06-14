@@ -7,7 +7,7 @@
                             <li class="breadcrumb-item"><a href="/aulas-virtuales">Anuncios</a></li>
                             <li class="breadcrumb-item active"><a href="/aulas-virtuales/cuentas">Cuentas</a></li>
                         </ul> -->
-                    <a href="/aulas-virtuales">Aulas Virtuales</a> &nbsp; / Cuentas
+                    <a href="/aulas-virtuales/reuniones">Aulas Virtuales</a> &nbsp; / Cuentas
                     <v-spacer/>
 
                     <v-btn icon color="primary"

@@ -9,7 +9,7 @@
             loading-text="Cargando datos..."
             :headers="dataTable.headers"
             :items="data"
-            :items-per-page="12"
+            :items-per-page="18"
             @update:sort-by="sortBy"
             @update:sort-desc="sortDesc"
             hide-default-footer
