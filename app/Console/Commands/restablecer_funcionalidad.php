@@ -105,13 +105,30 @@ class restablecer_funcionalidad extends Command
         // $this->generateStatusTopics();
         // $this->deleteDuplicateUserCriterionValues();
         // $this->restoreStatusSummaryTopics();
-        $this->setSummarysFromTopicGrades();
+        // $this->setSummarysFromTopicGrades();
         // $this->setSchoolOrden();
         // $this->setCourseOrden();
         // $this->restoSummaryCourseSinceSummaryTopic();
         // $this->restoreJsonNotification();
+        $this->restoreSummariesWithTypeTopicGradesMassive();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
+    }
+    public function restoreSummariesWithTypeTopicGradesMassive(){
+        $summary_topics = SummaryTopic::where('source_id', 4623)
+            ->where('created_at', '>', '2023-01-10 00:00:00')
+            ->with(['topic:id,course_id','topic.course','user'])
+            ->get(['id','topic_id','user_id']);
+
+        $_bar = $this->output->createProgressBar($summary_topics->count());
+        $_bar->start();
+        foreach ($summary_topics as $summary_topic) {
+            SummaryCourse::getCurrentRowOrCreate($summary_topic->topic->course, $summary_topic->user);
+            SummaryCourse::updateUserData($summary_topic->topic->course, $summary_topic->user, false,false);
+            SummaryUser::updateUserData($summary_topic->user);
+            $_bar->advance();
+        }
+
     }
     public function restoreJsonNotification(){
         $notificaciones = PushNotification::all();
