@@ -9,12 +9,12 @@
             <!-- :show-card-actions="false" -->
             <template v-slot:content>
                 <v-row class="mb-3">
-                    <div class="col col-8 text-left pt-0 text-overflow-ellipsis small" :title="resource.title">
+                    <div class="col col-8 text-left py-0 text-overflow-ellipsis small" :title="resource.title">
                         {{ resource.title }}
                     </div>
 
-                    <div class="col col-2 text-right pt-0 text-overflow-ellipsis small" :title="resource.type">{{ resource.type }}</div>
-                    <div class="col col-2 text-right pt-0 text-overflow-ellipsis small" :title="resource.formattedSize">{{ resource.formattedSize }}</div>
+                    <div class="col col-2 text-right py-0 text-overflow-ellipsis small" :title="resource.type">{{ resource.type }}</div>
+                    <div class="col col-2 text-right py-0 text-overflow-ellipsis small" :title="resource.formattedSize">{{ resource.formattedSize }}</div>
                 </v-row>
                 <v-row>
                     <v-col cols="12" class="py-0">
@@ -34,8 +34,8 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="center" class="mx-0 support-card-actions">
-                    <v-col cols="12" class="d-flex justify-content-center">
+                <v-row justify="center" class="mx-0">
+                    <v-col cols="12" class="d-flex justify-content-center py-0">
 
 
                         <v-btn
@@ -45,6 +45,7 @@
                             :ripple="false"
                             color="primary"
                             @click="openMultimedia"
+                            title="Abrir multimedia externamente"
                         >
                             <v-icon color="primary">mdi-open-in-new</v-icon>
                             <!-- Abrir multimedia -->
@@ -58,6 +59,7 @@
                             color="primary"
                             @click="downloadMultimedia"
                             v-if="resource.ext !== 'scorm'"
+                            title="Descargar multimedia"
                         >
                             <v-icon color="primary">mdi-download</v-icon>
                             <!-- Descargar multimedia -->
@@ -71,6 +73,7 @@
                             color="grey"
                             @click="modalDeleteOptions.open = true"
                             v-if="resource.ext !== 'scorm'"
+                            title="Eliminar multimedia"
                         >
                             <v-icon color="grey">mdi-trash-can</v-icon>
                             <!-- Eliminar multimedia -->
@@ -103,68 +106,16 @@
                 </v-row>
             </template>
 
-
-            <template v-slot:card-actions>
-               <!--  <v-card-actions :style="{ 'border-top': '1px solid rgba(0,0,0,.12)' }">
-
-                   <v-row justify="center" class="mx-0 support-card-actions">
-                        <v-col cols="12" class="d-flex justify-content-around">
-
-                            <v-btn
-                                class="default-modal-action-button"
-                                text
-                                elevation="0"
-                                :ripple="false"
-                                color="grey"
-                                @click="modalDeleteOptions.open = true"
-                                v-if="resource.ext !== 'scorm'"
-                            >
-                                <v-icon left color="grey" small>mdi-trash-can</v-icon>
-                                Eliminar multimedia
-                            </v-btn>
-
-                            <v-btn
-                                class="default-modal-action-button"
-                                text
-                                elevation="0"
-                                :ripple="false"
-                                color="primary"
-                                @click="openMultimedia"
-                            >
-                                <v-icon left color="primary" small>mdi-open-in-new</v-icon>
-                                Abrir multimedia
-                            </v-btn>
-
-                            <v-btn
-                                class="default-modal-action-button"
-                                text
-                                elevation="0"
-                                :ripple="false"
-                                color="primary"
-                                @click="downloadMultimedia"
-                                v-if="resource.ext !== 'scorm'"
-                            >
-                                <v-icon left color="primary" small>mdi-download</v-icon>
-                                Descargar multimedia
-                            </v-btn>
-
-                        </v-col>
-                       
-                    </v-row>
-
-                </v-card-actions> -->
-           
-                <DialogConfirm
-                    :ref="modalDeleteOptions.ref"
-                    v-model="modalDeleteOptions.open"
-                    :options="modalDeleteOptions"
-                    width="408px"
-                    title="Eliminar Multimedia"
-                    subtitle="¿Está seguro de eliminar el archivo multimedia?"
-                    @onConfirm="confirmDelete"
-                    @onCancel="modalDeleteOptions.open = false"
-                />
-            </template>
+            <DialogConfirm
+                :ref="modalDeleteOptions.ref"
+                v-model="modalDeleteOptions.open"
+                :options="modalDeleteOptions"
+                width="408px"
+                title="Eliminar Multimedia"
+                subtitle="¿Está seguro de eliminar el archivo multimedia?"
+                @onConfirm="confirmDelete"
+                @onCancel="modalDeleteOptions.open = false"
+            />
         </DefaultDialog>
     </div>
 </template>
