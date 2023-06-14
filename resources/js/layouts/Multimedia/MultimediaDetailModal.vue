@@ -81,8 +81,10 @@
 
                 <v-row v-if="resource.sections">
 
-                    <div class="col col-12">
+                    <div class="col col-12 text-center">
                         <hr class="mt-0">
+
+                        <strong>Secciones donde se utiliza:</strong>
                     </div>
 
                     <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />

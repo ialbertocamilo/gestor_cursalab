@@ -1,13 +1,24 @@
 <template>
 	<v-col cols="12" class="py-0" v-if="resource && resource.length > 0">
-		<v-row class="text-center">
-			<v-col cols="12" class="multimedia-label py-0" v-text="label"/>
+		<v-row class="text-left mx-5">
+			<!-- <v-col cols="12" class="multimedia-label py-0" v-text="label"/> -->
 		    <v-col cols="12">
 		        <ul class="mb-0 list-style-none">
 		            <li v-for="res of resource">
-		                <span v-text="res.name"></span>
+		                <!-- <span v-text="res.name"></span> -->
 		                <span v-if="Array.isArray(res.url)">
-		                    <v-btn 
+		                	<span
+		                		v-for="url of res.url"
+		                        :key="url"
+		                        class="text-overflow-ellipsis"
+		                	>
+		                		
+			                	<label class="multimedia-label py-0 mr-2" v-text="label" />
+			                	<a href="javascript:;" @click="openInOtherTabUrl(res)">
+			                		{{ res.name }}
+			                	</a>
+		                	</span>
+		                    <!-- <v-btn 
 		                     	class="default-modal-action-button"
 		                        v-for="url of res.url"
 		                        :key="url"
@@ -20,10 +31,15 @@
 		                        <v-icon>
 		                            mdi-open-in-new
 		                        </v-icon>
-		                    </v-btn>
+		                    </v-btn> -->
 		                </span>
-		                <span v-else>
-		                    <v-btn 
+		                <span v-else class="text-overflow-ellipsis">
+		                	<label class="multimedia-label py-0 mr-2" v-text="label" />
+		                	<!-- <span @click="openInOtherTabUrl(res)" v-text="res.name"></span> -->
+		                	<a href="javascript:;" @click="openInOtherTabUrl(res)">
+		                		{{ res.name }}
+		                	</a>
+		                    <!-- <v-btn 
 		                     	class="default-modal-action-button"
 		                        text
 		                        small
@@ -34,7 +50,7 @@
 		                        <v-icon>
 		                            mdi-open-in-new
 		                        </v-icon>
-		                    </v-btn>
+		                    </v-btn> -->
 		                </span>
 		            </li>
 		        </ul>
@@ -66,7 +82,10 @@
     	        let vue = this;
     	        const check_url = vue.resource.every((ele) => (ele.url_filters !== undefined));
 
+    	        console.log('openInOtherTabUrl')
+
     	        if(check_url) {
+    	        	console.log('check_url')
     	        	const url = new URL(res.url); 
     	        	const resourceParams = new URLSearchParams(url.search);
 
