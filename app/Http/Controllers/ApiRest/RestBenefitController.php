@@ -22,6 +22,7 @@ class RestBenefitController extends Controller
         $data = [
             'filtro' => $request->filtro,
             'status' => $request->status ?? null,
+            'user' => $user?->id ?? null,
             'page' => $request->page ?? null
         ];
         $apiResponse = Benefit::getBenefits($data);
@@ -47,6 +48,19 @@ class RestBenefitController extends Controller
             'speaker' => $speaker,
         ];
         $apiResponse = Speaker::getInfo($data);
+
+        return response()->json($apiResponse, 200);
+    }
+
+    public function registerUserForBenefit(Request $request)
+    {
+        $user = Auth::user();
+        $data = [
+            'user' => $user?->id ?? null,
+            'benefit' => $request->benefit ?? null,
+        ];
+
+        $apiResponse = Benefit::registerUserForBenefit($data);
 
         return response()->json($apiResponse, 200);
     }

@@ -44,6 +44,13 @@ Vue.use(VueNotification, {
         color: "#0f5132"
     }
 });
+import * as VueGoogleMaps from 'vue2-google-maps'
+Vue.use(VueGoogleMaps , {
+    load: {
+        key: 'AIzaSyBnS1vTLtRnpAH0H64msTG-I4OeEZcVNxE',
+        libraries: 'places',
+    },
+})
 
 Vue.use(Toast, {
     position: "bottom-right",

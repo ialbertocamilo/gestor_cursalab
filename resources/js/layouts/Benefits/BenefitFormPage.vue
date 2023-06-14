@@ -128,22 +128,21 @@
                     </v-row>
 
                     <!-- Map -->
-                    <!-- <v-row justify="space-around">
+                    <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Ubicación"
                             >
                                 <template slot="content">
-                                    <v-row justify="center">
-                                        <v-col cols="9">
+                                    <v-row justify="center" class="align-items-center">
+                                        <v-col cols="8">
                                             <DefaultInput
                                                 label="Dirección"
                                                 v-model="resource.direccion"
                                                 dense
                                             />
-                                            <input type="text" id="search-map">
                                         </v-col>
-                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                        <v-col cols="4" class="d-flex justify-content-center align-items-center bx_benefit_accesible">
                                             <DefaultToggle
                                                 v-model="resource.discapacidad"
                                                 active-label="Accesible para usuarios con discapacidad"
@@ -153,14 +152,72 @@
                                     </v-row>
                                     <div class="row">
                                         <div class="bx_maps_benefit" id="bx_maps_benefit">
-
+                                            <GmapMap
+                                                :center="center"
+                                                :zoom="zoom"
+                                                style="height: 300px"
+                                                >
+                                            </GmapMap>
                                         </div>
                                     </div>
                                 </template>
                             </DefaultModalSection>
                         </v-col>
-                    </v-row> -->
+                    </v-row>
                     <!-- End Map -->
+                    <!-- Dificultad -->
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Dificultad del beneficio"
+                            >
+                                <template slot="content">
+                                    <div class="box_dificultad_beneficios">
+                                        <p>Selecciona el nivel de dificultad que tendra el beneficio</p>
+                                        <div class="box_items_dificultad d-flex justify-content-center">
+                                            <div class="item_dificultad" :class="{'active': activeDificultad == 'basico'}" @click="selectDificultad('basico')">Básico</div>
+                                            <div class="item_dificultad" :class="{'active': activeDificultad == 'intermedio'}" @click="selectDificultad('intermedio')">Intermedio</div>
+                                            <div class="item_dificultad" :class="{'active': activeDificultad == 'avanzado'}" @click="selectDificultad('avanzado')">Avanzado</div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Dificultad -->
+                    <!-- Promotor -->
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Promotor del beneficio"
+                            >
+                                <template slot="content">
+                                    <!-- <v-row>
+                                        <v-col cols="7"> -->
+                                            <div class="box_beneficio_promotor d-flex">
+                                                <div class="box_input_promotor">
+                                                    <DefaultInput
+                                                        dense
+                                                        label="Promotor"
+                                                        placeholder="Empresa que promociona"
+                                                        v-model="resource.promotor"
+                                                        :rules="rules.promotor"
+                                                    />
+                                                </div>
+                                                <div class="box_button_promotor">
+                                                    <!-- <button class="btn btn-secondary">Agregar Logotipo</button> -->
+                                                    <v-btn color="primary" outlined @click="addLogoPromotor">
+                                                        Agregar Logotipo
+                                                    </v-btn>
+                                                </div>
+                                            </div>
+                                        <!-- </v-col>
+                                    </v-row> -->
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Promotor -->
 
                 </v-form>
             </v-card-text>
@@ -184,11 +241,11 @@ const file_fields = ['imagen', 'plantilla_diploma'];
 
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import Editor from "@tinymce/tinymce-vue";
-// import { GoogleMap, Marker } from "vue3-google-map";
+import GmapMap from 'vue2-google-maps/dist/components/map.vue'
 
 export default {
-    components: {DialogConfirm, Editor},
-    props: ["modulo_id", 'categoria_id', 'curso_id'],
+    components: {DialogConfirm, Editor,GmapMap},
+    props: ["modulo_id", 'categoria_id', 'curso_id', 'api_key_maps'],
     data() {
         const route_school = (this.categoria_id !== '')
             ? `/escuelas/${this.categoria_id}`
@@ -199,6 +256,9 @@ export default {
 
 
         return {
+            center: { lat: -12.0529046, lng: -77.0253457 },
+            zoom: 11,
+            activeDificultad: null,
             modalDateFilter1: {
                 open: false,
             },
@@ -231,6 +291,7 @@ export default {
                 inicio_liberacion: null,
                 correo: null,
                 lista_escuelas: [],
+                dificultad: null,
             },
             resource: {},
             rules: {
@@ -319,7 +380,7 @@ export default {
                 return false
             }
             return true
-        }
+        },
     },
     async mounted() {
         this.showLoader()
@@ -334,7 +395,6 @@ export default {
                 this.resource.lista_escuelas.push(+this.$props.categoria_id);
             }
         }
-        // iniciarMapBenefit()
     },
     methods: {
 
@@ -441,39 +501,57 @@ export default {
             }
 
             return valid;
+        },
+        async selectDificultad( item ) {
+            let vue = this
+            vue.resource.dificultad = item
+            vue.activeDificultad = item
+            console.log(vue.activeDificultad);
+            console.log(vue.resource);
+            // vue.$nextTick(() => {
+            //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+            // })
+        },
+        addLogoPromotor() {
+
         }
     }
 }
 
-// let  map;
-// let marker;
-// function iniciarMapBenefit(){
-//         var coord = {lat:-12.0529046 ,lng: -77.0253457};
-//         map = new google.maps.Map(document.getElementById('bx_maps_benefit'),{
-//             zoom: 10,
-//             center: coord
-//         });
-//         marker = new google.maps.Marker({
-//             position: coord,
-//             map: map
-//         });
-//         const searchMap = document.getElementById('search-map');
-//         const autocomplete = new google.maps.places.Autocomplete(searchMap);
-//         // autocomplete.bindTo('bounds',map);
-//         autocomplete.addListener("place_changed",()=>{
-//             const place = autocomplete.getPlace();
-//             const {geometry:{viewport,location}} = place;
-//             map.setCenter(location);
-//             map.setZoom(16);
-//             // addInfoMap(location);
-//             console.log(place);
-//         })
-//         //Buscar código postal
-// }
 </script>
 <style lang="scss">
 .bx_maps_benefit {
     height: 300px;
     width: 100%;
+}
+.bx_benefit_accesible .default-toggle.default-toggle.v-input--selection-controls {
+    margin-top: 0 !important;
+}
+.box_dificultad_beneficios p {
+    font-family: 'open sans';
+    font-size: 20px;
+    color: #9E9E9E;
+    text-align: center;
+}
+.box_items_dificultad .item_dificultad {
+    border: 1px solid #D9D9D9;
+    margin: 0 10px;
+    padding: 10px 20px;
+    min-width: 150px;
+    text-align: center;
+    color: #D9D9D9;
+    font-weight: 600;
+    font-family: 'open sans';
+    border-radius: 4px;
+    cursor: pointer;
+}
+.box_items_dificultad .item_dificultad.active,
+.box_items_dificultad .item_dificultad:hover {
+    border: 1px solid #5457E7;
+    color: #5457E7;
+}
+.box_input_promotor {
+    flex: 1;
+    margin-right: 15px;
 }
 </style>

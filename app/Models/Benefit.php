@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -79,6 +80,16 @@ class Benefit extends BaseModel
                             ->where('code', 'links')
                             ->first();
         return $this->properties()->where('type_id', $links_id->id);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_benefits', 'benefit_id', 'user_id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Taxonomy::class, 'status_id');
     }
 
     protected function storeRequest($data, $benefit = null)
@@ -188,17 +199,66 @@ class Benefit extends BaseModel
     }
 
     // Apis
+    protected function registerUserForBenefit( $data )
+    {
+        $response['error'] = false;
+
+        $user_id = $data['user'] ?? null;
+        $benefit_id = $data['benefit'] ?? null;
+
+        $is_registered = UserBenefit::where('user_id', $user_id)
+                        ->where('benefit_id', $benefit_id)
+                        ->first();
+
+        if($is_registered) {
+            $response['error'] = true;
+            $response['msg'] = 'El usuario ya se encuentra registrado en este beneficio.';
+        }
+        else {
+
+            try {
+                DB::beginTransaction();
+
+                $is_created = UserBenefit::create(['user_id'=>$user_id, 'benefit_id'=>$benefit_id]);
+                if($is_created) {
+                    $response['msg'] = 'Se registró correctamente al beneficio';
+                }
+
+                DB::commit();
+
+            } catch (\Exception $e) {
+                info($e);
+                DB::rollBack();
+                // Error::storeAndNotificateException($e, request());
+                $response['error'] = true;
+                $response['msg'] = 'No se pudo registrar el usuario a este beneficio. Inténtelo nuevamente.';
+                // abort(errorExceptionServer());
+            }
+
+            cache_clear_model(UserBenefit::class);
+        }
+
+        return $response;
+
+    }
     protected function getBenefits( $data )
     {
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
+        $user_id = $data['user'];
+        $status_benefit = ($data['status'] && is_array($data['status']) && count($data['status']) > 0) ? $data['status'] : null;
 
         // $workspace = get_current_workspace();
 
-        $benefits_query = Benefit::with(
-            ['type'=> function ($query) {
-                        $query->select('id', 'name', 'code');
-                    }
+        $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
+
+        $benefits_query = Benefit::with([
+            'type'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                },
+            'status'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                }
         ])
         ->where('active',1);
         // where('workspace_id', $workspace->id)
@@ -214,21 +274,68 @@ class Benefit extends BaseModel
                 $query->orWhere('benefits.description', 'like', "%$filtro%");
             });
         }
-        $benefits = $benefits_query->select('id','workspace_id','type_id','title','description','image','cupos','inicio_inscripcion','fin_inscripcion','fecha_liberacion','dificultad','active')->paginate(request('paginate', 15));
-
-
-        $benefits_items = $benefits->items();
-        foreach($benefits_items as $item) {
-            $item->status = ['name' => 'Suscrito', 'code' => 'suscrito'];
-            $item->ubicacion = "Lima";
-            $item->accesible = true;
+        if($status_benefit) {
+            if(in_array('subscribed', $status_benefit) && count($status_benefit) == 1) {
+                $benefits_query->whereIn('id', $benefits_user_registered);
+            }
+            else if(in_array('subscribed', $status_benefit) && count($status_benefit) > 1) {
+                $benefits_query->whereIn('id', $benefits_user_registered);
+                $benefits_query->orWhereHas('status', function ($query) use ($status_benefit) {
+                    $query->whereIn('code', $status_benefit);
+                });
+            }
+            else {
+                $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
+                    $query->whereIn('code', $status_benefit);
+                });
+            }
         }
 
+        $benefits = $benefits_query->paginate(request('paginate', 15));
+
+        $benefits_items = $benefits->items();
+
+        foreach($benefits_items as $item)
+        {
+            $item->user_status = null;
+            $item->subscribed = false;
+
+            if(in_array($item->id, $benefits_user_registered)) {
+                $user_benefit = UserBenefit::where(['user_id' => $user_id, 'benefit_id' => $item->id])->first();
+                if($user_benefit) {
+                    $item->user_status = ['name' => 'Suscrito', 'code' => 'subscribed'];
+                    $item->subscribed = true;
+                }
+            }
+
+            // if ($item->inicio_inscripcion && $item->fin_inscripcion) {
+            //     $inicio_inscripcion = new Carbon($item->inicio_inscripcion);
+            //     $fin_inscripcion = new Carbon($item->fin_inscripcion);
+            //     $now = Carbon::now();
+            //     if ($now->gt($inicio_inscripcion) && $now->lt($fin_inscripcion))
+            //         $item->status = ['name' => 'Activo', 'code' => 'activo'];
+            // }
 
 
-        // $speaker = $benefits->speaker()->get();
-        // $implements = $benefits->implements()->get();
-        // dd($benefits, $speaker, $implements);
+            $item->ubicacion = "Lima";
+            $item->accesible = true;
+            $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
+            $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
+            $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
+            unset(
+                $item->promotor,
+                $item->promotor_imagen,
+                $item->direccion,
+                $item->referencia,
+                $item->duracion,
+                $item->correo,
+                $item->workspace_id,
+                $item->type_id,
+                $item->speaker_id,
+                $item->status_id,
+                $item->active
+            );
+        }
 
         $response['data'] = $benefits->items();
         $response['lastPage'] = $benefits->lastPage();

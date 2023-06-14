@@ -60,6 +60,7 @@
                 :ref="modalSelectActivity.ref"
                 v-model="modalSelectActivity.open"
                 width="650px"
+            @onCancel="modalSelectActivity.open = false"
             />
     </section>
 </template>

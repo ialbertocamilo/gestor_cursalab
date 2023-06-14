@@ -212,6 +212,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->morphMany(Segment::class, 'model');
     }
 
+    public function benefits()
+    {
+        return $this->belongsToMany(Benefit::class, 'user_benefits', 'user_id', 'benefit_id');
+    }
+
     public function scopeOnlyClientUsers($q)
     {
         $q
