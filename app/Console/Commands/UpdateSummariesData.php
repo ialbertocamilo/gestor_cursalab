@@ -97,7 +97,6 @@ class UpdateSummariesData extends Command
                     SummaryUser::updateUserData($user);
     
                 }
-                $x = 1/0;
                 $user->update([
                     'summary_user_update' => NULL,
                     'summary_course_update' => NULL,
