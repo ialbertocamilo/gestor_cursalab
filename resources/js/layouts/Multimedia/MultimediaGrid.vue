@@ -80,10 +80,15 @@ export default {
     // font-size: .9rem !important;
     // color: white;
 
+    // border-radius: 1em;
+    // padding: 0.3rem 1rem !important;
+    // background-color: #b0b1c7;
+    // color: white;
+
     border-radius: 1em;
-    padding: 0.3rem 1rem !important;
-    background-color: #b0b1c7;
-    color: white;
+    padding: 0.2rem 0.7rem!important;
+    background-color: #5458eab3;
+    color: #fff;
 }
 
 .med-box-title {
