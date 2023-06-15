@@ -22,7 +22,7 @@
                         <v-img
                             :src="resource.preview"
                             :lazy-src="`https://picsum.photos/10/6?image=200`"
-                            max-height="300"
+                            max-height="350"
                             contain
                             class="grey lighten-5"
                         />

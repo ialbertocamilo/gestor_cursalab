@@ -2,8 +2,8 @@
 	<v-col cols="12" class="py-0" v-if="resource && resource.length > 0">
 		<v-row class="text-center mx-5">
 			<!-- <v-col cols="12" class="multimedia-label py-0" v-text="label"/> -->
-		    <v-col cols="12">
-		        <ul class="mb-0 pl-0 list-style-none">
+		    <v-col cols="12" class="py-0">
+		        <ul class="mb-0 pl-0 list-style-none pb-0">
 		            <li v-for="res of resource">
 		                <!-- <span v-text="res.name"></span> -->
 		                <span v-if="Array.isArray(res.url)">
@@ -13,7 +13,7 @@
 		                        class="text-overflow-ellipsis"
 		                	>
 		                		
-			                	<label class="multimedia-label py-0 mr-2" v-text="label" />
+			                	<label class="multimedia-label my-0 mr-2" v-text="label" />
 			                	<a href="javascript:;" @click="openInOtherTabUrl(res)">
 			                		{{ res.name }}
 			                	</a>
@@ -34,7 +34,7 @@
 		                    </v-btn> -->
 		                </span>
 		                <span v-else class="text-overflow-ellipsis">
-		                	<label class="multimedia-label py-0 mr-2" v-text="label" />
+		                	<label class="multimedia-label my-0 mr-2" v-text="label" />
 		                	<!-- <span @click="openInOtherTabUrl(res)" v-text="res.name"></span> -->
 		                	<a href="javascript:;" @click="openInOtherTabUrl(res)">
 		                		{{ res.name }}
