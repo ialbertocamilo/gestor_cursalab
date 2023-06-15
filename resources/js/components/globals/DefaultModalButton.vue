@@ -2,16 +2,17 @@
     <v-btn
         class="mx-1"
         :disabled="disabled"
+        :text="text"
         :class="{}"
         elevation="0"
         :ripple="false"
         color="primary"
         @click="emitClick"
     >
-        <div class="icon_tmp" v-if="template">
+        <!-- <div class="icon_tmp" v-if="template">
             <img src="/img/anfitriones.png">
-        </div>
-        <v-icon class="" v-text="'mdi-plus'" v-if="icon"/>
+        </div> -->
+        <v-icon class="mr-1" v-text="icon_name" v-if="icon"/>
         {{ label }}
     </v-btn>
 </template>
@@ -28,10 +29,18 @@ export default {
             type: Boolean,
             default: true
         },
+        icon_name: {
+            type: String,
+            default: 'mdi-plus'
+        },
         template: {
             type: String
         },
         disabled: {
+            type: Boolean,
+            default: false
+        },
+        text: {
             type: Boolean,
             default: false
         }

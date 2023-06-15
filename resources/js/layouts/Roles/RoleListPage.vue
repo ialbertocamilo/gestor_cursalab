@@ -10,7 +10,7 @@
                 <!--                    :label="'Actividad'"-->
                 <!--                    @click="activity"/>-->
                 <DefaultModalButton
-                    :label="'Rol'"
+                    :label="'Crear rol'"
                     @click="openFormModal(modalOptions, null, 'create')"/>
             </v-card-title>
         </v-card>

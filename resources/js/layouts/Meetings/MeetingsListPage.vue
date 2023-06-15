@@ -6,11 +6,11 @@
             >
                 <v-card-title>
                     Aulas Virtuales
-                    <v-spacer/>
                     <DefaultInfoTooltip
                         class="mr-5"
                         bottom
                         text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
+                    <v-spacer/>
                      <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
 <!--                    <v-btn icon color="primary"-->
@@ -21,10 +21,10 @@
 
 
                 <DefaultModalButton v-if="superuser"
-                    label="Configurar Anfitriones"
-                    template="anfitriones"
-                    :icon=false
-                    class="btn_anf"
+                    label="Configurar anfitriones"
+                    icon_name="mdi-contacts-outline"
+                    text
+                    class="---btn_anf"
                     @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
 
                 <SegmentFormModal
@@ -46,8 +46,7 @@
 
                     <DefaultModalButton
                         label="Crear reunión"
-                        :icon=false
-                        class="btn_crear"
+                        class="--btn_crear"
                         @click="openFormModal(modalFormOptions)"/>
                 </v-card-title>
             </div>
@@ -515,11 +514,11 @@ button.btn_anf.primary .icon_tmp {
 button.btn_anf.primary .icon_tmp img{
     max-width: 20px;
 }
-button.btn_crear {
-    font-family: "Nunito", sans-serif;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-    min-width: 175px !important;
-    height: 42px !important;
-}
+// button.btn_crear {
+//     font-family: "Nunito", sans-serif;
+//     padding-left: 10px !important;
+//     padding-right: 10px !important;
+//     min-width: 175px !important;
+//     height: 42px !important;
+// }
 </style>

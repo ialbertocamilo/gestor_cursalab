@@ -50,7 +50,7 @@
                     <slot name="consideraciones"/>
                 </v-row>
 
-                 <v-row justify="space-around">
+                <v-row justify="space-around">
                     <img src="/svg/filtros.svg" width="55%" class="mt-7">
                 </v-row>
             </div>
@@ -71,7 +71,7 @@ export default {
         },
         width: {
             type: Number | String,
-            default: '30%'
+            default: '400px'
         },
         disabledConfirmBtn: {
             type: Boolean,

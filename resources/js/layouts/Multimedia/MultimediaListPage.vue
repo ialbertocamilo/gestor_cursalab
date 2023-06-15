@@ -35,7 +35,7 @@
                             clearable
                             dense
                             v-model="filters.q"
-                            label="Buscar por título"
+                            label="Buscar por nombre"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
@@ -49,7 +49,7 @@
                 Multimedia
                 <v-spacer/>
                 <DefaultModalButton
-                    :label="'Subir multimedia'"
+                    :label="'Agregar multimedia'"
                     @click="openFormModal(modalUpdateMultimedia, null, 'updateMultimedia', `Subir archivos`)"
                 />
             </v-card-title>
@@ -88,7 +88,7 @@
                             clearable
                             dense
                             v-model="filters.q"
-                            label="Buscar por título"
+                            label="Buscar por nombre"
                             @onEnter="getData"
                             @clickAppendIcon="getData"
                             append-icon="mdi-magnify"
@@ -379,7 +379,7 @@ export default {
             url = url + filters
             this.$http.get(url)
                 .then(({data}) => {
-                    console.log(data.medias)
+                    // console.log(data.medias)
                     vue.data = data.medias.data
                     // console.log(vue.data)
                     if (vue.pagination.actual_page > data.medias.total_pages)

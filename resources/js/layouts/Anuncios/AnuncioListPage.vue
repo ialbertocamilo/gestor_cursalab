@@ -6,7 +6,7 @@
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'" @click="activity"/> -->
                 <DefaultModalButton
-                    :label="'Anuncio'"
+                    :label="'Crear anuncio'"
                     @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
