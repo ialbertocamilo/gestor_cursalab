@@ -104,18 +104,19 @@
                         />
                     </v-col> -->
                 </v-row>
+               
+                <DialogConfirm
+                    :ref="modalDeleteOptions.ref"
+                    v-model="modalDeleteOptions.open"
+                    :options="modalDeleteOptions"
+                    width="408px"
+                    title="Eliminar Multimedia"
+                    subtitle="¿Está seguro de eliminar el archivo multimedia?"
+                    @onConfirm="confirmDelete"
+                    @onCancel="modalDeleteOptions.open = false"
+                />
             </template>
 
-            <DialogConfirm
-                :ref="modalDeleteOptions.ref"
-                v-model="modalDeleteOptions.open"
-                :options="modalDeleteOptions"
-                width="408px"
-                title="Eliminar Multimedia"
-                subtitle="¿Está seguro de eliminar el archivo multimedia?"
-                @onConfirm="confirmDelete"
-                @onCancel="modalDeleteOptions.open = false"
-            />
         </DefaultDialog>
     </div>
 </template>

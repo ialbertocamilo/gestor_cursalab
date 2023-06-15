@@ -1,9 +1,9 @@
 <template>
 	<v-col cols="12" class="py-0" v-if="resource && resource.length > 0">
-		<v-row class="text-left mx-5">
+		<v-row class="text-center mx-5">
 			<!-- <v-col cols="12" class="multimedia-label py-0" v-text="label"/> -->
 		    <v-col cols="12">
-		        <ul class="mb-0 list-style-none">
+		        <ul class="mb-0 pl-0 list-style-none">
 		            <li v-for="res of resource">
 		                <!-- <span v-text="res.name"></span> -->
 		                <span v-if="Array.isArray(res.url)">
