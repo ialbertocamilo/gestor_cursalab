@@ -455,9 +455,9 @@ class Topic extends BaseModel
                     ->get();
         // UC
         $school_name = $school?->name;
-        if ($workspace_id === 25) {
-            $school_name = removeUCModuleNameFromCourseName($school_name);
-        }
+        // if ($workspace_id === 25 && $school_name) {
+        //     $school_name = removeUCModuleNameFromCourseName($school_name);
+        // }
         $sub_workspace = $user->subworkspace;
         $mod_eval = $sub_workspace->mod_evaluaciones;
 
@@ -500,9 +500,9 @@ class Topic extends BaseModel
 
             // UC rule
             $course_name = $course->name;
-            if ($workspace_id === 25) {
-                $course_name = removeUCModuleNameFromCourseName($course_name);
-            }
+            // if ($workspace_id === 25 && $course_name) {
+            //     $course_name = removeUCModuleNameFromCourseName($course_name);
+            // }
             $max_attempts = $course->mod_evaluaciones['nro_intentos'];
             $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
             $media_temas = $medias->whereIn('topic_id',$course->topics->pluck('id')) ?? [];
@@ -677,9 +677,9 @@ class Topic extends BaseModel
 
                             $req_school = $req->schools->first();
                             $course_name_req = $req->name;
-                            if ($workspace_id === 25) {
-                                $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
-                            }
+                            // if ($workspace_id === 25 && $course_name_req) {
+                            //     $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                            // }
                             $requirement_list = [
                                 'id' => $requirement_course?->requirement_id,
                                 'name' => $course_name_req,
@@ -736,9 +736,9 @@ class Topic extends BaseModel
 
                                 $req_school = $req->schools->first();
                                 $course_name_req = $req->name;
-                                if ($workspace_id === 25) {
-                                    $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
-                                }
+                                // if ($workspace_id === 25 && $course_name_req) {
+                                //     $course_name_req = removeUCModuleNameFromCourseName($course_name_req);
+                                // }
                                 $requirement_list = [
                                     'id' => $requirement_course?->requirement_id,
                                     'name' => $course_name_req,
