@@ -24,7 +24,7 @@
                 <div style="width:25px; height:5px; margin-left:-4rem; border-radius:4px; background: #FFCD0C;"></div>
                 
                 <p style="color:#CD0033; text-align:center; font-size: 2rem; margin-bottom:3px;margin-top:3px; font-weight:bold;">
-                    800/1000 
+                    {{$data['current_active_users_count']}}/{{$data['workspace_limit']}} 
                 </p>
                 <p style="color:#CD0033; text-align:center; font-size: 1.2rem; margin-bottom:3px;margin-top:10px; font-weight:bold;">
                     Licencias disponibles
@@ -36,7 +36,7 @@
     <tr style="background-color:#F9FAFB; text-align:center; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                Tu workspace de <b>Homecenter Peruanos</b> tiene <b>10 usuarios de 15</b> licencias disponibles. Contáctate con nuestros agentes comerciales para solicitar más licencias.
+                Tu workspace de <b>{{$data['workspace_name']}}</b> tiene <b>{{$data['current_active_users_count']}} usuarios de {{$data['workspace_limit']}}</b> licencias disponibles. Contáctate con nuestros agentes comerciales para solicitar más licencias.
             </p>
         </td>
     </tr>

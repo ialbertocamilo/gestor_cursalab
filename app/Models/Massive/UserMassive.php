@@ -65,6 +65,7 @@ class UserMassive extends Massive implements ToCollection
         //        $this->sortRows();
         if (!$this->validateLimitAllowedUsers()):
             $message = config('errors.limit-errors.limit-user-allowed');
+            
             $this->error_message = $message;
             return;
         endif;

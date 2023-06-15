@@ -427,7 +427,42 @@ class Workspace extends BaseModel
             default => null
         };
     }
+    public function sendEmailByLimit(){
+        $workspace = $this;
 
+        $workspace_constraint = $workspace->getSettingsLimitAllowedUser();
+
+        if (!$workspace_constraint) return false;
+
+        $workspace_limit = $workspace->getLimitAllowedUsers();
+
+        $q_current_active_users = User::onlyClientUsers()
+            ->where('active', ACTIVE);
+
+        if ($workspace_constraint['type'] === 'by_workspace')
+            $q_current_active_users->whereRelation('subworkspace', 'parent_id', $workspace->id);
+
+        if ($workspace_constraint['type'] === 'by_sub_workspace' && $sub_workspace_id)
+            $q_current_active_users->where('subworkspace_id', $sub_workspace_id);
+
+        $current_active_users_count = $q_current_active_users->count();
+        if($current_active_users_count/$workspace_limit < 0.4){
+            $emais_to_send_user = Workspace::where('id',$this->current_workspace->id)->with('emails.user:id,email_gestor')->wherehas('emails.user',function($q){
+                $q->where('active',ACTIVE)->whereNotNull('email_gestor');
+            })->select('id','name')->where('type_id',$type_id)->get()->map( fn ($e)=> $e->user->email_gestor);
+            if(count($emais_to_send_user) > 0){
+                $mail_data=[
+                    'subject'=>'Limite de usuarios',
+                    'workspace_name' => $workspace->name,
+                    'current_active_users_count'=> $current_active_users_count,
+                    'workspace_limit'=>$workspace_limit
+                ];
+                Mail::to($emais_to_send_user)
+                ->send(new EmailTemplate('emails.email_limite_usuarios', $mail_data));
+            }
+        }
+        return true;
+    }
     public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
     {
         $workspace = $this;
