@@ -51,14 +51,14 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('report:users-quantity')->dailyAt('23:58');
 
-        $schedule->command('mongo:save-data')->dailyAt('03:00');
+        // $schedule->command('mongo:save-data')->dailyAt('03:00');
 
         // Criteria
 
         $schedule->command('criteria:check-empty')->everyThreeHours();
 
         $schedule->command('tokens:revoke-impersonation-access')->everyTenMinutes();
-        $schedule->command('passport:purge --hours=1')->hourly();
+        // $schedule->command('passport:purge --hours=1')->hourly();
     }
 
     /**
