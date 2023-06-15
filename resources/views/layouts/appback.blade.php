@@ -223,8 +223,8 @@ if (isset($fullScreen)) {
         const USER_WORKSPACE_SLUG = "{{ $workspace?->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v=3.299-' . date('Y-W-d-H')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=2.129-' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/app.js?v=3.230-' . date('Y-W-d-H')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=2.130-' . date('Y-W-m')) }}"></script>
     <script>
         $(document).ready(function () {
             $('#content_polls').css('display','block');
