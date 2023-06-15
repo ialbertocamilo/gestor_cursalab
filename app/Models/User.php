@@ -560,7 +560,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             if ($user && !$from_massive) {
                 SummaryUser::updateUserData($user, false);
             }
-
+            try {   
+                //code...
+                $current_workspace = get_current_workspace();
+                $current_workspace->sendEmailByLimit();
+            } catch (\Throwable $th) {
+                
+            }
+                //throw $th;
             DB::commit();
         } catch (\Exception $e) {
 

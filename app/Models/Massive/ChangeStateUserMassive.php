@@ -47,6 +47,7 @@ class ChangeStateUserMassive extends Massive implements ToCollection
         // process dni or email <- change state user where dni or email
         $this->processData($rows);
         $this->q_errors = count($this->errors);
+        $this->current_workspace->sendEmailByLimit();
     }
 
     private function validateLimitAllowedUsers(): bool
