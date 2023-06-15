@@ -217,7 +217,8 @@ export default {
 
                 vue.$http.post(url, data)
                     .then(({data}) => {
-                        vue.filter_result = data.data;
+                        const users = (data.data.users) ? data.data.users :  data.data;
+                        vue.filter_result = users;
                         vue.autocomplete_loading = false;
                     })
                     .catch(err => {
@@ -301,7 +302,9 @@ export default {
             vue.$http.post(url, formData)
                 .then(({data}) => {
                     // vue.filter_result = data.data;
-                    data.data.forEach((user) => {
+                    const users = (data.data.users) ? data.data.users :  data.data;
+
+                    users.forEach((user) => {
                         const exist = vue.segment.segmentation_by_document.filter(el => el.document == user.document);
 
                         if (exist.length === 0){

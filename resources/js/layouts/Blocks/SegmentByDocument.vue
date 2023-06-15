@@ -175,7 +175,8 @@ export default {
 
                 vue.$http.post(url, data)
                     .then(({data}) => {
-                        vue.filter_result = data.data;
+                        const users = (data.data.users) ? data.data.users :  data.data;
+                        vue.filter_result = users;
                         vue.autocomplete_loading = false;
                     })
                     .catch(err => {
