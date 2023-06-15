@@ -4,6 +4,8 @@
         <vue-dropzone ref="myVueDropzone" id="dropzone"
                     :options="dropzoneOptions"
                     :useCustomSlot="true"
+                    v-on:vdropzone-queue-complete="onQueueComplete"
+                    v-on:vdropzone-upload-progress="viewProgress"
                     v-on:vdropzone-success="uploadSuccess"
                     v-on:vdropzone-complete="uploadComplete"
                     v-on:vdropzone-error="uploadError"
@@ -82,7 +84,12 @@
             return {
                 archivo:null,
                 dropzoneOptions: {
-                    url: 'https://httpbin.org/post',
+                    url: (files, test) => {
+                        return files[0]
+                    },
+                    autoProcessQueue: false,
+                    autoDiscover: false,
+
                     height: 400,
                     thumbnailWidth: 400,
                     headers: { "My-Awesome-Header": "header value" },
@@ -90,13 +97,10 @@
                     dictRemoveFile: 'Reemplazar archivo',
                     maxFiles:1,
                     previewTemplate: this.template(),
-                    accept: function(file, done) {
-                        console.log(file);
-                        if (file.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-                            done("El archivo no es del formato permitido");
-                        }
-                        else { done(); }
+                    timeout: {
+                        default: 0
                     },
+                    accept: this.validateFile,
                     init: function() {
                         this.on("maxfilesexceeded", function(file) {
                                 this.removeAllFiles();
@@ -124,9 +128,29 @@
             }
         },
         methods: {
+            viewProgress(file, progress, bytesSent) {
+            // console.log(file, progress, bytesSent)
+            },
+            onComplete(response) {
+                // console.log(response)
+            },
+            onQueueComplete() {
+                // console.log('queue complete')
+                // this.$emit("onUpload", file);
+            },
             limpiarArchivo() {
                 this.$refs.myVueDropzone.removeAllFiles()
                 this.archivo = null;
+            },
+            validateFile(file,done){
+                console.log('accept',file);
+                if (file.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+                    done("El archivo no es del formato permitido");
+                }
+                else {
+                    this.$emit("emitir-archivo", file);
+                    done();
+                }
             },
             uploadSuccess(file, response) {
                 this.$emit("emitir-archivo", file);
