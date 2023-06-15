@@ -58,7 +58,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('criteria:check-empty')->everyThreeHours();
 
         $schedule->command('tokens:revoke-impersonation-access')->everyTenMinutes();
-        $schedule->command('passport:purge --hours=1')->hourly();
+        // $schedule->command('passport:purge --hours=1')->hourly();
     }
 
     /**
