@@ -6,7 +6,8 @@ use App\Http\Requests\Benefit\BenefitStoreUpdateRequest;
 use Illuminate\Http\Request;
 
 use App\Models\Benefit;
-
+use App\Models\Poll;
+use App\Models\Taxonomy;
 
 class BenefitController extends Controller
 {
@@ -22,11 +23,17 @@ class BenefitController extends Controller
 
     public function getFormSelects(Benefit $benefit = null, $compactResponse = false)
     {
-        $escuelas = [];
-        $requisitos = [];
-        $types = [];
+        $types_poll= Taxonomy::getFirstData('poll', 'tipo', 'benefit');
 
-        $response = compact('escuelas', 'requisitos', 'types');
+        $workspace = get_current_workspace();
+
+        $polls = Poll::select('id', 'titulo as name')
+                ->where('workspace_id', $workspace->id)
+                ->where('type_id', $types_poll?->id)
+                ->where('active', true)
+                ->get();
+
+        $response = compact('polls');
 
         return $compactResponse ? $response : $this->success($response);
     }

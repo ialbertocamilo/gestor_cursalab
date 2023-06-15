@@ -2,7 +2,7 @@
     <section class="section-list">
         <v-card flat elevation="0">
             <v-card-title>
-                Beneficios: {{ curso_id ? 'Editar' : 'Crear' }}
+                Beneficios: {{ benefit_id ? 'Editar' : 'Crear' }}
             </v-card-title>
         </v-card>
         <br>
@@ -136,11 +136,10 @@
                                 <template slot="content">
                                     <v-row justify="center" class="align-items-center">
                                         <v-col cols="8">
-                                            <DefaultInput
-                                                label="Dirección"
-                                                v-model="resource.direccion"
-                                                dense
-                                            />
+                                            <div class="box_search_direction_map">
+                                                <span class="lbl_search_direction">Dirección</span>
+                                                <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                            </div>
                                         </v-col>
                                         <v-col cols="4" class="d-flex justify-content-center align-items-center bx_benefit_accesible">
                                             <DefaultToggle
@@ -151,15 +150,35 @@
                                         </v-col>
                                     </v-row>
                                     <div class="row">
-                                        <div class="bx_maps_benefit" id="bx_maps_benefit">
-                                            <GmapMap
-                                                :center="center"
-                                                :zoom="zoom"
-                                                style="height: 300px"
-                                                >
-                                            </GmapMap>
-                                        </div>
+                                        <v-col cols="12">
+                                            <div class="bx_maps_benefit" id="bx_maps_benefit">
+                                                <GmapMap
+                                                    :center="center"
+                                                    :zoom="zoom"
+                                                    style="height: 300px"
+                                                    >
+                                                    <GmapMarker
+                                                        :key="index"
+                                                        v-for="(m, index) in markers"
+                                                        :position="m.position"
+                                                        @click="center = m.position"
+                                                        :draggable="true"
+                                                        @drag="updateCoordinates"
+                                                    />
+                                                </GmapMap>
+                                            </div>
+                                        </v-col>
                                     </div>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <DefaultTextArea
+                                                label="Referencia"
+                                                placeholder="Ingresa una referencia de como llegar al lugar donde se realizara el curso"
+                                                v-model="resource.referencia"
+                                                :rules="rules.referencia"
+                                            />
+                                        </v-col>
+                                    </v-row>
                                 </template>
                             </DefaultModalSection>
                         </v-col>
@@ -185,6 +204,67 @@
                         </v-col>
                     </v-row>
                     <!-- End Dificultad -->
+                    <!-- Duración -->
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Duración"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_duracion d-flex justify-content-center align-items-center">
+                                        <div class="box_input_duracion mr-6">
+                                            <DefaultInput
+                                                dense
+                                                label="Duración del beneficio (hrs)"
+                                                placeholder="Ingresar la duración en horas"
+                                                v-model="duracionValue"
+                                                :rules="rules.duracion"
+                                                @input="duracionIlimitado = null"
+                                            />
+                                        </div>
+                                        <div class="box_button_duracion">
+                                            <v-radio-group v-model="duracionIlimitado">
+                                                <v-radio name="duracion" label="Ilimitado" :value="'ilimitado'" @change="duracionValue = null"></v-radio>
+                                            </v-radio-group>
+                                        </div>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Duración -->
+                    <!-- Encuesta -->
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Encuesta"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_encuesta d-flex justify-content-center">
+                                        <div class="box_input_encuesta">
+                                            <DefaultAutocomplete
+                                                :rules="rules.lista_encuestas"
+                                                dense
+                                                label="Encuesta"
+                                                placeholder="Agrega una encuesta"
+                                                v-model="resource.lista_encuestas"
+                                                :items="selects.lista_encuestas"
+                                                item-text="name"
+                                                item-value="id"
+                                            />
+                                        </div>
+                                        <div class="box_button_encuesta">
+                                            <v-btn color="primary" outlined @click="addLinkExterno">
+                                                <div class="img mr-1"><img src="/img/benefits/icono_link.svg"></div>
+                                                Link externo
+                                            </v-btn>
+                                        </div>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Encuesta -->
                     <!-- Promotor -->
                     <v-row justify="space-around">
                         <v-col cols="12">
@@ -192,27 +272,22 @@
                                 title="Promotor del beneficio"
                             >
                                 <template slot="content">
-                                    <!-- <v-row>
-                                        <v-col cols="7"> -->
-                                            <div class="box_beneficio_promotor d-flex">
-                                                <div class="box_input_promotor">
-                                                    <DefaultInput
-                                                        dense
-                                                        label="Promotor"
-                                                        placeholder="Empresa que promociona"
-                                                        v-model="resource.promotor"
-                                                        :rules="rules.promotor"
-                                                    />
-                                                </div>
-                                                <div class="box_button_promotor">
-                                                    <!-- <button class="btn btn-secondary">Agregar Logotipo</button> -->
-                                                    <v-btn color="primary" outlined @click="addLogoPromotor">
-                                                        Agregar Logotipo
-                                                    </v-btn>
-                                                </div>
-                                            </div>
-                                        <!-- </v-col>
-                                    </v-row> -->
+                                    <div class="box_beneficio_promotor d-flex">
+                                        <div class="box_input_promotor">
+                                            <DefaultInput
+                                                dense
+                                                label="Promotor"
+                                                placeholder="Empresa que promociona"
+                                                v-model="resource.promotor"
+                                                :rules="rules.promotor"
+                                            />
+                                        </div>
+                                        <div class="box_button_promotor">
+                                            <v-btn color="primary" outlined @click="addLogoPromotor">
+                                                Agregar Logotipo
+                                            </v-btn>
+                                        </div>
+                                    </div>
                                 </template>
                             </DefaultModalSection>
                         </v-col>
@@ -245,20 +320,19 @@ import GmapMap from 'vue2-google-maps/dist/components/map.vue'
 
 export default {
     components: {DialogConfirm, Editor,GmapMap},
-    props: ["modulo_id", 'categoria_id', 'curso_id', 'api_key_maps'],
+    props: [ 'benefit_id', 'api_key_maps'],
     data() {
-        const route_school = (this.categoria_id !== '')
-            ? `/escuelas/${this.categoria_id}`
-            : ``;
-
-        let base_endpoint_temp = `${route_school}/cursos`;
-
-
-
         return {
             center: { lat: -12.0529046, lng: -77.0253457 },
-            zoom: 11,
+            zoom: 16,
+            currentPlace: null,
+            markers: [{
+                position: { lat: -12.0529046, lng: -77.0253457 }
+            }],
+
             activeDificultad: null,
+            duracionValue: null,
+            duracionIlimitado: null,
             modalDateFilter1: {
                 open: false,
             },
@@ -274,7 +348,6 @@ export default {
             url: window.location.search,
             errors: [],
             conf_focus: true,
-            // base_endpoint: base_endpoint_temp,
             base_endpoint: '/beneficios',
             resourceDefault: {
                 title: null,
@@ -282,8 +355,6 @@ export default {
                 // position: null,
                 imagen: null,
                 file_imagen: null,
-                config_id: this.modulo_id,
-                // categoria_id: this.categoria_id,
                 active: true,
                 type_id: null,
                 inicio_inscripcion: null,
@@ -291,6 +362,7 @@ export default {
                 inicio_liberacion: null,
                 correo: null,
                 lista_escuelas: [],
+                lista_encuestas: [],
                 dificultad: null,
             },
             resource: {},
@@ -306,6 +378,7 @@ export default {
             selects: {
                 requisito_id: [],
                 lista_escuelas: [],
+                lista_encuestas: [],
                 types: [],
             },
             loadingActionBtn: false,
@@ -386,18 +459,29 @@ export default {
         this.showLoader()
         await this.loadData()
         this.hideLoader()
-
-        if (+this.$props.categoria_id) {
-            let exists = this.resource
-                .lista_escuelas
-                .includes(+this.$props.categoria_id);
-            if (!exists) {
-                this.resource.lista_escuelas.push(+this.$props.categoria_id);
-            }
-        }
     },
     methods: {
-
+        setPlace(place) {
+            this.currentPlace = place;
+            console.log(this.currentPlace);
+            if (this.currentPlace) {
+                const marker = {
+                lat: this.currentPlace.geometry.location.lat(),
+                lng: this.currentPlace.geometry.location.lng(),
+                };
+                this.markers = [{ position: marker }];
+                this.center = marker;
+                this.currentPlace = null;
+            }
+        },
+        updateCoordinates(location) {
+            let geocoder = new google.maps.Geocoder()
+            geocoder.geocode({ 'latLng': location.latLng }, (result, status) => {
+                if (status ===google.maps.GeocoderStatus.OK) {
+                    this.$refs.autocompleteMap.$refs.input.value = result[0].formatted_address
+                }
+            })
+        },
         images_upload_handler(blobInfo, success, failure) {
             // console.log(blobInfo.blob());
             let formdata = new FormData();
@@ -429,6 +513,14 @@ export default {
         confirmModal(validateForm = true) {
             let vue = this
             vue.errors = []
+
+            if( vue.duracionIlimitado == 'ilimitado' ) {
+                vue.resource.duracion = 'ilimitado'
+            }
+            else if( vue.duracionValue != null && vue.duracionValue != '' ) {
+                vue.resource.duracion = vue.duracionValue
+            }
+            console.log(vue.resource);
             vue.loadingActionBtn = true
             vue.showLoader()
             const validForm = vue.validateForm('BenefitForm')
@@ -439,8 +531,8 @@ export default {
                 return
             }
 
-            const edit = vue.curso_id !== ''
-            let url = `${vue.base_endpoint}/${edit ? `update/${vue.curso_id}` : 'store'}`
+            const edit = vue.benefit_id !== ''
+            let url = `${vue.base_endpoint}/${edit ? `update/${vue.benefit_id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
 
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
@@ -464,24 +556,15 @@ export default {
         },
         async loadData() {
             let vue = this
-            // vue.$nextTick(() => {
-            //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-            // })
-            // let url = `${vue.base_endpoint}/${vue.curso_id === '' ? 'form-selects' : `search/${vue.curso_id}`}`
-            // await vue.$http.get(url)
-            //     .then(({data}) => {
-            //         let response = data.data ? data.data : data;
-
-            //         vue.selects.requisito_id = response.requisitos
-            //         vue.selects.lista_escuelas = response.escuelas
-            //         vue.selects.types = response.types
-            //         if (vue.curso_id !== '') {
-            //             response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
-            //             response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
-
-            //             vue.resource = Object.assign({}, response.curso)
-            //         }
-            //     })
+            vue.$nextTick(() => {
+                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+            })
+            let url = `${vue.base_endpoint}/${vue.benefit_id === '' ? 'form-selects' : `search/${vue.benefit_id}`}`
+            await vue.$http.get(url)
+                .then(({data}) => {
+                    let response = data.data ? data.data : data;
+                    vue.selects.lista_encuestas = response.polls
+                })
             return 0;
         },
         isValid() {
@@ -513,6 +596,9 @@ export default {
             // })
         },
         addLogoPromotor() {
+
+        },
+        addLinkExterno() {
 
         }
     }
@@ -553,5 +639,46 @@ export default {
 .box_input_promotor {
     flex: 1;
     margin-right: 15px;
+}
+.box_input_duracion,
+.box_input_encuesta {
+    min-width: 600px;
+    margin-right: 10px;
+}
+.box_button_encuesta button .img img {
+    max-width: 20px;
+}
+.box_button_duracion .v-input__control .v-messages {
+    display: none;
+}
+.box_button_duracion .v-input__control .v-input__slot,
+.box_button_duracion .v-input__control .v-input__slot .v-radio .v-label {
+    margin-bottom: 0;
+    font-family: 'open sans';
+    font-size: 14px;
+    color: #2A3649;
+}
+.box_search_direction_map {
+    border: 1px solid #D9D9D9;
+    border-radius: 5px;
+    position: relative;
+}
+.box_search_direction_map span.lbl_search_direction {
+    position: absolute;
+    top: -8px;
+    left: 9px;
+    font-size: 11.5px;
+    line-height: 1;
+    background: #fff;
+    padding: 0 2px;
+}
+.box_search_direction_map input {
+    width: 100%;
+    padding: 10px 15px;
+}
+.bx_benefit_accesible .v-input__slot .v-label {
+    font-size: 13px;
+    font-family: "Nunito", sans-serif;
+    color: #2A3649;
 }
 </style>
