@@ -306,14 +306,8 @@ class Usuario extends Model
     {
         $workSpaceIndex = $workSpaceIdx ?? get_current_workspace_indexes('id');
 
-        info('workSpaceIndex');
-        info($workSpaceIndex);
-        
         # ==== criterios según segmentación (segmentacion directa). ====
         $currSegment = Workspace::find($workSpaceIndex)->segments;
-
-        info('currSegment');
-        info($currSegment);
 
         # ==== usuarios bajo criterio ====
         $course = new Course;
