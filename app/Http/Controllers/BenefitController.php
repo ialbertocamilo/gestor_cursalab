@@ -21,11 +21,22 @@ class BenefitController extends Controller
         return $this->success($data);
     }
 
+    public function getData(Benefit $benefit)
+    {
+        $response = Benefit::getData($benefit);
+
+        return $this->success($response);
+    }
+
     public function getFormSelects(Benefit $benefit = null, $compactResponse = false)
     {
-        $types_poll= Taxonomy::getFirstData('poll', 'tipo', 'benefit');
-
         $workspace = get_current_workspace();
+
+        // Type
+        $types_benefit = Taxonomy::getDataForSelect('benefit', 'benefit_type');
+
+        // Polls
+        $types_poll= Taxonomy::getFirstData('poll', 'tipo', 'benefit');
 
         $polls = Poll::select('id', 'titulo as name')
                 ->where('workspace_id', $workspace->id)
@@ -33,7 +44,7 @@ class BenefitController extends Controller
                 ->where('active', true)
                 ->get();
 
-        $response = compact('polls');
+        $response = compact('polls', 'types_benefit');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -51,5 +62,47 @@ class BenefitController extends Controller
             'messages' => ['list' => []]
         ];
         return $this->success($response);
+    }
+
+    public function update(BenefitStoreUpdateRequest $request, Benefit $benefit)
+    {
+        $data = $request->validated();
+        // $data = Media::requestUploadFile($data, 'imagen');
+
+        $benefit = Benefit::storeRequest($data, $benefit);
+
+        $response = [
+            'msg' => 'Beneficio actualizado correctamente.',
+            'benefit' => $benefit,
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+
+    /**
+     * Process request to toggle value of active status (1 or 0)
+     *
+     * @param Benefit $benefit
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(Benefit $benefit, Request $request)
+    {
+        $benefit->update(['active' => !$benefit->active]);
+
+        return $this->success(['msg' => 'Estado actualizado correctamente.']);
+    }
+
+    /**
+     * Process request to delete benefit record
+     *
+     * @param Benefit $benefit
+     * @return JsonResponse
+     */
+    public function destroy(Benefit $benefit)
+    {
+        $benefit->delete();
+
+        return $this->success(['msg' => 'Beneficio eliminado correctamente.']);
     }
 }

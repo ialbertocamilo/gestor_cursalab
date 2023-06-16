@@ -18,22 +18,22 @@
             <v-card-text class="py-8 text-center">
                 <p class="title_act">Selecciona el tipo de actividad a realizar</p>
                 <div class="bx_items_activitys">
-                    <div class="bx_item_activity">
+                    <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_presencial')">
                         <div class="img"><img src="/img/benefits/sesion_presencial.svg"></div>
                         <h5>Sesiones en vivo<br>(presencial)</h5>
                         <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
                     </div>
-                    <div class="bx_item_activity">
+                    <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_online')">
                         <div class="img"><img src="/img/benefits/sesion_online.svg"></div>
                         <h5>Sesiones en vivo</h5>
                         <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
                     </div>
-                    <div class="bx_item_activity">
+                    <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_hibrida')">
                         <div class="img"><img src="/img/benefits/sesion_hibrido.svg"></div>
                         <h5>Sesiones en vivo<br>(Hibridas)</h5>
                         <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
                     </div>
-                    <div class="bx_item_activity">
+                    <div class="bx_item_activity" @click="selectTypeActivityModal('descuento')">
                         <div class="img"><img src="/img/benefits/descuento.svg"></div>
                         <h5>Descuento</h5>
                         <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
@@ -67,17 +67,9 @@ export default {
             let vue = this
             vue.$emit('onCancel')
         },
-        confirmModal() {
-            // let vue = this
-            // vue.$emit('onConfirm')
-
+        selectTypeActivityModal(value) {
             let vue = this
-
-            let params = this.getAllUrlParams(window.location.search);
-            let temp = `${this.addParamsToURL(vue.base_endpoint, params)}`;
-            temp = `${vue.base_endpoint}?${temp}`;
-
-            window.location.href = temp;
+            vue.$emit('selectTypeActivityModal', value)
         }
     },
 };

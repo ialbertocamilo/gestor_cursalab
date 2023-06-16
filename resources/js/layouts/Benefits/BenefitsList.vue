@@ -43,7 +43,8 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openModalSelectActivitys($event)"
-                @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar Beneficio')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>beneficio</b>')"
+                @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminación de un <b>beneficio</b>')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Beneficio - ${$event.title}`)"
                 @addSpeaker="addSpeaker($event)"
             />
@@ -56,21 +57,31 @@
             @onCancel="closeFormModal(modalDeleteOptions)"
         />
 
+        <DefaultStatusModal
+            :options="modalStatusOptions"
+            :ref="modalStatusOptions.ref"
+            @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+            @onCancel="closeFormModal(modalStatusOptions)"
+        />
+
         <ModalSelectActivity
                 :ref="modalSelectActivity.ref"
                 v-model="modalSelectActivity.open"
                 width="650px"
-            @onCancel="modalSelectActivity.open = false"
+                @onCancel="modalSelectActivity.open = false"
+                @selectTypeActivityModal="selectTypeActivityModal"
             />
     </section>
 </template>
 
 <script>
+import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalSelectActivity from "../../components/Benefit/ModalSelectActivity";
 
 export default {
     components: {
+        DefaultStatusModal,
         DefaultDeleteModal,
         ModalSelectActivity
     },
@@ -92,8 +103,8 @@ export default {
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
-                        type: 'action',
-                        method_name: 'edit'
+                        type: 'route',
+                        route: 'edit_route'
                     },
                     {
                         text: "Segmentación",
@@ -110,17 +121,17 @@ export default {
                         type: 'action',
                         method_name: 'status'
                     },
-                    {
-                        text: "Duplicar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
-                    },
+                    // {
+                    //     text: "Duplicar",
+                    //     icon: 'far fa-trash-alt',
+                    //     type: 'action',
+                    //     method_name: 'delete'
+                    // },
                     {
                         text: "Gestión de colab.",
-                        icon: 'far fa-trash-alt',
+                        icon: 'fas fa-user-cog',
                         type: 'action',
-                        method_name: 'delete'
+                        method_name: 'gestion_colab'
                     },
                     {
                         text: "Eliminar",
@@ -150,10 +161,43 @@ export default {
                 base_endpoint: "/search"
             },
             modalDeleteOptions: {
-                ref: 'BeneficioDeleteModal',
+                ref: 'BenefitDeleteModal',
                 open: false,
                 base_endpoint: '/beneficios',
+                contentText: '¿Desea eliminar este registro?',
                 endpoint: '',
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar un beneficio!',
+                        details: [
+                            'Este beneficio no podrá ser visto por los usuarios.',
+                            'No se podrá recuperar.'
+                        ],
+                    }
+                },
+                width: '408px'
+            },
+            modalStatusOptions: {
+                ref: 'BenefitStatusModal',
+                open: false,
+                base_endpoint: '/beneficios',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un beneficio!',
+                        details: [
+                            'Los usuario no podran inscribirte a este beneficio.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un beneficio!',
+                        details: [
+                            'El beneficio se mostrará en la plataforma.'
+                        ]
+                    }
+                },
+                endpoint: '',
+                width: '408px'
             },
             file: null,
         }
@@ -165,6 +209,9 @@ export default {
         async openModalSelectActivitys() {
             let vue = this
             vue.modalSelectActivity.open = true
+        },
+        selectTypeActivityModal( value ) {
+            window.location.href = '/beneficios/create?type=' + value;
         }
     }
 };

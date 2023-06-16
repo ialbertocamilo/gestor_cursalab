@@ -157,8 +157,8 @@ class Benefit extends BaseModel
             'type'=> function ($query) {
                         $query->select('id', 'name', 'code');
                     }
-        ])
-        ->where('active',1);
+                ]);
+        // ->where('active',1);
         // where('workspace_id', $workspace->id)
 
         $field = request()->sortBy ?? 'created_at';
@@ -179,6 +179,9 @@ class Benefit extends BaseModel
             $item->benefit_speaker = $item->speaker?->name ?? null;
             $item->benefit_type = $item->type?->name ?? null;
             $item->benefit_stars = null;
+
+            $route_edit = route('benefit.editBenefit', [$item->id]);
+            $item->edit_route = $route_edit;
         }
 
         $response['data'] = $benefits->items();
@@ -198,6 +201,24 @@ class Benefit extends BaseModel
         return $response;
     }
 
+    protected function getData( $benefit_id )
+    {
+        $response['data'] = null;
+
+        // $workspace = get_current_workspace();
+
+        $benefit = Benefit::with(
+            ['implements','silabo','polls','links','speaker',
+            'type'=> function ($query) {
+                        $query->select('id', 'name', 'code');
+                    }
+        ])
+        ->where('id', $benefit_id->id)
+        ->first();
+        // where('workspace_id', $workspace->id)
+
+        return ['data'=> $benefit];
+    }
     // Apis
     protected function registerUserForBenefit( $data )
     {

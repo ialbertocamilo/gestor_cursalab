@@ -1,8 +1,60 @@
 <template>
     <section class="section-list">
         <v-card flat elevation="0">
-            <v-card-title>
-                Beneficios: {{ benefit_id ? 'Editar' : 'Crear' }}
+            <v-card-title class="justify-content-between align-items-center position-relative">
+                <span>Beneficios: {{ benefit_id ? 'Editar' : 'Crear' }}</span>
+                <div class="box_btn_modules position-relative">
+                    <v-menu
+                        v-model="menu"
+                            attach
+                            offset-y
+                            left
+                            nudge-bottom="10"
+						    :close-on-content-click="false"
+                            min-width="auto"
+                        >
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                color="primary"
+                                v-bind="attrs"
+                                v-on="on"
+                                class="btn_options_modules"
+                                outlined
+                            >
+                                Agregar opción
+                                <v-icon v-text="'mdi-chevron-down'"/>
+                            </v-btn>
+                        </template>
+
+                        <v-list dense>
+                                <v-list-item
+                                    style="cursor: pointer;"
+                                    v-for="action in options_modules"
+                                    :key="action.code"
+                                >
+                                    <v-list-item-content class="py-0">
+                                        <v-list-item-title class="d-flex justify-content-between py-2">
+
+                                            <span>{{ action.name }}</span>
+                                            <div class="bx_switch_options">
+                                                <v-switch
+                                                    class="default-toggle"
+                                                    inset
+                                                    label=""
+                                                    hide-details="auto"
+                                                    v-model="action.active"
+                                                    @change="updateValue(action)"
+                                                    dense
+                                                ></v-switch>
+                                            </div>
+
+                                        </v-list-item-title>
+                                    </v-list-item-content>
+
+                                </v-list-item>
+                            </v-list>
+                    </v-menu>
+                </div>
             </v-card-title>
         </v-card>
         <br>
@@ -26,14 +78,14 @@
                         <v-col cols="3">
                             <DefaultAutocomplete
                                 show-required
-                                :rules="rules.lista_escuelas"
+                                :rules="rules.list_types"
                                 dense
                                 label="Tipo"
-                                v-model="resource.lista_escuelas"
-                                :items="selects.lista_escuelas"
+                                v-model="selectType"
+                                :items="selects.list_types"
                                 item-text="name"
-                                item-value="id"
-                                multiple
+                                item-value="code"
+                                @onChange="changeTypes"
                             />
                         </v-col>
                         <v-col cols="2">
@@ -128,7 +180,7 @@
                     </v-row>
 
                     <!-- Map -->
-                    <v-row justify="space-around">
+                    <v-row justify="space-around" v-if="options_modules[2].active">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Ubicación"
@@ -185,7 +237,7 @@
                     </v-row>
                     <!-- End Map -->
                     <!-- Dificultad -->
-                    <v-row justify="space-around">
+                    <v-row justify="space-around" v-if="options_modules[5].active">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Dificultad del beneficio"
@@ -205,7 +257,7 @@
                     </v-row>
                     <!-- End Dificultad -->
                     <!-- Duración -->
-                    <v-row justify="space-around">
+                    <v-row justify="space-around" v-if="options_modules[7].active">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Duración"
@@ -234,7 +286,7 @@
                     </v-row>
                     <!-- End Duración -->
                     <!-- Encuesta -->
-                    <v-row justify="space-around">
+                    <v-row justify="space-around" v-if="options_modules[8].active">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Encuesta"
@@ -266,7 +318,7 @@
                     </v-row>
                     <!-- End Encuesta -->
                     <!-- Promotor -->
-                    <v-row justify="space-around">
+                    <v-row justify="space-around" v-if="options_modules[0].active">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Promotor del beneficio"
@@ -323,13 +375,28 @@ export default {
     props: [ 'benefit_id', 'api_key_maps'],
     data() {
         return {
+            // para el mapa
             center: { lat: -12.0529046, lng: -77.0253457 },
             zoom: 16,
             currentPlace: null,
             markers: [{
                 position: { lat: -12.0529046, lng: -77.0253457 }
             }],
-
+            // para el desplegable
+            menu: false,
+            options_modules: [
+                {name: 'Promotor del beneficio', code: 'promotor', active: false},
+                {name: 'Sílabo', code: 'silabo', active: false},
+                {name: 'Ubicación / Mapa', code: 'ubicacion', active: false},
+                {name: 'Agregar link', code: 'links', active: false},
+                {name: 'Speaker', code: 'speaker', active: false},
+                {name: 'Dificultad de cursos', code: 'dificultad', active: false},
+                {name: 'Implementos necesarios', code: 'implementos', active: false},
+                {name: 'Duración', code: 'duracion', active: false},
+                {name: 'Encuesta', code: 'encuesta', active: false},
+            ],
+            // otros
+            selectType: null,
             activeDificultad: null,
             duracionValue: null,
             duracionIlimitado: null,
@@ -361,25 +428,22 @@ export default {
                 fin_inscripcion: null,
                 inicio_liberacion: null,
                 correo: null,
-                lista_escuelas: [],
+                list_types: [],
                 lista_encuestas: [],
                 dificultad: null,
             },
             resource: {},
             rules: {
                 title: this.getRules(['required', 'max:120']),
-                // lista_escuelas: this.getRules(['required']),
-                // types: this.getRules(['required']),
+                list_types: this.getRules(['required']),
                 cupo: this.getRules(['number']),
                 inicio_inscripcion: this.getRules(['required']),
                 fin_inscripcion: this.getRules(['required']),
                 inicio_liberacion: this.getRules(['required']),
             },
             selects: {
-                requisito_id: [],
-                lista_escuelas: [],
                 lista_encuestas: [],
-                types: [],
+                list_types: [],
             },
             loadingActionBtn: false,
             courseValidationModal: {
@@ -461,6 +525,13 @@ export default {
         this.hideLoader()
     },
     methods: {
+        updateValue(value) {
+            let vue = this
+            console.log(vue.options_modules);
+        },
+        changeTypes() {
+            console.log("sss");
+        },
         setPlace(place) {
             this.currentPlace = place;
             console.log(this.currentPlace);
@@ -500,15 +571,7 @@ export default {
         },
         closeModal() {
             let vue = this
-
-            let params = this.getAllUrlParams(window.location.search);
-            let temp = `${this.addParamsToURL(vue.base_endpoint, params)}`;
-            temp = `${vue.base_endpoint}?${temp}`;
-
-            // console.log(temp);
-            // return;
-
-            window.location.href = temp;
+            window.location.href = vue.base_endpoint;
         },
         confirmModal(validateForm = true) {
             let vue = this
@@ -520,6 +583,8 @@ export default {
             else if( vue.duracionValue != null && vue.duracionValue != '' ) {
                 vue.resource.duracion = vue.duracionValue
             }
+
+            vue.resource.type = this.selectType
             console.log(vue.resource);
             vue.loadingActionBtn = true
             vue.showLoader()
@@ -556,15 +621,33 @@ export default {
         },
         async loadData() {
             let vue = this
+            let params = this.getAllUrlParams(window.location.search);
+
+            if( params.type ) {
+                vue.selectType = params.type
+            }
+
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
-            let url = `${vue.base_endpoint}/${vue.benefit_id === '' ? 'form-selects' : `search/${vue.benefit_id}`}`
+            let url = `${vue.base_endpoint}/form-selects`
             await vue.$http.get(url)
                 .then(({data}) => {
                     let response = data.data ? data.data : data;
                     vue.selects.lista_encuestas = response.polls
+                    vue.selects.list_types = response.types_benefit
                 })
+            if(vue.benefit_id != '') {
+                let url = `${vue.base_endpoint}/search/${vue.benefit_id}`
+                await vue.$http.get(url)
+                    .then(({data}) => {
+                        console.log(data);
+                        let response = data.data.data;
+                        console.log(this.resource);
+                        console.log(response);
+                        vue.resource = Object.assign({}, response)
+                    })
+            }
             return 0;
         },
         isValid() {
@@ -572,12 +655,12 @@ export default {
             let valid = true;
             let errors = [];
 
-            // if (this.resource.lista_escuelas.length === 0) {
-            //     errors.push({
-            //         message: 'Debe seleccionar una escuela'
-            //     })
-            //     valid = false;
-            // }
+            if (this.selectType == null || this.selectType == '') {
+                errors.push({
+                    message: 'Debe seleccionar un tipo de beneficio'
+                })
+                valid = false;
+            }
 
             if (!valid) {
                 this.errors = errors;
@@ -680,5 +763,15 @@ export default {
     font-size: 13px;
     font-family: "Nunito", sans-serif;
     color: #2A3649;
+}
+.box_btn_modules {
+    min-width: 300px;
+    text-align: right;
+}
+.bx_switch_options {
+    margin-left: 20px;
+}
+.bx_switch_options .v-input.default-toggle {
+    margin: 0 !important;
 }
 </style>
