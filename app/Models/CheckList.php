@@ -618,7 +618,7 @@ class CheckList extends BaseModel
 
         foreach ($actividades as $actividad) {
             $actividadProgreso = $checklistRpta->rpta_items->where('checklist_item_id', $actividad->id)->first();
-            $actividad->disponible = !is_null($actividadProgreso);
+            $actividad->disponible = is_null($actividadProgreso);
             if (!is_null($actividadProgreso)) {
                 $actividad->estado = $actividadProgreso->qualification;
             } else {
