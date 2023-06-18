@@ -53,6 +53,14 @@
                 :avoid_first_data_load="dataTable.avoid_first_data_load"
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>anuncio</b>')"
+                @segmentation="
+                    openFormModal(
+                        modalFormSegmentationOptions,
+                        $event,
+                        'segmentation',
+                        `Segmentación del anuncio - ${$event.nombre}`
+                    )
+                "
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminación de un <b>anuncio</b>')"
                 @logs="
                     openFormModal(
@@ -79,6 +87,16 @@
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
 
+            <SegmentFormModal
+                :options="modalFormSegmentationOptions"
+                width="55vw"
+                model_type="App\Models\Announcement"
+                :model_id="null"
+                :ref="modalFormSegmentationOptions.ref"
+                @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+            />
+
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
@@ -102,12 +120,14 @@ import AnuncioFormModal from "./AnuncioFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import LogsModal from "../../components/globals/Logs";
+import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
     components: {
         AnuncioFormModal,
         DefaultStatusModal,
         DefaultDeleteModal,
+        SegmentFormModal,
         LogsModal
     },
     data() {
@@ -136,6 +156,15 @@ export default {
                         type: 'action',
                         method_name: 'status'
                     },
+                    // {
+                    //     text: "Segmentación",
+                    //     icon: 'fa fa-square',
+                    //     type: 'action',
+                    //     count: 'segments_count',
+                    //     method_name: 'segmentation'
+                    // },
+                ],
+                more_actions: [
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
@@ -149,8 +178,6 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     }
-                ],
-                more_actions: [
                     // {
                     //     text: "Actividad",
                     //     icon: 'fas fa-file',
@@ -225,6 +252,14 @@ export default {
                     }
                 },
                 width: '408px'
+            },
+            modalFormSegmentationOptions: {
+                ref: 'SegmentFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/segments",
+                confirmLabel: "Guardar",
+                resource: "segmentación"
             },
         }
     },

@@ -45,6 +45,11 @@ class Announcement extends BaseModel
         );
     }
 
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
+    }
+
     /*
         Methods
     --------------------------------------------------------------------------*/
@@ -67,7 +72,7 @@ class Announcement extends BaseModel
      */
     protected function search($data)
     {
-        $query = self::query();
+        $query = self::withCount(['segments']);
 
         if ($data->q)
             $query->where('nombre', 'like', "%$data->q%");

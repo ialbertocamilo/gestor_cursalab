@@ -6,7 +6,7 @@
                 <v-spacer/>
                <!--  <DefaultActivityButton :label="'Actividad'"
                                        @click="activity"/> -->
-                <DefaultModalButton :label="'Pregunta'"
+                <DefaultModalButton :label="'Crear pregunta'"
                                     @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
@@ -23,6 +23,16 @@
                                       @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
+                    <v-col cols="3">
+                        <DefaultSelect
+                            clearable dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                            item-text="name"
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
 
@@ -31,7 +41,7 @@
                           :filters="filters"
                           @edit="openFormModal(modalOptions, $event)"
                           @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                          @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar anuncio')"
+                          @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar pregunta')"
 			  @logs="
 				    openFormModal(
 				        modalLogsOptions,
@@ -132,11 +142,17 @@ export default {
                 ]
             },
             selects: {
-                modules: []
+                modules: [],
+                statuses: [
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ],
             },
             filters: {
                 q: '',
-                module: null
+                module: null,
+                active: 1
             },
             modalOptions: {
                 ref: 'PreguntaFrecuenteFormModal',

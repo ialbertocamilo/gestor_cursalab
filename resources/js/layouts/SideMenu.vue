@@ -518,17 +518,17 @@ export default {
                     {
                         title: "Intentos masivos",
                         icon: "fas fa-redo-alt",
-                        path: "/masivo/usuarios/index_reinicios",
-                        subpaths: ["masivo/usuarios"],
+                        path: "/intentos-masivos",
+                        subpaths: ["intentos-masivos"],
                         selected: false,
                         permission: "reinicio_usuarios",
                         role: ["super-user", "admin"]
                     },
                     {
-                        title: "Subida masivos",
+                        title: "Procesos masivos",
                         icon: "fas fa-share-square",
-                        path: "/masivos",
-                        subpaths: ["masivos"],
+                        path: "/procesos-masivos",
+                        subpaths: ["procesos-masivos"],
                         selected: false,
                         permission: "proceso_masivo",
                         role: ["super-user", "admin"]

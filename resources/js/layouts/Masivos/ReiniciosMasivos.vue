@@ -269,6 +269,8 @@
                                                                         style="align-items: center"
                                                                     >
                                                                         {{ item.user.name }}
+                                                                        {{ item.user.lastname }}
+                                                                        {{ item.user.surname }}
                                                                         <!-- item.usuario.apellido_paterno -->
                                                                         <!-- item.usuario.apellido_materno -->
                                                                     </v-col>
@@ -439,7 +441,7 @@
         getData() {
             let vue = this;
             axios
-                .get("/masivo/usuarios/reinicios_data")
+                .get("/intentos-masivos/reinicios_data")
                 .then((res) => {
                     vue.baseData.modulos = res.data.modules;
                     vue.baseData.escuelas = res.data.schools;
@@ -479,7 +481,7 @@
                 return;
             }
 
-            let url = `/masivo/usuarios/buscarCursosxEscuela/${vue.select.escuela}`;
+            let url = `/intentos-masivos/buscarCursosxEscuela/${vue.select.escuela}`;
             axios
                 .get(url)
                 .then((res) => {
@@ -504,7 +506,7 @@
                 return;
             }
 
-            let url = `/masivo/usuarios/buscarTemasxCurso/${vue.select.curso}`;
+            let url = `/intentos-masivos/buscarTemasxCurso/${vue.select.curso}`;
             axios
                 .get(url)
                 .then((res) => {
@@ -559,7 +561,7 @@
             };
 
             axios
-                .post("/masivo/usuarios/validarReinicio", data)
+                .post("/intentos-masivos/validarReinicio", data)
                 .then((res) => {
 
                     vue.data_validar.count_usuarios = res.data.data.count_usuarios;
@@ -599,7 +601,7 @@
                 usuarios: vue.data_validar.pruebas.filter((element) => element.selected == true),
             };
             axios
-                .post("/masivo/usuarios/reiniciarIntentosMasivos", data)
+                .post("/intentos-masivos/reiniciarIntentosMasivos", data)
                 .then((res) => {
                     setTimeout(() => {
 

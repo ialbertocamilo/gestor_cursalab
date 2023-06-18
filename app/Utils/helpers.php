@@ -85,8 +85,9 @@ function convert($number)
  */
 function clean_html(?string $text, int $limit = 100)
 {
+    $text = html_entity_decode(strip_tags($text));
 
-    return mb_substr(strip_tags($text), 0, $limit);
+    return mb_substr($text, 0, $limit);
 }
 
 function secret($value)

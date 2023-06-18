@@ -130,7 +130,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('entrenamiento')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenamiento.php'));
 
     Route::prefix('programas')->middleware('checkrol:admin')->group(base_path('routes/cms/blocks.php'));
-//    Route::prefix('media')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/media.php'));
+    Route::prefix('media')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/media.php'));
 
     Route::prefix('ambiente')->middleware('checkrol:admin,super-user')->group(base_path('routes/cms/ambiente.php'));
 
@@ -139,7 +139,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::prefix('aulas-virtuales')->middleware('checkrol:admin')->group(base_path('routes/cms/meetings.php'));
 
-    Route::prefix('masivos')->middleware('checkrol:admin')->group(base_path('routes/cms/masivos.php'));
+    Route::prefix('procesos-masivos')->middleware('checkrol:admin')->group(base_path('routes/cms/masivos.php'));
     Route::prefix('importar-notas')->middleware('checkrol:admin')->group(base_path('routes/cms/importar-notas.php'));
 
     Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('checkrol:admin,super-user');

@@ -6,10 +6,21 @@
             <v-card-title class="title_prim">
                 Dashboard
                 <v-spacer/>
+
+                <DefaultSelect
+                    class="col-3"
+                    dense
+                    label="Módulo"
+                    :items="selects.modulo"
+                    v-model="filters.modulo"
+                    item-text="name"
+                    item-value="id"
+                    @onChange="getEstadisticas"
+                />
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
-        <v-card flat class="elevation-0 mb-4">
+        <!-- <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
                     <v-col cols="5">
@@ -26,7 +37,7 @@
                 </v-row>
 
             </v-card-text>
-        </v-card>
+        </v-card> -->
         <v-card flat class="elevation-0 mb-4 bg-transparent">
             <v-row>
                 <v-col  v-for="(value, key) in apiData.estadisticas" :key="key">
@@ -39,14 +50,16 @@
                 </v-col>
             </v-row>
         </v-card>
+
         <v-card flat class="elevation-0 mb-4">
-            <v-row class="p-3">
+            <v-row class="justify-space-around px-5 py-3">
                 <v-col cols="6" class="d-flex flex-column">
                     <GeneralGraphic
                         :graphic_data="apiData.graficos.evaluacionesPorFecha"
                         @refreshCache="getEvaluacionesPorFecha(true)"
                     />
                 </v-col>
+
                 <v-col cols="6" class="d-flex flex-column">
                     <GeneralGraphic
                         :graphic_data="apiData.graficos.visitas"
