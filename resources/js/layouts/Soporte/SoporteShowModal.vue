@@ -112,6 +112,10 @@
                         <!-- <v-icon left color="primary" medium class="font-bold">fab fa-whatsapp-square</v-icon> -->
                         <a target="_blank" :href="`https://wa.me/51${resource.contact}?text=¡Hola!,%20Vimos%20tu%20solicitud%20enviada%20desde%20la%20plataforma%20de%20capacitación`">{{resource.contact}}</a> 
                     </v-col>
+                    <v-col cols="6" class="" v-if="resource.last_login">
+                        <v-icon left color="primary">fas fa-sign-in-alt</v-icon>
+                        <span v-text="resource.last_login"></span> <strong> (última conexión)</strong>
+                    </v-col>
                 </v-row>
 
                <v-row justify="space-around" align="start" align-content="center">

@@ -133,7 +133,9 @@ class Vademecum extends Model
                 'modules' => function ($q) use ($request) {
                     if ($request->module_id) {
                         $workspace = Workspace::find($request->module_id);
-                        $q->where('module_id', $workspace->criterion_value_id);
+                        if($workspace?->criterion_value_id){
+                            $q->where('module_id', $workspace->criterion_value_id);
+                        }
                     }
                  },
                 'subcategory',

@@ -58,7 +58,7 @@ class AsignarEntrenadorImport implements ToCollection
                 continue;
             }
 
-            $is_student = EntrenadorUsuario::alumno($entrenador_dni)->first();
+            $is_student = EntrenadorUsuario::alumno($entrenador->id)->first();
             if (!is_null($is_student)) {
                 $temp = [
                     'dni' => (string)$entrenador_dni,
@@ -182,6 +182,8 @@ class AsignarEntrenadorImport implements ToCollection
             //TODO: Enviar notificación al entrenador
             //            NotificacionPush::enviar('titulo', 'texto', [$entrenador->token_firebase], []);
         }
+        cache_clear_model(EntrenadorUsuario::class);
+        cache_clear_model(User::class);
 
         $this->msg = 'Excel procesado.';
         $this->data_no_procesada = $data_no_procesada;

@@ -53,7 +53,9 @@ class CleanOverdueQuizzes extends Command
         foreach ($rows as $key => $row) {
 
             try {
-
+                if(!$row->topic?->course_id){
+                    continue;
+                }
                 if ($row->hasNoAttemptsLeft(null, $row->topic->course_id)){
                     $data_ev = [
                         'current_quiz_started_at' => NULL,

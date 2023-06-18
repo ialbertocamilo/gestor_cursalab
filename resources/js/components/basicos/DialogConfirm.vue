@@ -8,16 +8,17 @@
         @click:outside="closeModal"
         :class="{}"
         content-class="br-dialog"
+        :overlay-opacity="overlay_opacity"
     >
-        <v-card v-if="options">
-            <v-card-title class="default-dialog-title mod_head">
+        <v-card v-if="options" :class="[(options.type_modal == 'upload') ? 'bx_alert_upload' : '', (options.content_modal.upload && options.content_modal.upload.status == 'success') ? 'border_success' : 'border_error']">
+            <v-card-title class="default-dialog-title mod_head" v-if="!options.hide_header">
                 <span v-html="options.title_modal ? options.title_modal : title"></span>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </v-card-title>
-            <v-card-text class="py-8 text-center pbrmv">
+            <v-card-text class="text-center pbrmv" :class="[(options.type_modal == 'upload') ? '' : 'py-8']">
                 <div class="bx_content" v-if="options.type_modal == 'status'">
                     <div class="bx_header">
                         <div class="img"><img src="/img/modal_alert.png"></div>
@@ -69,8 +70,30 @@
                         </ul>
                     </div>
                 </div>
+                <div class="bx_content dialog_upload" v-else-if="options.type_modal == 'upload'">
+                    <div class="error_upload" v-if="options.content_modal.upload.status == 'error'">
+                        <div class="icon_upload_error">
+                            <img src="/img/upload_error.png">
+                        </div>
+                        <div class="text_error_upload">El archivo no se ha podido cargar correctamente.</div>
+                        <span class="label_error_upload"
+                            v-if="options.content_modal.upload.error_text"
+                            v-html="options.content_modal.upload.error_text">
+                        </span>
+                    </div>
+                    <div class="success_upload" v-else-if="options.content_modal.upload.status == 'success'">
+                        <div class="icon_upload_success">
+                            <img src="/img/upload_success.png">
+                        </div>
+                        <div class="text_success_upload">El archivo se ha cargado correctamente.</div>
+                        <span class="label_success_upload"
+                            v-if="options.content_modal.upload.success_text"
+                            v-html="options.content_modal.upload.success_text">
+                        </span>
+                    </div>
+                </div>
             </v-card-text>
-            <v-card-actions>
+            <v-card-actions v-if="!options.hide_btns">
                 <DefaultModalActionButton
                     @cancel="closeModal"
                     @confirm="confirmModal"
@@ -101,7 +124,7 @@
 
 <script>
 export default {
-    props: ["value", "width", "title", "subtitle", "txt_btn_confirm", "txt_btn_cancel", "options", "content_modal", "title_modal"],
+    props: ["value", "width", "title", "subtitle", "txt_btn_confirm", "txt_btn_cancel", "options", "content_modal", "title_modal","overlay_opacity"],
     data() {
         return {
             dialog: false,
@@ -211,5 +234,62 @@ export default {
 }
 .br-dialog, .br-dialog .v-sheet.v-card{
     border-radius: 16px !important;
+}
+
+.dialog_upload .success_upload,
+.dialog_upload .error_upload {
+    opacity: 1;
+    background: none;
+    color: red;
+    text-align: center;
+    height: 100%;
+    top: 0;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.dialog_upload .success_upload .icon_upload_success,
+.dialog_upload .error_upload .icon_upload_error {
+    margin-top: 10px;
+}
+.dialog_upload .success_upload .text_success_upload,
+.dialog_upload .error_upload .text_error_upload {
+    font-family: "Nunito", sans-serif;
+    margin-top: 25px;
+    display: flex;
+    font-size: 16px;
+    color: #FF4560;
+    line-height: 20px;
+    max-width: 80%;
+}
+.dialog_upload .success_upload,
+.dialog_upload .success_upload .text_success_upload{
+    color: #4CAF50;
+}
+.dialog_upload .success_upload span.label_success_upload,
+.dialog_upload .error_upload span.label_error_upload {
+    font-family: "Nunito", sans-serif;
+    margin-top: 6px;
+    display: flex;
+    font-size: 12px;
+    color: #A9B2B9;
+    line-height: 20px;
+    font-weight: 400;
+    min-height: 42px;
+    max-width: 80%;
+}
+.bx_content.dialog_upload {
+    padding: 20px 0;
+}
+.bx_alert_upload {
+    border-radius: 8px !important;
+    border: 1px solid #fff;
+}
+.bx_alert_upload .border_success {
+    border-color: #4CAF50;
+}
+.bx_alert_upload .border_error {
+    border-color: #FF4560;
 }
 </style>

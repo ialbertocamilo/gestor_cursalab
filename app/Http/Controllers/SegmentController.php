@@ -131,10 +131,17 @@ class SegmentController extends Controller
             ->whereRelation('subworkspace', 'parent_id', $workspace?->id);
 
         $users = ($request->has('file')) ? $users->get() : $users->limit(50)->get();
-
+        $users_not_found = [];
+        if($documents){
+            $users_not_found = array_diff($documents,$users->pluck('document')->toArray());
+            if(count($users_not_found)){
+                $users_not_found = collect($users_not_found)->map(function ($documento) {
+                    return (object)['document' => $documento];
+                })->toArray();
+            }
+        }
         $users = SegmentSearchUsersResource::collection($users);
-
-        return $this->success($users);
+        return $this->success(compact('users','users_not_found'));
     }
 
     public function syncSegmentValuesType()

@@ -52,7 +52,6 @@ Segment extends BaseModel
     {
         return $this->belongsTo(Criterion::class);
     }
-
     protected function getCriteriaByWorkspace($workspace)
     {
         return Criterion::select('id', 'name', 'position', 'code', 'field_id')
@@ -99,11 +98,17 @@ Segment extends BaseModel
             foreach ($segments as $segment) {
 
                 $segment->type_code = $segment->type?->code;
+
+                $direct_segmentation = ($segment->type_code == 'direct-segmentation') ? $this->setDataDirectSegmentation($criteria, $segment) : [];
+                $segmentation_by_document = ($segment->type_code == 'segmentation-by-document') ? $this->setDataSegmentationByDocument($segment) : [];
+
                 $segment->criteria_selected = match ($segment->type?->code) {
-                    'direct-segmentation' => $this->setDataDirectSegmentation($criteria, $segment),
-                    'segmentation-by-document' => $this->setDataSegmentationByDocument($segment),
+                    'direct-segmentation' => $direct_segmentation,
+                    'segmentation-by-document' => $segmentation_by_document,
                     default => [],
                 };
+                $segment->direct_segmentation = $direct_segmentation;
+                $segment->segmentation_by_document = $segmentation_by_document;
             }
         } else {
 
@@ -363,7 +368,9 @@ Segment extends BaseModel
                 'type_id' => NULL,
             ];
         }
-
+        $data['segments'] = [$segment];
+        $data = (object) $data; 
+        $this->updateSegmentToLaunchObeserver($data);
         $segment->values()->sync($values);
     }
 
@@ -482,7 +489,7 @@ Segment extends BaseModel
         $segments = Segment::loadSupervisorSegmentCriterionValues($supervisorId);
 
         if (count($segments) === 0) return [];
-        //Function to get 
+        //Function to get
         $course = new Course();
         return $course->usersSegmented($segments,'users_id');
         // Generate conditions
@@ -558,5 +565,54 @@ Segment extends BaseModel
         // $users = $row->usersSegmented($row->segments, 'count');
 
         return $totals;
+    }
+
+    public function storeSegmentationByDocumentForm($data)
+    {
+        $segmentation_by_document = Taxonomy::getFirstData('segment', 'type', 'segmentation-by-document');
+        $code_segmentation = Taxonomy::getFirstData('segment', 'code', $data['code']);
+
+        if (count($data['segment_by_document']['segmentation_by_document']) === 0) {
+            $segment = self::where('active', ACTIVE)
+                ->where('model_id', $data['model_id'])
+                ->where('model_type', $data['model_type'])
+                ->where('type_id', $segmentation_by_document->id)
+                ->first();
+
+            if ($segment) {
+                $segment->values()->delete();
+                $segment->delete();
+            }
+            return;
+        }
+
+
+        $segment = self::firstOrCreate(
+            [
+                'model_id' => $data['model_id'],
+                'model_type' => $data['model_type'],
+                'type_id' => $segmentation_by_document->id,
+                'code_id' => $code_segmentation?->id,
+            ],
+            ['name' => "Segmentación por documento", 'active' => ACTIVE]
+        );
+
+        $segment->values()->delete();
+
+        $document_criterion = Criterion::where('code', 'document')->first();
+
+        $values = [];
+
+        foreach ($data['segment_by_document']['segmentation_by_document'] ?? [] as $value) {
+
+            $values[] = [
+                'id' => $value['segment_value_id'] ?? null,
+                'criterion_value_id' => $value['criterion_value_id'],
+                'criterion_id' => $document_criterion->id,
+                'type_id' => NULL,
+            ];
+        }
+
+        $segment->values()->sync($values);
     }
 }

@@ -12,6 +12,7 @@ class ChecklistRpta extends Model
         'student_id',
         'checklist_id',
         // 'calificacion',
+        'flag_congrats',
         'percent',
         'course_id',
         'school_id'
@@ -36,7 +37,7 @@ class ChecklistRpta extends Model
 
     public function scopeAlumno($q, $alumno_id)
     {
-        return $q->where('student_id', $alumno_id);
+        return (is_array($alumno_id)) ? $q->whereIn('student_id', $alumno_id) :  $q->where('student_id', $alumno_id);
     }
 
     public function scopeChecklist($q, $checklist_id)
@@ -48,23 +49,44 @@ class ChecklistRpta extends Model
 
     public static function actualizarChecklistRpta(ChecklistRpta $checklistRpta): void
     {
-        -$cumple = 0;
+        $cumple = 0;
         $checklistValidos = 0;
         $actividades = CheckListItem::where('checklist_id', $checklistRpta->checklist_id)->active(1)->get();
 
+        $tax_trainer_user = Taxonomy::where('group', 'checklist')
+            ->where('type', 'type')
+            ->where('code', 'trainer_user')
+            ->first();
         foreach ($actividades as $actividad) {
-            $tax_trainer_user = Taxonomy::where('group', 'checklist')
-                ->where('type', 'type')
-                ->where('code', 'trainer_user')
-                ->first();
             if ($actividad->type_id == $tax_trainer_user->id) {
                 $checklistValidos++;
                 $rpta_item = ChecklistRptaItem::where('checklist_item_id', $actividad->id)->where('checklist_answer_id', $checklistRpta->id)->first();
                 if ($rpta_item && ($rpta_item->qualification === 'Cumple' || $rpta_item->qualification === 'No cumple'))  $cumple++;
             }
         }
+      
 
-        $checklistRpta->percent = number_format((($cumple / $checklistValidos) * 100), 2);
-        $checklistRpta->save();
+        $percent = ($checklistValidos > 0) ? (($cumple / $checklistValidos) * 100) : 0;
+        $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
+        $checklistRpta->percent = $percent;
+        $checklistRpta->update();
+    }
+    public static function actualizarChecklistRptaV2(ChecklistRpta $checklistRpta,$checklistItems,$checklists_taxonomies): void
+    {
+        $cumple = 0;
+        $checklistValidos = 0;
+        $actividades = $checklistItems->where('active',1);
+        $tax_trainer_user = $checklists_taxonomies->where('type','type')->where('code','trainer_user')->first();
+        foreach ($actividades as $actividad) {
+            if ($actividad->type_id == $tax_trainer_user->id) {
+                $checklistValidos++;
+                $rpta_item = $checklistRpta->rpta_items->where('checklist_item_id', $actividad->id)->first();
+                if ($rpta_item && ($rpta_item->qualification === 'Cumple' || $rpta_item->qualification === 'No cumple'))  $cumple++;
+            }
+        }
+        $percent = ($checklistValidos > 0) ? (($cumple / $checklistValidos) * 100) : 0;
+        $percent = round(($percent > 100) ? 100 : $percent); // maximo porcentaje = 100
+        $checklistRpta->percent = $percent;
+        $checklistRpta->update();
     }
 }
