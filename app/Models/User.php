@@ -475,6 +475,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if (!$update_password && isset($data['password'])) {
                     unset($data['password']);
                 }
+                $data['required_update_at'] = now();
 
                 $this->setPasswordData($data, $update_password, $user);
 
