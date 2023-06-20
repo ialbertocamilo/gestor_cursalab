@@ -9,25 +9,42 @@
         :class="{}"
         content-class="br-dialog"
     >
-        <v-card>
-            <div class="bx_close_modal_activity">
+        <v-card class="card_modal_select_speaker">
+            <p class="title_act">Elige un speaker</p>
+            <div class="bx_close_modal">
                 <v-btn icon :ripple="false" @click="closeModalSelectSpeaker">
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </div>
-            <v-card-text class="py-8">
-                <p class="title_act">Elije un speaker</p>
-                        <div class="bx_items_speakers">
-                            <div class="bx_item_speaker" @click="confirmSelectSpeaker(item)" v-for="(item, i) in data" :key="item.id">
-                                <div class="bis_img">
-                                    <img src="/img/benefits/sesion_presencial.svg">
-                                </div>
-                                <div class="bis_content">
-                                    <h5>{{item.name}}</h5>
-                                    <p>{{item.specialty}}</p>
-                                </div>
-                            </div>
+            <div class="bx_text_search">
+                <v-text-field
+                    outlined
+                    dense
+                    hide-details="auto"
+                    label="Nombre"
+                    placeholder="Nombre"
+                    v-model="txt_filter_speaker"
+                    autocomplete="off"
+                    clearable
+                    append-icon="mdi-magnify"
+                >
+                </v-text-field>
+            </div>
+            <v-card-text class="pb-8 pt-4">
+                <div class="bx_items_speakers" v-if="list_filter_speakers != null && list_filter_speakers.length > 0">
+                    <div class="bx_item_speaker" @click="confirmSelectSpeaker(item)" v-for="(item, i) in list_filter_speakers" :key="item.id">
+                        <div class="bis_img">
+                            <img src="/img/benefits/sesion_presencial.svg">
                         </div>
+                        <div class="bis_content">
+                            <h5>{{item.name}}</h5>
+                            <p>{{item.specialty}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div v-else>
+                    <p class="txt_nf pt-4 text-center" v-if="txt_filter_speaker != null">No se encontraron speakers</p>
+                </div>
             </v-card-text>
         </v-card>
     </v-dialog>
@@ -40,7 +57,23 @@ export default {
     data() {
         return {
             dialog: false,
+            txt_filter_speaker: null,
         };
+    },
+    computed: {
+        list_filter_speakers() {
+            let vue = this;
+            if (vue.txt_filter_speaker === null) {
+                return vue.$props.data;
+            }
+            return vue.$props.data.filter((speaker) => {
+                if(speaker.name != '' && speaker.name != null && speaker.email != '' && speaker.email != null)
+                return (
+                    speaker.name.toLowerCase().includes(vue.txt_filter_speaker.toLowerCase()) ||
+                    speaker.email.toLowerCase().includes(vue.txt_filter_speaker.toLowerCase())
+                );
+            });
+        }
     },
     methods: {
         confirm() {
@@ -68,26 +101,34 @@ export default {
 .br-dialog, .br-dialog .v-sheet.v-card{
     border-radius: 16px !important;
 }
-.bx_close_modal_activity {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-}
-.title_act {
-    color: #2A3649;
-    font-size: 19px;
-    line-height: 21px;
-    font-family: "Nunito", sans-serif;
-    font-weight: bold;
-    margin: 14px 0 25px;
+.card_modal_select_speaker {
+    .title_act {
+        color: #2A3649;
+        font-size: 19px;
+        line-height: 21px;
+        font-family: "Nunito", sans-serif;
+        font-weight: bold;
+        margin: 25px 0 25px;
+        padding: 0 30px;
+    }
+    .bx_close_modal {
+        position: absolute;
+        right: 10px;
+        top: 17px;
+    }
+    .bx_text_search {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 0 24px;
+    }
 }
 .bx_items_speakers {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     overflow-y: auto;
-    min-height: 100px;
-    max-height: 300px;
+    height: 260px;
     align-items: start;
     .bx_item_speaker {
         display: flex;
@@ -96,6 +137,10 @@ export default {
         border-radius: 4px;
         padding: 20px 30px;
         cursor: pointer;
+
+        &:hover {
+            border-color: #5458ea;
+        }
         .bis_img {
             width: 70px;
         }

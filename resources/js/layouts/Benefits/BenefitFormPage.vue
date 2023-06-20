@@ -545,7 +545,7 @@
                     </v-row>
                     <!-- End Promotor -->
                     <!-- Speaker -->
-                    <v-row justify="space-around">
+                    <v-row justify="space-around" v-if="options_modules[4].active">
                         <v-col cols="12">
                             <DefaultModalSection
                                 title="Speaker"
@@ -553,7 +553,20 @@
                                 <template slot="content">
                                     <div class="box_beneficio_speaker d-flex">
                                         <div class="box_input_speaker">
-                                            <span v-if="resource.speaker" >{{resource.speaker.name}}</span>
+                                            <div v-if="!resource.speaker" class="d-flex align-center">
+                                                <div class="bx_speaker_img"></div>
+                                                <div class="bx_speaker_name">
+                                                    <span>Seleccionar speaker</span>
+                                                </div>
+                                            </div>
+                                            <div v-if="resource.speaker" class="d-flex align-center">
+                                                <div class="bx_speaker_img">
+                                                    <img src="/img/benefits/sesion_presencial.svg">
+                                                </div>
+                                                <div class="bx_speaker_name">
+                                                    <span>{{resource.speaker.name}}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="box_button_speaker">
                                             <v-btn color="primary" outlined @click="openModalSelectSpeaker">
@@ -1022,7 +1035,18 @@ export default {
 
         },
         addLinkExterno() {
-
+            let vue = this;
+            const newID = `n-${Date.now()}`;
+            const newLink = {
+                id: newID,
+                name: "",
+                value: "",
+                active: 1,
+                benefit_id: vue.resource.id,
+                hasErrors: false,
+                is_default:false
+            };
+            this.openModalAddLink(newLink)
         }
     }
 }
@@ -1125,5 +1149,27 @@ export default {
 }
 .toggle_text_default.mt_0 .v-input.default-toggle {
     margin: 0 10px !important;
+}
+.box_input_speaker {
+    width: 100%;
+    border: 1px solid #D9D9D9;
+    padding: 6px 15px;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    border-radius: 4px;
+    .bx_speaker_img {
+        background: #D9D9D9;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+}
+.box_button_speaker button {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    height: 44px !important;
 }
 </style>

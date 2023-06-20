@@ -15,7 +15,7 @@
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </div>
-            <v-card-text class="py-8 text-center">
+            <v-card-text class="py-3 text-center">
                 <p class="title_act">Insertar/editar enlace</p>
                 <div class="bx_items_links">
                     <v-row>
@@ -27,7 +27,6 @@
                                 v-model="data.name"
                                 :rules="rules.name"
                                 show-required
-                                counter="200"
                             />
                         </v-col>
                         <v-col cols="12">
@@ -38,10 +37,9 @@
                                 v-model="data.value"
                                 :rules="rules.url"
                                 show-required
-                                counter="200"
                             />
                         </v-col>
-                        <v-col>
+                        <v-col class="py-0">
                             <DefaultModalActionButton
                                 @cancel="closeModalAddLink"
                                 @confirm="confirmAddLink"
