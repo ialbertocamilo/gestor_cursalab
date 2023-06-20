@@ -20,6 +20,7 @@
                         item-value="id"
                         dense
                         returnObject
+                        @onChange="verifyTypePool"
                     />
                 </div>
                 <div class="col-sm-6">
@@ -39,7 +40,7 @@
                 <div class="col-sm-6 mb-3">
                     <label text-variant="muted">Escuela</label>
                     <DefaultAutocomplete
-                        :disabled="!schools[0]"
+                        :disabled="!schools[0] || filters.poll.type.code != 'xcurso'"
                         v-model="filters.schools"
                         :items="schools"
                         label=""
@@ -53,7 +54,7 @@
                 <div class="col-sm-6 mb-3">
                     <label text-variant="muted">Curso</label>
                     <DefaultAutocomplete
-                        :disabled="!courses[0]"
+                        :disabled="!courses[0] || filters.poll.type.code != 'xcurso'"
                         v-model="filters.courses"
                         :items="courses"
                         label=""
@@ -83,7 +84,13 @@
                 </div>
                 <div class="row col-sm-12 mt-4 m-0 p-0 justify-center">
                   <div class="col-sm-4">
-                    <b-button :disabled="!filters.schools[0] || !filters.modules[0]" block variant="primary" @click="searchData()">Consultar</b-button>
+                    <b-button :disabled="
+                      filters.poll.type.code =='xcurso' 
+                      ? !filters.schools[0] || !filters.modules[0]
+                      : !filters.modules[0]" 
+                      block variant="primary" @click="searchData()">
+                      Consultar
+                    </b-button>
                   </div>
                 </div>
               </div>
@@ -160,7 +167,10 @@ export default {
       courses: [],
       //
       filters:{
-          poll:0,
+          poll:{
+            type:'',
+            id:0
+          },
           groups:[],
           modules:[],
           schools: [],
@@ -202,10 +212,20 @@ export default {
     async loadInitialData(){
       let vue = this;
       vue.poll_searched = false;
+      vue.showLoader();
       await axios.get('/resumen_encuesta/initial-data').then(({data})=>{
+        vue.hideLoader();
         vue.polls = data.data.polls;
         vue.modules = data.data.modules;
       })
+    },
+    verifyTypePool(){
+      let vue = this;
+      vue.courses = [];
+      vue.schools = [];
+      vue.filters.courses = [];
+      vue.filters.schools = [];
+      this.loadSchools();
     },
     async loadSchools(){
       let vue = this;
@@ -215,7 +235,7 @@ export default {
       vue.filters.courses = [];
       vue.filters.schools = [];
 
-      if (vue.filters.modules.length == 0) return false;
+      if (vue.filters.modules.length == 0 || vue.filters.poll.type.code != 'xcurso') return false;
 
       await axios.post('/resumen_encuesta/schools/'+vue.filters.poll.id, {
         modules: vue.filters.modules
@@ -279,9 +299,22 @@ export default {
       });
       vue.Grupos = res.data;
     },
-    async downloadReportPollQuestion(type_poll_question){
+    downloadReportPollQuestion(type_poll_question){
       let vue = this;
       vue.filters.type_poll_question = type_poll_question;
+      if(vue.filters.poll.type.code == 'xcurso'){
+        vue.downloadCoursePoll();
+      }else{
+        vue.downloadFreePoll();
+      }
+    },
+    async downloadFreePoll(){
+      this.showLoader();
+      await this.callApiReport([]);
+      this.hideLoader();
+    },
+    async downloadCoursePoll(){
+      const vue = this;
       vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses;
       const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); //Function in mixin.js
       //If the selected schools are greater than 10, the data will be downloaded in parts
@@ -409,6 +442,10 @@ export default {
     deleteFilterDate(){
       this.filters.date.end = null;
       this.filters.date.start = null;
+    },
+    verifyButton(){
+      let vue = this;
+      return 
     }
   },
 };
