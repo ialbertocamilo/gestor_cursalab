@@ -142,7 +142,7 @@
                 <v-tab class="justify-content-start py-7" key='vademecum'>
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
-                        Vademecum
+                        Protocolos y documentos
                     </span>
                 </v-tab>
 

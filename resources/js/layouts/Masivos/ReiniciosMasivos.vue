@@ -22,7 +22,7 @@
 
                 <ul class="mt-3">
                     <li><small>Se listan los usuarios luego de seleccionar el curso o tema evaluable.</small></li>
-                    <li><small>En el filtro "Tipo de reinicio", las opciones:</small>
+                    <li><small>En el filtro "Usuarios", las opciones:</small>
                         <ul>
                             <li><small>"Solo desaprobados" mostrará a los usuarios que desaprobaron el tema.</small></li>
                             <li><small>"Todos" mostrará a todos los usuarios que realizaron una evaluación del tema (aprobados y desaprobados).</small></li>
@@ -40,7 +40,7 @@
                         outlined
                         dense
                         attach=""
-                        label="Tipo de reinicio"
+                        label="Usuarios"
                         hide-details="auto"
                         :items="items.tipo_reinicio"
                         v-model="select.tipo_reinicio"
