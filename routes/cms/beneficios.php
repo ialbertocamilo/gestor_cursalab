@@ -18,4 +18,7 @@ Route::controller(BenefitController::class)->group(function() {
     Route::put('/{benefit}/status', 'status');
     Route::delete('/{benefit}/destroy', 'destroy');
 
+    // Speakers
+    Route::get('/speakers/search', 'getSpeakers');
+
 });

@@ -107,7 +107,7 @@
                                 v-model="resource.description"
                                 :init="{
                                 content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
-                                height: 175,
+                                height: 300,
                                 menubar: false,
                                 language: 'es',
                                 force_br_newlines : true,
@@ -179,6 +179,205 @@
                         </v-col>
                     </v-row>
 
+                    <!-- Sílabo -->
+                    <v-row justify="space-around" v-if="options_modules[1].active">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Configuración del silabo"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_silabos">
+                                        <v-row>
+                                            <v-col cols="12" md="12" lg="12">
+                                                    <draggable v-model="list_silabos" @start="drag_silabos=true" @end="drag_silabos=false" class="custom-draggable" ghost-class="ghost">
+                                                        <transition-group type="transition" name="flip-list" tag="div">
+                                                            <div v-for="(silabo, i) in list_silabos"
+                                                                :key="silabo.id">
+                                                                <div class="item-draggable activities">
+                                                                    <v-row>
+                                                                        <v-col cols="1" class="d-flex align-center justify-content-center ">
+                                                                            <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                            </v-icon>
+                                                                        </v-col>
+                                                                        <v-col cols="7">
+                                                                            <v-textarea
+                                                                                rows="1"
+                                                                                outlined
+                                                                                dense
+                                                                                auto-grow
+                                                                                hide-details="auto"
+                                                                                v-model="silabo.name"
+                                                                                :class="{'border-error': silabo.hasErrors}"
+                                                                            ></v-textarea>
+                                                                        </v-col>
+                                                                        <v-col cols="4" class="d-flex justify-content-center align-center">
+                                                                            <div>
+                                                                                <v-btn color="primary" outlined @click="silabo.expanded = !silabo.expanded">
+                                                                                    <v-icon class="icon_size">mdi-plus</v-icon>
+                                                                                    Asignar elementos
+                                                                                </v-btn>
+                                                                            </div>
+                                                                            <div class="toggle_text_default mt_0">
+                                                                                <DefaultToggle v-model="silabo.active"/>
+                                                                            </div>
+                                                                            <div>
+                                                                                <v-icon class="ml-0 mr-2 icon_size" color="black"
+                                                                                        @click="eliminarSilabo(silabo, i)">
+                                                                                    mdi-delete
+                                                                                </v-icon>
+                                                                            </div>
+                                                                        </v-col>
+                                                                    </v-row>
+                                                                    <v-row v-if="silabo.expanded">
+                                                                        <v-col cols="12">
+                                                                            <editor
+                                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                                v-model="silabo.value"
+                                                                                :init="{
+                                                                                content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                                                height: 200,
+                                                                                menubar: false,
+                                                                                language: 'es',
+                                                                                force_br_newlines : true,
+                                                                                force_p_newlines : false,
+                                                                                forced_root_block : '',
+                                                                                plugins: ['lists image preview anchor', 'code', 'paste','link'],
+                                                                                toolbar:
+                                                                                    'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                                                images_upload_handler: images_upload_handler,
+                                                                            }"/>
+                                                                        </v-col>
+                                                                        <v-col cols="12">
+                                                                            <div>Programación</div>
+                                                                            <div class="row">
+                                                                                <div class="col-3">
+                                                                                    <DefaultInputDate
+                                                                                        clearable
+                                                                                        dense
+                                                                                        :referenceComponent="'modalDateSilabo'"
+                                                                                        :options="silabo.modalDateSilabo"
+                                                                                        v-model="silabo.value_date"
+                                                                                        label="Fecha"
+                                                                                        placeholder="Fecha"
+                                                                                    />
+                                                                                </div>
+                                                                                <div class="col-3">
+                                                                                    <v-menu
+                                                                                        ref="menu_time_silabo"
+                                                                                        v-model="silabo.menu_value_time"
+                                                                                        :close-on-content-click="false"
+                                                                                        :nudge-right="40"
+                                                                                        :return-value.sync="silabo.menu_value_time"
+                                                                                        lazy
+                                                                                        transition="scale-transition"
+                                                                                        offset-y
+                                                                                        max-width="290px"
+                                                                                        min-width="290px"
+                                                                                    >
+                                                                                        <template v-slot:activator="{ on, attrs }">
+                                                                                        <v-text-field
+                                                                                            v-model="silabo.value_time"
+                                                                                            label="Hora"
+                                                                                            prepend-icon="mdi-clock"
+                                                                                            dense
+                                                                                            hide-details="auto"
+                                                                                            readonly
+                                                                                            v-bind="attrs"
+                                                                                            v-on="on"
+                                                                                        ></v-text-field>
+                                                                                        </template>
+                                                                                        <v-time-picker
+                                                                                        v-if="silabo.menu_value_time"
+                                                                                        v-model="silabo.value_time"
+                                                                                        full-width
+                                                                                        @click:minute="$refs.menu_time_silabo.save(silabo.value_time)"
+                                                                                        ></v-time-picker>
+                                                                                    </v-menu>
+                                                                                </div>
+                                                                            </div>
+                                                                        </v-col>
+                                                                    </v-row>
+                                                                </div>
+                                                            </div>
+                                                        </transition-group>
+                                                    </draggable>
+                                            </v-col>
+                                            <v-col cols="12" md="12" lg="12" class="d-flex justify-content-center">
+                                                <v-btn color="primary" outlined @click="addSilabo">
+                                                    <v-icon class="icon_size">mdi-plus</v-icon>
+                                                    Agregar nueva sección del silabo
+                                                </v-btn>
+                                            </v-col>
+                                        </v-row>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Sílabo -->
+                    <!-- Links -->
+                    <v-row justify="space-around" v-if="options_modules[3].active">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Link"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_links">
+
+                                        <v-row>
+                                            <v-col cols="12" md="12" lg="12">
+                                                    <draggable v-model="list_links" @start="drag_links=true" @end="drag_links=false" class="custom-draggable" ghost-class="ghost">
+                                                        <transition-group type="transition" name="flip-list" tag="div">
+                                                            <div v-for="(link, i) in list_links"
+                                                                :key="link.id">
+                                                                <div class="item-draggable activities">
+                                                                    <v-row>
+                                                                        <v-col cols="1" class="d-flex align-center justify-content-center ">
+                                                                            <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                            </v-icon>
+                                                                        </v-col>
+                                                                        <v-col cols="9">
+                                                                            <v-textarea
+                                                                                rows="1"
+                                                                                outlined
+                                                                                dense
+                                                                                auto-grow
+                                                                                hide-details="auto"
+                                                                                v-model="link.name"
+                                                                                :class="{'border-error': link.hasErrors}"
+                                                                            ></v-textarea>
+                                                                        </v-col>
+                                                                        <v-col cols="1" class="d-flex align-center">
+                                                                            <v-icon class="ml-0 mr-2 icon_size" color="black"
+                                                                                    @click="openModalAddLink(link, i)">
+                                                                                mdi-link
+                                                                            </v-icon>
+                                                                        </v-col>
+                                                                        <v-col cols="1" class="d-flex align-center">
+                                                                            <v-icon class="ml-0 mr-2 icon_size" color="black"
+                                                                                    @click="eliminarLink(link, i)">
+                                                                                mdi-delete
+                                                                            </v-icon>
+                                                                        </v-col>
+                                                                    </v-row>
+                                                                </div>
+                                                            </div>
+                                                        </transition-group>
+                                                    </draggable>
+                                            </v-col>
+                                            <v-col cols="12" md="12" lg="12" class="d-flex justify-content-center">
+                                                <v-btn color="primary" outlined @click="addLink">
+                                                    <v-icon class="icon_size">mdi-plus</v-icon>
+                                                    Agregar nuevo link
+                                                </v-btn>
+                                            </v-col>
+                                        </v-row>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Links -->
                     <!-- Map -->
                     <v-row justify="space-around" v-if="options_modules[2].active">
                         <v-col cols="12">
@@ -345,6 +544,28 @@
                         </v-col>
                     </v-row>
                     <!-- End Promotor -->
+                    <!-- Speaker -->
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Speaker"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_speaker d-flex">
+                                        <div class="box_input_speaker">
+                                            <span v-if="resource.speaker" >{{resource.speaker.name}}</span>
+                                        </div>
+                                        <div class="box_button_speaker">
+                                            <v-btn color="primary" outlined @click="openModalSelectSpeaker">
+                                                Seleccionar speaker
+                                            </v-btn>
+                                        </div>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Speaker -->
 
                 </v-form>
             </v-card-text>
@@ -356,6 +577,22 @@
                 />
             </v-card-actions>
         </v-card>
+        <ModalAddLink
+            :ref="modalAddLink.ref"
+            v-model="modalAddLink.open"
+            :data="modalAddLink.data"
+            width="650px"
+            @closeModalAddLink="modalAddLink.open = false"
+            @confirmAddLink="confirmAddLink"
+            />
+        <ModalSelectSpeaker
+            :ref="modalSelectSpeaker.ref"
+            v-model="modalSelectSpeaker.open"
+            :data="modalSelectSpeaker.data"
+            width="650px"
+            @closeModalSelectSpeaker="modalSelectSpeaker.open = false"
+            @confirmSelectSpeaker="confirmSelectSpeaker"
+            />
     </section>
 </template>
 <script>
@@ -369,9 +606,11 @@ const file_fields = ['imagen', 'plantilla_diploma'];
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import Editor from "@tinymce/tinymce-vue";
 import GmapMap from 'vue2-google-maps/dist/components/map.vue'
+import ModalAddLink from "../../components/Benefit/ModalAddLink";
+import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
 
 export default {
-    components: {DialogConfirm, Editor,GmapMap},
+    components: {DialogConfirm, Editor,GmapMap, ModalAddLink, ModalSelectSpeaker},
     props: [ 'benefit_id', 'api_key_maps'],
     data() {
         return {
@@ -395,7 +634,28 @@ export default {
                 {name: 'Duración', code: 'duracion', active: false},
                 {name: 'Encuesta', code: 'encuesta', active: false},
             ],
+            // modal add link
+
+            modalAddLink: {
+                ref: 'ModalAddLink',
+                open: false,
+                data: {},
+                endpoint: '',
+            },
+            // modal speaker
+
+            modalSelectSpeaker: {
+                ref: 'modalSelectSpeaker',
+                open: false,
+                data: [],
+                endpoint: '',
+            },
+
             // otros
+            drag_links: false,
+            drag_silabos: false,
+            list_links: [],
+            list_silabos: [],
             selectType: null,
             activeDificultad: null,
             duracionValue: null,
@@ -409,6 +669,11 @@ export default {
             modalDateFilter3: {
                 open: false,
             },
+            // silabo time
+            silabo_time: null,
+            silabo_menu2: false,
+            silabo_modal2: false,
+            //
             date: null,
             date2: null,
             date3: null,
@@ -504,20 +769,6 @@ export default {
         }
     },
     computed: {
-        showErrorReinicios() {
-            let vue = this
-            const reinicio = vue.resource.scheduled_restarts
-            const dias = vue.resource.scheduled_restarts_dias
-            const horas = vue.resource.scheduled_restarts_horas
-            const minutos = vue.resource.scheduled_restarts_minutos
-            if (!reinicio) {
-                return false
-            }
-            if (dias > 0 || horas > 0 || minutos > 0) {
-                return false
-            }
-            return true
-        },
     },
     async mounted() {
         this.showLoader()
@@ -525,6 +776,94 @@ export default {
         this.hideLoader()
     },
     methods: {
+
+        async openModalSelectSpeaker() {
+            let vue = this;
+
+            vue.showLoader();
+
+            vue.modalSelectSpeaker.open = true
+
+                await vue.$http.get(`/beneficios/speakers/search`)
+                    .then((res) => {
+                        let res_speakers = res.data.data.data;
+                        console.log(res);
+                        console.log(res_speakers);
+                        vue.modalSelectSpeaker.data = res_speakers
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+        },
+        confirmSelectSpeaker( value ){
+            let vue = this;
+            console.log(value);
+            console.log(vue.resource);
+            vue.resource.speaker = value
+            vue.modalSelectSpeaker.open = false
+        },
+        confirmAddLink( value ) {
+            let vue = this;
+            console.log(value);
+            console.log(this.list_links);
+            console.log(vue.resource);
+            vue.modalAddLink.open = false
+        },
+        async openModalAddLink( link ) {
+            let vue = this
+            vue.modalAddLink.open = true
+            vue.modalAddLink.data = link
+        },
+        addLink() {
+            let vue = this;
+            const newID = `n-${Date.now()}`;
+            const newLink = {
+                id: newID,
+                name: "",
+                value: "",
+                active: 1,
+                benefit_id: vue.resource.id,
+                hasErrors: false,
+                is_default:false
+            };
+            console.log(newLink);
+            console.log(vue.resource);
+            vue.list_links.unshift(newLink);
+        },
+        eliminarLink(link, index) {
+            let vue = this;
+            console.log(vue.resource);
+                vue.list_links.splice(index, 1);
+            console.log(vue.resource);
+        },
+        addSilabo() {
+            let vue = this;
+            const newID = `n-${Date.now()}`;
+            const newSilabo = {
+                id: newID,
+                name: "",
+                value: "",
+                active: 1,
+                benefit_id: vue.resource.id,
+                hasErrors: false,
+                is_default:false,
+                expanded: false,
+                modalDateSilabo: {
+                    open: false,
+                },
+            };
+            console.log(newSilabo);
+            console.log(vue.resource);
+            vue.list_silabos.unshift(newSilabo);
+        },
+        eliminarSilabo(silabo, index) {
+            let vue = this;
+            console.log(vue.resource);
+                vue.list_silabos.splice(index, 1);
+            console.log(vue.resource);
+        },
         updateValue(value) {
             let vue = this
             console.log(vue.options_modules);
@@ -585,6 +924,7 @@ export default {
             }
 
             vue.resource.type = this.selectType
+            vue.resource.list_links = this.list_links
             console.log(vue.resource);
             vue.loadingActionBtn = true
             vue.showLoader()
@@ -773,5 +1113,17 @@ export default {
 }
 .bx_switch_options .v-input.default-toggle {
     margin: 0 !important;
+}
+
+.toggle_text_default label.v-label {
+    color: #434D56;
+    font-weight: 400;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-size: 12px;
+}
+.toggle_text_default.mt_0 .v-input.default-toggle {
+    margin: 0 10px !important;
 }
 </style>

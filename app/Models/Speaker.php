@@ -55,4 +55,16 @@ class Speaker extends BaseModel
         return ['data'=>$speaker];
     }
 
+    protected function getSpeakers()
+    {
+        $workspace = get_current_workspace();
+        $speakers_items = Speaker::where('active',1)
+                        // ->where('workspace_id', $workspace->id)
+                        ->orderBy('name', 'DESC')
+                        ->get();
+
+        $response['data'] = $speakers_items;
+
+        return $response;
+    }
 }

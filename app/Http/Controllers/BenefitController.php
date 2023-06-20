@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Benefit;
 use App\Models\Poll;
+use App\Models\Speaker;
 use App\Models\Taxonomy;
 
 class BenefitController extends Controller
@@ -26,6 +27,13 @@ class BenefitController extends Controller
         $response = Benefit::getData($benefit);
 
         return $this->success($response);
+    }
+
+    public function getSpeakers()
+    {
+        $data = Speaker::getSpeakers();
+
+        return $this->success($data);
     }
 
     public function getFormSelects(Benefit $benefit = null, $compactResponse = false)
