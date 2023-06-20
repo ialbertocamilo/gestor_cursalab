@@ -97,16 +97,16 @@ class UpdateSummariesData extends Command
                     SummaryUser::updateUserData($user);
     
                 }
-    
                 $user->update([
                     'summary_user_update' => NULL,
                     'summary_course_update' => NULL,
                     'summary_course_data' => NULL,
                     'is_updating' => 0,
                     // 'required_update_at' => NULL,
-                    'last_summary_updated_at' => now(),
+                    'last_summary_updated_at' => now()
                 ]);
-            } catch (\Throwable $th) {
+            } catch (\Throwable $ex) {
+                info($ex);
                 //El estado indica que el usuario tuvo un error en su actualización .. se coloca de esta manera para no interrumpir la actualización de los datos.
                 $user->is_updating = 3;
                 $user->save();
