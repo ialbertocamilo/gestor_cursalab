@@ -35,6 +35,7 @@ class RestBenefitController extends Controller
         $user = Auth::user();
         $data = [
             'benefit' => $benefit,
+            'user' => $user->id
         ];
         $apiResponse = Benefit::getInfo($data);
 
@@ -46,6 +47,7 @@ class RestBenefitController extends Controller
         $user = Auth::user();
         $data = [
             'speaker' => $speaker,
+            'user' => $user->id
         ];
         $apiResponse = Speaker::getInfo($data);
 
@@ -55,12 +57,27 @@ class RestBenefitController extends Controller
     public function registerUserForBenefit(Request $request)
     {
         $user = Auth::user();
+        $type = $request->type ?? null;
+
         $data = [
             'user' => $user?->id ?? null,
             'benefit' => $request->benefit ?? null,
         ];
 
-        $apiResponse = Benefit::registerUserForBenefit($data);
+        if( $type == 'unsubscribe' ) {
+            $apiResponse = Benefit::unsubscribeUserForBenefit($data);
+        }
+        else if( $type == 'notify' ) {
+            $apiResponse['error'] = true;
+            $apiResponse['data'] = [];
+            $apiResponse['msg'] = [
+                'title' => 'Alerta de beneficio activada',
+                'description' => 'Se notificara cuando este beneficio este disponible.'
+            ];
+        }
+        else {
+            $apiResponse = Benefit::registerUserForBenefit($data);
+        }
 
         return response()->json($apiResponse, 200);
     }

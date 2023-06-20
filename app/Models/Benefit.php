@@ -134,7 +134,6 @@ class Benefit extends BaseModel
             DB::commit();
         } catch (\Exception $e) {
             info($e);
-            dd($e);
             DB::rollBack();
             // Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
@@ -222,7 +221,9 @@ class Benefit extends BaseModel
     // Apis
     protected function registerUserForBenefit( $data )
     {
+        $limit_benefits_x_user = 3;
         $response['error'] = false;
+        $response['data'] = [];
 
         $user_id = $data['user'] ?? null;
         $benefit_id = $data['benefit'] ?? null;
@@ -233,17 +234,112 @@ class Benefit extends BaseModel
 
         if($is_registered) {
             $response['error'] = true;
-            $response['msg'] = 'El usuario ya se encuentra registrado en este beneficio.';
+            $response['msg'] = [
+                'title' => 'Ya cuentas con este beneficio',
+                'description' => 'Ya te encuentras registrado en este beneficio.'
+            ];
+        }
+        else {
+
+            $benefits_user_registered = UserBenefit::where('user_id',$user_id)->count();
+            if($benefits_user_registered < $limit_benefits_x_user) {
+                try {
+                    DB::beginTransaction();
+
+                    $is_created = UserBenefit::create(['user_id'=>$user_id, 'benefit_id'=>$benefit_id]);
+                    cache_clear_model(UserBenefit::class);
+
+                    if($is_created) {
+                        $benefit = Benefit::with([
+                        'status'=> function ($query) {
+                                $query->select('id', 'name', 'code');
+                            }
+                        ])
+                        ->where('id', $benefit_id)
+                        ->first();
+                        $response['msg'] = [
+                            'title' => 'Se ha registrado al beneficio',
+                            'description' => 'Te haz registrado al beneficio: '. $benefit->title
+                        ];
+                        $response['data'] = [
+                            'benefit_id' => $benefit_id,
+                            'user_status' => ['name' => 'Suscrito', 'code' => 'subscribed'],
+                            'subscribed' => true,
+                            'status' => $benefit->status
+                        ];
+                    }
+
+                    DB::commit();
+
+                } catch (\Exception $e) {
+                    info($e);
+                    DB::rollBack();
+                    // Error::storeAndNotificateException($e, request());
+                    $response['error'] = true;
+                    $response['msg'] = [
+                        'title' => 'No se pudo registrar a este beneficio',
+                        'description' => 'No se pudo registrar a este beneficio. Inténtelo nuevamente.'
+                    ];
+                    // abort(errorExceptionServer());
+                }
+
+            }
+            else {
+                $response['error'] = true;
+                $response['msg'] = [
+                    'title' => 'Máximo número de beneficios seleccionados',
+                    'description' => 'Te has suscrito al número máximo de beneficios disponible ('.$limit_benefits_x_user.')  por colaborador.'
+                ];
+            }
+        }
+
+        return $response;
+    }
+    protected function unsubscribeUserForBenefit( $data )
+    {
+        $response['error'] = false;
+        $response['data'] = [];
+
+        $user_id = $data['user'] ?? null;
+        $benefit_id = $data['benefit'] ?? null;
+
+        $is_registered = UserBenefit::where('user_id', $user_id)
+                        ->where('benefit_id', $benefit_id)
+                        ->first();
+
+        if(!$is_registered) {
+            $response['error'] = true;
+            $response['msg'] = [
+                'title' => 'No cuentas con este beneficio',
+                'description' => 'No estás registrado en este beneficio.'
+            ];
         }
         else {
 
             try {
                 DB::beginTransaction();
 
-                $is_created = UserBenefit::create(['user_id'=>$user_id, 'benefit_id'=>$benefit_id]);
-                if($is_created) {
-                    $response['msg'] = 'Se registró correctamente al beneficio';
-                }
+                    $is_registered->delete();
+                    cache_clear_model(UserBenefit::class);
+
+                    $benefit = Benefit::with([
+                    'status'=> function ($query) {
+                            $query->select('id', 'name', 'code');
+                        }
+                    ])
+                    ->where('id', $benefit_id)
+                    ->first();
+
+                    $response['msg'] = [
+                        'title' => 'Te has retirado del beneficio',
+                        'description' => 'Ya no te encuentras registrado al beneficio: '. $benefit->title
+                    ];
+                    $response['data'] = [
+                        'benefit_id' => $benefit_id,
+                        'user_status' => ['name' => 'Retirado', 'code' => 'unsubscribe'],
+                        'subscribed' => false,
+                        'status' => $benefit->status
+                    ];
 
                 DB::commit();
 
@@ -252,16 +348,18 @@ class Benefit extends BaseModel
                 DB::rollBack();
                 // Error::storeAndNotificateException($e, request());
                 $response['error'] = true;
-                $response['msg'] = 'No se pudo registrar el usuario a este beneficio. Inténtelo nuevamente.';
+                $response['msg'] = [
+                    'title' => 'No se pudo dar de baja a este beneficio',
+                    'description' => 'No se pudo dar de baja a este beneficio. Inténtelo nuevamente.'
+                ];
                 // abort(errorExceptionServer());
             }
 
-            cache_clear_model(UserBenefit::class);
         }
 
         return $response;
-
     }
+
     protected function getBenefits( $data )
     {
         $response['data'] = null;
@@ -379,6 +477,9 @@ class Benefit extends BaseModel
     {
         $response['data'] = null;
         $benefit_id = $data['benefit'];
+        $user_id = $data['user'];
+
+        $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
         // $workspace = get_current_workspace();
 
@@ -386,7 +487,10 @@ class Benefit extends BaseModel
             ['implements','silabo','polls','links','speaker',
             'type'=> function ($query) {
                         $query->select('id', 'name', 'code');
-                    }
+                    },
+            'status'=> function ($query) {
+                $query->select('id', 'name', 'code');
+            }
         ])
         ->where('active',1)
         ->where('id', $benefit_id->id)
@@ -394,15 +498,37 @@ class Benefit extends BaseModel
         // where('workspace_id', $workspace->id)
 
         if($benefit) {
+
+            $benefit->user_status = null;
+            $benefit->subscribed = false;
+
+            if(in_array($benefit->id, $benefits_user_registered)) {
+                $user_benefit = UserBenefit::where(['user_id' => $user_id, 'benefit_id' => $benefit->id])->first();
+                if($user_benefit) {
+                    $benefit->user_status = ['name' => 'Suscrito', 'code' => 'subscribed'];
+                    $benefit->subscribed = true;
+                }
+            }
+
             $benefit->direccion = [
                 'lugar' => 'Av. Nicolas de Pierola 645 - Surquillo - Lima',
                 'link' => 'https://maps.google.com/?q=Av.+Vista+Alegre+3400,+Carabayllo+15121,+Per%C3%BA&ftid=0x9105d6daa1e0bb81:0x35aced63bf7fc7e2',
                 'image' => null,
                 'referencia' => $benefit->referencia
             ];
-            $benefit->status = ['name' => 'Activo', 'code' => 'activo'];
             $benefit->accesible = true;
-            unset($benefit->referencia);
+            $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
+            $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
+            $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
+            unset(
+                $benefit->referencia,
+                $benefit->workspace_id,
+                $benefit->type_id,
+                $benefit->speaker_id,
+                $benefit->status_id,
+                $benefit->poll_id,
+                $benefit->active
+            );
         }
 
         return ['data'=>$benefit];
