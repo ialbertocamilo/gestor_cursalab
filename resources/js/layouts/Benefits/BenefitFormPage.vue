@@ -435,29 +435,9 @@
                         </v-col>
                     </v-row>
                     <!-- End Map -->
-                    <!-- Dificultad -->
-                    <v-row justify="space-around" v-if="options_modules[5].active">
-                        <v-col cols="12">
-                            <DefaultModalSection
-                                title="Dificultad del beneficio"
-                            >
-                                <template slot="content">
-                                    <div class="box_dificultad_beneficios">
-                                        <p>Selecciona el nivel de dificultad que tendra el beneficio</p>
-                                        <div class="box_items_dificultad d-flex justify-content-center">
-                                            <div class="item_dificultad" :class="{'active': activeDificultad == 'basico'}" @click="selectDificultad('basico')">Básico</div>
-                                            <div class="item_dificultad" :class="{'active': activeDificultad == 'intermedio'}" @click="selectDificultad('intermedio')">Intermedio</div>
-                                            <div class="item_dificultad" :class="{'active': activeDificultad == 'avanzado'}" @click="selectDificultad('avanzado')">Avanzado</div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </DefaultModalSection>
-                        </v-col>
-                    </v-row>
-                    <!-- End Dificultad -->
-                    <!-- Duración -->
-                    <v-row justify="space-around" v-if="options_modules[7].active">
-                        <v-col cols="12">
+                    <v-row>
+                        <!-- Duración -->
+                        <v-col cols="6" v-if="options_modules[7].active">
                             <DefaultModalSection
                                 title="Duración"
                             >
@@ -482,71 +462,9 @@
                                 </template>
                             </DefaultModalSection>
                         </v-col>
-                    </v-row>
-                    <!-- End Duración -->
-                    <!-- Encuesta -->
-                    <v-row justify="space-around" v-if="options_modules[8].active">
-                        <v-col cols="12">
-                            <DefaultModalSection
-                                title="Encuesta"
-                            >
-                                <template slot="content">
-                                    <div class="box_beneficio_encuesta d-flex justify-content-center">
-                                        <div class="box_input_encuesta">
-                                            <DefaultAutocomplete
-                                                :rules="rules.lista_encuestas"
-                                                dense
-                                                label="Encuesta"
-                                                placeholder="Agrega una encuesta"
-                                                v-model="resource.lista_encuestas"
-                                                :items="selects.lista_encuestas"
-                                                item-text="name"
-                                                item-value="id"
-                                            />
-                                        </div>
-                                        <div class="box_button_encuesta">
-                                            <v-btn color="primary" outlined @click="addLinkExterno">
-                                                <div class="img mr-1"><img src="/img/benefits/icono_link.svg"></div>
-                                                Link externo
-                                            </v-btn>
-                                        </div>
-                                    </div>
-                                </template>
-                            </DefaultModalSection>
-                        </v-col>
-                    </v-row>
-                    <!-- End Encuesta -->
-                    <!-- Promotor -->
-                    <v-row justify="space-around" v-if="options_modules[0].active">
-                        <v-col cols="12">
-                            <DefaultModalSection
-                                title="Promotor del beneficio"
-                            >
-                                <template slot="content">
-                                    <div class="box_beneficio_promotor d-flex">
-                                        <div class="box_input_promotor">
-                                            <DefaultInput
-                                                dense
-                                                label="Promotor"
-                                                placeholder="Empresa que promociona"
-                                                v-model="resource.promotor"
-                                                :rules="rules.promotor"
-                                            />
-                                        </div>
-                                        <div class="box_button_promotor">
-                                            <v-btn color="primary" outlined @click="addLogoPromotor">
-                                                Agregar Logotipo
-                                            </v-btn>
-                                        </div>
-                                    </div>
-                                </template>
-                            </DefaultModalSection>
-                        </v-col>
-                    </v-row>
-                    <!-- End Promotor -->
-                    <!-- Speaker -->
-                    <v-row justify="space-around" v-if="options_modules[4].active">
-                        <v-col cols="12">
+                        <!-- End Duración -->
+                        <!-- Speaker -->
+                        <v-col cols="6" v-if="options_modules[4].active">
                             <DefaultModalSection
                                 title="Speaker"
                             >
@@ -577,8 +495,124 @@
                                 </template>
                             </DefaultModalSection>
                         </v-col>
+                        <!-- End Speaker -->
+                        <!-- Encuesta -->
+                        <v-col cols="6" v-if="options_modules[8].active">
+                            <DefaultModalSection
+                                title="Encuesta"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_encuesta d-flex justify-content-center">
+                                        <div class="box_input_encuesta">
+                                            <DefaultAutocomplete
+                                                :rules="rules.lista_encuestas"
+                                                dense
+                                                label="Encuesta"
+                                                placeholder="Agrega una encuesta"
+                                                v-model="resource.lista_encuestas"
+                                                :items="selects.lista_encuestas"
+                                                item-text="name"
+                                                item-value="id"
+                                            />
+                                        </div>
+                                        <div class="box_button_encuesta">
+                                            <v-btn color="primary" outlined @click="addLinkExterno">
+                                                <div class="img mr-1"><img src="/img/benefits/icono_link.svg"></div>
+                                                Link externo
+                                            </v-btn>
+                                        </div>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                        <!-- End Encuesta -->
+                        <!-- Tags -->
+                        <v-col cols="6" v-if="options_modules[5].active">
+                            <DefaultModalSection
+                                title="Etiquetas"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_tags d-flex justify-content-center">
+                                        <div class="box_input_etiqueta">
+                                            <DefaultAutocomplete
+                                                :rules="rules.lista_etiquetas"
+                                                dense
+                                                label="Etiqueta"
+                                                placeholder="Agrega una etiqueta"
+                                                v-model="resource.lista_etiquetas"
+                                                :items="selects.lista_etiquetas"
+                                                item-text="name"
+                                                item-value="id"
+                                            />
+                                        </div>
+                                        <div class="box_button_etiqueta">
+                                            <v-btn color="primary" outlined @click="addLinkExterno">
+                                                Agregar etiqueta
+                                            </v-btn>
+                                        </div>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                        <!-- End Tags -->
+                        <!-- Promotor -->
+                        <v-col cols="6" v-if="options_modules[0].active">
+                            <DefaultModalSection
+                                title="Promotor del beneficio"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_promotor d-flex">
+                                        <div class="box_input_promotor">
+                                            <DefaultInput
+                                                dense
+                                                label="Promotor"
+                                                placeholder="Empresa que promociona"
+                                                v-model="resource.promotor"
+                                                :rules="rules.promotor"
+                                            />
+                                        </div>
+                                        <div class="box_button_promotor">
+                                            <v-btn color="primary" outlined @click="addLogoPromotor">
+                                                Agregar Logotipo
+                                            </v-btn>
+                                        </div>
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                        <!-- End Promotor -->
+                        <!-- Implementos -->
+                        <v-row>
+                            <v-col cols="12" v-if="options_modules[6].active">
+                                <DefaultModalSection
+                                    title="Implementos"
+                                >
+                                    <template slot="content">
+                                        <div class="box_beneficio_implementos d-flex">
+                                            <span class="lbl_ben_implementos">Implementos necesarios</span>
+                                            <div class="box_input_implementos">
+                                                <div class="box_list_implementos">
+                                                    <span class="item_implementos"  v-for="(etiqueta, i) in lista_etiquetas" :key="etiqueta.id">
+                                                        {{etiqueta}}
+                                                        <v-icon @click="lista_etiquetas.splice(i, 1);">mdi-close-circle</v-icon>
+                                                    </span>
+                                                </div>
+                                                <div class="box_text_implementos" v-if="show_text_add_implement">
+                                                    <input type="text" v-model="text_add_implement" v-on:keyup.enter="actionAddImplement" ref="text_add_implement" id="text_add_implement"/>
+                                                </div>
+                                                <div class="box_button_implementos">
+                                                    <v-btn color="primary" @click="actionButtonAddImplement" :disabled="show_text_add_implement">
+                                                        Agregar
+                                                    </v-btn>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </DefaultModalSection>
+                            </v-col>
+                        </v-row>
+                        <!-- End Implementos -->
                     </v-row>
-                    <!-- End Speaker -->
 
                 </v-form>
             </v-card-text>
@@ -627,6 +661,9 @@ export default {
     props: [ 'benefit_id', 'api_key_maps'],
     data() {
         return {
+            // para implementos
+            text_add_implement: null,
+            show_text_add_implement: false,
             // para el mapa
             center: { lat: -12.0529046, lng: -77.0253457 },
             zoom: 16,
@@ -669,6 +706,7 @@ export default {
             drag_silabos: false,
             list_links: [],
             list_silabos: [],
+            lista_etiquetas: [],
             selectType: null,
             activeDificultad: null,
             duracionValue: null,
@@ -789,7 +827,24 @@ export default {
         this.hideLoader()
     },
     methods: {
+        actionButtonAddImplement() {
+            let vue = this
+            vue.show_text_add_implement = true
+            setTimeout(function () {
+                vue.$refs.text_add_implement.focus()
+            }, 1)
+        },
+        actionAddImplement() {
+            let vue = this
+            if(vue.text_add_implement != null && vue.text_add_implement != '') {
+                vue.lista_etiquetas.push(vue.text_add_implement)
+                vue.text_add_implement = null
+                vue.show_text_add_implement = false
+            }
+        },
+        addItemImplementos() {
 
+        },
         async openModalSelectSpeaker() {
             let vue = this;
 
@@ -1060,12 +1115,6 @@ export default {
 .bx_benefit_accesible .default-toggle.default-toggle.v-input--selection-controls {
     margin-top: 0 !important;
 }
-.box_dificultad_beneficios p {
-    font-family: 'open sans';
-    font-size: 20px;
-    color: #9E9E9E;
-    text-align: center;
-}
 .box_items_dificultad .item_dificultad {
     border: 1px solid #D9D9D9;
     margin: 0 10px;
@@ -1088,11 +1137,13 @@ export default {
     margin-right: 15px;
 }
 .box_input_duracion,
+.box_input_etiqueta,
 .box_input_encuesta {
-    min-width: 600px;
+    width: 100%;
     margin-right: 10px;
 }
-.box_button_encuesta button .img img {
+.box_button_encuesta button .img img,
+.box_button_etiqueta button .img img {
     max-width: 20px;
 }
 .box_button_duracion .v-input__control .v-messages {
@@ -1171,5 +1222,67 @@ export default {
     padding-top: 6px !important;
     padding-bottom: 6px !important;
     height: 44px !important;
+}
+.box_beneficio_implementos {
+    position: relative;
+
+    .lbl_ben_implementos {
+        position: absolute;
+        top: -10px;
+        left: 10px;
+        background: #fff;
+        font-size: 12px;
+        color: rgba(0,0,0,.6);
+    }
+    .box_input_implementos {
+        width: 100%;
+        border: 1px solid #D9D9D9;
+        border-radius: 4px;
+        padding: 16px 10px 10px;
+
+        .box_list_implementos,
+        .box_text_implementos,
+        .box_button_implementos {
+            display: inline-flex;
+        }
+        .box_list_implementos {
+            flex-wrap: wrap;
+        }
+        .box_text_implementos input {
+            padding: 3px 14px;
+            border-radius: 30px;
+            border: 1px solid #5457E7;
+            margin-right: 5px;
+            font-family: 'open sans';
+            font-size: 14px;
+            color: #5457E7;
+            position: relative;
+        }
+        .item_implementos {
+            padding: 3px 14px;
+            border-radius: 30px;
+            border: 1px solid #5457E7;
+            margin-right: 5px;
+            font-family: 'open sans';
+            font-size: 14px;
+            color: #5457E7;
+            padding-right: 28px;
+            position: relative;
+            margin-bottom: 5px;
+
+            button.v-icon {
+                color: #5458ea;
+                font-size: 15px;
+                position: absolute;
+                top: 50%;
+                right: 8px;
+                transform: translateY(-50%);
+                cursor: pointer;
+            }
+        }
+        .box_button_implementos button {
+            border-radius: 30px;
+        }
+    }
 }
 </style>
