@@ -273,7 +273,7 @@ class UserMassive extends Massive implements ToCollection
                 'has_error'=>true,
                 'info_error'=>[
                     'index' => $dc['index'],
-                    'message' => 'No se puede usar formulas de excel.'
+                    'message' => 'No se puede usar fórmulas de excel.'
                 ],
             ];
         } 
