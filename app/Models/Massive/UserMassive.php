@@ -267,6 +267,16 @@ class UserMassive extends Massive implements ToCollection
     }
     private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel){
         $has_error = false;
+        if (strpos($value_excel, "=") === 0) {
+            $has_error = true;
+            return [
+                'has_error'=>true,
+                'info_error'=>[
+                    'index' => $dc['index'],
+                    'message' => 'No se puede usar formulas de excel.'
+                ],
+            ];
+        } 
         $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
         if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value?->id)->first())) {
             $has_error = true;
