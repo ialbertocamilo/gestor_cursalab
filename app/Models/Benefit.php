@@ -236,7 +236,7 @@ class Benefit extends BaseModel
             $response['error'] = true;
             $response['msg'] = [
                 'title' => 'Ya cuentas con este beneficio',
-                'description' => 'Ya te encuentras registrado en este beneficio.'
+                'description' => ['Ya te encuentras registrado en este beneficio.']
             ];
         }
         else {
@@ -259,7 +259,7 @@ class Benefit extends BaseModel
                         ->first();
                         $response['msg'] = [
                             'title' => 'Se ha registrado al beneficio',
-                            'description' => 'Te haz registrado al beneficio: '. $benefit->title
+                            'description' => ['Te haz inscrito satisfactoriamente al beneficio de <b>'.$benefit->title.'</b>.<br>Recuerda revisar el detalle.']
                         ];
                         $response['data'] = [
                             'benefit_id' => $benefit_id,
@@ -278,7 +278,7 @@ class Benefit extends BaseModel
                     $response['error'] = true;
                     $response['msg'] = [
                         'title' => 'No se pudo registrar a este beneficio',
-                        'description' => 'No se pudo registrar a este beneficio. Inténtelo nuevamente.'
+                        'description' => ['No se pudo registrar a este beneficio. Inténtelo nuevamente.']
                     ];
                     // abort(errorExceptionServer());
                 }
@@ -287,8 +287,10 @@ class Benefit extends BaseModel
             else {
                 $response['error'] = true;
                 $response['msg'] = [
-                    'title' => 'Máximo número de beneficios seleccionados',
-                    'description' => 'Te has suscrito al número máximo de beneficios disponible ('.$limit_benefits_x_user.')  por colaborador.'
+                    'title' => 'Límite de inscripciones alcanzadas',
+                    'description' => [
+                        'Has alcanzando el máximo de beneficios inscritos a la vez ('.$limit_benefits_x_user.'), si deseas registrarte debes retirarte de otro beneficio o comunicarte con el coordinador del beneficio.'
+                    ]
                 ];
             }
         }
@@ -311,7 +313,7 @@ class Benefit extends BaseModel
             $response['error'] = true;
             $response['msg'] = [
                 'title' => 'No cuentas con este beneficio',
-                'description' => 'No estás registrado en este beneficio.'
+                'description' => ['No estás registrado en este beneficio.']
             ];
         }
         else {
@@ -332,7 +334,7 @@ class Benefit extends BaseModel
 
                     $response['msg'] = [
                         'title' => 'Te has retirado del beneficio',
-                        'description' => 'Ya no te encuentras registrado al beneficio: '. $benefit->title
+                        'description' => ['Ya no te encuentras registrado al beneficio: '. $benefit->title]
                     ];
                     $response['data'] = [
                         'benefit_id' => $benefit_id,
@@ -350,7 +352,7 @@ class Benefit extends BaseModel
                 $response['error'] = true;
                 $response['msg'] = [
                     'title' => 'No se pudo dar de baja a este beneficio',
-                    'description' => 'No se pudo dar de baja a este beneficio. Inténtelo nuevamente.'
+                    'description' => ['No se pudo dar de baja a este beneficio. Inténtelo nuevamente.']
                 ];
                 // abort(errorExceptionServer());
             }
