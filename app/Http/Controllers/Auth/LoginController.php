@@ -149,7 +149,7 @@ class LoginController extends Controller
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
                 if(config('slack.routes.demo')){
-                    $message = '*Demo Cursalab 2.0*';
+                    $message = 'Demo Cursalab 2.0';
                     $attachments = [
                         [
                             "color" => "#36a64f",
@@ -191,7 +191,7 @@ class LoginController extends Controller
         // verificar intentos   
         $user->checkTimeToReset($request->email); 
         if(config('slack.routes.demo')){
-            $message = '*Demo Cursalab 2.0*';
+            $message = 'Demo Cursalab 2.0';
             $attachments = [
                 [
                     "color" => "#FF0000",

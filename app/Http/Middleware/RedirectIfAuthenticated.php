@@ -28,7 +28,7 @@ class RedirectIfAuthenticated
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
                 if(config('slack.routes.demo')){
-                    $message = '*Demo Cursalab 2.0*';
+                    $message = 'Demo Cursalab 2.0';
                     $attachments = [
                         [
                             "color" => "#36a64f",
