@@ -3,6 +3,7 @@
 return [
     'notification_enable' => env('SLACK_NOTIFICATION_ENABLE', false),
     'routes' => [
+        'demo' => env('LOG_SLACK_DEMO',NULL),
     	'posts' => env('SLACK_ROUTE_POSTS', 'NOT_FOUND'),
         'errors' => env('SLACK_ROUTE_ERROR', 'NOT_FOUND'),
         'general' => env('SLACK_ROUTE_GENERAL', 'NOT_FOUND'),

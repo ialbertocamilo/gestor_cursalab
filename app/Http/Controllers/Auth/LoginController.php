@@ -148,7 +148,16 @@ class LoginController extends Controller
                 if ($request->hasSession()) {
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
-
+                if(config('slack.routes.demo')){
+                    $message = '*Demo Cursalab 2.0*';
+                    $attachments = [
+                        [
+                            "color" => "#36a64f",
+                            "text" => 'El usuario con email: '.$user->email_gestor. ' se ha logueado'
+                        ]
+                    ];
+                    messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
+                }
                 $user->resetAttemptsUser(); // reset attempts
 
                 if($user->enable_2fa) {
@@ -181,7 +190,16 @@ class LoginController extends Controller
         }
         // verificar intentos   
         $user->checkTimeToReset($request->email); 
-
+        if(config('slack.routes.demo')){
+            $message = '*Demo Cursalab 2.0*';
+            $attachments = [
+                [
+                    "color" => "#FF0000",
+                    "text" => 'El usuario con email: '.$request->email. ' intentó loguearse'
+                ]
+            ];
+            messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
+        }
         $user_attempts = $user->incrementAttempts($request->email);
         if($user_attempts) return $this->sendAttempsResponse($user_attempts);
         // verificar intentos
