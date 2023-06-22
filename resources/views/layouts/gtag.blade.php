@@ -1,5 +1,5 @@
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TBVL8PVKBD"></script>
+<script async src="{{config('app.gestor')}}"></script>
 <script>
 
 var host = window.location.hostname;
@@ -10,7 +10,7 @@ var host = window.location.hostname;
 // console.log('document.location')
 // console.log(document.location)
 
-if( host == "gestiona.inretail.cursalab.io" )
+if( host == "gestiona.inretail.cursalab.io"  || host =='gestiona.demo.cursalab.io')
 {
 	window.dataLayer = window.dataLayer || [];
 	function gtag(){dataLayer.push(arguments);}
