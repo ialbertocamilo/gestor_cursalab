@@ -33,12 +33,14 @@ class Benefit extends BaseModel
         'promotor_imagen',
         'direccion',
         'referencia',
+        'accesible',
 
         'active',
     ];
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
+        'accesible' => 'boolean',
     ];
 
     protected $hidden = [
@@ -235,6 +237,9 @@ class Benefit extends BaseModel
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('Y-m-d');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('Y-m-d');
             $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('Y-m-d');
+            if($benefit->speaker) {
+                $benefit->speaker->image = $benefit->speaker->image ? FileService::generateUrl($benefit->speaker->image) : $benefit->speaker->image;
+            }
         }
 
         return ['data'=> $benefit];
@@ -460,11 +465,9 @@ class Benefit extends BaseModel
 
 
             $item->ubicacion = "Lima";
-            $item->accesible = true;
             $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
             $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
             $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
-            $item->image = $item->image ? FileService::generateUrl($item->image) : $item->image;
             unset(
                 $item->promotor,
                 $item->promotor_imagen,
@@ -539,11 +542,9 @@ class Benefit extends BaseModel
                 'image' => null,
                 'referencia' => $benefit->referencia
             ];
-            $benefit->accesible = true;
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
             $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
-            $benefit->image = $benefit->image ? FileService::generateUrl($benefit->image) : $benefit->image;
             unset(
                 $benefit->referencia,
                 $benefit->workspace_id,

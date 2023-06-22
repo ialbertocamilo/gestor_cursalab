@@ -53,10 +53,6 @@ class Speaker extends BaseModel
         ->first();
         // where('workspace_id', $workspace->id)
 
-        if(!is_null($speaker)) {
-            $speaker->image = $speaker->image ? FileService::generateUrl($speaker->image) : $speaker->image;
-        }
-
         return ['data'=>$speaker];
     }
 
