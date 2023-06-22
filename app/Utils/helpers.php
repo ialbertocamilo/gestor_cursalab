@@ -345,3 +345,27 @@ function get_data_bykeys($data, $keys = [])
     return $new_data;
 }
 
+function messageToSlackByChannel($texto,$attachments,$canal){
+    $blocks =  [
+        "text" => "*".$texto."*",
+        "attachments"  => $attachments
+	];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $canal);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    // curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"text\":\"$mensaje\"}");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($blocks));
+
+    // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['text'=>$mensaje]));
+    $headers = array();
+    $headers[] = 'Content-Type: application/json';
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec($ch);
+    info($result);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_close($ch);
+}
