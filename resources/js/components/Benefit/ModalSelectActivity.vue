@@ -20,23 +20,19 @@
                 <div class="bx_items_activitys">
                     <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_presencial')">
                         <div class="img"><img src="/img/benefits/sesion_presencial.svg"></div>
-                        <h5>Sesiones en vivo<br>(presencial)</h5>
-                        <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
+                        <h5>Sesiones presenciales</h5>
                     </div>
                     <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_online')">
                         <div class="img"><img src="/img/benefits/sesion_online.svg"></div>
                         <h5>Sesiones en vivo</h5>
-                        <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
                     </div>
                     <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_hibrida')">
                         <div class="img"><img src="/img/benefits/sesion_hibrido.svg"></div>
-                        <h5>Sesiones en vivo<br>(Hibridas)</h5>
-                        <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
+                        <h5>Sesiones híbridas</h5>
                     </div>
                     <div class="bx_item_activity" @click="selectTypeActivityModal('descuento')">
                         <div class="img"><img src="/img/benefits/descuento.svg"></div>
-                        <h5>Descuento</h5>
-                        <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
+                        <h5>Beneficio</h5>
                     </div>
                 </div>
             </v-card-text>
@@ -88,18 +84,22 @@ export default {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    margin: 40px 0 20px;
 }
 .bx_item_activity {
     padding: 26px;
     border-radius: 10px;
-    width: 215px;
+    width: 218px;
     margin: 5px;
     cursor: pointer;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
 }
+.bx_item_activity:hover {
+    box-shadow: 0px 4px 15px rgba(194,194,194,1);
+}
 .bx_item_activity h5 {
     color: #2A3649;
-    font-size: 17px;
+    font-size: 16px;
     line-height: 20px;
     font-family: "Nunito", sans-serif;
     font-weight: bold;

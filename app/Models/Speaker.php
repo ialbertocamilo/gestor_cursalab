@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\FileService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -52,6 +53,10 @@ class Speaker extends BaseModel
         ->first();
         // where('workspace_id', $workspace->id)
 
+        if(!is_null($speaker)) {
+            $speaker->image = $speaker->image ? FileService::generateUrl($speaker->image) : $speaker->image;
+        }
+
         return ['data'=>$speaker];
     }
 
@@ -62,6 +67,9 @@ class Speaker extends BaseModel
                         // ->where('workspace_id', $workspace->id)
                         ->orderBy('name', 'DESC')
                         ->get();
+        foreach($speakers_items as $speaker) {
+            $speaker->image = $speaker->image ? FileService::generateUrl($speaker->image) : $speaker->image;
+        }
 
         $response['data'] = $speakers_items;
 

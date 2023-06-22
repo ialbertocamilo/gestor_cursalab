@@ -19,9 +19,8 @@
                                 v-bind="attrs"
                                 v-on="on"
                                 class="btn_options_modules"
-                                outlined
                             >
-                                Agregar opción
+                                Agregar más configuraciones
                                 <v-icon v-text="'mdi-chevron-down'"/>
                             </v-btn>
                         </template>
@@ -96,10 +95,10 @@
                         <v-col cols="6">
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputLogo"
-                                v-model="resource.imagen"
+                                v-model="resource.image"
                                 label="Imagen (500x350px)"
                                 :file-types="['image']"
-                                @onSelect="setFile($event, resource,'imagen')"/>
+                                @onSelect="setFile($event, resource,'image')"/>
                         </v-col>
                         <v-col cols="6">
                             <editor
@@ -127,8 +126,8 @@
                                 dense
                                 label="Cupo de participantes"
                                 placeholder="Indicar cupos"
-                                v-model="resource.cupo"
-                                :rules="rules.cupo"
+                                v-model="resource.cupos"
+                                :rules="rules.cupos"
                                 show-required
                             />
                         </v-col>
@@ -162,7 +161,7 @@
                                 dense
                                 :referenceComponent="'modalDateFilter3'"
                                 :options="modalDateFilter3"
-                                v-model="resource.inicio_liberacion"
+                                v-model="resource.fecha_liberacion"
                                 label="Fecha de liberación"
                                 placeholder="Indicar fecha"
                             />
@@ -479,7 +478,7 @@
                                             </div>
                                             <div v-if="resource.speaker" class="d-flex align-center">
                                                 <div class="bx_speaker_img">
-                                                    <img src="/img/benefits/sesion_presencial.svg">
+                                                    <img :src="resource.speaker.image">
                                                 </div>
                                                 <div class="bx_speaker_name">
                                                     <span>{{resource.speaker.name}}</span>
@@ -572,7 +571,7 @@
                                             />
                                         </div>
                                         <div class="box_button_promotor">
-                                            <v-btn color="primary" outlined @click="addLogoPromotor">
+                                            <v-btn color="primary" outlined @click="openModalSelectLogoPromotor">
                                                 Agregar Logotipo
                                             </v-btn>
                                         </div>
@@ -581,38 +580,38 @@
                             </DefaultModalSection>
                         </v-col>
                         <!-- End Promotor -->
-                        <!-- Implementos -->
-                        <v-row>
-                            <v-col cols="12" v-if="options_modules[6].active">
-                                <DefaultModalSection
-                                    title="Implementos"
-                                >
-                                    <template slot="content">
-                                        <div class="box_beneficio_implementos d-flex">
-                                            <span class="lbl_ben_implementos">Implementos necesarios</span>
-                                            <div class="box_input_implementos">
-                                                <div class="box_list_implementos">
-                                                    <span class="item_implementos"  v-for="(etiqueta, i) in lista_etiquetas" :key="etiqueta.id">
-                                                        {{etiqueta}}
-                                                        <v-icon @click="lista_etiquetas.splice(i, 1);">mdi-close-circle</v-icon>
-                                                    </span>
-                                                </div>
-                                                <div class="box_text_implementos" v-if="show_text_add_implement">
-                                                    <input type="text" v-model="text_add_implement" v-on:keyup.enter="actionAddImplement" ref="text_add_implement" id="text_add_implement"/>
-                                                </div>
-                                                <div class="box_button_implementos">
-                                                    <v-btn color="primary" @click="actionButtonAddImplement" :disabled="show_text_add_implement">
-                                                        Agregar
-                                                    </v-btn>
-                                                </div>
+                    </v-row>
+                    <!-- Implementos -->
+                    <v-row>
+                        <v-col cols="12" v-if="options_modules[6].active">
+                            <DefaultModalSection
+                                title="Implementos"
+                            >
+                                <template slot="content">
+                                    <div class="box_beneficio_implementos d-flex">
+                                        <span class="lbl_ben_implementos">Implementos necesarios</span>
+                                        <div class="box_input_implementos">
+                                            <div class="box_list_implementos">
+                                                <span class="item_implementos"  v-for="(etiqueta, i) in lista_etiquetas" :key="etiqueta.id">
+                                                    {{etiqueta}}
+                                                    <v-icon @click="lista_etiquetas.splice(i, 1);">mdi-close-circle</v-icon>
+                                                </span>
+                                            </div>
+                                            <div class="box_text_implementos" v-if="show_text_add_implement">
+                                                <input type="text" v-model="text_add_implement" v-on:keyup.enter="actionAddImplement" ref="text_add_implement" id="text_add_implement"/>
+                                            </div>
+                                            <div class="box_button_implementos">
+                                                <v-btn color="primary" @click="actionButtonAddImplement" :disabled="show_text_add_implement">
+                                                    Agregar
+                                                </v-btn>
                                             </div>
                                         </div>
-                                    </template>
-                                </DefaultModalSection>
-                            </v-col>
-                        </v-row>
-                        <!-- End Implementos -->
+                                    </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
                     </v-row>
+                    <!-- End Implementos -->
 
                 </v-form>
             </v-card-text>
@@ -640,24 +639,51 @@
             @closeModalSelectSpeaker="modalSelectSpeaker.open = false"
             @confirmSelectSpeaker="confirmSelectSpeaker"
             />
+        <ModalSelectLogoPromotor
+            :ref="modalLogoPromotor.ref"
+            v-model="modalLogoPromotor.open"
+            :data="modalLogoPromotor.data"
+            width="650px"
+            @closeModalSelectLogoPromotor="modalLogoPromotor.open = false"
+            @confirmSelectLogoPromotor="confirmSelectLogoPromotor"
+            />
     </section>
 </template>
 <script>
 const fields = [
-    'title', 'active', 'position', 'imagen',
+    'title',
+    'active',
+    'position',
+    'image',
     'type_id',
-    'description'
+    'description',
+    'correo',
+    'cupos',
+    'description',
+    'dificultad',
+    'discapacidad',
+    'fin_inscripcion',
+    'inicio_inscripcion',
+    'fecha_liberacion',
+    'list_links',
+    'lista_encuestas',
+    'promotor',
+    'referencia',
+    'speaker',
+    'type',
+    'ubicacion_mapa'
 ];
-const file_fields = ['imagen', 'plantilla_diploma'];
+const file_fields = ['image'];
 
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import Editor from "@tinymce/tinymce-vue";
 import GmapMap from 'vue2-google-maps/dist/components/map.vue'
 import ModalAddLink from "../../components/Benefit/ModalAddLink";
 import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
+import ModalSelectLogoPromotor from "../../components/Benefit/ModalSelectLogoPromotor";
 
 export default {
-    components: {DialogConfirm, Editor,GmapMap, ModalAddLink, ModalSelectSpeaker},
+    components: {DialogConfirm, Editor,GmapMap, ModalAddLink, ModalSelectSpeaker, ModalSelectLogoPromotor},
     props: [ 'benefit_id', 'api_key_maps'],
     data() {
         return {
@@ -671,6 +697,7 @@ export default {
             markers: [{
                 position: { lat: -12.0529046, lng: -77.0253457 }
             }],
+            ubicacion_mapa: [],
             // para el desplegable
             menu: false,
             options_modules: [
@@ -696,6 +723,14 @@ export default {
 
             modalSelectSpeaker: {
                 ref: 'modalSelectSpeaker',
+                open: false,
+                data: [],
+                endpoint: '',
+            },
+            // modal logo promotor
+
+            modalLogoPromotor: {
+                ref: 'modalLogoPromotor',
                 open: false,
                 data: [],
                 endpoint: '',
@@ -736,13 +771,13 @@ export default {
                 title: null,
                 description: null,
                 // position: null,
-                imagen: null,
-                file_imagen: null,
+                image: null,
+                file_image: null,
                 active: true,
                 type_id: null,
                 inicio_inscripcion: null,
                 fin_inscripcion: null,
-                inicio_liberacion: null,
+                fecha_liberacion: null,
                 correo: null,
                 list_types: [],
                 lista_encuestas: [],
@@ -752,10 +787,10 @@ export default {
             rules: {
                 title: this.getRules(['required', 'max:120']),
                 list_types: this.getRules(['required']),
-                cupo: this.getRules(['number']),
+                cupos: this.getRules(['number']),
                 inicio_inscripcion: this.getRules(['required']),
                 fin_inscripcion: this.getRules(['required']),
-                inicio_liberacion: this.getRules(['required']),
+                fecha_liberacion: this.getRules(['required']),
             },
             selects: {
                 lista_encuestas: [],
@@ -844,6 +879,16 @@ export default {
         },
         addItemImplementos() {
 
+        },
+         openModalSelectLogoPromotor() {
+            let vue = this;
+            vue.modalLogoPromotor.open = true
+        },
+        confirmSelectLogoPromotor( value ){
+            let vue = this;
+            console.log(value);
+            console.log(vue.resource);
+            vue.modalLogoPromotor.open = false
         },
         async openModalSelectSpeaker() {
             let vue = this;
@@ -943,6 +988,7 @@ export default {
             this.currentPlace = place;
             console.log(this.currentPlace);
             if (this.currentPlace) {
+                this.ubicacion_mapa = [{...this.currentPlace}]
                 const marker = {
                 lat: this.currentPlace.geometry.location.lat(),
                 lng: this.currentPlace.geometry.location.lng(),
@@ -957,6 +1003,7 @@ export default {
             geocoder.geocode({ 'latLng': location.latLng }, (result, status) => {
                 if (status ===google.maps.GeocoderStatus.OK) {
                     this.$refs.autocompleteMap.$refs.input.value = result[0].formatted_address
+                    this.ubicacion_mapa = [{...result[0]}]
                 }
             })
         },
@@ -983,6 +1030,9 @@ export default {
         confirmModal(validateForm = true) {
             let vue = this
             vue.errors = []
+            console.log(vue.ubicacion_mapa);
+
+            vue.resource.ubicacion_mapa = vue.ubicacion_mapa
 
             if( vue.duracionIlimitado == 'ilimitado' ) {
                 vue.resource.duracion = 'ilimitado'
@@ -1216,6 +1266,12 @@ export default {
         display: inline-flex;
         border-radius: 50%;
         margin-right: 10px;
+        overflow: hidden;
+        align-items: center;
+        justify-content: center;
+        img {
+            max-width: 100%;
+        }
     }
 }
 .box_button_speaker button {

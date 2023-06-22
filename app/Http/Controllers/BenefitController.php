@@ -6,6 +6,7 @@ use App\Http\Requests\Benefit\BenefitStoreUpdateRequest;
 use Illuminate\Http\Request;
 
 use App\Models\Benefit;
+use App\Models\Media;
 use App\Models\Poll;
 use App\Models\Speaker;
 use App\Models\Taxonomy;
@@ -60,7 +61,7 @@ class BenefitController extends Controller
     public function store(BenefitStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        // $data = Media::requestUploadFile($data, 'imagen');
+        $data = Media::requestUploadFile($data, 'image');
 
         $benefit = Benefit::storeRequest($data);
 
@@ -75,7 +76,7 @@ class BenefitController extends Controller
     public function update(BenefitStoreUpdateRequest $request, Benefit $benefit)
     {
         $data = $request->validated();
-        // $data = Media::requestUploadFile($data, 'imagen');
+        $data = Media::requestUploadFile($data, 'image');
 
         $benefit = Benefit::storeRequest($data, $benefit);
 

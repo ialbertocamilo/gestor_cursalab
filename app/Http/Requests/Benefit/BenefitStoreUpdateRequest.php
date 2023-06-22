@@ -25,13 +25,30 @@ class BenefitStoreUpdateRequest extends FormRequest
     {
         return [
             'title' => 'required|max:120',
-            // 'description' => 'nullable',
-            // // 'active' => 'required',
+            'description' => 'required',
+            'active' => 'required',
+            'correo' => 'required',
+            'cupos' => 'required',
+            'fin_inscripcion' => 'required',
+            'inicio_inscripcion' => 'required',
+            'fecha_liberacion' => 'required',
+            'type' => 'required',
+
+            // 'position' => 'nullable',
+            // 'type_id' => 'nullable',
+            'dificultad' => 'nullable',
+            'discapacidad' => 'nullable',
+            'list_links' => 'nullable',
+            'lista_encuestas' => 'nullable',
+            'promotor' => 'nullable',
+            'referencia' => 'nullable',
+            'speaker' => 'nullable',
+            'ubicacion_mapa' => 'nullable',
 
 
-            // 'imagen' => 'nullable',
-            // 'file_imagen' => 'nullable',
-            // 'validateForm' => 'required',
+            'image' => 'nullable',
+            'file_image' => 'nullable',
+            'validateForm' => 'required',
         ];
     }
 

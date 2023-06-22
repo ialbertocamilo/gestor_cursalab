@@ -34,7 +34,7 @@
                 <div class="bx_items_speakers" v-if="list_filter_speakers != null && list_filter_speakers.length > 0">
                     <div class="bx_item_speaker" @click="confirmSelectSpeaker(item)" v-for="(item, i) in list_filter_speakers" :key="item.id">
                         <div class="bis_img">
-                            <img src="/img/benefits/sesion_presencial.svg">
+                            <img :src="item.image">
                         </div>
                         <div class="bis_content">
                             <h5>{{item.name}}</h5>
@@ -143,6 +143,15 @@ export default {
         }
         .bis_img {
             width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            img {
+                max-width: 100%;
+            }
         }
         .bis_content {
             margin-left: 10px;

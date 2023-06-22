@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\FileService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,9 +17,23 @@ class Benefit extends BaseModel
         'workspace_id',
         'type_id',
         'speaker_id',
+        'status_id',
+        'poll_id',
+
         'title',
         'description',
         'image',
+        'cupos',
+        'inicio_inscripcion',
+        'fin_inscripcion',
+        'fecha_liberacion',
+        'correo',
+        'duracion',
+        'promotor',
+        'promotor_imagen',
+        'direccion',
+        'referencia',
+
         'active',
     ];
 
@@ -215,6 +230,12 @@ class Benefit extends BaseModel
         ->where('id', $benefit_id->id)
         ->first();
         // where('workspace_id', $workspace->id)
+
+        if( !is_null($benefit) ) {
+            $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('Y-m-d');
+            $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('Y-m-d');
+            $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('Y-m-d');
+        }
 
         return ['data'=> $benefit];
     }
@@ -443,13 +464,13 @@ class Benefit extends BaseModel
             $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
             $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
             $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
+            $item->image = $item->image ? FileService::generateUrl($item->image) : $item->image;
             unset(
                 $item->promotor,
                 $item->promotor_imagen,
                 $item->direccion,
                 $item->referencia,
                 $item->duracion,
-                $item->correo,
                 $item->workspace_id,
                 $item->type_id,
                 $item->speaker_id,
@@ -522,6 +543,7 @@ class Benefit extends BaseModel
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
             $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
+            $benefit->image = $benefit->image ? FileService::generateUrl($benefit->image) : $benefit->image;
             unset(
                 $benefit->referencia,
                 $benefit->workspace_id,
