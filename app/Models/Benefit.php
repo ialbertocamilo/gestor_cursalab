@@ -586,9 +586,9 @@ class Benefit extends BaseModel
             }
 
             $benefit->direccion = [
-                'lugar' => 'Av. Nicolas de Pierola 645 - Surquillo - Lima',
-                'link' => 'https://maps.google.com/?q=Av.+Vista+Alegre+3400,+Carabayllo+15121,+Per%C3%BA&ftid=0x9105d6daa1e0bb81:0x35aced63bf7fc7e2',
-                'image' => null,
+                'lugar' => 'Av. José Larco 401, Miraflores 15074, Perú',
+                'link' => 'https://goo.gl/maps/9bxyJjvWxxPeadap6',
+                'image' => 'images/wrkspc-25-mapa-20230623100732-G69RYsduBbafxRV.PNG',
                 'referencia' => $benefit->referencia
             ];
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');

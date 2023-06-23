@@ -1148,7 +1148,7 @@ export default {
 
                         this.selectType = (response.type != null) ? response.type.code : null
 
-                        if(response.silabo != null) {
+                        if(response.silabo != null && response.silabo.length > 0) {
                             vue.options_modules[1].active = true
                             response.silabo.forEach(element => {
                                 vue.addSilabo(element)
@@ -1174,7 +1174,7 @@ export default {
                                 vue.duracionValue = response.duracion
                         }
 
-                        if(response.implements != null) {
+                        if(response.implements != null && response.implements.length > 0) {
                             vue.options_modules[6].active = true
                             response.implements.forEach(element => {
                                 let newImplement = {
