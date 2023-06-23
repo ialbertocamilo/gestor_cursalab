@@ -333,7 +333,7 @@ class Benefit extends BaseModel
                         ->where('id', $benefit_id)
                         ->first();
                         $response['msg'] = [
-                            'title' => 'Se ha registrado al beneficio',
+                            'title' => 'Inscripción confirmada',
                             'description' => ['Te haz inscrito satisfactoriamente al beneficio de <b>'.$benefit->title.'</b>.<br>Recuerda revisar el detalle.']
                         ];
                         $response['data'] = [
@@ -364,7 +364,7 @@ class Benefit extends BaseModel
                 $response['msg'] = [
                     'title' => 'Límite de inscripciones alcanzadas',
                     'description' => [
-                        'Has alcanzando el máximo de beneficios inscritos a la vez ('.$limit_benefits_x_user.'), si deseas registrarte debes retirarte de otro beneficio o comunicarte con el coordinador del beneficio.'
+                        'Has alcanzando <b>el máximo de beneficios inscritos a la vez ('.$limit_benefits_x_user.')</b>, si deseas registrarte debes retirarte de otro beneficio o comunicarte con el coordinador del beneficio.'
                     ]
                 ];
             }
