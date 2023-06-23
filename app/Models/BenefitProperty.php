@@ -15,6 +15,9 @@ class BenefitProperty extends BaseModel
         'type_id',
         'name',
         'value',
+        'value_date',
+        'value_time',
+        'position',
         'active'
     ];
 

@@ -557,11 +557,18 @@
 
             <!-- BENEFICIOS -->
             <template v-slot:item.benefit_speaker="{ item, header }">
-                <div class="text-center" v-if="item.benefit_speaker">
-                    {{ item.benefit_speaker }}
+                <div v-if="item.type != null && item.type.code == 'descuento'">
+                    <div class="text-center" style="color: #b8b8b8;">
+                        No aplica
+                    </div>
                 </div>
-                <div class="text-center" v-else>
-                    <span class="custom_link_add_speaker" @click="addSpeaker(item)">Agregar Speaker</span>
+                <div v-else>
+                    <div class="text-center" v-if="item.benefit_speaker">
+                        {{ item.benefit_speaker }}
+                    </div>
+                    <div class="text-center" v-else>
+                        <span class="custom_link_add_speaker" @click="addSpeaker(item)">Agregar Speaker</span>
+                    </div>
                 </div>
             </template>
             <template v-slot:item.benefit_type="{ item, header }">

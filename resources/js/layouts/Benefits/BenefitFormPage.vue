@@ -128,7 +128,6 @@
                                 placeholder="Indicar cupos"
                                 v-model="resource.cupos"
                                 :rules="rules.cupos"
-                                show-required
                             />
                         </v-col>
                         <v-col cols="4">
@@ -149,7 +148,7 @@
                                 :referenceComponent="'modalDateFilter2'"
                                 :options="modalDateFilter2"
                                 v-model="resource.fin_inscripcion"
-                                label="Fecha de fin de inscripción"
+                                label="Cierre de inscripción"
                                 placeholder="Indicar fecha"
                             />
                         </v-col>
@@ -228,72 +227,80 @@
                                                                         </v-col>
                                                                     </v-row>
                                                                     <v-row v-if="silabo.expanded">
-                                                                        <v-col cols="12">
-                                                                            <editor
-                                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
-                                                                                v-model="silabo.value"
-                                                                                :init="{
-                                                                                content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
-                                                                                height: 200,
-                                                                                menubar: false,
-                                                                                language: 'es',
-                                                                                force_br_newlines : true,
-                                                                                force_p_newlines : false,
-                                                                                forced_root_block : '',
-                                                                                plugins: ['lists image preview anchor', 'code', 'paste','link'],
-                                                                                toolbar:
-                                                                                    'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
-                                                                                images_upload_handler: images_upload_handler,
-                                                                            }"/>
-                                                                        </v-col>
-                                                                        <v-col cols="12">
-                                                                            <div>Programación</div>
-                                                                            <div class="row">
-                                                                                <div class="col-3">
-                                                                                    <DefaultInputDate
-                                                                                        clearable
-                                                                                        dense
-                                                                                        :referenceComponent="'modalDateSilabo'"
-                                                                                        :options="silabo.modalDateSilabo"
-                                                                                        v-model="silabo.value_date"
-                                                                                        label="Fecha"
-                                                                                        placeholder="Fecha"
-                                                                                    />
-                                                                                </div>
-                                                                                <div class="col-3">
-                                                                                    <v-menu
-                                                                                        ref="menu_time_silabo"
-                                                                                        v-model="silabo.menu_value_time"
-                                                                                        :close-on-content-click="false"
-                                                                                        :nudge-right="40"
-                                                                                        :return-value.sync="silabo.menu_value_time"
-                                                                                        lazy
-                                                                                        transition="scale-transition"
-                                                                                        offset-y
-                                                                                        max-width="290px"
-                                                                                        min-width="290px"
-                                                                                    >
-                                                                                        <template v-slot:activator="{ on, attrs }">
-                                                                                        <v-text-field
-                                                                                            v-model="silabo.value_time"
-                                                                                            label="Hora"
-                                                                                            prepend-icon="mdi-clock"
-                                                                                            dense
-                                                                                            hide-details="auto"
-                                                                                            readonly
-                                                                                            v-bind="attrs"
-                                                                                            v-on="on"
-                                                                                        ></v-text-field>
-                                                                                        </template>
-                                                                                        <v-time-picker
-                                                                                        v-if="silabo.menu_value_time"
-                                                                                        v-model="silabo.value_time"
-                                                                                        full-width
-                                                                                        @click:minute="$refs.menu_time_silabo.save(silabo.value_time)"
-                                                                                        ></v-time-picker>
-                                                                                    </v-menu>
-                                                                                </div>
-                                                                            </div>
+                                                                        <v-col cols="1"></v-col>
+                                                                        <v-col cols="11">
+                                                                            <v-row>
+                                                                                <v-col cols="12">
+                                                                                    <div class="lbl_silabo_bloque">Descripción</div>
+                                                                                    <div class="border_editor_silabo">
+                                                                                        <editor
+                                                                                            api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                                            v-model="silabo.value"
+                                                                                            :init="{
+                                                                                            content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                                                            height: 200,
+                                                                                            menubar: false,
+                                                                                            language: 'es',
+                                                                                            force_br_newlines : true,
+                                                                                            force_p_newlines : false,
+                                                                                            forced_root_block : '',
+                                                                                            plugins: ['lists image preview anchor', 'code', 'paste','link'],
+                                                                                            toolbar:
+                                                                                                'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                                                            images_upload_handler: images_upload_handler,
+                                                                                        }"/>
+                                                                                    </div>
+                                                                                </v-col>
+                                                                                <v-col cols="12">
+                                                                                    <div class="lbl_silabo_bloque">Programación</div>
+                                                                                    <div class="row">
+                                                                                        <div class="col-3">
+                                                                                            <DefaultInputDate
+                                                                                                clearable
+                                                                                                dense
+                                                                                                :referenceComponent="'modalDateSilabo'"
+                                                                                                :options="silabo.modalDateSilabo"
+                                                                                                v-model="silabo.value_date"
+                                                                                                label="Fecha"
+                                                                                                placeholder="Fecha"
+                                                                                            />
+                                                                                        </div>
+                                                                                        <div class="col-3">
+                                                                                            <v-menu
+                                                                                                ref="menu_time_silabo"
+                                                                                                v-model="silabo.menu_value_time"
+                                                                                                :close-on-content-click="false"
+                                                                                                :nudge-right="40"
+                                                                                                :return-value.sync="silabo.menu_value_time"
+                                                                                                lazy
+                                                                                                transition="scale-transition"
+                                                                                                offset-y
+                                                                                                max-width="290px"
+                                                                                                min-width="290px"
+                                                                                            >
+                                                                                                <template v-slot:activator="{ on, attrs }">
+                                                                                                <v-text-field
+                                                                                                    v-model="silabo.value_time"
+                                                                                                    label="Hora"
+                                                                                                    prepend-icon="mdi-clock"
+                                                                                                    dense
+                                                                                                    hide-details="auto"
+                                                                                                    readonly
+                                                                                                    v-bind="attrs"
+                                                                                                    v-on="on"
+                                                                                                ></v-text-field>
+                                                                                                </template>
+                                                                                                <v-time-picker
+                                                                                                v-if="silabo.menu_value_time"
+                                                                                                v-model="silabo.value_time"
+                                                                                                full-width
+                                                                                                @click:minute="$refs.menu_time_silabo[i].save(silabo.value_time)"
+                                                                                                ></v-time-picker>
+                                                                                            </v-menu>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </v-col>
+                                                                            </v-row>
                                                                         </v-col>
                                                                     </v-row>
                                                                 </div>
@@ -302,7 +309,7 @@
                                                     </draggable>
                                             </v-col>
                                             <v-col cols="12" md="12" lg="12" class="d-flex justify-content-center">
-                                                <v-btn color="primary" outlined @click="addSilabo">
+                                                <v-btn color="primary" outlined @click="addSilabo(null)">
                                                     <v-icon class="icon_size">mdi-plus</v-icon>
                                                     Agregar nueva sección del silabo
                                                 </v-btn>
@@ -669,9 +676,10 @@ const fields = [
     'lista_encuestas',
     'promotor',
     'referencia',
-    'speaker',
+    // 'speaker',
     'type',
-    'ubicacion_mapa'
+    'ubicacion_mapa',
+    'list_silabos'
 ];
 const file_fields = ['image'];
 
@@ -781,6 +789,7 @@ export default {
                 correo: null,
                 list_types: [],
                 lista_encuestas: [],
+                list_silabos: [],
                 dificultad: null,
             },
             resource: {},
@@ -886,8 +895,6 @@ export default {
         },
         confirmSelectLogoPromotor( value ){
             let vue = this;
-            console.log(value);
-            console.log(vue.resource);
             vue.modalLogoPromotor.open = false
         },
         async openModalSelectSpeaker() {
@@ -900,8 +907,6 @@ export default {
                 await vue.$http.get(`/beneficios/speakers/search`)
                     .then((res) => {
                         let res_speakers = res.data.data.data;
-                        console.log(res);
-                        console.log(res_speakers);
                         vue.modalSelectSpeaker.data = res_speakers
                         this.hideLoader()
                     })
@@ -912,16 +917,11 @@ export default {
         },
         confirmSelectSpeaker( value ){
             let vue = this;
-            console.log(value);
-            console.log(vue.resource);
             vue.resource.speaker = value
             vue.modalSelectSpeaker.open = false
         },
         confirmAddLink( value ) {
             let vue = this;
-            console.log(value);
-            console.log(this.list_links);
-            console.log(vue.resource);
             vue.modalAddLink.open = false
         },
         async openModalAddLink( link ) {
@@ -941,41 +941,59 @@ export default {
                 hasErrors: false,
                 is_default:false
             };
-            console.log(newLink);
-            console.log(vue.resource);
-            vue.list_links.unshift(newLink);
+            vue.list_links.push(newLink);
         },
         eliminarLink(link, index) {
             let vue = this;
-            console.log(vue.resource);
-                vue.list_links.splice(index, 1);
-            console.log(vue.resource);
+            vue.list_links.splice(index, 1);
         },
-        addSilabo() {
+        addSilabo( data = null) {
             let vue = this;
             const newID = `n-${Date.now()}`;
-            const newSilabo = {
-                id: newID,
-                name: "",
-                value: "",
-                active: 1,
-                benefit_id: vue.resource.id,
-                hasErrors: false,
-                is_default:false,
-                expanded: false,
-                modalDateSilabo: {
-                    open: false,
-                },
-            };
-            console.log(newSilabo);
-            console.log(vue.resource);
-            vue.list_silabos.unshift(newSilabo);
+            let newSilabo = {};
+            if( data != null) {
+                newSilabo = {
+                    id: data.id,
+                    ref: newID,
+                    name: data.name,
+                    value: data.value,
+                    value_date: data.value_date,
+                    value_time: data.value_time,
+                    menu_value_time: false,
+                    active: data.active,
+                    benefit_id: data.benefit_id,
+                    hasErrors: false,
+                    is_default:false,
+                    expanded: false,
+                    modalDateSilabo: {
+                        open: false,
+                    },
+                };
+            }
+            else {
+                newSilabo = {
+                    id: newID,
+                    ref: newID,
+                    name: "",
+                    value: "",
+                    value_date:  null,
+                    value_time: null,
+                    menu_value_time: false,
+                    active: 1,
+                    benefit_id: vue.resource.id,
+                    hasErrors: false,
+                    is_default:false,
+                    expanded: false,
+                    modalDateSilabo: {
+                        open: false,
+                    },
+                };
+            }
+            vue.list_silabos.push(newSilabo);
         },
         eliminarSilabo(silabo, index) {
             let vue = this;
-            console.log(vue.resource);
-                vue.list_silabos.splice(index, 1);
-            console.log(vue.resource);
+            vue.list_silabos.splice(index, 1);
         },
         updateValue(value) {
             let vue = this
@@ -986,7 +1004,6 @@ export default {
         },
         setPlace(place) {
             this.currentPlace = place;
-            console.log(this.currentPlace);
             if (this.currentPlace) {
                 this.ubicacion_mapa = [{...this.currentPlace}]
                 const marker = {
@@ -1008,7 +1025,6 @@ export default {
             })
         },
         images_upload_handler(blobInfo, success, failure) {
-            // console.log(blobInfo.blob());
             let formdata = new FormData();
             formdata.append("image", blobInfo.blob(), blobInfo.filename());
             formdata.append("model_id", null);
@@ -1030,7 +1046,6 @@ export default {
         confirmModal(validateForm = true) {
             let vue = this
             vue.errors = []
-            console.log(vue.ubicacion_mapa);
 
             vue.resource.ubicacion_mapa = vue.ubicacion_mapa
 
@@ -1041,9 +1056,9 @@ export default {
                 vue.resource.duracion = vue.duracionValue
             }
 
-            vue.resource.type = this.selectType
-            vue.resource.list_links = this.list_links
-            console.log(vue.resource);
+            vue.resource.type = vue.selectType
+            vue.resource.list_links = vue.list_links
+
             vue.loadingActionBtn = true
             vue.showLoader()
             const validForm = vue.validateForm('BenefitForm')
@@ -1061,9 +1076,14 @@ export default {
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validateForm', validateForm ? "1" : "0");
 
+            let list_silabos = JSON.stringify(vue.list_silabos)
+            formData.append('list_silabos', list_silabos)
+
+            let speaker = JSON.stringify(vue.resource.speaker)
+            formData.append('speaker', speaker)
+
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
-                    console.log(data);
                     this.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0
                     vue.showAlert(data.data.msg)
@@ -1099,10 +1119,19 @@ export default {
                 let url = `${vue.base_endpoint}/search/${vue.benefit_id}`
                 await vue.$http.get(url)
                     .then(({data}) => {
-                        console.log(data);
                         let response = data.data.data;
-                        console.log(this.resource);
-                        console.log(response);
+
+                        this.selectType = (response.type != null) ? response.type.code : null
+
+                        if(response.silabo != null) {
+                            vue.options_modules[1].active = true
+                            response.silabo.forEach(element => {
+                                vue.addSilabo(element)
+                            });
+                        }
+                        if(response.speaker != null) {
+                            vue.options_modules[4].active = true
+                        }
                         vue.resource = Object.assign({}, response)
                     })
             }
@@ -1130,8 +1159,6 @@ export default {
             let vue = this
             vue.resource.dificultad = item
             vue.activeDificultad = item
-            console.log(vue.activeDificultad);
-            console.log(vue.resource);
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             // })
@@ -1340,5 +1367,14 @@ export default {
             border-radius: 30px;
         }
     }
+}
+.border_editor_silabo {
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+}
+.lbl_silabo_bloque {
+    font-family: 'open sans';
+    color: #666666;
+    font-size: 13px;
 }
 </style>

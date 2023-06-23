@@ -24,7 +24,7 @@
                     </div>
                     <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_online')">
                         <div class="img"><img src="/img/benefits/sesion_online.svg"></div>
-                        <h5>Sesiones en vivo</h5>
+                        <h5>Sesiones virtuales</h5>
                     </div>
                     <div class="bx_item_activity" @click="selectTypeActivityModal('sesion_hibrida')">
                         <div class="img"><img src="/img/benefits/sesion_hibrido.svg"></div>

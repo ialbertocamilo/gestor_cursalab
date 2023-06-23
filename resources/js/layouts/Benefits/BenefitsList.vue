@@ -43,8 +43,8 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openModalSelectActivitys($event)"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>beneficio</b>')"
-                @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminación de un <b>beneficio</b>')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un beneficio')"
+                @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un beneficio')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Beneficio - ${$event.title}`)"
                 @addSpeaker="addSpeaker($event)"
             />
@@ -168,10 +168,10 @@ export default {
                 endpoint: '',
                 content_modal: {
                     delete: {
-                        title: '¡Estás por eliminar un beneficio!',
+                        title: '¡Estás por eliminar un Beneficio!',
                         details: [
                             'Este beneficio no podrá ser visto por los usuarios.',
-                            'No se podrá recuperar.'
+                            'La información eliminada no podra recuperarse'
                         ],
                     }
                 },
@@ -184,15 +184,15 @@ export default {
                 contentText: '¿Desea cambiar de estado a este registro?',
                 content_modal: {
                     inactive: {
-                        title: '¡Estás por desactivar un beneficio!',
+                        title: '¡Estás por desactivar un Beneficio!',
                         details: [
-                            'Los usuario no podran inscribirte a este beneficio.'
+                            'Este beneficio ahora no podrá ser visto por los usuarios.'
                         ],
                     },
                     active: {
-                        title: '¡Estás por activar un beneficio!',
+                        title: '¡Estás por activar un Beneficio!',
                         details: [
-                            'El beneficio se mostrará en la plataforma.'
+                            'Este beneficio ahora podrá ser visto por los usuarios.'
                         ]
                     }
                 },

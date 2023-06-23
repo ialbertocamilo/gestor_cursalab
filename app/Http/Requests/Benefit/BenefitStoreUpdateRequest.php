@@ -40,6 +40,7 @@ class BenefitStoreUpdateRequest extends FormRequest
             'discapacidad' => 'nullable',
             'list_links' => 'nullable',
             'lista_encuestas' => 'nullable',
+            'list_silabos' => 'nullable',
             'promotor' => 'nullable',
             'referencia' => 'nullable',
             'speaker' => 'nullable',

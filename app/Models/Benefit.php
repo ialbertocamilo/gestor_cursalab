@@ -111,6 +111,19 @@ class Benefit extends BaseModel
 
     protected function storeRequest($data, $benefit = null)
     {
+        $list_silabos = (!is_null($data['list_silabos'])) ? json_decode($data['list_silabos']) : null;
+        $speaker = (!is_null($data['speaker'])) ? json_decode($data['speaker']) : null;
+
+        $property_silabo = Taxonomy::getFirstData('benefit', 'benefit_property', 'silabo');
+        $property_links = Taxonomy::getFirstData('benefit', 'benefit_property', 'links');
+        $property_polls = Taxonomy::getFirstData('benefit', 'benefit_property', 'polls');
+        $property_implements = Taxonomy::getFirstData('benefit', 'benefit_property', 'implements');
+
+        $benefit_type = Taxonomy::getFirstData('benefit', 'benefit_type', $data['type']);
+
+        $data['type_id'] = !is_null($benefit_type) ? $benefit_type->id : null;
+        $data['speaker_id'] = !is_null($speaker) ? $speaker->id : null;
+
         try {
             $workspace = get_current_workspace();
 
@@ -135,6 +148,26 @@ class Benefit extends BaseModel
                 // }
             endif;
 
+            if(!is_null($list_silabos)) {
+                foreach ($list_silabos as $key => $silabo) {
+                    BenefitProperty::updateOrCreate(
+                        ['id' => str_contains($silabo->id, 'n-') ? null : $silabo->id],
+                        [
+                            'name' => $silabo->name,
+                            'value' => $silabo->value,
+                            'value_date' => $silabo->value_date ? Carbon::parse($silabo->value_date)->format('Y-m-d') : null,
+                            'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:m:i') : null,
+                            'value' => $silabo->value,
+                            'active' => $silabo->active,
+                            'benefit_id' => $benefit->id,
+                            'type_id' => $property_silabo->id,
+                            'position' => $key + 1,
+                        ]
+                    );
+                }
+            }
+
+
             // if ($data['requisito_id']) :
             //     Requirement::updateOrCreate(
             //         ['model_type' => Course::class, 'model_id' => $course->id,],
@@ -157,6 +190,7 @@ class Benefit extends BaseModel
         }
 
         cache_clear_model(Benefit::class);
+        cache_clear_model(BenefitProperty::class);
 
         return $benefit;
     }
