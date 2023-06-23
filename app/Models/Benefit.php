@@ -497,7 +497,8 @@ class Benefit extends BaseModel
             $item->subscribed = false;
             if(!is_null($item->cupos) && is_numeric($item->cupos)) {
                 $registrados = count($benefits_user_registered);
-                $item->cupos = $item->cupos - $registrados;
+                $item->cupos -= $registrados;
+                $item->cupos = $item->cupos < 0 ? 0 : $item->cupos;
             }
 
             if(in_array($item->id, $benefits_user_registered)) {
@@ -582,7 +583,8 @@ class Benefit extends BaseModel
             $benefit->subscribed = false;
             if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
                 $registrados = count($benefits_user_registered);
-                $benefit->cupos = $benefit->cupos - $registrados;
+                $benefit->cupos -= $registrados;
+                $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
             }
 
             if(in_array($benefit->id, $benefits_user_registered)) {
