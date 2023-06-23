@@ -400,7 +400,7 @@
                                         </v-col>
                                         <v-col cols="4" class="d-flex justify-content-center align-items-center bx_benefit_accesible">
                                             <DefaultToggle
-                                                v-model="resource.discapacidad"
+                                                v-model="resource.accesible"
                                                 active-label="Accesible para usuarios con discapacidad"
                                                 inactive-label="Accesible para usuarios con discapacidad"
                                             />
@@ -535,7 +535,7 @@
                         <!-- Tags -->
                         <v-col cols="6" v-if="options_modules[5].active">
                             <DefaultModalSection
-                                title="Etiquetas"
+                                title="Selecciona un tag"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_tags d-flex justify-content-center">
@@ -543,19 +543,19 @@
                                             <DefaultAutocomplete
                                                 :rules="rules.lista_etiquetas"
                                                 dense
-                                                label="Etiqueta"
-                                                placeholder="Agrega una etiqueta"
+                                                label="Tag"
+                                                placeholder="Selecciona un tag"
                                                 v-model="resource.lista_etiquetas"
                                                 :items="selects.lista_etiquetas"
                                                 item-text="name"
                                                 item-value="id"
                                             />
                                         </div>
-                                        <div class="box_button_etiqueta">
+                                        <!-- <div class="box_button_etiqueta">
                                             <v-btn color="primary" outlined @click="addLinkExterno">
                                                 Agregar etiqueta
                                             </v-btn>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </template>
                             </DefaultModalSection>
@@ -599,16 +599,16 @@
                                         <span class="lbl_ben_implementos">Implementos necesarios</span>
                                         <div class="box_input_implementos">
                                             <div class="box_list_implementos">
-                                                <span class="item_implementos"  v-for="(etiqueta, i) in lista_etiquetas" :key="etiqueta.id">
-                                                    {{etiqueta}}
-                                                    <v-icon @click="lista_etiquetas.splice(i, 1);">mdi-close-circle</v-icon>
+                                                <span class="item_implementos"  v-for="(implemento, i) in lista_implementos" :key="implemento.id">
+                                                    {{implemento.name}}
+                                                    <v-icon @click="lista_implementos.splice(i, 1);">mdi-close-circle</v-icon>
                                                 </span>
                                             </div>
                                             <div class="box_text_implementos" v-if="show_text_add_implement">
                                                 <input type="text" v-model="text_add_implement" v-on:keyup.enter="actionAddImplement" ref="text_add_implement" id="text_add_implement"/>
                                             </div>
                                             <div class="box_button_implementos">
-                                                <v-btn color="primary" @click="actionButtonAddImplement" :disabled="show_text_add_implement">
+                                                <v-btn color="primary" @click="actionButtonAddImplement">
                                                     Agregar
                                                 </v-btn>
                                             </div>
@@ -668,7 +668,8 @@ const fields = [
     'cupos',
     'description',
     'dificultad',
-    'discapacidad',
+    'accesible',
+    'duracion',
     'fin_inscripcion',
     'inicio_inscripcion',
     'fecha_liberacion',
@@ -714,7 +715,7 @@ export default {
                 {name: 'Ubicación / Mapa', code: 'ubicacion', active: false},
                 {name: 'Agregar link', code: 'links', active: false},
                 {name: 'Speaker', code: 'speaker', active: false},
-                {name: 'Dificultad de cursos', code: 'dificultad', active: false},
+                {name: 'Tags', code: 'dificultad', active: false},
                 {name: 'Implementos necesarios', code: 'implementos', active: false},
                 {name: 'Duración', code: 'duracion', active: false},
                 {name: 'Encuesta', code: 'encuesta', active: false},
@@ -750,6 +751,7 @@ export default {
             list_links: [],
             list_silabos: [],
             lista_etiquetas: [],
+            lista_implementos: [],
             selectType: null,
             activeDificultad: null,
             duracionValue: null,
@@ -790,6 +792,8 @@ export default {
                 list_types: [],
                 lista_encuestas: [],
                 list_silabos: [],
+                lista_etiquetas: [],
+                lista_implementos: [],
                 dificultad: null,
             },
             resource: {},
@@ -804,6 +808,11 @@ export default {
             selects: {
                 lista_encuestas: [],
                 list_types: [],
+                lista_etiquetas: [
+                    {id: 1, name: "Básico"},
+                    {id: 2, name: "Intermedio"},
+                    {id: 3, name: "Avanzado"},
+                ]
             },
             loadingActionBtn: false,
             courseValidationModal: {
@@ -873,15 +882,27 @@ export default {
     methods: {
         actionButtonAddImplement() {
             let vue = this
-            vue.show_text_add_implement = true
-            setTimeout(function () {
-                vue.$refs.text_add_implement.focus()
-            }, 1)
+            if(vue.show_text_add_implement) {
+                vue.actionAddImplement()
+            }
+            else {
+                vue.show_text_add_implement = true
+                setTimeout(function () {
+                    vue.$refs.text_add_implement.focus()
+                }, 1)
+            }
         },
         actionAddImplement() {
             let vue = this
             if(vue.text_add_implement != null && vue.text_add_implement != '') {
-                vue.lista_etiquetas.push(vue.text_add_implement)
+                const newID = `n-${Date.now()}`;
+                let newImplement = {
+                    id: newID,
+                    name: vue.text_add_implement,
+                    active: 1,
+                    benefit_id: vue.resource.id,
+                }
+                vue.lista_implementos.push(newImplement)
                 vue.text_add_implement = null
                 vue.show_text_add_implement = false
             }
@@ -1079,6 +1100,10 @@ export default {
             let list_silabos = JSON.stringify(vue.list_silabos)
             formData.append('list_silabos', list_silabos)
 
+            console.log(vue.lista_implementos);
+            let lista_implementos = JSON.stringify(vue.lista_implementos)
+            formData.append('lista_implementos', lista_implementos)
+
             let speaker = JSON.stringify(vue.resource.speaker)
             formData.append('speaker', speaker)
 
@@ -1131,6 +1156,35 @@ export default {
                         }
                         if(response.speaker != null) {
                             vue.options_modules[4].active = true
+                        }
+
+                        if(response.promotor != null && response.promotor != '') {
+                            vue.options_modules[0].active = true
+                        }
+
+                        if(response.referencia != null && response.referencia != '') {
+                            vue.options_modules[2].active = true
+                        }
+
+                        if(response.duracion != null && response.duracion != '') {
+                            vue.options_modules[7].active = true
+                            if(response.duracion == 'ilimitado')
+                                vue.duracionIlimitado = response.duracion
+                            else
+                                vue.duracionValue = response.duracion
+                        }
+
+                        if(response.implements != null) {
+                            vue.options_modules[6].active = true
+                            response.implements.forEach(element => {
+                                let newImplement = {
+                                    id: element.id,
+                                    name: element.name,
+                                    active: element.active,
+                                    benefit_id: element.benefit_id,
+                                }
+                                vue.lista_implementos.push(newImplement)
+                            });
                         }
                         vue.resource = Object.assign({}, response)
                     })

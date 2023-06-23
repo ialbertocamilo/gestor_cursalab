@@ -111,7 +111,8 @@ class Benefit extends BaseModel
 
     protected function storeRequest($data, $benefit = null)
     {
-        $list_silabos = (!is_null($data['list_silabos'])) ? json_decode($data['list_silabos']) : null;
+        $list_silabos = (isset($data['list_silabos']) && !is_null($data['list_silabos'])) ? json_decode($data['list_silabos']) : null;
+        $lista_implementos = (isset($data['lista_implementos']) && !is_null($data['lista_implementos'])) ? json_decode($data['lista_implementos']) : null;
         $speaker = (!is_null($data['speaker'])) ? json_decode($data['speaker']) : null;
 
         $property_silabo = Taxonomy::getFirstData('benefit', 'benefit_property', 'silabo');
@@ -157,10 +158,24 @@ class Benefit extends BaseModel
                             'value' => $silabo->value,
                             'value_date' => $silabo->value_date ? Carbon::parse($silabo->value_date)->format('Y-m-d') : null,
                             'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:m:i') : null,
-                            'value' => $silabo->value,
                             'active' => $silabo->active,
                             'benefit_id' => $benefit->id,
                             'type_id' => $property_silabo->id,
+                            'position' => $key + 1,
+                        ]
+                    );
+                }
+            }
+
+            if(!is_null($lista_implementos)) {
+                foreach ($lista_implementos as $key => $implemento) {
+                    BenefitProperty::updateOrCreate(
+                        ['id' => str_contains($implemento->id, 'n-') ? null : $implemento->id],
+                        [
+                            'name' => $implemento->name,
+                            'active' => $implemento->active,
+                            'benefit_id' => $benefit->id,
+                            'type_id' => $property_implements->id,
                             'position' => $key + 1,
                         ]
                     );

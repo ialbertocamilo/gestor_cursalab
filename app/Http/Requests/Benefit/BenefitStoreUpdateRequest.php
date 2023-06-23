@@ -37,9 +37,12 @@ class BenefitStoreUpdateRequest extends FormRequest
             // 'position' => 'nullable',
             // 'type_id' => 'nullable',
             'dificultad' => 'nullable',
-            'discapacidad' => 'nullable',
+            'duracion' => 'nullable',
+            'accesible' => 'nullable',
             'list_links' => 'nullable',
             'lista_encuestas' => 'nullable',
+            'lista_etiquetas' => 'nullable',
+            'lista_implementos' => 'nullable',
             'list_silabos' => 'nullable',
             'promotor' => 'nullable',
             'referencia' => 'nullable',
@@ -56,8 +59,10 @@ class BenefitStoreUpdateRequest extends FormRequest
     public function validationData()
     {
         $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
+        $accesible = ($this->accesible === 'true' or $this->accesible === true or $this->accesible === 1 or $this->accesible === '1');
 
         $data['active'] = $active;
+        $data['accesible'] = $accesible;
         $data['validateForm'] = !!$this->validateForm;
 
         return $this->merge($data)->all();

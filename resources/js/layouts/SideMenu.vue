@@ -197,6 +197,22 @@ export default {
                 ]
             },
             {
+                title: "BENEFICIOS",
+                icon: "fas fa-gift",
+                active: false,
+                items: [
+                    {
+                        title: "Configuración",
+                        icon: "fas fa-gift",
+                        path: "/beneficios",
+                        subpaths: ["beneficios"],
+                        selected: false,
+                        permission: "usuarios",
+                        role: ["super-user"]
+                    }
+                ]
+            },
+            {
                 title: "USUARIOS",
                 icon: "fas fa-users-cog",
                 active: false,

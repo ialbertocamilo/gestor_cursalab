@@ -24,8 +24,8 @@
                                 dense
                                 label="URL"
                                 placeholder="URL"
-                                v-model="data.name"
-                                :rules="rules.name"
+                                v-model="data.value"
+                                :rules="rules.url"
                                 show-required
                             />
                         </v-col>
@@ -34,8 +34,8 @@
                                 dense
                                 label="Texto que mostrar"
                                 placeholder="Texto que mostrar"
-                                v-model="data.value"
-                                :rules="rules.url"
+                                v-model="data.name"
+                                :rules="rules.name"
                                 show-required
                             />
                         </v-col>
@@ -60,8 +60,8 @@ export default {
         return {
             dialog: false,
             rules: {
-                name: this.getRules(['required', 'max:200']),
-                url: this.getRules(['required', 'max:200']),
+                name: this.getRules(['required']),
+                url: this.getRules(['required']),
             },
         };
     },

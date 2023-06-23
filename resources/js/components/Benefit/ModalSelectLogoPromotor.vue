@@ -93,6 +93,7 @@ export default {
             let vue = this
             vue.closeSelectPreviewMultimediaModal()
             console.log(media);
+            vue.closeModalSelectLogoPromotor()
             // vue.fileSelected = media.file
             // vue.$emit('onSelect', vue.fileSelected)
         },
@@ -115,6 +116,7 @@ export default {
 
             vue.archivos.append('file[]', file)
 console.log(vue.archivos, file, vue.archivos.values());
+vue.closeModalSelectLogoPromotor()
             // let reader = new FileReader();
             // reader.addEventListener(
             //     "load",
