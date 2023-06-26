@@ -111,6 +111,7 @@ class Benefit extends BaseModel
 
     protected function storeRequest($data, $benefit = null)
     {
+        $list_links = (isset($data['list_links']) && !is_null($data['list_links'])) ? json_decode($data['list_links']) : null;
         $list_silabos = (isset($data['list_silabos']) && !is_null($data['list_silabos'])) ? json_decode($data['list_silabos']) : null;
         $lista_implementos = (isset($data['lista_implementos']) && !is_null($data['lista_implementos'])) ? json_decode($data['lista_implementos']) : null;
         $speaker = (!is_null($data['speaker'])) ? json_decode($data['speaker']) : null;
@@ -161,6 +162,22 @@ class Benefit extends BaseModel
                             'active' => $silabo->active,
                             'benefit_id' => $benefit->id,
                             'type_id' => $property_silabo->id,
+                            'position' => $key + 1,
+                        ]
+                    );
+                }
+            }
+
+            if(!is_null($list_links)) {
+                foreach ($list_links as $key => $link) {
+                    BenefitProperty::updateOrCreate(
+                        ['id' => str_contains($link->id, 'n-') ? null : $link->id],
+                        [
+                            'name' => $link->name,
+                            'value' => $link->value,
+                            'active' => $link->active,
+                            'benefit_id' => $benefit->id,
+                            'type_id' => $property_links->id,
                             'position' => $key + 1,
                         ]
                     );
@@ -364,7 +381,7 @@ class Benefit extends BaseModel
                 $response['msg'] = [
                     'title' => 'Límite de inscripciones alcanzadas',
                     'description' => [
-                        'Has alcanzando <b>el máximo de beneficios inscritos a la vez ('.$limit_benefits_x_user.')</b>, si deseas registrarte debes retirarte de otro beneficio o comunicarte con el coordinador del beneficio.'
+                        'Has alcanzando <b>el máximo de beneficios inscritos a la vez ('.$limit_benefits_x_user.')</b>, si deseas registrarte debes retirarte de otro beneficio o comunicarte con tu coordinador del beneficio.'
                     ]
                 ];
             }
@@ -604,6 +621,17 @@ class Benefit extends BaseModel
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
             $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
+
+            if(!is_null($benefit->poll_id)) {
+                $benefit->type_poll = 'interno';
+                $poll = Poll::select('id','titulo','imagen','anonima')->where('id', $benefit->poll_id)->first();
+                $benefit->poll = $poll;
+            }
+            else {
+                $benefit->type_poll = 'externo';
+                $benefit->poll = null;
+            }
+
             unset(
                 $benefit->referencia,
                 $benefit->workspace_id,

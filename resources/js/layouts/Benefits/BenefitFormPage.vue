@@ -137,8 +137,9 @@
                                 :referenceComponent="'modalDateFilter1'"
                                 :options="modalDateFilter1"
                                 v-model="resource.inicio_inscripcion"
-                                label="Fecha de inicio de inscripción"
+                                label="Inicio de inscripción"
                                 placeholder="Indicar fecha"
+                                show-required
                             />
                         </v-col>
                         <v-col cols="4">
@@ -150,6 +151,7 @@
                                 v-model="resource.fin_inscripcion"
                                 label="Cierre de inscripción"
                                 placeholder="Indicar fecha"
+                                show-required
                             />
                         </v-col>
                     </v-row>
@@ -163,6 +165,7 @@
                                 v-model="resource.fecha_liberacion"
                                 label="Fecha de liberación"
                                 placeholder="Indicar fecha"
+                                show-required
                             />
                         </v-col>
                         <v-col cols="4">
@@ -679,7 +682,7 @@ const fields = [
     'referencia',
     // 'speaker',
     'type',
-    'ubicacion_mapa',
+    // 'ubicacion_mapa',
     'list_silabos'
 ];
 const file_fields = ['image'];
@@ -706,7 +709,7 @@ export default {
             markers: [{
                 position: { lat: -12.0529046, lng: -77.0253457 }
             }],
-            ubicacion_mapa: [],
+            ubicacion_mapa: null,
             // para el desplegable
             menu: false,
             options_modules: [
@@ -798,7 +801,7 @@ export default {
             },
             resource: {},
             rules: {
-                title: this.getRules(['required', 'max:120']),
+                title: this.getRules(['required', 'max:200']),
                 list_types: this.getRules(['required']),
                 cupos: this.getRules(['number']),
                 inicio_inscripcion: this.getRules(['required']),
@@ -1026,7 +1029,7 @@ export default {
         setPlace(place) {
             this.currentPlace = place;
             if (this.currentPlace) {
-                this.ubicacion_mapa = [{...this.currentPlace}]
+                this.ubicacion_mapa = {...this.currentPlace}
                 const marker = {
                 lat: this.currentPlace.geometry.location.lat(),
                 lng: this.currentPlace.geometry.location.lng(),
@@ -1041,7 +1044,7 @@ export default {
             geocoder.geocode({ 'latLng': location.latLng }, (result, status) => {
                 if (status ===google.maps.GeocoderStatus.OK) {
                     this.$refs.autocompleteMap.$refs.input.value = result[0].formatted_address
-                    this.ubicacion_mapa = [{...result[0]}]
+                    this.ubicacion_mapa = {...result[0]}
                 }
             })
         },
@@ -1068,8 +1071,6 @@ export default {
             let vue = this
             vue.errors = []
 
-            vue.resource.ubicacion_mapa = vue.ubicacion_mapa
-
             if( vue.duracionIlimitado == 'ilimitado' ) {
                 vue.resource.duracion = 'ilimitado'
             }
@@ -1078,7 +1079,6 @@ export default {
             }
 
             vue.resource.type = vue.selectType
-            vue.resource.list_links = vue.list_links
 
             vue.loadingActionBtn = true
             vue.showLoader()
@@ -1100,7 +1100,12 @@ export default {
             let list_silabos = JSON.stringify(vue.list_silabos)
             formData.append('list_silabos', list_silabos)
 
-            console.log(vue.lista_implementos);
+            let list_links = JSON.stringify(vue.list_links)
+            formData.append('list_links', list_links)
+
+            let ubicacion_mapa = JSON.stringify(vue.ubicacion_mapa)
+            formData.append('ubicacion_mapa', ubicacion_mapa)
+
             let lista_implementos = JSON.stringify(vue.lista_implementos)
             formData.append('lista_implementos', lista_implementos)
 
@@ -1152,6 +1157,21 @@ export default {
                             vue.options_modules[1].active = true
                             response.silabo.forEach(element => {
                                 vue.addSilabo(element)
+                            });
+                        }
+                        if(response.links != null && response.links.length > 0) {
+                            vue.options_modules[3].active = true
+                            response.links.forEach(element => {
+                                const newLink = {
+                                    id: element.id,
+                                    name: element.name,
+                                    value: element.value,
+                                    active: element.active,
+                                    benefit_id: element.benefit_id,
+                                    hasErrors: false,
+                                    is_default:false
+                                };
+                                vue.list_links.push(newLink);
                             });
                         }
                         if(response.speaker != null) {
