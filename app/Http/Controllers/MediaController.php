@@ -263,7 +263,7 @@ class MediaController extends Controller
 
 //            $path = Storage::url($media_topic->value);
             $path = get_media_url($media_topic->value);
-            
+
             if ($stream = fopen($path, 'r')) {
 
                 while (!feof($stream)) {
