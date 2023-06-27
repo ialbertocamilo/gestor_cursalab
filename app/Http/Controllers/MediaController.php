@@ -254,7 +254,7 @@ class MediaController extends Controller
 
         $headers = [];
         if (isset($pathInfo['extension'])) {
-            if ($pathInfo['extension'] === 'pdf') {
+            if (strtolower($pathInfo['extension']) === 'pdf') {
                 $headers = ['Content-Type' => 'application/pdf'];
             }
         }
