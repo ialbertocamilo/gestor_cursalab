@@ -247,13 +247,23 @@ class MediaController extends Controller
         if (!$media_topic) abort(404);
 
         $filename = Str::after($media_topic->value, '/');
+        $pathInfo = pathinfo($filename);
         // $stream = Storage::readStream($this->file);
+
+        // Set content type
+
+        $headers = [];
+        if (isset($pathInfo['extension'])) {
+            if ($pathInfo['extension'] === 'pdf') {
+                $headers = ['Content-Type' => 'application/pdf'];
+            }
+        }
 
         $response = response()->streamDownload(function () use($media_topic){
 
 //            $path = Storage::url($media_topic->value);
             $path = get_media_url($media_topic->value);
-
+            
             if ($stream = fopen($path, 'r')) {
 
                 while (!feof($stream)) {
@@ -263,7 +273,7 @@ class MediaController extends Controller
 
                 fclose($stream);
             }
-        }, $filename);
+        }, $filename, $headers);
 
         if (ob_get_level()) ob_end_clean();
 
