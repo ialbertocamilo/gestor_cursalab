@@ -511,7 +511,7 @@ export default {
             let vue = this
             // vue.resource.media.splice(media_index, 1)
             vue.mediaDeleteModal.media_index = media_index
-            vue.mediaDeleteModal.open = true
+            vue.mediaDeleteModal.open = true;
         },
         async loadData() {
             let vue = this
@@ -602,6 +602,11 @@ export default {
         },
         async confirmDeleteMedia(){
             let vue = this
+            if(vue.resource.media.filter((media, index) => index != vue.mediaDeleteModal.media_index && media.embed).length == 0){
+                vue.mediaDeleteModal.open = false
+                vue.showAlert("Debe haber almenos un multimedia embebido.", 'warning')
+                return;
+            }
             vue.resource.media.splice(vue.mediaDeleteModal.media_index, 1)
             vue.mediaDeleteModal.open = false
         }

@@ -32,7 +32,7 @@ class MeetingDetail implements FromView, ShouldAutoSize, WithTitle, WithDrawings
 
             $drawing->setName('Cursalab');
             $drawing->setDescription('Logo Cursalab');
-            $drawing->setPath(public_path('img/logo_cursalab.png'));
+            $drawing->setPath(public_path('img/logo_cursalab_v2_black.png'));
             $drawing->setHeight(80);
             $drawing->setCoordinates('B2');
             return $drawing;
