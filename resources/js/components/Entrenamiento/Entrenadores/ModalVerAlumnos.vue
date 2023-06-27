@@ -31,8 +31,8 @@
                     >
                         <v-btn
                             color="primary"
-                            :outlined="entrenador.asignar_alumnos"
-                            @click="entrenador.asignar_alumnos = !entrenador.asignar_alumnos"
+                            :outlined="asignar_alumnos"
+                            @click="asignar_alumnos = !asignar_alumnos"
                         >
                             Agregar alumnos
                         </v-btn
@@ -41,7 +41,7 @@
                 </v-row>
                 <v-expand-transition>
                     <v-row
-                        v-show="entrenador.asignar_alumnos"
+                        v-show="asignar_alumnos"
                         class="mb-4"
                     >
                         <v-col cols="12" md="12" lg="12" class="py-0 my-0">
@@ -88,7 +88,7 @@
                         </v-col>
 
                         <v-col cols="12" md="2" lg="2" class="d-flex justify-end pb-0 mb-0">
-                            <v-btn outlined @click="agregarAlumno">Agregar</v-btn>
+                            <v-btn outlined @click="agregarAlumno" :disabled="alumno_seleccionados.length == 0">Agregar</v-btn>
                         </v-col>
                     </v-row>
                 </v-expand-transition>
@@ -192,7 +192,8 @@ export default {
             timeout: null,
             search_text: null,
             dialog_delete: false,
-            data_eliminar: null
+            data_eliminar: null,
+            asignar_alumnos: false
         };
     },
     computed: {
@@ -231,6 +232,7 @@ export default {
             vue.search_text = null
             vue.alumno_seleccionados = []
             vue.results_search = []
+            vue.asignar_alumnos = false
         },
         subirExcel() {
             let vue = this;
@@ -291,18 +293,52 @@ export default {
                 filtro: "",
                 estado: 1
             };
+            vue.showLoader();
             axios
                 .post(`/entrenamiento/entrenadores/asignar`, data)
                 .then((res) => {
                     vue.entrenador.alumnos = res.data.alumnos;
                     vue.autocomplete_disabled = false;
                     vue.isLoading = false;
+
+                    if(res.data.errors.length > 0) {
+                        res.data.errors.forEach(element => {
+                            // vue.$emit("showSnackbar", {msg: element, color: 'primary'});
+                            vue.$notification.warning(`${element}`, {
+                                title: "No se pudo asignar:",
+                                timer: 8,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+                        });
+                    }
+                    else {
+
+                        vue.alumno_seleccionados.forEach(element => {
+                            vue.$notification.success(`Se agregó al alumno con Doc. de Indentidad (${element.document})`, {
+                                timer: 8,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+                        });
+                    }
+
                     vue.$emit("refreshTable")
+
+                    vue.txt_filtrar_alumnos = " "
+                    setTimeout(() => {
+                        vue.txt_filtrar_alumnos = null
+                    }, 50);
+
+                    vue.resetSelects()
+                    vue.hideLoader();
                 })
                 .catch((err) => {
                     console.log(err);
                     vue.autocomplete_disabled = false;
                     vue.isLoading = false;
+                    vue.resetSelects()
+                    vue.hideLoader();
                 });
         },
         remove(item) {
@@ -349,6 +385,7 @@ export default {
                 entrenador: vue.entrenador,
                 alumno: vue.data_eliminar
             }
+            vue.showLoader();
             axios.post(`/entrenamiento/entrenadores/eliminar_relacion_entrenador_alumno`, data)
                 .then(res => {
                     let response = res.data
@@ -356,16 +393,28 @@ export default {
                         let indexAlumno = vue.entrenador.alumnos.findIndex(alumno => alumno.id === vue.data_eliminar.id);
                         vue.entrenador.alumnos.splice(indexAlumno, 1)
                     }
-                    vue.$emit("showSnackbar", {msg: response.msg, color: 'primary'});
+                    // vue.$emit("showSnackbar", {msg: response.msg, color: 'primary'});
+                    vue.$notification.success(`${response.msg}`, {
+                        timer: 8,
+                        showLeftIcn: false,
+                        showCloseIcn: true
+                    });
                     vue.$emit("refreshTable")
+
+                    vue.txt_filtrar_alumnos = " "
+                    setTimeout(() => {
+                        vue.txt_filtrar_alumnos = null
+                    }, 50);
 
                     vue.data_eliminar = false
                     vue.dialog_delete = false;
+                    vue.hideLoader();
                 })
                 .catch(err => {
                     console.log(err)
                     vue.data_eliminar = false
                     vue.dialog_delete = false;
+                    vue.hideLoader();
                 })
         }
     }

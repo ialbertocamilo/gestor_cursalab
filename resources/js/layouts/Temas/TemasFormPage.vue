@@ -424,8 +424,11 @@ export default {
                 .then(async ({data}) => {
                     this.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0
-                    if (has_info_messages)
-                        await vue.handleValidationsAfterUpdate(data.data, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                    console.log(has_info_messages)
+                    if (has_info_messages){
+                        const res = await vue.handleValidationsAfterUpdate(data.data, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                        console.log('handleValidationsAfterUpdate:',res)
+                        }
                     else {
                         vue.queryStatus("tema", "crear_tema");
                         vue.showAlert(data.data.msg)
@@ -433,7 +436,8 @@ export default {
                     }
                 })
                 .catch(async (error) => {
-                    await vue.handleValidationsBeforeUpdate(error, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                    const res = await vue.handleValidationsBeforeUpdate(error, vue.topicsValidationModal, vue.topicsValidationModalDefault);
+                    console.log('handleValidationsBeforeUpdate:',res)
                     vue.loadingActionBtn = false
                 })
         },

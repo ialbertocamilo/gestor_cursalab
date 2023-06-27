@@ -52,20 +52,15 @@
 
                 <v-row justify="space-around">
                     <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.key" label="API Key" :rules="rules.key" />
+                        <DefaultInput v-model="resource.account_id" label="Account ID" :rules="rules.account_id" />
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.secret" label="API Secret" :rules="rules.secret" />
+                        <DefaultInput v-model="resource.client_id" label="Client ID" :rules="rules.client_id" />
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.token" label="Token" :rules="rules.token" />
-                    </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
-                        <DefaultInput v-model="resource.refresh_token" label="Refresh token" :rules="rules.refresh_token" />
+                        <DefaultInput v-model="resource.client_secret" label="Client Secret" :rules="rules.client_secret" />
                     </v-col>
                 </v-row>
-
-                <!-- <v-subheader class="mt-5"><strong>Datos adicionales</strong></v-subheader> -->
 
                 <v-divider class="mx-3" />
 
@@ -74,36 +69,6 @@
                         <DefaultTextArea v-model="resource.description" label="Descripción" :rows="4" />
                     </v-col>
                 </v-row>
-
-               <!--  <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="d-flex justify-content-between pb-0"
-                           @click="showConfigTokens = !showConfigTokens"
-                           style="cursor: pointer">
-                        <strong>Configurar SDK y ZAK Tokens</strong>
-                        <v-icon v-text="showConfigTokens ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
-                    </v-col>
-                    <v-col cols="12" class="py-0">
-                        <DefaultDivider/>
-                    </v-col>
-                </v-row> -->
-
-     <!--            <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="d-flex justify-content-center pt-0">
-
-                        <v-expand-transition>
-                            <v-row justify="space-around" align="start" align-content="center" v-show="showConfigTokens">
-                                <v-col cols="12" class="d-flex justify-content-center">
-                                    <DefaultTextArea v-model="resource.sdk_token" label="SDK Token" :disabled="true" :rows="4" />
-                                </v-col>
-                                <v-col cols="12" class="d-flex justify-content-start">
-                                    <DefaultTextArea v-model="resource.zak_token" label="ZAK Token" :disabled="true" :rows="5"/>
-                                </v-col>
-                            </v-row>
-                        </v-expand-transition>
-
-                    </v-col>
-
-                </v-row> -->
 
                 <v-row align="center" align-content="center">
                     <v-col cols="6" class="--d-flex --justify-content-start">
@@ -119,7 +84,7 @@
 
 <script>
 
-const fields = ['name', 'email', 'username', 'password', 'key', 'secret', 'token', 'refresh_token', 'identifier', 'sdk_token', 'zak_token', 'service', 'plan', 'type', 'description', 'active'];
+const fields = ['name', 'email', 'username', 'password', 'account_id','client_id','client_secret', 'identifier', 'service', 'plan', 'type', 'description', 'active'];
 
 export default {
     props: {
@@ -143,22 +108,19 @@ export default {
                 password: '',
 
                 key: null,
-                secret: null,
-                identifier: null,
 
                 type: null,
                 service: null,
                 plan: null,
 
-                token: null,
-                refresh_token: null,
+                client_id:null,
+                client_secret:null,
+                account_id:null,
 
                 active: true,
 
                 description: '',
 
-                sdk_token: null,
-                zak_token: null,
             },
             resource: {},
             selects: {
@@ -168,9 +130,7 @@ export default {
             },
 
             rules: {
-                // text: this.getRules(['required', 'max:255']),
                 name: this.getRules(['required', 'max:255']),
-                // name: this.getRules(['required', 'max:255']),
                 service: this.getRules(['required']),
                 plan: this.getRules(['required']),
                 type: this.getRules(['required']),
@@ -191,7 +151,7 @@ export default {
         },
         confirmModal() {
             let vue = this
-
+            console.log(vue.resource)
             vue.errors = []
 
             this.showLoader()
@@ -204,7 +164,6 @@ export default {
 
             let method = edit ? 'PUT' : 'POST';
 
-            // if (validateForm && validateSelectedModules) {
             if (validateForm ) {
 
                 let formData = vue.getMultipartFormData(method, vue.resource, fields);

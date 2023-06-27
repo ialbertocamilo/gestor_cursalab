@@ -46,6 +46,11 @@ return [
                 },
                 'compatibilities_a:id',
                 'compatibilities_b:id',
+                'schools' => function ($query) {
+                    $query
+                        ->select('id', 'name')
+                        ->where('active', ACTIVE);
+                },
             ],
             'summary-user-update' => [
                 'segments' => function ($q) {

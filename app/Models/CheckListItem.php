@@ -29,6 +29,11 @@ class CheckListItem extends BaseModel
         return $this->belongsTo(CheckList::class, 'checklist_id');
     }
 
+    public function type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
     protected function guardarActividadByID($data)
     {
         $response['error'] = false;

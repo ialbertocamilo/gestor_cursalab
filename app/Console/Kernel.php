@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('delete:err_masivos')->dailyAt('03:00');
 
         $schedule->command('summary:update-data')->everyFifteenMinutes();
+        // $schedule->command('summary:update-data-v2')->everyFifteenMinutes();
         // $schedule->command('resumen:update_resumen_general')->everyFifteenMinutes();
         $schedule->command('notificaciones:enviar')->everyMinute();
 
@@ -57,7 +58,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('criteria:check-empty')->everyThreeHours();
 
         $schedule->command('tokens:revoke-impersonation-access')->everyTenMinutes();
-        $schedule->command('passport:purge --hours=1')->hourly();
+        // $schedule->command('passport:purge --hours=1')->hourly();
     }
 
     /**

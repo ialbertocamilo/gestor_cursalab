@@ -1,10 +1,13 @@
 <template>
     <div>
-        <span class="mb-4">Subida de archivos de base de datos.</span>
+        <span class="mb-4" v-if="title">{{ title }}</span>
         <vue-dropzone ref="myVueDropzone" id="dropzone"
                     :options="dropzoneOptions"
                     :useCustomSlot="true"
+                    v-on:vdropzone-queue-complete="onQueueComplete"
+                    v-on:vdropzone-upload-progress="viewProgress"
                     v-on:vdropzone-success="uploadSuccess"
+                    v-on:vdropzone-complete="uploadComplete"
                     v-on:vdropzone-error="uploadError"
                     v-on:vdropzone-removed-file="fileRemoved"
         >
@@ -21,7 +24,7 @@
                         <img src="/img/upload_success.png">
                     </div>
                     <div class="text_success_upload">El archivo se ha cargado correctamente.</div>
-                    <span class="label_success_upload" v-html="success_text"></span>
+                    <span class="label_success_upload" v-if="success_text" v-html="success_text"></span>
                 </div>
                 <div class="init_upload" v-else>
                     <div class="icon_upload">
@@ -29,7 +32,13 @@
                         <img class="img_load" style="display:none;" src="/img/upload_load.png">
                         <img class="img_hover" style="display:none;" src="/img/upload_load_hover.png">
                     </div>
-                    <div class="subtitle">Sube o arrastra el archivo</div><br>
+                    <div class="subtitle" v-if="subtitle" v-html="subtitle"></div><br>
+                </div>
+                <div v-if="hasObservation" class="mx-8 mt-4">
+                    <div class="text-subtitle-2" style="color:red;">Sin embargo el archivo tuvo observaciones que no se pudieron cargar.</div><br>
+                    <div class="mt-4 text-subtitle-2">
+                        Descargar <span style="color:red;font-weight: bolder; cursor: pointer;" @click="downloadObservationsFile()">el archivo</span> con observaciones.
+                    </div>
                 </div>
                 <br>
             </div>
@@ -42,6 +51,10 @@
     export default {
         components:{ vueDropzone: vue2Dropzone},
         props: {
+            hasObservation:{
+                type: Boolean,
+                default:false
+            },
             error_file: {
                 type: Boolean,
                 default: false
@@ -57,13 +70,26 @@
             success_text: {
                 type: String,
                 default: ''
+            },
+            title:{
+                type:String,
+                default: 'Subida de archivos de base de datos.'
+            },
+            subtitle:{
+                type:String,
+                default: 'Sube o arrastra el archivo'
             }
         },
         data () {
             return {
                 archivo:null,
                 dropzoneOptions: {
-                    url: 'https://httpbin.org/post',
+                    url: (files, test) => {
+                        return files[0]
+                    },
+                    autoProcessQueue: false,
+                    autoDiscover: false,
+
                     height: 400,
                     thumbnailWidth: 400,
                     headers: { "My-Awesome-Header": "header value" },
@@ -71,13 +97,10 @@
                     dictRemoveFile: 'Reemplazar archivo',
                     maxFiles:1,
                     previewTemplate: this.template(),
-                    accept: function(file, done) {
-                        console.log(file);
-                        if (file.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-                            done("El archivo no es del formato permitido");
-                        }
-                        else { done(); }
+                    timeout: {
+                        default: 0
                     },
+                    accept: this.validateFile,
                     init: function() {
                         this.on("maxfilesexceeded", function(file) {
                                 this.removeAllFiles();
@@ -95,15 +118,45 @@
             success_file: function(newVal, oldVal) {
                 this.$refs.myVueDropzone.removeAllFiles()
                 this.archivo = null;
+            },
+            hasObservation: function(newVal, oldVal) {
+                if(this.hasObservation)
+                    this.$refs.myVueDropzone.disable()
+                else
+                    this.$refs.myVueDropzone.enable()
+                this.archivo = null;
             }
         },
         methods: {
+            viewProgress(file, progress, bytesSent) {
+            // console.log(file, progress, bytesSent)
+            },
+            onComplete(response) {
+                // console.log(response)
+            },
+            onQueueComplete() {
+                // console.log('queue complete')
+                // this.$emit("onUpload", file);
+            },
             limpiarArchivo() {
                 this.$refs.myVueDropzone.removeAllFiles()
                 this.archivo = null;
             },
+            validateFile(file,done){
+                console.log('accept',file);
+                if (file.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+                    done("El archivo no es del formato permitido");
+                }
+                else {
+                    this.$emit("emitir-archivo", file);
+                    done();
+                }
+            },
             uploadSuccess(file, response) {
                 this.$emit("emitir-archivo", file);
+            },
+            uploadComplete(file, response) {
+                this.$emit("emitir-archivo-completo", file);
             },
             uploadError(file, message) {
                 // this.$emit("emitir-alerta", 'Ocurrió un error');
@@ -111,6 +164,9 @@
             fileRemoved() {
                 this.$emit("emitir-archivo", null);
                 // this.$emit("emitir-alerta", 'Archivo removido');
+            },
+            downloadObservationsFile(){
+                this.$emit("emitir-download-file", null);
             },
             template() {
                 return `<div class="dz-preview dz-file-preview">

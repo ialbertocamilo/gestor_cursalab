@@ -114,7 +114,11 @@ class MasivoController extends Controller
             endif;
         } catch (\Throwable $exception) {
             Error::storeAndNotificateException($exception, $request);
-            return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'], 500);
+            $errorMessage = $exception->getMessage();
+            $message = strpos($errorMessage, 'cantidad máxima') !== false ? $errorMessage : 'Ha ocurrido un problema. Contáctate con el equipo de soporte.';
+            return response()->json([
+                'message'=>$message
+            ],500);
         }
     }
 
@@ -153,7 +157,11 @@ class MasivoController extends Controller
             endif;
         } catch (\Throwable $exception) {
             Error::storeAndNotificateException($exception, $request);
-            return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'], 500);
+            $errorMessage = $exception->getMessage();
+            $message = strpos($errorMessage, 'cantidad máxima') !== false ? $errorMessage : 'Ha ocurrido un problema. Contáctate con el equipo de soporte.';
+            return response()->json([
+                'message'=>$message
+            ],500);
         }
     }
 
@@ -180,7 +188,11 @@ class MasivoController extends Controller
             ]);
         } catch (\Throwable $exception) {
             Error::storeAndNotificateException($exception, $request);
-            return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'], 500);
+            $errorMessage = $exception->getMessage();
+            $message = strpos($errorMessage, 'cantidad máxima') !== false ? $errorMessage : 'Ha ocurrido un problema. Contáctate con el equipo de soporte.';
+            return response()->json([
+                'message'=>$message
+            ],500);
         }
     }
 

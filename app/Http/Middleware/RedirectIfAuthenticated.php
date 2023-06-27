@@ -27,6 +27,16 @@ class RedirectIfAuthenticated
         
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                if(config('slack.routes.demo')){
+                    $message = 'Demo Cursalab 2.0';
+                    $attachments = [
+                        [
+                            "color" => "#36a64f",
+                            "text" => 'El usuario con email: '.Auth::user()->email_gestor.' retornó a la plataforma'
+                        ]
+                    ];
+                    messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
+                }
                 return redirect('/welcome');
             }
         }

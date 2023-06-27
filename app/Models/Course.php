@@ -513,12 +513,12 @@ class Course extends BaseModel
                          ->get();
 
             $courses = $courses->sortBy('position');
-            $cycles = null;
-            if($workspace_id === 25){
-                $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
-                ->where('value_text', '<>', 'Ciclo 0')
-                ->orderBy('position')->get();
-            }
+            // $cycles = null;
+            // if($workspace_id === 25){
+            //     $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
+            //     ->where('value_text', '<>', 'Ciclo 0')
+            //     ->orderBy('position')->get();
+            // }
 
             foreach ($courses as $course) {
                 $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
@@ -748,6 +748,15 @@ class Course extends BaseModel
             ->get();
 
         $data = [];
+        $positions_schools = SchoolSubworkspace::select('school_id','position')
+                                ->where('subworkspace_id',$user->subworkspace_id)
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->get();
+
+        $positions_courses = CourseSchool::select('school_id','course_id','position')
+                                ->whereIn('school_id',array_keys($schools->all()))
+                                ->whereIn('course_id',$user_courses->pluck('id'))
+                                ->get();
         $summary_courses_compatibles = SummaryCourse::with('course:id,name')
             ->whereRelation('course', 'active', ACTIVE)
             ->where('user_id', $user->id)
@@ -758,7 +767,6 @@ class Course extends BaseModel
         $user->loadMissing('criterion_values.criterion.field_type');
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
-
 
         foreach ($schools as $school_id => $courses) {
 
@@ -773,6 +781,8 @@ class Course extends BaseModel
             $courses = $courses->sortBy('position');
 
             foreach ($courses as $course) {
+                $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
+                $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
 
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $course_status = self::getCourseStatusByUser($user, $course, $summary_courses_compatibles, $medias, $statuses);
@@ -792,6 +802,8 @@ class Course extends BaseModel
                         'encuesta_habilitada' => false,
                         'encuesta_resuelta' => false,
                         'encuesta_id' => null,
+                        'orden' => $course_position,
+
                     ];
                 }
                 else
@@ -806,6 +818,8 @@ class Course extends BaseModel
                         'encuesta_habilitada' => $course_status['enabled_poll'],
                         'encuesta_resuelta' => $course_status['solved_poll'],
                         'encuesta_id' => $course_status['poll_id'],
+                        'orden' => $course_position,
+
                     ];
                 }
             }
@@ -814,13 +828,18 @@ class Course extends BaseModel
             if ($workspace_id === 25) {
                 $school_name = removeUCModuleNameFromCourseName($school_name);
             }
-
+            $columns = array_column($school_courses, 'orden');
+            array_multisort($columns, SORT_ASC, $school_courses);
             $data[] = [
                 'id' => $school->id,
                 'categoria' => $school_name,
                 "cursos" => $school_courses,
+                'orden' => $school_position,
             ];
         }
+
+        $columns = array_column($data, 'orden');
+        array_multisort($columns, SORT_ASC, $data);
         return $data;
     }
 
