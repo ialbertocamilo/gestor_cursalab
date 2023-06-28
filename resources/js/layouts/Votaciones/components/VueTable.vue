@@ -172,7 +172,7 @@
 				const response = await vm.$http.get(INMUTABLE + ST_PARAMS);
 				vm.currLoader = false; //loader
 
-				const { data, ...paginate } = response.data;
+				const { data, ...paginate } = response.data.data;
 				
 				vm.currData = data;
 				vm.makePagination(paginate); //para botones de paginacion prev - next

@@ -1,118 +1,200 @@
 <template>
 	<div>
-		<v-row class="my-2">
-			<v-col cols="12" md="8">
-				<v-card class="pr-2">
-					<v-card-title>Lista de contenidos</v-card-title>
-					<v-card-text :class="frmadd.content_list_overflow">
-						<v-row class="mt-2">
-							<v-col v-for="(item, index) of contents" :key="index" cols="12" class="pt-0">
-								<div class="border rounded border-primary p-2 d-flex justify-content-between align-items-center"
-										 :class="item.state ? frmadd.bg_primary : '' " draggable="true">
-									<div>
-										<span class="text-primary" :class="`fas ${setCurrentIcon(item).icon} f-md`"></span> 
-										<span class="ml-2 font-w" v-text="item.title"></span>
-									</div>
-									<div>
-										<span class="text-uppercase" 
-													v-text="(setCurrentIcon(item).ext === 'html') ? 'SCORM' :
-																	setCurrentIcon(item).ext"></span> <!-- opcional -->
-										
-										<v-btn text color="primary" @click="editCurrentData(index)"> 
-											<span class="fas fa-pen"></span>
-										</v-btn>
-										<v-btn text color="red" @click="deleteCurrentData(index)"> 
-											<span class="fas fa-trash"></span> 
-										</v-btn>
-									</div>
-								</div>
-							</v-col>
-						</v-row>
-						<p v-show="!contents.length" class="text-center mt-4">
-							<span class="fas fa-ban"></span> Por favor agrega contenido.
-						</p>
-					</v-card-text>
-				</v-card>
-			</v-col>
-			<v-col cols="12" md="4">
-				<v-btn block color="primary" @click="openDialogCard(true)">
-					<span class="fas fa-plus mr-2"></span> Agregar
+		<v-row>
+			<v-col cols="12" class="d-flex justify-content-between">
+				<span>Agrega contenido multimedia para tu campaña.</span>
+				<v-btn color="primary" @click="openDialogCard(true)">
+					<span class="fas fa-plus mr-2"></span> Contenido
 				</v-btn>
 			</v-col>
 			<v-col cols="12">
-				<DefaultInput label="Pregunta para encuesta" v-model="question" 
-											maxlength="70" :counter="70"></DefaultInput>	
-				<span>
-					<b>Nota:</b> La "Encuesta" será parte de la campaña solo si tiene texto el campo "Pregunta de encuesta". 
-				</span>			
+
+				<table class="table table-primary-sub table-scroll table-bordered-rounded table-hover mb-0">
+					<thead>
+						<tr>
+							<th scope="col" class="text-left">Archivo</th>
+							<th scope="col" class="text-center">Formato</th>
+							<th scope="col" class="text-right">Opciones</th>
+						</tr>
+					</thead>
+					<tbody class="scroll-default" style="max-height: 20rem;">
+						<tr v-for="(item, index) of contents" :key="index">
+							<td class="text-left">
+								<div class="d-flex align-items-center mt-2">
+									<span :class="`fas ${setCurrentIcon(item.file_media, item.linked).icon} fa-2x fa-fw`"></span>
+									<span class="ml-2" v-text="item.title"></span>
+								</div>
+							</td>
+							<td class="text-center">
+								<span class="mt-3 text-uppercase" 
+									  v-text="setCurrentIcon(item.file_media, item.linked).ext === 'html' ? 'SCORM': setCurrentIcon(item.file_media, item.linked).ext"></span>
+							</td>
+							<td class="text-right">
+								<v-btn text color="primary" @click="editCurrentData(index)"> 
+									<div class="d-flex flex-column">
+										<span class="fas fa-pen"></span>
+										<small>Editar</small>
+									</div>
+								</v-btn>
+								<v-btn text color="red" @click="deleteCurrentData(index)"> 
+									<div class="d-flex flex-column">
+										<span class="fas fa-trash"></span>
+										<small>Eliminar</small>										
+									</div>
+								</v-btn>
+							</td>
+						</tr>
+						<!-- sin contenido -->
+						<tr class="no-border" v-show="!contents.length">
+							<td class="border-0"></td>
+							<td class="text-center d-flex flex-column border-0"> 
+								<span class="mdi mdi-file-search text-primary-sub fa-3x"></span>
+								<p class="mb-0">En esta sección se listarán los contenidos de la campaña.</p>
+							</td>
+							<td class="border-0"></td>
+						</tr>
+					</tbody>
+				</table>
+			</v-col>
+			<v-col cols="12">
+				<div class="d-flex align-items-center">
+					<div>
+						<DefaultToggle 
+							class="mt-0" 
+							v-model="showQuestion" 
+							no-label 
+							@onChange="(val) => {
+								if(!val) question = null;
+							}"
+						/>
+					</div>	
+					<span class="mt-3">Incluir pregunta de encuesta para la campaña.</span>
+				</div>
+
+				<div v-show="showQuestion" class="mt-6">
+					<DefaultInput
+						dense 
+						clearable
+						label="Pregunta para encuesta" 
+						v-model="question" 
+						maxlength="70" 
+						:counter="70"
+					/>	
+				</div>
 				<!-- 
 					<DefaultInput label="Pregunta para encuesta" v-model="question" :rules="rules.question" 
 											maxlength="70" :counter="70" required></DefaultInput>				
 				 -->
-
 			</v-col>
 		</v-row>
 
-		<v-dialog v-model="dialogCard" persistent scrollable max-width="800px">
+		<v-dialog v-model="dialogCard" persistent scrollable max-width="600px">
 			<v-card>
-		    <v-card-title class="d-flex justify-content-between primary text-white">
-		    	<span v-text="dialogState.title"></span> <!-- titulo dinamico -->
-		    	<v-btn icon @click="clearCurrentData">
-		  		  <v-icon class="text-white"> mdi-close </v-icon>
-		    	</v-btn>
-		    </v-card-title>
-		    <v-card-text class="pt-5">
+			<v-card-title class="d-flex justify-content-between primary text-white">
+				<span v-text="dialogState.title"></span> <!-- titulo dinamico -->
+				<v-btn icon @click="clearCurrentData">
+				  <v-icon class="text-white"> mdi-close </v-icon>
+				</v-btn>
+			</v-card-title>
+			<v-card-text class="pt-5">
 					 <v-form v-model="valid" ref="form" lazy-validation>
-					 	<v-row>
-					 		<v-col cols="12">
-					 			<v-alert v-model="alertForm" text type="error" dismissible>
-					 				El título del contenido se repite.
-					 			</v-alert>
-					 		</v-col>
-							<v-col cols="12" md="6">
-								<div v-if="!frm.linked" class="mb-4">
-									<vue-upload-content-multimedia 
-																		label="Seleccione contenido" 
-																		sub-label="Seleccione archivo"
- 																		v-model="frm.file" 
- 																		icon-place-holder="fa-file"
- 																		:file-types="['image', 'video', 'audio', 'pdf', 'scorm', 'office']" 
- 																		:default-size="300"
- 																		:clearable="clearableMultimedia" />
-								</div>
-								
-								<div v-if="!frm.file">
-									<DefaultInput v-model="frm.linked" label="Link (Youtube o Vimeo)" :rules="rules.linked"/>
-								</div>
-
-								<div class="mt-2">
-									<v-switch v-model="frm.state" label="Estado"></v-switch>
-								</div>
-
-							</v-col>				 		
-							<v-col cols="12" md="6">
-								<DefaultInput label="Título de contenido *" 
-															:rules="rules.title"  
-															:counter="70" maxlength="70" 
-															required
-															v-model="frm.title" />
-
-							  <v-textarea label="Descripción de contenido *" 
-							  						:rules="rules.description" 
-							  						:counter="200" maxlength="200"
-							  					  class="custom-default-input" 
-							  					  outlined 
-							  					  rows="6" 
-										  			v-model="frm.description" required />
+						<v-row>
+							<v-col cols="12" v-show="alertForm">
+								<v-alert v-model="alertForm" text type="error" dismissible>
+									El título del contenido se repite.
+								</v-alert>
 							</v-col>
-					 	</v-row>
+							<v-col cols="12" class="pb-0">
+								<DefaultInput 
+									dense
+									required
+									clearable
+									label="Título de contenido" 
+									:rules="rules.title"  
+									:counter="70" maxlength="70" 
+									v-model="frm.title" 
+								/>
+							</v-col>
+							<v-col cols="12" class="pb-0">
+								<v-textarea 
+									dense
+									outlined 
+									clearable
+									required 
+									label="Descripción de contenido" 
+									:rules="rules.description" 
+									:counter="200" maxlength="200"
+									class="custom-default-input" 
+									rows="6" 
+									v-model="frm.description" 
+								/>
+							</v-col>
+
+							<v-col cols="12" class="py-0">
+								<v-row>
+									<v-col cols="6" class="d-flex justify-content-center">
+										<v-card class="w-100" 
+												:class="{'border-solid-primary': showLinkVideo }"
+												@click="showMultimedia = false, showLinkVideo = true">
+											<v-card-text 
+												class="text-center d-flex flex-column"
+												:class="{'text-primary-sub': showLinkVideo }"
+												>
+												<span class="mdi mdi-youtube fa-2x mb-2"></span>
+												<span>Link de video</span>
+											</v-card-text>
+										</v-card>
+									</v-col>
+									<v-col cols="6" class="d-flex justify-content-center">
+										<v-card class="w-100" 
+												:class="{'border-solid-primary': showMultimedia }"
+												@click="showLinkVideo = false, showMultimedia = true">
+											<v-card-text 
+												class="text-center d-flex flex-column"
+												:class="{'text-primary-sub': showMultimedia }"
+												>
+												<span class="mdi mdi-folder-multiple-image fa-2x mb-2"></span>
+												<span>Multimedia</span>
+											</v-card-text>
+										</v-card>
+									</v-col>
+								</v-row>
+							</v-col>
+
+							<v-col cols="12" v-show="(showMultimedia || showLinkVideo)">
+								<!-- <div v-show="!frm.linked" class="mb-4"> -->
+								<div v-show="showMultimedia">
+									<p>Selecciona un archivo desde multimedia.</p>
+	
+									<DefaultSelectOrUploadMultimediaDimension
+										ref="inputContenidoCampaign"
+										v-model="frm.file_media"
+										label="Selecciona contenido"
+										label-button="Seleccionar multimedia"
+										:file-types="['image', 'video', 'audio', 'pdf', 'scorm', 'office']" 
+										@onSelect="setFileOnly($event, frm, 'media')"
+									/>
+
+								</div>
+								<div v-show="showLinkVideo">
+									<DefaultInput 
+										clearable
+										dense 
+										v-model="frm.linked" 
+										label="Link (Youtube o Vimeo)" 
+										:rules="rules.linked"
+									/>
+								</div>
+							</v-col>				 		
+
+						</v-row>
 					 </v-form>
-		    </v-card-text>
-		    <v-card-actions class="d-flex justify-content-center pb-4">
-		      <v-btn color="gray" class="mr-2" @click="clearCurrentData"> Cancelar </v-btn>
-		      <v-btn color="primary" @click="saveCurrentData" v-text="dialogState.btn"></v-btn> <!-- Boton dianmico dinamico -->
-		    </v-card-actions>
-	    </v-card>
+			</v-card-text>
+			<v-card-actions class="d-flex justify-content-center pb-4">
+			  <v-btn text color="primary" class="mr-2" @click="clearCurrentData"> Cancelar </v-btn>
+			  <v-btn color="primary" @click="saveCurrentData" v-text="dialogState.btn"></v-btn> <!-- Boton dianmico dinamico -->
+			</v-card-actions>
+		</v-card>
 		</v-dialog>
 
 	</div>
@@ -120,10 +202,6 @@
 </template>
 
 <script>
-	// === components ===
-	import VueUploadContentMultimedia from '../components/VueUploadContentMultimedia.vue'
-	// === components ===
-
 	// === utils ===
 	import { setRules, Stackvalidations } from '../utils/UtlValidators.js';
 	import { getFileExtension } from '../utils/UtlGeneral.js';
@@ -136,11 +214,11 @@
 			data: { type: Object },
 			mode: { type: Boolean, require: true }
 	  },
-	  components:{ VueUploadContentMultimedia },
 		data() {
 			return {
 				valid: false,
 				alertForm: false,
+				showQuestion: false,
 
 				dialogCard: false,
 				dialogMode: false,
@@ -148,13 +226,16 @@
 				
 				clearableMultimedia: true,
 
+				showMultimedia: false,
+				showLinkVideo: false,
+
 				// content fprm
 				contents: [],
 				question: null,
 				frm: {
 					title: null,
 					description: null,
-					file: null,
+					file_media: null,
 					linked: null,
 					state: true
 				},
@@ -170,7 +251,7 @@
 		computed:{
 			dialogState() {
 				return this.dialogMode ? { title: 'Editar contenido', btn: 'Editar' } :
-																 { title: 'Agregar contenido', btn: 'Agregar' };
+										 { title: 'Agregar contenido', btn: 'Agregar' };
 			}
 		},
 		watch:{
@@ -207,7 +288,7 @@
 				vm.$emit('valid', { attr, state } );
 			},
 
-			setCurrentIcon( { file, linked } ) {
+			setCurrentIcon( file, linked ) {
 				const vm = this;
 				const fileString = (typeof file === 'string');
 
@@ -232,7 +313,11 @@
 
 				vm.frm.title = null;
 				vm.frm.description = null;
-				vm.frm.file = null;
+
+				vm.removeFileFromDropzone(vm.frm.file_media, 'inputContenidoCampaign');
+				vm.$refs.inputContenidoCampaign.removeAllFilesFromDropzone();
+				vm.frm.file_media = null;
+
 				vm.frm.linked = null;
 
 				vm.frm.state = false;
@@ -241,6 +326,9 @@
 				vm.dialogIndex = null;
 				vm.alertForm = false;
 				vm.clearableMultimedia = !vm.clearableMultimedia;
+
+				vm.showMultimedia =  false;
+				vm.showLinkVideo = false;
 
 				vm.openDialogCard(false); //devuelve el estado original de dialogMode y dialogCard
 			},
@@ -251,6 +339,18 @@
 				for(const prop in vm.frm) {
 					vm.frm[prop] = data[prop];
 				}
+				// link video
+				if(vm.frm.linked) {
+					vm.showMultimedia =  false;
+					vm.showLinkVideo = true;
+				}
+
+				// multimedia 
+				if(vm.frm.file_media) {
+					vm.showMultimedia =  true;
+					vm.showLinkVideo = false;
+				}
+
 				vm.dialogIndex = index;
 				vm.openDialogCard(true, true);
 			},
@@ -268,17 +368,20 @@
 				};
 
 				const stateVal = (counter > 0 && !vm.dialogMode) ? checkIfExistContent() :
-												 (counter > 1 && vm.dialogMode) ? checkIfExistContent(true) : false;
+								 (counter > 1 && vm.dialogMode) ? checkIfExistContent(true) : false;
 				if(stateVal) return vm.alertForm = true;
 
-				const { title, description, file, linked } = vm.frm;
-				if(!file && !linked) return; //console.log('ambos nulos')
-				if(!valObjNull(vm.frm, ['file', 'linked'])) return; //console.log('jumped valObjNull')
+				const { title, description, file_media, linked } = vm.frm;
+
+				if(file_media && vm.showMultimedia) vm.frm.linked = null;
+				else vm.frm.file_media = null;
+
+				if(!file_media && !linked) return; //console.log('ambos nulos')
+				if(!valObjNull(vm.frm, ['file_media', 'linked'])) return; //console.log('jumped valObjNull')
 				if(!valString(title,[5, 70])) return;
 				if(linked && !valDomains(linked, ['youtube','youtu','vimeo'])) return;
 				if(!valString(description,[5, 200])) return;
 
-				// console.log(vm.frm, vm.dialogIndex);
 				// validamos el dialogMode 
 				if(vm.dialogMode) vm.contents[vm.dialogIndex] = { ...vm.frm };
 				else vm.contents.push({...vm.frm});
@@ -298,9 +401,10 @@
 				const initialDataEdit = Object.entries(vm.data);
 
 				for(const [key, value] of initialDataEdit) {
+
 					vm[key] = value;
+					if(key === 'question' && value) vm.showQuestion = true;
 				}
-				// console.log('edit CurrContents', vm.contents, vm.question);						
 			}
 		}
 	}

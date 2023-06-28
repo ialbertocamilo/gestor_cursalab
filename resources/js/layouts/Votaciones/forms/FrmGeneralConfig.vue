@@ -10,72 +10,111 @@
 						</v-alert>
 					</v-col>
 					<v-col cols="12">
-	      		<DefaultSelect label="Seleccione módulo *" return-object required item-text="name" 
-	      			v-model="frm.modules" :loading="loader" :rules="rules.modules" :items="itemsSelect" :multiple="true" />
+						<DefaultSelect 
+							dense 
+							return-object 
+							required 
+							multiple
+							label="Seleccione módulo *" 
+							item-text="name" 
+							v-model="frm.modules" 
+							:loading="loader" 
+							:rules="rules.modules" 
+							:items="itemsSelect" 
+						/>
 					</v-col>
 					<v-col cols="12" class="pb-0">
-	      		<DefaultInput label="Nombre de campaña *" required 
-	      			v-model="frm.title" :rules="rules.title" :counter="70" maxlength="70"/>
+						<DefaultInput dense label="Nombre de campaña *" required 
+						v-model="frm.title" :rules="rules.title" :counter="70" maxlength="70"/>
 					</v-col>
 					<v-col cols="12" class="py-1">
-					  <v-textarea label="Descripción"  
-					  	class="custom-default-input" outlined rows="5" 
-			  			v-model="frm.description" :rules="rules.description" :counter="200" maxlength="200"></v-textarea>
+					  <v-textarea dense label="Descripción"  
+						class="custom-default-input" outlined rows="3" 
+						v-model="frm.description" :rules="rules.description" :counter="200" maxlength="200"></v-textarea>
+					</v-col>
+					<v-col cols="12" class="p-0">
+						<v-alert v-show="checkDatesRange" text type="error" class="mx-2">
+							La fecha fin debe ser mayor a la fecha de inicio
+						</v-alert>
+					</v-col>
+					<v-col cols="6">
+						<DefaultInputDate
+							dense 
+							clearable
+							:referenceComponent="'modalDateFilterStart'"
+							:options="modalDateFilterStart"
+							v-model="frm.start_date"
+							label="Fecha de inicio"
+						/>
+					</v-col>
+					<v-col cols="6">
+						<DefaultInputDate 
+							dense
+							clearable
+							:referenceComponent="'modalDateFilterEnd'"
+							:options="modalDateFilterEnd"
+							v-model="frm.end_date"
+							label="Fecha de fin"
+						/>
 					</v-col>
 				</v-row>
 			</v-col>
 			<v-col cols="12" md="5">
-			
- 			<vue-upload-content-multimedia label="Seleccione imagen (450 x 400)" 
- 																		 sub-label="Seleccione imagen"
- 																		 v-model="frm.image" 
- 																		 icon-place-holder="fa-image"
- 																		 :img-place-holder="provideData.localDefaults.announ"
- 																		 :file-types="['image']"
 
- 																		 :check-dimensions="true"
- 																		 :stack-dimensions="{ width: 450, height: 400 }" 
- 																		 />
-
-			</v-col>
-			<v-col cols="12" class="py-0">
-				<v-alert v-show="checkDatesRange" text type="error">
-					La fecha fin debe ser mayor a la fecha de inicio
-				</v-alert>
-			</v-col>
-			<v-col cols="12" md="6" class="pt-0">
-				<vue-date-mod v-model="frm.start_date" label="Fecha de inicio" name="v-star-date"></vue-date-mod>
-			</v-col>
-			<v-col cols="12" md="6" class="pt-0">
-				<vue-date-mod v-model="frm.end_date" label="Fecha de fin" name="v-end-date"></vue-date-mod>
+				<DefaultSelectOrUploadMultimediaDimension
+					ref="inputFondoCampaign" 
+					v-model="frm.file_image"
+					label="Tamaño máximo (450 x 400)"
+					label-button="Seleccione imagen"
+					:file-types="['image']"
+					@onSelect="setFileOnly($event, frm,'image')"
+					check-dimensions
+					:stack-dimensions="{ width: 450, height: 400 }"
+				/>
 			</v-col>
 		</v-row>
 		<!-- OPT GENERAL BASIC -->
 
 		<!-- OPT NOTIFICACIONES -->
 		<v-expansion-panel>
-			<v-expansion-panel-header class="text-primary grey lighten-5">
-				<span>
+			<v-expansion-panel-header class="grey lighten-5">
+				<span class="text-primary-sub">
 					<span class="font-weight-bold">Notificaciones</span>
-					<small class="ml-2">Opcional</small> 
+					<small class="ml-2">(Opcional)</small> 
 				</span>
 			</v-expansion-panel-header>
 			<v-expansion-panel-content class="pb-0">
 
 				<v-row class="mt-4">
+					<v-col cols="12">
+						Configura el asunto y cuerpo del correo que podrás enviar a los postulados.
+					</v-col>
 					<v-col cols="12" class="py-0">
 						<v-alert v-show="checkNotification" text type="error">
 							Al ingresar notificación asegurese de rellenar asunto y mensaje correctamente.
-						</v-alert>	
-						<p>Notificaciones por email:</p>
+						</v-alert>  
 					</v-col>
 					<v-col cols="12" md="6" class="py-0">
-						<DefaultInput label="Asunto" 
-							v-model="frm.subject" :rules="rules.subject" :counter="70" maxlength="70" hide-details="auto"/>
+						<DefaultInput 
+							dense
+							label="Asunto" 
+							v-model="frm.subject" 
+							:rules="rules.subject" 
+							:counter="70" 
+							maxlength="70" 
+							hide-details="auto"
+							/>
 					</v-col>
 					<v-col cols="12" md="6" class="py-0">
-       		  <v-textarea label="Mensaje" rows="2" class="custom-default-input" outlined 
-       		  	v-model="frm.body" :rules="rules.body" :counter="200" maxlength="200"></v-textarea>
+						<v-textarea 
+							label="Mensaje" 
+							rows="2" 
+							class="custom-default-input" 
+							outlined 
+							v-model="frm.body" 
+							:rules="rules.body" 
+							:counter="200" 
+							maxlength="200" />
 					</v-col>
 				</v-row>
 
@@ -85,74 +124,75 @@
 
 		<!-- OPT BRANDING -->
 		<v-expansion-panel>
-			<v-expansion-panel-header class="text-primary grey lighten-5">
-				<span>
+			<v-expansion-panel-header class="grey lighten-5">
+				<span class="text-primary-sub">
 					<span class="font-weight-bold">Branding</span>
-					<small class="ml-2">Opcional</small> 
+					<small class="ml-2">(Opcional)</small> 
 				</span>
 			</v-expansion-panel-header>
 			<v-expansion-panel-content>
 				<v-row class="mt-4">
-					<v-col cols="12" md="6">
+					<v-col cols="12">
 						<v-row>
-							<v-col cols="12" class="py-0">
-								<vue-upload-content-multimedia label="Seleccione banner (1300 x 300)" 
- 																		 sub-label="Seleccione imagen"
- 																		 v-model="frm.banner" 
- 																		 icon-place-holder="fa-image"
- 																		 :img-place-holder="provideData.localDefaults.banner"
- 																		 :file-types="['image']"
-
- 																		 :check-dimensions="true"
- 																		 :stack-dimensions="{ width: 1300, height: 300}" />
+							<v-col cols="6" class="align-self-center py-0">
+								<span>Personaliza tu campaña de reconocimiento con el banner, insignias y color temático</span>
 							</v-col>
-							<v-col cols="12" class="mt-2">
-								<vue-color v-model="frm.color" label="Color"></vue-color>
+							<v-col cols="6" class="py-0">
+								<v-row>
+									<v-col cols="5">
+										<DefaultInput 
+											dense
+											clearable 
+											v-model="frm.color"
+											type="color" 
+											label="Color" 
+										/>
+									</v-col>
+								</v-row>
 							</v-col>
 						</v-row>
 					</v-col>
-					<!-- DINAMIYC CONTENT -->
-					<v-col cols="12" md="6">
-						<v-row>
-							<v-col v-if="showCurrentBadged.first" cols="12" class="py-0 mb-4">
-								<div class="d-flex">
-									<span>1ª insignia</span> 
-									<DefaultInfoTooltip text="Los participantes obtendrán esta insignia cuando completen la pregunta de encuesta." :right="true"/>
-								</div>
 
-									<vue-upload-content-multimedia label="Seleccione insignia (50 x 50)" 
- 																		 sub-label="Seleccione insignia"
- 																		 v-model="frm.badge_one" 
- 																		 icon-place-holder="fa-image"
- 																		 :img-place-holder="provideData.localDefaults.badge1"
- 																		 :file-types="['image']"
-
- 																		 :check-dimensions="true"
- 																		 :height="90"
- 																		 :stack-dimensions="{ width:50, height:50 }"
-                                     :contain-image="true" />
-
-							</v-col>
-							<v-col v-if="showCurrentBadged.second" cols="12" class="py-0">
-								<div class="d-flex">
-									<span>2ª insignia</span> 
-									<DefaultInfoTooltip text="Al ser seleccionado como candidato." :right="true"/>
-								</div>
-
-									<vue-upload-content-multimedia label="Seleccione insignia (50 x 50)" 
- 																		 sub-label="Seleccione insignia"
- 																		 v-model="frm.badge_two" 
- 																		 icon-place-holder="fa-image"
- 																		 :img-place-holder="provideData.localDefaults.badge2"
- 																		 :file-types="['image']"
-
- 																		 :check-dimensions="true"
- 																		 :height="90"
- 																		 :stack-dimensions="{ width:50, height:50 }"
-                                     :contain-image="true" />
-							</v-col>
-						</v-row>
+					<v-col cols="4" class="py-0">
+						<DefaultSelectOrUploadMultimediaDimension
+							ref="inputFondoBanner" 
+							v-model="frm.file_banner"
+							label="Seleccione banner (1300 x 300)"
+							label-button="Seleccione imagen"
+							:file-types="['image']"
+							@onSelect="setFileOnly($event, frm,'banner')"
+							check-dimensions
+							:stack-dimensions="{ width: 1300, height: 300 }"
+						/>
 					</v-col>
+
+					<!-- === INSIGNIAS SEGUN MODALIDAD === -->
+					<v-col v-show="showCurrentBadged.first" cols="4" class="py-0">
+						<DefaultSelectOrUploadMultimediaDimension
+							ref="inputFondoBadgeOne" 
+							v-model="frm.file_badge_one"
+							label="1° insignia (50 x 50)"
+							label-button="Seleccione imagen"
+							:file-types="['image']"
+							@onSelect="setFileOnly($event, frm,'badge_one')"
+							check-dimensions
+							:stack-dimensions="{ width: 50, height: 50 }"
+						/>
+					</v-col>
+					<v-col v-show="showCurrentBadged.second" cols="4" class="py-0">
+						<DefaultSelectOrUploadMultimediaDimension
+							ref="inputFondoBadgeTwo" 
+							v-model="frm.file_badge_two"
+							label="2° insignia (50 x 50)"
+							label-button="Seleccione imagen"
+							:file-types="['image']"
+							@onSelect="setFileOnly($event, frm,'badge_two')"
+							check-dimensions
+							:stack-dimensions="{ width: 50, height: 50 }"
+						/>
+					</v-col>
+					<!-- === INSIGNIAS SEGUN MODALIDAD === -->
+
 				</v-row>
 			</v-expansion-panel-content>
 		</v-expansion-panel>
@@ -164,18 +204,10 @@
 
 <script>
 
-	// components
-	import VueImage from '../components/VueImage.vue';
-	import VueDateMod from '../components/VueDateMod.vue';
-	import VueColor from '../components/VueColor.vue';
-	const LocalComponents = { VueImage, VueDateMod, VueColor };
-
-	import VueUploadContentMultimedia from '../components/VueUploadContentMultimedia.vue';
-
 	// functions
 	import { createDinamycPayload } from '../utils/UtlComponents.js';
 	import { setRules, Stackvalidations } from '../utils/UtlValidators.js';
-  	import { transDate } from '../utils/UtlFilters.js';
+	import { transDate } from '../utils/UtlFilters.js';
 
 	const { valString, valOptString } = Stackvalidations; 
 
@@ -189,19 +221,19 @@
 			validation: { type: Boolean, default: false },
 			badge: { require: true }
 		},
-		components:{ ...LocalComponents, VueUploadContentMultimedia },
 		data() {
 			return {
 				menu: false,
 				provideData:{ localDefaults: {} },
+				modalDateFilterStart:{ open: true },
+				modalDateFilterEnd:{ open: true },
 				frm: {
 					// modules: [ { id:2 } ],
-					modules: [],
 					modules: null,
 
 					title: null,
 					description: null,
-					image: null,
+					file_image: null,
 
 					start_date: null,
 					end_date: null,
@@ -209,10 +241,10 @@
 					subject: null,
 					body: null,
 
-					banner: null,
+					file_banner: null,
 					color: null,
-					badge_one: null,
-					badge_two: null,
+					file_badge_one: null,
+					file_badge_two: null,
 				},
 				loader: false,
 				itemsSelect:[],
@@ -229,14 +261,14 @@
 				},
 
 				// modalPreviewMultimedia 
-     //    fileTypes:['image'],
+	 //    fileTypes:['image'],
 			  // modalPreviewMultimedia: {
-     //    	ref: 'modalSelectPreviewMultimedia',
-     //      open: false,
-     //      title: 'Buscar multimedia',
-     //      confirmLabel: 'Seleccionar',
-     //      cancelLabel: 'Cerrar'
-     //    },
+	 //     ref: 'modalSelectPreviewMultimedia',
+	 //      open: false,
+	 //      title: 'Buscar multimedia',
+	 //      confirmLabel: 'Seleccionar',
+	 //      cancelLabel: 'Cerrar'
+	 //    },
 
 			}
 		},
@@ -245,11 +277,10 @@
 				handler(val) {
 					const vm = this;
 
-					(val === 1) && (vm.frm.badge_two = null);
-  			  (val === 2) && (vm.frm.badge_one = null);
-  			  (val === 3) && (vm.frm.badge_one = null,
-  			  								vm.frm.badge_two = null);
-
+					(val === 1) && (vm.frm.file_badge_two = null);
+				    (val === 2) && (vm.frm.file_badge_one = null);
+				  	(val === 3) && (vm.frm.file_badge_one = null, vm.frm.file_badge_two = null);
+				  	console.log('badge')
 					vm.emitData(vm.frm);
 				}
 			},
@@ -262,12 +293,27 @@
 					if(title) vm.emitValid('title', !valString(title, [10, 70]) );
 					if(description !== null) vm.emitValid('description', valOptString(description, [10, 200]) );
 
+					// console.log('GeneralConfig', frm);
+
 					vm.emitValid('dates', vm.checkDatesRange);
 					vm.emitValid('notifications', vm.checkNotification);
-					// console.log('emit general config', frm);
 					vm.emitData(frm);
+				  	// console.log('frm')
 				},
 				deep: true
+			},
+			mode:{
+				handler(val) {
+					let vm = this;
+
+					if(val) {
+						const initialDataEdit = Object.entries(vm.data);
+						for(const [key, value] of initialDataEdit) {
+								const checkDates = (['start_date','end_date'].includes(key) && value);
+								vm.frm[key] = checkDates ? transDate(value) : value;
+						}
+					}
+				}
 			}
 		},
 		computed:{
@@ -278,7 +324,7 @@
 				const showLayout = ([null, 0].includes(vm.badge)) ? setBoolLayout(true, true) : 
 												   (vm.badge === 1) ? setBoolLayout(true, false) :  
 												   (vm.badge === 2) ? setBoolLayout(false, true) : 
-												   										setBoolLayout(false, false);
+																						setBoolLayout(false, false);
 
 				return showLayout;
 			},
@@ -319,28 +365,15 @@
 				vm.$emit('valid', { attr, state } );
 			} 
 		},
-		mounted(){
-			const vm = this;
-
-			if(vm.mode) {
-				const initialDataEdit = Object.entries(vm.data);
-
-				for(const [key, value] of initialDataEdit) {
-						const checkDates = (['start_date','end_date'].includes(key) && value);
-						vm.frm[key] = checkDates ? transDate(value) : value;
-				}
-				// console.log('edit CurrGeneralConfig', vm.frm);						
-			}
-		},
 		created() {
 			const vm = this;
 
 			vm.loader = true;
-			vm.$http.get('/votaciones/announ/data?module=modules')
+			vm.$http.get('/votaciones/modules/get-data')
 							.then((res) => {
-								// console.log(res);
+								const { data } = res.data
 								vm.loader = false;
-								vm.itemsSelect = res.data;
+								vm.itemsSelect = data.modules;
 							});
 		}
 	}

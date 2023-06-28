@@ -30,7 +30,8 @@ class WorkspaceRequest extends FormRequest
             'marca_agua_estado' => 'nullable',
             'notificaciones_push_envio_inicio' => 'nullable',
             'notificaciones_push_envio_intervalo' => 'nullable',
-            'notificaciones_push_chunk' => 'nullable'
+            'notificaciones_push_chunk' => 'nullable',
+            'criterio_id_fecha_inicio_reconocimiento' => 'nullable'
         ];
     }
 

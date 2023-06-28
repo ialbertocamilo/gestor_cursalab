@@ -716,6 +716,7 @@ Route::prefix('/diploma')->controller(DiplomaController::class)->group(function 
 // === VOTACIONES ===
 Route::prefix('/votacion')->controller(CampaignController::class)->group(function() {
     Route::view('/create', 'votaciones.create_edit')->name('votacion.create');
-    Route::view('/edit/{campaign}', 'diploma.create_edit')->name('votacion.edit');
+    Route::view('/edit/{campaign}', 'votaciones.create_edit')->name('votacion.edit');
+    Route::view('/detail/{campaign}', 'votaciones.view_detail')->name('votacion.detail');
 });
 // === VOTACIONES ===

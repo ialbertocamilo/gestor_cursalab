@@ -89,6 +89,7 @@ class WorkspaceController extends Controller
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
+        $workspace['criteria_workspace_dates'] = $workspace->subworkpsace_criterion_type(['date']);
 
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
 
@@ -111,7 +112,8 @@ class WorkspaceController extends Controller
 
         // Upload files
         info(['data' => $request->all() ]);
-
+        // return response()->json(['hola']);
+        
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
         $data = Media::requestUploadFile($data, 'logo_marca_agua');

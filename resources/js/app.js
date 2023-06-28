@@ -209,6 +209,7 @@ Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
 /*=== votaciones ===*/
 Vue.component("votacion-layout", require("./layouts/Votaciones/VotacionesListPage.vue"));
 Vue.component("votacion-form-page", require("./layouts/Votaciones/VotacionesFormPage.vue"));
+Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesListDetailPage.vue"));
 /*=== votaciones ===*/
 
 

@@ -10,50 +10,40 @@ Route::controller(CampaignController::class)->group(function () {
 
 	Route::get('/form-selects', 'getFormSelects')->name('votacion.form-selects');
 
-/*	// ==== CAMPAÑAS ====
-	Route::get('/index', [AnnouncementsController::class, 'index']);
-	Route::get('/indexid/{id}', [AnnouncementsController::class, 'indexId']);
-	Route::get('/duplicate/{id}', [AnnouncementsController::class, 'duplicate']);
-	Route::put('/state', [AnnouncementsController::class, 'state']);
-	Route::put('/statestage', [AnnouncementsController::class, 'stateStage']);
+    Route::get('/modules/get-data', 'getFiltersSelects')->name('votacion.filters_selects_modules');
 
-	Route::post('/create', [AnnouncementsController::class, 'create']);
-	Route::post('/update', [AnnouncementsController::class, 'update']);
+    /* criterios*/
+    Route::get('/criterion/get-data', 'getFilterCriterion')->name('votacion.filters_selects_criterion');
+    Route::get('/criterion/values/{criterion}', 'getFilterCriterionValues')->name('votacion.filters_selects_criterion_values');
+    /* criterios*/
 
-	Route::get('/announ/data', [AnnouncementsController::class, 'data']); // criterio y/o modulos
-	Route::get('/announ/verify', [AnnouncementsController::class, 'verify']);
+    /* verify -  */
+    Route::get('/verify', 'getVerifyRequirements')->name('votacion.verify');
+    /* verify */
 
-	Route::delete('/delete/{id}', [AnnouncementsController::class, 'delete']);
-	Route::get('/report/{id}/{module}', [AnnouncementsController::class, 'report']);
+    /* store - edit - update - duplicate */
+    Route::post('/store', 'store')->name('votacion.store');
+    Route::post('/update/{campaign}', 'update')->name('votacion.update');
+    Route::put('/{campaign}/status', 'status')->name('votacion.status');
+    Route::delete('/{campaign}/destroy', 'destroy')->name('votacion.destroy');
+    Route::put('/{campaign}/duplicate', 'duplicate')->name('votacion.duplicate');
+    Route::get('/check_duplicate/{campaign}', 'check_duplicate')->name('votacion.check_duplicate');
+    Route::get('/edit/{campaign}', 'edit_campaign')->name('votacion.edit_campaign');
+    /* store - edit - update - duplicate*/
 
-	Route::get('/test/{id}', [AnnouncementsController::class, 'test']);
-*/
+	/* update stages*/
+    Route::put('/status/stages/{campaign}', 'update_stages')->name('votacion.update_stages');
+	/* update stages*/
 
+	/* campaign_id*/
+    Route::get('/get_campaign/{campaign}', 'get_campaign')->name('votacion.get_campaign');
+	/* campaign_id*/
+
+    /* reportes */
+    Route::get('/report/{campaign}/candidates', 'report_candidates')->name('votacion.report_candidates');
+    Route::get('/report/{campaign}/postulates', 'report_postulates')->name('votacion.report_postulates');
+    /* reportes */
 });
 
-// ==== CONVOCADOS ====
-/*Route::post('/convocados/create', [SummonedsController::class, 'create']);
-Route::post('/convocados/createcheck', [SummonedsController::class, 'checkPostulate']);
-
-Route::get('/convocados/index/{id}', [SummonedsController::class, 'index']);
-Route::get('/convocados/requirement/{id}', [SummonedsController::class, 'requirement']);
-Route::put('/convocados/state', [SummonedsController::class, 'state']);
-
-// ==== POSTULADOS ====
-Route::get('/postulados/sustents/index/{id}', [PostulatesController::class, 'index']);
-Route::put('/postulados/sustents/state', [PostulatesController::class, 'state']);
-
-Route::get('/postulados/sustents/checks/{id}', [PostulatesController::class, 'checks']);
-
-Route::put('/postulados/notification',[PostulatesController::class, 'notification']);
-Route::put('/postulados/sustents/updatesub',[PostulatesController::class, 'updatesub']);
-Route::put('/postulados/sustents/update', [PostulatesController::class, 'update']);
-Route::put('/postulados/sustents/reset', [PostulatesController::class, 'reset']);
-
-// ==== VOTACIONES ====
-Route::get('/resultados/votos/index/{id}', [VotationsController::class, 'index']);
-Route::get('/resultados/votos/repeats/{id}', [VotationsController::class, 'repeats']);
-Route::put('/resultados/votos/confirm', [VotationsController::class, 'confirm']);
-
-Route::get('/resultados/votos/porcent/{id}/{id_requirement}', [VotationsController::class, 'indexValidate']);
-*/
+Route::prefix('{campaign}/postulacion')->group(base_path('routes/cms/postulacion.php'));
+Route::prefix('{campaign}/votacion')->group(base_path('routes/cms/votacion.php'));

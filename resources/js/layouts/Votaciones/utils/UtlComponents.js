@@ -6,8 +6,10 @@ export function getCurrentExtensionsTypes(types, mixin_extensions) {
 
 	const CureExtension = (extensions) => {
 		let lineExtension = '';
+		console.log(extensions);
 		for(const value of extensions) {
 			lineExtension += `.${value}, `
+		console.log(value);
 		}
 		return lineExtension;
 	};

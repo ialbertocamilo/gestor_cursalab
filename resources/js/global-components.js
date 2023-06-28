@@ -13,7 +13,10 @@ import DefaultAutocompleteOrder from "./components/globals/DefaultAutocompleteOr
 import DefaultAlertDialog from "./components/globals/DefaultAlertDialog";
 import DefaultCheckBox from "./components/globals/DefaultCheckBox";
 import DefaultSingleExpansionPanel from "./components/globals/DefaultSingleExpansionPanel";
+
 import DefaultSelectOrUploadMultimedia from "./components/globals/DefaultSelectOrUploadMultimedia";
+import DefaultSelectOrUploadMultimediaDimension from "./components/globals/DefaultSelectOrUploadMultimediaDimension";
+
 import DefaultInputDate from "./components/globals/DefaultInputDate";
 import DefaultTextArea from "./components/globals/DefaultTextArea";
 import DefaultFilter from './components/globals/DefaultFilter'
@@ -36,6 +39,8 @@ import DefaultSimpleMessageAlert from "./components/globals/DefaultSimpleMessage
 
 export default {
     components: {
+        DefaultSelectOrUploadMultimediaDimension,
+        
         DefaultTable,
         DefaultSelect,
         DefaultInput,

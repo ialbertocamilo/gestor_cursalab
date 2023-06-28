@@ -9,8 +9,8 @@
             $workspace = $workspace ? $workspace->toArray() : $workspace;
             $workspace_id = is_array($workspace) ? $workspace['id'] : null;
 
-            $votacion = $votacion ?? NULL;
+            $campaign = $campaign ?? NULL;
         @endphp
-        <votacion-form-page modulo_id="{{ $workspace_id }}" campana_id="{{ $votacion }}"/>
+        <votacion-form-page modulo_id="{{ $workspace_id }}" campaign_id="{{ $campaign }}"/>
     </v-app>
 @endsection

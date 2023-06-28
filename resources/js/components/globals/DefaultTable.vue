@@ -39,6 +39,57 @@
                 </v-tooltip>
             </template>
 
+            <!-- VOTACIONES -->
+            <template v-slot:item.etapa="{item, header}">
+                <DefaultButton 
+                    dense
+                    text
+                    :label="item.etapa"
+                    @click="doAction({type:'action', method_name: 'stage'}, item)"
+                />
+            </template>
+
+            <!-- VOTACIONES - DETALLE -->
+            <template v-slot:item.actions_sustent="{item, header}">
+                <DefaultButton 
+                    dense
+                    small
+                    :color="(item.state_sustent) ? 'success' : 'primary'"
+                    :disabled="!item.total"
+                    :class="(!item.total) ? '' : (item.state_sustent) ? 'px-6' : 'px-7'"
+                    :label="(!item.total) ? 'Pendiente' : (item.state_sustent) ? 'Validado' : 'Validar'"
+                    @click="doAction({type:'action', method_name: 'sustent'}, item)"
+                />
+
+
+                <v-chip
+                    v-if="dataObject.availableStageVotation"
+                    class="ma-2" 
+                    color="primary" 
+                    :disabled="!item.candidate_state"
+                    outlined
+                    >
+                  <v-icon class="mb-1" left>
+                    {{ item.candidate_state ? 'mdi-check' : 'mdi-close' }}
+                  </v-icon>
+                  Candidato
+                </v-chip>
+
+            </template>
+
+              <!-- VOTACIONES - DETALLE -->
+            <template v-slot:item.criterio_porcent="{item, header}">
+                <v-chip
+                    class="ma-2" 
+                    :color="item.porcent_state ? 'success' : 'primary' " 
+                    outlined
+                    >
+
+                    {{ item.criterio_porcent + '%' }}
+
+                </v-chip>
+            </template>
+
             <template v-slot:item.position="{item, header}">
                 <div class="d-flex flex-column align-items-center">
                     <v-btn
@@ -635,6 +686,9 @@ export default {
             type: Boolean,
             default: false
         },
+        dataObject: {
+            type: Object
+        },
         avoid_first_data_load: {
             type: Boolean,
             default: false,
@@ -668,7 +722,6 @@ export default {
     },
     mounted() {
         let vue = this;
-
         if (!vue.avoid_first_data_load){
             let filters = this.addParamsToURL(this.dataTable.filters, this.filters)
             this.getData(filters)

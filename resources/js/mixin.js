@@ -11,6 +11,7 @@ const extensiones = {
     pdf: ["pdf"],
     excel: ["xls", 'xlsx', 'csv'],
     scorm: ["zip", "scorm"],
+    office:['xls', 'xlsx', 'csv','ppt', 'pptx', 'doc', 'docx'],
     // rise: ["zip", "rise"],
 };
 const default_media_images = {
@@ -175,6 +176,18 @@ export default {
             }
             // console.info(logTitle);
             // console.table(tempObj);
+        },
+        getFileExtension(file) {
+            let vue = this;
+            let extension = null;
+            let fileName = (vue.TypeOf(file) === 'object') ? file.name : file;
+                fileName = fileName.split('.');
+
+            return (fileName.pop()).toLowerCase();
+        },
+        getFilepreviewUrl(file) {
+            let vue = this;
+            return (vue.TypeOf(vue.fileSelected) === 'object') ? URL.createObjectURL(file) : file;
         },
         /**
          * Get bucket URL
@@ -484,6 +497,10 @@ export default {
                 resource[resource_prop] = file;
             }
         },
+        setFileOnly(file, resource, resource_prop) {
+            let vue = this;
+            resource[`file_${resource_prop}`] = file;
+        },
         getMultipartFormData(method, data, fields, file_fields = [], array_fields = []) {
             let vue = this;
 
@@ -746,6 +763,50 @@ export default {
             }
 
             return { storage, status };
-        }
+        },
+        openLinkTarget(url) {
+            const targetUrl = window.origin + url;
+            window.open(targetUrl, '_blank');
+        },
+        async fetchDataReport() {
+            const vue = this;
+            const reportsBaseUrl = vue.getReportsBaseUrl();
+
+            let url = `../usuarios/session`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            const userSession = response.data;  
+            const adminId = response.data.user.id
+            const workspaceId = response.data.session.workspace.id
+
+            // Fetch modules and admins
+
+            let url2 = `${reportsBaseUrl}/filtros/datosiniciales/${workspaceId}`
+
+            let response2 = await axios({
+                url: url2,
+                method: 'get'
+            })
+
+            const modules = response2.data.modules
+            const admins = response2.data.admins
+            const VademecumList = response2.data.vademecums
+
+            return  { 
+                // user session
+                userSession,
+                adminId,
+                workspaceId,
+                reportsBaseUrl,
+
+                // admins
+                modules,
+                admins,
+                VademecumList
+            }
+        },
     },
 };

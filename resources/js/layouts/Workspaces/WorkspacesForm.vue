@@ -128,6 +128,30 @@
                     </v-col>
                 </v-row>
 
+
+                <v-row>
+                    <v-col cols="12">
+                        <DefaultModalSection title="Criterio reconocimiento">
+                                <template v-slot:content>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <DefaultAutocomplete 
+                                                clearable
+                                                return-object 
+                                                item-text="name" 
+                                                label="Seleccione tipo de criterio fecha *"
+                                                :loading="true" 
+                                                v-model="resource.criterio_id_fecha_inicio_reconocimiento" 
+                                                :items="itemsCriterionDates" 
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
+
                 <v-row>
                     <v-col>
                         <v-subheader class="mt-4 px-0">
@@ -201,7 +225,7 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
     'logo_marca_agua', 'marca_agua_estado', 
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk'
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk','criterio_id_fecha_inicio_reconocimiento'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -252,6 +276,8 @@ export default {
             defaultCriteria: []
             ,
             customCriteria: []
+            ,
+            itemsCriterionDates: []
             ,
             rules: {
                 name: this.getRules(['required', 'max:255']),
@@ -368,6 +394,8 @@ export default {
                 .get(url)
                 .then(({data}) => {
                     vue.hideLoader();
+                    // criterion dates
+                    vue.itemsCriterionDates = data.data.criteria_workspace_dates;
 
                     vue.is_superuser = data.data.is_superuser || false;
 

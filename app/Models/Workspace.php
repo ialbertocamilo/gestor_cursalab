@@ -28,7 +28,8 @@ class Workspace extends BaseModel
         'marca_agua_estado',
         'notificaciones_push_chunk',
         'notificaciones_push_envio_inicio',
-        'notificaciones_push_envio_intervalo'
+        'notificaciones_push_envio_intervalo',
+        'criterio_id_fecha_inicio_reconocimiento'
     ];
 
     public function sluggable(): array
@@ -99,6 +100,12 @@ class Workspace extends BaseModel
         return $this->hasMany(Workspace::class, 'parent_id');
     }
 
+    public function subworkpsace_criterion_type(array $codes) {
+        return $this->criterionWorkspace()->whereHas('field_type', function($query) use ($codes) {
+            $query->whereIn('code', $codes);
+        })->get();
+    }
+    
     public function app_menu()
     {
         return $this->belongsToMany(Taxonomy::class, 'workspace_app_menu', 'workspace_id', 'menu_id')

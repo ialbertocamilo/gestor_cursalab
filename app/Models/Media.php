@@ -435,6 +435,25 @@ class Media extends BaseModel
         // return $data;
     }
 
+
+    protected function requestUploadFileOnly($data, $field)
+    {
+        $file_field = 'file_' . $field;
+        
+        if (!empty($data[$file_field]) && is_string($data[$file_field])) {
+            $data[$file_field] = $data[$file_field];
+        } else {
+            if (!empty($data[$file_field])) {
+                $path = Media::uploadFile($data[$file_field]);
+                $data[$file_field] = $path;
+            } else {
+                $data[$file_field] = null;
+            }
+        }
+
+        return $data;
+    }
+
     protected function requestUploadFileForId($data, $field, $nombre = null)
     {
         $multimedia_field = 'file_' . $field;
