@@ -81,4 +81,15 @@ class RestBenefitController extends Controller
 
         return response()->json($apiResponse, 200);
     }
+
+    public function getConfig()
+    {
+        $user = Auth::user();
+        $data = [
+            'user' => $user->id
+        ];
+        $apiResponse = Benefit::config($data);
+
+        return response()->json($apiResponse, 200);
+    }
 }

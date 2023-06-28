@@ -587,6 +587,11 @@
                     <span class="custom_benefit_stars">Pendiente</span>
                 </div>
             </template>
+            <template v-slot:item.perfil_speaker="{ item, header }">
+                <div class="tbl_perfil_speaker">
+                    <img :src="item.perfil_speaker" v-if="item.perfil_speaker">
+                </div>
+            </template>
 
         </v-data-table>
         <!--   Custom Paginator -->

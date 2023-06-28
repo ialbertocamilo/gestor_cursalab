@@ -209,6 +209,15 @@ export default {
                         selected: false,
                         permission: "usuarios",
                         role: ["super-user"]
+                    },
+                    {
+                        title: "Speakers",
+                        icon: "fas fa-gift",
+                        path: "/speakers",
+                        subpaths: ["speakers"],
+                        selected: false,
+                        permission: "usuarios",
+                        role: ["super-user"]
                     }
                 ]
             },

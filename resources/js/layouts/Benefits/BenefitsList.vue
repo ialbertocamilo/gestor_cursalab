@@ -42,7 +42,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="openModalSelectActivitys($event)"
+                @segmentation="openModalSegment($event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un beneficio')"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un beneficio')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Beneficio - ${$event.title}`)"
@@ -71,6 +71,16 @@
                 @onCancel="modalSelectActivity.open = false"
                 @selectTypeActivityModal="selectTypeActivityModal"
             />
+
+        <ModalSegment
+            ref="ModalSegment"
+            v-model="modalSegment.open"
+            :width="'870px'"
+            @onClose="closeModalSegment"
+            @onConfirm="confirmModalSegment"
+            :benefit="dataModalSegment"
+        />
+
     </section>
 </template>
 
@@ -78,12 +88,14 @@
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalSelectActivity from "../../components/Benefit/ModalSelectActivity";
+import ModalSegment from "./ModalSegment";
 
 export default {
     components: {
         DefaultStatusModal,
         DefaultDeleteModal,
-        ModalSelectActivity
+        ModalSelectActivity,
+        ModalSegment
     },
     mounted() {
         let vue = this;
@@ -141,6 +153,13 @@ export default {
                     },
                 ]
             },
+            modalSegment: {
+                open: false,
+                ver_items: false,
+                asignar: false,
+                subida_masiva: false
+            },
+            dataModalSegment: {},
 
             modalSelectActivity: {
                 ref: 'ModalSelectActivity',
@@ -203,6 +222,51 @@ export default {
         }
     },
     methods: {
+        confirmModalSegment() {
+
+        },
+        closeModalSegment() {
+
+        },
+        async openModalSegment(benefit, edit = false) {
+            let vue = this;
+
+            // if(edit && benefit.id != null && benefit.id != 0) {
+            //     this.showLoader()
+            //     vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: benefit.id})
+            //         .then((res) => {
+            //             let res_checklist = res.data.data.benefit;
+            //             if (res_checklist != null) {
+
+            //                 vue.dataModalSegment = res_checklist;
+
+            //             }else{
+            //                 vue.$notification.warning(`No se pudo obtener datos del benefit`, {
+            //                     timer: 6,
+            //                     showLeftIcn: false,
+            //                     showCloseIcn: true
+            //                 });
+            //                 vue.closeModalCreateEditChecklist();
+            //                 vue.refreshDefaultTable(vue.dataTable, vue.filters);
+            //             }
+            //             this.hideLoader()
+            //         })
+            //         .catch((err) => {
+            //             console.log(err);
+            //             this.hideLoader()
+            //         });
+            // } else {
+                vue.dataModalSegment = benefit;
+            // }
+
+            // await vue.$refs.ModalSegment.resetValidation()
+
+            // vue.$refs.ModalSegment.setActividadesHasErrorProp()
+            // // if (edit)
+            // //     vue.$refs.ModalSegment.rep()
+
+            vue.modalSegment.open = true;
+        },
         addSpeaker( item ) {
             console.log(item);
         },
