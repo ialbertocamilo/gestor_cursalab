@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\FileService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Speaker extends BaseModel
 {
@@ -40,6 +41,8 @@ class Speaker extends BaseModel
 
     protected function storeRequest($data, $speaker = null)
     {
+        $lista_experiencias = (isset($data['lista_experiencias']) && !is_null($data['lista_experiencias'])) ? json_decode($data['lista_experiencias']) : null;
+
         try {
             $workspace = get_current_workspace();
 
@@ -54,6 +57,20 @@ class Speaker extends BaseModel
 
                 $speaker = self::create($data);
             endif;
+
+            if(!is_null($lista_experiencias)) {
+                foreach ($lista_experiencias as $key => $experience) {
+                    SpeakerExperience::updateOrCreate(
+                        ['id' => str_contains($experience->id, 'n-') ? null : $experience->id],
+                        [
+                            'company' => $experience->company,
+                            'occupation' => $experience->occupation,
+                            'active' => $experience->active,
+                            'speaker_id' => $speaker->id
+                        ]
+                    );
+                }
+            }
 
 
             DB::commit();

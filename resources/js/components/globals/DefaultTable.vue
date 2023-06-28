@@ -938,4 +938,17 @@ span.custom_benefit_type {
     font-size: 14px;
     font-family: "Nunito", sans-serif;
 }
+.tbl_perfil_speaker {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: #D9D9D9;
+    img {
+        max-width: 100%;
+    }
+}
 </style>

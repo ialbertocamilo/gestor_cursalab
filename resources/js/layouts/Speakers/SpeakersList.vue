@@ -14,7 +14,7 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar usuarios"
+                            label="Buscar speaker"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
@@ -28,7 +28,7 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openModalSelectActivitys($event)"
-                @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un beneficio')"
+                @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un speaker')"
                 @addSpeaker="addSpeaker($event)"
             />
         </v-card>

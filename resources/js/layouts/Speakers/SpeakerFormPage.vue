@@ -145,11 +145,12 @@
 </template>
 <script>
 const fields = [
-    'title',
+    'name',
+    'biography',
+    'email',
+    'specialty',
     'active',
     'image',
-    'description',
-    'correo',
     'lista_experiencias',
 ];
 const file_fields = ['image'];
@@ -171,12 +172,13 @@ export default {
             conf_focus: true,
             base_endpoint: '/speakers',
             resourceDefault: {
-                title: null,
-                description: null,
+                name: null,
+                biography: null,
+                email: null,
+                specialty: null,
                 image: null,
                 file_image: null,
                 active: true,
-                correo: null,
             },
             resource: {},
             rules: {
