@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Benefit;
 use App\Models\Media;
 use App\Models\Poll;
+use App\Models\Segment;
 use App\Models\Speaker;
 use App\Models\Taxonomy;
 
@@ -35,6 +36,49 @@ class BenefitController extends Controller
         $data = Speaker::getSpeakers();
 
         return $this->success($data);
+    }
+
+    public function getSegments(Benefit $benefit)
+    {
+        $response = Benefit::getSegments($benefit);
+
+        return $this->success($response);
+    }
+
+    public function saveSegment(Request $request)
+    {
+        $workspace = get_current_workspace();
+        $data = $request->all();
+        $benefit_id = $data['id'] ?? null;
+
+        // Segmentación directa
+        if(isset($data['list_segments']['segments']) && count($data['list_segments']['segments']) > 0)
+        {
+            $data['list_segments']['model_id'] = $benefit_id;
+
+            $list_segments_temp = [];
+            foreach($data['list_segments']['segments'] as $seg) {
+                if($seg['type_code'] === 'direct-segmentation')
+                    array_push($list_segments_temp, $seg);
+            }
+            $data['list_segments']['segments'] = $list_segments_temp;
+
+            $list_segments = (object) $data['list_segments'];
+
+            (new Segment)->storeDirectSegmentation($list_segments);
+        }
+        // Segmentación por documento
+        if(isset($data['list_segments_document']['segment_by_document']) && isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']))
+        {
+            $data['list_segments_document']['model_id'] = $benefit_id;
+            $list_segments = $data['list_segments_document'];
+
+            (new Segment)->storeSegmentationByDocumentForm($list_segments);
+        }
+
+        $msg = 'Beneficio segmentado.';
+
+        return $this->success(['msg' => $msg, 'benefit'=>$benefit_id]);
     }
 
     public function getFormSelects(Benefit $benefit = null, $compactResponse = false)

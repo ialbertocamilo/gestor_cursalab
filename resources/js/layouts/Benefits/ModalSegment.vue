@@ -4,7 +4,7 @@
     <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
         <v-card>
             <v-card-title class="default-dialog-title">
-                {{ benefit.id == 0 ? "Crear Benefit" : "Editar Benefit" }}
+                Segmentar Beneficio
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
@@ -27,11 +27,11 @@
                                                 <v-col cols="12" class="pb-0 pt-0">
                                                     <SegmentFormModal
                                                         :options="modalFormSegmentationOptions"
-                                                        :list_segments="benefit.segments"
-                                                        :list_segments_document="benefit.segmentation_by_document"
+                                                        :list_segments="segmentdata.segments"
+                                                        :list_segments_document="segmentdata.segmentation_by_document"
                                                         width="55vw"
-                                                        model_type="App\Models\Checklist"
-                                                        :model_id="null"
+                                                        model_type="App\Models\Benefit"
+                                                        :model_id="segmentdata.id"
                                                         ref="modalFormSegmentationOptions"
                                                         @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
                                                         @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
@@ -44,7 +44,7 @@
                                     </v-card-text>
                                 </v-card>
                         </v-stepper-content>
-                        <v-stepper-content step="2" class="p-0">
+                        <!-- <v-stepper-content step="2" class="p-0">
                                 <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step3">
                                     <v-card-text>
                                         <v-row>
@@ -54,14 +54,16 @@
                                         </v-row>
                                     </v-card-text>
                                 </v-card>
-                        </v-stepper-content>
+                        </v-stepper-content> -->
                     </v-stepper-items>
                     <v-stepper-header class="stepper_dots">
-                        <v-stepper-step step="1" :complete="stepper_box > 1">
+                        <v-stepper-step step="1">
+                        </v-stepper-step>
+                        <!-- <v-stepper-step step="1" :complete="stepper_box > 1">
                             <v-divider></v-divider>
-                        </v-stepper-step>
-                        <v-stepper-step step="2">
-                        </v-stepper-step>
+                        </v-stepper-step> -->
+                        <!-- <v-stepper-step step="2">
+                        </v-stepper-step> -->
                     </v-stepper-header>
                 </v-stepper>
 
@@ -105,7 +107,7 @@ export default {
     props: {
         value: Boolean,
         width: String,
-        benefit: Object,
+        segmentdata: Object,
         limitOne: {
             type:Boolean,
             default:false
@@ -235,31 +237,14 @@ export default {
             // data segmenteacion
         };
     },
-    computed: {
-        actividadesEmpty() {
-            return this.benefit.checklist_actividades && this.benefit.checklist_actividades.length === 0
-        }
-    },
-    async mounted() {
-        // this.addActividad()
-    },
     watch: {
-        benefit: {
+        segmentdata: {
             handler(n, o) {
                 let vue = this;
 
-                if(vue.stepper_box == 1) {
-                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.benefit.type_checklist) && vue.validateRequired(vue.benefit.title) && vue.validateRequired(vue.benefit.description));
-                    vue.disabled_btn_next = vue.stepper_box_btn1;
-                }
-                else if(vue.stepper_box == 2){
+                if(vue.stepper_box == 1){
                     vue.disabledBtnModal()
-                    vue.disabled_btn_next = vue.stepper_box_btn2;
-                }
-                else if(vue.stepper_box == 3){
-                    let errors = vue.showValidateActividades()
-                    vue.stepper_box_btn3 = vue.benefit.checklist_actividades.length == 0 || errors > 0
-                    vue.disabled_btn_next = vue.stepper_box_btn3;
+                    vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
             },
             deep: true
@@ -268,20 +253,9 @@ export default {
             handler(n, o) {
                 let vue = this;
 
-                if(vue.stepper_box == 1) {
-                    if(vue.validateRequired(vue.benefit.type_checklist) && vue.validateRequired(vue.benefit.title) && vue.validateRequired(vue.benefit.description)) {
-                        vue.stepper_box_btn1 = false;
-                    }
-                    vue.disabled_btn_next = vue.stepper_box_btn1;
-                }
-                else if(vue.stepper_box == 2){
+                if(vue.stepper_box == 1){
                     vue.disabledBtnModal()
-                    vue.disabled_btn_next = vue.stepper_box_btn2;
-                }
-                else if(vue.stepper_box == 3){
-                    let errors = vue.showValidateActividades()
-                    vue.stepper_box_btn3 = vue.benefit.checklist_actividades.length == 0 || errors > 0
-                    vue.disabled_btn_next = vue.stepper_box_btn3;
+                    vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
             },
             deep: true
@@ -298,87 +272,47 @@ export default {
             let vue = this;
             vue.cancelLabel = "Cancelar";
 
-            if(vue.benefit.segments != null && vue.benefit.segments.length > 0) {}
-            else {
-                vue.benefit.segments = [{
-                    id: `new-segment-${Date.now()}`,
-                    type_code: 'direct-segmentation',
-                    criteria_selected: [],
-                    direct_segmentation: [null]
-                }];
-            }
-
-            if(vue.stepper_box == 1){
-                vue.cancelLabel = "Retroceder";
-                vue.stepper_box = 2;
-
-                if(vue.benefit.type_checklist == "libre") {
-                    vue.benefit.courses = [];
-                }
-                if(vue.benefit.type_checklist == "curso") {
-                    vue.benefit.segments[0].direct_segmentation = [null];
-                    vue.benefit.segmentation_by_document.segmentation_by_document = [];
-                }
-            }
-            else if(vue.stepper_box == 2){
-                vue.cancelLabel = "Retroceder";
-                vue.stepper_box = 3;
-            }
-            else if(vue.stepper_box == 3){
-                vue.cancelLabel = "Retroceder";
+            // if(vue.stepper_box == 1){
+            //     vue.cancelLabel = "Retroceder";
+            //     vue.stepper_box = 2;
+            // }
+            // else if(vue.stepper_box == 2){
+            //     vue.cancelLabel = "Retroceder";
+            //     vue.confirm();
+            // }
                 vue.confirm();
-            }
         },
         prevStep(){
             let vue = this;
             if(vue.stepper_box == 1){
                 vue.closeModal();
-                // vue.stepper_box = 2;
             }
             else if(vue.stepper_box == 2){
                 vue.cancelLabel = "Cancelar";
                 vue.stepper_box = 1;
             }
-            else if(vue.stepper_box == 3){
-                vue.cancelLabel = "Retroceder";
-                vue.stepper_box = 2;
-            }
         },
         disabledBtnModal() {
             let vue = this;
-            vue.stepper_box_btn2 = false;
+            vue.stepper_box_btn1 = false;
 
-            let direct_segmentation = (vue.benefit.segments != null && vue.benefit.segments.length > 0) ? vue.benefit.segments[0].direct_segmentation : [];
-            let segmentation_by_document = vue.benefit.segmentation_by_document != null && vue.benefit.segmentation_by_document.segmentation_by_document.length > 0;
+            let direct_segmentation = (vue.segmentdata.segments != null && vue.segmentdata.segments.length > 0) ? vue.segmentdata.segments[0].direct_segmentation : [];
+            let segmentation_by_document = vue.segmentdata.segmentation_by_document != null && vue.segmentdata.segmentation_by_document.segmentation_by_document.length > 0;
 
-            if(vue.benefit.courses.length == 0 && (direct_segmentation.length > 0 && direct_segmentation[0] == null) && !segmentation_by_document) {
-                vue.stepper_box_btn2 = true;
+            if((direct_segmentation.length > 0 && direct_segmentation[0] == null) && !segmentation_by_document) {
+                vue.stepper_box_btn1 = true;
             } else {
 
-                if (vue.benefit.type_checklist == 'curso') {
-                    if (vue.benefit.courses.length == 0) {
-                        vue.stepper_box_btn2 = true
-                    }
-                } else {
-                    if (direct_segmentation.length > 0)  {
-                        if( direct_segmentation[0] == null ) {}
-                        else {
-                            direct_segmentation.forEach(element => {
-                                if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
-                                    vue.stepper_box_btn2 = true;
-                                }
-                            });
-                        }
+                if (direct_segmentation.length > 0)  {
+                    if( direct_segmentation[0] == null ) {}
+                    else {
+                        direct_segmentation.forEach(element => {
+                            if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
+                                vue.stepper_box_btn1 = true;
+                            }
+                        });
                     }
                 }
-            }
-        },
-        setActividadesHasErrorProp() {
-            let vue = this
-            if (vue.benefit.checklist_actividades) {
-                vue.benefit.checklist_actividades.forEach(el => {
-                    el = Object.assign({}, el, {hasErrors: false})
-                })
             }
         },
         closeModal() {
@@ -396,152 +330,31 @@ export default {
             vue.results_search = []
             vue.stepper_box = 1
 
-            if (vue.$refs.modalFormSegmentationOptions)
-                vue.$refs.modalFormSegmentationOptions.closeModal()
+            // if (vue.$refs.modalFormSegmentationOptions)
+            //     vue.$refs.modalFormSegmentationOptions.closeModal()
         },
         confirm() {
             let vue = this;
-            vue.benefit.list_segments = {
-                'segments' : vue.benefit.segments,
-                'model_type': "App\\Models\\Checklist",
+            vue.segmentdata.list_segments = {
+                'segments' : vue.segmentdata.segments,
+                'model_type': "App\\Models\\Benefit",
                 'model_id': null,
                 'code': "direct-segmentation"
             };
-            vue.benefit.list_segments_document = {
-                'segment_by_document' : vue.benefit.segmentation_by_document,
-                'model_type': "App\\Models\\Checklist",
+            vue.segmentdata.list_segments_document = {
+                'segment_by_document' : vue.segmentdata.segmentation_by_document,
+                'model_type': "App\\Models\\Benefit",
                 'model_id': null,
                 'code': "segmentation-by-document"
             };
-            const allIsValid = vue.moreValidaciones()
+            // const allIsValid = vue.moreValidaciones()
 
-            if (allIsValid == 0)
+            // if (allIsValid == 0)
                 vue.$emit("onConfirm");
-        },
-        showValidateActividades() {
-            let vue = this
-            let errors = 0;
-
-            if( vue.benefit.checklist_actividades.length > 0 ) {
-                vue.benefit.checklist_actividades.forEach((el, index) => {
-                    el.hasErrors = !el.activity || el.activity === ''
-                    if(el.hasErrors) errors++;
-                })
-            }
-            return errors;
-        },
-        moreValidaciones() {
-            let vue = this
-            let errors = 0
-
-            let hasActividadEntrenadorUsuario = false;
-            vue.benefit.checklist_actividades.map(actividad=>{
-               if( actividad.type_name=='trainer_user') hasActividadEntrenadorUsuario=true;
-            });
-            if(!hasActividadEntrenadorUsuario){
-                this.modalAlert.open= true;
-               errors++
-            }
-            return errors > 0
         },
         cancel() {
             let vue = this;
             vue.$emit("onCancel");
-        },
-        eliminarActividad(actividad, index) {
-            let vue = this;
-            if (String(actividad.id).charAt(0).includes('n')) {
-                vue.actividades_expanded = []
-                vue.benefit.checklist_actividades.splice(index, 1);
-                return
-            }
-            axios
-                .post(`/entrenamiento/checklists/delete_actividad_by_id`, actividad)
-                .then((res) => {
-                    if (res.data.error) {
-                        vue.$notification.warning(`${res.data.msg}`, {
-                            timer: 6,
-                            showLeftIcn: false,
-                            showCloseIcn: true
-                        });
-                    } else {
-                        vue.actividades_expanded = []
-                        vue.benefit.checklist_actividades.splice(index, 1);
-                        vue.$notification.success(`${res.data.msg}`, {
-                            timer: 6,
-                            showLeftIcn: false,
-                            showCloseIcn: true
-                        });
-                    }
-                })
-                .catch((err) => {
-                    console.err(err);
-                });
-        },
-        addActividad() {
-            let vue = this;
-            const newID = `n-${vue.benefit.checklist_actividades.length + 1}`;
-            const newActividad = {
-                id: newID,
-                activity: "",
-                active: 1,
-                type_name: "trainer_user",
-                checklist_id: vue.benefit.id,
-                hasErrors: false,
-                is_default:false
-            };
-            vue.benefit.checklist_actividades.unshift(newActividad);
-        },
-        search() {
-            clearTimeout(this.timeout);
-            let vue = this;
-            if (vue.search_text == null || vue.search_text === "") return;
-            if (vue.isLoading) return;
-            this.timeout = setTimeout(function () {
-                vue.isLoading = true;
-                const data = {
-                    filtro: vue.search_text,
-                };
-                axios
-                    .post(`/entrenamiento/checklists/buscar_curso`, data)
-                    .then((res) => {
-                        console.log(vue.results_search);
-                        vue.results_search = res.data.data;
-                        // vue.$nextTick(() => {
-                        //     vue.$refs.resultSearch.focus()
-                        //     vue.$refs.resultSearch.isMenuActive = true
-                        //     vue.$refs.resultSearch.isMenuActive = true;
-                        // })
-                        setTimeout(() => {
-                            vue.isLoading = false;
-                        }, 1500);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        vue.isLoading = false;
-                    });
-            }, 1000);
-        },
-        removeCurso(curso, index) {
-            let vue = this;
-            vue.results_search.push(curso)
-            vue.benefit.courses.splice(index, 1)
-            if(vue.benefit.courses.length >= 2) {
-                vue.disabled_add_courses = true;
-            } else {
-                vue.disabled_add_courses = false;
-            }
-
-        },
-        seleccionarCurso(curso, index) {
-            let vue = this;
-            vue.benefit.courses.push(curso)
-            vue.results_search.splice(index, 1)
-            if(vue.benefit.courses.length >= 2) {
-                vue.disabled_add_courses = true;
-            } else {
-                vue.disabled_add_courses = false;
-            }
         },
         getNewSegment(type_code) {
             return {

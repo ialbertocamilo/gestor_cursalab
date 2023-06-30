@@ -78,7 +78,7 @@
             :width="'870px'"
             @onClose="closeModalSegment"
             @onConfirm="confirmModalSegment"
-            :benefit="dataModalSegment"
+            :segmentdata="dataModalSegment"
         />
 
     </section>
@@ -223,47 +223,78 @@ export default {
     },
     methods: {
         confirmModalSegment() {
-
+            let vue = this;
+            this.showLoader()
+            vue.$http.post(`/beneficios/segments/save`, vue.dataModalSegment)
+                .then((res) => {
+                    if (res.data.type == "success") {
+  						vue.$toast.success(`${res.data.data.msg}`, {position: 'bottom-center'});
+                        vue.closeModalSegment();
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+  					}
+                    this.hideLoader()
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.hideLoader()
+                });
         },
         closeModalSegment() {
+            let vue = this
 
+            vue.dataModalSegment.segments = [];
+            vue.dataModalSegment.segmentation_by_document = {
+                    segmentation_by_document:[]
+                }
+            vue.modalSegment.open = false;
         },
         async openModalSegment(benefit, edit = false) {
             let vue = this;
 
-            // if(edit && benefit.id != null && benefit.id != 0) {
-            //     this.showLoader()
-            //     vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: benefit.id})
-            //         .then((res) => {
-            //             let res_checklist = res.data.data.benefit;
-            //             if (res_checklist != null) {
+            this.showLoader()
 
-            //                 vue.dataModalSegment = res_checklist;
+            vue.$http.get(`/beneficios/segments/${benefit.id}`)
+                .then((res) => {
+                    let res_benefit = res.data.data.benefit;
+                    console.log(res);
+                    console.log(res_benefit);
+                    if (res_benefit != null) {
 
-            //             }else{
-            //                 vue.$notification.warning(`No se pudo obtener datos del benefit`, {
-            //                     timer: 6,
-            //                     showLeftIcn: false,
-            //                     showCloseIcn: true
-            //                 });
-            //                 vue.closeModalCreateEditChecklist();
-            //                 vue.refreshDefaultTable(vue.dataTable, vue.filters);
-            //             }
-            //             this.hideLoader()
-            //         })
-            //         .catch((err) => {
-            //             console.log(err);
-            //             this.hideLoader()
-            //         });
-            // } else {
-                vue.dataModalSegment = benefit;
-            // }
+                        benefit.segmentation_by_document = res_benefit.segmentation_by_document;
 
-            // await vue.$refs.ModalSegment.resetValidation()
+                        if(res_benefit.segments != null && res_benefit.segments.length > 0)
+                        {
+                                benefit.segments = res_benefit.segments;
 
-            // vue.$refs.ModalSegment.setActividadesHasErrorProp()
-            // // if (edit)
-            // //     vue.$refs.ModalSegment.rep()
+                        }
+                        else {
+                            benefit.segments = [{
+                                id: `new-segment-${Date.now()}`,
+                                type_code: 'direct-segmentation',
+                                criteria_selected: [],
+                                direct_segmentation: [null]
+                            }];
+                        }
+
+                        vue.dataModalSegment = {...benefit};
+
+                    }else{
+                        vue.$notification.warning(`No se pudo obtener datos del beneficio`, {
+                            timer: 6,
+                            showLeftIcn: false,
+                            showCloseIcn: true
+                        });
+                        vue.closeModalSegment();
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                    }
+                    this.hideLoader()
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.hideLoader()
+                });
+
+            await vue.$refs.ModalSegment.resetValidation()
 
             vue.modalSegment.open = true;
         },

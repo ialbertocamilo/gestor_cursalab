@@ -310,6 +310,36 @@ class Benefit extends BaseModel
 
         return ['data'=> $benefit];
     }
+
+    protected function getSegments( $benefit_id )
+    {
+        $benefit = null;
+
+        $workspace = get_current_workspace();
+
+        if(!is_null($benefit_id)) {
+
+            $criteria = Segment::getCriteriaByWorkspace(get_current_workspace());
+            $segments = Segment::getSegmentsByModel($criteria, Benefit::class, $benefit_id->id);
+
+            $benefit['segments'] = $segments;
+
+            $segmentation_by_document_list = [];
+            $segmentation_by_document = $segments->map(function ($item) {
+                return ['segmentation_by_document'=> $item->segmentation_by_document];
+            });
+
+            foreach ($segmentation_by_document as $seg) {
+                foreach ($seg['segmentation_by_document'] as $value) {
+                    array_push($segmentation_by_document_list, $value);
+                }
+            }
+            $benefit['segmentation_by_document'] = ['segmentation_by_document'=> $segmentation_by_document_list];
+
+        }
+
+        return ['benefit' => $benefit];
+    }
     // Apis
     protected function registerUserForBenefit( $data )
     {
@@ -652,9 +682,9 @@ class Benefit extends BaseModel
             "buscador" => [
                 "filtros_status" => [
                     ["name" => "Activos", "code"=> "active"],
-                    ["name" => "Registrados", "code"=> "subscribed"],
                     ["name" => "Bloqueados", "code"=> "locked"],
-                    ["name" => "Canjeados", "code"=> "finished"]
+                    ["name" => "Registrados", "code"=> "subscribed"],
+                    ["name" => "Canjeados", "code"=> "exchanged"]
                 ],
                 "filtros_tipo" => [
                     ["name" => "Todos", "code"=> "free", "show"=> false],
@@ -690,7 +720,7 @@ class Benefit extends BaseModel
                     "code"=> "benefits",
                     "filtros_status" => [
                         ["name" => "Activos", "code"=> "active"],
-                        ["name" => "Canjeados", "code"=> "finished"],
+                        ["name" => "Canjeados", "code"=> "exchanged"],
                         ["name" => "Registrados", "code"=> "subscribed"]
                     ],
                     "filtros_tipo" => [

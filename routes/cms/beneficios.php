@@ -13,6 +13,8 @@ Route::controller(BenefitController::class)->group(function() {
 
     Route::get('/search', 'search');
     Route::get('/search/{benefit}', 'getData')->name('benefit.getData');
+    Route::get('/segments/{benefit}', 'getSegments')->name('benefit.getSegments');
+    Route::post('/segments/save', 'saveSegment');
 	Route::get('/form-selects', 'getFormSelects');
 
     Route::put('/{benefit}/status', 'status');
