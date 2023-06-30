@@ -27,6 +27,7 @@ use App\Models\Workspace;
 use App\Models\AssignedRole;
 use App\Models\SegmentValue;
 use App\Models\SummaryTopic;
+use App\Models\UsuarioMaster;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
 use App\Services\FileService;
@@ -114,7 +115,7 @@ class UsuarioController extends Controller
     public function getListSelects()
     {
         $workspace = get_current_workspace();
-        
+
         $sub_workspaces = Workspace::where('parent_id', $workspace?->id)
             ->select('id', 'name')->get();
 
@@ -157,7 +158,7 @@ class UsuarioController extends Controller
         $user_criteria = [];
 
         foreach ($current_workspace_criterion_list as $criterion) {
-            
+
             $value = $user->criterion_values->where('criterion_id', $criterion->id);
 
             $user_criterion_value = $criterion->multiple ? $value->pluck('id') : $value?->first()?->id;
@@ -223,8 +224,16 @@ class UsuarioController extends Controller
     {
         $data = $request->validated();
         // $data['subworkspace_id'] = get_current_workspace()?->id;
+        $usuario = Usuario::create($data);
 
         User::storeRequest($data);
+        /****************** Insertar/Actualizar en BD master ****************/
+        if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
+            $dni_previo = '';
+            $email_previo = '';
+            $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario);
+        }
+        /********************************************************************/
 
         return $this->success(['msg' => 'Usuario creado correctamente.']);
     }
@@ -235,7 +244,13 @@ class UsuarioController extends Controller
         // $data['subworkspace_id'] = get_current_workspace()?->id;
         // info($data);
         User::storeRequest($data, $user);
-
+        /****************** Insertar/Actualizar en BD master ****************/
+        if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
+            $dni_previo = $user->dni;
+            $email_previo = $user->email;
+            $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $user);
+        }
+        /********************************************************************/
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);
     }
 
@@ -256,6 +271,16 @@ class UsuarioController extends Controller
             Matricula_criterio::where('matricula_id', $matricula->id)->destroy();
             Matricula::destroy($matricula->id);
         }
+
+        /******************ELIMINA en BD master****************/
+        if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
+            $usu_master = UsuarioMaster::where('dni', $usuario->dni)->first();
+            if ($usu_master) {
+                $usu_master->delete();
+            }
+        }
+        /**********************************/
+
         // $usuario->matricula()->delete();
         $usuario->delete();
 
@@ -912,7 +937,7 @@ class UsuarioController extends Controller
         $user->update($data);
 
         return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
-    } 
+    }
 
     public function getSignature(User $user, Request $request)
     {
@@ -944,5 +969,38 @@ class UsuarioController extends Controller
         $data = compact('url', 'signature', 'expires', 'token', 'signed_url');
 
         return $this->success(['msg' => 'Autenticando...', 'config' => $data]);
+    }
+
+        public function crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario){
+        $usu_master = UsuarioMaster::where('dni', $dni_previo)->first();
+
+        if ($usu_master) {
+            $usu_master->dni = $usuario->document;
+            $usu_master->email = $usuario->email;
+            $usu_master->username = $usuario->username;
+            $usu_master->customer_id = ENV('CUSTOMER_ID');
+            $usu_master->created_at = $usuario->created_at;
+            $usu_master->updated_at = null;
+                $usu_master->deleted_at = null;
+            $usu_master->save();
+        }else{
+
+            $usu_master = UsuarioMaster::where('dni', $usuario->dni)->first();
+
+            if (!$usu_master)
+            {
+                $usu_master = new UsuarioMaster;
+                $usu_master->dni = $usuario->document;
+                $usu_master->email = $usuario->email;
+                $usu_master->username = $usuario->username;
+                $usu_master->customer_id = ENV('CUSTOMER_ID');
+                $usu_master->created_at = $usuario->created_at;
+                $usu_master->updated_at = $usuario->updated_at;
+                if ($usuario->deleted_at)
+                    $usu_master->deleted_at = $usuario->deleted_at;
+                $usu_master->save();
+            }
+
+        }
     }
 }
