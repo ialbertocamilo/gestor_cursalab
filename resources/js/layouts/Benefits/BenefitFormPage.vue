@@ -127,7 +127,6 @@
                                 label="Cupo de participantes"
                                 placeholder="Indicar cupos"
                                 v-model="resource.cupos"
-                                :rules="rules.cupos"
                             />
                         </v-col>
                         <v-col cols="4">
@@ -176,6 +175,23 @@
                                 v-model="resource.correo"
                                 :rules="rules.correo"
                                 show-required
+                            />
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12 mb-0">
+                            <hr class="mb-3">
+                            <span class="txt_conf_av">Configuración Avanzada</span>
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultAutocomplete
+                                dense
+                                label="Tipo de agrupación de beneficio"
+                                v-model="resource.group"
+                                :items="selects.lista_grupo"
+                                item-text="name"
+                                item-value="code"
+                                :rules="rules.group"
                             />
                         </v-col>
                     </v-row>
@@ -683,7 +699,9 @@ const fields = [
     // 'speaker',
     'type',
     // 'ubicacion_mapa',
-    'list_silabos'
+    'list_silabos',
+    'lista_grupo',
+    'group'
 ];
 const file_fields = ['image'];
 
@@ -755,7 +773,9 @@ export default {
             list_silabos: [],
             lista_etiquetas: [],
             lista_implementos: [],
+            lista_grupo: [],
             selectType: null,
+            selectGroup: null,
             activeDificultad: null,
             duracionValue: null,
             duracionIlimitado: null,
@@ -797,13 +817,15 @@ export default {
                 list_silabos: [],
                 lista_etiquetas: [],
                 lista_implementos: [],
+                lista_grupo: [],
                 dificultad: null,
             },
             resource: {},
             rules: {
                 title: this.getRules(['required', 'max:200']),
                 list_types: this.getRules(['required']),
-                cupos: this.getRules(['number']),
+                correo: this.getRules(['required']),
+                group: this.getRules(['required']),
                 inicio_inscripcion: this.getRules(['required']),
                 fin_inscripcion: this.getRules(['required']),
                 fecha_liberacion: this.getRules(['required']),
@@ -815,7 +837,8 @@ export default {
                     {id: 1, name: "Básico"},
                     {id: 2, name: "Intermedio"},
                     {id: 3, name: "Avanzado"},
-                ]
+                ],
+                lista_grupo: []
             },
             loadingActionBtn: false,
             courseValidationModal: {
@@ -1079,6 +1102,7 @@ export default {
             }
 
             vue.resource.type = vue.selectType
+            // vue.resource.group = vue.selectGroup
 
             vue.loadingActionBtn = true
             vue.showLoader()
@@ -1144,6 +1168,7 @@ export default {
                     let response = data.data ? data.data : data;
                     vue.selects.lista_encuestas = response.polls
                     vue.selects.list_types = response.types_benefit
+                    vue.selects.lista_grupo = response.group
                 })
             if(vue.benefit_id != '') {
                 let url = `${vue.base_endpoint}/search/${vue.benefit_id}`
@@ -1450,5 +1475,11 @@ export default {
     font-family: 'open sans';
     color: #666666;
     font-size: 13px;
+}
+.txt_conf_av {
+    font-size: 15px;
+    color: #5458EA;
+    font-family: 'open sans';
+    font-weight: 700;
 }
 </style>

@@ -19,6 +19,7 @@ class Benefit extends BaseModel
         'speaker_id',
         'status_id',
         'poll_id',
+        'group_id',
 
         'title',
         'description',
@@ -51,6 +52,11 @@ class Benefit extends BaseModel
     public function type()
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Taxonomy::class, 'group_id');
     }
 
     public function properties()
@@ -123,7 +129,11 @@ class Benefit extends BaseModel
 
         $benefit_type = Taxonomy::getFirstData('benefit', 'benefit_type', $data['type']);
 
+        $group = $data['group'] ?? 'free';
+        $benefit_group = Taxonomy::getFirstData('benefit', 'group', $group);
+
         $data['type_id'] = !is_null($benefit_type) ? $benefit_type->id : null;
+        $data['group_id'] = !is_null($benefit_group) ? $benefit_group->id : null;
         $data['speaker_id'] = !is_null($speaker) ? $speaker->id : null;
 
         try {
@@ -292,6 +302,9 @@ class Benefit extends BaseModel
         $benefit = Benefit::with(
             ['implements','silabo','polls','links','speaker',
             'type'=> function ($query) {
+                        $query->select('id', 'name', 'code');
+                    },
+            'group'=> function ($query) {
                         $query->select('id', 'name', 'code');
                     }
         ])

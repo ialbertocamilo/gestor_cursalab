@@ -97,7 +97,10 @@ class BenefitController extends Controller
                 ->where('active', true)
                 ->get();
 
-        $response = compact('polls', 'types_benefit');
+        // Groups
+        $group= Taxonomy::getDataForSelect('benefit', 'group');
+
+        $response = compact('polls', 'types_benefit', 'group');
 
         return $compactResponse ? $response : $this->success($response);
     }

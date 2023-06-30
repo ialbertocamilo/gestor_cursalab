@@ -33,6 +33,7 @@ class BenefitStoreUpdateRequest extends FormRequest
             'inicio_inscripcion' => 'required',
             'fecha_liberacion' => 'required',
             'type' => 'required',
+            'group' => 'required',
 
             // 'position' => 'nullable',
             // 'type_id' => 'nullable',
