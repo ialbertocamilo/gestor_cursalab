@@ -681,14 +681,14 @@ class Benefit extends BaseModel
         $response = [
             "buscador" => [
                 "filtros_status" => [
-                    ["name" => "Activos", "code"=> "active"],
-                    ["name" => "Bloqueados", "code"=> "locked"],
-                    ["name" => "Registrados", "code"=> "subscribed"],
-                    ["name" => "Canjeados", "code"=> "exchanged"]
+                    ["name" => "Activos", "code"=> "active", "checked" => true],
+                    ["name" => "Bloqueados", "code"=> "locked", "checked" => true],
+                    ["name" => "Registrados", "code"=> "subscribed", "checked" => true],
+                    ["name" => "Canjeados", "code"=> "exchanged", "checked" => true]
                 ],
                 "filtros_tipo" => [
-                    ["name" => "Todos", "code"=> "free", "show"=> false],
-                    ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true]
+                    ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
+                    ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
                 ]
             ],
             "tabs"=> [
@@ -696,36 +696,36 @@ class Benefit extends BaseModel
                     "name" => "Todos",
                     "code"=> "free",
                     "filtros_status" => [
-                        ["name" => "Activos", "code"=> "active"],
-                        ["name" => "Bloqueados", "code"=> "locked"]
+                        ["name" => "Activos", "code"=> "active", "checked" => true],
+                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
                     ],
                     "filtros_tipo" => [
-                        ["name" => "Todos", "code"=> "free", "show"=> false],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false]
+                        ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
+                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
                     "name" => "IR Academy",
                     "code" => "ir-academy",
                     "filtros_status" => [
-                        ["name" => "Activos", "code"=> "active"],
-                        ["name" => "Bloqueados", "code"=> "locked"]
+                        ["name" => "Activos", "code"=> "active", "checked" => true],
+                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
                     ],
                     "filtros_tipo" => [
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false]
+                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
                     "name" => "Mis Beneficios",
                     "code"=> "benefits",
                     "filtros_status" => [
-                        ["name" => "Activos", "code"=> "active"],
-                        ["name" => "Canjeados", "code"=> "exchanged"],
-                        ["name" => "Registrados", "code"=> "subscribed"]
+                        ["name" => "Activos", "code"=> "active", "checked" => true],
+                        ["name" => "Canjeados", "code"=> "exchanged", "checked" => true],
+                        ["name" => "Registrados", "code"=> "subscribed", "checked" => true]
                     ],
                     "filtros_tipo" => [
-                        ["name" => "Todos", "code"=> "free", "show"=> false],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true]
+                        ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
+                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
                     ]
                 ]
             ]
