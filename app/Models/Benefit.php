@@ -496,6 +496,7 @@ class Benefit extends BaseModel
         $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
         $benefits_query = Benefit::with([
+            'polls',
             'type'=> function ($query) {
                     $query->select('id', 'name', 'code');
                 },
@@ -569,6 +570,20 @@ class Benefit extends BaseModel
             $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
             $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
             $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
+
+            if(!is_null($item->poll_id)) {
+                $item->type_poll = 'interno';
+                $poll = Poll::select('id','titulo','imagen','anonima')->where('id', $item->poll_id)->first();
+                $item->poll = $poll;
+            }
+            else {
+                $item->poll = null;
+                if(count($item->polls) > 0)
+                    $item->type_poll = 'externo';
+                else
+                    $item->type_poll = null;
+            }
+
             unset(
                 $item->promotor,
                 $item->promotor_imagen,
@@ -658,8 +673,11 @@ class Benefit extends BaseModel
                 $benefit->poll = $poll;
             }
             else {
-                $benefit->type_poll = 'externo';
                 $benefit->poll = null;
+                if(count($benefit->polls) > 0)
+                    $benefit->type_poll = 'externo';
+                else
+                    $benefit->type_poll = null;
             }
 
             unset(
