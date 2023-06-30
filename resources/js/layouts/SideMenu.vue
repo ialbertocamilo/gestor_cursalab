@@ -207,8 +207,11 @@ export default {
                         path: "/beneficios",
                         subpaths: ["beneficios"],
                         selected: false,
-                        permission: "usuarios",
-                        role: ["super-user"]
+                        permission: "beneficios",
+                        role: [
+                            "super-user",
+                            "admin"
+                        ]
                     },
                     {
                         title: "Speakers",
@@ -216,8 +219,11 @@ export default {
                         path: "/speakers",
                         subpaths: ["speakers"],
                         selected: false,
-                        permission: "usuarios",
-                        role: ["super-user"]
+                        permission: "speakers",
+                        role: [
+                            "super-user",
+                            "admin"
+                        ]
                     }
                 ]
             },
