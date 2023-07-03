@@ -366,6 +366,7 @@ class Benefit extends BaseModel
             $benefit->save();
         }
 
+        cache_clear_model(Benefit::class);
 
         return $benefit;
     }
@@ -385,6 +386,7 @@ class Benefit extends BaseModel
                                 ->first();
 
         $limit_benefits_x_user = $max_benefits_workspace ? $max_benefits_workspace->max_benefits : 0;
+        $limit_benefits_x_user = $limit_benefits_x_user ?? 0;
 
         $is_registered = UserBenefit::where('user_id', $user_id)
                         ->where('benefit_id', $benefit_id)
@@ -522,6 +524,9 @@ class Benefit extends BaseModel
 
     protected function getBenefits( $data )
     {
+        // $user = auth()->user();
+        // $workspace = $user?->subworkspace?->parent?->id;
+
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
         $user_id = $data['user'];
@@ -541,6 +546,9 @@ class Benefit extends BaseModel
 
         $benefits_query = Benefit::with([
             'polls',
+            'group'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                },
             'type'=> function ($query) {
                     $query->select('id', 'name', 'code');
                 },
@@ -555,6 +563,10 @@ class Benefit extends BaseModel
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $benefits_query->orderBy($field, $sort);
+
+        $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
+            $query->where('code', '<>', 'released');
+        });
 
         if (!is_null($filtro) && !empty($filtro)) {
             $benefits_query->where(function ($query) use ($filtro) {
@@ -583,7 +595,7 @@ class Benefit extends BaseModel
 
         $benefits_items = $benefits->items();
 
-        foreach($benefits_items as $item)
+        foreach($benefits_items as $key => $item)
         {
             $item->user_status = null;
             $item->subscribed = false;
@@ -596,28 +608,34 @@ class Benefit extends BaseModel
             if(in_array($item->id, $benefits_user_registered)) {
                 $user_benefit = UserBenefit::where(['user_id' => $user_id, 'benefit_id' => $item->id])->first();
 
-                if($item->status?->code == 'active') {
+                if($user_benefit) {
                     if($user_benefit->status_id == $user_status_subscribed?->id) {
                         $item->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
                         $item->subscribed = true;
+                        if($item->status?->code == 'released') {
+                            $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                        }
                     }
-                    else {
-                        $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
-                    }
-                }
-                else if($item->status?->code == 'locked') {
-                    $item->user_status = $item->status;
-                }
-                else if($item->status?->code == 'finished') {
-                    $item->user_status = $item->status;
-                }
-                else if($item->status?->code == 'released') {
-                    if($user_benefit->status_id == $user_status_subscribed?->id) {
-                        $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
-                        $item->subscribed = true;
+                    else if($user_benefit->status_id == $user_status_notify?->id) {
+                        $item->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
                     }
                 }
             }
+            else {
+                if($item->status?->code == 'active') {
+                    $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                }
+                else if($item->status?->code == 'locked') {
+                    $item->user_status = ['name' => 'Notificarme', 'code' => 'disabled'];
+                }
+                else if($item->status?->code == 'finished') {
+                    $item->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
+                }
+                else if($item->status?->code == 'released') {
+                    $item->user_status = $item->status;
+                }
+            }
+
             unset($item->status);
             $item->status = $item->user_status;
 
@@ -650,7 +668,8 @@ class Benefit extends BaseModel
                 $item->type_id,
                 $item->speaker_id,
                 $item->status_id,
-                $item->active
+                $item->active,
+                $item->user_status
             );
         }
 
@@ -679,10 +698,21 @@ class Benefit extends BaseModel
 
         $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
+        $user_status_active = Taxonomy::getFirstData('benefit', 'user_status', 'active');
+        $user_status_notify = Taxonomy::getFirstData('benefit', 'user_status', 'notify');
+        $user_status_exchanged = Taxonomy::getFirstData('benefit', 'user_status', 'exchanged');
+        $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
+        $user_status_disabled = Taxonomy::getFirstData('benefit', 'user_status', 'disabled');
+        $user_status_contactme = Taxonomy::getFirstData('benefit', 'user_status', 'contact-me');
+        $user_status_poll = Taxonomy::getFirstData('benefit', 'user_status', 'poll');
+
         // $workspace = get_current_workspace();
 
         $benefit = Benefit::with(
             ['implements','silabo','polls','links','speaker',
+            'group'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                },
             'type'=> function ($query) {
                         $query->select('id', 'name', 'code');
                     },
@@ -707,11 +737,37 @@ class Benefit extends BaseModel
 
             if(in_array($benefit->id, $benefits_user_registered)) {
                 $user_benefit = UserBenefit::where(['user_id' => $user_id, 'benefit_id' => $benefit->id])->first();
+
                 if($user_benefit) {
-                    $benefit->user_status = ['name' => 'Suscrito', 'code' => 'subscribed'];
-                    $benefit->subscribed = true;
+                    if($user_benefit->status_id == $user_status_subscribed?->id) {
+                        $benefit->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
+                        $benefit->subscribed = true;
+                        if($benefit->status?->code == 'released') {
+                            $benefit->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                        }
+                    }
+                    else if($user_benefit->status_id == $user_status_notify?->id) {
+                        $benefit->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
+                    }
                 }
             }
+            {
+                if($benefit->status?->code == 'active') {
+                    $benefit->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                }
+                else if($benefit->status?->code == 'locked') {
+                    $benefit->user_status = ['name' => 'Notificarme', 'code' => 'disabled'];
+                }
+                else if($benefit->status?->code == 'finished') {
+                    $benefit->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
+                }
+                else if($benefit->status?->code == 'released') {
+                    $benefit->user_status = $benefit->status;
+                }
+            }
+
+            unset($benefit->status);
+            $benefit->status = $benefit->user_status;
 
             $benefit->direccion = [
                 'lugar' => 'Av. José Larco 401, Miraflores 15074, Perú',
