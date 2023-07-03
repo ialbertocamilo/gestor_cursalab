@@ -62,8 +62,7 @@ return [
             'scorm' => [
                 'bucket' => env('AWS_BUCKET_SCORM'),
                 'root' => env('AWS_CURSALAB_CLIENT_NAME_FOLDER_SCORM'),
-            ],
-            'visibility' => 'public'
+            ]
         ],
 
         'cdn' => [
