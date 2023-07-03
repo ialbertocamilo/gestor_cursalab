@@ -208,6 +208,7 @@ export default {
                     { id: "deleted", name: "Eliminación" },
                     { id: "downloaded", name: "Descarga" },
                     { id: "impersonated", name: "Personificación" },
+                    { id: "upload", name: "Subida" },
                 ],
                 model_type: []
             },

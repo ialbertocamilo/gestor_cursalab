@@ -109,7 +109,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::prefix('errores')->middleware('checkrol:admin')->group(base_path('routes/cms/errores.php'));
     Route::prefix('incidencias')->middleware('checkrol:admin')->group(base_path('routes/cms/incidencias.php'));
-    Route::prefix('auditoria')->middleware('checkrol:admin')->group(base_path('routes/cms/audits.php'));
+    Route::prefix('auditoria')->middleware('checkrol:super-user')->group(base_path('routes/cms/audits.php'));
     // Route::prefix('auditoria')->middleware('checkrol:super-user')->group(base_path('routes/cms/audits.php'));
 
 
